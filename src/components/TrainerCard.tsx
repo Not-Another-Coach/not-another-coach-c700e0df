@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Star, MapPin, Clock, Users, Award } from "lucide-react";
+import { MatchBadge } from "@/components/MatchBadge";
 
 export interface Trainer {
   id: string;
@@ -22,12 +23,20 @@ export interface Trainer {
 interface TrainerCardProps {
   trainer: Trainer;
   onViewProfile: (trainerId: string) => void;
+  matchScore?: number;
+  matchReasons?: string[];
 }
 
-export const TrainerCard = ({ trainer, onViewProfile }: TrainerCardProps) => {
+export const TrainerCard = ({ trainer, onViewProfile, matchScore = 0, matchReasons = [] }: TrainerCardProps) => {
   return (
-    <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-card to-muted/30 border-0">
+    <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-card to-muted/30 border-0 relative">
       <CardContent className="p-6">
+        {/* Match Badge */}
+        {matchScore > 0 && (
+          <div className="absolute top-4 right-4 z-10">
+            <MatchBadge score={matchScore} reasons={matchReasons} />
+          </div>
+        )}
         {/* Trainer Image and Basic Info */}
         <div className="flex items-start gap-4 mb-4">
           <div className="relative">

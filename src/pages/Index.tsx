@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { useTrainerMatching } from "@/hooks/useTrainerMatching";
 import { HeroSection } from "@/components/HeroSection";
 import { FilterSection } from "@/components/FilterSection";
 import { TrainerCard, Trainer } from "@/components/TrainerCard";
@@ -93,6 +94,12 @@ const Index = () => {
       trainingType: ["In-Person", "Group"]
     }
   ]);
+
+  // Get matched trainers based on quiz answers
+  const { matchedTrainers, hasMatches } = useTrainerMatching(
+    trainers, 
+    profile?.quiz_answers as any
+  );
 
   const [filteredTrainers, setFilteredTrainers] = useState<Trainer[]>(trainers);
 
@@ -202,21 +209,24 @@ const Index = () => {
           <h2 className="text-2xl font-bold mb-2">
             {isAdmin() ? "All Personal Trainers" : 
              isTrainer() ? "Your Trainer Profile" : 
-             "Featured Personal Trainers"}
+             profile?.quiz_completed && hasMatches ? "Recommended for You" : "Featured Personal Trainers"}
           </h2>
           <p className="text-muted-foreground">
             {isAdmin() ? "Manage and verify trainer profiles" :
              isTrainer() ? "View and edit your trainer profile" :
+             profile?.quiz_completed && hasMatches ? "Based on your quiz answers, here are trainers that match your fitness goals" :
              "Discover certified trainers who can help you reach your fitness goals"}
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredTrainers.map((trainer) => (
+          {(profile?.quiz_completed ? matchedTrainers : filteredTrainers.map(t => ({ trainer: t, score: 0, matchReasons: [] }))).map((match) => (
             <TrainerCard
-              key={trainer.id}
-              trainer={trainer}
+              key={match.trainer.id}
+              trainer={match.trainer}
               onViewProfile={handleViewProfile}
+              matchScore={match.score}
+              matchReasons={match.matchReasons}
             />
           ))}
         </div>

@@ -44,7 +44,7 @@ export default function Onboarding() {
       
       toast({
         title: "Quiz completed!",
-        description: "Your preferences have been saved. We'll help you find the perfect trainer.",
+        description: "Your preferences have been saved. Check out your personalized trainer recommendations!",
       });
 
       navigate('/');
