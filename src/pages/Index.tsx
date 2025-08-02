@@ -6,6 +6,7 @@ import { useTrainerMatching } from "@/hooks/useTrainerMatching";
 import { SimpleHeroSection } from "@/components/SimpleHeroSection";
 
 import { FilterSection } from "@/components/FilterSection";
+import { VisualSwipeSection } from "@/components/VisualSwipeSection";
 import { TrainerCard, Trainer } from "@/components/TrainerCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -205,24 +206,7 @@ const Index = () => {
         {/* Discovery CTA for clients */}
         {isClient() && profile?.quiz_completed && (
           <div className="mb-8">
-            <Card className="bg-gradient-to-r from-primary/10 to-purple-500/10 border-primary/20">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-xl font-bold mb-2">🔥 Discover Mode</h3>
-                    <p className="text-muted-foreground">
-                      Swipe through trainers and find your perfect match!
-                    </p>
-                  </div>
-                  <Button 
-                    onClick={() => navigate('/discovery')}
-                    className="bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90"
-                  >
-                    Start Swiping
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <VisualSwipeSection />
           </div>
         )}
         
