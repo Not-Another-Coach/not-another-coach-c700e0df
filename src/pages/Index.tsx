@@ -10,6 +10,7 @@ import { VisualSwipeSection } from "@/components/VisualSwipeSection";
 import { TrainerCard, Trainer } from "@/components/TrainerCard";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { Button } from "@/components/ui/button";
+import { Edit } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import trainerSarah from "@/assets/trainer-sarah.jpg";
 import trainerMike from "@/assets/trainer-mike.jpg";
@@ -190,17 +191,34 @@ const Index = () => {
         {!isTrainer() && <FilterSection onFiltersChange={handleFiltersChange} />}
         
         <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-2">
-            {isAdmin() ? "All Personal Trainers" : 
-             isTrainer() ? "Your Trainer Profile" : 
-             profile?.quiz_completed && hasMatches ? "Recommended for You" : "Featured Personal Trainers"}
-          </h2>
-          <p className="text-muted-foreground">
-            {isAdmin() ? "Manage and verify trainer profiles" :
-             isTrainer() ? "View and edit your trainer profile" :
-             profile?.quiz_completed && hasMatches ? "Based on your quiz answers, here are trainers that match your fitness goals" :
-             "Discover certified trainers who can help you reach your fitness goals"}
-          </p>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-2xl font-bold mb-2">
+                {isAdmin() ? "All Personal Trainers" : 
+                 isTrainer() ? "Your Trainer Profile" : 
+                 profile?.quiz_completed && hasMatches ? "Recommended for You" : "Featured Personal Trainers"}
+              </h2>
+              <p className="text-muted-foreground">
+                {isAdmin() ? "Manage and verify trainer profiles" :
+                 isTrainer() ? "View and edit your trainer profile" :
+                 profile?.quiz_completed && hasMatches ? "Based on your quiz answers, here are trainers that match your fitness goals" :
+                 "Discover certified trainers who can help you reach your fitness goals"}
+              </p>
+            </div>
+            
+            {/* Update Preferences Button for Clients with Recommendations */}
+            {isClient() && profile?.quiz_completed && hasMatches && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate('/onboarding')}
+                className="flex items-center gap-2 hover:bg-primary/10"
+              >
+                <Edit className="h-4 w-4" />
+                Update Preferences
+              </Button>
+            )}
+          </div>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
