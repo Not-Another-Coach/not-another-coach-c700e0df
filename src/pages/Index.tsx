@@ -8,6 +8,7 @@ import { SimpleHeroSection } from "@/components/SimpleHeroSection";
 import { FilterSection } from "@/components/FilterSection";
 import { VisualSwipeSection } from "@/components/VisualSwipeSection";
 import { TrainerCard, Trainer } from "@/components/TrainerCard";
+import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import trainerSarah from "@/assets/trainer-sarah.jpg";
@@ -136,19 +137,15 @@ const Index = () => {
       <div className="flex justify-between items-center p-4 border-b">
         <div className="flex items-center gap-4">
           <h1 className="text-xl font-bold">PT Match Finder</h1>
+        </div>
+        <div className="flex items-center gap-3">
           {profile && (
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">Welcome,</span>
-              <span className="font-medium">{profile.first_name} {profile.last_name}</span>
-              <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full capitalize">
-                {profile.user_type}
-              </span>
-            </div>
+            <ProfileDropdown 
+              profile={profile} 
+              onSignOut={handleSignOut}
+            />
           )}
         </div>
-        <Button variant="outline" onClick={handleSignOut}>
-          Sign Out
-        </Button>
       </div>
 
       {/* Role-specific content */}
