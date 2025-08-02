@@ -7,6 +7,7 @@ import { HeroSection } from "@/components/HeroSection";
 import { FilterSection } from "@/components/FilterSection";
 import { TrainerCard, Trainer } from "@/components/TrainerCard";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import trainerSarah from "@/assets/trainer-sarah.jpg";
 import trainerMike from "@/assets/trainer-mike.jpg";
 import trainerEmma from "@/assets/trainer-emma.jpg";
@@ -202,6 +203,30 @@ const Index = () => {
       <HeroSection onSearch={handleSearch} />
       
       <div className="max-w-7xl mx-auto px-6 py-12">
+        {/* Discovery CTA for clients */}
+        {isClient() && profile?.quiz_completed && (
+          <div className="mb-8">
+            <Card className="bg-gradient-to-r from-primary/10 to-purple-500/10 border-primary/20">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xl font-bold mb-2">🔥 Discover Mode</h3>
+                    <p className="text-muted-foreground">
+                      Swipe through trainers and find your perfect match!
+                    </p>
+                  </div>
+                  <Button 
+                    onClick={() => navigate('/discovery')}
+                    className="bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90"
+                  >
+                    Start Swiping
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+        
         {/* Show different content based on user role */}
         {!isTrainer() && <FilterSection onFiltersChange={handleFiltersChange} />}
         
