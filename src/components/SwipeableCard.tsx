@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { Heart, X, Star, MapPin, Award } from 'lucide-react';
+import { Heart, X, Star, MapPin, Award, Bookmark, BookmarkCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Trainer } from '@/components/TrainerCard';
 import { MatchBadge } from '@/components/MatchBadge';
+import { useSavedTrainers } from '@/hooks/useSavedTrainers';
 
 interface SwipeableCardProps {
   trainer: Trainer;
@@ -19,8 +21,20 @@ export const SwipeableCard = ({ trainer, onSwipe, matchScore = 0, matchReasons =
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 200], [-25, 25]);
   const opacity = useTransform(x, [-200, -150, 0, 150, 200], [0, 1, 1, 1, 0]);
+  
+  const { isTrainerSaved, saveTrainer, unsaveTrainer } = useSavedTrainers();
+  const isSaved = isTrainerSaved(trainer.id);
 
   const cardRef = useRef<HTMLDivElement>(null);
+
+  const handleToggleSave = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isSaved) {
+      await unsaveTrainer(trainer.id);
+    } else {
+      await saveTrainer(trainer.id);
+    }
+  };
 
   const handleDragEnd = (event: any, info: PanInfo) => {
     const offset = info.offset.x;
@@ -93,6 +107,20 @@ export const SwipeableCard = ({ trainer, onSwipe, matchScore = 0, matchReasons =
             <X className="w-12 h-12 text-white" />
           </div>
         </motion.div>
+
+        {/* Save Button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="absolute top-6 left-6 z-20 bg-white/80 backdrop-blur hover:bg-white/90"
+          onClick={handleToggleSave}
+        >
+          {isSaved ? (
+            <BookmarkCheck className="h-4 w-4 text-blue-500" />
+          ) : (
+            <Bookmark className="h-4 w-4 text-gray-500" />
+          )}
+        </Button>
 
         {/* Match Badge */}
         {matchScore > 0 && (

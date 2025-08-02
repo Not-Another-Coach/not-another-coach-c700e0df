@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useTrainerMatching } from "@/hooks/useTrainerMatching";
+import { useSavedTrainers } from "@/hooks/useSavedTrainers";
 import { SimpleHeroSection } from "@/components/SimpleHeroSection";
 
 import { FilterSection } from "@/components/FilterSection";
@@ -10,7 +11,7 @@ import { VisualSwipeSection } from "@/components/VisualSwipeSection";
 import { TrainerCard, Trainer } from "@/components/TrainerCard";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { Button } from "@/components/ui/button";
-import { Edit } from "lucide-react";
+import { Edit, Heart } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import trainerSarah from "@/assets/trainer-sarah.jpg";
 import trainerMike from "@/assets/trainer-mike.jpg";
@@ -20,6 +21,7 @@ import trainerAlex from "@/assets/trainer-alex.jpg";
 const Index = () => {
   const { user, signOut, loading } = useAuth();
   const { profile, loading: profileLoading, isAdmin, isTrainer, isClient } = useProfile();
+  const { savedTrainerIds } = useSavedTrainers();
   const navigate = useNavigate();
 
   // Redirect to auth if not logged in
@@ -140,6 +142,17 @@ const Index = () => {
           <h1 className="text-xl font-bold">PT Match Finder</h1>
         </div>
         <div className="flex items-center gap-3">
+          {isClient() && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => navigate('/saved')}
+              className="flex items-center gap-2"
+            >
+              <Heart className="h-4 w-4" />
+              Saved ({savedTrainerIds.length})
+            </Button>
+          )}
           {profile && (
             <ProfileDropdown 
               profile={profile} 

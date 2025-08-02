@@ -77,6 +77,30 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_trainers: {
+        Row: {
+          id: string
+          notes: string | null
+          saved_at: string
+          trainer_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          notes?: string | null
+          saved_at?: string
+          trainer_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          notes?: string | null
+          saved_at?: string
+          trainer_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

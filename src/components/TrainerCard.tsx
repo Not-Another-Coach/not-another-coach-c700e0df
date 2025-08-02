@@ -2,8 +2,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Star, MapPin, Clock, Users, Award, Target, Dumbbell, Heart } from "lucide-react";
+import { Star, MapPin, Clock, Users, Award, Target, Dumbbell, Heart, HeartOff } from "lucide-react";
 import { MatchBadge } from "@/components/MatchBadge";
+import { useSavedTrainers } from "@/hooks/useSavedTrainers";
 
 export interface Trainer {
   id: string;
@@ -37,9 +38,35 @@ interface TrainerCardProps {
 }
 
 export const TrainerCard = ({ trainer, onViewProfile, matchScore = 0, matchReasons = [], matchDetails = [] }: TrainerCardProps) => {
+  const { isTrainerSaved, saveTrainer, unsaveTrainer } = useSavedTrainers();
+  const isSaved = isTrainerSaved(trainer.id);
+
+  const handleToggleSave = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isSaved) {
+      await unsaveTrainer(trainer.id);
+    } else {
+      await saveTrainer(trainer.id);
+    }
+  };
+
   return (
     <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-card to-muted/30 border-0 relative overflow-hidden">
       <CardContent className="p-6">
+        {/* Save Button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="absolute top-3 left-3 z-20 bg-white/80 backdrop-blur hover:bg-white/90 opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={handleToggleSave}
+        >
+          {isSaved ? (
+            <Heart className="h-4 w-4 text-red-500 fill-current" />
+          ) : (
+            <HeartOff className="h-4 w-4 text-gray-500" />
+          )}
+        </Button>
+
         {/* Match Badge - Fixed positioning */}
         {matchScore > 0 && (
           <div className="absolute top-3 right-3 z-10">
