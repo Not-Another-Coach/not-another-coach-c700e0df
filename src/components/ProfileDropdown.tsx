@@ -9,7 +9,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { User, Settings, LogOut } from "lucide-react";
+import { User, Settings, LogOut, Key, Edit } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 interface ProfileDropdownProps {
   profile: {
@@ -17,11 +20,15 @@ interface ProfileDropdownProps {
     last_name: string | null;
     user_type: string;
     profile_photo_url?: string | null;
+    quiz_completed?: boolean;
+    email?: string;
   };
   onSignOut: () => void;
 }
 
 export const ProfileDropdown = ({ profile, onSignOut }: ProfileDropdownProps) => {
+  const navigate = useNavigate();
+  
   const getInitials = () => {
     const first = profile.first_name?.charAt(0) || '';
     const last = profile.last_name?.charAt(0) || '';
@@ -30,6 +37,50 @@ export const ProfileDropdown = ({ profile, onSignOut }: ProfileDropdownProps) =>
 
   const getFullName = () => {
     return `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'User';
+  };
+
+  const handleResetPassword = async () => {
+    try {
+      // Get current user email
+      const { data: { user } } = await supabase.auth.getUser();
+      const email = user?.email;
+      
+      if (!email) {
+        toast({
+          title: "Error",
+          description: "No email found for current user.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth?mode=reset`
+      });
+      
+      if (error) {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Password Reset Email Sent",
+          description: "Check your email for instructions to reset your password.",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send password reset email. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUpdatePreferences = () => {
+    navigate('/onboarding');
   };
 
   return (
@@ -80,14 +131,35 @@ export const ProfileDropdown = ({ profile, onSignOut }: ProfileDropdownProps) =>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        
         <DropdownMenuItem className="cursor-pointer">
           <User className="mr-2 h-4 w-4" />
           <span>View Profile</span>
         </DropdownMenuItem>
+        
+        {profile.user_type === 'client' && (
+          <DropdownMenuItem 
+            className="cursor-pointer"
+            onClick={handleUpdatePreferences}
+          >
+            <Edit className="mr-2 h-4 w-4" />
+            <span>Update Preferences</span>
+          </DropdownMenuItem>
+        )}
+        
+        <DropdownMenuItem 
+          className="cursor-pointer"
+          onClick={handleResetPassword}
+        >
+          <Key className="mr-2 h-4 w-4" />
+          <span>Reset Password</span>
+        </DropdownMenuItem>
+        
         <DropdownMenuItem className="cursor-pointer">
           <Settings className="mr-2 h-4 w-4" />
           <span>Settings</span>
         </DropdownMenuItem>
+        
         <DropdownMenuSeparator />
         <DropdownMenuItem 
           className="cursor-pointer text-red-600 focus:text-red-600"
