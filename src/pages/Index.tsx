@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import { HeroSection } from "@/components/HeroSection";
 import { FilterSection } from "@/components/FilterSection";
 import { TrainerCard, Trainer } from "@/components/TrainerCard";
@@ -12,6 +13,7 @@ import trainerAlex from "@/assets/trainer-alex.jpg";
 
 const Index = () => {
   const { user, signOut, loading } = useAuth();
+  const { profile, loading: profileLoading, isAdmin, isTrainer, isClient } = useProfile();
   const navigate = useNavigate();
 
   // Redirect to auth if not logged in
@@ -107,7 +109,7 @@ const Index = () => {
     navigate('/auth');
   };
 
-  if (loading) {
+  if (loading || profileLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-lg">Loading...</div>
@@ -117,22 +119,78 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header with logout */}
-      <div className="flex justify-end p-4">
+      {/* Header with user info and logout */}
+      <div className="flex justify-between items-center p-4 border-b">
+        <div className="flex items-center gap-4">
+          <h1 className="text-xl font-bold">PT Match Finder</h1>
+          {profile && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Welcome,</span>
+              <span className="font-medium">{profile.first_name} {profile.last_name}</span>
+              <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full capitalize">
+                {profile.user_type}
+              </span>
+            </div>
+          )}
+        </div>
         <Button variant="outline" onClick={handleSignOut}>
           Sign Out
         </Button>
       </div>
+
+      {/* Role-specific content */}
+      {isAdmin() && (
+        <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
+          <div className="flex">
+            <div className="ml-3">
+              <p className="text-sm text-red-700">
+                <strong>Administrator Dashboard</strong> - You have full access to manage users, trainers, and platform settings.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isTrainer() && (
+        <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+          <div className="flex">
+            <div className="ml-3">
+              <p className="text-sm text-blue-700">
+                <strong>Trainer Dashboard</strong> - Manage your profile, view client requests, and update your availability.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isClient() && (
+        <div className="bg-green-50 border-l-4 border-green-400 p-4 mb-6">
+          <div className="flex">
+            <div className="ml-3">
+              <p className="text-sm text-green-700">
+                <strong>Client Dashboard</strong> - Find and connect with personal trainers that match your fitness goals.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       
       <HeroSection onSearch={handleSearch} />
       
       <div className="max-w-7xl mx-auto px-6 py-12">
-        <FilterSection onFiltersChange={handleFiltersChange} />
+        {/* Show different content based on user role */}
+        {!isTrainer() && <FilterSection onFiltersChange={handleFiltersChange} />}
         
         <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-2">Featured Personal Trainers</h2>
+          <h2 className="text-2xl font-bold mb-2">
+            {isAdmin() ? "All Personal Trainers" : 
+             isTrainer() ? "Your Trainer Profile" : 
+             "Featured Personal Trainers"}
+          </h2>
           <p className="text-muted-foreground">
-            Discover certified trainers who can help you reach your fitness goals
+            {isAdmin() ? "Manage and verify trainer profiles" :
+             isTrainer() ? "View and edit your trainer profile" :
+             "Discover certified trainers who can help you reach your fitness goals"}
           </p>
         </div>
 

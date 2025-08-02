@@ -19,7 +19,7 @@ export default function Auth() {
     confirmPassword: '',
     firstName: '',
     lastName: '',
-    userType: 'client' as 'client' | 'trainer'
+    userType: 'client' as 'client' | 'trainer' | 'admin'
   });
 
   const { signIn, signUp } = useAuth();
@@ -188,13 +188,14 @@ export default function Auth() {
                 
                 <div className="space-y-2">
                   <Label htmlFor="signup-usertype">I am a...</Label>
-                  <Select value={signupForm.userType} onValueChange={(value: 'client' | 'trainer') => setSignupForm({ ...signupForm, userType: value })}>
+                  <Select value={signupForm.userType} onValueChange={(value: 'client' | 'trainer' | 'admin') => setSignupForm({ ...signupForm, userType: value })}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="client">Client looking for a trainer</SelectItem>
                       <SelectItem value="trainer">Personal trainer</SelectItem>
+                      <SelectItem value="admin">Administrator</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
