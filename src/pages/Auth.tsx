@@ -14,7 +14,10 @@ import { supabase } from '@/integrations/supabase/client';
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showPasswordReset, setShowPasswordReset] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
   const [signupForm, setSignupForm] = useState({
     email: '',
@@ -33,6 +36,8 @@ export default function Auth() {
   useEffect(() => {
     const type = searchParams.get('type');
     if (type === 'recovery') {
+      setShowPasswordReset(true);
+      setShowForgotPassword(false);
       toast({
         title: "Password Reset",
         description: "Please enter your new password below.",
@@ -167,6 +172,63 @@ export default function Auth() {
     setIsLoading(false);
   };
 
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!newPassword || !confirmNewPassword) {
+      toast({
+        title: "Error",
+        description: "Please fill in all fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      toast({
+        title: "Error",
+        description: "Passwords do not match",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast({
+        title: "Error",
+        description: "Password must be at least 6 characters long",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword
+    });
+
+    if (error) {
+      toast({
+        title: "Update Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Password Updated!",
+        description: "Your password has been successfully updated. You can now login.",
+      });
+      setShowPasswordReset(false);
+      setNewPassword('');
+      setConfirmNewPassword('');
+      // Clear URL parameters
+      navigate('/auth', { replace: true });
+    }
+    
+    setIsLoading(false);
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
@@ -175,7 +237,45 @@ export default function Auth() {
           <CardDescription>Connect with personal trainers or find clients</CardDescription>
         </CardHeader>
         <CardContent>
-          {showForgotPassword ? (
+          {showPasswordReset ? (
+            <div className="space-y-4">
+              <div className="text-center mb-4">
+                <h3 className="text-lg font-semibold">Set New Password</h3>
+                <p className="text-sm text-muted-foreground">
+                  Enter your new password below
+                </p>
+              </div>
+
+              <form onSubmit={handleUpdatePassword} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="new-password">New Password</Label>
+                  <Input
+                    id="new-password"
+                    type="password"
+                    placeholder="Enter your new password (min 6 characters)"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirm-new-password">Confirm New Password</Label>
+                  <Input
+                    id="confirm-new-password"
+                    type="password"
+                    placeholder="Confirm your new password"
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                    required
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Update Password
+                </Button>
+              </form>
+            </div>
+          ) : showForgotPassword ? (
             <div className="space-y-4">
               <div className="flex items-center gap-2 mb-4">
                 <Button
