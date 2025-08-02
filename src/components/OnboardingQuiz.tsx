@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -129,8 +129,13 @@ export function OnboardingQuiz({ onComplete, onSkip, existingAnswers = [] }: Onb
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<QuizAnswer[]>(existingAnswers);
 
-  // Filter questions based on conditional logic
-  const getVisibleQuestions = () => {
+  // Define getCurrentAnswer FIRST, before any functions that use it
+  const getCurrentAnswer = (questionId: string) => {
+    return answers.find(a => a.questionId === questionId);
+  };
+
+  // Filter questions based on conditional logic - now using useMemo for proper dependencies
+  const visibleQuestions = useMemo(() => {
     return quizQuestions.filter(question => {
       if (!question.conditional) return true;
       
@@ -139,13 +144,7 @@ export function OnboardingQuiz({ onComplete, onSkip, existingAnswers = [] }: Onb
       
       return question.conditional.showIf.includes(dependentAnswer.value as string);
     });
-  };
-
-  const visibleQuestions = getVisibleQuestions();
-
-  const getCurrentAnswer = (questionId: string) => {
-    return answers.find(a => a.questionId === questionId);
-  };
+  }, [answers]); // Re-calculate when answers change
 
   const updateAnswer = (questionId: string, value: string | string[] | number) => {
     setAnswers(prev => {
