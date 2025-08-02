@@ -18,6 +18,9 @@ interface Profile {
   rating: number;
   total_ratings: number;
   fitness_goals: string[] | null;
+  quiz_completed: boolean;
+  quiz_answers: any;
+  quiz_completed_at: string | null;
 }
 
 export function useProfile() {

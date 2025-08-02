@@ -26,6 +26,9 @@ export type Database = {
           location: string | null
           profile_photo_url: string | null
           qualifications: string[] | null
+          quiz_answers: Json | null
+          quiz_completed: boolean | null
+          quiz_completed_at: string | null
           rating: number | null
           specializations: string[] | null
           total_ratings: number | null
@@ -43,6 +46,9 @@ export type Database = {
           location?: string | null
           profile_photo_url?: string | null
           qualifications?: string[] | null
+          quiz_answers?: Json | null
+          quiz_completed?: boolean | null
+          quiz_completed_at?: string | null
           rating?: number | null
           specializations?: string[] | null
           total_ratings?: number | null
@@ -60,6 +66,9 @@ export type Database = {
           location?: string | null
           profile_photo_url?: string | null
           qualifications?: string[] | null
+          quiz_answers?: Json | null
+          quiz_completed?: boolean | null
+          quiz_completed_at?: string | null
           rating?: number | null
           specializations?: string[] | null
           total_ratings?: number | null

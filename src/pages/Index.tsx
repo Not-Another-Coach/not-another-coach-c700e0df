@@ -23,6 +23,13 @@ const Index = () => {
     }
   }, [user, loading, navigate]);
 
+  // Redirect clients to onboarding quiz if not completed
+  useEffect(() => {
+    if (!loading && !profileLoading && user && profile && isClient() && !profile.quiz_completed) {
+      navigate('/onboarding');
+    }
+  }, [user, profile, loading, profileLoading, isClient, navigate]);
+
   // Sample trainer data
   const [trainers] = useState<Trainer[]>([
     {
@@ -165,12 +172,22 @@ const Index = () => {
 
       {isClient() && (
         <div className="bg-green-50 border-l-4 border-green-400 p-4 mb-6">
-          <div className="flex">
+          <div className="flex justify-between items-center">
             <div className="ml-3">
               <p className="text-sm text-green-700">
                 <strong>Client Dashboard</strong> - Find and connect with personal trainers that match your fitness goals.
               </p>
             </div>
+            {profile?.quiz_completed && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate('/onboarding')}
+                className="ml-4"
+              >
+                Update Preferences
+              </Button>
+            )}
           </div>
         </div>
       )}
