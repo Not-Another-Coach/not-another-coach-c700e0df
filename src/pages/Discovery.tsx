@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { useTrainerMatching } from '@/hooks/useTrainerMatching';
+import { useJourneyProgress } from '@/hooks/useJourneyProgress';
 import { SwipeableCard } from '@/components/SwipeableCard';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowLeft, Heart, X, RotateCcw, Settings, MessageCircle } from 'lucide-react';
+import { ProgressBreadcrumb } from '@/components/ProgressBreadcrumb';
 import { toast } from '@/hooks/use-toast';
 import { Trainer } from '@/components/TrainerCard';
 
@@ -84,6 +86,7 @@ export default function Discovery() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { profile } = useProfile();
+  const { progress: journeyProgress, updateProgress } = useJourneyProgress();
   
   const [currentTrainerIndex, setCurrentTrainerIndex] = useState(0);
   const [likedTrainers, setLikedTrainers] = useState<string[]>([]);
@@ -99,12 +102,14 @@ export default function Discovery() {
   const handleSwipe = useCallback((direction: 'left' | 'right', trainer: Trainer) => {
     if (direction === 'right') {
       setLikedTrainers(prev => [...prev, trainer.id]);
+      updateProgress('discovery', 'like_trainer', { trainerId: trainer.id });
       toast({
         title: "❤️ Liked!",
         description: `You liked ${trainer.name}. They've been added to your matches!`,
       });
     } else {
       setPassedTrainers(prev => [...prev, trainer.id]);
+      updateProgress('discovery', 'pass_trainer', { trainerId: trainer.id });
     }
 
     // Move to next trainer
@@ -160,6 +165,16 @@ export default function Discovery() {
           <Settings className="h-4 w-4" />
         </Button>
       </div>
+
+      {/* Progress Breadcrumb */}
+      {journeyProgress && (
+        <div className="max-w-md mx-auto px-4 mb-4">
+          <ProgressBreadcrumb 
+            progress={journeyProgress} 
+            variant="minimal"
+          />
+        </div>
+      )}
 
       <div className="max-w-md mx-auto p-4">
         {/* Card Stack */}

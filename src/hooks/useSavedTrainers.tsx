@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useJourneyProgress } from '@/hooks/useJourneyProgress';
 import { toast } from '@/hooks/use-toast';
 
 export interface SavedTrainer {
@@ -12,6 +13,7 @@ export interface SavedTrainer {
 
 export const useSavedTrainers = () => {
   const { user } = useAuth();
+  const { updateProgress, advanceToStage } = useJourneyProgress();
   const [savedTrainers, setSavedTrainers] = useState<SavedTrainer[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -77,6 +79,15 @@ export const useSavedTrainers = () => {
       }
 
       await fetchSavedTrainers(); // Refresh the list
+      
+      // Track progress - first save advances to shortlisting stage
+      if (savedTrainers.length === 0) {
+        await advanceToStage('shortlisting');
+        await updateProgress('shortlisting', 'first_save', { trainerId });
+      } else {
+        await updateProgress('shortlisting', 'save_trainer', { trainerId });
+      }
+      
       toast({
         title: "Trainer saved!",
         description: "Added to your saved trainers list",

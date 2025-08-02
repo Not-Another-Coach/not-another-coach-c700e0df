@@ -4,10 +4,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useTrainerMatching } from "@/hooks/useTrainerMatching";
 import { useSavedTrainers } from "@/hooks/useSavedTrainers";
+import { useJourneyProgress } from "@/hooks/useJourneyProgress";
 import { SimpleHeroSection } from "@/components/SimpleHeroSection";
 
 import { FilterSection } from "@/components/FilterSection";
 import { VisualSwipeSection } from "@/components/VisualSwipeSection";
+import { ProgressBreadcrumb } from "@/components/ProgressBreadcrumb";
 import { TrainerCard, Trainer } from "@/components/TrainerCard";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { Button } from "@/components/ui/button";
@@ -22,6 +24,7 @@ const Index = () => {
   const { user, signOut, loading } = useAuth();
   const { profile, loading: profileLoading, isAdmin, isTrainer, isClient } = useProfile();
   const { savedTrainerIds } = useSavedTrainers();
+  const { progress: journeyProgress, updateProgress, advanceToStage } = useJourneyProgress();
   const navigate = useNavigate();
 
   // Redirect to auth if not logged in
@@ -118,6 +121,8 @@ const Index = () => {
 
   const handleViewProfile = (trainerId: string) => {
     console.log("View profile:", trainerId);
+    // Track discovery stage progress
+    updateProgress('discovery', 'browse_matches');
     // This would navigate to trainer detail page
   };
 
@@ -161,6 +166,17 @@ const Index = () => {
           )}
         </div>
       </div>
+
+      {/* Progress Breadcrumb for Clients */}
+      {isClient() && journeyProgress && (
+        <div className="max-w-7xl mx-auto px-4 pt-6">
+          <ProgressBreadcrumb 
+            progress={journeyProgress} 
+            variant="compact"
+            className="mb-6"
+          />
+        </div>
+      )}
 
       {/* Role-specific content */}
       {isAdmin() && (

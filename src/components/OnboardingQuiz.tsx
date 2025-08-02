@@ -3,8 +3,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { ChevronLeft, ChevronRight, CheckCircle, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useJourneyProgress } from '@/hooks/useJourneyProgress';
 
 interface QuizQuestion {
   id: string;
@@ -128,6 +130,7 @@ const quizQuestions: QuizQuestion[] = [
 export function OnboardingQuiz({ onComplete, onSkip, existingAnswers = [] }: OnboardingQuizProps) {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<QuizAnswer[]>(existingAnswers);
+  const { updateOnboardingStep } = useJourneyProgress();
 
   // Define getCurrentAnswer FIRST, before any functions that use it
   const getCurrentAnswer = (questionId: string) => {
@@ -191,15 +194,20 @@ export function OnboardingQuiz({ onComplete, onSkip, existingAnswers = [] }: Onb
 
   const goNext = () => {
     if (currentQuestion < visibleQuestions.length - 1) {
+      const newStep = currentQuestion + 2; // +2 because we start from step 1
       setCurrentQuestion(prev => prev + 1);
+      updateOnboardingStep(newStep);
     } else {
+      updateOnboardingStep(visibleQuestions.length); // Mark as completed
       onComplete(answers);
     }
   };
 
   const goPrevious = () => {
     if (currentQuestion > 0) {
+      const newStep = currentQuestion; // Going back one step
       setCurrentQuestion(prev => prev - 1);
+      updateOnboardingStep(newStep);
     }
   };
 
@@ -209,18 +217,20 @@ export function OnboardingQuiz({ onComplete, onSkip, existingAnswers = [] }: Onb
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-background flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
-        {/* Progress bar */}
-        <div className="mb-6">
-          <div className="flex justify-between text-sm text-muted-foreground mb-2">
-            <span>Question {currentQuestion + 1} of {visibleQuestions.length}</span>
-            <span>{Math.round(((currentQuestion + 1) / visibleQuestions.length) * 100)}%</span>
+        {/* Progress Header */}
+        <div className="mb-6 p-4 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-lg border border-primary/20">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="bg-gradient-to-r from-primary to-secondary p-2 rounded-full">
+              <Target className="h-4 w-4 text-white" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-lg">Fitness Assessment</h3>
+              <p className="text-sm text-muted-foreground">
+                Step {currentQuestion + 1} of {visibleQuestions.length} • {Math.round(((currentQuestion + 1) / visibleQuestions.length) * 100)}% to your perfect match
+              </p>
+            </div>
           </div>
-          <div className="w-full bg-muted rounded-full h-2">
-            <div 
-              className="bg-primary h-2 rounded-full transition-all duration-300 ease-out"
-              style={{ width: `${((currentQuestion + 1) / visibleQuestions.length) * 100}%` }}
-            />
-          </div>
+          <Progress value={((currentQuestion + 1) / visibleQuestions.length) * 100} className="h-3" />
         </div>
 
         {/* Question card */}

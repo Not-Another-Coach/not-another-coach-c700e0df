@@ -22,8 +22,11 @@ export type Database = {
           fitness_goals: string[] | null
           id: string
           is_verified: boolean | null
+          journey_progress: Json | null
+          journey_stage: string | null
           last_name: string | null
           location: string | null
+          onboarding_step: number | null
           profile_photo_url: string | null
           qualifications: string[] | null
           quiz_answers: Json | null
@@ -31,6 +34,7 @@ export type Database = {
           quiz_completed_at: string | null
           rating: number | null
           specializations: string[] | null
+          total_onboarding_steps: number | null
           total_ratings: number | null
           updated_at: string
           user_type: Database["public"]["Enums"]["user_type"]
@@ -42,8 +46,11 @@ export type Database = {
           fitness_goals?: string[] | null
           id: string
           is_verified?: boolean | null
+          journey_progress?: Json | null
+          journey_stage?: string | null
           last_name?: string | null
           location?: string | null
+          onboarding_step?: number | null
           profile_photo_url?: string | null
           qualifications?: string[] | null
           quiz_answers?: Json | null
@@ -51,6 +58,7 @@ export type Database = {
           quiz_completed_at?: string | null
           rating?: number | null
           specializations?: string[] | null
+          total_onboarding_steps?: number | null
           total_ratings?: number | null
           updated_at?: string
           user_type: Database["public"]["Enums"]["user_type"]
@@ -62,8 +70,11 @@ export type Database = {
           fitness_goals?: string[] | null
           id?: string
           is_verified?: boolean | null
+          journey_progress?: Json | null
+          journey_stage?: string | null
           last_name?: string | null
           location?: string | null
+          onboarding_step?: number | null
           profile_photo_url?: string | null
           qualifications?: string[] | null
           quiz_answers?: Json | null
@@ -71,6 +82,7 @@ export type Database = {
           quiz_completed_at?: string | null
           rating?: number | null
           specializations?: string[] | null
+          total_onboarding_steps?: number | null
           total_ratings?: number | null
           updated_at?: string
           user_type?: Database["public"]["Enums"]["user_type"]
@@ -97,6 +109,33 @@ export type Database = {
           notes?: string | null
           saved_at?: string
           trainer_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_journey_tracking: {
+        Row: {
+          completed_at: string
+          id: string
+          metadata: Json | null
+          stage: string
+          step_name: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          id?: string
+          metadata?: Json | null
+          stage: string
+          step_name: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          id?: string
+          metadata?: Json | null
+          stage?: string
+          step_name?: string
           user_id?: string
         }
         Relationships: []

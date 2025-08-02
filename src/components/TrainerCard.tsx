@@ -4,6 +4,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Star, MapPin, Clock, Users, Award, Target, Dumbbell, Heart, HeartOff } from "lucide-react";
 import { MatchBadge } from "@/components/MatchBadge";
+import { MatchProgressIndicator } from "@/components/MatchProgressIndicator";
 import { useSavedTrainers } from "@/hooks/useSavedTrainers";
 
 export interface Trainer {
@@ -178,6 +179,19 @@ export const TrainerCard = ({ trainer, onViewProfile, matchScore = 0, matchReaso
                 );
               })}
             </div>
+          </div>
+        )}
+
+        {/* Match Progress Indicator */}
+        {matchScore > 0 && (
+          <div className="mb-4">
+            <MatchProgressIndicator
+              matchScore={matchScore}
+              matchReasons={matchReasons}
+              isShortlisted={isSaved}
+              hasContacted={false} // TODO: Track actual contact status
+              hasScheduledCall={false} // TODO: Track actual call status
+            />
           </div>
         )}
 
