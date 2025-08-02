@@ -173,27 +173,6 @@ const Index = () => {
         </div>
       )}
 
-      {isClient() && (
-        <div className="bg-green-50 border-l-4 border-green-400 p-4 mb-6">
-          <div className="flex justify-between items-center">
-            <div className="ml-3">
-              <p className="text-sm text-green-700">
-                <strong>Client Dashboard</strong> - Find and connect with personal trainers that match your fitness goals.
-              </p>
-            </div>
-            {profile?.quiz_completed && (
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => navigate('/onboarding')}
-                className="ml-4"
-              >
-                Update Preferences
-              </Button>
-            )}
-          </div>
-        </div>
-      )}
       
       
       
