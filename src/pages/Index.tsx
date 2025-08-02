@@ -222,13 +222,14 @@ const Index = () => {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {(profile?.quiz_completed ? matchedTrainers : filteredTrainers.map(t => ({ trainer: t, score: 0, matchReasons: [] }))).map((match) => (
+          {(profile?.quiz_completed ? matchedTrainers : filteredTrainers.map(t => ({ trainer: t, score: 0, matchReasons: [], matchDetails: [] }))).map((match) => (
             <TrainerCard
               key={match.trainer.id}
               trainer={match.trainer}
               onViewProfile={handleViewProfile}
               matchScore={match.score}
               matchReasons={match.matchReasons}
+              matchDetails={match.matchDetails}
             />
           ))}
         </div>

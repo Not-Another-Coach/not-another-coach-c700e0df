@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Star, MapPin, Clock, Users, Award } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Star, MapPin, Clock, Users, Award, Target, Dumbbell, Heart } from "lucide-react";
 import { MatchBadge } from "@/components/MatchBadge";
 
 export interface Trainer {
@@ -20,25 +21,33 @@ export interface Trainer {
   trainingType: string[];
 }
 
+interface MatchDetail {
+  category: string;
+  score: number;
+  icon: React.ComponentType<any>;
+  color: string;
+}
+
 interface TrainerCardProps {
   trainer: Trainer;
   onViewProfile: (trainerId: string) => void;
   matchScore?: number;
   matchReasons?: string[];
+  matchDetails?: MatchDetail[];
 }
 
-export const TrainerCard = ({ trainer, onViewProfile, matchScore = 0, matchReasons = [] }: TrainerCardProps) => {
+export const TrainerCard = ({ trainer, onViewProfile, matchScore = 0, matchReasons = [], matchDetails = [] }: TrainerCardProps) => {
   return (
-    <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-card to-muted/30 border-0 relative">
+    <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-card to-muted/30 border-0 relative overflow-hidden">
       <CardContent className="p-6">
-        {/* Match Badge */}
+        {/* Match Badge - Fixed positioning */}
         {matchScore > 0 && (
-          <div className="absolute top-4 right-4 z-10">
+          <div className="absolute top-3 right-3 z-10">
             <MatchBadge score={matchScore} reasons={matchReasons} />
           </div>
         )}
         {/* Trainer Image and Basic Info */}
-        <div className="flex items-start gap-4 mb-4">
+        <div className="flex items-start gap-4 mb-4" style={{ marginTop: matchScore > 0 ? '2rem' : '0' }}>
           <div className="relative">
             <img 
               src={trainer.image} 
@@ -114,6 +123,36 @@ export const TrainerCard = ({ trainer, onViewProfile, matchScore = 0, matchReaso
             ))}
           </div>
         </div>
+
+        {/* Match Details - Visual indicators */}
+        {matchDetails.length > 0 && (
+          <div className="mb-4 p-3 bg-muted/30 rounded-lg border border-primary/10">
+            <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+              <Target className="h-4 w-4 text-primary" />
+              Match Breakdown
+            </h4>
+            <div className="space-y-3">
+              {matchDetails.map((detail, index) => {
+                const IconComponent = detail.icon;
+                return (
+                  <div key={index} className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 w-24 text-xs">
+                      <IconComponent className={`h-3 w-3 ${detail.color}`} />
+                      <span className="text-muted-foreground">{detail.category}</span>
+                    </div>
+                    <div className="flex-1 flex items-center gap-2">
+                      <Progress 
+                        value={detail.score} 
+                        className="h-2 flex-1"
+                      />
+                      <span className="text-xs font-medium w-8 text-right">{detail.score}%</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Certifications */}
         <div className="text-xs text-muted-foreground">

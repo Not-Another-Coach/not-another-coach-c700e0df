@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { Trainer } from '@/components/TrainerCard';
+import { Target, Dumbbell, MapPin, Clock, DollarSign } from 'lucide-react';
 
 interface QuizAnswers {
   fitness_goals?: string[];
@@ -10,10 +11,18 @@ interface QuizAnswers {
   workout_frequency?: string;
 }
 
+interface MatchDetail {
+  category: string;
+  score: number;
+  icon: React.ComponentType<any>;
+  color: string;
+}
+
 interface MatchScore {
   trainer: Trainer;
   score: number;
   matchReasons: string[];
+  matchDetails: MatchDetail[];
 }
 
 export const useTrainerMatching = (trainers: Trainer[], userAnswers?: QuizAnswers) => {
@@ -22,28 +31,32 @@ export const useTrainerMatching = (trainers: Trainer[], userAnswers?: QuizAnswer
       return trainers.map(trainer => ({
         trainer,
         score: 0,
-        matchReasons: []
+        matchReasons: [],
+        matchDetails: []
       }));
     }
 
-    const scoredTrainers: MatchScore[] = trainers.map(trainer => {
+    const calculateMatch = (trainer: Trainer): MatchScore => {
       let score = 0;
-      const matchReasons: string[] = [];
-
-      // Fitness goals matching (highest weight - 40 points)
+      const reasons: string[] = [];
+      const details: MatchDetail[] = [];
+      
+      // Fitness Goals Match (30% weight)
+      let goalsScore = 0;
       if (userAnswers.fitness_goals && userAnswers.fitness_goals.length > 0) {
-        const goalMatches = userAnswers.fitness_goals.filter(goal => {
-          const goalMapping: Record<string, string[]> = {
-            'weight_loss': ['Weight Loss', 'Cardio', 'Nutrition'],
-            'muscle_gain': ['Muscle Building', 'Strength Training'],
-            'endurance': ['Endurance', 'Cardio', 'Sports Performance'],
-            'strength': ['Strength Training', 'Powerlifting', 'Muscle Building'],
-            'flexibility': ['Yoga', 'Pilates', 'Flexibility'],
-            'general_fitness': ['Functional Training', 'HIIT', 'CrossFit'],
-            'rehabilitation': ['Rehabilitation', 'Corrective Exercise'],
-            'sport_performance': ['Sports Performance', 'Functional Training']
-          };
-          
+        const userGoals = userAnswers.fitness_goals;
+        const goalMapping: Record<string, string[]> = {
+          'weight_loss': ['Weight Loss', 'Cardio', 'Nutrition'],
+          'muscle_gain': ['Muscle Building', 'Strength Training'],
+          'endurance': ['Endurance', 'Cardio', 'Sports Performance'],
+          'strength': ['Strength Training', 'Powerlifting', 'Muscle Building'],
+          'flexibility': ['Yoga', 'Pilates', 'Flexibility'],
+          'general_fitness': ['Functional Training', 'HIIT', 'CrossFit'],
+          'rehabilitation': ['Rehabilitation', 'Corrective Exercise'],
+          'sport_performance': ['Sports Performance', 'Functional Training']
+        };
+        
+        const matchingGoals = userGoals.filter(goal => {
           const relatedSpecialties = goalMapping[goal] || [];
           return trainer.specialties.some(specialty => 
             relatedSpecialties.some(related => 
@@ -51,30 +64,38 @@ export const useTrainerMatching = (trainers: Trainer[], userAnswers?: QuizAnswer
               related.toLowerCase().includes(specialty.toLowerCase())
             )
           );
-        });
-
-        const goalScore = (goalMatches.length / userAnswers.fitness_goals.length) * 40;
-        score += goalScore;
+        }).length;
         
-        if (goalMatches.length > 0) {
-          matchReasons.push(`Matches ${goalMatches.length} of your fitness goals`);
+        goalsScore = Math.round((matchingGoals / userGoals.length) * 100);
+        score += goalsScore * 0.3;
+        
+        details.push({
+          category: 'Goals',
+          score: goalsScore,
+          icon: Target,
+          color: 'text-blue-500'
+        });
+        
+        if (matchingGoals > 0) {
+          reasons.push(`${matchingGoals}/${userGoals.length} goals match`);
         }
       }
-
-      // Training type matching (30 points)
+      
+      // Training Type Match (25% weight)
+      let typeScore = 0;
       if (userAnswers.training_type && userAnswers.training_type.length > 0) {
-        const typeMatches = userAnswers.training_type.filter(type => {
-          const typeMapping: Record<string, string[]> = {
-            'strength_training': ['Strength Training', 'Powerlifting', 'Muscle Building'],
-            'cardio': ['Cardio', 'Endurance'],
-            'hiit': ['HIIT', 'CrossFit', 'Functional Training'],
-            'yoga': ['Yoga', 'Flexibility', 'Mindfulness'],
-            'pilates': ['Pilates', 'Flexibility'],
-            'crossfit': ['CrossFit', 'Functional Training'],
-            'martial_arts': ['Sports Performance'],
-            'dance': ['Cardio', 'Flexibility']
-          };
-          
+        const typeMapping: Record<string, string[]> = {
+          'strength_training': ['Strength Training', 'Powerlifting', 'Muscle Building'],
+          'cardio': ['Cardio', 'Endurance'],
+          'hiit': ['HIIT', 'CrossFit', 'Functional Training'],
+          'yoga': ['Yoga', 'Flexibility', 'Mindfulness'],
+          'pilates': ['Pilates', 'Flexibility'],
+          'crossfit': ['CrossFit', 'Functional Training'],
+          'martial_arts': ['Sports Performance'],
+          'dance': ['Cardio', 'Flexibility']
+        };
+        
+        const trainingTypeMatch = userAnswers.training_type.some(type => {
           const relatedSpecialties = typeMapping[type] || [];
           return trainer.specialties.some(specialty => 
             relatedSpecialties.some(related => 
@@ -83,16 +104,24 @@ export const useTrainerMatching = (trainers: Trainer[], userAnswers?: QuizAnswer
             )
           );
         });
-
-        const typeScore = (typeMatches.length / userAnswers.training_type.length) * 30;
-        score += typeScore;
         
-        if (typeMatches.length > 0) {
-          matchReasons.push(`Specializes in your preferred training types`);
+        typeScore = trainingTypeMatch ? 100 : 0;
+        score += typeScore * 0.25;
+        
+        details.push({
+          category: 'Training',
+          score: typeScore,
+          icon: Dumbbell,
+          color: 'text-green-500'
+        });
+        
+        if (trainingTypeMatch) {
+          reasons.push('Training type matches');
         }
       }
-
-      // Session preference matching (15 points)
+      
+      // Session Preference Match (20% weight)
+      let sessionScore = 0;
       if (userAnswers.session_preference) {
         const sessionMapping: Record<string, string[]> = {
           'in_person': ['In-Person'],
@@ -102,19 +131,29 @@ export const useTrainerMatching = (trainers: Trainer[], userAnswers?: QuizAnswer
         };
         
         const preferredTypes = sessionMapping[userAnswers.session_preference] || [];
-        const hasMatch = trainer.trainingType.some(type => 
+        const sessionMatch = trainer.trainingType.some(type => 
           preferredTypes.some(pref => 
             type.toLowerCase().includes(pref.toLowerCase())
           )
         );
         
-        if (hasMatch) {
-          score += 15;
-          matchReasons.push(`Offers your preferred session format`);
+        sessionScore = sessionMatch ? 100 : 0;
+        score += sessionScore * 0.2;
+        
+        details.push({
+          category: 'Session',
+          score: sessionScore,
+          icon: MapPin,
+          color: 'text-purple-500'
+        });
+        
+        if (sessionMatch) {
+          reasons.push('Session preference matches');
         }
       }
-
-      // Budget matching (10 points)
+      
+      // Budget Match (15% weight)
+      let budgetScore = 0;
       if (userAnswers.budget_range) {
         const budgetRanges: Record<string, [number, number]> = {
           '30-50': [30, 50],
@@ -124,36 +163,59 @@ export const useTrainerMatching = (trainers: Trainer[], userAnswers?: QuizAnswer
         };
         
         const [min, max] = budgetRanges[userAnswers.budget_range] || [0, 999];
-        if (trainer.hourlyRate >= min && trainer.hourlyRate <= max) {
-          score += 10;
-          matchReasons.push(`Within your budget range`);
+        const budgetMatch = trainer.hourlyRate >= min && trainer.hourlyRate <= max;
+        
+        budgetScore = budgetMatch ? 100 : 0;
+        score += budgetScore * 0.15;
+        
+        details.push({
+          category: 'Budget',
+          score: budgetScore,
+          icon: DollarSign,
+          color: 'text-orange-500'
+        });
+        
+        if (budgetMatch) {
+          reasons.push('Within budget range');
         }
       }
-
-      // Experience level bonus (5 points)
+      
+      // Experience Level Match (10% weight)
+      let experienceScore = 0;
       if (userAnswers.experience_level) {
-        const experienceBonus: Record<string, number> = {
-          'beginner': trainer.rating >= 4.8 ? 5 : 3, // High-rated for beginners
-          'intermediate': 4,
-          'advanced': parseInt(trainer.experience) >= 8 ? 5 : 3,
-          'expert': parseInt(trainer.experience) >= 10 ? 5 : 2
+        const experienceMapping: Record<string, boolean> = {
+          'beginner': trainer.rating >= 4.8,
+          'intermediate': trainer.rating >= 4.5,
+          'advanced': parseInt(trainer.experience) >= 8,
+          'expert': parseInt(trainer.experience) >= 10
         };
         
-        score += experienceBonus[userAnswers.experience_level] || 0;
+        const experienceMatch = experienceMapping[userAnswers.experience_level] || false;
         
-        if (userAnswers.experience_level === 'beginner' && trainer.rating >= 4.8) {
-          matchReasons.push(`Highly rated - great for beginners`);
-        } else if (userAnswers.experience_level === 'advanced' && parseInt(trainer.experience) >= 8) {
-          matchReasons.push(`Experienced trainer for advanced clients`);
+        experienceScore = experienceMatch ? 100 : 0;
+        score += experienceScore * 0.1;
+        
+        details.push({
+          category: 'Experience',
+          score: experienceScore,
+          icon: Clock,
+          color: 'text-red-500'
+        });
+        
+        if (experienceMatch) {
+          reasons.push('Experience level matches');
         }
       }
 
       return {
         trainer,
         score: Math.round(score),
-        matchReasons
+        matchReasons: reasons,
+        matchDetails: details
       };
-    });
+    };
+
+    const scoredTrainers = trainers.map(calculateMatch);
 
     // Sort by score (highest first) and then by rating
     return scoredTrainers.sort((a, b) => {
