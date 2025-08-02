@@ -1,13 +1,26 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import { HeroSection } from "@/components/HeroSection";
 import { FilterSection } from "@/components/FilterSection";
 import { TrainerCard, Trainer } from "@/components/TrainerCard";
+import { Button } from "@/components/ui/button";
 import trainerSarah from "@/assets/trainer-sarah.jpg";
 import trainerMike from "@/assets/trainer-mike.jpg";
 import trainerEmma from "@/assets/trainer-emma.jpg";
 import trainerAlex from "@/assets/trainer-alex.jpg";
 
 const Index = () => {
+  const { user, signOut, loading } = useAuth();
+  const navigate = useNavigate();
+
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/auth');
+    }
+  }, [user, loading, navigate]);
+
   // Sample trainer data
   const [trainers] = useState<Trainer[]>([
     {
@@ -89,8 +102,28 @@ const Index = () => {
     // This would navigate to trainer detail page
   };
 
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/auth');
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-lg">Loading...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
+      {/* Header with logout */}
+      <div className="flex justify-end p-4">
+        <Button variant="outline" onClick={handleSignOut}>
+          Sign Out
+        </Button>
+      </div>
+      
       <HeroSection onSearch={handleSearch} />
       
       <div className="max-w-7xl mx-auto px-6 py-12">
