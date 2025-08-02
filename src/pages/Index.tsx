@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useTrainerMatching } from "@/hooks/useTrainerMatching";
+import { SimpleHeroSection } from "@/components/SimpleHeroSection";
 
 import { FilterSection } from "@/components/FilterSection";
 import { TrainerCard, Trainer } from "@/components/TrainerCard";
@@ -197,6 +198,8 @@ const Index = () => {
       )}
       
       
+      
+      <SimpleHeroSection />
       
       <div className="max-w-7xl mx-auto px-6 py-12">
         {/* Discovery CTA for clients */}
