@@ -180,15 +180,15 @@ export default function Discovery() {
               <CardContent className="text-center space-y-4">
                 <div className="text-6xl">🎉</div>
                 <h2 className="text-2xl font-bold">All Done!</h2>
-                <p className="text-muted-foreground">
-                  You've seen all available trainers. Check your matches or adjust your preferences.
+                <p className="text-muted-foreground mb-4">
+                  No more matches right now! New trainers join daily — check back soon for more options.
                 </p>
                 <div className="space-y-2">
                   <Button onClick={() => navigate('/')} className="w-full">
-                    View Matches ({likedTrainers.length})
+                    View Your Matches ({likedTrainers.length})
                   </Button>
                   <Button variant="outline" onClick={() => navigate('/onboarding')} className="w-full">
-                    Update Preferences
+                    Refine Your Filters
                   </Button>
                 </div>
               </CardContent>
@@ -213,11 +213,13 @@ export default function Discovery() {
               <Button
                 variant="outline"
                 size="lg"
-                className="rounded-full w-12 h-12 p-0 border-gray-200 hover:bg-gray-50"
+                className="rounded-full w-12 h-12 p-0 border-gray-200 hover:bg-gray-50 group"
                 onClick={handleUndo}
                 disabled={currentTrainerIndex === 0}
+                title="Undo last action"
               >
-                <RotateCcw className="h-4 w-4 text-gray-500" />
+                <RotateCcw className="h-4 w-4 text-gray-500 group-hover:text-gray-700" />
+                <span className="sr-only">Undo</span>
               </Button>
 
               <Button

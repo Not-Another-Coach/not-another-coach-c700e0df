@@ -236,7 +236,7 @@ export default function Auth() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">PT Match Finder</CardTitle>
-          <CardDescription>Connect with personal trainers or find clients</CardDescription>
+          <CardDescription>Let's find your fitness fit 💪</CardDescription>
         </CardHeader>
         <CardContent>
           {showPasswordReset ? (

@@ -170,7 +170,8 @@ export const SwipeableCard = ({ trainer, onSwipe, matchScore = 0, matchReasons =
             <span className="text-sm text-muted-foreground">Offers:</span>
             <div className="flex gap-1">
               {trainer.trainingType.map((type) => (
-                <span key={type} className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+                <span key={type} className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full flex items-center gap-1">
+                  {type === "In-Person" ? "🧍" : type === "Online" ? "💻" : type === "Group" ? "👥" : type === "Hybrid" ? "🔄" : ""}
                   {type}
                 </span>
               ))}
