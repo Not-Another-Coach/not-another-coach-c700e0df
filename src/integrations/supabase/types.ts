@@ -14,7 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          bio: string | null
+          created_at: string
+          first_name: string | null
+          fitness_goals: string[] | null
+          id: string
+          is_verified: boolean | null
+          last_name: string | null
+          location: string | null
+          profile_photo_url: string | null
+          qualifications: string[] | null
+          rating: number | null
+          specializations: string[] | null
+          total_ratings: number | null
+          updated_at: string
+          user_type: Database["public"]["Enums"]["user_type"]
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          first_name?: string | null
+          fitness_goals?: string[] | null
+          id: string
+          is_verified?: boolean | null
+          last_name?: string | null
+          location?: string | null
+          profile_photo_url?: string | null
+          qualifications?: string[] | null
+          rating?: number | null
+          specializations?: string[] | null
+          total_ratings?: number | null
+          updated_at?: string
+          user_type: Database["public"]["Enums"]["user_type"]
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          first_name?: string | null
+          fitness_goals?: string[] | null
+          id?: string
+          is_verified?: boolean | null
+          last_name?: string | null
+          location?: string | null
+          profile_photo_url?: string | null
+          qualifications?: string[] | null
+          rating?: number | null
+          specializations?: string[] | null
+          total_ratings?: number | null
+          updated_at?: string
+          user_type?: Database["public"]["Enums"]["user_type"]
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +76,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      user_type: "client" | "trainer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +203,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_type: ["client", "trainer"],
+    },
   },
 } as const
