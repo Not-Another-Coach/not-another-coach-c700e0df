@@ -2,18 +2,23 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface QuizQuestion {
   id: string;
-  type: 'single' | 'multiple' | 'range';
+  type: 'single' | 'multiple' | 'range' | 'text';
   question: string;
   description?: string;
   options?: { value: string; label: string; emoji?: string }[];
   min?: number;
   max?: number;
   unit?: string;
+  conditional?: {
+    dependsOn: string;
+    showIf: string[];
+  };
 }
 
 interface QuizAnswer {
@@ -107,12 +112,36 @@ const quizQuestions: QuizQuestion[] = [
       { value: '75-100', label: '$75-100 per session', emoji: '💷' },
       { value: '100+', label: '$100+ per session', emoji: '💎' }
     ]
+  },
+  {
+    id: 'postcode',
+    type: 'text',
+    question: 'What\'s your postcode?',
+    description: 'This helps us find trainers in your area for in-person sessions',
+    conditional: {
+      dependsOn: 'session_preference',
+      showIf: ['in_person', 'hybrid']
+    }
   }
 ];
 
 export function OnboardingQuiz({ onComplete, onSkip, existingAnswers = [] }: OnboardingQuizProps) {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<QuizAnswer[]>(existingAnswers);
+
+  // Filter questions based on conditional logic
+  const getVisibleQuestions = () => {
+    return quizQuestions.filter(question => {
+      if (!question.conditional) return true;
+      
+      const dependentAnswer = getCurrentAnswer(question.conditional.dependsOn);
+      if (!dependentAnswer) return false;
+      
+      return question.conditional.showIf.includes(dependentAnswer.value as string);
+    });
+  };
+
+  const visibleQuestions = getVisibleQuestions();
 
   const getCurrentAnswer = (questionId: string) => {
     return answers.find(a => a.questionId === questionId);
@@ -158,11 +187,11 @@ export function OnboardingQuiz({ onComplete, onSkip, existingAnswers = [] }: Onb
   };
 
   const canGoNext = () => {
-    return isAnswered(quizQuestions[currentQuestion].id);
+    return isAnswered(visibleQuestions[currentQuestion].id);
   };
 
   const goNext = () => {
-    if (currentQuestion < quizQuestions.length - 1) {
+    if (currentQuestion < visibleQuestions.length - 1) {
       setCurrentQuestion(prev => prev + 1);
     } else {
       onComplete(answers);
@@ -175,7 +204,7 @@ export function OnboardingQuiz({ onComplete, onSkip, existingAnswers = [] }: Onb
     }
   };
 
-  const question = quizQuestions[currentQuestion];
+  const question = visibleQuestions[currentQuestion];
   const currentAnswer = getCurrentAnswer(question.id);
 
   return (
@@ -184,13 +213,13 @@ export function OnboardingQuiz({ onComplete, onSkip, existingAnswers = [] }: Onb
         {/* Progress bar */}
         <div className="mb-6">
           <div className="flex justify-between text-sm text-muted-foreground mb-2">
-            <span>Question {currentQuestion + 1} of {quizQuestions.length}</span>
-            <span>{Math.round(((currentQuestion + 1) / quizQuestions.length) * 100)}%</span>
+            <span>Question {currentQuestion + 1} of {visibleQuestions.length}</span>
+            <span>{Math.round(((currentQuestion + 1) / visibleQuestions.length) * 100)}%</span>
           </div>
           <div className="w-full bg-muted rounded-full h-2">
             <div 
               className="bg-primary h-2 rounded-full transition-all duration-300 ease-out"
-              style={{ width: `${((currentQuestion + 1) / quizQuestions.length) * 100}%` }}
+              style={{ width: `${((currentQuestion + 1) / visibleQuestions.length) * 100}%` }}
             />
           </div>
         </div>
@@ -251,6 +280,17 @@ export function OnboardingQuiz({ onComplete, onSkip, existingAnswers = [] }: Onb
               </div>
             )}
 
+            {question.type === 'text' && (
+              <div className="space-y-4">
+                <Input
+                  placeholder="Enter your postcode..."
+                  value={(currentAnswer?.value as string) || ''}
+                  onChange={(e) => updateAnswer(question.id, e.target.value)}
+                  className="h-12 text-base"
+                />
+              </div>
+            )}
+
             {/* Selected items preview for multiple choice */}
             {question.type === 'multiple' && currentAnswer && (currentAnswer.value as string[]).length > 0 && (
               <div className="mt-4 p-3 bg-muted rounded-lg">
@@ -294,7 +334,7 @@ export function OnboardingQuiz({ onComplete, onSkip, existingAnswers = [] }: Onb
               disabled={!canGoNext()}
               className="flex items-center gap-2"
             >
-              {currentQuestion === quizQuestions.length - 1 ? 'Complete Quiz' : 'Next'}
+              {currentQuestion === visibleQuestions.length - 1 ? 'Complete Quiz' : 'Next'}
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>

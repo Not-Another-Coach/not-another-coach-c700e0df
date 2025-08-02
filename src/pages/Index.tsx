@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useTrainerMatching } from "@/hooks/useTrainerMatching";
-import { HeroSection } from "@/components/HeroSection";
+
 import { FilterSection } from "@/components/FilterSection";
 import { TrainerCard, Trainer } from "@/components/TrainerCard";
 import { Button } from "@/components/ui/button";
@@ -104,10 +104,6 @@ const Index = () => {
 
   const [filteredTrainers, setFilteredTrainers] = useState<Trainer[]>(trainers);
 
-  const handleSearch = (searchTerm: string, goal: string, location: string) => {
-    // This would implement actual search logic
-    console.log("Search:", { searchTerm, goal, location });
-  };
 
   const handleFiltersChange = (filters: any) => {
     // This would implement actual filtering logic
@@ -200,7 +196,7 @@ const Index = () => {
         </div>
       )}
       
-      <HeroSection onSearch={handleSearch} />
+      
       
       <div className="max-w-7xl mx-auto px-6 py-12">
         {/* Discovery CTA for clients */}
