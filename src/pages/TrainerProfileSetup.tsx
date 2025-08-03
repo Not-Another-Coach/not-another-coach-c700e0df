@@ -200,26 +200,37 @@ const TrainerProfileSetup = () => {
     try {
       setIsLoading(true);
       
-      // Remove any fields that don't exist in the database schema
-      const {
-        ideal_client_age_range,
-        ideal_client_fitness_level,
-        ideal_client_personality,
-        training_vibe,
-        max_clients,
-        availability_schedule,
-        package_options,
-        free_discovery_call,
-        calendar_link,
-        testimonials,
-        delivery_format,
-        ...validFormData
-      } = formData;
+      // Whitelist of valid columns that exist in the profiles table
+      const validProfileFields = [
+        'first_name', 'last_name', 'bio', 'profile_photo_url', 'location',
+        'specializations', 'qualifications', 'tagline', 'hourly_rate', 
+        'training_types', 'terms_agreed', 'profile_setup_completed',
+        'client_status', 'user_type', 'is_verified', 'rating', 'total_ratings',
+        'fitness_goals', 'quiz_completed', 'quiz_answers', 'quiz_completed_at',
+        'verification_status', 'profile_published', 'before_after_photos',
+        'availability_schedule', 'max_clients', 'package_options', 
+        'free_discovery_call', 'testimonials', 'profile_setup_step',
+        'total_profile_setup_steps', 'package_inclusions', 'availability_slots',
+        'is_uk_based', 'works_bank_holidays', 'uploaded_certificates',
+        'special_credentials', 'internal_tags', 'admin_verification_notes',
+        'ideal_client_types', 'coaching_styles', 'languages', 'journey_progress',
+        'onboarding_step', 'total_onboarding_steps', 'year_certified',
+        'delivery_format', 'journey_stage', 'certifying_body', 'proof_upload_urls',
+        'ideal_client_age_range', 'ideal_client_fitness_level', 
+        'ideal_client_personality', 'training_vibe', 'calendar_link'
+      ];
       
-      // Only include fields that exist in the profiles table
+      // Only include fields that exist in the database schema
       const cleanedFormData = Object.fromEntries(
-        Object.entries(validFormData).filter(([_, value]) => value !== undefined && value !== null)
+        Object.entries(formData)
+          .filter(([key, value]) => 
+            validProfileFields.includes(key) && 
+            value !== undefined && 
+            value !== null
+          )
       );
+      
+      console.log('Cleaned form data:', cleanedFormData);
       
       const result = await updateProfile(cleanedFormData);
       
