@@ -72,8 +72,8 @@ export default function Auth() {
         title: "Welcome back!",
         description: "You have successfully logged in.",
       });
-      // Don't navigate immediately - let the useEffect in Index.tsx handle the redirect
-      // based on user profile/role
+      // Navigate to home page to trigger role-based redirect logic
+      navigate('/');
     }
     setIsLoading(false);
   };
