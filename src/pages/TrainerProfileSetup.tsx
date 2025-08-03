@@ -94,12 +94,11 @@ const TrainerProfileSetup = () => {
   // Populate form data from profile (only using existing fields) - with stability check
   useEffect(() => {
     if (profile && profile.id) {
-      // Only update if we haven't already populated from this profile
       setFormData(prev => {
-        // Check if we already have this profile's data
-        if (prev.first_name === (profile.first_name || "") && 
-            prev.last_name === (profile.last_name || "")) {
-          return prev; // No update needed
+        // Check if we already have this profile's data loaded
+        const hasProfileData = prev.first_name && prev.last_name;
+        if (hasProfileData) {
+          return prev; // Don't update if we already have data
         }
         
         return {
@@ -120,7 +119,7 @@ const TrainerProfileSetup = () => {
         };
       });
     }
-  }, [profile?.id]);
+  }, [profile?.id]); // Only depend on profile ID to avoid re-renders on profile updates
 
   const updateFormData = useCallback((updates: Partial<typeof formData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
