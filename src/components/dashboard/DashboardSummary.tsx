@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { TrainerCard } from "@/components/TrainerCard";
+import { NewsAlertsSection } from "@/components/dashboard/NewsAlertsSection";
 import { 
   Heart, 
   Settings, 
@@ -274,6 +275,9 @@ export function DashboardSummary({ profile, onTabChange }: DashboardSummaryProps
 
         {/* Right Sidebar */}
         <div className="space-y-4">
+          {/* News & Alerts Section */}
+          <NewsAlertsSection />
+          
           {/* Messages Waiting */}
           <Card>
             <CardHeader>
