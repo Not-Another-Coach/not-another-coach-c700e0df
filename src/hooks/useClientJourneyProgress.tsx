@@ -17,7 +17,8 @@ export interface ClientJourneyStep {
   tooltip: string;
   completed: boolean;
   current?: boolean;
-  icon: '✅' | '🕒' | '⬜';
+  hasData?: boolean;
+  icon: '✅' | '🟠' | '⬜' | '⚪';
 }
 
 export interface ClientJourneyProgress {
@@ -161,6 +162,34 @@ export const useClientJourneyProgress = () => {
         const completed = index <= currentStageIndex;
         const current = index === currentStageIndex;
         
+        // Determine if stage has data/progress
+        let hasData = false;
+        if (stageKey === 'preferences_identified') {
+          hasData = profile?.quiz_completed || false;
+        } else if (stageKey === 'exploring_coaches') {
+          hasData = hasLikedCoaches;
+        } else if (stageKey === 'discovery_call_booked') {
+          hasData = hasDiscoveryCall;
+        } else if (stageKey === 'coach_chosen') {
+          hasData = hasChosenCoach;
+        } else if (stageKey === 'onboarding_in_progress') {
+          hasData = isOnboarding;
+        } else if (stageKey === 'on_your_journey') {
+          hasData = isActiveClient;
+        }
+        
+        // Determine icon based on completion and data state
+        let icon: '✅' | '🟠' | '⬜' | '⚪' = '⚪';
+        if (completed) {
+          icon = '✅';
+        } else if (current && hasData) {
+          icon = '🟠'; // Orange for partial progress
+        } else if (current) {
+          icon = '🟠'; // Orange for current stage  
+        } else {
+          icon = '⬜'; // Grey for future stages
+        }
+        
         return {
           id: stageKey,
           title: config.title,
@@ -168,7 +197,8 @@ export const useClientJourneyProgress = () => {
           tooltip: config.tooltip,
           completed,
           current,
-          icon: completed ? '✅' : current ? '🕒' : '⬜'
+          hasData,
+          icon
         };
       });
 

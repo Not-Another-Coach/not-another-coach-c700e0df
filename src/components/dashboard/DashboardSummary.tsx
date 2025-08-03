@@ -177,9 +177,9 @@ export function DashboardSummary({ profile, onTabChange }: DashboardSummaryProps
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium">Profile Completion</p>
+              <p className="font-medium">Survey Completion</p>
               <p className="text-sm text-muted-foreground">
-                {profileCompletion}% complete - Keep your preferences updated for better matches
+                {profileCompletion}% complete - {profileCompletion < 100 ? 'Complete the full survey for better matches' : 'All preferences set!'}
               </p>
             </div>
             <div className="text-right">
@@ -188,13 +188,6 @@ export function DashboardSummary({ profile, onTabChange }: DashboardSummaryProps
           </div>
           <Progress value={profileCompletion} className="w-full" />
           <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => onTabChange('preferences')}
-            >
-              Update Preferences
-            </Button>
             <Button 
               variant="outline" 
               size="sm"

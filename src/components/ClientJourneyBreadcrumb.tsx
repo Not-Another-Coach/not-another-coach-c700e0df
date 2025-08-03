@@ -49,7 +49,9 @@ export const ClientJourneyBreadcrumb = ({
                         step.completed 
                           ? "bg-green-100 text-green-800 border border-green-200" 
                           : step.current
-                          ? "bg-primary/10 text-primary border border-primary/20 animate-pulse"
+                          ? step.hasData 
+                            ? "bg-orange-100 text-orange-800 border border-orange-200"
+                            : "bg-primary/10 text-primary border border-primary/20 animate-pulse"
                           : "bg-muted/50 text-muted-foreground"
                       )}>
                         <span className="text-sm">{step.icon}</span>
@@ -119,7 +121,9 @@ export const ClientJourneyBreadcrumb = ({
                     step.completed 
                       ? "bg-green-50 text-green-800 border-green-200 shadow-sm" 
                       : step.current
-                      ? "bg-primary/10 text-primary border-primary/20 shadow-md animate-pulse"
+                      ? step.hasData
+                        ? "bg-orange-50 text-orange-800 border-orange-200 shadow-md"
+                        : "bg-primary/10 text-primary border-primary/20 shadow-md animate-pulse"
                       : "bg-muted/50 text-muted-foreground border-muted"
                   )}>
                     <div className={cn(
