@@ -16,7 +16,9 @@ export type Database = {
     Tables: {
       profiles: {
         Row: {
+          admin_verification_notes: string | null
           availability_schedule: Json | null
+          before_after_photos: Json | null
           bio: string | null
           calendar_link: string | null
           certifying_body: string | null
@@ -37,11 +39,14 @@ export type Database = {
           journey_progress: Json | null
           journey_stage: string | null
           last_name: string | null
+          last_verification_request: string | null
           location: string | null
           max_clients: number | null
           onboarding_step: number | null
+          package_inclusions: Json | null
           package_options: Json | null
           profile_photo_url: string | null
+          profile_published: boolean | null
           profile_setup_completed: boolean | null
           profile_setup_step: number | null
           proof_upload_urls: string[] | null
@@ -68,7 +73,9 @@ export type Database = {
           year_certified: number | null
         }
         Insert: {
+          admin_verification_notes?: string | null
           availability_schedule?: Json | null
+          before_after_photos?: Json | null
           bio?: string | null
           calendar_link?: string | null
           certifying_body?: string | null
@@ -89,11 +96,14 @@ export type Database = {
           journey_progress?: Json | null
           journey_stage?: string | null
           last_name?: string | null
+          last_verification_request?: string | null
           location?: string | null
           max_clients?: number | null
           onboarding_step?: number | null
+          package_inclusions?: Json | null
           package_options?: Json | null
           profile_photo_url?: string | null
+          profile_published?: boolean | null
           profile_setup_completed?: boolean | null
           profile_setup_step?: number | null
           proof_upload_urls?: string[] | null
@@ -120,7 +130,9 @@ export type Database = {
           year_certified?: number | null
         }
         Update: {
+          admin_verification_notes?: string | null
           availability_schedule?: Json | null
+          before_after_photos?: Json | null
           bio?: string | null
           calendar_link?: string | null
           certifying_body?: string | null
@@ -141,11 +153,14 @@ export type Database = {
           journey_progress?: Json | null
           journey_stage?: string | null
           last_name?: string | null
+          last_verification_request?: string | null
           location?: string | null
           max_clients?: number | null
           onboarding_step?: number | null
+          package_inclusions?: Json | null
           package_options?: Json | null
           profile_photo_url?: string | null
+          profile_published?: boolean | null
           profile_setup_completed?: boolean | null
           profile_setup_step?: number | null
           proof_upload_urls?: string[] | null
@@ -232,6 +247,10 @@ export type Database = {
       get_current_user_type: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      request_profile_verification: {
+        Args: { trainer_id: string }
+        Returns: boolean
       }
     }
     Enums: {
