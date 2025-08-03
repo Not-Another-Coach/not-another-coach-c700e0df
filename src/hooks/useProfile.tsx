@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -34,16 +34,7 @@ export function useProfile() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (user) {
-      fetchProfile();
-    } else {
-      setProfile(null);
-      setLoading(false);
-    }
-  }, [user]);
-
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -63,9 +54,18 @@ export function useProfile() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
-  const updateProfile = async (updates: Partial<Profile>) => {
+  useEffect(() => {
+    if (user) {
+      fetchProfile();
+    } else {
+      setProfile(null);
+      setLoading(false);
+    }
+  }, [user, fetchProfile]);
+
+  const updateProfile = useCallback(async (updates: Partial<Profile>) => {
     if (!user) return { error: 'No user logged in' };
 
     try {
@@ -85,11 +85,11 @@ export function useProfile() {
     } catch (error) {
       return { error };
     }
-  };
+  }, [user]);
 
-  const isAdmin = () => profile?.user_type === 'admin';
-  const isTrainer = () => profile?.user_type === 'trainer';
-  const isClient = () => profile?.user_type === 'client';
+  const isAdmin = useCallback(() => profile?.user_type === 'admin', [profile?.user_type]);
+  const isTrainer = useCallback(() => profile?.user_type === 'trainer', [profile?.user_type]);
+  const isClient = useCallback(() => profile?.user_type === 'client', [profile?.user_type]);
 
   return {
     profile,
