@@ -215,11 +215,6 @@ export function PackageWaysOfWorkingSection({ formData }: PackageWaysOfWorkingSe
         ...currentWorkflow,
         [`${section}_items`]: updatedItems
       });
-
-      toast({
-        title: "Suggestion added",
-        description: `Added "${suggestion}" to ${sectionTitles[section as keyof typeof sectionTitles]}`,
-      });
     } catch (error) {
       toast({
         title: "Error",
@@ -272,8 +267,8 @@ export function PackageWaysOfWorkingSection({ formData }: PackageWaysOfWorkingSe
               <Label className="text-sm font-medium">Current items:</Label>
               <div className="space-y-2">
                 {items.map((item: WaysOfWorkingItem) => (
-                  <div key={item.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                    <span className="text-sm">{item.text}</span>
+                  <div key={item.id} className="flex items-center justify-between p-3 bg-primary/10 border border-primary/20 rounded-lg">
+                    <span className="text-sm font-medium text-primary">{item.text}</span>
                     <Button
                       variant="ghost"
                       size="sm"

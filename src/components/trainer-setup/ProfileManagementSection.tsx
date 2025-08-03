@@ -4,7 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
-import { Bell, Eye, CheckCircle, AlertTriangle, Users, Clock, Pause } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Bell, Eye, CheckCircle, AlertTriangle, Users, Clock, Pause, Calendar } from "lucide-react";
 import { TrainerProfilePreview } from "@/components/TrainerProfilePreview";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
@@ -126,6 +127,31 @@ export function ProfileManagementSection({ formData, updateFormData }: ProfileMa
           </Card>
         </div>
       </div>
+
+      {/* Waitlist Date Setting */}
+      {formData.client_status === 'waitlist' && (
+        <Card className="border-amber-200 bg-amber-50">
+          <CardContent className="p-4 space-y-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Calendar className="h-5 w-5 text-amber-600" />
+              <Label className="text-amber-900">Waitlist Information</Label>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="next_available_date">Next Available Date</Label>
+              <Input
+                id="next_available_date"
+                type="date"
+                value={formData.next_available_date || ""}
+                onChange={(e) => updateFormData({ next_available_date: e.target.value })}
+                min={new Date().toISOString().split('T')[0]}
+              />
+              <p className="text-xs text-amber-700">
+                Let potential clients know when you'll next have availability
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Notification Preferences */}
       <div className="space-y-4">
