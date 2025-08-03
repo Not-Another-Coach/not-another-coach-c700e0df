@@ -393,6 +393,9 @@ const ClientSurvey = () => {
             <div className="flex-1">
               <Progress value={calculateProgress()} className="h-2" />
             </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              💡 Click on any step circle to jump to that section
+            </p>
           </div>
           
           {/* Step indicators */}
@@ -428,8 +431,9 @@ const ClientSurvey = () => {
               return (
                 <div
                   key={stepNumber}
-                  className={`flex flex-col items-center text-xs cursor-pointer ${statusColor}`}
+                  className={`flex flex-col items-center text-xs cursor-pointer transition-all hover:scale-105 ${statusColor}`}
                   onClick={() => setCurrentStep(stepNumber)}
+                  title={`Go to step ${stepNumber}: ${title}`}
                 >
                   <div
                     className={`w-8 h-8 rounded-full border-2 flex items-center justify-center mb-1 ${borderColor} ${
