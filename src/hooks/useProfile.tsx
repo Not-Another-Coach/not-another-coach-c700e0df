@@ -21,6 +21,11 @@ interface Profile {
   quiz_completed: boolean;
   quiz_answers: any;
   quiz_completed_at: string | null;
+  tagline: string | null;
+  hourly_rate: number | null;
+  training_types: string[] | null;
+  terms_agreed: boolean | null;
+  client_status: 'open' | 'waitlist' | 'paused' | null;
 }
 
 export function useProfile() {

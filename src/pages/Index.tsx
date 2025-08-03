@@ -41,6 +41,13 @@ const Index = () => {
     }
   }, [user, profile, loading, profileLoading, isClient, navigate]);
 
+  // Redirect trainers to their dashboard
+  useEffect(() => {
+    if (!loading && !profileLoading && user && profile && isTrainer()) {
+      navigate('/trainer/dashboard');
+    }
+  }, [user, profile, loading, profileLoading, isTrainer, navigate]);
+
   // Sample trainer data
   const [trainers] = useState<Trainer[]>([
     {
