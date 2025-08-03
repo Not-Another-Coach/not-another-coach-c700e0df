@@ -38,12 +38,34 @@ export function PackageWaysOfWorkingSection({ formData }: PackageWaysOfWorkingSe
   // Get packages from formData
   const packages = formData.package_options || [];
   
-  // Set default active package
+  // Set default active package and create workflow if needed
   useEffect(() => {
     if (packages.length > 0 && !activePackageId) {
       setActivePackageId(packages[0].id);
     }
   }, [packages, activePackageId]);
+
+  // Create workflow when package is selected if it doesn't exist
+  useEffect(() => {
+    const createWorkflowIfNeeded = async () => {
+      if (activePackageId && packages.length > 0) {
+        const currentPackage = packages.find((pkg: any) => pkg.id === activePackageId);
+        const existingWorkflow = getPackageWorkflow(activePackageId);
+        
+        if (currentPackage && !existingWorkflow) {
+          try {
+            await savePackageWorkflow(activePackageId, currentPackage.name, {
+              visibility: 'public'
+            });
+          } catch (error) {
+            console.error('Error creating workflow:', error);
+          }
+        }
+      }
+    };
+
+    createWorkflowIfNeeded();
+  }, [activePackageId, packages, getPackageWorkflow, savePackageWorkflow]);
 
   // Common suggestions for each section
   const suggestions = {
