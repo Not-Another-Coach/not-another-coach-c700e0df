@@ -83,7 +83,7 @@ export const useClientJourneyProgress = () => {
       // Get user profile with survey completion
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('client_survey_completed, client_journey_stage')
+        .select('quiz_completed, client_journey_stage')
         .eq('id', user.id)
         .single();
 
@@ -109,7 +109,7 @@ export const useClientJourneyProgress = () => {
       let currentStage: ClientJourneyStage = 'preferences_identified';
       
       // Check if survey is completed (100%)
-      if (!profile?.client_survey_completed) {
+      if (!profile?.quiz_completed) {
         // If survey not complete, don't show journey tracker yet
         setProgress(null);
         setLoading(false);

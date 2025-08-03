@@ -121,6 +121,7 @@ export type Database = {
           card_last_four: string | null
           card_type: string | null
           certifying_body: string | null
+          client_journey_stage: string | null
           client_personality_type: string[] | null
           client_status:
             | Database["public"]["Enums"]["client_status_enum"]
@@ -229,6 +230,7 @@ export type Database = {
           card_last_four?: string | null
           card_type?: string | null
           certifying_body?: string | null
+          client_journey_stage?: string | null
           client_personality_type?: string[] | null
           client_status?:
             | Database["public"]["Enums"]["client_status_enum"]
@@ -337,6 +339,7 @@ export type Database = {
           card_last_four?: string | null
           card_type?: string | null
           certifying_body?: string | null
+          client_journey_stage?: string | null
           client_personality_type?: string[] | null
           client_status?:
             | Database["public"]["Enums"]["client_status_enum"]

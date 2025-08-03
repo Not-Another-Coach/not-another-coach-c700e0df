@@ -12,12 +12,15 @@ import { EditPreferencesSection } from "@/components/dashboard/EditPreferencesSe
 import { ExploreMatchSection } from "@/components/dashboard/ExploreMatchSection";
 import { MessagesSection } from "@/components/dashboard/MessagesSection";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
+import { ClientJourneyBreadcrumb } from "@/components/ClientJourneyBreadcrumb";
+import { useClientJourneyProgress } from "@/hooks/useClientJourneyProgress";
 import { Heart, Settings, Search, MessageCircle, Menu } from "lucide-react";
 
 export default function ClientDashboard() {
   const { user, signOut, loading } = useAuth();
   const { profile, loading: profileLoading, isClient, isTrainer } = useProfile();
   const { savedTrainerIds } = useSavedTrainers();
+  const { progress: journeyProgress, loading: journeyLoading } = useClientJourneyProgress();
   const navigate = useNavigate();
   const location = useLocation();
   const [activeTab, setActiveTab] = useState("summary");
@@ -91,6 +94,17 @@ export default function ClientDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Client Journey Progress Tracker - Shows when survey is 100% complete */}
+      {journeyProgress && !journeyLoading && (
+        <div className="max-w-7xl mx-auto px-6 pt-6">
+          <ClientJourneyBreadcrumb 
+            progress={journeyProgress} 
+            variant="compact"
+            className="mb-4"
+          />
+        </div>
+      )}
 
       {/* Main Dashboard Content */}
       <div className="max-w-7xl mx-auto p-6">
