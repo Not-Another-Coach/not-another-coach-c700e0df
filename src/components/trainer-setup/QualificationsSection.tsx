@@ -84,7 +84,7 @@ export function QualificationsSection({ formData, updateFormData }: Qualificatio
         uploaded_certificates: [...currentFiles, ...uploadedFiles]
       });
       
-      console.log("Certificate files uploaded:", uploadedFiles.map(f => f.name));
+      console.log("Certificate files uploaded successfully:", uploadedFiles.map(f => f.name));
     } catch (error) {
       console.error("Certificate upload failed:", error);
     }

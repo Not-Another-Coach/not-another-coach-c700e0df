@@ -70,6 +70,7 @@ export type Database = {
           training_types: string[] | null
           training_vibe: string | null
           updated_at: string
+          uploaded_certificates: Json | null
           user_type: Database["public"]["Enums"]["user_type"]
           verification_status:
             | Database["public"]["Enums"]["verification_status_enum"]
@@ -132,6 +133,7 @@ export type Database = {
           training_types?: string[] | null
           training_vibe?: string | null
           updated_at?: string
+          uploaded_certificates?: Json | null
           user_type: Database["public"]["Enums"]["user_type"]
           verification_status?:
             | Database["public"]["Enums"]["verification_status_enum"]
@@ -194,6 +196,7 @@ export type Database = {
           training_types?: string[] | null
           training_vibe?: string | null
           updated_at?: string
+          uploaded_certificates?: Json | null
           user_type?: Database["public"]["Enums"]["user_type"]
           verification_status?:
             | Database["public"]["Enums"]["verification_status_enum"]

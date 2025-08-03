@@ -121,7 +121,14 @@ const TrainerProfileSetup = () => {
     try {
       setIsLoading(true);
       console.log('handleSave called with data:', formData);
-      const result = await updateProfile(formData);
+      
+      // Clean the form data to remove any undefined or null fields that might cause issues
+      const cleanedFormData = Object.fromEntries(
+        Object.entries(formData).filter(([_, value]) => value !== undefined && value !== null)
+      );
+      
+      console.log('Cleaned form data:', cleanedFormData);
+      const result = await updateProfile(cleanedFormData);
       console.log('updateProfile result:', result);
       
       if (result.error) {
