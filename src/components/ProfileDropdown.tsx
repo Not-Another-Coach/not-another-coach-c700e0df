@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -7,12 +8,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { User, Settings, LogOut, Key, Edit } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { ProfileViewEdit } from "@/components/dashboard/ProfileViewEdit";
 
 interface ProfileDropdownProps {
   profile: {
@@ -28,6 +31,7 @@ interface ProfileDropdownProps {
 
 export const ProfileDropdown = ({ profile, onSignOut }: ProfileDropdownProps) => {
   const navigate = useNavigate();
+  const [showProfileModal, setShowProfileModal] = useState(false);
   
   const getInitials = () => {
     const first = profile.first_name?.charAt(0) || '';
@@ -132,7 +136,10 @@ export const ProfileDropdown = ({ profile, onSignOut }: ProfileDropdownProps) =>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         
-        <DropdownMenuItem className="cursor-pointer">
+        <DropdownMenuItem 
+          className="cursor-pointer"
+          onClick={() => setShowProfileModal(true)}
+        >
           <User className="mr-2 h-4 w-4" />
           <span>View Profile</span>
         </DropdownMenuItem>
@@ -179,6 +186,16 @@ export const ProfileDropdown = ({ profile, onSignOut }: ProfileDropdownProps) =>
           <span>Sign Out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
+
+      {/* Profile Edit Modal */}
+      <Dialog open={showProfileModal} onOpenChange={setShowProfileModal}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Profile Settings</DialogTitle>
+          </DialogHeader>
+          <ProfileViewEdit profile={profile} />
+        </DialogContent>
+      </Dialog>
     </DropdownMenu>
   );
 };
