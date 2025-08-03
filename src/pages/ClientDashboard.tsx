@@ -41,10 +41,10 @@ export default function ClientDashboard() {
     }
   }, [user, profile, loading, profileLoading, isTrainer, navigate, location.pathname]);
 
-  // Redirect clients to onboarding quiz if not completed
+  // Redirect clients to client survey if not completed
   useEffect(() => {
     if (!loading && !profileLoading && user && profile && isClient() && !profile.quiz_completed) {
-      navigate('/onboarding');
+      navigate('/client-survey');
     }
   }, [user, profile, loading, profileLoading, isClient, navigate]);
 

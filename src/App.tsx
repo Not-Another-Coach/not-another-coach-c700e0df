@@ -6,7 +6,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import ClientDashboard from "./pages/ClientDashboard";
 import Auth from "./pages/Auth";
-import Onboarding from "./pages/Onboarding";
 import ClientSurvey from "./pages/ClientSurvey";
 import Discovery from "./pages/Discovery";
 import SavedTrainers from "./pages/SavedTrainers";
@@ -26,7 +25,6 @@ const App = () => (
           <Routes>
             <Route path="/" element={<ClientDashboard />} />
             <Route path="/auth" element={<Auth />} />
-            <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/client-survey" element={<ClientSurvey />} />
             <Route path="/discovery" element={<Discovery />} />
             <Route path="/saved" element={<SavedTrainers />} />
