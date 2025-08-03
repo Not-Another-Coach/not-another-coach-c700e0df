@@ -187,7 +187,10 @@ const ClientSurvey = () => {
         }
         break;
       case 7: // Budget
-        // Budget is optional, no validation required
+        // Budget is now mandatory - either quick range or custom range required
+        if (!formData.budget_range_min && !formData.budget_range_max) {
+          newErrors.budget_range = "Please select a budget range or set custom min/max values";
+        }
         break;
       case 8: // Availability
         if (!formData.start_timeline) {
@@ -217,7 +220,8 @@ const ClientSurvey = () => {
       case 6:
         return formData.preferred_package_type ? 'completed' : 'not_started';
       case 7:
-        return 'completed'; // Budget is optional
+        // Budget is mandatory - either min or max must be set
+        return (formData.budget_range_min || formData.budget_range_max) ? 'completed' : 'not_started';
       case 8:
         return formData.start_timeline ? 'completed' : 'not_started';
       default:

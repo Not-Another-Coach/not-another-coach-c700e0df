@@ -44,16 +44,28 @@ export function BudgetSection({ formData, updateFormData, errors, clearFieldErro
       budget_range_min: range.min, 
       budget_range_max: range.max 
     });
+    // Clear any budget validation errors when a selection is made
+    if (clearFieldError) {
+      clearFieldError('budget_range');
+    }
   };
 
   const handleCustomMinChange = (value: string) => {
     const numValue = value ? parseFloat(value) : null;
     updateFormData({ budget_range_min: numValue });
+    // Clear validation errors when user starts typing
+    if (clearFieldError && (numValue || formData.budget_range_max)) {
+      clearFieldError('budget_range');
+    }
   };
 
   const handleCustomMaxChange = (value: string) => {
     const numValue = value ? parseFloat(value) : null;
     updateFormData({ budget_range_max: numValue });
+    // Clear validation errors when user starts typing
+    if (clearFieldError && (numValue || formData.budget_range_min)) {
+      clearFieldError('budget_range');
+    }
   };
 
   const handleFlexibilityChange = (flexibility: string) => {
@@ -77,10 +89,13 @@ export function BudgetSection({ formData, updateFormData, errors, clearFieldErro
   return (
     <div className="space-y-6">
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-bold">What's your budget range?</h2>
+        <h2 className="text-2xl font-bold">What's your budget range? *</h2>
         <p className="text-muted-foreground">
-          This is optional but helps us show you trainers within your price range
+          Please select either a quick range or set custom values. This helps us match you with suitable trainers.
         </p>
+        {errors?.budget_range && (
+          <p className="text-sm text-destructive font-medium">{errors.budget_range}</p>
+        )}
       </div>
 
       {/* Budget Info Card */}
@@ -100,7 +115,7 @@ export function BudgetSection({ formData, updateFormData, errors, clearFieldErro
 
       {/* Quick Budget Ranges */}
       <div className="space-y-4">
-        <Label className="text-base font-semibold">Quick Budget Ranges (Optional)</Label>
+        <Label className="text-base font-semibold">Quick Budget Ranges *</Label>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {budgetRanges.map((range, index) => {
@@ -128,7 +143,7 @@ export function BudgetSection({ formData, updateFormData, errors, clearFieldErro
 
       {/* Custom Budget Range */}
       <div className="space-y-4">
-        <Label className="text-base font-semibold">Or set a custom range</Label>
+        <Label className="text-base font-semibold">Or set a custom range *</Label>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
@@ -212,11 +227,11 @@ export function BudgetSection({ formData, updateFormData, errors, clearFieldErro
         </Card>
       )}
 
-      {/* Skip Option */}
-      <Card className="border-dashed">
+      {/* Information Note */}
+      <Card className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950">
         <CardContent className="p-4 text-center">
-          <p className="text-sm text-muted-foreground">
-            <strong>Prefer not to set a budget?</strong> That's fine! You can always discuss pricing directly with trainers during discovery calls.
+          <p className="text-sm text-blue-700 dark:text-blue-300">
+            <strong>Required:</strong> Please select either a quick budget range above or set custom min/max values to continue.
           </p>
         </CardContent>
       </Card>
