@@ -26,6 +26,7 @@ export function PackageWaysOfWorkingSection({ formData }: PackageWaysOfWorkingSe
   const { packageWorkflows, loading, savePackageWorkflow, getPackageWorkflow } = usePackageWaysOfWorking();
   const { toast } = useToast();
   const [activePackageId, setActivePackageId] = useState<string>("");
+  const [activeTab, setActiveTab] = useState<string>("onboarding");
   const [newItems, setNewItems] = useState<{ [key: string]: string }>({
     onboarding: "",
     first_week: "",
@@ -393,7 +394,7 @@ export function PackageWaysOfWorkingSection({ formData }: PackageWaysOfWorkingSe
 
       {/* Package Workflow Configuration */}
       {activePackageId && currentPackage && (
-        <Tabs defaultValue="onboarding" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="onboarding">Getting Started</TabsTrigger>
             <TabsTrigger value="ongoing">Ongoing Support</TabsTrigger>

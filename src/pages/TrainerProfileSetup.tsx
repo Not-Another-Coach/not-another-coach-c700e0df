@@ -239,12 +239,12 @@ const TrainerProfileSetup = () => {
           
           // Check if at least one section has content
           const hasContent = (
-            workflow.onboarding_items.length > 0 ||
-            workflow.first_week_items.length > 0 ||
-            workflow.ongoing_structure_items.length > 0 ||
-            workflow.tracking_tools_items.length > 0 ||
-            workflow.client_expectations_items.length > 0 ||
-            workflow.what_i_bring_items.length > 0
+            (workflow.onboarding_items?.length || 0) > 0 ||
+            (workflow.first_week_items?.length || 0) > 0 ||
+            (workflow.ongoing_structure_items?.length || 0) > 0 ||
+            (workflow.tracking_tools_items?.length || 0) > 0 ||
+            (workflow.client_expectations_items?.length || 0) > 0 ||
+            (workflow.what_i_bring_items?.length || 0) > 0
           );
           return hasContent;
         });
@@ -252,12 +252,12 @@ const TrainerProfileSetup = () => {
         const anyPackageConfigured = packages.some((pkg: any) => {
           const workflow = packageWorkflows.find(w => w.package_id === pkg.id);
           return workflow && (
-            workflow.onboarding_items.length > 0 ||
-            workflow.first_week_items.length > 0 ||
-            workflow.ongoing_structure_items.length > 0 ||
-            workflow.tracking_tools_items.length > 0 ||
-            workflow.client_expectations_items.length > 0 ||
-            workflow.what_i_bring_items.length > 0
+            (workflow.onboarding_items?.length || 0) > 0 ||
+            (workflow.first_week_items?.length || 0) > 0 ||
+            (workflow.ongoing_structure_items?.length || 0) > 0 ||
+            (workflow.tracking_tools_items?.length || 0) > 0 ||
+            (workflow.client_expectations_items?.length || 0) > 0 ||
+            (workflow.what_i_bring_items?.length || 0) > 0
           );
         });
         

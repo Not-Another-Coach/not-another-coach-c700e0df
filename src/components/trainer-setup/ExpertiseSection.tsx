@@ -183,7 +183,7 @@ export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionP
             {formData.training_types.map((type: string) => (
               <Badge
                 key={type}
-                variant="outline"
+                variant="secondary"
                 className="flex items-center gap-2 px-3 py-1"
               >
                 <span>{type}</span>
