@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Users, Heart, Target, Zap, Sparkles } from "lucide-react";
 import { AIDescriptionHelper } from "./AIDescriptionHelper";
-import { AvailabilityStructured } from "./AvailabilityStructured";
+import { AvailabilityGrid } from "./AvailabilityGrid";
 
 interface ClientFitSectionProps {
   formData: any;
@@ -279,7 +279,7 @@ export function ClientFitSection({ formData, updateFormData }: ClientFitSectionP
           </p>
         </div>
 
-        <AvailabilityStructured 
+        <AvailabilityGrid 
           formData={formData}
           updateFormData={updateFormData}
         />

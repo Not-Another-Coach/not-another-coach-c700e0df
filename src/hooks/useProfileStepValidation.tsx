@@ -86,6 +86,20 @@ const stepFieldMapping: Record<number, string[]> = {
   7: ['terms_agreed']
 };
 
+// Additional fields to ensure they're saved (not validated but tracked for completeness)
+const additionalFormFields = [
+  'profile_photo_url',
+  'availability_slots', 
+  'max_clients',
+  'ideal_client_personality',
+  'is_uk_based',
+  'works_bank_holidays',
+  'free_discovery_call',
+  'package_options',
+  'testimonials',
+  'before_after_photos'
+];
+
 export const useProfileStepValidation = () => {
   const validation = useFormValidation(validationRules);
 

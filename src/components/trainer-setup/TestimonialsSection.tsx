@@ -134,7 +134,7 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
                     "{testimonial.clientQuote}"
                   </blockquote>
                   <p className="text-sm font-medium">Achievement: {testimonial.achievement}</p>
-                  {testimonial.showImages && (
+                  {testimonial.showImages && (testimonial.beforeImage || testimonial.afterImage) && (
                     <div className="flex gap-4">
                       {testimonial.beforeImage && (
                         <div className="text-center">
@@ -142,6 +142,10 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
                             src={testimonial.beforeImage} 
                             alt="Before"
                             className="w-20 h-20 object-cover rounded border"
+                            onError={(e) => {
+                              console.error('Error loading before image:', testimonial.beforeImage);
+                              e.currentTarget.style.display = 'none';
+                            }}
                           />
                           <p className="text-xs text-muted-foreground mt-1">Before</p>
                         </div>
@@ -152,6 +156,10 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
                             src={testimonial.afterImage} 
                             alt="After"
                             className="w-20 h-20 object-cover rounded border"
+                            onError={(e) => {
+                              console.error('Error loading after image:', testimonial.afterImage);
+                              e.currentTarget.style.display = 'none';
+                            }}
                           />
                           <p className="text-xs text-muted-foreground mt-1">After</p>
                         </div>

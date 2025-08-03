@@ -69,8 +69,9 @@ const TrainerDashboard = () => {
       profile.training_types?.length,
       profile.specializations?.length,
       profile.qualifications?.length,
+      (profile as any).ideal_client_types?.length,
+      (profile as any).coaching_styles?.length,
       profile.terms_agreed,
-      // Check if at least one rate is set (hourly_rate is the main one in DB)
       profile.hourly_rate
     ];
     
@@ -135,28 +136,37 @@ const TrainerDashboard = () => {
             </p>
             
             {/* Profile Completion Banner */}
-            {!isProfileComplete && (
-              <Card className="bg-amber-50 border-amber-200 mb-6">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-amber-800">
+            <Card className={`mb-6 ${!isProfileComplete ? 'bg-amber-50 border-amber-200' : 'bg-green-50 border-green-200'}`}>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    {isProfileComplete ? (
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                    ) : (
+                      <AlertCircle className="h-4 w-4 text-amber-600" />
+                    )}
+                    <span className={`text-sm font-medium ${!isProfileComplete ? 'text-amber-800' : 'text-green-800'}`}>
                       Profile {profileCompletion}% Complete
                     </span>
-                    <Button 
-                      size="sm" 
-                      onClick={() => navigate('/trainer/profile-setup')}
-                      className="bg-amber-600 hover:bg-amber-700"
-                    >
-                      Complete Profile
-                    </Button>
                   </div>
-                  <Progress value={profileCompletion} className="h-2" />
-                  <p className="text-xs text-amber-700 mt-2">
-                    Finish your profile to get discovered by ideal clients
-                  </p>
-                </CardContent>
-              </Card>
-            )}
+                  <Button 
+                    size="sm" 
+                    onClick={() => navigate('/trainer/profile-setup')}
+                    className={!isProfileComplete ? 'bg-amber-600 hover:bg-amber-700' : 'bg-green-600 hover:bg-green-700'}
+                  >
+                    <Edit3 className="h-4 w-4 mr-2" />
+                    {isProfileComplete ? 'Edit Profile' : 'Complete Profile'}
+                  </Button>
+                </div>
+                <Progress value={profileCompletion} className="h-2" />
+                <p className={`text-xs mt-2 ${!isProfileComplete ? 'text-amber-700' : 'text-green-700'}`}>
+                  {isProfileComplete 
+                    ? 'Your profile is complete and published!' 
+                    : 'Finish your profile to get discovered by ideal clients'
+                  }
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
@@ -205,32 +215,6 @@ const TrainerDashboard = () => {
 
         {/* Dashboard Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {/* Profile Completeness */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Profile Completeness
-              </CardTitle>
-              {isProfileComplete ? (
-                <CheckCircle className="h-4 w-4 text-green-600" />
-              ) : (
-                <AlertCircle className="h-4 w-4 text-amber-600" />
-              )}
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{profileCompletion}%</div>
-              <Progress value={profileCompletion} className="mt-2" />
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="mt-3 w-full"
-                onClick={() => navigate('/trainer/profile-setup')}
-              >
-                <Edit3 className="h-4 w-4 mr-2" />
-                Edit Profile
-              </Button>
-            </CardContent>
-          </Card>
 
           {/* Client Requests */}
           <Card>
