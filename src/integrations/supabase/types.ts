@@ -28,6 +28,7 @@ export type Database = {
             | null
           coaching_styles: string[] | null
           created_at: string
+          delivery_format: string | null
           first_name: string | null
           fitness_goals: string[] | null
           free_discovery_call: boolean | null
@@ -42,6 +43,7 @@ export type Database = {
           is_verified: boolean | null
           journey_progress: Json | null
           journey_stage: string | null
+          languages: string[] | null
           last_name: string | null
           last_verification_request: string | null
           location: string | null
@@ -91,6 +93,7 @@ export type Database = {
             | null
           coaching_styles?: string[] | null
           created_at?: string
+          delivery_format?: string | null
           first_name?: string | null
           fitness_goals?: string[] | null
           free_discovery_call?: boolean | null
@@ -105,6 +108,7 @@ export type Database = {
           is_verified?: boolean | null
           journey_progress?: Json | null
           journey_stage?: string | null
+          languages?: string[] | null
           last_name?: string | null
           last_verification_request?: string | null
           location?: string | null
@@ -154,6 +158,7 @@ export type Database = {
             | null
           coaching_styles?: string[] | null
           created_at?: string
+          delivery_format?: string | null
           first_name?: string | null
           fitness_goals?: string[] | null
           free_discovery_call?: boolean | null
@@ -168,6 +173,7 @@ export type Database = {
           is_verified?: boolean | null
           journey_progress?: Json | null
           journey_stage?: string | null
+          languages?: string[] | null
           last_name?: string | null
           last_verification_request?: string | null
           location?: string | null

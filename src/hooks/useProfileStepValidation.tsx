@@ -44,9 +44,9 @@ const validationRules: ValidationRules = {
     message: 'At least one training type is required' 
   },
   location: { 
-    required: true, 
+    required: false, // We'll handle this custom validation in the step validation
     minLength: 3, 
-    message: 'Location is required' 
+    message: 'Location is required for in-person and hybrid training' 
   },
   
   // Step 4: Client Fit Preferences
@@ -105,6 +105,27 @@ export const useProfileStepValidation = () => {
 
   const validateStep = (formData: any, step: number): boolean => {
     const stepFields = stepFieldMapping[step] || [];
+    
+    // Special handling for step 3 (Expertise) - location validation depends on delivery format
+    if (step === 3) {
+      const customValidation = stepFields.every(field => {
+        if (field === 'location') {
+          // Location is only required for in-person or hybrid delivery
+          const deliveryFormat = formData.delivery_format;
+          if (deliveryFormat === 'online') {
+            return true; // Location not required for online-only
+          }
+          // For in-person or hybrid, location is required
+          return formData.location && formData.location.length >= 3;
+        }
+        // Use standard validation for other fields
+        const error = validation.validateField(field, formData[field]);
+        return !error;
+      });
+      return customValidation;
+    }
+    
+    // Use standard validation for other steps
     return validation.validateStep(formData, stepFields);
   };
 
@@ -120,6 +141,16 @@ export const useProfileStepValidation = () => {
 
     stepFields.forEach(field => {
       const value = formData[field];
+      
+      // Special handling for location in step 3
+      if (step === 3 && field === 'location') {
+        const deliveryFormat = formData.delivery_format;
+        if (deliveryFormat === 'online') {
+          completedFields++; // Consider location completed for online-only
+          return;
+        }
+      }
+      
       if (value && value !== '' && (!Array.isArray(value) || value.length > 0)) {
         completedFields++;
       }
@@ -131,11 +162,7 @@ export const useProfileStepValidation = () => {
   };
 
   const isStepValid = (formData: any, step: number): boolean => {
-    const stepFields = stepFieldMapping[step] || [];
-    return stepFields.every(field => {
-      const error = validation.validateField(field, formData[field]);
-      return !error;
-    });
+    return validateStep(formData, step);
   };
 
   return {

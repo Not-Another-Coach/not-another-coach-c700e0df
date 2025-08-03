@@ -73,7 +73,20 @@ const languages = [
 ];
 
 export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionProps) {
-  const [deliveryFormat, setDeliveryFormat] = useState<'in-person' | 'online' | 'hybrid'>('hybrid');
+  const [deliveryFormat, setDeliveryFormat] = useState<'in-person' | 'online' | 'hybrid'>(
+    formData.delivery_format || 'hybrid'
+  );
+
+  // Update form data when delivery format changes
+  const handleDeliveryFormatChange = (format: 'in-person' | 'online' | 'hybrid') => {
+    setDeliveryFormat(format);
+    updateFormData({ delivery_format: format });
+    
+    // Clear location if switching to online-only
+    if (format === 'online') {
+      updateFormData({ location: 'Online Only' });
+    }
+  };
 
   const handleSpecialtyToggle = (specialty: string) => {
     const current = formData.specializations || [];
@@ -215,7 +228,7 @@ export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionP
           <Card className={`cursor-pointer transition-colors ${deliveryFormat === 'in-person' ? 'border-primary bg-primary/5' : ''}`}>
             <CardContent 
               className="p-4 text-center"
-              onClick={() => setDeliveryFormat('in-person')}
+              onClick={() => handleDeliveryFormatChange('in-person')}
             >
               <Users className="h-8 w-8 mx-auto mb-2 text-primary" />
               <p className="font-medium">In-Person</p>
@@ -226,7 +239,7 @@ export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionP
           <Card className={`cursor-pointer transition-colors ${deliveryFormat === 'online' ? 'border-primary bg-primary/5' : ''}`}>
             <CardContent 
               className="p-4 text-center"
-              onClick={() => setDeliveryFormat('online')}
+              onClick={() => handleDeliveryFormatChange('online')}
             >
               <Monitor className="h-8 w-8 mx-auto mb-2 text-primary" />
               <p className="font-medium">Online</p>
@@ -237,7 +250,7 @@ export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionP
           <Card className={`cursor-pointer transition-colors ${deliveryFormat === 'hybrid' ? 'border-primary bg-primary/5' : ''}`}>
             <CardContent 
               className="p-4 text-center"
-              onClick={() => setDeliveryFormat('hybrid')}
+              onClick={() => handleDeliveryFormatChange('hybrid')}
             >
               <Globe className="h-8 w-8 mx-auto mb-2 text-primary" />
               <p className="font-medium">Hybrid</p>
