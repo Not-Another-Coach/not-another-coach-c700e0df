@@ -58,6 +58,13 @@ const TrainerProfileSetup = () => {
     package_options: [],
     free_discovery_call: false,
     calendar_link: "",
+    next_available_date: "",
+    
+    // Communication Style
+    communication_style: "",
+    video_checkins: false,
+    messaging_support: false,
+    weekly_programming_only: false,
     
     // Testimonials & Case Studies
     testimonials: [],
@@ -217,7 +224,9 @@ const TrainerProfileSetup = () => {
         'onboarding_step', 'total_onboarding_steps', 'year_certified',
         'delivery_format', 'journey_stage', 'certifying_body', 'proof_upload_urls',
         'ideal_client_age_range', 'ideal_client_fitness_level', 
-        'ideal_client_personality', 'training_vibe', 'calendar_link'
+        'ideal_client_personality', 'training_vibe', 'calendar_link',
+        'next_available_date', 'communication_style', 'video_checkins',
+        'messaging_support', 'weekly_programming_only'
       ];
       
       // Only include fields that exist in the database schema

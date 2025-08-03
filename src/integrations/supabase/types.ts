@@ -27,6 +27,7 @@ export type Database = {
             | Database["public"]["Enums"]["client_status_enum"]
             | null
           coaching_styles: string[] | null
+          communication_style: string | null
           created_at: string
           delivery_format: string | null
           first_name: string | null
@@ -48,6 +49,8 @@ export type Database = {
           last_verification_request: string | null
           location: string | null
           max_clients: number | null
+          messaging_support: boolean | null
+          next_available_date: string | null
           onboarding_step: number | null
           package_inclusions: Json | null
           package_options: Json | null
@@ -77,6 +80,8 @@ export type Database = {
           verification_status:
             | Database["public"]["Enums"]["verification_status_enum"]
             | null
+          video_checkins: boolean | null
+          weekly_programming_only: boolean | null
           works_bank_holidays: boolean | null
           year_certified: number | null
         }
@@ -92,6 +97,7 @@ export type Database = {
             | Database["public"]["Enums"]["client_status_enum"]
             | null
           coaching_styles?: string[] | null
+          communication_style?: string | null
           created_at?: string
           delivery_format?: string | null
           first_name?: string | null
@@ -113,6 +119,8 @@ export type Database = {
           last_verification_request?: string | null
           location?: string | null
           max_clients?: number | null
+          messaging_support?: boolean | null
+          next_available_date?: string | null
           onboarding_step?: number | null
           package_inclusions?: Json | null
           package_options?: Json | null
@@ -142,6 +150,8 @@ export type Database = {
           verification_status?:
             | Database["public"]["Enums"]["verification_status_enum"]
             | null
+          video_checkins?: boolean | null
+          weekly_programming_only?: boolean | null
           works_bank_holidays?: boolean | null
           year_certified?: number | null
         }
@@ -157,6 +167,7 @@ export type Database = {
             | Database["public"]["Enums"]["client_status_enum"]
             | null
           coaching_styles?: string[] | null
+          communication_style?: string | null
           created_at?: string
           delivery_format?: string | null
           first_name?: string | null
@@ -178,6 +189,8 @@ export type Database = {
           last_verification_request?: string | null
           location?: string | null
           max_clients?: number | null
+          messaging_support?: boolean | null
+          next_available_date?: string | null
           onboarding_step?: number | null
           package_inclusions?: Json | null
           package_options?: Json | null
@@ -207,6 +220,8 @@ export type Database = {
           verification_status?:
             | Database["public"]["Enums"]["verification_status_enum"]
             | null
+          video_checkins?: boolean | null
+          weekly_programming_only?: boolean | null
           works_bank_holidays?: boolean | null
           year_certified?: number | null
         }

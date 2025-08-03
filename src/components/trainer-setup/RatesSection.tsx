@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Plus, ExternalLink, DollarSign, PoundSterling, Euro } from "lucide-react";
+import { Trash2, Plus, ExternalLink, DollarSign, PoundSterling, Euro, Calendar } from "lucide-react";
 
 interface RatesSectionProps {
   formData: any;
@@ -16,6 +16,7 @@ interface RatesSectionProps {
 interface TrainingPackage {
   id: string;
   name: string;
+  sessions?: number;
   price: number;
   currency: string;
   description: string;
@@ -29,6 +30,7 @@ export function RatesSection({ formData, updateFormData }: RatesSectionProps) {
   const [packages, setPackages] = useState<TrainingPackage[]>(formData.package_options || []);
   const [newPackage, setNewPackage] = useState({
     name: "",
+    sessions: "",
     price: "",
     description: "",
     terms: "",
@@ -40,6 +42,7 @@ export function RatesSection({ formData, updateFormData }: RatesSectionProps) {
       const trainingPackage: TrainingPackage = {
         id: Date.now().toString(),
         name: newPackage.name,
+        sessions: newPackage.sessions ? parseInt(newPackage.sessions) : undefined,
         price: parseFloat(newPackage.price),
         currency,
         description: newPackage.description
@@ -51,6 +54,7 @@ export function RatesSection({ formData, updateFormData }: RatesSectionProps) {
       
       setNewPackage({
         name: "",
+        sessions: "",
         price: "",
         description: "",
         terms: "",
@@ -137,67 +141,38 @@ export function RatesSection({ formData, updateFormData }: RatesSectionProps) {
         </div>
       </div>
 
-      {/* Rate Types - Multiple Selection */}
+      {/* Single Session Rate */}
       <div className="space-y-2">
-        <Label>Rate Types (Select all that apply)</Label>
-        <div className="flex flex-wrap items-center gap-2">
-          <Button
-            variant={selectedRateTypes.includes('hourly') ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => toggleRateType('hourly')}
-          >
-            Hourly (1-on-1)
-          </Button>
-          <Button
-            variant={selectedRateTypes.includes('class') ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => toggleRateType('class')}
-          >
-            Class Rate
-          </Button>
-          <Button
-            variant={selectedRateTypes.includes('monthly') ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => toggleRateType('monthly')}
-          >
-            Monthly Rate
-          </Button>
+        <Label htmlFor="hourly_rate">Single Session Rate *</Label>
+        <div className="relative">
+          <div className="absolute left-3 top-3 text-muted-foreground">
+            {currency === 'GBP' ? '£' : currency === 'USD' ? '$' : '€'}
+          </div>
+          <Input
+            id="hourly_rate"
+            type="number"
+            value={formData.hourly_rate || ""}
+            onChange={(e) => updateFormData({ hourly_rate: e.target.value ? parseFloat(e.target.value) : null })}
+            placeholder="50"
+            className="pl-8"
+            min="0"
+            step="0.01"
+          />
         </div>
         <p className="text-xs text-muted-foreground">
-          Select all rate types you offer to give clients flexibility
+          Your standard rate for 1-on-1 personal training sessions
         </p>
       </div>
 
-      {/* Rate Inputs - Dynamic based on selected types */}
-      {selectedRateTypes.map(rateType => (
-        <div key={rateType} className="space-y-2">
-          <Label htmlFor={`${rateType}_rate`}>
-            {rateType === 'hourly' && 'Hourly Rate *'}
-            {rateType === 'class' && 'Class Rate *'}
-            {rateType === 'monthly' && 'Monthly Rate *'}
-          </Label>
-          <div className="relative">
-            <div className="absolute left-3 top-3 text-muted-foreground">
-              {currency === 'GBP' ? '£' : currency === 'USD' ? '$' : '€'}
-            </div>
-            <Input
-              id={`${rateType}_rate`}
-              type="number"
-              value={formData[`${rateType}_rate`] || ""}
-              onChange={(e) => updateFormData({ [`${rateType}_rate`]: e.target.value ? parseFloat(e.target.value) : null })}
-              placeholder={rateType === 'hourly' ? '50' : rateType === 'class' ? '25' : '200'}
-              className="pl-8"
-              min="0"
-              step="0.01"
-            />
-          </div>
-          <p className="text-xs text-muted-foreground">
-            {rateType === 'hourly' && 'Your standard rate for 1-on-1 personal training sessions'}
-            {rateType === 'class' && 'Your rate per class session (group training)'}
-            {rateType === 'monthly' && 'Your monthly rate for ongoing training programs'}
+      {/* Tiered Package Pricing */}
+      <div className="space-y-4">
+        <div>
+          <Label>Tiered Pricing Packages</Label>
+          <p className="text-sm text-muted-foreground">
+            Create packages like "10 PT sessions for £400" to offer better value for clients
           </p>
         </div>
-      ))}
+      </div>
 
       {/* Existing Packages */}
       {packages.length > 0 && (
@@ -207,16 +182,19 @@ export function RatesSection({ formData, updateFormData }: RatesSectionProps) {
             {packages.map((pkg) => (
               <Card key={pkg.id}>
                 <CardContent className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h4 className="font-medium">{pkg.name}</h4>
-                        <Badge variant="secondary">
-                          {pkg.currency === 'GBP' ? '£' : pkg.currency === 'USD' ? '$' : '€'}{pkg.price}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground">{pkg.description}</p>
-                    </div>
+                   <div className="flex items-start justify-between">
+                     <div className="flex-1">
+                       <div className="flex items-center gap-2 mb-2">
+                         <h4 className="font-medium">{pkg.name}</h4>
+                         {pkg.sessions && (
+                           <Badge variant="outline">{pkg.sessions} sessions</Badge>
+                         )}
+                         <Badge variant="secondary">
+                           {pkg.currency === 'GBP' ? '£' : pkg.currency === 'USD' ? '$' : '€'}{pkg.price}
+                         </Badge>
+                       </div>
+                       <p className="text-sm text-muted-foreground">{pkg.description}</p>
+                     </div>
                     <Button
                       variant="ghost"
                       size="sm"
@@ -245,8 +223,23 @@ export function RatesSection({ formData, updateFormData }: RatesSectionProps) {
               id="package_name"
               value={newPackage.name}
               onChange={(e) => setNewPackage({ ...newPackage, name: e.target.value })}
-              placeholder="e.g., 4-Week Transformation Package"
+              placeholder="e.g., 10 PT Sessions Bundle"
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="package_sessions">Number of Sessions (Optional)</Label>
+            <Input
+              id="package_sessions"
+              type="number"
+              value={newPackage.sessions}
+              onChange={(e) => setNewPackage({ ...newPackage, sessions: e.target.value })}
+              placeholder="10"
+              min="1"
+            />
+            <p className="text-xs text-muted-foreground">
+              Leave blank for time-based packages (e.g., 4-week programs)
+            </p>
           </div>
           
           <div className="space-y-2">
@@ -274,7 +267,7 @@ export function RatesSection({ formData, updateFormData }: RatesSectionProps) {
               id="package_description"
               value={newPackage.description}
               onChange={(e) => setNewPackage({ ...newPackage, description: e.target.value })}
-              placeholder="Describe what's included in this package..."
+              placeholder="e.g., 10 x 1-hour PT sessions with personalized nutrition plan"
               rows={3}
               className="resize-none"
             />
@@ -397,6 +390,91 @@ export function RatesSection({ formData, updateFormData }: RatesSectionProps) {
         )}
       </div>
 
+      {/* Waitlist & Availability */}
+      {formData.client_status === 'waitlist' && (
+        <Card className="border-amber-200 bg-amber-50">
+          <CardContent className="p-4 space-y-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Calendar className="h-5 w-5 text-amber-600" />
+              <Label className="text-amber-900">Waitlist Information</Label>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="next_available_date">Next Available Date</Label>
+              <Input
+                id="next_available_date"
+                type="date"
+                value={formData.next_available_date || ""}
+                onChange={(e) => updateFormData({ next_available_date: e.target.value })}
+                min={new Date().toISOString().split('T')[0]}
+              />
+              <p className="text-xs text-amber-700">
+                Let potential clients know when you'll next have availability
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Communication Style */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Communication Style</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Help clients understand how you prefer to work together
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="communication_style">How do you work best with clients?</Label>
+            <Textarea
+              id="communication_style"
+              value={formData.communication_style || ""}
+              onChange={(e) => updateFormData({ communication_style: e.target.value })}
+              placeholder="e.g., I believe in regular check-ins and being available for questions. I prefer a collaborative approach where we work together to achieve your goals..."
+              rows={3}
+              className="resize-none"
+            />
+          </div>
+
+          <div className="space-y-3">
+            <Label>Communication Methods You Offer</Label>
+            
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="font-normal">Video Check-ins</Label>
+                <p className="text-sm text-muted-foreground">Regular video calls to review progress</p>
+              </div>
+              <Switch
+                checked={formData.video_checkins || false}
+                onCheckedChange={(checked) => updateFormData({ video_checkins: checked })}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="font-normal">Messaging Support</Label>
+                <p className="text-sm text-muted-foreground">Available for questions via WhatsApp/text</p>
+              </div>
+              <Switch
+                checked={formData.messaging_support || false}
+                onCheckedChange={(checked) => updateFormData({ messaging_support: checked })}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="font-normal">Weekly Programming Only</Label>
+                <p className="text-sm text-muted-foreground">Provide workouts with minimal ongoing communication</p>
+              </div>
+              <Switch
+                checked={formData.weekly_programming_only || false}
+                onCheckedChange={(checked) => updateFormData({ weekly_programming_only: checked })}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Pricing Tips */}
       <Card className="border-blue-200 bg-blue-50">
         <CardContent className="p-4">
@@ -406,6 +484,7 @@ export function RatesSection({ formData, updateFormData }: RatesSectionProps) {
             <li>• Consider your experience level and unique qualifications</li>
             <li>• Package deals often provide better value for clients and higher revenue for you</li>
             <li>• Discovery calls help build trust and can increase conversion rates</li>
+            <li>• Clear communication preferences help set proper expectations with clients</li>
           </ul>
         </CardContent>
       </Card>
