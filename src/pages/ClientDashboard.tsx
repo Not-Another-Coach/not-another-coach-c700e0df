@@ -98,11 +98,24 @@ export default function ClientDashboard() {
       {/* Client Journey Progress Tracker - Shows when survey is 100% complete */}
       {journeyProgress && !journeyLoading && (
         <div className="max-w-7xl mx-auto px-6 pt-6">
-          <ClientJourneyBreadcrumb 
-            progress={journeyProgress} 
-            variant="compact"
-            className="mb-4"
-          />
+          <Card 
+            className="mb-4 cursor-pointer transition-all hover:shadow-md bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20"
+            onClick={() => navigate('/client/journey')}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold text-primary">Your Fitness Journey</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {journeyProgress.stage.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())} • {journeyProgress.percentage}% Complete
+                  </p>
+                </div>
+                <Button variant="ghost" size="sm">
+                  View Details →
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
 
