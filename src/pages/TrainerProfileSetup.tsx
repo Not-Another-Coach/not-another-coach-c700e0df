@@ -15,7 +15,7 @@ import { ExpertiseSection } from "@/components/trainer-setup/ExpertiseSection";
 import { ClientFitSection } from "@/components/trainer-setup/ClientFitSection";
 import { RatesSection } from "@/components/trainer-setup/RatesSection";
 import { TestimonialsSection } from "@/components/trainer-setup/TestimonialsSection";
-import { WaysOfWorkingSection } from "@/components/trainer-setup/WaysOfWorkingSection";
+import { PackageWaysOfWorkingSection } from "@/components/trainer-setup/PackageWaysOfWorkingSection";
 import { ProfileManagementSection } from "@/components/trainer-setup/ProfileManagementSection";
 
 const TrainerProfileSetup = () => {
@@ -363,7 +363,7 @@ const TrainerProfileSetup = () => {
       case 6:
         return <TestimonialsSection {...commonProps} />;
       case 7:
-        return <WaysOfWorkingSection {...commonProps} />;
+        return <PackageWaysOfWorkingSection {...commonProps} />;
       case 8:
         return <ProfileManagementSection {...commonProps} />;
       default:

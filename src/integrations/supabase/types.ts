@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      package_ways_of_working: {
+        Row: {
+          client_expectations_items: Json | null
+          created_at: string
+          first_week_items: Json | null
+          id: string
+          onboarding_items: Json | null
+          ongoing_structure_items: Json | null
+          package_id: string
+          package_name: string
+          tracking_tools_items: Json | null
+          trainer_id: string
+          updated_at: string
+          visibility: string | null
+          what_i_bring_items: Json | null
+        }
+        Insert: {
+          client_expectations_items?: Json | null
+          created_at?: string
+          first_week_items?: Json | null
+          id?: string
+          onboarding_items?: Json | null
+          ongoing_structure_items?: Json | null
+          package_id: string
+          package_name: string
+          tracking_tools_items?: Json | null
+          trainer_id: string
+          updated_at?: string
+          visibility?: string | null
+          what_i_bring_items?: Json | null
+        }
+        Update: {
+          client_expectations_items?: Json | null
+          created_at?: string
+          first_week_items?: Json | null
+          id?: string
+          onboarding_items?: Json | null
+          ongoing_structure_items?: Json | null
+          package_id?: string
+          package_name?: string
+          tracking_tools_items?: Json | null
+          trainer_id?: string
+          updated_at?: string
+          visibility?: string | null
+          what_i_bring_items?: Json | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           admin_verification_notes: string | null
