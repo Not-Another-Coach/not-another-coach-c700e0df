@@ -97,44 +97,44 @@ export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionP
     updateFormData(updates);
   }, [updateFormData]);
 
-  const handleSpecialtyToggle = (specialty: string) => {
+  const handleSpecialtyToggle = useCallback((specialty: string) => {
     const current = formData.specializations || [];
     const updated = current.includes(specialty)
       ? current.filter((s: string) => s !== specialty)
       : [...current, specialty];
     updateFormData({ specializations: updated });
-  };
+  }, [updateFormData]);
 
-  const handleTrainingTypeToggle = (type: string) => {
+  const handleTrainingTypeToggle = useCallback((type: string) => {
     const current = formData.training_types || [];
     const updated = current.includes(type)
       ? current.filter((t: string) => t !== type)
       : [...current, type];
     updateFormData({ training_types: updated });
-  };
+  }, [updateFormData]);
 
-  const handleLanguageToggle = (language: string) => {
+  const handleLanguageToggle = useCallback((language: string) => {
     const current = formData.languages || [];
     const updated = current.includes(language)
       ? current.filter((l: string) => l !== language)
       : [...current, language];
     updateFormData({ languages: updated });
-  };
+  }, [updateFormData]);
 
-  const removeSpecialty = (specialty: string) => {
+  const removeSpecialty = useCallback((specialty: string) => {
     const current = formData.specializations || [];
     updateFormData({ specializations: current.filter((s: string) => s !== specialty) });
-  };
+  }, [updateFormData]);
 
-  const removeTrainingType = (type: string) => {
+  const removeTrainingType = useCallback((type: string) => {
     const current = formData.training_types || [];
     updateFormData({ training_types: current.filter((t: string) => t !== type) });
-  };
+  }, [updateFormData]);
 
-  const removeLanguage = (language: string) => {
+  const removeLanguage = useCallback((language: string) => {
     const current = formData.languages || [];
     updateFormData({ languages: current.filter((l: string) => l !== language) });
-  };
+  }, [updateFormData]);
 
   return (
     <div className="space-y-6">
