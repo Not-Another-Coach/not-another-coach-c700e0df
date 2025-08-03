@@ -359,48 +359,59 @@ const ClientSurvey = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="flex justify-between items-center p-4 border-b bg-card">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate('/')}
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Home
-          </Button>
-          <div>
-            <h1 className="text-xl font-bold">Find Your Perfect Trainer</h1>
-            <p className="text-sm text-muted-foreground">
-              Step {currentStep} of {totalSteps}: {stepTitles[currentStep - 1]}
-            </p>
+      <div className="bg-card border-b">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-4 gap-3">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/')}
+              className="hidden sm:flex"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Home
+            </Button>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-lg sm:text-xl font-bold truncate">Find Your Perfect Trainer</h1>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                Step {currentStep} of {totalSteps}: {stepTitles[currentStep - 1]}
+              </p>
+            </div>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => handleSave()}>
-            <Save className="h-4 w-4 mr-2" />
-            Save Progress
-          </Button>
+          <div className="flex items-center justify-between sm:justify-end gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/')}
+              className="sm:hidden"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => handleSave()}>
+              <Save className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Save Progress</span>
+            </Button>
+          </div>
         </div>
       </div>
 
       {/* Progress Bar */}
-      <div className="bg-card border-b p-4">
+      <div className="bg-card border-b p-3 sm:p-4">
         <div className="max-w-4xl mx-auto">
-          <div className="flex items-center gap-4 mb-2">
-            <span className="text-sm font-medium">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-3">
+            <span className="text-sm font-medium whitespace-nowrap">
               {calculateProgress()}% Complete
             </span>
             <div className="flex-1">
               <Progress value={calculateProgress()} className="h-2" />
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              💡 Click on any step circle to jump to that section
+            <p className="text-xs text-muted-foreground hidden sm:block">
+              💡 Click any step to jump there
             </p>
           </div>
           
-          {/* Step indicators */}
-          <div className="flex justify-between mt-4">
+          {/* Step indicators - More mobile friendly */}
+          <div className="grid grid-cols-4 sm:flex sm:justify-between gap-2 sm:gap-1 mt-3">
             {stepTitles.map((title, index) => {
               const stepNumber = index + 1;
               const completion = getStepCompletion(stepNumber);
@@ -432,25 +443,28 @@ const ClientSurvey = () => {
               return (
                 <div
                   key={stepNumber}
-                  className={`flex flex-col items-center text-xs cursor-pointer transition-all hover:scale-105 ${statusColor}`}
+                  className={`flex flex-col items-center text-xs cursor-pointer transition-all hover:scale-105 ${statusColor} p-1`}
                   onClick={() => setCurrentStep(stepNumber)}
                   title={`Go to step ${stepNumber}: ${title}`}
                 >
                   <div
-                    className={`w-8 h-8 rounded-full border-2 flex items-center justify-center mb-1 ${borderColor} ${
+                    className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center mb-1 ${borderColor} ${
                       completion === 'completed' || completion === 'partial' || isCurrent 
                         ? `${bgColor} text-white`
                         : 'bg-transparent'
                     }`}
                   >
                     {showIcon ? (
-                      isPartial ? <AlertCircle className="h-4 w-4" /> : <CheckCircle className="h-4 w-4" />
+                      isPartial ? <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4" /> : <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4" />
                     ) : (
-                      stepNumber
+                      <span className="text-xs sm:text-sm font-medium">{stepNumber}</span>
                     )}
                   </div>
-                  <span className="text-center max-w-20 leading-tight">
+                  <span className="text-center text-xs leading-tight max-w-16 sm:max-w-20 hidden sm:block">
                     {title}
+                  </span>
+                  <span className="text-center text-xs leading-tight max-w-16 sm:hidden">
+                    {title.split(' ')[0]}
                   </span>
                 </div>
               );
@@ -460,50 +474,58 @@ const ClientSurvey = () => {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-4xl mx-auto p-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">
+      <div className="max-w-4xl mx-auto p-3 sm:p-6 pb-20 sm:pb-6">
+        <Card className="shadow-sm">
+          <CardHeader className="pb-4 sm:pb-6">
+            <CardTitle className="text-xl sm:text-2xl leading-tight">
               {stepTitles[currentStep - 1]}
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-4 sm:space-y-6">
             {renderCurrentSection()}
           </CardContent>
         </Card>
 
-        {/* Navigation */}
-        <div className="flex justify-between mt-6">
-          <Button
-            variant="outline"
-            onClick={handlePrevious}
-            disabled={currentStep === 1}
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Previous
-          </Button>
-          
-          <Button 
-            onClick={handleNext}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                {currentStep === totalSteps ? 'Completing...' : 'Saving...'}
-              </>
-            ) : currentStep === totalSteps ? (
-              <>
-                <CheckCircle className="h-4 w-4 mr-2" />
-                Complete Survey
-              </>
-            ) : (
-              <>
-                Next
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </>
-            )}
-          </Button>
+        {/* Navigation - Fixed bottom on mobile, normal on desktop */}
+        <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-3 sm:relative sm:bg-transparent sm:border-t-0 sm:p-0 sm:mt-6">
+          <div className="flex justify-between max-w-4xl mx-auto">
+            <Button
+              variant="outline"
+              onClick={handlePrevious}
+              disabled={currentStep === 1}
+              size="sm"
+              className="sm:size-default"
+            >
+              <ArrowLeft className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Previous</span>
+            </Button>
+            
+            <Button 
+              onClick={handleNext}
+              disabled={isLoading}
+              size="sm"
+              className="sm:size-default"
+            >
+              {isLoading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  <span className="hidden sm:inline">{currentStep === totalSteps ? 'Completing...' : 'Saving...'}</span>
+                </>
+              ) : currentStep === totalSteps ? (
+                <>
+                  <CheckCircle className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Complete Survey</span>
+                  <span className="sm:hidden">Complete</span>
+                </>
+              ) : (
+                <>
+                  <span className="hidden sm:inline">Next</span>
+                  <span className="sm:hidden">Next</span>
+                  <ArrowRight className="h-4 w-4 sm:ml-2 ml-1" />
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </div>
     </div>
