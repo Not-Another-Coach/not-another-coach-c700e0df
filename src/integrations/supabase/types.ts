@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      alerts: {
+        Row: {
+          alert_type: string
+          content: string
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          metadata: Json | null
+          priority: number
+          target_audience: Json | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          alert_type: string
+          content: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          metadata?: Json | null
+          priority?: number
+          target_audience?: Json | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          alert_type?: string
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          metadata?: Json | null
+          priority?: number
+          target_audience?: Json | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       client_trainer_engagement: {
         Row: {
           became_client_at: string | null
@@ -457,6 +502,38 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_alert_interactions: {
+        Row: {
+          alert_id: string
+          created_at: string
+          id: string
+          interaction_type: string
+          user_id: string
+        }
+        Insert: {
+          alert_id: string
+          created_at?: string
+          id?: string
+          interaction_type: string
+          user_id: string
+        }
+        Update: {
+          alert_id?: string
+          created_at?: string
+          id?: string
+          interaction_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_alert_interactions_alert_id_fkey"
+            columns: ["alert_id"]
+            isOneToOne: false
+            referencedRelation: "alerts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_journey_tracking: {
         Row: {
