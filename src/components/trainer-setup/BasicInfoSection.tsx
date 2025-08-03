@@ -122,11 +122,20 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
                     />
                   </div>
                   <div className="flex gap-2 justify-center">
-                    <Button variant="outline" size="sm">
-                      <Camera className="h-4 w-4 mr-2" />
-                      Change Photo
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileSelect}
+                      className="hidden"
+                      id="photo-change"
+                    />
+                    <Button variant="outline" size="sm" asChild>
+                      <label htmlFor="photo-change" className="cursor-pointer">
+                        <Camera className="h-4 w-4 mr-2" />
+                        Change Photo
+                      </label>
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => console.log("AI enhance coming soon")}>
                       <Sparkles className="h-4 w-4 mr-2" />
                       AI Enhance
                     </Button>
