@@ -201,10 +201,13 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
       {/* Tiered Package Pricing */}
       <div className="space-y-4">
         <div>
-          <Label>Tiered Pricing Packages</Label>
+          <Label>Tiered Pricing Packages *</Label>
           <p className="text-sm text-muted-foreground">
             Create packages like "10 PT sessions for £400" to offer better value for clients
           </p>
+          {errors?.package_options && (
+            <p className="text-sm text-destructive mt-1">{errors.package_options}</p>
+          )}
         </div>
 
         {/* Existing Packages */}

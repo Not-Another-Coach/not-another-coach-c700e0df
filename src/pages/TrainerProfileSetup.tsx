@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { usePackageWaysOfWorking } from "@/hooks/usePackageWaysOfWorking";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,6 +22,7 @@ import { ProfileManagementSection } from "@/components/trainer-setup/ProfileMana
 const TrainerProfileSetup = () => {
   const { user, loading } = useAuth();
   const { profile, loading: profileLoading, isTrainer, updateProfile } = useProfile();
+  const { packageWorkflows, loading: waysOfWorkingLoading } = usePackageWaysOfWorking();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -187,6 +189,9 @@ const TrainerProfileSetup = () => {
         if (!hasCommunicationMethod) {
           newErrors.communication_methods = "Please select at least one communication method you offer";
         }
+        if (!formData.package_options || formData.package_options.length === 0) {
+          newErrors.package_options = "At least one tiered pricing package is required";
+        }
         break;
       case 8:
         if (!formData.terms_agreed) {
@@ -216,13 +221,47 @@ const TrainerProfileSetup = () => {
         const hasRate = formData.hourly_rate && formData.hourly_rate > 0;
         const hasCommunicationStyle = formData.communication_style && formData.communication_style.trim().length >= 20;
         const hasCommunicationMethod = formData.video_checkins || formData.messaging_support || formData.weekly_programming_only;
-        const hasAllRateRequirements = hasRate && hasCommunicationStyle && hasCommunicationMethod;
-        const hasPartialRate = hasRate || hasCommunicationStyle || hasCommunicationMethod;
+        const hasPackages = formData.package_options && formData.package_options.length > 0;
+        const hasAllRateRequirements = hasRate && hasCommunicationStyle && hasCommunicationMethod && hasPackages;
+        const hasPartialRate = hasRate || hasCommunicationStyle || hasCommunicationMethod || hasPackages;
         return hasAllRateRequirements ? 'completed' : (hasPartialRate ? 'partial' : 'not_started');
       case 6:
         return 'completed'; // Optional step
       case 7:
-        return 'completed'; // Optional step
+        // Ways of working is only completed if configured for ALL packages
+        const packages = formData.package_options || [];
+        if (packages.length === 0) return 'not_started';
+        
+        // Check if all packages have ways of working configured with at least some content
+        const allPackagesConfigured = packages.every((pkg: any) => {
+          const workflow = packageWorkflows.find(w => w.package_id === pkg.id);
+          if (!workflow) return false;
+          
+          // Check if at least one section has content
+          const hasContent = (
+            workflow.onboarding_items.length > 0 ||
+            workflow.first_week_items.length > 0 ||
+            workflow.ongoing_structure_items.length > 0 ||
+            workflow.tracking_tools_items.length > 0 ||
+            workflow.client_expectations_items.length > 0 ||
+            workflow.what_i_bring_items.length > 0
+          );
+          return hasContent;
+        });
+        
+        const anyPackageConfigured = packages.some((pkg: any) => {
+          const workflow = packageWorkflows.find(w => w.package_id === pkg.id);
+          return workflow && (
+            workflow.onboarding_items.length > 0 ||
+            workflow.first_week_items.length > 0 ||
+            workflow.ongoing_structure_items.length > 0 ||
+            workflow.tracking_tools_items.length > 0 ||
+            workflow.client_expectations_items.length > 0 ||
+            workflow.what_i_bring_items.length > 0
+          );
+        });
+        
+        return allPackagesConfigured ? 'completed' : (anyPackageConfigured ? 'partial' : 'not_started');
       case 8:
         return formData.terms_agreed ? 'completed' : 'not_started';
       default:
@@ -391,7 +430,7 @@ const TrainerProfileSetup = () => {
     }
   };
 
-  if (loading || profileLoading) {
+  if (loading || profileLoading || waysOfWorkingLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-lg">Loading...</div>
