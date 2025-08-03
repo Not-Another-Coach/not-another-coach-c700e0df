@@ -80,7 +80,7 @@ export const ProfileDropdown = ({ profile, onSignOut }: ProfileDropdownProps) =>
   };
 
   const handleUpdatePreferences = () => {
-    navigate('/onboarding');
+    navigate('/client-survey');
   };
 
   return (

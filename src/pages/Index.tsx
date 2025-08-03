@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
-import { useTrainerMatching } from "@/hooks/useTrainerMatching";
+import { useEnhancedTrainerMatching } from "@/hooks/useEnhancedTrainerMatching";
 import { useSavedTrainers } from "@/hooks/useSavedTrainers";
 import { useJourneyProgress } from "@/hooks/useJourneyProgress";
 import { SimpleHeroSection } from "@/components/SimpleHeroSection";
@@ -131,10 +131,31 @@ const Index = () => {
     }
   ]);
 
-  // Get matched trainers based on quiz answers
-  const { matchedTrainers, hasMatches } = useTrainerMatching(
+  // Get enhanced matched trainers using client survey data
+  const clientSurveyData = profile ? {
+    primary_goals: (profile as any).primary_goals,
+    secondary_goals: (profile as any).secondary_goals,
+    training_location_preference: (profile as any).training_location_preference,
+    open_to_virtual_coaching: (profile as any).open_to_virtual_coaching,
+    preferred_training_frequency: (profile as any).preferred_training_frequency,
+    preferred_time_slots: (profile as any).preferred_time_slots,
+    start_timeline: (profile as any).start_timeline,
+    preferred_coaching_style: (profile as any).preferred_coaching_style,
+    motivation_factors: (profile as any).motivation_factors,
+    client_personality_type: (profile as any).client_personality_type,
+    experience_level: (profile as any).experience_level,
+    preferred_package_type: (profile as any).preferred_package_type,
+    budget_range_min: (profile as any).budget_range_min,
+    budget_range_max: (profile as any).budget_range_max,
+    budget_flexibility: (profile as any).budget_flexibility,
+    waitlist_preference: (profile as any).waitlist_preference,
+    flexible_scheduling: (profile as any).flexible_scheduling,
+  } : undefined;
+
+  const { matchedTrainers, hasMatches } = useEnhancedTrainerMatching(
     trainers, 
-    profile?.quiz_answers as any
+    profile?.quiz_answers as any,
+    clientSurveyData
   );
 
   const [filteredTrainers, setFilteredTrainers] = useState<Trainer[]>(trainers);
@@ -251,22 +272,22 @@ const Index = () => {
               <h2 className="text-2xl font-bold mb-2">
                 {isAdmin() ? "All Personal Trainers" : 
                  isTrainer() ? "Your Trainer Profile" : 
-                 profile?.quiz_completed && hasMatches ? "Recommended for You" : "Featured Personal Trainers"}
+                 profile?.quiz_completed ? "Personal Trainers" : "Featured Personal Trainers"}
               </h2>
               <p className="text-muted-foreground">
                 {isAdmin() ? "Manage and verify trainer profiles" :
                  isTrainer() ? "View and edit your trainer profile" :
-                 profile?.quiz_completed && hasMatches ? "Based on your quiz answers, here are trainers that match your fitness goals" :
+                 profile?.quiz_completed ? "All trainers sorted by compatibility - best matches first" :
                  "Discover certified trainers who can help you reach your fitness goals"}
               </p>
             </div>
             
-            {/* Update Preferences Button for Clients with Recommendations */}
-            {isClient() && profile?.quiz_completed && hasMatches && (
+            {/* Update Preferences Button for Clients with Survey Completed */}
+            {isClient() && profile?.quiz_completed && (
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => navigate('/onboarding')}
+                onClick={() => navigate('/client-survey')}
                 className="flex items-center gap-2 hover:bg-primary/10"
               >
                 <Edit className="h-4 w-4" />
