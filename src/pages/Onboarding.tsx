@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { OnboardingQuiz } from '@/components/OnboardingQuiz';
 import { toast } from '@/hooks/use-toast';
@@ -11,7 +13,20 @@ interface QuizAnswer {
 
 export default function Onboarding() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { profile, refetchProfile } = useProfile();
+
+  // Route clients to the new comprehensive survey
+  useEffect(() => {
+    if (profile && profile.user_type === 'client') {
+      // Check if client has completed the new survey
+      const surveyCompleted = (profile as any).client_survey_completed;
+      if (!surveyCompleted) {
+        navigate('/client-survey');
+        return;
+      }
+    }
+  }, [profile, navigate]);
 
   const handleQuizComplete = async (answers: QuizAnswer[]) => {
     if (!profile) return;

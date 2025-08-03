@@ -7,6 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Onboarding from "./pages/Onboarding";
+import ClientSurvey from "./pages/ClientSurvey";
 import Discovery from "./pages/Discovery";
 import SavedTrainers from "./pages/SavedTrainers";
 import TrainerDashboard from "./pages/TrainerDashboard";
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/client-survey" element={<ClientSurvey />} />
             <Route path="/discovery" element={<Discovery />} />
             <Route path="/saved" element={<SavedTrainers />} />
             <Route path="/trainer/dashboard" element={<TrainerDashboard />} />

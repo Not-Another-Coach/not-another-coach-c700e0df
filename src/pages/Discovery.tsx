@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
-import { useTrainerMatching } from '@/hooks/useTrainerMatching';
+import { useEnhancedTrainerMatching } from '@/hooks/useEnhancedTrainerMatching';
 import { useJourneyProgress } from '@/hooks/useJourneyProgress';
 import { SwipeableCard } from '@/components/SwipeableCard';
 import { Button } from '@/components/ui/button';
@@ -93,10 +93,31 @@ export default function Discovery() {
   const [passedTrainers, setPassedTrainers] = useState<string[]>([]);
   const [trainersToShow, setTrainersToShow] = useState(sampleTrainers);
 
-  // Get matched trainers with scores
-  const { matchedTrainers } = useTrainerMatching(
+  // Get matched trainers with enhanced algorithm using client survey data
+  const clientSurveyData = profile ? {
+    primary_goals: (profile as any).primary_goals,
+    secondary_goals: (profile as any).secondary_goals,
+    training_location_preference: (profile as any).training_location_preference,
+    open_to_virtual_coaching: (profile as any).open_to_virtual_coaching,
+    preferred_training_frequency: (profile as any).preferred_training_frequency,
+    preferred_time_slots: (profile as any).preferred_time_slots,
+    start_timeline: (profile as any).start_timeline,
+    preferred_coaching_style: (profile as any).preferred_coaching_style,
+    motivation_factors: (profile as any).motivation_factors,
+    client_personality_type: (profile as any).client_personality_type,
+    experience_level: (profile as any).experience_level,
+    preferred_package_type: (profile as any).preferred_package_type,
+    budget_range_min: (profile as any).budget_range_min,
+    budget_range_max: (profile as any).budget_range_max,
+    budget_flexibility: (profile as any).budget_flexibility,
+    waitlist_preference: (profile as any).waitlist_preference,
+    flexible_scheduling: (profile as any).flexible_scheduling,
+  } : undefined;
+
+  const { matchedTrainers, topMatches, goodMatches } = useEnhancedTrainerMatching(
     trainersToShow, 
-    profile?.quiz_answers as any
+    profile?.quiz_answers as any,
+    clientSurveyData
   );
 
   const handleSwipe = useCallback((direction: 'left' | 'right', trainer: Trainer) => {
@@ -161,7 +182,7 @@ export default function Discovery() {
           </p>
         </div>
 
-        <Button variant="ghost" onClick={() => navigate('/onboarding')}>
+        <Button variant="ghost" onClick={() => navigate('/client-survey')}>
           <Settings className="h-4 w-4" />
         </Button>
       </div>
@@ -185,7 +206,7 @@ export default function Discovery() {
                 key={`${match.trainer.id}-${currentTrainerIndex + index}`}
                 trainer={match.trainer}
                 onSwipe={handleSwipe}
-                matchScore={match.score}
+                matchScore={match.compatibilityPercentage}
                 matchReasons={match.matchReasons}
                 index={index}
               />
@@ -202,8 +223,8 @@ export default function Discovery() {
                   <Button onClick={() => navigate('/')} className="w-full">
                     View Your Matches ({likedTrainers.length})
                   </Button>
-                  <Button variant="outline" onClick={() => navigate('/onboarding')} className="w-full">
-                    Refine Your Filters
+                  <Button variant="outline" onClick={() => navigate('/client-survey')} className="w-full">
+                    Update Your Preferences
                   </Button>
                 </div>
               </CardContent>
