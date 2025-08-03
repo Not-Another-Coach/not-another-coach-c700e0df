@@ -69,17 +69,26 @@ export type Database = {
           availability_slots: Json | null
           before_after_photos: Json | null
           bio: string | null
+          budget_flexibility: string | null
+          budget_range_max: number | null
+          budget_range_min: number | null
           calendar_link: string | null
           certifying_body: string | null
+          client_personality_type: string[] | null
           client_status:
             | Database["public"]["Enums"]["client_status_enum"]
             | null
+          client_survey_completed: boolean | null
+          client_survey_completed_at: string | null
+          client_survey_step: number | null
           coaching_styles: string[] | null
           communication_style: string | null
           created_at: string
           delivery_format: string | null
+          experience_level: string | null
           first_name: string | null
           fitness_goals: string[] | null
+          flexible_scheduling: boolean | null
           free_discovery_call: boolean | null
           hourly_rate: number | null
           id: string
@@ -98,10 +107,17 @@ export type Database = {
           location: string | null
           max_clients: number | null
           messaging_support: boolean | null
+          motivation_factors: string[] | null
           next_available_date: string | null
           onboarding_step: number | null
+          open_to_virtual_coaching: boolean | null
           package_inclusions: Json | null
           package_options: Json | null
+          preferred_coaching_style: string[] | null
+          preferred_package_type: string | null
+          preferred_time_slots: string[] | null
+          preferred_training_frequency: number | null
+          primary_goals: string[] | null
           profile_photo_url: string | null
           profile_published: boolean | null
           profile_setup_completed: boolean | null
@@ -112,14 +128,18 @@ export type Database = {
           quiz_completed: boolean | null
           quiz_completed_at: string | null
           rating: number | null
+          secondary_goals: string[] | null
           special_credentials: string[] | null
           specializations: string[] | null
+          start_timeline: string | null
           tagline: string | null
           terms_agreed: boolean | null
           testimonials: Json | null
+          total_client_survey_steps: number | null
           total_onboarding_steps: number | null
           total_profile_setup_steps: number | null
           total_ratings: number | null
+          training_location_preference: string | null
           training_types: string[] | null
           training_vibe: string | null
           updated_at: string
@@ -129,6 +149,7 @@ export type Database = {
             | Database["public"]["Enums"]["verification_status_enum"]
             | null
           video_checkins: boolean | null
+          waitlist_preference: string | null
           ways_of_working_client_expectations: Json | null
           ways_of_working_completed: boolean | null
           ways_of_working_first_week: Json | null
@@ -147,17 +168,26 @@ export type Database = {
           availability_slots?: Json | null
           before_after_photos?: Json | null
           bio?: string | null
+          budget_flexibility?: string | null
+          budget_range_max?: number | null
+          budget_range_min?: number | null
           calendar_link?: string | null
           certifying_body?: string | null
+          client_personality_type?: string[] | null
           client_status?:
             | Database["public"]["Enums"]["client_status_enum"]
             | null
+          client_survey_completed?: boolean | null
+          client_survey_completed_at?: string | null
+          client_survey_step?: number | null
           coaching_styles?: string[] | null
           communication_style?: string | null
           created_at?: string
           delivery_format?: string | null
+          experience_level?: string | null
           first_name?: string | null
           fitness_goals?: string[] | null
+          flexible_scheduling?: boolean | null
           free_discovery_call?: boolean | null
           hourly_rate?: number | null
           id: string
@@ -176,10 +206,17 @@ export type Database = {
           location?: string | null
           max_clients?: number | null
           messaging_support?: boolean | null
+          motivation_factors?: string[] | null
           next_available_date?: string | null
           onboarding_step?: number | null
+          open_to_virtual_coaching?: boolean | null
           package_inclusions?: Json | null
           package_options?: Json | null
+          preferred_coaching_style?: string[] | null
+          preferred_package_type?: string | null
+          preferred_time_slots?: string[] | null
+          preferred_training_frequency?: number | null
+          primary_goals?: string[] | null
           profile_photo_url?: string | null
           profile_published?: boolean | null
           profile_setup_completed?: boolean | null
@@ -190,14 +227,18 @@ export type Database = {
           quiz_completed?: boolean | null
           quiz_completed_at?: string | null
           rating?: number | null
+          secondary_goals?: string[] | null
           special_credentials?: string[] | null
           specializations?: string[] | null
+          start_timeline?: string | null
           tagline?: string | null
           terms_agreed?: boolean | null
           testimonials?: Json | null
+          total_client_survey_steps?: number | null
           total_onboarding_steps?: number | null
           total_profile_setup_steps?: number | null
           total_ratings?: number | null
+          training_location_preference?: string | null
           training_types?: string[] | null
           training_vibe?: string | null
           updated_at?: string
@@ -207,6 +248,7 @@ export type Database = {
             | Database["public"]["Enums"]["verification_status_enum"]
             | null
           video_checkins?: boolean | null
+          waitlist_preference?: string | null
           ways_of_working_client_expectations?: Json | null
           ways_of_working_completed?: boolean | null
           ways_of_working_first_week?: Json | null
@@ -225,17 +267,26 @@ export type Database = {
           availability_slots?: Json | null
           before_after_photos?: Json | null
           bio?: string | null
+          budget_flexibility?: string | null
+          budget_range_max?: number | null
+          budget_range_min?: number | null
           calendar_link?: string | null
           certifying_body?: string | null
+          client_personality_type?: string[] | null
           client_status?:
             | Database["public"]["Enums"]["client_status_enum"]
             | null
+          client_survey_completed?: boolean | null
+          client_survey_completed_at?: string | null
+          client_survey_step?: number | null
           coaching_styles?: string[] | null
           communication_style?: string | null
           created_at?: string
           delivery_format?: string | null
+          experience_level?: string | null
           first_name?: string | null
           fitness_goals?: string[] | null
+          flexible_scheduling?: boolean | null
           free_discovery_call?: boolean | null
           hourly_rate?: number | null
           id?: string
@@ -254,10 +305,17 @@ export type Database = {
           location?: string | null
           max_clients?: number | null
           messaging_support?: boolean | null
+          motivation_factors?: string[] | null
           next_available_date?: string | null
           onboarding_step?: number | null
+          open_to_virtual_coaching?: boolean | null
           package_inclusions?: Json | null
           package_options?: Json | null
+          preferred_coaching_style?: string[] | null
+          preferred_package_type?: string | null
+          preferred_time_slots?: string[] | null
+          preferred_training_frequency?: number | null
+          primary_goals?: string[] | null
           profile_photo_url?: string | null
           profile_published?: boolean | null
           profile_setup_completed?: boolean | null
@@ -268,14 +326,18 @@ export type Database = {
           quiz_completed?: boolean | null
           quiz_completed_at?: string | null
           rating?: number | null
+          secondary_goals?: string[] | null
           special_credentials?: string[] | null
           specializations?: string[] | null
+          start_timeline?: string | null
           tagline?: string | null
           terms_agreed?: boolean | null
           testimonials?: Json | null
+          total_client_survey_steps?: number | null
           total_onboarding_steps?: number | null
           total_profile_setup_steps?: number | null
           total_ratings?: number | null
+          training_location_preference?: string | null
           training_types?: string[] | null
           training_vibe?: string | null
           updated_at?: string
@@ -285,6 +347,7 @@ export type Database = {
             | Database["public"]["Enums"]["verification_status_enum"]
             | null
           video_checkins?: boolean | null
+          waitlist_preference?: string | null
           ways_of_working_client_expectations?: Json | null
           ways_of_working_completed?: boolean | null
           ways_of_working_first_week?: Json | null
