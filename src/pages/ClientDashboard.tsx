@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useSavedTrainers } from "@/hooks/useSavedTrainers";
@@ -16,26 +16,35 @@ import { Heart, Settings, Search, MessageCircle, Menu } from "lucide-react";
 
 export default function ClientDashboard() {
   const { user, signOut, loading } = useAuth();
-  const { profile, loading: profileLoading, isClient } = useProfile();
+  const { profile, loading: profileLoading, isClient, isTrainer } = useProfile();
   const { savedTrainerIds } = useSavedTrainers();
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState("summary");
 
-  // Redirect if not client or not logged in
+  // Redirect if not logged in
   useEffect(() => {
-    if (!loading && !profileLoading) {
-      if (!user) {
-        navigate('/auth');
-        return;
+    if (!loading && !user) {
+      navigate('/auth');
+    }
+  }, [user, loading, navigate]);
+
+  // Redirect trainers to their dashboard (only from root page)
+  useEffect(() => {
+    if (!loading && !profileLoading && user && profile && isTrainer() && location.pathname === '/') {
+      // Check if profile setup is needed
+      if (!profile.terms_agreed || !(profile as any).profile_setup_completed) {
+        navigate('/trainer/profile-setup');
+      } else {
+        navigate('/trainer/dashboard');
       }
-      if (!isClient()) {
-        navigate('/');
-        return;
-      }
-      if (!profile?.quiz_completed) {
-        navigate('/onboarding');
-        return;
-      }
+    }
+  }, [user, profile, loading, profileLoading, isTrainer, navigate, location.pathname]);
+
+  // Redirect clients to onboarding quiz if not completed
+  useEffect(() => {
+    if (!loading && !profileLoading && user && profile && isClient() && !profile.quiz_completed) {
+      navigate('/onboarding');
     }
   }, [user, profile, loading, profileLoading, isClient, navigate]);
 
@@ -52,7 +61,8 @@ export default function ClientDashboard() {
     );
   }
 
-  if (!profile || !user) {
+  // Only render dashboard for clients with completed quiz
+  if (!profile || !user || !isClient() || !profile.quiz_completed) {
     return null;
   }
 
