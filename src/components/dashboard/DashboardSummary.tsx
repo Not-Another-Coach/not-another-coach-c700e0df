@@ -274,39 +274,6 @@ export function DashboardSummary({ profile, onTabChange }: DashboardSummaryProps
 
         {/* Right Sidebar */}
         <div className="space-y-4">
-          {/* Quick Actions */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Button 
-                variant="outline" 
-                className="w-full justify-start"
-                onClick={() => navigate('/discovery')}
-              >
-                <Search className="h-4 w-4 mr-2" />
-                Start Swiping
-              </Button>
-              <Button 
-                variant="outline" 
-                className="w-full justify-start"
-                onClick={() => onTabChange('explore')}
-              >
-                <Users className="h-4 w-4 mr-2" />
-                Browse All Trainers
-              </Button>
-              <Button 
-                variant="outline" 
-                className="w-full justify-start"
-                onClick={() => navigate('/saved')}
-              >
-                <Heart className="h-4 w-4 mr-2" />
-                View Saved ({savedTrainerIds.length})
-              </Button>
-            </CardContent>
-          </Card>
-
           {/* Messages Waiting */}
           <Card>
             <CardHeader>
@@ -327,38 +294,6 @@ export function DashboardSummary({ profile, onTabChange }: DashboardSummaryProps
                 >
                   View Messages
                 </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Keep Exploring */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Target className="h-5 w-5" />
-                Keep Exploring
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <p className="text-sm text-muted-foreground">
-                  Discover more trainers who match your goals and preferences.
-                </p>
-                <div className="flex gap-2">
-                  <Button 
-                    size="sm"
-                    onClick={() => onTabChange('explore')}
-                  >
-                    Explore More
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => navigate('/discovery')}
-                  >
-                    Swipe Mode
-                  </Button>
-                </div>
               </div>
             </CardContent>
           </Card>
