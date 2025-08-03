@@ -236,7 +236,7 @@ export function AvailabilityStructured({ formData, updateFormData }: Availabilit
               variant="outline"
               size="sm"
               onClick={() => {
-                const workingWeekSlots = [
+                const weekSlots = [
                   { day: "Monday", startTime: "06:00", endTime: "18:00" },
                   { day: "Tuesday", startTime: "06:00", endTime: "18:00" },
                   { day: "Wednesday", startTime: "06:00", endTime: "18:00" },
@@ -244,12 +244,29 @@ export function AvailabilityStructured({ formData, updateFormData }: Availabilit
                   { day: "Friday", startTime: "06:00", endTime: "18:00" }
                 ].map(slot => ({ ...slot, id: Date.now().toString() + Math.random() }));
                 
-                setTimeSlots(workingWeekSlots);
-                updateFormData({ availability_slots: workingWeekSlots });
+                setTimeSlots(weekSlots);
+                updateFormData({ availability_slots: weekSlots });
               }}
               className="mr-2 mb-2"
             >
-              Monday-Friday 6am-6pm
+              Week (Mon-Fri)
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const weekendSlots = [
+                  { day: "Saturday", startTime: "08:00", endTime: "14:00" },
+                  { day: "Sunday", startTime: "10:00", endTime: "16:00" }
+                ].map(slot => ({ ...slot, id: Date.now().toString() + Math.random() }));
+                
+                setTimeSlots(prev => [...prev, ...weekendSlots]);
+                updateFormData({ availability_slots: [...timeSlots, ...weekendSlots] });
+              }}
+              className="mr-2 mb-2"
+            >
+              Weekend
             </Button>
             
             <Button
@@ -279,6 +296,32 @@ export function AvailabilityStructured({ formData, updateFormData }: Availabilit
           </p>
         </CardContent>
       </Card>
+
+      {/* UK Bank Holidays */}
+      {isUKBased && (
+        <Card>
+          <CardContent className="p-4">
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">UK Bank Holidays</Label>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="work-bank-holidays"
+                  checked={formData.works_bank_holidays || false}
+                  onChange={(e) => updateFormData({ works_bank_holidays: e.target.checked })}
+                  className="rounded border-gray-300"
+                />
+                <Label htmlFor="work-bank-holidays" className="text-sm">
+                  I'm available to work on UK bank holidays
+                </Label>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                This helps clients know if you're available during holiday periods
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

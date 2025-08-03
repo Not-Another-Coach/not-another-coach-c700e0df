@@ -50,17 +50,15 @@ const validationRules: ValidationRules = {
   },
   
   // Step 4: Client Fit Preferences
-  ideal_client_age_range: { 
+  ideal_client_types: { 
     required: true, 
-    message: 'Please select an ideal client age range' 
+    custom: (value) => Array.isArray(value) && value.length > 0,
+    message: 'At least one ideal client type is required' 
   },
-  ideal_client_fitness_level: { 
+  coaching_styles: { 
     required: true, 
-    message: 'Please select an ideal client fitness level' 
-  },
-  training_vibe: { 
-    required: true, 
-    message: 'Please select a training vibe' 
+    custom: (value) => Array.isArray(value) && value.length > 0,
+    message: 'At least one coaching style is required' 
   },
   
   // Step 5: Rates & Discovery Calls
@@ -82,7 +80,7 @@ const stepFieldMapping: Record<number, string[]> = {
   1: ['first_name', 'last_name', 'tagline', 'bio'],
   2: ['qualifications'],
   3: ['specializations', 'training_types', 'location'],
-  4: ['ideal_client_age_range', 'ideal_client_fitness_level', 'training_vibe'],
+  4: ['ideal_client_types', 'coaching_styles'],
   5: ['hourly_rate'],
   6: [], // Testimonials are optional
   7: ['terms_agreed']
