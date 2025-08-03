@@ -81,6 +81,14 @@ export type Database = {
             | Database["public"]["Enums"]["verification_status_enum"]
             | null
           video_checkins: boolean | null
+          ways_of_working_client_expectations: Json | null
+          ways_of_working_completed: boolean | null
+          ways_of_working_first_week: Json | null
+          ways_of_working_onboarding: Json | null
+          ways_of_working_ongoing_structure: Json | null
+          ways_of_working_tracking_tools: Json | null
+          ways_of_working_visibility: string | null
+          ways_of_working_what_i_bring: Json | null
           weekly_programming_only: boolean | null
           works_bank_holidays: boolean | null
           year_certified: number | null
@@ -151,6 +159,14 @@ export type Database = {
             | Database["public"]["Enums"]["verification_status_enum"]
             | null
           video_checkins?: boolean | null
+          ways_of_working_client_expectations?: Json | null
+          ways_of_working_completed?: boolean | null
+          ways_of_working_first_week?: Json | null
+          ways_of_working_onboarding?: Json | null
+          ways_of_working_ongoing_structure?: Json | null
+          ways_of_working_tracking_tools?: Json | null
+          ways_of_working_visibility?: string | null
+          ways_of_working_what_i_bring?: Json | null
           weekly_programming_only?: boolean | null
           works_bank_holidays?: boolean | null
           year_certified?: number | null
@@ -221,6 +237,14 @@ export type Database = {
             | Database["public"]["Enums"]["verification_status_enum"]
             | null
           video_checkins?: boolean | null
+          ways_of_working_client_expectations?: Json | null
+          ways_of_working_completed?: boolean | null
+          ways_of_working_first_week?: Json | null
+          ways_of_working_onboarding?: Json | null
+          ways_of_working_ongoing_structure?: Json | null
+          ways_of_working_tracking_tools?: Json | null
+          ways_of_working_visibility?: string | null
+          ways_of_working_what_i_bring?: Json | null
           weekly_programming_only?: boolean | null
           works_bank_holidays?: boolean | null
           year_certified?: number | null

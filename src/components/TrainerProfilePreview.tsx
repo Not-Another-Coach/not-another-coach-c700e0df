@@ -220,6 +220,109 @@ export const TrainerProfilePreview = ({ formData }: TrainerProfilePreviewProps) 
         </Card>
       )}
 
+      {/* Ways of Working */}
+      {(formData.ways_of_working_onboarding?.length > 0 || 
+        formData.ways_of_working_first_week?.length > 0 ||
+        formData.ways_of_working_ongoing_structure?.length > 0 ||
+        formData.ways_of_working_tracking_tools?.length > 0 ||
+        formData.ways_of_working_client_expectations?.length > 0 ||
+        formData.ways_of_working_what_i_bring?.length > 0) && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              Ways of Working
+              {formData.ways_of_working_visibility === 'post_match' && (
+                <Badge variant="secondary" className="text-xs">Post-Match Only</Badge>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {formData.ways_of_working_onboarding?.length > 0 && (
+              <div>
+                <h5 className="font-medium mb-2">Onboarding Process</h5>
+                <div className="space-y-1">
+                  {formData.ways_of_working_onboarding.map((item: any) => (
+                    <div key={item.id} className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 bg-primary rounded-full"></div>
+                      <span className="text-sm">{item.text}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {formData.ways_of_working_first_week?.length > 0 && (
+              <div>
+                <h5 className="font-medium mb-2">First Week Experience</h5>
+                <div className="space-y-1">
+                  {formData.ways_of_working_first_week.map((item: any) => (
+                    <div key={item.id} className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 bg-primary rounded-full"></div>
+                      <span className="text-sm">{item.text}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {formData.ways_of_working_ongoing_structure?.length > 0 && (
+              <div>
+                <h5 className="font-medium mb-2">Ongoing Structure</h5>
+                <div className="space-y-1">
+                  {formData.ways_of_working_ongoing_structure.map((item: any) => (
+                    <div key={item.id} className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 bg-primary rounded-full"></div>
+                      <span className="text-sm">{item.text}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {formData.ways_of_working_tracking_tools?.length > 0 && (
+              <div>
+                <h5 className="font-medium mb-2">Tracking & Progress Tools</h5>
+                <div className="flex flex-wrap gap-2">
+                  {formData.ways_of_working_tracking_tools.map((item: any) => (
+                    <Badge key={item.id} variant="outline" className="text-xs">
+                      {item.text}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {formData.ways_of_working_client_expectations?.length > 0 && (
+              <div>
+                <h5 className="font-medium mb-2">What I Expect From Clients</h5>
+                <div className="space-y-1">
+                  {formData.ways_of_working_client_expectations.map((item: any) => (
+                    <div key={item.id} className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 bg-amber-500 rounded-full"></div>
+                      <span className="text-sm">{item.text}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {formData.ways_of_working_what_i_bring?.length > 0 && (
+              <div>
+                <h5 className="font-medium mb-2">What I Bring</h5>
+                <div className="space-y-1">
+                  {formData.ways_of_working_what_i_bring.map((item: any) => (
+                    <div key={item.id} className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                      <span className="text-sm">{item.text}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Availability */}
       {formData.availability_slots?.length > 0 && (
         <Card>

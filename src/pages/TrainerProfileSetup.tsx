@@ -15,6 +15,7 @@ import { ExpertiseSection } from "@/components/trainer-setup/ExpertiseSection";
 import { ClientFitSection } from "@/components/trainer-setup/ClientFitSection";
 import { RatesSection } from "@/components/trainer-setup/RatesSection";
 import { TestimonialsSection } from "@/components/trainer-setup/TestimonialsSection";
+import { WaysOfWorkingSection } from "@/components/trainer-setup/WaysOfWorkingSection";
 import { ProfileManagementSection } from "@/components/trainer-setup/ProfileManagementSection";
 
 const TrainerProfileSetup = () => {
@@ -70,12 +71,22 @@ const TrainerProfileSetup = () => {
     // Testimonials & Case Studies
     testimonials: [],
     
+    // Ways of Working
+    ways_of_working_onboarding: [],
+    ways_of_working_first_week: [],
+    ways_of_working_ongoing_structure: [],
+    ways_of_working_tracking_tools: [],
+    ways_of_working_client_expectations: [],
+    ways_of_working_what_i_bring: [],
+    ways_of_working_visibility: "public" as "public" | "post_match",
+    ways_of_working_completed: false,
+    
     // Profile Management
     client_status: "open" as "open" | "waitlist" | "paused",
     terms_agreed: false,
   });
 
-  const totalSteps = 7;
+  const totalSteps = 8;
 
   const stepTitles = [
     "Basic Info",
@@ -84,6 +95,7 @@ const TrainerProfileSetup = () => {
     "Client Fit Preferences",
     "Rates & Discovery Calls",
     "Testimonials & Case Studies",
+    "Ways of Working",
     "Profile Management"
   ];
 
@@ -169,7 +181,7 @@ const TrainerProfileSetup = () => {
           newErrors.hourly_rate = "Hourly rate is required";
         }
         break;
-      case 7:
+      case 8:
         if (!formData.terms_agreed) {
           newErrors.terms_agreed = "You must agree to the terms";
         }
@@ -198,6 +210,8 @@ const TrainerProfileSetup = () => {
       case 6:
         return 'completed'; // Optional step
       case 7:
+        return 'completed'; // Optional step
+      case 8:
         return formData.terms_agreed ? 'completed' : 'not_started';
       default:
         return 'not_started';
@@ -227,7 +241,11 @@ const TrainerProfileSetup = () => {
         'ideal_client_age_range', 'ideal_client_fitness_level', 
         'ideal_client_personality', 'training_vibe', 'calendar_link',
         'next_available_date', 'communication_style', 'video_checkins',
-        'messaging_support', 'weekly_programming_only'
+        'messaging_support', 'weekly_programming_only', 'ways_of_working_onboarding',
+        'ways_of_working_first_week', 'ways_of_working_ongoing_structure',
+        'ways_of_working_tracking_tools', 'ways_of_working_client_expectations',
+        'ways_of_working_what_i_bring', 'ways_of_working_visibility',
+        'ways_of_working_completed'
       ];
       
       // Only include fields that exist in the database schema
@@ -345,6 +363,8 @@ const TrainerProfileSetup = () => {
       case 6:
         return <TestimonialsSection {...commonProps} />;
       case 7:
+        return <WaysOfWorkingSection {...commonProps} />;
+      case 8:
         return <ProfileManagementSection {...commonProps} />;
       default:
         return null;
