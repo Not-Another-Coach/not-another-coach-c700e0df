@@ -254,8 +254,16 @@ const TrainerProfileSetup = () => {
           .filter(([key, value]) => 
             validProfileFields.includes(key) && 
             value !== undefined && 
-            value !== null
+            value !== null &&
+            value !== "" // Filter out empty strings that could cause date parsing errors
           )
+          .map(([key, value]) => {
+            // Convert empty date strings to null
+            if (key === 'next_available_date' && value === '') {
+              return [key, null];
+            }
+            return [key, value];
+          })
       );
       
       console.log('Cleaned form data:', cleanedFormData);

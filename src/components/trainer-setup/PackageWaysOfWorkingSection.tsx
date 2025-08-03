@@ -344,22 +344,7 @@ export function PackageWaysOfWorkingSection({ formData }: PackageWaysOfWorkingSe
   }
 
   return (
-    <div className="space-y-6">
-      {/* Section Introduction */}
-      <Card className="border-primary/20 bg-primary/5">
-        <CardContent className="p-4">
-          <div className="flex items-start gap-3">
-            <Info className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-            <div className="space-y-2">
-              <h3 className="font-medium text-primary">Package-Specific Ways of Working</h3>
-              <p className="text-sm text-muted-foreground">
-                Configure unique workflows for each of your packages. This helps set clear expectations and builds trust with clients.
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
+    <div className="space-y-4">
       {/* Package Selection */}
       <Card>
         <CardContent className="p-4">
@@ -378,7 +363,7 @@ export function PackageWaysOfWorkingSection({ formData }: PackageWaysOfWorkingSe
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{pkg.name}</span>
                       <Badge variant="outline" className="text-xs">
-                        £{pkg.price}/{pkg.duration}
+                        £{pkg.price}
                       </Badge>
                     </div>
                   </SelectItem>
@@ -391,48 +376,61 @@ export function PackageWaysOfWorkingSection({ formData }: PackageWaysOfWorkingSe
 
       {/* Package Workflow Configuration */}
       {activePackageId && currentPackage && (
-        <>
-          {/* Visibility Setting for this package */}
-          <Card>
-            <CardContent className="p-4">
-              <div className="space-y-3">
-                <Label className="text-sm font-medium">
-                  Visibility for "{currentPackage.name}"
-                </Label>
-                <Select
-                  value={currentWorkflow?.visibility || "public"}
-                  onValueChange={(value: 'public' | 'post_match') => updateVisibility(value)}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="public">
-                      <div className="flex items-center gap-2">
-                        <Eye className="h-4 w-4" />
-                        <span>Public - Visible on my profile</span>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="post_match">
-                      <div className="flex items-center gap-2">
-                        <EyeOff className="h-4 w-4" />
-                        <span>Post-Match Only - Visible after matching</span>
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground">
-                  Choose when clients can see this package's working style details
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* All sections for the selected package */}
-          <div className="space-y-6">
-            {Object.keys(sectionTitles).map(section => renderSection(section))}
-          </div>
-        </>
+        <Tabs defaultValue="onboarding" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="onboarding">Getting Started</TabsTrigger>
+            <TabsTrigger value="ongoing">Ongoing Support</TabsTrigger>
+            <TabsTrigger value="expectations">Expectations</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="onboarding" className="space-y-4">
+            {renderSection("onboarding")}
+            {renderSection("first_week")}
+          </TabsContent>
+          
+          <TabsContent value="ongoing" className="space-y-4">
+            {renderSection("ongoing_structure")}
+            {renderSection("tracking_tools")}
+            {renderSection("what_i_bring")}
+          </TabsContent>
+          
+          <TabsContent value="expectations" className="space-y-4">
+            {renderSection("client_expectations")}
+            
+            {/* Visibility Setting */}
+            <Card>
+              <CardContent className="p-4">
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium">
+                    When should clients see these details?
+                  </Label>
+                  <Select
+                    value={currentWorkflow?.visibility || "public"}
+                    onValueChange={(value: 'public' | 'post_match') => updateVisibility(value)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="public">
+                        <div className="flex items-center gap-2">
+                          <Eye className="h-4 w-4" />
+                          <span>Show on my profile</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="post_match">
+                        <div className="flex items-center gap-2">
+                          <EyeOff className="h-4 w-4" />
+                          <span>Show only after matching</span>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       )}
     </div>
   );
