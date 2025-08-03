@@ -62,9 +62,32 @@ export function QualificationsSection({ formData, updateFormData }: Qualificatio
     }
   };
 
-  const handleFileUpload = (files: File[]) => {
-    // TODO: Implement file upload to Supabase storage
-    console.log("Uploading certificate files:", files);
+  const handleFileUpload = async (files: File[]) => {
+    try {
+      const uploadPromises = files.map(async (file) => {
+        return new Promise<{ name: string; url: string; type: string }>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            resolve({
+              name: file.name,
+              url: e.target?.result as string,
+              type: file.type
+            });
+          };
+          reader.readAsDataURL(file);
+        });
+      });
+
+      const uploadedFiles = await Promise.all(uploadPromises);
+      const currentFiles = formData.uploaded_certificates || [];
+      updateFormData({ 
+        uploaded_certificates: [...currentFiles, ...uploadedFiles]
+      });
+      
+      console.log("Certificate files uploaded:", uploadedFiles.map(f => f.name));
+    } catch (error) {
+      console.error("Certificate upload failed:", error);
+    }
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -220,23 +243,40 @@ export function QualificationsSection({ formData, updateFormData }: Qualificatio
         </Card>
         
         {/* Uploaded Certificates */}
-        {formData.proof_upload_urls && formData.proof_upload_urls.length > 0 && (
+        {formData.uploaded_certificates && formData.uploaded_certificates.length > 0 && (
           <div className="space-y-2 mt-4">
             <Label>Uploaded Certificates</Label>
             <div className="space-y-2">
-              {formData.proof_upload_urls.map((url: string, index: number) => (
+              {formData.uploaded_certificates.map((file: any, index: number) => (
                 <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                   <div className="flex items-center gap-3">
                     <FileText className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">Certificate {index + 1}</span>
+                    <span className="text-sm">{file.name}</span>
                     <Badge variant="outline" className="text-xs">
                       <Clock className="h-3 w-3 mr-1" />
                       Pending Review
                     </Badge>
                   </div>
-                  <Button variant="ghost" size="sm">
-                    View
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => window.open(file.url, '_blank')}
+                    >
+                      View
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        const updatedFiles = formData.uploaded_certificates.filter((_: any, i: number) => i !== index);
+                        updateFormData({ uploaded_certificates: updatedFiles });
+                      }}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      Remove
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>

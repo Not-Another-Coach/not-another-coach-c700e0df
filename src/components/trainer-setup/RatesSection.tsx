@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Plus, ExternalLink, DollarSign, PoundSterling } from "lucide-react";
+import { Trash2, Plus, ExternalLink, DollarSign, PoundSterling, Euro } from "lucide-react";
 
 interface RatesSectionProps {
   formData: any;
@@ -22,7 +22,8 @@ interface TrainingPackage {
 }
 
 export function RatesSection({ formData, updateFormData }: RatesSectionProps) {
-  const [currency, setCurrency] = useState<'GBP' | 'USD'>('GBP');
+  const [currency, setCurrency] = useState<'GBP' | 'USD' | 'EUR'>('GBP');
+  const [rateType, setRateType] = useState<'hourly' | 'class' | 'monthly'>('hourly');
   const [packages, setPackages] = useState<TrainingPackage[]>(formData.package_options || []);
   const [newPackage, setNewPackage] = useState({
     name: "",
@@ -78,7 +79,7 @@ export function RatesSection({ formData, updateFormData }: RatesSectionProps) {
       {/* Currency Toggle */}
       <div className="space-y-2">
         <Label>Currency</Label>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
             variant={currency === 'GBP' ? 'default' : 'outline'}
             size="sm"
@@ -97,29 +98,72 @@ export function RatesSection({ formData, updateFormData }: RatesSectionProps) {
             <DollarSign className="h-4 w-4" />
             US Dollar ($)
           </Button>
+          <Button
+            variant={currency === 'EUR' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setCurrency('EUR')}
+            className="flex items-center gap-2"
+          >
+            <Euro className="h-4 w-4" />
+            Euro (€)
+          </Button>
         </div>
       </div>
 
-      {/* Hourly Rate */}
+      {/* Rate Type */}
       <div className="space-y-2">
-        <Label htmlFor="hourly_rate">Hourly Rate *</Label>
+        <Label>Rate Type</Label>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant={rateType === 'hourly' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setRateType('hourly')}
+          >
+            Hourly (1-on-1)
+          </Button>
+          <Button
+            variant={rateType === 'class' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setRateType('class')}
+          >
+            Class Rate
+          </Button>
+          <Button
+            variant={rateType === 'monthly' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setRateType('monthly')}
+          >
+            Monthly Rate
+          </Button>
+        </div>
+      </div>
+
+      {/* Rate Input */}
+      <div className="space-y-2">
+        <Label htmlFor="rate">
+          {rateType === 'hourly' && 'Hourly Rate *'}
+          {rateType === 'class' && 'Class Rate *'}
+          {rateType === 'monthly' && 'Monthly Rate *'}
+        </Label>
         <div className="relative">
           <div className="absolute left-3 top-3 text-muted-foreground">
-            {currency === 'GBP' ? '£' : '$'}
+            {currency === 'GBP' ? '£' : currency === 'USD' ? '$' : '€'}
           </div>
           <Input
-            id="hourly_rate"
+            id="rate"
             type="number"
-            value={formData.hourly_rate || ""}
-            onChange={(e) => updateFormData({ hourly_rate: e.target.value ? parseFloat(e.target.value) : null })}
-            placeholder="50"
+            value={formData[`${rateType}_rate`] || ""}
+            onChange={(e) => updateFormData({ [`${rateType}_rate`]: e.target.value ? parseFloat(e.target.value) : null })}
+            placeholder={rateType === 'hourly' ? '50' : rateType === 'class' ? '25' : '200'}
             className="pl-8"
             min="0"
             step="0.01"
           />
         </div>
         <p className="text-xs text-muted-foreground">
-          Your standard rate for 1-on-1 personal training sessions
+          {rateType === 'hourly' && 'Your standard rate for 1-on-1 personal training sessions'}
+          {rateType === 'class' && 'Your rate per class session (group training)'}
+          {rateType === 'monthly' && 'Your monthly rate for ongoing training programs'}
         </p>
       </div>
 
@@ -136,7 +180,7 @@ export function RatesSection({ formData, updateFormData }: RatesSectionProps) {
                       <div className="flex items-center gap-2 mb-2">
                         <h4 className="font-medium">{pkg.name}</h4>
                         <Badge variant="secondary">
-                          {pkg.currency === 'GBP' ? '£' : '$'}{pkg.price}
+                          {pkg.currency === 'GBP' ? '£' : pkg.currency === 'USD' ? '$' : '€'}{pkg.price}
                         </Badge>
                       </div>
                       <p className="text-sm text-muted-foreground">{pkg.description}</p>
@@ -177,7 +221,7 @@ export function RatesSection({ formData, updateFormData }: RatesSectionProps) {
             <Label htmlFor="package_price">Price</Label>
             <div className="relative">
               <div className="absolute left-3 top-3 text-muted-foreground">
-                {currency === 'GBP' ? '£' : '$'}
+                {currency === 'GBP' ? '£' : currency === 'USD' ? '$' : '€'}
               </div>
               <Input
                 id="package_price"

@@ -4,7 +4,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, Heart, Target, Zap } from "lucide-react";
+import { useState } from "react";
+import { Users, Heart, Target, Zap, Sparkles } from "lucide-react";
+import { AIDescriptionHelper } from "./AIDescriptionHelper";
+import { AvailabilityStructured } from "./AvailabilityStructured";
 
 interface ClientFitSectionProps {
   formData: any;
@@ -75,6 +78,7 @@ const coachingStyles = [
 ];
 
 export function ClientFitSection({ formData, updateFormData }: ClientFitSectionProps) {
+  const [showAIHelper, setShowAIHelper] = useState(false);
   const handleClientTypeToggle = (clientType: string) => {
     const current = formData.ideal_client_types || [];
     const updated = current.includes(clientType)
@@ -153,7 +157,30 @@ export function ClientFitSection({ formData, updateFormData }: ClientFitSectionP
 
       {/* Custom Ideal Client Description */}
       <div className="space-y-2">
-        <Label htmlFor="ideal_client_personality">Describe Your Ideal Client (Optional)</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="ideal_client_personality">Describe Your Ideal Client (Optional)</Label>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowAIHelper(!showAIHelper)}
+          >
+            <Sparkles className="h-4 w-4 mr-2" />
+            AI Helper
+          </Button>
+        </div>
+
+        {showAIHelper && (
+          <AIDescriptionHelper
+            selectedClientTypes={formData.ideal_client_types || []}
+            selectedCoachingStyles={formData.coaching_styles || []}
+            currentDescription={formData.ideal_client_personality || ""}
+            onSuggestionSelect={(suggestion) => {
+              updateFormData({ ideal_client_personality: suggestion });
+              setShowAIHelper(false);
+            }}
+          />
+        )}
+        
         <Textarea
           id="ideal_client_personality"
           value={formData.ideal_client_personality}
@@ -252,30 +279,10 @@ export function ClientFitSection({ formData, updateFormData }: ClientFitSectionP
           </p>
         </div>
 
-        {/* Simple availability input for now */}
-        <Textarea
-          value={formData.availability_description || ""}
-          onChange={(e) => updateFormData({ availability_description: e.target.value })}
-          placeholder="e.g., Monday-Friday 6am-8pm, Weekends 8am-2pm. Flexible for the right client!"
-          rows={3}
-          className="resize-none"
+        <AvailabilityStructured 
+          formData={formData}
+          updateFormData={updateFormData}
         />
-
-        <Card className="border-blue-200 bg-blue-50">
-          <CardContent className="p-4">
-            <div className="flex items-start gap-3">
-              <Users className="h-5 w-5 text-blue-600 mt-0.5" />
-              <div>
-                <p className="text-sm font-medium text-blue-900">
-                  Availability Integration
-                </p>
-                <p className="text-xs text-blue-700 mt-1">
-                  In future updates, you'll be able to connect your calendar for automatic availability management and booking.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

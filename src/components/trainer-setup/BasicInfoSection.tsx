@@ -16,9 +16,21 @@ export function BasicInfoSection({ formData, updateFormData }: BasicInfoSectionP
   const [dragOver, setDragOver] = useState(false);
   const [bioAIHelperOpen, setBioAIHelperOpen] = useState(false);
 
-  const handleFileUpload = (file: File) => {
-    // TODO: Implement file upload to Supabase storage
-    console.log("Uploading file:", file);
+  const handleFileUpload = async (file: File) => {
+    try {
+      // Create a file reader to get base64 data URL for preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        updateFormData({ profile_photo_url: result });
+      };
+      reader.readAsDataURL(file);
+      
+      // TODO: In production, upload to Supabase storage
+      console.log("File uploaded:", file.name);
+    } catch (error) {
+      console.error("Upload failed:", error);
+    }
   };
 
   const handleDrop = (e: React.DragEvent) => {
