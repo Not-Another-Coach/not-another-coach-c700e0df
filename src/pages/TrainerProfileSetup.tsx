@@ -3,10 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
+import { useProfileStepValidation } from "@/hooks/useProfileStepValidation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, Save, Eye, CheckCircle } from "lucide-react";
+import { ArrowLeft, ArrowRight, Save, Eye, CheckCircle, AlertCircle } from "lucide-react";
 
 // Import form sections
 import { BasicInfoSection } from "@/components/trainer-setup/BasicInfoSection";
@@ -22,6 +23,7 @@ const TrainerProfileSetup = () => {
   const { profile, loading: profileLoading, isTrainer, updateProfile } = useProfile();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { validateStep, getStepCompletion, isStepValid, errors, clearFieldError } = useProfileStepValidation();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -133,12 +135,22 @@ const TrainerProfileSetup = () => {
   };
 
   const handleNext = async () => {
+    // Validate current step before proceeding
+    if (!validateStep(formData, currentStep)) {
+      toast({
+        title: "Validation Error",
+        description: "Please complete all required fields before proceeding.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     await handleSave(false);
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
     } else {
       // Final save and mark profile as completed
-      await updateProfile({ ...formData });
+      await updateProfile(formData);
       toast({
         title: "Profile completed!",
         description: "Your trainer profile is now live and visible to clients.",
@@ -168,6 +180,8 @@ const TrainerProfileSetup = () => {
     const commonProps = {
       formData,
       updateFormData,
+      errors,
+      clearFieldError,
     };
 
     switch (currentStep) {
@@ -246,27 +260,47 @@ const TrainerProfileSetup = () => {
           <div className="flex justify-between mt-4">
             {stepTitles.map((title, index) => {
               const stepNumber = index + 1;
-              const isCompleted = stepNumber < currentStep;
+              const completion = getStepCompletion(formData, stepNumber);
               const isCurrent = stepNumber === currentStep;
+              
+              let statusColor = 'text-muted-foreground';
+              let borderColor = 'border-muted-foreground';
+              let bgColor = 'bg-transparent';
+              let showIcon = false;
+              let isPartial = false;
+
+              if (completion === 'completed') {
+                statusColor = 'text-green-600';
+                borderColor = 'border-green-600';
+                bgColor = 'bg-green-600';
+                showIcon = true;
+              } else if (completion === 'partial') {
+                statusColor = 'text-amber-600';
+                borderColor = 'border-amber-600';
+                bgColor = 'bg-amber-600';
+                showIcon = true;
+                isPartial = true;
+              } else if (isCurrent) {
+                statusColor = 'text-primary';
+                borderColor = 'border-primary';
+                bgColor = 'bg-primary';
+              }
               
               return (
                 <div
                   key={stepNumber}
-                  className={`flex flex-col items-center text-xs ${
-                    isCurrent ? 'text-primary' : isCompleted ? 'text-green-600' : 'text-muted-foreground'
-                  }`}
+                  className={`flex flex-col items-center text-xs cursor-pointer ${statusColor}`}
+                  onClick={() => setCurrentStep(stepNumber)}
                 >
                   <div
-                    className={`w-8 h-8 rounded-full border-2 flex items-center justify-center mb-1 ${
-                      isCurrent 
-                        ? 'border-primary bg-primary text-primary-foreground' 
-                        : isCompleted 
-                        ? 'border-green-600 bg-green-600 text-white'
-                        : 'border-muted-foreground'
+                    className={`w-8 h-8 rounded-full border-2 flex items-center justify-center mb-1 ${borderColor} ${
+                      completion === 'completed' || completion === 'partial' || isCurrent 
+                        ? `${bgColor} text-white`
+                        : 'bg-transparent'
                     }`}
                   >
-                    {isCompleted ? (
-                      <CheckCircle className="h-4 w-4" />
+                    {showIcon ? (
+                      isPartial ? <AlertCircle className="h-4 w-4" /> : <CheckCircle className="h-4 w-4" />
                     ) : (
                       stepNumber
                     )}
@@ -305,7 +339,11 @@ const TrainerProfileSetup = () => {
             Previous
           </Button>
           
-          <Button onClick={handleNext}>
+          <Button 
+            onClick={handleNext}
+            disabled={!isStepValid(formData, currentStep)}
+            className={!isStepValid(formData, currentStep) ? 'opacity-50 cursor-not-allowed' : ''}
+          >
             {currentStep === totalSteps ? (
               <>
                 <CheckCircle className="h-4 w-4 mr-2" />

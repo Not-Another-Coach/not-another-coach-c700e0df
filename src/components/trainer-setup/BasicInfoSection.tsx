@@ -10,9 +10,11 @@ import { Upload, Camera, Sparkles, User } from "lucide-react";
 interface BasicInfoSectionProps {
   formData: any;
   updateFormData: (updates: any) => void;
+  errors?: { [key: string]: string };
+  clearFieldError?: (field: string) => void;
 }
 
-export function BasicInfoSection({ formData, updateFormData }: BasicInfoSectionProps) {
+export function BasicInfoSection({ formData, updateFormData, errors = {}, clearFieldError }: BasicInfoSectionProps) {
   const [dragOver, setDragOver] = useState(false);
   const [bioAIHelperOpen, setBioAIHelperOpen] = useState(false);
 
@@ -70,20 +72,32 @@ export function BasicInfoSection({ formData, updateFormData }: BasicInfoSectionP
           <Input
             id="first_name"
             value={formData.first_name}
-            onChange={(e) => updateFormData({ first_name: e.target.value })}
+            onChange={(e) => {
+              updateFormData({ first_name: e.target.value });
+              if (errors.first_name && clearFieldError) clearFieldError('first_name');
+            }}
             placeholder="Enter your first name"
-            className="capitalize"
+            className={`capitalize ${errors.first_name ? 'border-red-500' : ''}`}
           />
+          {errors.first_name && (
+            <p className="text-sm text-red-500 mt-1">{errors.first_name}</p>
+          )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="last_name">Last Name *</Label>
           <Input
             id="last_name"
             value={formData.last_name}
-            onChange={(e) => updateFormData({ last_name: e.target.value })}
+            onChange={(e) => {
+              updateFormData({ last_name: e.target.value });
+              if (errors.last_name && clearFieldError) clearFieldError('last_name');
+            }}
             placeholder="Enter your last name"
-            className="capitalize"
+            className={`capitalize ${errors.last_name ? 'border-red-500' : ''}`}
           />
+          {errors.last_name && (
+            <p className="text-sm text-red-500 mt-1">{errors.last_name}</p>
+          )}
         </div>
       </div>
 
@@ -158,12 +172,19 @@ export function BasicInfoSection({ formData, updateFormData }: BasicInfoSectionP
           <Input
             id="tagline"
             value={formData.tagline}
-            onChange={(e) => updateFormData({ tagline: e.target.value })}
+            onChange={(e) => {
+              updateFormData({ tagline: e.target.value });
+              if (errors.tagline && clearFieldError) clearFieldError('tagline');
+            }}
             placeholder="Helping busy women lift confidently at home"
-            maxLength={80}
+            maxLength={100}
+            className={errors.tagline ? 'border-red-500' : ''}
           />
+          {errors.tagline && (
+            <p className="text-sm text-red-500 mt-1">{errors.tagline}</p>
+          )}
           <div className="absolute right-3 top-3 text-xs text-muted-foreground">
-            {formData.tagline.length}/80
+            {(formData.tagline || '').length}/100
           </div>
         </div>
         <p className="text-xs text-muted-foreground">
@@ -208,11 +229,17 @@ export function BasicInfoSection({ formData, updateFormData }: BasicInfoSectionP
         <Textarea
           id="bio"
           value={formData.bio}
-          onChange={(e) => updateFormData({ bio: e.target.value })}
+          onChange={(e) => {
+            updateFormData({ bio: e.target.value });
+            if (errors.bio && clearFieldError) clearFieldError('bio');
+          }}
           placeholder="Tell potential clients about your background, experience, and approach to training..."
           rows={6}
-          className="resize-none"
+          className={`resize-none ${errors.bio ? 'border-red-500' : ''}`}
         />
+        {errors.bio && (
+          <p className="text-sm text-red-500 mt-1">{errors.bio}</p>
+        )}
         <p className="text-xs text-muted-foreground">
           Share your story, qualifications, and what makes you unique as a trainer
         </p>
