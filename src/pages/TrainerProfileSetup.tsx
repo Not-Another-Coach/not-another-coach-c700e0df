@@ -55,6 +55,7 @@ const TrainerProfileSetup = () => {
     
     // Rates & Discovery Calls
     hourly_rate: null as number | null,
+    class_rate: null as number | null,
     package_options: [],
     free_discovery_call: false,
     calendar_link: "",
@@ -210,7 +211,7 @@ const TrainerProfileSetup = () => {
       // Whitelist of valid columns that exist in the profiles table
       const validProfileFields = [
         'first_name', 'last_name', 'bio', 'profile_photo_url', 'location',
-        'specializations', 'qualifications', 'tagline', 'hourly_rate', 
+        'specializations', 'qualifications', 'tagline', 'hourly_rate', 'class_rate',
         'training_types', 'terms_agreed', 'profile_setup_completed',
         'client_status', 'user_type', 'is_verified', 'rating', 'total_ratings',
         'fitness_goals', 'quiz_completed', 'quiz_answers', 'quiz_completed_at',

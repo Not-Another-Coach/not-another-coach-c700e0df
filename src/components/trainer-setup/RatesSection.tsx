@@ -141,27 +141,60 @@ export function RatesSection({ formData, updateFormData }: RatesSectionProps) {
         </div>
       </div>
 
-      {/* Single Session Rate */}
-      <div className="space-y-2">
-        <Label htmlFor="hourly_rate">Single Session Rate *</Label>
-        <div className="relative">
-          <div className="absolute left-3 top-3 text-muted-foreground">
-            {currency === 'GBP' ? '£' : currency === 'USD' ? '$' : '€'}
-          </div>
-          <Input
-            id="hourly_rate"
-            type="number"
-            value={formData.hourly_rate || ""}
-            onChange={(e) => updateFormData({ hourly_rate: e.target.value ? parseFloat(e.target.value) : null })}
-            placeholder="50"
-            className="pl-8"
-            min="0"
-            step="0.01"
-          />
+      {/* Session Rates */}
+      <div className="space-y-4">
+        <div>
+          <Label>Session Rates</Label>
+          <p className="text-sm text-muted-foreground">
+            Set your rates for different types of training sessions
+          </p>
         </div>
-        <p className="text-xs text-muted-foreground">
-          Your standard rate for 1-on-1 personal training sessions
-        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="hourly_rate">1-on-1 Personal Training *</Label>
+            <div className="relative">
+              <div className="absolute left-3 top-3 text-muted-foreground">
+                {currency === 'GBP' ? '£' : currency === 'USD' ? '$' : '€'}
+              </div>
+              <Input
+                id="hourly_rate"
+                type="number"
+                value={formData.hourly_rate || ""}
+                onChange={(e) => updateFormData({ hourly_rate: e.target.value ? parseFloat(e.target.value) : null })}
+                placeholder="50"
+                className="pl-8"
+                min="0"
+                step="0.01"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Your rate per hour for 1-on-1 sessions
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="class_rate">Group/Class Rate</Label>
+            <div className="relative">
+              <div className="absolute left-3 top-3 text-muted-foreground">
+                {currency === 'GBP' ? '£' : currency === 'USD' ? '$' : '€'}
+              </div>
+              <Input
+                id="class_rate"
+                type="number"
+                value={formData.class_rate || ""}
+                onChange={(e) => updateFormData({ class_rate: e.target.value ? parseFloat(e.target.value) : null })}
+                placeholder="25"
+                className="pl-8"
+                min="0"
+                step="0.01"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Your rate per person for group sessions
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Tiered Package Pricing */}
@@ -172,12 +205,9 @@ export function RatesSection({ formData, updateFormData }: RatesSectionProps) {
             Create packages like "10 PT sessions for £400" to offer better value for clients
           </p>
         </div>
-      </div>
 
-      {/* Existing Packages */}
-      {packages.length > 0 && (
-        <div className="space-y-4">
-          <Label>Training Packages</Label>
+        {/* Existing Packages */}
+        {packages.length > 0 && (
           <div className="space-y-3">
             {packages.map((pkg) => (
               <Card key={pkg.id}>
@@ -208,14 +238,16 @@ export function RatesSection({ formData, updateFormData }: RatesSectionProps) {
               </Card>
             ))}
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Add New Package */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Add Training Package</CardTitle>
-        </CardHeader>
+        {/* Add New Package */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Add Training Package</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Create tiered pricing packages to offer better value
+            </p>
+          </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="package_name">Package Name</Label>
@@ -337,6 +369,7 @@ export function RatesSection({ formData, updateFormData }: RatesSectionProps) {
           </Button>
         </CardContent>
       </Card>
+      </div>
 
       {/* Discovery Call */}
       <div className="space-y-4">
