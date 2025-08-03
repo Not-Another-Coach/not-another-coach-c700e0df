@@ -1,9 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
-import { useProfileStepValidation } from "@/hooks/useProfileStepValidation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -23,10 +22,12 @@ const TrainerProfileSetup = () => {
   const { profile, loading: profileLoading, isTrainer, updateProfile } = useProfile();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { validateStep, getStepCompletion, isStepValid, errors, clearFieldError } = useProfileStepValidation();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const hasInitialized = useRef(false);
+
   const [formData, setFormData] = useState({
     // Basic Info
     first_name: "",
@@ -91,53 +92,138 @@ const TrainerProfileSetup = () => {
     }
   }, [user, loading, navigate]);
 
-  // Populate form data from profile (only using existing fields) - with stability check
+  // Populate form data from profile - prevent infinite loops with a ref
   useEffect(() => {
-    if (profile && profile.id) {
-      setFormData(prev => {
-        // Check if we already have this profile's data loaded
-        const hasProfileData = prev.first_name && prev.last_name;
-        if (hasProfileData) {
-          return prev; // Don't update if we already have data
-        }
+    if (profile && profile.id && !hasInitialized.current) {
+      hasInitialized.current = true;
+      setFormData({
+        // Basic Info
+        first_name: profile.first_name || "",
+        last_name: profile.last_name || "",
+        tagline: profile.tagline || "",
+        bio: profile.bio || "",
+        profile_photo_url: profile.profile_photo_url || "",
         
-        return {
-          ...prev,
-          first_name: profile.first_name || "",
-          last_name: profile.last_name || "",
-          tagline: profile.tagline || "",
-          bio: profile.bio || "",
-          profile_photo_url: profile.profile_photo_url || "",
-          qualifications: profile.qualifications || [],
-          specializations: profile.specializations || [],
-          training_types: profile.training_types || [],
-          location: profile.location || "",
-          hourly_rate: profile.hourly_rate,
-          client_status: profile.client_status || "open",
-          terms_agreed: profile.terms_agreed || false,
-          // Note: Other fields will be stored as form-only data until database is updated
-        };
+        // Qualifications
+        qualifications: profile.qualifications || [],
+        
+        // Expertise & Services
+        specializations: profile.specializations || [],
+        training_types: profile.training_types || [],
+        location: profile.location || "",
+        
+        // Client Fit Preferences
+        ideal_client_age_range: "",
+        ideal_client_fitness_level: "",
+        ideal_client_personality: "",
+        training_vibe: "",
+        max_clients: null,
+        availability_schedule: {},
+        
+        // Rates & Discovery Calls
+        hourly_rate: profile.hourly_rate,
+        package_options: [],
+        free_discovery_call: false,
+        calendar_link: "",
+        
+        // Testimonials & Case Studies
+        testimonials: [],
+        
+        // Profile Management
+        client_status: profile.client_status || "open",
+        terms_agreed: profile.terms_agreed || false,
       });
     }
-  }, [profile?.id]); // Only depend on profile ID to avoid re-renders on profile updates
+  }, [profile?.id]);
 
   const updateFormData = useCallback((updates: Partial<typeof formData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
-  }, []); // Remove formData dependency to prevent recreating the function
+  }, []);
+
+  const clearFieldError = useCallback((fieldName: string) => {
+    setErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors[fieldName];
+      return newErrors;
+    });
+  }, []);
+
+  // Simple validation functions
+  const validateStep = useCallback((step: number): boolean => {
+    const newErrors: Record<string, string> = {};
+    
+    switch (step) {
+      case 1:
+        if (!formData.first_name) newErrors.first_name = "First name is required";
+        if (!formData.last_name) newErrors.last_name = "Last name is required";
+        if (!formData.tagline || formData.tagline.length < 10) newErrors.tagline = "Tagline is required (10+ characters)";
+        if (!formData.bio || formData.bio.length < 50) newErrors.bio = "Bio is required (50+ characters)";
+        break;
+      case 2:
+        if (!formData.qualifications || formData.qualifications.length === 0) {
+          newErrors.qualifications = "At least one qualification is required";
+        }
+        break;
+      case 3:
+        if (!formData.specializations || formData.specializations.length === 0) {
+          newErrors.specializations = "At least one specialization is required";
+        }
+        if (!formData.training_types || formData.training_types.length === 0) {
+          newErrors.training_types = "At least one training type is required";
+        }
+        break;
+      case 5:
+        if (!formData.hourly_rate || formData.hourly_rate <= 0) {
+          newErrors.hourly_rate = "Hourly rate is required";
+        }
+        break;
+      case 7:
+        if (!formData.terms_agreed) {
+          newErrors.terms_agreed = "You must agree to the terms";
+        }
+        break;
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }, [formData]);
+
+  const isStepValid = useCallback((step: number): boolean => {
+    return validateStep(step);
+  }, [validateStep]);
+
+  const getStepCompletion = useCallback((step: number): 'completed' | 'partial' | 'not_started' => {
+    switch (step) {
+      case 1:
+        const hasBasicInfo = formData.first_name && formData.last_name && formData.tagline && formData.bio;
+        return hasBasicInfo ? 'completed' : 'not_started';
+      case 2:
+        return formData.qualifications?.length > 0 ? 'completed' : 'not_started';
+      case 3:
+        const hasExpertise = formData.specializations?.length > 0 && formData.training_types?.length > 0;
+        return hasExpertise ? 'completed' : 'not_started';
+      case 4:
+        return 'completed'; // Optional step
+      case 5:
+        return formData.hourly_rate && formData.hourly_rate > 0 ? 'completed' : 'not_started';
+      case 6:
+        return 'completed'; // Optional step
+      case 7:
+        return formData.terms_agreed ? 'completed' : 'not_started';
+      default:
+        return 'not_started';
+    }
+  }, [formData]);
 
   const handleSave = async (showToast: boolean = true) => {
     try {
       setIsLoading(true);
-      console.log('handleSave called with data:', formData);
       
-      // Clean the form data to remove any undefined or null fields that might cause issues
       const cleanedFormData = Object.fromEntries(
         Object.entries(formData).filter(([_, value]) => value !== undefined && value !== null)
       );
       
-      console.log('Cleaned form data:', cleanedFormData);
       const result = await updateProfile(cleanedFormData);
-      console.log('updateProfile result:', result);
       
       if (result.error) {
         throw new Error(result.error.message || 'Failed to save profile');
@@ -164,8 +250,7 @@ const TrainerProfileSetup = () => {
   };
 
   const handleNext = async () => {
-    // Validate current step before proceeding
-    if (!validateStep(formData, currentStep)) {
+    if (!validateStep(currentStep)) {
       toast({
         title: "Validation Error",
         description: "Please complete all required fields before proceeding.",
@@ -176,19 +261,13 @@ const TrainerProfileSetup = () => {
 
     try {
       setIsLoading(true);
-      console.log('Saving step data for step:', currentStep);
-      console.log('Form data being saved:', formData);
       
-      const result = await handleSave(false);
-      console.log('Save result:', result);
+      await handleSave(false);
       
       if (currentStep < totalSteps) {
-        console.log('Moving to next step:', currentStep + 1);
         setCurrentStep(currentStep + 1);
       } else {
-        // Final save and mark profile as completed
-        const finalResult = await updateProfile(formData);
-        console.log('Final save result:', finalResult);
+        await updateProfile(formData);
         toast({
           title: "Profile completed!",
           description: "Your trainer profile is now live and visible to clients.",
@@ -224,14 +303,14 @@ const TrainerProfileSetup = () => {
     return Math.round((currentStep / totalSteps) * 100);
   };
 
-  const renderCurrentSection = useCallback(() => {
-    const commonProps = {
-      formData,
-      updateFormData,
-      errors,
-      clearFieldError,
-    };
+  const commonProps = useMemo(() => ({
+    formData,
+    updateFormData,
+    errors,
+    clearFieldError,
+  }), [formData, updateFormData, errors, clearFieldError]);
 
+  const renderCurrentSection = () => {
     switch (currentStep) {
       case 1:
         return <BasicInfoSection {...commonProps} />;
@@ -250,7 +329,7 @@ const TrainerProfileSetup = () => {
       default:
         return null;
     }
-  }, [formData, updateFormData, errors, clearFieldError, currentStep]);
+  };
 
   if (loading || profileLoading) {
     return (
@@ -308,7 +387,7 @@ const TrainerProfileSetup = () => {
           <div className="flex justify-between mt-4">
             {stepTitles.map((title, index) => {
               const stepNumber = index + 1;
-              const completion = getStepCompletion(formData, stepNumber);
+              const completion = getStepCompletion(stepNumber);
               const isCurrent = stepNumber === currentStep;
               
               let statusColor = 'text-muted-foreground';
@@ -389,8 +468,8 @@ const TrainerProfileSetup = () => {
           
           <Button 
             onClick={handleNext}
-            disabled={!isStepValid(formData, currentStep) || isLoading}
-            className={(!isStepValid(formData, currentStep) || isLoading) ? 'opacity-50 cursor-not-allowed' : ''}
+            disabled={!isStepValid(currentStep) || isLoading}
+            className={(!isStepValid(currentStep) || isLoading) ? 'opacity-50 cursor-not-allowed' : ''}
           >
             {isLoading ? (
               <>
