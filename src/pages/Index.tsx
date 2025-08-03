@@ -29,6 +29,7 @@ const Index = () => {
 
   // Redirect to auth if not logged in
   useEffect(() => {
+    console.log('Checking auth redirect:', { loading, user: !!user });
     if (!loading && !user) {
       navigate('/auth');
     }
@@ -41,10 +42,25 @@ const Index = () => {
     }
   }, [user, profile, loading, profileLoading, isClient, navigate]);
 
-  // Redirect trainers to their dashboard
+  // Redirect trainers to their dashboard or profile setup
   useEffect(() => {
+    console.log('Checking trainer redirect:', { 
+      loading, 
+      profileLoading, 
+      user: !!user, 
+      profile: !!profile, 
+      userType: profile?.user_type,
+      isTrainer: isTrainer() 
+    });
+    
     if (!loading && !profileLoading && user && profile && isTrainer()) {
-      navigate('/trainer/dashboard');
+      console.log('Redirecting trainer to dashboard');
+      // Check if profile setup is needed
+      if (!profile.terms_agreed || !(profile as any).profile_setup_completed) {
+        navigate('/trainer/profile-setup');
+      } else {
+        navigate('/trainer/dashboard');
+      }
     }
   }, [user, profile, loading, profileLoading, isTrainer, navigate]);
 

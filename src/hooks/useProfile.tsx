@@ -25,6 +25,7 @@ interface Profile {
   hourly_rate: number | null;
   training_types: string[] | null;
   terms_agreed: boolean | null;
+  profile_setup_completed: boolean | null;
   client_status: 'open' | 'waitlist' | 'paused' | null;
 }
 

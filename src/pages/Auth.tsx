@@ -72,7 +72,8 @@ export default function Auth() {
         title: "Welcome back!",
         description: "You have successfully logged in.",
       });
-      navigate('/');
+      // Don't navigate immediately - let the useEffect in Index.tsx handle the redirect
+      // based on user profile/role
     }
     setIsLoading(false);
   };
@@ -133,7 +134,8 @@ export default function Auth() {
         title: "Account created!",
         description: "Please check your email to confirm your account.",
       });
-      navigate('/');
+      // Don't navigate immediately - let the useEffect in Index.tsx handle the redirect
+      // based on user profile/role after confirmation
     }
     setIsLoading(false);
   };
