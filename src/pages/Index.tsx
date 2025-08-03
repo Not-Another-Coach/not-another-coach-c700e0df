@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useTrainerMatching } from "@/hooks/useTrainerMatching";
@@ -26,6 +26,7 @@ const Index = () => {
   const { savedTrainerIds } = useSavedTrainers();
   const { progress: journeyProgress, updateProgress, advanceToStage } = useJourneyProgress();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Redirect to auth if not logged in
   useEffect(() => {
@@ -42,7 +43,7 @@ const Index = () => {
     }
   }, [user, profile, loading, profileLoading, isClient, navigate]);
 
-  // Redirect trainers to their dashboard or profile setup
+  // Redirect trainers to their dashboard or profile setup (only from Index page)
   useEffect(() => {
     console.log('Checking trainer redirect:', { 
       loading, 
@@ -50,10 +51,12 @@ const Index = () => {
       user: !!user, 
       profile: !!profile, 
       userType: profile?.user_type,
-      isTrainer: isTrainer() 
+      isTrainer: isTrainer(),
+      currentPath: location.pathname
     });
     
-    if (!loading && !profileLoading && user && profile && isTrainer()) {
+    // Only redirect trainers if they're currently on the index page
+    if (!loading && !profileLoading && user && profile && isTrainer() && location.pathname === '/') {
       console.log('Redirecting trainer to dashboard');
       // Check if profile setup is needed
       if (!profile.terms_agreed || !(profile as any).profile_setup_completed) {
@@ -62,7 +65,7 @@ const Index = () => {
         navigate('/trainer/dashboard');
       }
     }
-  }, [user, profile, loading, profileLoading, isTrainer, navigate]);
+  }, [user, profile, loading, profileLoading, isTrainer, navigate, location.pathname]);
 
   // Sample trainer data
   const [trainers] = useState<Trainer[]>([
