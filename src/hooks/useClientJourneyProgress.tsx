@@ -8,7 +8,8 @@ export type ClientJourneyStage =
   | 'discovery_call_booked'
   | 'coach_chosen'
   | 'onboarding_in_progress'
-  | 'on_your_journey';
+  | 'on_your_journey'
+  | 'goal_achieved';
 
 export interface ClientJourneyStep {
   id: string;
@@ -65,6 +66,11 @@ const CLIENT_JOURNEY_STAGES: Record<ClientJourneyStage, {
     title: 'On Your Journey',
     description: 'Training active',
     tooltip: 'Congratulations! Your fitness journey with your coach is now active.'
+  },
+  goal_achieved: {
+    title: 'Goal Achieved',
+    description: 'Success reached',
+    tooltip: 'Amazing! You\'ve achieved your fitness goals with your coach.'
   }
 };
 
@@ -176,6 +182,9 @@ export const useClientJourneyProgress = () => {
           hasData = isOnboarding;
         } else if (stageKey === 'on_your_journey') {
           hasData = isActiveClient;
+        } else if (stageKey === 'goal_achieved') {
+          // Goal achieved is manually set by coach/admin
+          hasData = false;
         }
         
         // Determine icon based on completion and data state
@@ -222,6 +231,9 @@ export const useClientJourneyProgress = () => {
           break;
         case 'on_your_journey':
           nextAction = 'Continue your fitness journey with your coach';
+          break;
+        case 'goal_achieved':
+          nextAction = 'Congratulations! Consider renewal, new goals, or sharing your success story.';
           break;
       }
 
