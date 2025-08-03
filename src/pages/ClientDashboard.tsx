@@ -11,8 +11,9 @@ import { DashboardSummary } from "@/components/dashboard/DashboardSummary";
 import { EditPreferencesSection } from "@/components/dashboard/EditPreferencesSection";
 import { ExploreMatchSection } from "@/components/dashboard/ExploreMatchSection";
 import { MessagesSection } from "@/components/dashboard/MessagesSection";
+import { ProfileViewEdit } from "@/components/dashboard/ProfileViewEdit";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
-import { Heart, Settings, Search, MessageCircle, Menu } from "lucide-react";
+import { Heart, Settings, Search, MessageCircle, Menu, User } from "lucide-react";
 
 export default function ClientDashboard() {
   const { user, signOut, loading } = useAuth();
@@ -97,10 +98,14 @@ export default function ClientDashboard() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           {/* Tab Navigation */}
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            <TabsList className="grid w-full sm:w-auto grid-cols-4 lg:grid-cols-4">
+            <TabsList className="grid w-full sm:w-auto grid-cols-5 lg:grid-cols-5">
               <TabsTrigger value="summary" className="flex items-center gap-2">
                 <Menu className="h-4 w-4" />
                 <span className="hidden sm:inline">Dashboard</span>
+              </TabsTrigger>
+              <TabsTrigger value="profile" className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                <span className="hidden sm:inline">Profile</span>
               </TabsTrigger>
               <TabsTrigger value="preferences" className="flex items-center gap-2">
                 <Settings className="h-4 w-4" />
@@ -135,6 +140,12 @@ export default function ClientDashboard() {
             <DashboardSummary 
               profile={profile}
               onTabChange={setActiveTab}
+            />
+          </TabsContent>
+
+          <TabsContent value="profile" className="space-y-6">
+            <ProfileViewEdit 
+              profile={profile}
             />
           </TabsContent>
 

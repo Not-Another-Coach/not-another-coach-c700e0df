@@ -110,11 +110,16 @@ export type Database = {
           availability_schedule: Json | null
           availability_slots: Json | null
           before_after_photos: Json | null
+          billing_address: Json | null
           bio: string | null
           budget_flexibility: string | null
           budget_range_max: number | null
           budget_range_min: number | null
           calendar_link: string | null
+          card_expiry_month: number | null
+          card_expiry_year: number | null
+          card_last_four: string | null
+          card_type: string | null
           certifying_body: string | null
           client_personality_type: string[] | null
           client_status:
@@ -156,6 +161,7 @@ export type Database = {
           open_to_virtual_coaching: boolean | null
           package_inclusions: Json | null
           package_options: Json | null
+          phone: string | null
           preferred_coaching_style: string[] | null
           preferred_package_type: string | null
           preferred_time_slots: string[] | null
@@ -212,11 +218,16 @@ export type Database = {
           availability_schedule?: Json | null
           availability_slots?: Json | null
           before_after_photos?: Json | null
+          billing_address?: Json | null
           bio?: string | null
           budget_flexibility?: string | null
           budget_range_max?: number | null
           budget_range_min?: number | null
           calendar_link?: string | null
+          card_expiry_month?: number | null
+          card_expiry_year?: number | null
+          card_last_four?: string | null
+          card_type?: string | null
           certifying_body?: string | null
           client_personality_type?: string[] | null
           client_status?:
@@ -258,6 +269,7 @@ export type Database = {
           open_to_virtual_coaching?: boolean | null
           package_inclusions?: Json | null
           package_options?: Json | null
+          phone?: string | null
           preferred_coaching_style?: string[] | null
           preferred_package_type?: string | null
           preferred_time_slots?: string[] | null
@@ -314,11 +326,16 @@ export type Database = {
           availability_schedule?: Json | null
           availability_slots?: Json | null
           before_after_photos?: Json | null
+          billing_address?: Json | null
           bio?: string | null
           budget_flexibility?: string | null
           budget_range_max?: number | null
           budget_range_min?: number | null
           calendar_link?: string | null
+          card_expiry_month?: number | null
+          card_expiry_year?: number | null
+          card_last_four?: string | null
+          card_type?: string | null
           certifying_body?: string | null
           client_personality_type?: string[] | null
           client_status?:
@@ -360,6 +377,7 @@ export type Database = {
           open_to_virtual_coaching?: boolean | null
           package_inclusions?: Json | null
           package_options?: Json | null
+          phone?: string | null
           preferred_coaching_style?: string[] | null
           preferred_package_type?: string | null
           preferred_time_slots?: string[] | null
