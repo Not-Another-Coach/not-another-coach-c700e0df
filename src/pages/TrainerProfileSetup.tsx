@@ -200,8 +200,25 @@ const TrainerProfileSetup = () => {
     try {
       setIsLoading(true);
       
+      // Remove any fields that don't exist in the database schema
+      const {
+        ideal_client_age_range,
+        ideal_client_fitness_level,
+        ideal_client_personality,
+        training_vibe,
+        max_clients,
+        availability_schedule,
+        package_options,
+        free_discovery_call,
+        calendar_link,
+        testimonials,
+        delivery_format,
+        ...validFormData
+      } = formData;
+      
+      // Only include fields that exist in the profiles table
       const cleanedFormData = Object.fromEntries(
-        Object.entries(formData).filter(([_, value]) => value !== undefined && value !== null)
+        Object.entries(validFormData).filter(([_, value]) => value !== undefined && value !== null)
       );
       
       const result = await updateProfile(cleanedFormData);
