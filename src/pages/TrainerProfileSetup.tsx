@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -113,9 +113,9 @@ const TrainerProfileSetup = () => {
     }
   }, [profile]);
 
-  const updateFormData = (updates: Partial<typeof formData>) => {
+  const updateFormData = useCallback((updates: Partial<typeof formData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
-  };
+  }, []);
 
   const handleSave = async (showToast: boolean = true) => {
     try {
