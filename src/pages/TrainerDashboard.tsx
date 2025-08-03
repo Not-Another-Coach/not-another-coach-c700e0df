@@ -28,13 +28,16 @@ const TrainerDashboard = () => {
 
   // Sync availability status with profile data
   useEffect(() => {
+    console.log('Profile client_status:', profile?.client_status);
     if (profile?.client_status) {
       const statusMap = {
         'open': 'accepting' as const,
         'waitlist': 'waitlist' as const,
         'paused': 'unavailable' as const
       };
-      setAvailabilityStatus(statusMap[profile.client_status] || 'accepting');
+      const newStatus = statusMap[profile.client_status] || 'accepting';
+      console.log('Setting availability status to:', newStatus);
+      setAvailabilityStatus(newStatus);
     }
   }, [profile?.client_status]);
 
@@ -84,6 +87,7 @@ const TrainerDashboard = () => {
   };
 
   const handleStatusChange = async (status: 'accepting' | 'waitlist' | 'unavailable') => {
+    console.log('Changing status from', availabilityStatus, 'to', status);
     setAvailabilityStatus(status);
     
     // Map status to client_status enum
@@ -93,7 +97,8 @@ const TrainerDashboard = () => {
       'unavailable': 'paused' as const
     };
     
-    await updateProfile({ client_status: clientStatusMap[status] });
+    const result = await updateProfile({ client_status: clientStatusMap[status] });
+    console.log('Status update result:', result);
   };
 
   if (loading || profileLoading) {

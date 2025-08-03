@@ -251,13 +251,16 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
             </div>
 
             {newTestimonial.showImages && (
-              <ImageUploadSection
-                onImageUpload={handleImageUpload}
-                existingImages={{
-                  before: newTestimonial.beforeImage,
-                  after: newTestimonial.afterImage
-                }}
-              />
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Client Before/After Images</Label>
+                <ImageUploadSection
+                  onImageUpload={handleImageUpload}
+                  existingImages={{
+                    before: newTestimonial.beforeImage,
+                    after: newTestimonial.afterImage
+                  }}
+                />
+              </div>
             )}
           </div>
 

@@ -120,19 +120,29 @@ const TrainerProfileSetup = () => {
   const handleSave = async (showToast: boolean = true) => {
     try {
       setIsLoading(true);
-      await updateProfile(formData);
+      console.log('handleSave called with data:', formData);
+      const result = await updateProfile(formData);
+      console.log('updateProfile result:', result);
+      
+      if (result.error) {
+        throw new Error(result.error.message || 'Failed to save profile');
+      }
+      
       if (showToast) {
         toast({
           title: "Profile saved",
           description: "Your changes have been saved successfully.",
         });
       }
+      return result;
     } catch (error) {
+      console.error('Error in handleSave:', error);
       toast({
         title: "Error",
         description: "Failed to save profile. Please try again.",
         variant: "destructive",
       });
+      throw error;
     } finally {
       setIsLoading(false);
     }
@@ -151,16 +161,19 @@ const TrainerProfileSetup = () => {
 
     try {
       setIsLoading(true);
-      console.log('Saving step data:', formData);
+      console.log('Saving step data for step:', currentStep);
+      console.log('Form data being saved:', formData);
       
-      await handleSave(false);
+      const result = await handleSave(false);
+      console.log('Save result:', result);
       
       if (currentStep < totalSteps) {
         console.log('Moving to next step:', currentStep + 1);
         setCurrentStep(currentStep + 1);
       } else {
         // Final save and mark profile as completed
-        await updateProfile(formData);
+        const finalResult = await updateProfile(formData);
+        console.log('Final save result:', finalResult);
         toast({
           title: "Profile completed!",
           description: "Your trainer profile is now live and visible to clients.",

@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           admin_verification_notes: string | null
           availability_schedule: Json | null
+          availability_slots: Json | null
           before_after_photos: Json | null
           bio: string | null
           calendar_link: string | null
@@ -25,6 +26,7 @@ export type Database = {
           client_status:
             | Database["public"]["Enums"]["client_status_enum"]
             | null
+          coaching_styles: string[] | null
           created_at: string
           first_name: string | null
           fitness_goals: string[] | null
@@ -34,7 +36,9 @@ export type Database = {
           ideal_client_age_range: string | null
           ideal_client_fitness_level: string | null
           ideal_client_personality: string | null
+          ideal_client_types: string[] | null
           internal_tags: string[] | null
+          is_uk_based: boolean | null
           is_verified: boolean | null
           journey_progress: Json | null
           journey_stage: string | null
@@ -70,11 +74,13 @@ export type Database = {
           verification_status:
             | Database["public"]["Enums"]["verification_status_enum"]
             | null
+          works_bank_holidays: boolean | null
           year_certified: number | null
         }
         Insert: {
           admin_verification_notes?: string | null
           availability_schedule?: Json | null
+          availability_slots?: Json | null
           before_after_photos?: Json | null
           bio?: string | null
           calendar_link?: string | null
@@ -82,6 +88,7 @@ export type Database = {
           client_status?:
             | Database["public"]["Enums"]["client_status_enum"]
             | null
+          coaching_styles?: string[] | null
           created_at?: string
           first_name?: string | null
           fitness_goals?: string[] | null
@@ -91,7 +98,9 @@ export type Database = {
           ideal_client_age_range?: string | null
           ideal_client_fitness_level?: string | null
           ideal_client_personality?: string | null
+          ideal_client_types?: string[] | null
           internal_tags?: string[] | null
+          is_uk_based?: boolean | null
           is_verified?: boolean | null
           journey_progress?: Json | null
           journey_stage?: string | null
@@ -127,11 +136,13 @@ export type Database = {
           verification_status?:
             | Database["public"]["Enums"]["verification_status_enum"]
             | null
+          works_bank_holidays?: boolean | null
           year_certified?: number | null
         }
         Update: {
           admin_verification_notes?: string | null
           availability_schedule?: Json | null
+          availability_slots?: Json | null
           before_after_photos?: Json | null
           bio?: string | null
           calendar_link?: string | null
@@ -139,6 +150,7 @@ export type Database = {
           client_status?:
             | Database["public"]["Enums"]["client_status_enum"]
             | null
+          coaching_styles?: string[] | null
           created_at?: string
           first_name?: string | null
           fitness_goals?: string[] | null
@@ -148,7 +160,9 @@ export type Database = {
           ideal_client_age_range?: string | null
           ideal_client_fitness_level?: string | null
           ideal_client_personality?: string | null
+          ideal_client_types?: string[] | null
           internal_tags?: string[] | null
+          is_uk_based?: boolean | null
           is_verified?: boolean | null
           journey_progress?: Json | null
           journey_stage?: string | null
@@ -184,6 +198,7 @@ export type Database = {
           verification_status?:
             | Database["public"]["Enums"]["verification_status_enum"]
             | null
+          works_bank_holidays?: boolean | null
           year_certified?: number | null
         }
         Relationships: []
