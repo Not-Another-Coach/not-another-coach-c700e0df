@@ -91,27 +91,36 @@ const TrainerProfileSetup = () => {
     }
   }, [user, loading, navigate]);
 
-  // Populate form data from profile (only using existing fields)
+  // Populate form data from profile (only using existing fields) - with stability check
   useEffect(() => {
-    if (profile) {
-      setFormData(prev => ({
-        ...prev,
-        first_name: profile.first_name || "",
-        last_name: profile.last_name || "",
-        tagline: profile.tagline || "",
-        bio: profile.bio || "",
-        profile_photo_url: profile.profile_photo_url || "",
-        qualifications: profile.qualifications || [],
-        specializations: profile.specializations || [],
-        training_types: profile.training_types || [],
-        location: profile.location || "",
-        hourly_rate: profile.hourly_rate,
-        client_status: profile.client_status || "open",
-        terms_agreed: profile.terms_agreed || false,
-        // Note: Other fields will be stored as form-only data until database is updated
-      }));
+    if (profile && profile.id) {
+      // Only update if we haven't already populated from this profile
+      setFormData(prev => {
+        // Check if we already have this profile's data
+        if (prev.first_name === (profile.first_name || "") && 
+            prev.last_name === (profile.last_name || "")) {
+          return prev; // No update needed
+        }
+        
+        return {
+          ...prev,
+          first_name: profile.first_name || "",
+          last_name: profile.last_name || "",
+          tagline: profile.tagline || "",
+          bio: profile.bio || "",
+          profile_photo_url: profile.profile_photo_url || "",
+          qualifications: profile.qualifications || [],
+          specializations: profile.specializations || [],
+          training_types: profile.training_types || [],
+          location: profile.location || "",
+          hourly_rate: profile.hourly_rate,
+          client_status: profile.client_status || "open",
+          terms_agreed: profile.terms_agreed || false,
+          // Note: Other fields will be stored as form-only data until database is updated
+        };
+      });
     }
-  }, [profile]);
+  }, [profile?.id]);
 
   const updateFormData = useCallback((updates: Partial<typeof formData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
