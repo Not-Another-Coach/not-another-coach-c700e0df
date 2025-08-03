@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { Upload, Plus, Trash2, Image, Quote, Star } from "lucide-react";
+import { ImageUploadSection } from "./ImageUploadSection";
 
 interface TestimonialsSectionProps {
   formData: any;
@@ -93,9 +94,11 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
     updateFormData({ testimonials: updatedTestimonials });
   };
 
-  const handleImageUpload = (type: 'before' | 'after') => {
-    // TODO: Implement image upload to Supabase storage
-    console.log(`Uploading ${type} image`);
+  const handleImageUpload = (imageUrl: string, type: 'before' | 'after') => {
+    setNewTestimonial(prev => ({
+      ...prev,
+      [type === 'before' ? 'beforeImage' : 'afterImage']: imageUrl
+    }));
   };
 
   return (
@@ -240,37 +243,13 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
             </div>
 
             {newTestimonial.showImages && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card className="border-dashed">
-                  <CardContent className="p-4 text-center">
-                    <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                    <p className="text-sm font-medium mb-2">Before Image</p>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleImageUpload('before')}
-                    >
-                      <Image className="h-4 w-4 mr-2" />
-                      Upload
-                    </Button>
-                  </CardContent>
-                </Card>
-                
-                <Card className="border-dashed">
-                  <CardContent className="p-4 text-center">
-                    <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                    <p className="text-sm font-medium mb-2">After Image</p>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleImageUpload('after')}
-                    >
-                      <Image className="h-4 w-4 mr-2" />
-                      Upload
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
+              <ImageUploadSection
+                onImageUpload={handleImageUpload}
+                existingImages={{
+                  before: newTestimonial.beforeImage,
+                  after: newTestimonial.afterImage
+                }}
+              />
             )}
           </div>
 

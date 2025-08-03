@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { Bell, Eye, CheckCircle, AlertTriangle, Users, Clock, Pause } from "lucide-react";
+import { TrainerProfilePreview } from "@/components/TrainerProfilePreview";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface ProfileManagementSectionProps {
   formData: any;
@@ -184,10 +186,20 @@ export function ProfileManagementSection({ formData, updateFormData }: ProfileMa
             <p className="text-sm text-blue-700 mb-3">
               See how your profile appears to potential clients before going live.
             </p>
-            <Button variant="outline" size="sm" className="border-blue-300 text-blue-700 hover:bg-blue-100">
-              <Eye className="h-4 w-4 mr-2" />
-              Preview Profile
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="border-blue-300 text-blue-700 hover:bg-blue-100">
+                  <Eye className="h-4 w-4 mr-2" />
+                  Preview Profile
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Profile Preview</DialogTitle>
+                </DialogHeader>
+                <TrainerProfilePreview formData={formData} />
+              </DialogContent>
+            </Dialog>
           </CardContent>
         </Card>
       </div>

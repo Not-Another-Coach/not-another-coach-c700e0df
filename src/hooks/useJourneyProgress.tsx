@@ -18,6 +18,10 @@ export interface JourneyStep {
   description: string;
   completed: boolean;
   current?: boolean;
+  metadata?: {
+    isPartial?: boolean;
+    [key: string]: any;
+  };
 }
 
 export interface JourneyProgress {

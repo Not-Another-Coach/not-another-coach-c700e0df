@@ -23,12 +23,16 @@ interface TrainingPackage {
 
 export function RatesSection({ formData, updateFormData }: RatesSectionProps) {
   const [currency, setCurrency] = useState<'GBP' | 'USD' | 'EUR'>('GBP');
-  const [rateType, setRateType] = useState<'hourly' | 'class' | 'monthly'>('hourly');
+  const [selectedRateTypes, setSelectedRateTypes] = useState<('hourly' | 'class' | 'monthly')[]>(
+    formData.selected_rate_types || ['hourly']
+  );
   const [packages, setPackages] = useState<TrainingPackage[]>(formData.package_options || []);
   const [newPackage, setNewPackage] = useState({
     name: "",
     price: "",
-    description: ""
+    description: "",
+    terms: "",
+    inclusions: [] as string[]
   });
 
   const addPackage = () => {
@@ -48,7 +52,9 @@ export function RatesSection({ formData, updateFormData }: RatesSectionProps) {
       setNewPackage({
         name: "",
         price: "",
-        description: ""
+        description: "",
+        terms: "",
+        inclusions: []
       });
     }
   };
@@ -73,6 +79,27 @@ export function RatesSection({ formData, updateFormData }: RatesSectionProps) {
       return false;
     }
   };
+
+  const toggleRateType = (rateType: 'hourly' | 'class' | 'monthly') => {
+    const updatedTypes = selectedRateTypes.includes(rateType)
+      ? selectedRateTypes.filter(type => type !== rateType)
+      : [...selectedRateTypes, rateType];
+    
+    setSelectedRateTypes(updatedTypes);
+    updateFormData({ selected_rate_types: updatedTypes });
+  };
+
+  const standardInclusions = [
+    "Personalized workout plan",
+    "Nutrition guidance",
+    "Progress tracking",
+    "WhatsApp support",
+    "Weekly check-ins",
+    "Goal setting session",
+    "Equipment recommendations",
+    "Form corrections",
+    "Motivation and accountability"
+  ];
 
   return (
     <div className="space-y-6">
@@ -110,62 +137,67 @@ export function RatesSection({ formData, updateFormData }: RatesSectionProps) {
         </div>
       </div>
 
-      {/* Rate Type */}
+      {/* Rate Types - Multiple Selection */}
       <div className="space-y-2">
-        <Label>Rate Type</Label>
+        <Label>Rate Types (Select all that apply)</Label>
         <div className="flex flex-wrap items-center gap-2">
           <Button
-            variant={rateType === 'hourly' ? 'default' : 'outline'}
+            variant={selectedRateTypes.includes('hourly') ? 'default' : 'outline'}
             size="sm"
-            onClick={() => setRateType('hourly')}
+            onClick={() => toggleRateType('hourly')}
           >
             Hourly (1-on-1)
           </Button>
           <Button
-            variant={rateType === 'class' ? 'default' : 'outline'}
+            variant={selectedRateTypes.includes('class') ? 'default' : 'outline'}
             size="sm"
-            onClick={() => setRateType('class')}
+            onClick={() => toggleRateType('class')}
           >
             Class Rate
           </Button>
           <Button
-            variant={rateType === 'monthly' ? 'default' : 'outline'}
+            variant={selectedRateTypes.includes('monthly') ? 'default' : 'outline'}
             size="sm"
-            onClick={() => setRateType('monthly')}
+            onClick={() => toggleRateType('monthly')}
           >
             Monthly Rate
           </Button>
         </div>
-      </div>
-
-      {/* Rate Input */}
-      <div className="space-y-2">
-        <Label htmlFor="rate">
-          {rateType === 'hourly' && 'Hourly Rate *'}
-          {rateType === 'class' && 'Class Rate *'}
-          {rateType === 'monthly' && 'Monthly Rate *'}
-        </Label>
-        <div className="relative">
-          <div className="absolute left-3 top-3 text-muted-foreground">
-            {currency === 'GBP' ? '£' : currency === 'USD' ? '$' : '€'}
-          </div>
-          <Input
-            id="rate"
-            type="number"
-            value={formData[`${rateType}_rate`] || ""}
-            onChange={(e) => updateFormData({ [`${rateType}_rate`]: e.target.value ? parseFloat(e.target.value) : null })}
-            placeholder={rateType === 'hourly' ? '50' : rateType === 'class' ? '25' : '200'}
-            className="pl-8"
-            min="0"
-            step="0.01"
-          />
-        </div>
         <p className="text-xs text-muted-foreground">
-          {rateType === 'hourly' && 'Your standard rate for 1-on-1 personal training sessions'}
-          {rateType === 'class' && 'Your rate per class session (group training)'}
-          {rateType === 'monthly' && 'Your monthly rate for ongoing training programs'}
+          Select all rate types you offer to give clients flexibility
         </p>
       </div>
+
+      {/* Rate Inputs - Dynamic based on selected types */}
+      {selectedRateTypes.map(rateType => (
+        <div key={rateType} className="space-y-2">
+          <Label htmlFor={`${rateType}_rate`}>
+            {rateType === 'hourly' && 'Hourly Rate *'}
+            {rateType === 'class' && 'Class Rate *'}
+            {rateType === 'monthly' && 'Monthly Rate *'}
+          </Label>
+          <div className="relative">
+            <div className="absolute left-3 top-3 text-muted-foreground">
+              {currency === 'GBP' ? '£' : currency === 'USD' ? '$' : '€'}
+            </div>
+            <Input
+              id={`${rateType}_rate`}
+              type="number"
+              value={formData[`${rateType}_rate`] || ""}
+              onChange={(e) => updateFormData({ [`${rateType}_rate`]: e.target.value ? parseFloat(e.target.value) : null })}
+              placeholder={rateType === 'hourly' ? '50' : rateType === 'class' ? '25' : '200'}
+              className="pl-8"
+              min="0"
+              step="0.01"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {rateType === 'hourly' && 'Your standard rate for 1-on-1 personal training sessions'}
+            {rateType === 'class' && 'Your rate per class session (group training)'}
+            {rateType === 'monthly' && 'Your monthly rate for ongoing training programs'}
+          </p>
+        </div>
+      ))}
 
       {/* Existing Packages */}
       {packages.length > 0 && (
@@ -245,6 +277,60 @@ export function RatesSection({ formData, updateFormData }: RatesSectionProps) {
               placeholder="Describe what's included in this package..."
               rows={3}
               className="resize-none"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="package_terms">Package Terms</Label>
+            <Input
+              id="package_terms"
+              value={newPackage.terms}
+              onChange={(e) => setNewPackage({ ...newPackage, terms: e.target.value })}
+              placeholder="e.g., Minimum 12 weeks, 1 week notice required"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Package Inclusions</Label>
+            <div className="grid grid-cols-2 gap-2 mb-2">
+              {standardInclusions.map((inclusion) => (
+                <label key={inclusion} className="flex items-center space-x-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={newPackage.inclusions.includes(inclusion)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setNewPackage({ 
+                          ...newPackage, 
+                          inclusions: [...newPackage.inclusions, inclusion] 
+                        });
+                      } else {
+                        setNewPackage({ 
+                          ...newPackage, 
+                          inclusions: newPackage.inclusions.filter(inc => inc !== inclusion) 
+                        });
+                      }
+                    }}
+                    className="rounded"
+                  />
+                  <span>{inclusion}</span>
+                </label>
+              ))}
+            </div>
+            <Input
+              placeholder="Add custom inclusion..."
+              onKeyPress={(e) => {
+                if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                  const customInclusion = e.currentTarget.value.trim();
+                  if (!newPackage.inclusions.includes(customInclusion)) {
+                    setNewPackage({ 
+                      ...newPackage, 
+                      inclusions: [...newPackage.inclusions, customInclusion] 
+                    });
+                  }
+                  e.currentTarget.value = '';
+                }
+              }}
             />
           </div>
           

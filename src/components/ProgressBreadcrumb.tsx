@@ -2,8 +2,9 @@ import React from 'react';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { CheckCircle, Circle, ArrowRight, Target, Sparkles } from 'lucide-react';
+import { CheckCircle, Circle, ArrowRight, Target, Sparkles, AlertCircle } from 'lucide-react';
 import { JourneyProgress } from '@/hooks/useJourneyProgress';
+import { StepCompletionIcon } from '@/components/StepCompletionIcon';
 import { cn } from '@/lib/utils';
 
 interface ProgressBreadcrumbProps {
@@ -99,29 +100,35 @@ export const ProgressBreadcrumb = ({
         <Progress value={progress.percentage} className="h-3 mb-4" />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-4">
-          {progress.steps.map((step, index) => (
-            <div
-              key={step.id}
-              className={cn(
-                "flex items-center gap-2 p-2 rounded-lg transition-colors",
-                step.completed 
-                  ? "bg-green-50 text-green-800 border border-green-200" 
-                  : step.current 
-                  ? "bg-primary/10 text-primary border border-primary/20" 
-                  : "bg-muted/50 text-muted-foreground"
-              )}
-            >
-              {step.completed ? (
-                <CheckCircle className="h-4 w-4 text-green-600" />
-              ) : (
-                <Circle className={cn(
-                  "h-4 w-4",
-                  step.current ? "text-primary" : "text-muted-foreground"
-                )} />
-              )}
-              <span className="text-sm font-medium">{step.title}</span>
-            </div>
-          ))}
+          {progress.steps.map((step, index) => {
+            // Check if step is partially completed
+            const isPartial = step.metadata?.isPartial || false;
+            
+            return (
+              <div
+                key={step.id}
+                className={cn(
+                  "flex items-center gap-2 p-2 rounded-lg transition-colors",
+                  step.completed 
+                    ? "bg-green-50 text-green-800 border border-green-200" 
+                    : isPartial
+                    ? "bg-amber-50 text-amber-800 border border-amber-200"
+                    : step.current 
+                    ? "bg-primary/10 text-primary border border-primary/20" 
+                    : "bg-muted/50 text-muted-foreground"
+                )}
+              >
+                <StepCompletionIcon 
+                  isCompleted={step.completed}
+                  isPartial={isPartial}
+                  className={cn(
+                    step.current && !step.completed && !isPartial ? "text-primary" : ""
+                  )}
+                />
+                <span className="text-sm font-medium">{step.title}</span>
+              </div>
+            );
+          })}
         </div>
 
         {showNextAction && progress.nextAction && (

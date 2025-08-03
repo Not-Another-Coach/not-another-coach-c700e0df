@@ -117,20 +117,42 @@ export function AvailabilityStructured({ formData, updateFormData }: Availabilit
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {daySlots.map(slot => (
-                        <Badge
-                          key={slot.id}
-                          variant="outline"
-                          className="flex items-center gap-2 px-3 py-1"
-                        >
-                          <Clock className="h-3 w-3" />
-                          <span>{slot.startTime} - {slot.endTime}</span>
-                          <button
-                            onClick={() => removeTimeSlot(slot.id)}
-                            className="ml-1 text-muted-foreground hover:text-foreground"
+                        <div key={slot.id} className="flex items-center gap-2">
+                          <Badge
+                            variant="outline"
+                            className="flex items-center gap-2 px-3 py-1"
                           >
-                            ×
-                          </button>
-                        </Badge>
+                            <Clock className="h-3 w-3" />
+                            <span>{slot.startTime} - {slot.endTime}</span>
+                            <button
+                              onClick={() => removeTimeSlot(slot.id)}
+                              className="ml-1 text-muted-foreground hover:text-foreground"
+                            >
+                              ×
+                            </button>
+                          </Badge>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              const clonedSlot: TimeSlot = {
+                                id: Date.now().toString(),
+                                day: slot.day,
+                                startTime: slot.startTime,
+                                endTime: slot.endTime
+                              };
+                              setNewSlot({
+                                day: clonedSlot.day,
+                                startTime: clonedSlot.startTime,
+                                endTime: clonedSlot.endTime
+                              });
+                            }}
+                            className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+                            title="Clone this time slot"
+                          >
+                            📋
+                          </Button>
+                        </div>
                       ))}
                     </div>
                   </CardContent>

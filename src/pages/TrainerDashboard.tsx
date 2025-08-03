@@ -26,6 +26,18 @@ const TrainerDashboard = () => {
   const navigate = useNavigate();
   const [availabilityStatus, setAvailabilityStatus] = useState<'accepting' | 'waitlist' | 'unavailable'>('accepting');
 
+  // Sync availability status with profile data
+  useEffect(() => {
+    if (profile?.client_status) {
+      const statusMap = {
+        'open': 'accepting' as const,
+        'waitlist': 'waitlist' as const,
+        'paused': 'unavailable' as const
+      };
+      setAvailabilityStatus(statusMap[profile.client_status] || 'accepting');
+    }
+  }, [profile?.client_status]);
+
   // Redirect if not trainer
   useEffect(() => {
     if (!loading && !profileLoading && user && profile && !isTrainer()) {
@@ -54,15 +66,18 @@ const TrainerDashboard = () => {
       profile.tagline,
       profile.location,
       profile.bio,
-      profile.hourly_rate,
       profile.training_types?.length,
       profile.specializations?.length,
-      profile.terms_agreed
+      profile.qualifications?.length,
+      profile.terms_agreed,
+      // Check if at least one rate is set (hourly_rate is the main one in DB)
+      profile.hourly_rate
     ];
     
-    const completedFields = requiredFields.filter(field => 
-      field !== null && field !== undefined && field !== '' && field !== 0
-    ).length;
+    const completedFields = requiredFields.filter(field => {
+      if (typeof field === 'boolean') return field;
+      return field !== null && field !== undefined && field !== '' && field !== 0;
+    }).length;
     
     return Math.round((completedFields / requiredFields.length) * 100);
   };

@@ -147,6 +147,16 @@ export const ProfileDropdown = ({ profile, onSignOut }: ProfileDropdownProps) =>
           </DropdownMenuItem>
         )}
         
+        {profile.user_type === 'trainer' && (
+          <DropdownMenuItem 
+            className="cursor-pointer"
+            onClick={() => navigate('/trainer/profile-setup')}
+          >
+            <Edit className="mr-2 h-4 w-4" />
+            <span>Change Profile</span>
+          </DropdownMenuItem>
+        )}
+        
         <DropdownMenuItem 
           className="cursor-pointer"
           onClick={handleResetPassword}
