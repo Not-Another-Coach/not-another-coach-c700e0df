@@ -16,76 +16,160 @@ export type Database = {
     Tables: {
       profiles: {
         Row: {
+          availability_schedule: Json | null
           bio: string | null
+          calendar_link: string | null
+          certifying_body: string | null
+          client_status:
+            | Database["public"]["Enums"]["client_status_enum"]
+            | null
           created_at: string
           first_name: string | null
           fitness_goals: string[] | null
+          free_discovery_call: boolean | null
+          hourly_rate: number | null
           id: string
+          ideal_client_age_range: string | null
+          ideal_client_fitness_level: string | null
+          ideal_client_personality: string | null
+          internal_tags: string[] | null
           is_verified: boolean | null
           journey_progress: Json | null
           journey_stage: string | null
           last_name: string | null
           location: string | null
+          max_clients: number | null
           onboarding_step: number | null
+          package_options: Json | null
           profile_photo_url: string | null
+          profile_setup_completed: boolean | null
+          profile_setup_step: number | null
+          proof_upload_urls: string[] | null
           qualifications: string[] | null
           quiz_answers: Json | null
           quiz_completed: boolean | null
           quiz_completed_at: string | null
           rating: number | null
+          special_credentials: string[] | null
           specializations: string[] | null
+          tagline: string | null
+          terms_agreed: boolean | null
+          testimonials: Json | null
           total_onboarding_steps: number | null
+          total_profile_setup_steps: number | null
           total_ratings: number | null
+          training_types: string[] | null
+          training_vibe: string | null
           updated_at: string
           user_type: Database["public"]["Enums"]["user_type"]
+          verification_status:
+            | Database["public"]["Enums"]["verification_status_enum"]
+            | null
+          year_certified: number | null
         }
         Insert: {
+          availability_schedule?: Json | null
           bio?: string | null
+          calendar_link?: string | null
+          certifying_body?: string | null
+          client_status?:
+            | Database["public"]["Enums"]["client_status_enum"]
+            | null
           created_at?: string
           first_name?: string | null
           fitness_goals?: string[] | null
+          free_discovery_call?: boolean | null
+          hourly_rate?: number | null
           id: string
+          ideal_client_age_range?: string | null
+          ideal_client_fitness_level?: string | null
+          ideal_client_personality?: string | null
+          internal_tags?: string[] | null
           is_verified?: boolean | null
           journey_progress?: Json | null
           journey_stage?: string | null
           last_name?: string | null
           location?: string | null
+          max_clients?: number | null
           onboarding_step?: number | null
+          package_options?: Json | null
           profile_photo_url?: string | null
+          profile_setup_completed?: boolean | null
+          profile_setup_step?: number | null
+          proof_upload_urls?: string[] | null
           qualifications?: string[] | null
           quiz_answers?: Json | null
           quiz_completed?: boolean | null
           quiz_completed_at?: string | null
           rating?: number | null
+          special_credentials?: string[] | null
           specializations?: string[] | null
+          tagline?: string | null
+          terms_agreed?: boolean | null
+          testimonials?: Json | null
           total_onboarding_steps?: number | null
+          total_profile_setup_steps?: number | null
           total_ratings?: number | null
+          training_types?: string[] | null
+          training_vibe?: string | null
           updated_at?: string
           user_type: Database["public"]["Enums"]["user_type"]
+          verification_status?:
+            | Database["public"]["Enums"]["verification_status_enum"]
+            | null
+          year_certified?: number | null
         }
         Update: {
+          availability_schedule?: Json | null
           bio?: string | null
+          calendar_link?: string | null
+          certifying_body?: string | null
+          client_status?:
+            | Database["public"]["Enums"]["client_status_enum"]
+            | null
           created_at?: string
           first_name?: string | null
           fitness_goals?: string[] | null
+          free_discovery_call?: boolean | null
+          hourly_rate?: number | null
           id?: string
+          ideal_client_age_range?: string | null
+          ideal_client_fitness_level?: string | null
+          ideal_client_personality?: string | null
+          internal_tags?: string[] | null
           is_verified?: boolean | null
           journey_progress?: Json | null
           journey_stage?: string | null
           last_name?: string | null
           location?: string | null
+          max_clients?: number | null
           onboarding_step?: number | null
+          package_options?: Json | null
           profile_photo_url?: string | null
+          profile_setup_completed?: boolean | null
+          profile_setup_step?: number | null
+          proof_upload_urls?: string[] | null
           qualifications?: string[] | null
           quiz_answers?: Json | null
           quiz_completed?: boolean | null
           quiz_completed_at?: string | null
           rating?: number | null
+          special_credentials?: string[] | null
           specializations?: string[] | null
+          tagline?: string | null
+          terms_agreed?: boolean | null
+          testimonials?: Json | null
           total_onboarding_steps?: number | null
+          total_profile_setup_steps?: number | null
           total_ratings?: number | null
+          training_types?: string[] | null
+          training_vibe?: string | null
           updated_at?: string
           user_type?: Database["public"]["Enums"]["user_type"]
+          verification_status?:
+            | Database["public"]["Enums"]["verification_status_enum"]
+            | null
+          year_certified?: number | null
         }
         Relationships: []
       }
@@ -145,10 +229,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_current_user_type: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
     }
     Enums: {
+      client_status_enum: "open" | "waitlist" | "paused"
       user_type: "client" | "trainer" | "admin"
+      verification_status_enum: "pending" | "verified" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -276,7 +365,9 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      client_status_enum: ["open", "waitlist", "paused"],
       user_type: ["client", "trainer", "admin"],
+      verification_status_enum: ["pending", "verified", "rejected"],
     },
   },
 } as const
