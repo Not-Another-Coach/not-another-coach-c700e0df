@@ -26,6 +26,7 @@ const TrainerProfileSetup = () => {
   const { validateStep, getStepCompletion, isStepValid, errors, clearFieldError } = useProfileStepValidation();
 
   const [currentStep, setCurrentStep] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     // Basic Info
     first_name: "",
@@ -118,6 +119,7 @@ const TrainerProfileSetup = () => {
 
   const handleSave = async (showToast: boolean = true) => {
     try {
+      setIsLoading(true);
       await updateProfile(formData);
       if (showToast) {
         toast({
@@ -131,6 +133,8 @@ const TrainerProfileSetup = () => {
         description: "Failed to save profile. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -145,17 +149,33 @@ const TrainerProfileSetup = () => {
       return;
     }
 
-    await handleSave(false);
-    if (currentStep < totalSteps) {
-      setCurrentStep(currentStep + 1);
-    } else {
-      // Final save and mark profile as completed
-      await updateProfile(formData);
+    try {
+      setIsLoading(true);
+      console.log('Saving step data:', formData);
+      
+      await handleSave(false);
+      
+      if (currentStep < totalSteps) {
+        console.log('Moving to next step:', currentStep + 1);
+        setCurrentStep(currentStep + 1);
+      } else {
+        // Final save and mark profile as completed
+        await updateProfile(formData);
+        toast({
+          title: "Profile completed!",
+          description: "Your trainer profile is now live and visible to clients.",
+        });
+        navigate('/trainer/dashboard');
+      }
+    } catch (error) {
+      console.error('Error in handleNext:', error);
       toast({
-        title: "Profile completed!",
-        description: "Your trainer profile is now live and visible to clients.",
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
       });
-      navigate('/trainer/dashboard');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -341,10 +361,15 @@ const TrainerProfileSetup = () => {
           
           <Button 
             onClick={handleNext}
-            disabled={!isStepValid(formData, currentStep)}
-            className={!isStepValid(formData, currentStep) ? 'opacity-50 cursor-not-allowed' : ''}
+            disabled={!isStepValid(formData, currentStep) || isLoading}
+            className={(!isStepValid(formData, currentStep) || isLoading) ? 'opacity-50 cursor-not-allowed' : ''}
           >
-            {currentStep === totalSteps ? (
+            {isLoading ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                {currentStep === totalSteps ? 'Completing...' : 'Saving...'}
+              </>
+            ) : currentStep === totalSteps ? (
               <>
                 <CheckCircle className="h-4 w-4 mr-2" />
                 Complete Profile
