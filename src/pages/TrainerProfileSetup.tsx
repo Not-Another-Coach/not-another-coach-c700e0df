@@ -123,7 +123,7 @@ const TrainerProfileSetup = () => {
 
   const updateFormData = useCallback((updates: Partial<typeof formData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
-  }, []);
+  }, []); // Remove formData dependency to prevent recreating the function
 
   const handleSave = async (showToast: boolean = true) => {
     try {
@@ -224,7 +224,7 @@ const TrainerProfileSetup = () => {
     return Math.round((currentStep / totalSteps) * 100);
   };
 
-  const renderCurrentSection = () => {
+  const renderCurrentSection = useCallback(() => {
     const commonProps = {
       formData,
       updateFormData,
@@ -250,7 +250,7 @@ const TrainerProfileSetup = () => {
       default:
         return null;
     }
-  };
+  }, [formData, updateFormData, errors, clearFieldError, currentStep]);
 
   if (loading || profileLoading) {
     return (
