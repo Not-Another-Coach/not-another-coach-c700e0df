@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -73,68 +73,59 @@ const languages = [
 ];
 
 export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionProps) {
-  const [deliveryFormat, setDeliveryFormat] = useState<'in-person' | 'online' | 'hybrid'>('hybrid');
+  const [deliveryFormat, setDeliveryFormat] = useState<'in-person' | 'online' | 'hybrid'>(
+    formData.delivery_format || 'hybrid'
+  );
 
-  // Initialize delivery format from form data when component mounts or form data changes
-  useEffect(() => {
-    if (formData.delivery_format) {
-      setDeliveryFormat(formData.delivery_format);
-    }
-  }, [formData.delivery_format]);
-
-  // Update form data when delivery format changes (memoized to prevent recreating on every render)
-  const handleDeliveryFormatChange = useCallback((format: 'in-person' | 'online' | 'hybrid') => {
+  // Update form data when delivery format changes
+  const handleDeliveryFormatChange = (format: 'in-person' | 'online' | 'hybrid') => {
     setDeliveryFormat(format);
-    
-    // Update form data with delivery format
-    const updates: any = { delivery_format: format };
+    updateFormData({ delivery_format: format });
     
     // Clear location if switching to online-only
     if (format === 'online') {
-      updates.location = 'Online Only';
+      updateFormData({ location: 'Online Only' });
     }
-    
-    updateFormData(updates);
-  }, [updateFormData]);
+  };
 
-  const handleSpecialtyToggle = useCallback((specialty: string) => {
+  const handleSpecialtyToggle = (specialty: string) => {
     const current = formData.specializations || [];
     const updated = current.includes(specialty)
       ? current.filter((s: string) => s !== specialty)
       : [...current, specialty];
     updateFormData({ specializations: updated });
-  }, [updateFormData]);
+  };
 
-  const handleTrainingTypeToggle = useCallback((type: string) => {
+  const handleTrainingTypeToggle = (type: string) => {
     const current = formData.training_types || [];
     const updated = current.includes(type)
       ? current.filter((t: string) => t !== type)
       : [...current, type];
     updateFormData({ training_types: updated });
-  }, [updateFormData]);
+  };
 
-  const handleLanguageToggle = useCallback((language: string) => {
+  const handleLanguageToggle = (language: string) => {
     const current = formData.languages || [];
     const updated = current.includes(language)
       ? current.filter((l: string) => l !== language)
       : [...current, language];
     updateFormData({ languages: updated });
-  }, [updateFormData]);
+  };
 
-  const removeSpecialty = useCallback((specialty: string) => {
+  const removeSpecialty = (specialty: string) => {
     const current = formData.specializations || [];
     updateFormData({ specializations: current.filter((s: string) => s !== specialty) });
-  }, [updateFormData]);
+  };
 
-  const removeTrainingType = useCallback((type: string) => {
+  const removeTrainingType = (type: string) => {
     const current = formData.training_types || [];
     updateFormData({ training_types: current.filter((t: string) => t !== type) });
-  }, [updateFormData]);
+  };
 
-  const removeLanguage = useCallback((language: string) => {
+  const removeLanguage = (language: string) => {
     const current = formData.languages || [];
     updateFormData({ languages: current.filter((l: string) => l !== language) });
-  }, [updateFormData]);
+  };
 
   return (
     <div className="space-y-6">
