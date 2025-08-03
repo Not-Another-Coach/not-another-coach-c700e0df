@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -73,20 +73,29 @@ const languages = [
 ];
 
 export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionProps) {
-  const [deliveryFormat, setDeliveryFormat] = useState<'in-person' | 'online' | 'hybrid'>(
-    formData.delivery_format || 'hybrid'
-  );
+  const [deliveryFormat, setDeliveryFormat] = useState<'in-person' | 'online' | 'hybrid'>('hybrid');
 
-  // Update form data when delivery format changes
-  const handleDeliveryFormatChange = (format: 'in-person' | 'online' | 'hybrid') => {
+  // Initialize delivery format from form data when component mounts or form data changes
+  useEffect(() => {
+    if (formData.delivery_format) {
+      setDeliveryFormat(formData.delivery_format);
+    }
+  }, [formData.delivery_format]);
+
+  // Update form data when delivery format changes (memoized to prevent recreating on every render)
+  const handleDeliveryFormatChange = useCallback((format: 'in-person' | 'online' | 'hybrid') => {
     setDeliveryFormat(format);
-    updateFormData({ delivery_format: format });
+    
+    // Update form data with delivery format
+    const updates: any = { delivery_format: format };
     
     // Clear location if switching to online-only
     if (format === 'online') {
-      updateFormData({ location: 'Online Only' });
+      updates.location = 'Online Only';
     }
-  };
+    
+    updateFormData(updates);
+  }, [updateFormData]);
 
   const handleSpecialtyToggle = (specialty: string) => {
     const current = formData.specializations || [];
