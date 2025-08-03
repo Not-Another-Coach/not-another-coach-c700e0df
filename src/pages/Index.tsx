@@ -282,16 +282,16 @@ const Index = () => {
               </p>
             </div>
             
-            {/* Update Preferences Button for Clients with Survey Completed */}
+            {/* Dashboard Button for Clients with Survey Completed */}
             {isClient() && profile?.quiz_completed && (
               <Button 
-                variant="outline" 
+                variant="default" 
                 size="sm"
-                onClick={() => navigate('/client-survey')}
-                className="flex items-center gap-2 hover:bg-primary/10"
+                onClick={() => navigate('/client-dashboard')}
+                className="flex items-center gap-2"
               >
                 <Edit className="h-4 w-4" />
-                Update Preferences
+                My Dashboard
               </Button>
             )}
           </div>
