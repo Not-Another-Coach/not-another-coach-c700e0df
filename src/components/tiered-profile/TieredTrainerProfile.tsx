@@ -1,0 +1,196 @@
+import { useState } from 'react';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Heart, MessageCircle, Calendar, Lock, Star, MapPin, Clock, Award } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useEngagementStage } from '@/hooks/useEngagementStage';
+import { useProfile } from '@/hooks/useProfile';
+import { useSavedTrainers } from '@/hooks/useSavedTrainers';
+import { HeroBlock } from './blocks/HeroBlock';
+import { MiniBioBlock } from './blocks/MiniBioBlock';
+import { SpecialismsBlock } from './blocks/SpecialismsBlock';
+import { WaysOfWorkingBlock } from './blocks/WaysOfWorkingBlock';
+import { GalleryPackagesBlock } from './blocks/GalleryPackagesBlock';
+import { ProcessTimelineBlock } from './blocks/ProcessTimelineBlock';
+import { ReviewsBlock } from './blocks/ReviewsBlock';
+import { PricingLockMessage } from './PricingLockMessage';
+import { AskQuestionButton } from './AskQuestionButton';
+
+interface TieredTrainerProfileProps {
+  trainer: any;
+  onViewProfile?: () => void;
+  onMessage?: () => void;
+  className?: string;
+}
+
+export const TieredTrainerProfile = ({ 
+  trainer, 
+  onViewProfile, 
+  onMessage,
+  className 
+}: TieredTrainerProfileProps) => {
+  const { profile } = useProfile();
+  const { stage, updateEngagementStage, canViewContent, loading } = useEngagementStage(trainer.id);
+  const { savedTrainers, saveTrainer, unsaveTrainer, isTrainerSaved } = useSavedTrainers();
+  const [isUpdatingStage, setIsUpdatingStage] = useState(false);
+
+  const isSaved = isTrainerSaved(trainer.id);
+  const isClient = profile?.user_type === 'client';
+
+  const handleLikeTrainer = async () => {
+    if (!isClient || stage !== 'browsing') return;
+    
+    setIsUpdatingStage(true);
+    await updateEngagementStage('liked');
+    if (isSaved) {
+      await unsaveTrainer(trainer.id);
+    } else {
+      await saveTrainer(trainer.id);
+    }
+    setIsUpdatingStage(false);
+  };
+
+  const handleMessage = () => {
+    if (stage === 'browsing') {
+      // Update to matched stage when first message is sent
+      updateEngagementStage('matched');
+    }
+    onMessage?.();
+  };
+
+  const handleDiscoveryComplete = () => {
+    updateEngagementStage('discovery_completed');
+  };
+
+  const getStageInfo = () => {
+    switch (stage) {
+      case 'browsing':
+        return { label: 'Browsing', color: 'bg-gray-500' };
+      case 'liked':
+        return { label: 'Liked', color: 'bg-blue-500' };
+      case 'matched':
+        return { label: 'Matched', color: 'bg-purple-500' };
+      case 'discovery_completed':
+        return { label: 'Discovery Complete', color: 'bg-green-500' };
+      case 'active_client':
+        return { label: 'Active Client', color: 'bg-orange-500' };
+      default:
+        return { label: 'Browsing', color: 'bg-gray-500' };
+    }
+  };
+
+  if (loading) {
+    return (
+      <Card className={cn("animate-pulse", className)}>
+        <div className="h-96 bg-muted rounded-lg"></div>
+      </Card>
+    );
+  }
+
+  const stageInfo = getStageInfo();
+
+  return (
+    <Card className={cn("overflow-hidden", className)}>
+      {/* Stage Indicator */}
+      {isClient && (
+        <div className="px-4 py-2 bg-muted/50 border-b">
+          <Badge variant="secondary" className={cn("text-white", stageInfo.color)}>
+            <div className="w-2 h-2 bg-white rounded-full mr-2" />
+            {stageInfo.label}
+          </Badge>
+        </div>
+      )}
+
+      <div className="space-y-6 p-6">
+        {/* Hero Block - Always visible */}
+        <HeroBlock 
+          trainer={trainer} 
+          stage={stage}
+          isClient={isClient}
+          isSaved={isSaved}
+          onLike={handleLikeTrainer}
+          isUpdatingStage={isUpdatingStage}
+        />
+
+        {/* Mini Bio Block - Visible from Stage 2 */}
+        {canViewContent('liked') && (
+          <MiniBioBlock trainer={trainer} />
+        )}
+
+        {/* Specialisms Block - Visible from Stage 2 */}
+        {canViewContent('liked') && (
+          <SpecialismsBlock trainer={trainer} />
+        )}
+
+        {/* Ask Question Button - Only visible before matching */}
+        {stage === 'browsing' || stage === 'liked' ? (
+          <AskQuestionButton trainer={trainer} />
+        ) : null}
+
+        {/* Ways of Working Block - Visible from Stage 3 */}
+        {canViewContent('matched') && (
+          <WaysOfWorkingBlock trainer={trainer} />
+        )}
+
+        {/* Gallery & Packages Block - Pricing locked until Stage 4 */}
+        <GalleryPackagesBlock 
+          trainer={trainer}
+          canViewPricing={canViewContent('discovery_completed')}
+          stage={stage}
+        />
+
+        {/* Process Timeline Block - Visible from Stage 3 */}
+        {canViewContent('matched') && (
+          <ProcessTimelineBlock trainer={trainer} />
+        )}
+
+        {/* Reviews Block - Visible from Stage 4 */}
+        {canViewContent('discovery_completed') && (
+          <ReviewsBlock trainer={trainer} />
+        )}
+
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
+          {stage === 'browsing' && isClient && (
+            <Button 
+              onClick={handleLikeTrainer}
+              disabled={isUpdatingStage}
+              className="flex-1"
+            >
+              <Heart className="w-4 h-4 mr-2" />
+              {isUpdatingStage ? 'Adding to Liked...' : 'Like Trainer'}
+            </Button>
+          )}
+
+          {(stage === 'liked' || stage === 'matched') && (
+            <>
+              <Button onClick={handleMessage} className="flex-1">
+                <MessageCircle className="w-4 h-4 mr-2" />
+                Message
+              </Button>
+              
+              <Button variant="outline" onClick={handleDiscoveryComplete} className="flex-1">
+                <Calendar className="w-4 h-4 mr-2" />
+                Schedule Discovery Call
+              </Button>
+            </>
+          )}
+
+          {stage === 'discovery_completed' && (
+            <Button onClick={onViewProfile} className="flex-1">
+              <Award className="w-4 h-4 mr-2" />
+              Book Training Package
+            </Button>
+          )}
+
+          {onViewProfile && (
+            <Button variant="outline" onClick={onViewProfile}>
+              View Full Profile
+            </Button>
+          )}
+        </div>
+      </div>
+    </Card>
+  );
+};
