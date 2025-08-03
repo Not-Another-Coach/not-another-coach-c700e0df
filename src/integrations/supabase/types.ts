@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      client_trainer_engagement: {
+        Row: {
+          became_client_at: string | null
+          client_id: string
+          created_at: string
+          discovery_completed_at: string | null
+          id: string
+          liked_at: string | null
+          matched_at: string | null
+          notes: string | null
+          stage: Database["public"]["Enums"]["engagement_stage"]
+          trainer_id: string
+          updated_at: string
+        }
+        Insert: {
+          became_client_at?: string | null
+          client_id: string
+          created_at?: string
+          discovery_completed_at?: string | null
+          id?: string
+          liked_at?: string | null
+          matched_at?: string | null
+          notes?: string | null
+          stage?: Database["public"]["Enums"]["engagement_stage"]
+          trainer_id: string
+          updated_at?: string
+        }
+        Update: {
+          became_client_at?: string | null
+          client_id?: string
+          created_at?: string
+          discovery_completed_at?: string | null
+          id?: string
+          liked_at?: string | null
+          matched_at?: string | null
+          notes?: string | null
+          stage?: Database["public"]["Enums"]["engagement_stage"]
+          trainer_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       package_ways_of_working: {
         Row: {
           client_expectations_items: Json | null
@@ -85,6 +127,7 @@ export type Database = {
           communication_style: string | null
           created_at: string
           delivery_format: string | null
+          discovery_call_price: number | null
           experience_level: string | null
           first_name: string | null
           fitness_goals: string[] | null
@@ -117,7 +160,9 @@ export type Database = {
           preferred_package_type: string | null
           preferred_time_slots: string[] | null
           preferred_training_frequency: number | null
+          pricing_unlock_required: boolean | null
           primary_goals: string[] | null
+          profile_blocks: Json | null
           profile_photo_url: string | null
           profile_published: boolean | null
           profile_setup_completed: boolean | null
@@ -184,6 +229,7 @@ export type Database = {
           communication_style?: string | null
           created_at?: string
           delivery_format?: string | null
+          discovery_call_price?: number | null
           experience_level?: string | null
           first_name?: string | null
           fitness_goals?: string[] | null
@@ -216,7 +262,9 @@ export type Database = {
           preferred_package_type?: string | null
           preferred_time_slots?: string[] | null
           preferred_training_frequency?: number | null
+          pricing_unlock_required?: boolean | null
           primary_goals?: string[] | null
+          profile_blocks?: Json | null
           profile_photo_url?: string | null
           profile_published?: boolean | null
           profile_setup_completed?: boolean | null
@@ -283,6 +331,7 @@ export type Database = {
           communication_style?: string | null
           created_at?: string
           delivery_format?: string | null
+          discovery_call_price?: number | null
           experience_level?: string | null
           first_name?: string | null
           fitness_goals?: string[] | null
@@ -315,7 +364,9 @@ export type Database = {
           preferred_package_type?: string | null
           preferred_time_slots?: string[] | null
           preferred_training_frequency?: number | null
+          pricing_unlock_required?: boolean | null
           primary_goals?: string[] | null
+          profile_blocks?: Json | null
           profile_photo_url?: string | null
           profile_published?: boolean | null
           profile_setup_completed?: boolean | null
@@ -422,13 +473,31 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_engagement_stage: {
+        Args: { client_uuid: string; trainer_uuid: string }
+        Returns: Database["public"]["Enums"]["engagement_stage"]
+      }
       request_profile_verification: {
         Args: { trainer_id: string }
         Returns: boolean
       }
+      update_engagement_stage: {
+        Args: {
+          client_uuid: string
+          trainer_uuid: string
+          new_stage: Database["public"]["Enums"]["engagement_stage"]
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       client_status_enum: "open" | "waitlist" | "paused"
+      engagement_stage:
+        | "browsing"
+        | "liked"
+        | "matched"
+        | "discovery_completed"
+        | "active_client"
       user_type: "client" | "trainer" | "admin"
       verification_status_enum: "pending" | "verified" | "rejected"
     }
@@ -559,6 +628,13 @@ export const Constants = {
   public: {
     Enums: {
       client_status_enum: ["open", "waitlist", "paused"],
+      engagement_stage: [
+        "browsing",
+        "liked",
+        "matched",
+        "discovery_completed",
+        "active_client",
+      ],
       user_type: ["client", "trainer", "admin"],
       verification_status_enum: ["pending", "verified", "rejected"],
     },
