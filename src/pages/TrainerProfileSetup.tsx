@@ -34,7 +34,6 @@ const TrainerProfileSetup = () => {
     
     // Qualifications
     qualifications: [] as string[],
-    proof_upload_urls: [] as string[],
     
     // Expertise & Services
     specializations: [] as string[],
@@ -59,7 +58,7 @@ const TrainerProfileSetup = () => {
     testimonials: [],
     
     // Profile Management
-    client_status: "open" as const,
+    client_status: "open" as "open" | "waitlist" | "paused",
     terms_agreed: false,
   });
 
@@ -89,34 +88,25 @@ const TrainerProfileSetup = () => {
     }
   }, [user, loading, navigate]);
 
-  // Populate form data from profile
+  // Populate form data from profile (only using existing fields)
   useEffect(() => {
     if (profile) {
-      setFormData({
+      setFormData(prev => ({
+        ...prev,
         first_name: profile.first_name || "",
         last_name: profile.last_name || "",
         tagline: profile.tagline || "",
         bio: profile.bio || "",
         profile_photo_url: profile.profile_photo_url || "",
         qualifications: profile.qualifications || [],
-        proof_upload_urls: profile.proof_upload_urls || [],
         specializations: profile.specializations || [],
         training_types: profile.training_types || [],
         location: profile.location || "",
-        ideal_client_age_range: profile.ideal_client_age_range || "",
-        ideal_client_fitness_level: profile.ideal_client_fitness_level || "",
-        ideal_client_personality: profile.ideal_client_personality || "",
-        training_vibe: profile.training_vibe || "",
-        max_clients: profile.max_clients,
-        availability_schedule: profile.availability_schedule || {},
         hourly_rate: profile.hourly_rate,
-        package_options: profile.package_options || [],
-        free_discovery_call: profile.free_discovery_call || false,
-        calendar_link: profile.calendar_link || "",
-        testimonials: profile.testimonials || [],
         client_status: profile.client_status || "open",
         terms_agreed: profile.terms_agreed || false,
-      });
+        // Note: Other fields will be stored as form-only data until database is updated
+      }));
     }
   }, [profile]);
 
@@ -229,7 +219,7 @@ const TrainerProfileSetup = () => {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={handleSave}>
+          <Button variant="outline" size="sm" onClick={() => handleSave()}>
             <Save className="h-4 w-4 mr-2" />
             Save Draft
           </Button>

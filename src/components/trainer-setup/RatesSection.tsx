@@ -85,7 +85,7 @@ export function RatesSection({ formData, updateFormData }: RatesSectionProps) {
             onClick={() => setCurrency('GBP')}
             className="flex items-center gap-2"
           >
-            <Pound className="h-4 w-4" />
+            <PoundSterling className="h-4 w-4" />
             British Pound (£)
           </Button>
           <Button

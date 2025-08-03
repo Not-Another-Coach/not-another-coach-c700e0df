@@ -10,6 +10,7 @@ import Onboarding from "./pages/Onboarding";
 import Discovery from "./pages/Discovery";
 import SavedTrainers from "./pages/SavedTrainers";
 import TrainerDashboard from "./pages/TrainerDashboard";
+import TrainerProfileSetup from "./pages/TrainerProfileSetup";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/discovery" element={<Discovery />} />
             <Route path="/saved" element={<SavedTrainers />} />
             <Route path="/trainer/dashboard" element={<TrainerDashboard />} />
+            <Route path="/trainer/profile-setup" element={<TrainerProfileSetup />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
