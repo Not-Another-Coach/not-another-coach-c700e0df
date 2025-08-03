@@ -29,9 +29,9 @@ export default function ClientDashboard() {
     }
   }, [user, loading, navigate]);
 
-  // Redirect trainers to their dashboard (only from root page)
+  // Redirect trainers to their dashboard (only from client dashboard page)
   useEffect(() => {
-    if (!loading && !profileLoading && user && profile && isTrainer() && location.pathname === '/') {
+    if (!loading && !profileLoading && user && profile && isTrainer() && location.pathname === '/client/dashboard') {
       // Check if profile setup is needed
       if (!profile.terms_agreed || !(profile as any).profile_setup_completed) {
         navigate('/trainer/profile-setup');

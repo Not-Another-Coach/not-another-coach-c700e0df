@@ -290,7 +290,7 @@ const ClientSurvey = () => {
           title: "Survey completed!",
           description: "You can now discover and match with trainers.",
         });
-        navigate('/');
+        navigate('/client/dashboard');
       }
     } catch (error) {
       console.error('Error in handleNext:', error);

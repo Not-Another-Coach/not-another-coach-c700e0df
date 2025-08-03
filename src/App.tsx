@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import Home from "./pages/Home";
 import ClientDashboard from "./pages/ClientDashboard";
 import Auth from "./pages/Auth";
 import ClientSurvey from "./pages/ClientSurvey";
@@ -23,7 +24,8 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<ClientDashboard />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/client/dashboard" element={<ClientDashboard />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/client-survey" element={<ClientSurvey />} />
             <Route path="/discovery" element={<Discovery />} />
