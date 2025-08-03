@@ -180,6 +180,13 @@ const TrainerProfileSetup = () => {
         if (!formData.hourly_rate || formData.hourly_rate <= 0) {
           newErrors.hourly_rate = "Hourly rate is required";
         }
+        if (!formData.communication_style || formData.communication_style.trim().length < 20) {
+          newErrors.communication_style = "Please describe how you work best with clients (minimum 20 characters)";
+        }
+        const hasCommunicationMethod = formData.video_checkins || formData.messaging_support || formData.weekly_programming_only;
+        if (!hasCommunicationMethod) {
+          newErrors.communication_methods = "Please select at least one communication method you offer";
+        }
         break;
       case 8:
         if (!formData.terms_agreed) {
@@ -206,7 +213,12 @@ const TrainerProfileSetup = () => {
       case 4:
         return 'completed'; // Optional step
       case 5:
-        return formData.hourly_rate && formData.hourly_rate > 0 ? 'completed' : 'not_started';
+        const hasRate = formData.hourly_rate && formData.hourly_rate > 0;
+        const hasCommunicationStyle = formData.communication_style && formData.communication_style.trim().length >= 20;
+        const hasCommunicationMethod = formData.video_checkins || formData.messaging_support || formData.weekly_programming_only;
+        const hasAllRateRequirements = hasRate && hasCommunicationStyle && hasCommunicationMethod;
+        const hasPartialRate = hasRate || hasCommunicationStyle || hasCommunicationMethod;
+        return hasAllRateRequirements ? 'completed' : (hasPartialRate ? 'partial' : 'not_started');
       case 6:
         return 'completed'; // Optional step
       case 7:

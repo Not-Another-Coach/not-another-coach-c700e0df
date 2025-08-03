@@ -11,6 +11,7 @@ import { Trash2, Plus, ExternalLink, DollarSign, PoundSterling, Euro, Calendar }
 interface RatesSectionProps {
   formData: any;
   updateFormData: (updates: any) => void;
+  errors?: { [key: string]: string };
 }
 
 interface TrainingPackage {
@@ -22,7 +23,7 @@ interface TrainingPackage {
   description: string;
 }
 
-export function RatesSection({ formData, updateFormData }: RatesSectionProps) {
+export function RatesSection({ formData, updateFormData, errors }: RatesSectionProps) {
   const [currency, setCurrency] = useState<'GBP' | 'USD' | 'EUR'>('GBP');
   const [selectedRateTypes, setSelectedRateTypes] = useState<('hourly' | 'class' | 'monthly')[]>(
     formData.selected_rate_types || ['hourly']
@@ -434,19 +435,25 @@ export function RatesSection({ formData, updateFormData }: RatesSectionProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="communication_style">How do you work best with clients?</Label>
+            <Label htmlFor="communication_style">How do you work best with clients? *</Label>
             <Textarea
               id="communication_style"
               value={formData.communication_style || ""}
               onChange={(e) => updateFormData({ communication_style: e.target.value })}
               placeholder="e.g., I believe in regular check-ins and being available for questions. I prefer a collaborative approach where we work together to achieve your goals..."
               rows={3}
-              className="resize-none"
+              className={`resize-none ${errors?.communication_style ? 'border-destructive' : ''}`}
             />
+            {errors?.communication_style && (
+              <p className="text-sm text-destructive">{errors.communication_style}</p>
+            )}
           </div>
 
           <div className="space-y-3">
-            <Label>Communication Methods You Offer</Label>
+            <Label>Communication Methods You Offer *</Label>
+            {errors?.communication_methods && (
+              <p className="text-sm text-destructive">{errors.communication_methods}</p>
+            )}
             
             <div className="flex items-center justify-between">
               <div>
