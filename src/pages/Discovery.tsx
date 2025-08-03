@@ -182,9 +182,17 @@ export default function Discovery() {
           </p>
         </div>
 
-        <Button variant="ghost" onClick={() => navigate('/client-survey')}>
-          <Settings className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => navigate('/client-survey')}
+            className="flex items-center gap-2 hover:bg-primary/10"
+          >
+            <Settings className="h-4 w-4" />
+            <span className="hidden sm:inline">Edit Survey</span>
+          </Button>
+        </div>
       </div>
 
       {/* Progress Breadcrumb */}
@@ -297,6 +305,7 @@ export default function Discovery() {
                 <li>• Swipe left or tap ✕ to pass</li>
                 <li>• Tap ↻ to undo your last action</li>
                 <li>• Check match scores for recommendations</li>
+                <li>• Tap "Edit Survey" above to change your preferences</li>
               </ul>
             </CardContent>
           </Card>
