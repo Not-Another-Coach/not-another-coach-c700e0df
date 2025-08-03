@@ -166,38 +166,40 @@ export function DashboardSummary({ profile, onTabChange }: DashboardSummaryProps
         </Card>
       </div>
 
-      {/* Profile Completion Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Settings className="h-5 w-5" />
-            Update Preferences
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium">Survey Completion</p>
-              <p className="text-sm text-muted-foreground">
-                {profileCompletion}% complete - {profileCompletion < 100 ? 'Complete the full survey for better matches' : 'All preferences set!'}
-              </p>
+      {/* Profile Completion Section - Only show if not 100% complete */}
+      {profileCompletion < 100 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              Complete Your Survey
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Survey Completion</p>
+                <p className="text-sm text-muted-foreground">
+                  {profileCompletion}% complete - Complete the full survey for better matches
+                </p>
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-primary">{profileCompletion}%</div>
+              </div>
             </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold text-primary">{profileCompletion}%</div>
+            <Progress value={profileCompletion} className="w-full" />
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate('/client-survey')}
+              >
+                Complete Survey
+              </Button>
             </div>
-          </div>
-          <Progress value={profileCompletion} className="w-full" />
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => navigate('/client-survey')}
-            >
-              Full Survey
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Your Top Matches */}
