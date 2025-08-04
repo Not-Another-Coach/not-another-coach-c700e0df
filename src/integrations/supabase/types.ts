@@ -1022,6 +1022,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      client_has_sent_first_message: {
+        Args: { conversation_uuid: string; client_uuid: string }
+        Returns: boolean
+      }
       get_content_visibility: {
         Args: {
           p_trainer_id: string
