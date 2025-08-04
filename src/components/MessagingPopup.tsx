@@ -566,7 +566,7 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
                 </div>
               )}
 
-              <ScrollArea className="flex-1 p-3">
+              <ScrollArea className="flex-1 p-3 max-h-[200px] overflow-y-auto">
                 {!canMessage && isTrainer ? (
                   <div className="text-center text-muted-foreground py-8">
                     <Lock className="w-8 h-8 mx-auto mb-2 opacity-50" />
