@@ -396,7 +396,7 @@ const TrainerDashboard = () => {
             </Card>
 
             {/* Availability Status Management */}
-            <Card>
+            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/trainer/profile-setup?tab=management')}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Settings className="h-5 w-5" />
