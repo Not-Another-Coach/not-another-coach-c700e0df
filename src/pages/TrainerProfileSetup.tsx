@@ -133,6 +133,33 @@ const TrainerProfileSetup = () => {
         hourly_rate: profile.hourly_rate,
         client_status: profile.client_status || "open",
         terms_agreed: profile.terms_agreed || false,
+        // Initialize ways of working data from profile
+        ways_of_working_onboarding: (profile as any).ways_of_working_onboarding || [],
+        ways_of_working_first_week: (profile as any).ways_of_working_first_week || [],
+        ways_of_working_ongoing_structure: (profile as any).ways_of_working_ongoing_structure || [],
+        ways_of_working_tracking_tools: (profile as any).ways_of_working_tracking_tools || [],
+        ways_of_working_client_expectations: (profile as any).ways_of_working_client_expectations || [],
+        ways_of_working_what_i_bring: (profile as any).ways_of_working_what_i_bring || [],
+        ways_of_working_visibility: (profile as any).ways_of_working_visibility || "public",
+        ways_of_working_completed: (profile as any).ways_of_working_completed || false,
+        // Initialize other missing fields
+        ideal_client_age_range: (profile as any).ideal_client_age_range || "",
+        ideal_client_fitness_level: (profile as any).ideal_client_fitness_level || "",
+        ideal_client_personality: (profile as any).ideal_client_personality || "",
+        training_vibe: (profile as any).training_vibe || "",
+        max_clients: (profile as any).max_clients,
+        availability_schedule: (profile as any).availability_schedule || {},
+        class_rate: (profile as any).class_rate,
+        package_options: (profile as any).package_options || [],
+        free_discovery_call: (profile as any).free_discovery_call || false,
+        calendar_link: (profile as any).calendar_link || "",
+        next_available_date: (profile as any).next_available_date || "",
+        communication_style: (profile as any).communication_style || "",
+        video_checkins: (profile as any).video_checkins || false,
+        messaging_support: (profile as any).messaging_support || false,
+        weekly_programming_only: (profile as any).weekly_programming_only || false,
+        testimonials: (profile as any).testimonials || [],
+        delivery_format: (profile as any).delivery_format || "hybrid",
       }));
     }
   }, [profile?.id]);
