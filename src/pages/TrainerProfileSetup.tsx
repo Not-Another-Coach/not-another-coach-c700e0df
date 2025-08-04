@@ -516,9 +516,9 @@ const TrainerProfileSetup = () => {
             Back to Dashboard
           </Button>
           <div>
-            <h1 className="text-xl font-bold">Profile Setup</h1>
+            <h1 className="text-xl font-bold">{isFullyComplete() ? 'Profile Management' : 'Profile Setup'}</h1>
             <p className="text-sm text-muted-foreground">
-              Step {currentStep} of {totalSteps}: {stepTitles[currentStep - 1]}
+              {isFullyComplete() ? 'Manage your trainer profile settings' : `Step ${currentStep} of ${totalSteps}: ${stepTitles[currentStep - 1]}`}
             </p>
           </div>
         </div>
@@ -607,16 +607,48 @@ const TrainerProfileSetup = () => {
         </div>
       )}
 
-      {/* Current Step Indicator when progress bar is hidden */}
+      {/* Step indicators for completed profiles */}
       {isFullyComplete() && (
         <div className="bg-card border-b p-4">
           <div className="max-w-4xl mx-auto">
-            <div className="flex items-center justify-center gap-2">
+            <div className="flex items-center justify-center gap-2 mb-4">
               <span className="text-sm font-medium text-green-600">✓ Profile Complete</span>
               <span className="text-sm text-muted-foreground">•</span>
               <span className="text-sm text-muted-foreground">
                 Currently editing: {stepTitles[currentStep - 1]}
               </span>
+            </div>
+            
+            {/* Clickable step indicators */}
+            <div className="flex justify-between">
+              {stepTitles.map((title, index) => {
+                const stepNumber = index + 1;
+                const completion = getStepCompletion(stepNumber);
+                const isCurrent = stepNumber === currentStep;
+                
+                return (
+                  <div
+                    key={stepNumber}
+                    className={`flex flex-col items-center text-xs cursor-pointer transition-all hover:scale-105 ${
+                      isCurrent ? 'text-primary' : 'text-green-600'
+                    }`}
+                    onClick={() => setCurrentStep(stepNumber)}
+                  >
+                    <div
+                      className={`w-8 h-8 rounded-full border-2 flex items-center justify-center mb-1 ${
+                        isCurrent 
+                          ? 'border-primary bg-primary text-white' 
+                          : 'border-green-600 bg-green-600 text-white'
+                      }`}
+                    >
+                      {isCurrent ? stepNumber : <CheckCircle className="h-4 w-4" />}
+                    </div>
+                    <span className={`text-center max-w-20 leading-tight ${isCurrent ? 'font-bold' : ''}`}>
+                      {title}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
