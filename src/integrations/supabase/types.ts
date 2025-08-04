@@ -101,6 +101,48 @@ export type Database = {
         }
         Relationships: []
       }
+      coach_analytics: {
+        Row: {
+          conversion_rate: number
+          created_at: string
+          id: string
+          last_activity_at: string | null
+          match_tier_stats: Json
+          total_likes: number
+          total_saves: number
+          total_shortlists: number
+          total_views: number
+          trainer_id: string
+          updated_at: string
+        }
+        Insert: {
+          conversion_rate?: number
+          created_at?: string
+          id?: string
+          last_activity_at?: string | null
+          match_tier_stats?: Json
+          total_likes?: number
+          total_saves?: number
+          total_shortlists?: number
+          total_views?: number
+          trainer_id: string
+          updated_at?: string
+        }
+        Update: {
+          conversion_rate?: number
+          created_at?: string
+          id?: string
+          last_activity_at?: string | null
+          match_tier_stats?: Json
+          total_likes?: number
+          total_saves?: number
+          total_shortlists?: number
+          total_views?: number
+          trainer_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       package_ways_of_working: {
         Row: {
           client_expectations_items: Json | null
@@ -499,6 +541,45 @@ export type Database = {
           notes?: string | null
           saved_at?: string
           trainer_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      shortlisted_trainers: {
+        Row: {
+          chat_enabled: boolean
+          created_at: string
+          discovery_call_booked_at: string | null
+          discovery_call_enabled: boolean
+          id: string
+          notes: string | null
+          shortlisted_at: string
+          trainer_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          chat_enabled?: boolean
+          created_at?: string
+          discovery_call_booked_at?: string | null
+          discovery_call_enabled?: boolean
+          id?: string
+          notes?: string | null
+          shortlisted_at?: string
+          trainer_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          chat_enabled?: boolean
+          created_at?: string
+          discovery_call_booked_at?: string | null
+          discovery_call_enabled?: boolean
+          id?: string
+          notes?: string | null
+          shortlisted_at?: string
+          trainer_id?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []

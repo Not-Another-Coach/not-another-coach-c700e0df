@@ -3,8 +3,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Star, MapPin, Award, Clock, DollarSign, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Star, MapPin, Award, Clock, MessageCircle, Target, Heart } from 'lucide-react';
 import { Trainer } from '@/components/TrainerCard';
+import { MatchBadge } from '@/components/MatchBadge';
 
 interface ComparisonViewProps {
   trainers: Trainer[];
@@ -17,19 +18,16 @@ export const ComparisonView = ({ trainers, onClose }: ComparisonViewProps) => {
   const metrics = [
     { key: 'rating', label: 'Rating', icon: Star },
     { key: 'experience', label: 'Experience', icon: Award },
-    { key: 'hourlyRate', label: 'Rate', icon: DollarSign },
     { key: 'location', label: 'Location', icon: MapPin },
     { key: 'availability', label: 'Availability', icon: Clock },
+    { key: 'coachingStyle', label: 'Coaching Style', icon: Target },
+    { key: 'personality', label: 'Personality Fit', icon: Heart },
   ];
 
   const highlightBest = (metric: string) => {
     if (metric === 'rating') {
       const maxRating = Math.max(...trainers.map(t => t.rating));
       return trainers.map(t => t.rating === maxRating);
-    }
-    if (metric === 'hourlyRate') {
-      const minRate = Math.min(...trainers.map(t => t.hourlyRate));
-      return trainers.map(t => t.hourlyRate === minRate);
     }
     if (metric === 'experience') {
       const maxExp = Math.max(...trainers.map(t => parseInt(t.experience)));
@@ -62,7 +60,7 @@ export const ComparisonView = ({ trainers, onClose }: ComparisonViewProps) => {
 
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Trainer Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {trainers.map((trainer) => (
             <Card key={trainer.id} className="overflow-hidden">
               <div className="relative h-48">
@@ -73,22 +71,26 @@ export const ComparisonView = ({ trainers, onClose }: ComparisonViewProps) => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 <div className="absolute bottom-4 left-4 text-white">
-                  <h3 className="text-xl font-bold">{trainer.name}</h3>
+                  <h3 className="text-lg font-bold">{trainer.name}</h3>
                   <div className="flex items-center gap-2 mt-1">
                     <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                     <span>{trainer.rating}</span>
                     <span className="opacity-75">({trainer.reviews})</span>
                   </div>
+                  {/* Goal Match Badge */}
+                  {(trainer as any).matchScore && (
+                    <div className="mt-2">
+                      <MatchBadge 
+                        score={(trainer as any).matchScore} 
+                        reasons={(trainer as any).matchReasons || []} 
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
               
               <CardContent className="p-4">
                 <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Rate</span>
-                    <span className="font-bold text-primary">${trainer.hourlyRate}/hr</span>
-                  </div>
-                  
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Experience</span>
                     <span className="font-medium">{trainer.experience}</span>
@@ -102,6 +104,24 @@ export const ComparisonView = ({ trainers, onClose }: ComparisonViewProps) => {
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Availability</span>
                     <span className="font-medium">{trainer.availability}</span>
+                  </div>
+
+                  <div>
+                    <span className="text-sm text-muted-foreground">Coaching Style</span>
+                    <div className="mt-1">
+                      <Badge variant="outline" className="text-xs">
+                        {(trainer as any).coachingStyle || 'Motivational'}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="text-sm text-muted-foreground">Personality</span>
+                    <div className="mt-1">
+                      <Badge variant="secondary" className="text-xs">
+                        {(trainer as any).personalityType || 'Supportive'}
+                      </Badge>
+                    </div>
                   </div>
                 </div>
                 
@@ -186,14 +206,17 @@ export const ComparisonView = ({ trainers, onClose }: ComparisonViewProps) => {
                             case 'experience':
                               value = trainer.experience;
                               break;
-                            case 'hourlyRate':
-                              value = `$${trainer.hourlyRate}/hr`;
-                              break;
                             case 'location':
                               value = trainer.location;
                               break;
                             case 'availability':
                               value = trainer.availability;
+                              break;
+                            case 'coachingStyle':
+                              value = (trainer as any).coachingStyle || 'Motivational';
+                              break;
+                            case 'personality':
+                              value = (trainer as any).personalityType || 'Supportive';
                               break;
                           }
                           
@@ -262,17 +285,17 @@ export const ComparisonView = ({ trainers, onClose }: ComparisonViewProps) => {
               </div>
               
               <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <h4 className="font-semibold text-blue-800 mb-2">💰 Most Affordable</h4>
+                <h4 className="font-semibold text-blue-800 mb-2">🎯 Best Goal Match</h4>
                 <p className="text-blue-700">
-                  {trainers.find(t => t.hourlyRate === Math.min(...trainers.map(tr => tr.hourlyRate)))?.name}
+                  {trainers.find(t => (t as any).matchScore === Math.max(...trainers.map((tr: any) => tr.matchScore || 0)))?.name || trainers[0]?.name}
                 </p>
                 <p className="text-sm text-blue-600">
-                  ${Math.min(...trainers.map(t => t.hourlyRate))}/hr
+                  {Math.max(...trainers.map((t: any) => t.matchScore || 0))}% match
                 </p>
               </div>
               
               <div className="text-center p-4 bg-purple-50 rounded-lg border border-purple-200">
-                <h4 className="font-semibold text-purple-800 mb-2">🎯 Most Experienced</h4>
+                <h4 className="font-semibold text-purple-800 mb-2">⭐ Most Experienced</h4>
                 <p className="text-purple-700">
                   {trainers.find(t => parseInt(t.experience) === Math.max(...trainers.map(tr => parseInt(tr.experience))))?.name}
                 </p>

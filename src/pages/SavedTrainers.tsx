@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSavedTrainers } from '@/hooks/useSavedTrainers';
+import { useShortlistedTrainers } from '@/hooks/useShortlistedTrainers';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Heart, Scale, Trash2 } from 'lucide-react';
+import { ArrowLeft, Heart, Scale, Trash2, Star, MessageCircle, Phone } from 'lucide-react';
 import { TrainerCard, Trainer } from '@/components/TrainerCard';
 import { ComparisonView } from '@/components/ComparisonView';
+import { toast } from 'sonner';
 
 // Sample trainer data (in real app, this would come from API)
 import trainerSarah from "@/assets/trainer-sarah.jpg";
@@ -81,6 +83,7 @@ const sampleTrainers: Trainer[] = [
 export default function SavedTrainers() {
   const navigate = useNavigate();
   const { savedTrainers, loading, unsaveTrainer } = useSavedTrainers();
+  const { shortlistTrainer, isShortlisted, shortlistCount, canShortlistMore } = useShortlistedTrainers();
   const [selectedForComparison, setSelectedForComparison] = useState<string[]>([]);
   const [showComparison, setShowComparison] = useState(false);
 
@@ -92,11 +95,23 @@ export default function SavedTrainers() {
 
   const handleToggleComparison = (trainerId: string, checked: boolean) => {
     if (checked) {
-      if (selectedForComparison.length < 3) {
+      if (selectedForComparison.length < 4) {
         setSelectedForComparison(prev => [...prev, trainerId]);
       }
     } else {
       setSelectedForComparison(prev => prev.filter(id => id !== trainerId));
+    }
+  };
+
+  const handleShortlist = async (trainerId: string) => {
+    if (!canShortlistMore) {
+      toast.error('You can only shortlist up to 4 trainers');
+      return;
+    }
+    
+    const result = await shortlistTrainer(trainerId);
+    if (result.error) {
+      toast.error('Failed to shortlist trainer');
     }
   };
 
@@ -147,7 +162,10 @@ export default function SavedTrainers() {
                   Saved Trainers
                 </h1>
                 <p className="text-muted-foreground">
-                  {savedTrainerDetails.length} trainer{savedTrainerDetails.length !== 1 ? 's' : ''} saved
+                  {savedTrainerDetails.length} trainer{savedTrainerDetails.length !== 1 ? 's' : ''} saved • Trainers you liked or swiped right on
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Shortlisted: {shortlistCount}/4 trainers
                 </p>
               </div>
             </div>
@@ -164,7 +182,7 @@ export default function SavedTrainers() {
           {savedTrainerDetails.length >= 2 && (
             <div className="mt-4 p-3 bg-primary/5 rounded-lg">
               <p className="text-sm text-muted-foreground mb-2">
-                Select 2-3 trainers to compare them side by side
+                Select 2-4 trainers to compare them side by side
               </p>
               <div className="flex flex-wrap gap-2">
                 {selectedForComparison.map(id => {
@@ -194,7 +212,7 @@ export default function SavedTrainers() {
               <Heart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <CardTitle className="mb-2">No Saved Trainers Yet</CardTitle>
               <CardDescription className="mb-6">
-                Start exploring trainers and save your favorites to compare them later
+                Start exploring trainers and like them or swipe right to add them here. You can then shortlist up to 4 trainers to unlock chat and discovery call options.
               </CardDescription>
               <Button onClick={() => navigate('/discovery')}>
                 Discover Trainers
@@ -214,7 +232,7 @@ export default function SavedTrainers() {
                         onCheckedChange={(checked) => 
                           handleToggleComparison(trainer.id, checked as boolean)
                         }
-                        disabled={!selectedForComparison.includes(trainer.id) && selectedForComparison.length >= 3}
+                        disabled={!selectedForComparison.includes(trainer.id) && selectedForComparison.length >= 4}
                       />
                     </div>
                   </div>
@@ -236,6 +254,38 @@ export default function SavedTrainers() {
                   trainer={trainer}
                   onViewProfile={(id) => console.log('View profile:', id)}
                 />
+
+                {/* Action Buttons */}
+                <div className="mt-4 space-y-2">
+                  {isShortlisted(trainer.id) ? (
+                    <div className="space-y-2">
+                      <Badge variant="default" className="w-full justify-center bg-green-100 text-green-800 border-green-200">
+                        ✓ Shortlisted
+                      </Badge>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button size="sm" variant="outline" className="text-xs">
+                          <MessageCircle className="h-3 w-3 mr-1" />
+                          Chat
+                        </Button>
+                        <Button size="sm" variant="outline" className="text-xs">
+                          <Phone className="h-3 w-3 mr-1" />
+                          Book Call
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <Button 
+                      size="sm" 
+                      variant="default" 
+                      className="w-full"
+                      onClick={() => handleShortlist(trainer.id)}
+                      disabled={!canShortlistMore}
+                    >
+                      <Star className="h-3 w-3 mr-1" />
+                      {canShortlistMore ? 'Add to Shortlist' : 'Shortlist Full'}
+                    </Button>
+                  )}
+                </div>
 
                 {/* Saved Date */}
                 <div className="mt-2 text-xs text-muted-foreground text-center">
