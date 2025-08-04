@@ -20,6 +20,7 @@ import { ProcessTimelineBlock } from './blocks/ProcessTimelineBlock';
 import { ReviewsBlock } from './blocks/ReviewsBlock';
 import { PricingLockMessage } from './PricingLockMessage';
 import { AskQuestionButton } from './AskQuestionButton';
+import { BookDiscoveryCallButton } from '@/components/discovery-call/BookDiscoveryCallButton';
 
 interface TieredTrainerProfileProps {
   trainer: any;
@@ -199,10 +200,17 @@ export const TieredTrainerProfile = ({
                 Message
               </Button>
               
-              <Button variant="outline" onClick={handleDiscoveryComplete} className="flex-1">
-                <Calendar className="w-4 h-4 mr-2" />
-                Schedule Discovery Call
-              </Button>
+              <BookDiscoveryCallButton 
+                trainer={{
+                  id: trainer.id,
+                  name: trainer.name,
+                  firstName: trainer.firstName,
+                  lastName: trainer.lastName,
+                  profilePhotoUrl: trainer.profilePhotoUrl
+                }}
+                variant="outline"
+                className="flex-1"
+              />
             </>
           )}
 

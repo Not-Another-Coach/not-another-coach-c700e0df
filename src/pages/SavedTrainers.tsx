@@ -11,6 +11,7 @@ import { TrainerCard, Trainer } from '@/components/TrainerCard';
 import { ComparisonView } from '@/components/ComparisonView';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { BookDiscoveryCallButton } from '@/components/discovery-call/BookDiscoveryCallButton';
 
 // Sample trainer data (in real app, this would come from API)
 import trainerSarah from "@/assets/trainer-sarah.jpg";
@@ -325,10 +326,18 @@ export default function SavedTrainers() {
                           <MessageCircle className="h-3 w-3 mr-1" />
                           Chat
                         </Button>
-                        <Button size="sm" variant="outline" className="text-xs">
-                          <Phone className="h-3 w-3 mr-1" />
-                          Book Call
-                        </Button>
+                        <BookDiscoveryCallButton
+                          trainer={{
+                            id: trainer.id,
+                            name: trainer.name,
+                            firstName: trainer.name.split(' ')[0],
+                            lastName: trainer.name.split(' ')[1],
+                            profilePhotoUrl: trainer.image
+                          }}
+                          variant="outline"
+                          size="sm"
+                          className="text-xs"
+                        />
                       </div>
                     </div>
                   ) : (
