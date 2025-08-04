@@ -10,6 +10,7 @@ import { AvailabilitySettings } from "@/components/coach/AvailabilitySettings";
 import { WaitlistManagement } from "@/components/coach/WaitlistManagement";
 import { ActiveClientsSection } from "@/components/coach/ActiveClientsSection";
 import { ProspectsSection } from "@/components/coach/ProspectsSection";
+import { FloatingMessageButton } from "@/components/FloatingMessageButton";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -698,6 +699,9 @@ const TrainerDashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Floating Message Button */}
+      <FloatingMessageButton />
     </div>
   );
 };

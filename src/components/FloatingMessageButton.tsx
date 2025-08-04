@@ -4,10 +4,17 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MessagingPopup } from '@/components/MessagingPopup';
 import { useSavedTrainers } from '@/hooks/useSavedTrainers';
+import { useProfile } from '@/hooks/useProfile';
 
 export const FloatingMessageButton = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const { savedTrainers } = useSavedTrainers();
+  const { profile } = useProfile();
+  
+  const isTrainer = profile?.user_type === 'trainer';
+  
+  // For trainers, show different badge logic (would be based on unread messages in real app)
+  const badgeCount = isTrainer ? 0 : savedTrainers.length;
 
   return (
     <>
@@ -17,12 +24,12 @@ export const FloatingMessageButton = () => {
         size="lg"
       >
         <MessageCircle className="w-6 h-6" />
-        {savedTrainers.length > 0 && (
+        {badgeCount > 0 && (
           <Badge 
             variant="destructive" 
             className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 flex items-center justify-center text-xs"
           >
-            {savedTrainers.length}
+            {badgeCount}
           </Badge>
         )}
       </Button>

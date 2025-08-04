@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useSavedTrainers } from '@/hooks/useSavedTrainers';
 import { useTrainerList } from '@/hooks/useTrainerList';
+import { useProfile } from '@/hooks/useProfile';
 import { cn } from '@/lib/utils';
 
 interface Message {
@@ -28,15 +29,18 @@ export const MessagingPopup = ({ isOpen, onClose }: MessagingPopupProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [view, setView] = useState<'list' | 'chat'>('list');
   
+  const { profile } = useProfile();
   const { savedTrainers, savedTrainerIds } = useSavedTrainers();
   const { trainers } = useTrainerList();
 
-  // Get trainer details for saved trainers
-  const shortlistedTrainers = trainers.filter(trainer => 
-    savedTrainerIds.includes(trainer.id)
-  );
+  const isTrainer = profile?.user_type === 'trainer';
+  
+  // Get contacts based on user type
+  const contacts = isTrainer 
+    ? [] // For now, trainers see empty list - in real app would show clients who messaged them
+    : trainers.filter(trainer => savedTrainerIds.includes(trainer.id)); // Clients see shortlisted trainers
 
-  const selectedTrainer = selectedTrainerId 
+  const selectedContact = selectedTrainerId 
     ? trainers.find(t => t.id === selectedTrainerId)
     : null;
 
@@ -78,7 +82,7 @@ export const MessagingPopup = ({ isOpen, onClose }: MessagingPopupProps) => {
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg flex items-center gap-2">
               <MessageCircle className="w-5 h-5" />
-              {view === 'chat' && selectedTrainer ? selectedTrainer.name : 'Messages'}
+              {view === 'chat' && selectedContact ? selectedContact.name : 'Messages'}
             </CardTitle>
             <div className="flex items-center gap-2">
               {view === 'chat' && (
@@ -109,34 +113,43 @@ export const MessagingPopup = ({ isOpen, onClose }: MessagingPopupProps) => {
             <div className="flex-1">
               <div className="p-4 border-b bg-muted/30">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Heart className="w-4 h-4" />
-                  <span>Your Shortlisted Trainers</span>
+                  {isTrainer ? (
+                    <>
+                      <Users className="w-4 h-4" />
+                      <span>Your Clients & Prospects</span>
+                    </>
+                  ) : (
+                    <>
+                      <Heart className="w-4 h-4" />
+                      <span>Your Shortlisted Trainers</span>
+                    </>
+                  )}
                   <Badge variant="secondary" className="ml-auto">
-                    {shortlistedTrainers.length}
+                    {contacts.length}
                   </Badge>
                 </div>
               </div>
 
               <ScrollArea className="flex-1">
-                {shortlistedTrainers.length > 0 ? (
+                {contacts.length > 0 ? (
                   <div className="p-2">
-                    {shortlistedTrainers.map((trainer) => (
+                    {contacts.map((contact) => (
                       <Button
-                        key={trainer.id}
+                        key={contact.id}
                         variant="ghost"
                         className="w-full justify-start h-auto p-3 mb-2 hover:bg-muted/50"
-                        onClick={() => handleSelectTrainer(trainer.id)}
+                        onClick={() => handleSelectTrainer(contact.id)}
                       >
                         <div className="flex items-center gap-3 w-full">
                           <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                             <span className="text-sm font-medium">
-                              {trainer.firstName?.[0]}{trainer.lastName?.[0]}
+                              {contact.firstName?.[0]}{contact.lastName?.[0]}
                             </span>
                           </div>
                           <div className="flex-1 text-left">
-                            <p className="font-medium text-sm">{trainer.name}</p>
+                            <p className="font-medium text-sm">{contact.name}</p>
                             <p className="text-xs text-muted-foreground">
-                              {trainer.location || 'Available for chat'}
+                              {contact.location || 'Available for chat'}
                             </p>
                           </div>
                           <div className="flex-shrink-0">
@@ -151,9 +164,14 @@ export const MessagingPopup = ({ isOpen, onClose }: MessagingPopupProps) => {
                 ) : (
                   <div className="flex flex-col items-center justify-center h-full p-4 text-center">
                     <Users className="w-12 h-12 text-muted-foreground/50 mb-2" />
-                    <p className="text-sm font-medium text-muted-foreground">No shortlisted trainers</p>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {isTrainer ? 'No client conversations' : 'No shortlisted trainers'}
+                    </p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Like trainers to add them to your shortlist and start messaging
+                      {isTrainer 
+                        ? 'When clients message you, they\'ll appear here'
+                        : 'Like trainers to add them to your shortlist and start messaging'
+                      }
                     </p>
                   </div>
                 )}
@@ -162,17 +180,17 @@ export const MessagingPopup = ({ isOpen, onClose }: MessagingPopupProps) => {
           ) : (
             // Chat View
             <div className="flex-1 flex flex-col">
-              {selectedTrainer && (
+              {selectedContact && (
                 <div className="p-3 border-b bg-muted/30">
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                       <span className="text-xs font-medium">
-                        {selectedTrainer.firstName?.[0]}{selectedTrainer.lastName?.[0]}
+                        {selectedContact.firstName?.[0]}{selectedContact.lastName?.[0]}
                       </span>
                     </div>
                     <div>
-                      <p className="font-medium text-sm">{selectedTrainer.name}</p>
-                      <p className="text-xs text-muted-foreground">{selectedTrainer.location}</p>
+                      <p className="font-medium text-sm">{selectedContact.name}</p>
+                      <p className="text-xs text-muted-foreground">{selectedContact.location}</p>
                     </div>
                     <Badge variant="secondary" className="ml-auto text-xs">
                       Online
@@ -186,7 +204,7 @@ export const MessagingPopup = ({ isOpen, onClose }: MessagingPopupProps) => {
                   <div className="text-center text-muted-foreground py-8">
                     <MessageCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
                     <p className="text-sm">Start the conversation!</p>
-                    <p className="text-xs mt-1">Send a message to {selectedTrainer?.name}</p>
+                    <p className="text-xs mt-1">Send a message to {selectedContact?.name}</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
