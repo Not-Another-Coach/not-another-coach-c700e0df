@@ -204,13 +204,15 @@ export function useDiscoveryCallBooking() {
             title: 'New Discovery Call Booked!',
             content: `A client has booked a discovery call for ${selectedDateTime.toLocaleDateString()} at ${selectedDateTime.toLocaleTimeString()}`,
             created_by: trainerId,
-            target_audience: { trainers: true },
+            target_audience: ["trainers"],
             metadata: {
               client_id: user.id,
               discovery_call_id: data.id,
-              scheduled_for: selectedDateTime.toISOString()
+              scheduled_for: selectedDateTime.toISOString(),
+              trainer_id: trainerId
             },
-            is_active: true
+            is_active: true,
+            priority: 1
           });
         
         console.log('Alert creation result:', alertResult);
