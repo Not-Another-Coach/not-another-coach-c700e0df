@@ -114,7 +114,8 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
   const [selectedGoal, setSelectedGoal] = useState("all");
   const [selectedLocation, setSelectedLocation] = useState("all");
   const [selectedAvailability, setSelectedAvailability] = useState("all");
-  const [activeTab, setActiveTab] = useState("recommended");
+  const [activeTab, setActiveTab] = useState("browse");
+  const [browseView, setBrowseView] = useState("recommended"); // Sub-navigation for browse tab
 
   // Get enhanced matched trainers using client survey data
   const clientSurveyData = {
@@ -325,18 +326,10 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
 
       {/* Tabs for different views */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="recommended" className="flex items-center gap-2">
-            <Target className="h-4 w-4" />
-            <span className="hidden sm:inline">Recommended</span>
-          </TabsTrigger>
-          <TabsTrigger value="matched" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            <span className="hidden sm:inline">Match</span>
-          </TabsTrigger>
-          <TabsTrigger value="list" className="flex items-center gap-2">
-            <List className="h-4 w-4" />
-            <span className="hidden sm:inline">List View</span>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="browse" className="flex items-center gap-2">
+            <Search className="h-4 w-4" />
+            <span className="hidden sm:inline">Browse</span>
           </TabsTrigger>
           <TabsTrigger value="saved" className="flex items-center gap-2">
             <Heart className="h-4 w-4" />
@@ -348,67 +341,155 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
           </TabsTrigger>
         </TabsList>
 
-        {/* Recommended For You */}
-        <TabsContent value="recommended" className="space-y-6">
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Recommended For You</h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filterTrainers(topMatches).map((match) => (
-                <div key={match.trainer.id} className="relative">
+        {/* Browse Tab - Combines Recommended, Match, and List View */}
+        <TabsContent value="browse" className="space-y-6">
+          {/* Sub-navigation for Browse views */}
+          <div className="flex items-center justify-center">
+            <div className="flex items-center bg-muted rounded-lg p-1">
+              <Button
+                variant={browseView === "recommended" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setBrowseView("recommended")}
+                className="flex items-center gap-2"
+              >
+                <Target className="h-4 w-4" />
+                Recommended
+              </Button>
+              <Button
+                variant={browseView === "matches" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setBrowseView("matches")}
+                className="flex items-center gap-2"
+              >
+                <Users className="h-4 w-4" />
+                Matches
+              </Button>
+              <Button
+                variant={browseView === "all" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setBrowseView("all")}
+                className="flex items-center gap-2"
+              >
+                <List className="h-4 w-4" />
+                All Trainers
+              </Button>
+            </div>
+          </div>
+
+          {/* Recommended View */}
+          {browseView === "recommended" && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-xl font-semibold mb-4">Recommended For You</h2>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filterTrainers(topMatches).map((match) => (
+                    <div key={match.trainer.id} className="relative">
+                      <TrainerCard
+                        trainer={match.trainer}
+                        onViewProfile={handleViewProfile}
+                        matchScore={match.score}
+                        matchReasons={match.matchReasons}
+                        matchDetails={match.matchDetails}
+                      />
+                      <Badge 
+                        className="absolute top-2 right-2 bg-primary text-primary-foreground"
+                      >
+                        ⚡{match.score}% Match
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {goodMatches.length > 0 && (
+                <div>
+                  <h2 className="text-xl font-semibold mb-4">Good Matches</h2>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filterTrainers(goodMatches).slice(0, 6).map((match) => (
+                      <TrainerCard
+                        key={match.trainer.id}
+                        trainer={match.trainer}
+                        onViewProfile={handleViewProfile}
+                        matchScore={match.score}
+                        matchReasons={match.matchReasons}
+                        matchDetails={match.matchDetails}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Matches View */}
+          {browseView === "matches" && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold">Mutual Matches</h2>
+                <Badge variant="outline">{mutualMatches.length} matches</Badge>
+              </div>
+              {mutualMatches.length > 0 ? (
+                <div className="space-y-4">
+                  <div className="text-sm text-muted-foreground">
+                    These trainers are interested in working with you! You can save them to your shortlist.
+                  </div>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {mutualMatches.map((match) => (
+                      <div key={match.trainer.id} className="relative">
+                        <TrainerCard
+                          trainer={match.trainer}
+                          onViewProfile={handleViewProfile}
+                          matchScore={match.score}
+                          matchReasons={match.matchReasons}
+                          matchDetails={match.matchDetails}
+                        />
+                        <Badge 
+                          className="absolute top-2 right-2 bg-green-500 text-white"
+                        >
+                          Mutual Match!
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No mutual matches yet</h3>
+                    <p className="text-muted-foreground mb-4">
+                      Keep exploring trainers! Mutual matches appear when trainers are also interested in working with you.
+                    </p>
+                    <Button onClick={() => setBrowseView('recommended')}>
+                      View Recommended Trainers
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          )}
+
+          {/* All Trainers View */}
+          {browseView === "all" && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold">All Trainers</h2>
+                <Badge variant="outline">{filterTrainers(matchedTrainers).length} trainers</Badge>
+              </div>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filterTrainers(matchedTrainers).map((match) => (
                   <TrainerCard
+                    key={match.trainer.id}
                     trainer={match.trainer}
                     onViewProfile={handleViewProfile}
                     matchScore={match.score}
                     matchReasons={match.matchReasons}
                     matchDetails={match.matchDetails}
                   />
-                  <Badge 
-                    className="absolute top-2 right-2 bg-primary text-primary-foreground"
-                  >
-                    ⚡{match.score}% Match
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {goodMatches.length > 0 && (
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Good Matches</h2>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filterTrainers(goodMatches).slice(0, 6).map((match) => (
-                <TrainerCard
-                  key={match.trainer.id}
-                  trainer={match.trainer}
-                  onViewProfile={handleViewProfile}
-                  matchScore={match.score}
-                  matchReasons={match.matchReasons}
-                  matchDetails={match.matchDetails}
-                />
                 ))}
               </div>
             </div>
           )}
-        </TabsContent>
-
-        {/* List View */}
-        <TabsContent value="list" className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">All Trainers</h2>
-            <Badge variant="outline">{filterTrainers(matchedTrainers).length} trainers</Badge>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filterTrainers(matchedTrainers).map((match) => (
-                <TrainerCard
-                  key={match.trainer.id}
-                  trainer={match.trainer}
-                  onViewProfile={handleViewProfile}
-                  matchScore={match.score}
-                  matchReasons={match.matchReasons}
-                  matchDetails={match.matchDetails}
-                />
-            ))}
-          </div>
         </TabsContent>
 
         {/* Saved Trainers */}
@@ -483,54 +564,8 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                 <p className="text-muted-foreground mb-4">
                   Like trainers by clicking the heart icon to save them for later and build your shortlist
                 </p>
-                <Button onClick={() => setActiveTab('recommended')}>
+                <Button onClick={() => setBrowseView('recommended')}>
                   Explore Trainers
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-
-        {/* Matched Coaches */}
-        <TabsContent value="matched" className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Mutual Matches</h2>
-            <Badge variant="outline">{mutualMatches.length} matches</Badge>
-          </div>
-          {mutualMatches.length > 0 ? (
-            <div className="space-y-4">
-              <div className="text-sm text-muted-foreground">
-                These trainers are interested in working with you! You can now book discovery calls or send messages.
-              </div>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {mutualMatches.map((match) => (
-                  <div key={match.trainer.id} className="relative">
-                    <TrainerCard
-                      trainer={match.trainer}
-                      onViewProfile={handleViewProfile}
-                      matchScore={match.score}
-                      matchReasons={match.matchReasons}
-                      matchDetails={match.matchDetails}
-                    />
-                    <Badge 
-                      className="absolute top-2 right-2 bg-green-500 text-white"
-                    >
-                      Mutual Match!
-                    </Badge>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <Card>
-              <CardContent className="p-8 text-center">
-                <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No mutual matches yet</h3>
-                <p className="text-muted-foreground mb-4">
-                  Keep swiping and liking trainers to increase your chances of mutual matches
-                </p>
-                <Button onClick={() => navigate('/discovery')}>
-                  Start Swiping
                 </Button>
               </CardContent>
             </Card>
