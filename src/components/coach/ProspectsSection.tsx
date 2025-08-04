@@ -61,7 +61,9 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
       }
 
       if (!shortlistedData || shortlistedData.length === 0) {
+        console.log('No shortlisted data found for trainer:', profile.id);
         setProspects([]);
+        onCountChange?.(0);
         return;
       }
 
