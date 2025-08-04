@@ -172,8 +172,11 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
   };
 
   const handleViewProfile = (trainerId: string) => {
-    console.log("View profile:", trainerId);
-    // This would navigate to trainer detail page
+    navigate(`/trainer/${trainerId}`);
+  };
+
+  const handleMessage = (trainerId: string) => {
+    navigate(`/messages/${trainerId}`);
   };
 
   return (
@@ -268,6 +271,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                   <TrainerCard
                     trainer={match.trainer}
                     onViewProfile={handleViewProfile}
+                    onMessage={handleMessage}
                     matchScore={match.score}
                     matchReasons={match.matchReasons}
                     matchDetails={match.matchDetails}
@@ -291,6 +295,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                     key={match.trainer.id}
                     trainer={match.trainer}
                     onViewProfile={handleViewProfile}
+                    onMessage={handleMessage}
                     matchScore={match.score}
                     matchReasons={match.matchReasons}
                     matchDetails={match.matchDetails}
@@ -313,6 +318,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                 key={match.trainer.id}
                 trainer={match.trainer}
                 onViewProfile={handleViewProfile}
+                onMessage={handleMessage}
                 matchScore={match.score}
                 matchReasons={match.matchReasons}
                 matchDetails={match.matchDetails}
@@ -334,6 +340,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                   key={match.trainer.id}
                   trainer={match.trainer}
                   onViewProfile={handleViewProfile}
+                  onMessage={handleMessage}
                   matchScore={match.score}
                   matchReasons={match.matchReasons}
                   matchDetails={match.matchDetails}
