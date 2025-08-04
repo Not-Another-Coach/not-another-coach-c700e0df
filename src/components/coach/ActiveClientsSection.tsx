@@ -22,7 +22,11 @@ interface ActiveClient {
   };
 }
 
-export function ActiveClientsSection() {
+interface ActiveClientsSectionProps {
+  onCountChange?: (count: number) => void;
+}
+
+export function ActiveClientsSection({ onCountChange }: ActiveClientsSectionProps) {
   const { profile } = useProfile();
   const [activeClients, setActiveClients] = useState<ActiveClient[]>([]);
   const [loading, setLoading] = useState(true);
@@ -74,6 +78,7 @@ export function ActiveClientsSection() {
       }));
 
       setActiveClients(mergedData as ActiveClient[]);
+      onCountChange?.(mergedData.length);
     } catch (error) {
       console.error('Error fetching active clients:', error);
     } finally {

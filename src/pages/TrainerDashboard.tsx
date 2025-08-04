@@ -60,6 +60,8 @@ const TrainerDashboard = () => {
   const [availabilityStatus, setAvailabilityStatus] = useState<'accepting' | 'waitlist' | 'unavailable'>('accepting');
   const [nextAvailableDate, setNextAvailableDate] = useState<Date | undefined>();
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [prospectsCount, setProspectsCount] = useState(0);
+  const [activeClientsCount, setActiveClientsCount] = useState(0);
 
   // Sync availability status with profile data
   useEffect(() => {
@@ -275,9 +277,9 @@ const TrainerDashboard = () => {
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview">Dashboard</TabsTrigger>
-            <TabsTrigger value="prospects">Prospects</TabsTrigger>
+            <TabsTrigger value="prospects">Prospects ({prospectsCount})</TabsTrigger>
             <TabsTrigger value="waitlist">Waitlist ({waitlistEntries?.length || 0})</TabsTrigger>
-            <TabsTrigger value="clients">Active Clients</TabsTrigger>
+            <TabsTrigger value="clients">Active Clients ({activeClientsCount})</TabsTrigger>
           </TabsList>
           
           <TabsContent value="overview" className="mt-6">
@@ -684,7 +686,7 @@ const TrainerDashboard = () => {
           </TabsContent>
           
           <TabsContent value="prospects" className="mt-6">
-            <ProspectsSection />
+            <ProspectsSection onCountChange={setProspectsCount} />
           </TabsContent>
           
           <TabsContent value="waitlist" className="mt-6">
@@ -692,7 +694,7 @@ const TrainerDashboard = () => {
           </TabsContent>
           
           <TabsContent value="clients" className="mt-6">
-            <ActiveClientsSection />
+            <ActiveClientsSection onCountChange={setActiveClientsCount} />
           </TabsContent>
         </Tabs>
       </div>

@@ -25,7 +25,11 @@ interface Prospect {
   engagement_stage?: string;
 }
 
-export function ProspectsSection() {
+interface ProspectsSectionProps {
+  onCountChange?: (count: number) => void;
+}
+
+export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
   const { profile } = useProfile();
   const [prospects, setProspects] = useState<Prospect[]>([]);
   const [loading, setLoading] = useState(true);
@@ -98,6 +102,7 @@ export function ProspectsSection() {
       }));
 
       setProspects(mergedData as Prospect[]);
+      onCountChange?.(mergedData.length);
     } catch (error) {
       console.error('Error fetching prospects:', error);
     } finally {
