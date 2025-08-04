@@ -2,13 +2,14 @@ import { useShortlistedTrainers } from '@/hooks/useShortlistedTrainers';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Star, Phone, Trash2 } from 'lucide-react';
+import { ArrowLeft, Star, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { StartConversationButton } from '@/components/StartConversationButton';
+import { BookDiscoveryCallButton } from '@/components/discovery-call/BookDiscoveryCallButton';
 
 export default function Shortlist() {
   const navigate = useNavigate();
-  const { shortlistedTrainers, loading, removeFromShortlist, bookDiscoveryCall } = useShortlistedTrainers();
+  const { shortlistedTrainers, loading, removeFromShortlist } = useShortlistedTrainers();
 
   if (loading) {
     return (
@@ -96,15 +97,16 @@ export default function Shortlist() {
                         size="sm"
                         variant="outline"
                       />
-                      <Button 
-                        size="sm" 
+                      <BookDiscoveryCallButton 
+                        trainer={{
+                          id: shortlisted.trainer_id,
+                          name: `Trainer ${shortlisted.trainer_id}`,
+                          firstName: `Trainer`,
+                          lastName: shortlisted.trainer_id
+                        }}
                         variant="default"
-                        onClick={() => bookDiscoveryCall(shortlisted.trainer_id)}
-                        disabled={!!shortlisted.discovery_call_booked_at}
-                      >
-                        <Phone className="h-4 w-4 mr-2" />
-                        {shortlisted.discovery_call_booked_at ? 'Call Booked' : 'Book Call'}
-                      </Button>
+                        size="sm"
+                      />
                     </div>
 
                     {shortlisted.discovery_call_booked_at && (
