@@ -358,7 +358,6 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                   <TrainerCard
                     trainer={match.trainer}
                     onViewProfile={handleViewProfile}
-                    onMessage={handleMessage}
                     matchScore={match.score}
                     matchReasons={match.matchReasons}
                     matchDetails={match.matchDetails}
@@ -378,15 +377,14 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
               <h2 className="text-xl font-semibold mb-4">Good Matches</h2>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filterTrainers(goodMatches).slice(0, 6).map((match) => (
-                  <TrainerCard
-                    key={match.trainer.id}
-                    trainer={match.trainer}
-                    onViewProfile={handleViewProfile}
-                    onMessage={handleMessage}
-                    matchScore={match.score}
-                    matchReasons={match.matchReasons}
-                    matchDetails={match.matchDetails}
-                  />
+                <TrainerCard
+                  key={match.trainer.id}
+                  trainer={match.trainer}
+                  onViewProfile={handleViewProfile}
+                  matchScore={match.score}
+                  matchReasons={match.matchReasons}
+                  matchDetails={match.matchDetails}
+                />
                 ))}
               </div>
             </div>
@@ -401,15 +399,14 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filterTrainers(matchedTrainers).map((match) => (
-              <TrainerCard
-                key={match.trainer.id}
-                trainer={match.trainer}
-                onViewProfile={handleViewProfile}
-                onMessage={handleMessage}
-                matchScore={match.score}
-                matchReasons={match.matchReasons}
-                matchDetails={match.matchDetails}
-              />
+                <TrainerCard
+                  key={match.trainer.id}
+                  trainer={match.trainer}
+                  onViewProfile={handleViewProfile}
+                  matchScore={match.score}
+                  matchReasons={match.matchReasons}
+                  matchDetails={match.matchDetails}
+                />
             ))}
           </div>
         </TabsContent>
@@ -439,7 +436,6 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                   <TrainerCard
                     trainer={match.trainer}
                     onViewProfile={handleViewProfile}
-                    onMessage={handleMessage}
                     matchScore={match.score}
                     matchReasons={match.matchReasons}
                     matchDetails={match.matchDetails}
