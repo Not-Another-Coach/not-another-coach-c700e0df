@@ -11,8 +11,10 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { TrainerCard } from "@/components/TrainerCard";
 import { SwipeableCard } from "@/components/SwipeableCard";
+import { ComparisonView } from "@/components/ComparisonView";
 import { toast } from "sonner";
 import { 
   Search, 
@@ -27,7 +29,8 @@ import {
   MapPin,
   Phone,
   MessageCircle,
-  X
+  X,
+  BarChart3
 } from "lucide-react";
 import trainerSarah from "@/assets/trainer-sarah.jpg";
 import trainerMike from "@/assets/trainer-mike.jpg";
@@ -116,6 +119,10 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
   const [selectedAvailability, setSelectedAvailability] = useState("all");
   const [activeTab, setActiveTab] = useState("browse");
   const [browseView, setBrowseView] = useState("recommended"); // Sub-navigation for browse tab
+  
+  // Comparison functionality
+  const [selectedForComparison, setSelectedForComparison] = useState<string[]>([]);
+  const [showComparison, setShowComparison] = useState(false);
 
   // Get enhanced matched trainers using client survey data
   const clientSurveyData = {
@@ -262,6 +269,44 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
       toast.success(`${trainerName} removed from shortlist but kept in saved trainers`);
     }
   };
+
+  // Comparison functionality
+  const handleComparisonToggle = (trainerId: string) => {
+    setSelectedForComparison(prev => 
+      prev.includes(trainerId) 
+        ? prev.filter(id => id !== trainerId)
+        : prev.length < 4 
+          ? [...prev, trainerId] 
+          : prev
+    );
+  };
+
+  const getSelectedTrainersData = () => {
+    return allTrainers.filter(trainer => selectedForComparison.includes(trainer.id));
+  };
+
+  const handleStartComparison = () => {
+    if (selectedForComparison.length < 2) {
+      toast.error('Please select at least 2 trainers to compare');
+      return;
+    }
+    setShowComparison(true);
+  };
+
+  const handleCloseComparison = () => {
+    setShowComparison(false);
+    setSelectedForComparison([]);
+  };
+
+  // Show comparison view if active
+  if (showComparison) {
+    return (
+      <ComparisonView 
+        trainers={getSelectedTrainersData()} 
+        onClose={handleCloseComparison}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -494,11 +539,22 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
 
         {/* Saved Trainers */}
         <TabsContent value="saved" className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
             <h2 className="text-xl font-semibold">Your Saved Trainers</h2>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <Badge variant="outline">{savedTrainers.length} saved</Badge>
               <Badge variant="outline">{shortlistCount}/4 shortlisted</Badge>
+              {selectedForComparison.length >= 2 && (
+                <Button 
+                  variant="default" 
+                  size="sm"
+                  onClick={handleStartComparison}
+                  className="flex items-center gap-2"
+                >
+                  <BarChart3 className="h-4 w-4" />
+                  Compare ({selectedForComparison.length})
+                </Button>
+              )}
               <Button 
                 variant="outline" 
                 size="sm"
@@ -514,6 +570,16 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {savedTrainers.map((match) => (
                 <div key={match.trainer.id} className="relative">
+                  {/* Comparison Checkbox */}
+                  <div className="absolute top-2 left-2 z-10">
+                    <Checkbox
+                      checked={selectedForComparison.includes(match.trainer.id)}
+                      onCheckedChange={() => handleComparisonToggle(match.trainer.id)}
+                      disabled={!selectedForComparison.includes(match.trainer.id) && selectedForComparison.length >= 4}
+                      className="bg-white/90 backdrop-blur border-2"
+                    />
+                  </div>
+
                   <TrainerCard
                     trainer={match.trainer}
                     onViewProfile={handleViewProfile}
@@ -574,9 +640,22 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
 
         {/* Shortlisted Trainers */}
         <TabsContent value="shortlisted" className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
             <h2 className="text-xl font-semibold">Your Shortlisted Trainers</h2>
-            <Badge variant="outline">{shortlistCount}/4 shortlisted</Badge>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Badge variant="outline">{shortlistCount}/4 shortlisted</Badge>
+              {selectedForComparison.length >= 2 && (
+                <Button 
+                  variant="default" 
+                  size="sm"
+                  onClick={handleStartComparison}
+                  className="flex items-center gap-2"
+                >
+                  <BarChart3 className="h-4 w-4" />
+                  Compare ({selectedForComparison.length})
+                </Button>
+              )}
+            </div>
           </div>
           {shortlistedTrainers.length > 0 ? (
             <div className="space-y-4">
@@ -586,6 +665,16 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {shortlistedTrainers.map((match) => (
                   <div key={match.trainer.id} className="relative">
+                    {/* Comparison Checkbox */}
+                    <div className="absolute top-2 left-2 z-10">
+                      <Checkbox
+                        checked={selectedForComparison.includes(match.trainer.id)}
+                        onCheckedChange={() => handleComparisonToggle(match.trainer.id)}
+                        disabled={!selectedForComparison.includes(match.trainer.id) && selectedForComparison.length >= 4}
+                        className="bg-white/90 backdrop-blur border-2"
+                      />
+                    </div>
+
                     <TrainerCard
                       trainer={match.trainer}
                       onViewProfile={handleViewProfile}
@@ -603,7 +692,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="absolute top-2 left-2 bg-white/90 backdrop-blur hover:bg-red-50 hover:text-red-600"
+                      className="absolute top-12 left-2 bg-white/90 backdrop-blur hover:bg-red-50 hover:text-red-600"
                       onClick={() => handleRemoveFromShortlist(match.trainer.id, match.trainer.name)}
                     >
                       <X className="h-4 w-4" />
