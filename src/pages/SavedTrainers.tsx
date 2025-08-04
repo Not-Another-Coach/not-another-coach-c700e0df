@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSavedTrainers } from '@/hooks/useSavedTrainers';
 import { useShortlistedTrainers } from '@/hooks/useShortlistedTrainers';
@@ -10,6 +10,7 @@ import { ArrowLeft, Heart, Scale, Trash2, Star, MessageCircle, Phone } from 'luc
 import { TrainerCard, Trainer } from '@/components/TrainerCard';
 import { ComparisonView } from '@/components/ComparisonView';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 // Sample trainer data (in real app, this would come from API)
 import trainerSarah from "@/assets/trainer-sarah.jpg";
@@ -86,12 +87,69 @@ export default function SavedTrainers() {
   const { shortlistTrainer, isShortlisted, shortlistCount, canShortlistMore } = useShortlistedTrainers();
   const [selectedForComparison, setSelectedForComparison] = useState<string[]>([]);
   const [showComparison, setShowComparison] = useState(false);
+  const [allTrainers, setAllTrainers] = useState<(Trainer & { savedInfo: any })[]>([]);
+  const [loadingTrainers, setLoadingTrainers] = useState(true);
 
-  // Get trainer details for saved trainers
-  const savedTrainerDetails = savedTrainers.map(saved => {
-    const trainer = sampleTrainers.find(t => t.id === saved.trainer_id);
-    return trainer ? { ...trainer, savedInfo: saved } : null;
-  }).filter(Boolean) as (Trainer & { savedInfo: any })[];
+  // Fetch real trainer data from database and combine with sample data
+  useEffect(() => {
+    const fetchTrainerDetails = async () => {
+      if (savedTrainers.length === 0) {
+        setAllTrainers([]);
+        setLoadingTrainers(false);
+        return;
+      }
+
+      try {
+        const trainerDetails: (Trainer & { savedInfo: any })[] = [];
+        
+        // Process each saved trainer
+        for (const saved of savedTrainers) {
+          // First check sample data
+          const sampleTrainer = sampleTrainers.find(t => t.id === saved.trainer_id);
+          
+          if (sampleTrainer) {
+            trainerDetails.push({ ...sampleTrainer, savedInfo: saved });
+          } else {
+            // If not in sample data, fetch from database
+            const { data: dbTrainer } = await supabase
+              .from('profiles')
+              .select('id, first_name, last_name, bio, location, specializations, training_types, hourly_rate, rating, total_ratings, profile_photo_url, is_verified, tagline')
+              .eq('id', saved.trainer_id)
+              .eq('user_type', 'trainer')
+              .single();
+
+            if (dbTrainer) {
+              // Convert database trainer to Trainer format
+              const convertedTrainer: Trainer = {
+                id: dbTrainer.id,
+                name: `${dbTrainer.first_name} ${dbTrainer.last_name}`,
+                specialties: dbTrainer.specializations || [],
+                rating: Number(dbTrainer.rating) || 0,
+                reviews: dbTrainer.total_ratings || 0,
+                experience: "Professional trainer", // Default since we don't have this field
+                location: dbTrainer.location || "Location not specified",
+                hourlyRate: Number(dbTrainer.hourly_rate) || 0,
+                image: dbTrainer.profile_photo_url || "/placeholder.svg",
+                certifications: [], // Default since we don't have this field
+                description: dbTrainer.bio || "Professional fitness trainer",
+                availability: "Contact for availability", // Default
+                trainingType: dbTrainer.training_types || ["In-Person"]
+              };
+              trainerDetails.push({ ...convertedTrainer, savedInfo: saved });
+            }
+          }
+        }
+
+        setAllTrainers(trainerDetails);
+      } catch (error) {
+        console.error('Error fetching trainer details:', error);
+      } finally {
+        setLoadingTrainers(false);
+      }
+    };
+
+    fetchTrainerDetails();
+  }, [savedTrainers]);
 
   const handleToggleComparison = (trainerId: string, checked: boolean) => {
     if (checked) {
@@ -122,10 +180,10 @@ export default function SavedTrainers() {
   };
 
   const selectedTrainers = selectedForComparison.map(id => 
-    sampleTrainers.find(t => t.id === id)
+    allTrainers.find(t => t.id === id)
   ).filter(Boolean) as Trainer[];
 
-  if (loading) {
+  if (loading || loadingTrainers) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -162,7 +220,7 @@ export default function SavedTrainers() {
                   Saved Trainers
                 </h1>
                 <p className="text-muted-foreground">
-                  {savedTrainerDetails.length} trainer{savedTrainerDetails.length !== 1 ? 's' : ''} saved • Trainers you liked or swiped right on
+                  {allTrainers.length} trainer{allTrainers.length !== 1 ? 's' : ''} saved • Trainers you liked or swiped right on
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
                   Shortlisted: {shortlistCount}/4 trainers
@@ -179,14 +237,14 @@ export default function SavedTrainers() {
           </div>
 
           {/* Comparison Selection Info */}
-          {savedTrainerDetails.length >= 2 && (
+          {allTrainers.length >= 2 && (
             <div className="mt-4 p-3 bg-primary/5 rounded-lg">
               <p className="text-sm text-muted-foreground mb-2">
                 Select 2-4 trainers to compare them side by side
               </p>
               <div className="flex flex-wrap gap-2">
                 {selectedForComparison.map(id => {
-                  const trainer = sampleTrainers.find(t => t.id === id);
+                  const trainer = allTrainers.find(t => t.id === id);
                   return trainer ? (
                     <Badge key={id} variant="secondary" className="flex items-center gap-1">
                       {trainer.name}
@@ -206,7 +264,7 @@ export default function SavedTrainers() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-6">
-        {savedTrainerDetails.length === 0 ? (
+        {allTrainers.length === 0 ? (
           <Card className="text-center py-12">
             <CardContent>
               <Heart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -221,10 +279,10 @@ export default function SavedTrainers() {
           </Card>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {savedTrainerDetails.map((trainer) => (
+            {allTrainers.map((trainer) => (
               <div key={trainer.id} className="relative">
                 {/* Comparison Checkbox */}
-                {savedTrainerDetails.length >= 2 && (
+                {allTrainers.length >= 2 && (
                   <div className="absolute top-4 left-4 z-10">
                     <div className="bg-white/90 backdrop-blur rounded-full p-2 shadow-sm">
                       <Checkbox
