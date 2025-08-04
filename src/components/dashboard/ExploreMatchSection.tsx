@@ -15,6 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { TrainerCard } from "@/components/TrainerCard";
 import { SwipeableCard } from "@/components/SwipeableCard";
 import { ComparisonView } from "@/components/ComparisonView";
+import { BookDiscoveryCallButton } from "@/components/discovery-call/BookDiscoveryCallButton";
 import { toast } from "sonner";
 import { 
   Search, 
@@ -108,7 +109,7 @@ const sampleTrainers = [
 export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
   const navigate = useNavigate();
   const { savedTrainerIds, unsaveTrainer } = useSavedTrainers();
-  const { shortlistTrainer, isShortlisted, shortlistCount, canShortlistMore, removeFromShortlist } = useShortlistedTrainers();
+  const { shortlistTrainer, isShortlisted, shortlistCount, canShortlistMore, removeFromShortlist, bookDiscoveryCall } = useShortlistedTrainers();
   
   // Use real trainers from database
   const { trainers: realTrainers, loading: trainersLoading } = useRealTrainers();
@@ -600,10 +601,15 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                             <MessageCircle className="h-3 w-3 mr-1" />
                             Chat
                           </Button>
-                          <Button size="sm" variant="outline" className="text-xs">
-                            <Phone className="h-3 w-3 mr-1" />
-                            Book Call
-                          </Button>
+                          <BookDiscoveryCallButton 
+                            trainer={{
+                              id: match.trainer.id,
+                              name: match.trainer.name
+                            }}
+                            size="sm"
+                            variant="outline"
+                            className="text-xs"
+                          />
                         </div>
                       </div>
                     ) : (
@@ -717,14 +723,15 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                         <MessageCircle className="h-3 w-3" />
                         Chat
                       </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        className="flex items-center gap-1 text-xs"
-                      >
-                        <Phone className="h-3 w-3" />
-                        Book Call
-                      </Button>
+                      <BookDiscoveryCallButton 
+                        trainer={{
+                          id: match.trainer.id,
+                          name: match.trainer.name
+                        }}
+                        size="sm"
+                        variant="outline"
+                        className="text-xs"
+                      />
                     </div>
                   </div>
                 ))}
