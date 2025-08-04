@@ -231,7 +231,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
 
       {/* Tabs for different views */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="recommended" className="flex items-center gap-2">
             <Target className="h-4 w-4" />
             <span className="hidden sm:inline">Recommended</span>
@@ -247,10 +247,6 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
           <TabsTrigger value="matched" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             <span className="hidden sm:inline">Matched</span>
-          </TabsTrigger>
-          <TabsTrigger value="swipe" className="flex items-center gap-2">
-            <Shuffle className="h-4 w-4" />
-            <span className="hidden sm:inline">Swipe</span>
           </TabsTrigger>
         </TabsList>
 
@@ -398,40 +394,6 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
           )}
         </TabsContent>
 
-        {/* Swipe Cards */}
-        <TabsContent value="swipe" className="space-y-4">
-          <div className="text-center space-y-4">
-            <h2 className="text-xl font-semibold">Quick Swipe Mode</h2>
-            <p className="text-muted-foreground">
-              Swipe right to like, left to pass. Find your perfect match!
-            </p>
-          </div>
-          
-          {matchedTrainers.length > 0 ? (
-            <div className="max-w-md mx-auto">
-              <SwipeableCard
-                trainer={matchedTrainers[0].trainer}
-                onSwipe={handleSwipe}
-                matchScore={matchedTrainers[0].score}
-                matchReasons={matchedTrainers[0].matchReasons}
-                index={0}
-              />
-            </div>
-          ) : (
-            <Card>
-              <CardContent className="p-8 text-center">
-                <Shuffle className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No more trainers to swipe</h3>
-                <p className="text-muted-foreground mb-4">
-                  You've seen all available trainers. Check back later for new matches!
-                </p>
-                <Button onClick={() => setActiveTab('recommended')}>
-                  View Recommended
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
       </Tabs>
     </div>
   );
