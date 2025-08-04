@@ -227,7 +227,7 @@ export const TrainerCard = ({ trainer, onViewProfile, matchScore = 0, matchReaso
             variant="hero" 
             size="sm" 
             className="flex-1"
-            onClick={() => onViewProfile(trainer.id)}
+            onClick={() => window.location.href = `/trainer/${trainer.id}`}
           >
             View Profile
           </Button>
