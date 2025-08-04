@@ -449,6 +449,20 @@ const TrainerProfileSetup = () => {
     return Math.round((currentStep / totalSteps) * 100);
   };
 
+  const calculateOverallCompletion = () => {
+    let completedSteps = 0;
+    for (let i = 1; i <= totalSteps; i++) {
+      if (getStepCompletion(i) === 'completed') {
+        completedSteps++;
+      }
+    }
+    return Math.round((completedSteps / totalSteps) * 100);
+  };
+
+  const isFullyComplete = () => {
+    return calculateOverallCompletion() === 100;
+  };
+
   const renderCurrentSection = () => {
     // Create stable props object
     const commonProps = {
@@ -520,76 +534,93 @@ const TrainerProfileSetup = () => {
         </div>
       </div>
 
-      {/* Progress Bar */}
-      <div className="bg-card border-b p-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center gap-4 mb-2">
-            <span className="text-sm font-medium">
-              {calculateProgress()}% Complete
-            </span>
-            <div className="flex-1">
-              <Progress value={calculateProgress()} className="h-2" />
+      {/* Progress Bar - only show if not fully complete */}
+      {!isFullyComplete() && (
+        <div className="bg-card border-b p-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex items-center gap-4 mb-2">
+              <span className="text-sm font-medium">
+                {calculateOverallCompletion()}% Complete
+              </span>
+              <div className="flex-1">
+                <Progress value={calculateOverallCompletion()} className="h-2" />
+              </div>
+            </div>
+            
+            {/* Step indicators */}
+            <div className="flex justify-between mt-4">
+              {stepTitles.map((title, index) => {
+                const stepNumber = index + 1;
+                const completion = getStepCompletion(stepNumber);
+                const isCurrent = stepNumber === currentStep;
+                
+                let statusColor = 'text-muted-foreground';
+                let borderColor = 'border-muted-foreground';
+                let bgColor = 'bg-transparent';
+                let showIcon = false;
+                let isPartial = false;
+
+                if (completion === 'completed') {
+                  statusColor = 'text-green-600';
+                  borderColor = 'border-green-600';
+                  bgColor = 'bg-green-600';
+                  showIcon = true;
+                } else if (completion === 'partial') {
+                  statusColor = 'text-amber-600';
+                  borderColor = 'border-amber-600';
+                  bgColor = 'bg-amber-600';
+                  showIcon = true;
+                  isPartial = true;
+                } else if (isCurrent) {
+                  statusColor = 'text-primary';
+                  borderColor = 'border-primary';
+                  bgColor = 'bg-primary';
+                }
+                
+                return (
+                  <div
+                    key={stepNumber}
+                    className={`flex flex-col items-center text-xs cursor-pointer ${statusColor}`}
+                    onClick={() => setCurrentStep(stepNumber)}
+                  >
+                    <div
+                      className={`w-8 h-8 rounded-full border-2 flex items-center justify-center mb-1 ${borderColor} ${
+                        completion === 'completed' || completion === 'partial' || isCurrent 
+                          ? `${bgColor} text-white`
+                          : 'bg-transparent'
+                      }`}
+                    >
+                      {showIcon ? (
+                        isPartial ? <AlertCircle className="h-4 w-4" /> : <CheckCircle className="h-4 w-4" />
+                      ) : (
+                        stepNumber
+                      )}
+                    </div>
+                    <span className="text-center max-w-20 leading-tight">
+                      {title}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
-          
-          {/* Step indicators */}
-          <div className="flex justify-between mt-4">
-            {stepTitles.map((title, index) => {
-              const stepNumber = index + 1;
-              const completion = getStepCompletion(stepNumber);
-              const isCurrent = stepNumber === currentStep;
-              
-              let statusColor = 'text-muted-foreground';
-              let borderColor = 'border-muted-foreground';
-              let bgColor = 'bg-transparent';
-              let showIcon = false;
-              let isPartial = false;
+        </div>
+      )}
 
-              if (completion === 'completed') {
-                statusColor = 'text-green-600';
-                borderColor = 'border-green-600';
-                bgColor = 'bg-green-600';
-                showIcon = true;
-              } else if (completion === 'partial') {
-                statusColor = 'text-amber-600';
-                borderColor = 'border-amber-600';
-                bgColor = 'bg-amber-600';
-                showIcon = true;
-                isPartial = true;
-              } else if (isCurrent) {
-                statusColor = 'text-primary';
-                borderColor = 'border-primary';
-                bgColor = 'bg-primary';
-              }
-              
-              return (
-                <div
-                  key={stepNumber}
-                  className={`flex flex-col items-center text-xs cursor-pointer ${statusColor}`}
-                  onClick={() => setCurrentStep(stepNumber)}
-                >
-                  <div
-                    className={`w-8 h-8 rounded-full border-2 flex items-center justify-center mb-1 ${borderColor} ${
-                      completion === 'completed' || completion === 'partial' || isCurrent 
-                        ? `${bgColor} text-white`
-                        : 'bg-transparent'
-                    }`}
-                  >
-                    {showIcon ? (
-                      isPartial ? <AlertCircle className="h-4 w-4" /> : <CheckCircle className="h-4 w-4" />
-                    ) : (
-                      stepNumber
-                    )}
-                  </div>
-                  <span className="text-center max-w-20 leading-tight">
-                    {title}
-                  </span>
-                </div>
-              );
-            })}
+      {/* Current Step Indicator when progress bar is hidden */}
+      {isFullyComplete() && (
+        <div className="bg-card border-b p-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-sm font-medium text-green-600">✓ Profile Complete</span>
+              <span className="text-sm text-muted-foreground">•</span>
+              <span className="text-sm text-muted-foreground">
+                Currently editing: {stepTitles[currentStep - 1]}
+              </span>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Main Content */}
       <div className="max-w-4xl mx-auto p-6">

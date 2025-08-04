@@ -14,7 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { 
   Users, 
-  Calendar, 
+  CalendarIcon, 
   Edit3, 
   Star, 
   TrendingUp, 
@@ -39,6 +39,10 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 const TrainerDashboard = () => {
   const { user, signOut, loading } = useAuth();
@@ -47,7 +51,8 @@ const TrainerDashboard = () => {
   const { isAdmin } = useUserRoles();
   const navigate = useNavigate();
   const [availabilityStatus, setAvailabilityStatus] = useState<'accepting' | 'waitlist' | 'unavailable'>('accepting');
-  const [nextAvailableDate, setNextAvailableDate] = useState('');
+  const [nextAvailableDate, setNextAvailableDate] = useState<Date | undefined>();
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   // Sync availability status with profile data
   useEffect(() => {
@@ -64,7 +69,7 @@ const TrainerDashboard = () => {
       
       // Initialize next available date from profile
       if ((profile as any).next_available_date) {
-        setNextAvailableDate((profile as any).next_available_date);
+        setNextAvailableDate(new Date((profile as any).next_available_date));
       }
     }
   }, [profile?.client_status]);
@@ -116,7 +121,13 @@ const TrainerDashboard = () => {
 
   const handleStatusChange = async (status: 'accepting' | 'waitlist' | 'unavailable') => {
     console.log('Changing status from', availabilityStatus, 'to', status);
+    const previousStatus = availabilityStatus;
     setAvailabilityStatus(status);
+    
+    // Show date picker when moving to waitlist for the first time
+    if (status === 'waitlist' && previousStatus !== 'waitlist' && !nextAvailableDate) {
+      setShowDatePicker(true);
+    }
     
     // Map status to client_status enum
     const clientStatusMap = {
@@ -129,9 +140,12 @@ const TrainerDashboard = () => {
     console.log('Status update result:', result);
   };
 
-  const handleNextAvailableDateChange = async (date: string) => {
+  const handleNextAvailableDateChange = async (date: Date | undefined) => {
     setNextAvailableDate(date);
-    await updateProfile({ next_available_date: date || null } as any);
+    setShowDatePicker(false);
+    
+    const dateString = date ? format(date, 'yyyy-MM-dd') : null;
+    await updateProfile({ next_available_date: dateString } as any);
   };
 
   if (loading || profileLoading) {
@@ -181,12 +195,12 @@ const TrainerDashboard = () => {
               {/* Profile Status */}
               <div className="flex items-center gap-2">
                 {isProfileComplete ? (
-                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                 ) : (
                   <div className="w-3 h-3 bg-amber-500 rounded-full animate-pulse"></div>
                 )}
                 <span className="text-sm font-medium">
-                  Profile {profileCompletion}% Complete
+                  {isProfileComplete ? 'Profile Complete' : `Profile ${profileCompletion}% Complete`}
                 </span>
               </div>
               
@@ -214,6 +228,19 @@ const TrainerDashboard = () => {
                 )}
               </div>
               
+              {nextAvailableDate && availabilityStatus === 'waitlist' && (
+                <>
+                  <Separator orientation="vertical" className="h-4" />
+                  
+                  <div className="flex items-center gap-2">
+                    <CalendarIcon className="w-3 h-3 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">
+                      Available: {format(nextAvailableDate, 'MMM d, yyyy')}
+                    </span>
+                  </div>
+                </>
+              )}
+               
               <Separator orientation="vertical" className="h-4" />
               
               {/* Next Billing */}
@@ -407,17 +434,35 @@ const TrainerDashboard = () => {
                   
                   {availabilityStatus === 'waitlist' && (
                     <div className="space-y-2">
-                      <Label htmlFor="next-available" className="text-sm font-medium">
+                      <Label className="text-sm font-medium">
                         Next Available Date (optional)
                       </Label>
-                      <Input
-                        id="next-available"
-                        type="date"
-                        value={nextAvailableDate}
-                        onChange={(e) => handleNextAvailableDateChange(e.target.value)}
-                        className="max-w-xs"
-                        placeholder="Select next available date"
-                      />
+                      
+                      <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full max-w-xs justify-start text-left font-normal h-10",
+                              !nextAvailableDate && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {nextAvailableDate ? format(nextAvailableDate, "PPP") : <span>Select date</span>}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={nextAvailableDate}
+                            onSelect={handleNextAvailableDateChange}
+                            disabled={(date) => date < new Date()}
+                            initialFocus
+                            className={cn("p-3 pointer-events-auto")}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      
                       <p className="text-xs text-muted-foreground">
                         This date will be shown to potential clients when they view your profile
                       </p>
@@ -517,7 +562,7 @@ const TrainerDashboard = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5" />
+                  <CalendarIcon className="h-5 w-5" />
                   Upcoming Sessions
                 </CardTitle>
               </CardHeader>
