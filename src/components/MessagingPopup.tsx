@@ -193,7 +193,7 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
         .select('id')
         .eq(isTrainer ? 'trainer_id' : 'client_id', profile.id)
         .eq(isTrainer ? 'client_id' : 'trainer_id', clientId)
-        .single();
+        .maybeSingle();
 
       if (!conversation) {
         setMessages([]);
@@ -238,7 +238,7 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
         .select('id')
         .eq(isTrainer ? 'trainer_id' : 'client_id', profile.id)
         .eq(isTrainer ? 'client_id' : 'trainer_id', selectedTrainerId)
-        .single();
+        .maybeSingle();
 
       if (existingConversation) {
         conversationId = existingConversation.id;
@@ -255,6 +255,7 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
 
         if (error || !newConversation) {
           console.error('Error creating conversation:', error);
+          alert('Failed to create conversation. Make sure you have shortlisted this trainer.');
           return;
         }
         conversationId = newConversation.id;
