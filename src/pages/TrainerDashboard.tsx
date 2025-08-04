@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
 import { 
   Users, 
   Calendar, 
@@ -21,7 +22,18 @@ import {
   AlertCircle,
   Clock,
   Eye,
-  Heart
+  Heart,
+  Plus,
+  DollarSign,
+  Package,
+  Target,
+  Zap,
+  Award,
+  MessageCircle,
+  TrendingDown,
+  ArrowUpRight,
+  CreditCard,
+  Filter
 } from "lucide-react";
 
 const TrainerDashboard = () => {
@@ -122,7 +134,7 @@ const TrainerDashboard = () => {
       {/* Header */}
       <div className="flex justify-between items-center p-4 border-b">
         <div className="flex items-center gap-4">
-          <h1 className="text-xl font-bold">PT Dashboard</h1>
+          <h1 className="text-xl font-bold">Mission Control</h1>
         </div>
         <div className="flex items-center gap-3">
           {profile && (
@@ -134,202 +146,369 @@ const TrainerDashboard = () => {
         </div>
       </div>
 
-      {/* Hero Header - PT Specific */}
-      <div className="bg-gradient-to-br from-primary/5 via-background to-accent/5 py-12">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              🎯 Build Your Fitness Brand. Attract the Right Clients.
-            </h1>
-            <p className="text-lg md:text-xl text-muted-foreground mb-8">
-              Manage your profile, share your expertise, and connect with motivated clients who match your coaching style.
-            </p>
+      {/* Account Health Bar */}
+      <div className="bg-gradient-to-r from-primary/5 to-accent/5 border-b">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-6">
+              {/* Profile Status */}
+              <div className="flex items-center gap-2">
+                {isProfileComplete ? (
+                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                ) : (
+                  <div className="w-3 h-3 bg-amber-500 rounded-full animate-pulse"></div>
+                )}
+                <span className="text-sm font-medium">
+                  Profile {profileCompletion}% Complete
+                </span>
+              </div>
+              
+              <Separator orientation="vertical" className="h-4" />
+              
+              {/* Availability Status */}
+              <div className="flex items-center gap-2">
+                {availabilityStatus === 'accepting' && (
+                  <>
+                    <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                    <span className="text-sm font-medium text-green-700">Accepting Clients</span>
+                  </>
+                )}
+                {availabilityStatus === 'waitlist' && (
+                  <>
+                    <div className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse"></div>
+                    <span className="text-sm font-medium text-yellow-700">Waitlist Only</span>
+                  </>
+                )}
+                {availabilityStatus === 'unavailable' && (
+                  <>
+                    <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                    <span className="text-sm font-medium text-red-700">Not Available</span>
+                  </>
+                )}
+              </div>
+              
+              <Separator orientation="vertical" className="h-4" />
+              
+              {/* Next Billing */}
+              <div className="flex items-center gap-2">
+                <CreditCard className="w-3 h-3 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">Next Billing: Sep 1</span>
+              </div>
+            </div>
             
-            {/* Profile Completion Banner */}
-            <Card className={`mb-6 ${!isProfileComplete ? 'bg-amber-50 border-amber-200' : 'bg-green-50 border-green-200'}`}>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    {isProfileComplete ? (
-                      <CheckCircle className="h-4 w-4 text-green-600" />
-                    ) : (
-                      <AlertCircle className="h-4 w-4 text-amber-600" />
-                    )}
-                    <span className={`text-sm font-medium ${!isProfileComplete ? 'text-amber-800' : 'text-green-800'}`}>
-                      Profile {profileCompletion}% Complete
-                    </span>
-                  </div>
-                  <Button 
-                    size="sm" 
-                    onClick={() => navigate('/trainer/profile-setup')}
-                    className={!isProfileComplete ? 'bg-amber-600 hover:bg-amber-700' : 'bg-green-600 hover:bg-green-700'}
-                  >
-                    <Edit3 className="h-4 w-4 mr-2" />
-                    {isProfileComplete ? 'Edit Profile' : 'Complete Profile'}
-                  </Button>
-                </div>
-                <Progress value={profileCompletion} className="h-2" />
-                <p className={`text-xs mt-2 ${!isProfileComplete ? 'text-amber-700' : 'text-green-700'}`}>
-                  {isProfileComplete 
-                    ? 'Your profile is complete and published!' 
-                    : 'Finish your profile to get discovered by ideal clients'
-                  }
-                </p>
-              </CardContent>
-            </Card>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate('/trainer/profile-setup')}
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                Manage
+              </Button>
+            </div>
           </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Status Toggle */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Settings className="h-5 w-5" />
-              Availability Status
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex items-center space-x-2">
-                <Switch 
-                  checked={availabilityStatus === 'accepting'} 
-                  onCheckedChange={() => handleStatusChange('accepting')}
-                />
-                <label className="text-sm font-medium">
-                  ✅ Accepting New Clients
-                </label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Switch 
-                  checked={availabilityStatus === 'waitlist'} 
-                  onCheckedChange={() => handleStatusChange('waitlist')}
-                />
-                <label className="text-sm font-medium">
-                  ⏳ Waitlist Only
-                </label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Switch 
-                  checked={availabilityStatus === 'unavailable'} 
-                  onCheckedChange={() => handleStatusChange('unavailable')}
-                />
-                <label className="text-sm font-medium">
-                  ❌ Not Available
-                </label>
-              </div>
+        {/* Two Column Layout */}
+        <div className="grid lg:grid-cols-3 gap-8">
+          
+          {/* Left Column: Key Stats + Performance */}
+          <div className="lg:col-span-2 space-y-6">
+            
+            {/* This Week's Goal Card */}
+            <Card className="bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">🎯 This Week's Goal</h3>
+                    <p className="text-muted-foreground">Convert 3 new clients</p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Progress value={33} className="w-32 h-2" />
+                      <span className="text-sm text-muted-foreground">1/3</span>
+                    </div>
+                  </div>
+                  <Target className="w-8 h-8 text-primary" />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Performance Metrics with Visual Cues */}
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+              
+              {/* Profile Views with Trend */}
+              <Card className="relative overflow-hidden">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Profile Views</CardTitle>
+                  <Eye className="h-4 w-4 text-blue-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{analyticsLoading ? '...' : analytics?.total_views || 256}</div>
+                  <div className="flex items-center gap-1 mt-1">
+                    <ArrowUpRight className="h-3 w-3 text-green-500" />
+                    <span className="text-xs text-green-600 font-medium">+12 this week</span>
+                  </div>
+                  {/* Mini sparkline effect */}
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-blue-200 to-blue-300"></div>
+                </CardContent>
+              </Card>
+
+              {/* Likes with Trend */}
+              <Card className="relative overflow-hidden">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Likes</CardTitle>
+                  <Heart className="h-4 w-4 text-red-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{analyticsLoading ? '...' : analytics?.total_likes || 42}</div>
+                  <div className="flex items-center gap-1 mt-1">
+                    <ArrowUpRight className="h-3 w-3 text-green-500" />
+                    <span className="text-xs text-green-600 font-medium">+5 this week</span>
+                  </div>
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-red-200 to-red-300"></div>
+                </CardContent>
+              </Card>
+
+              {/* Shortlisted with Trend */}
+              <Card className="relative overflow-hidden">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Shortlisted</CardTitle>
+                  <Star className="h-4 w-4 text-yellow-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{analyticsLoading ? '...' : analytics?.total_shortlists || 18}</div>
+                  <div className="flex items-center gap-1 mt-1">
+                    <ArrowUpRight className="h-3 w-3 text-green-500" />
+                    <span className="text-xs text-green-600 font-medium">+3 this week</span>
+                  </div>
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-yellow-200 to-yellow-300"></div>
+                </CardContent>
+              </Card>
+
+              {/* Conversion Rate */}
+              <Card className="relative overflow-hidden">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
+                  <TrendingUp className="h-4 w-4 text-green-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{analyticsLoading ? '...' : `${analytics?.conversion_rate?.toFixed(1) || 7.2}%`}</div>
+                  <div className="flex items-center gap-1 mt-1">
+                    <ArrowUpRight className="h-3 w-3 text-green-500" />
+                    <span className="text-xs text-green-600 font-medium">+1.3% this week</span>
+                  </div>
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-green-200 to-green-300"></div>
+                </CardContent>
+              </Card>
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Dashboard Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {/* Primary Quick Actions */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="h-5 w-5" />
+                  Quick Actions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-3 gap-3">
+                  <Button className="h-12 justify-start gap-3" variant="default">
+                    <Plus className="h-4 w-4" />
+                    Add Testimonial
+                  </Button>
+                  <Button className="h-12 justify-start gap-3" variant="default">
+                    <DollarSign className="h-4 w-4" />
+                    Update Rates
+                  </Button>
+                  <Button className="h-12 justify-start gap-3" variant="default">
+                    <Package className="h-4 w-4" />
+                    Add New Package
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
 
-          {/* Profile Views */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Profile Views
-              </CardTitle>
-              <Eye className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {analyticsLoading ? '...' : analytics?.total_views || 0}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Total profile views
-              </p>
-            </CardContent>
-          </Card>
+            {/* Availability Status Management */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="h-5 w-5" />
+                  Availability Settings
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-3 gap-4">
+                  <Button 
+                    variant={availabilityStatus === 'accepting' ? 'default' : 'outline'}
+                    onClick={() => handleStatusChange('accepting')}
+                    className="flex items-center gap-2 h-12"
+                  >
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    Accepting
+                  </Button>
+                  <Button 
+                    variant={availabilityStatus === 'waitlist' ? 'default' : 'outline'}
+                    onClick={() => handleStatusChange('waitlist')}
+                    className="flex items-center gap-2 h-12"
+                  >
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                    Waitlist
+                  </Button>
+                  <Button 
+                    variant={availabilityStatus === 'unavailable' ? 'default' : 'outline'}
+                    onClick={() => handleStatusChange('unavailable')}
+                    className="flex items-center gap-2 h-12"
+                  >
+                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                    Unavailable
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-          {/* Likes */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Likes
-              </CardTitle>
-              <Heart className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {analyticsLoading ? '...' : analytics?.total_likes || 0}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Total likes received
-              </p>
-            </CardContent>
-          </Card>
+          {/* Right Column: Live Activity Feed + Actions */}
+          <div className="space-y-6">
+            
+            {/* Engagement Streak */}
+            <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <Award className="w-8 h-8 text-green-600" />
+                  <div>
+                    <p className="font-semibold text-green-800">🔥 3 Week Streak!</p>
+                    <p className="text-sm text-green-600">You've updated your profile consistently</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-          {/* Shortlisted */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Shortlisted
-              </CardTitle>
-              <Star className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {analyticsLoading ? '...' : analytics?.total_shortlists || 0}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Times shortlisted
-              </p>
-            </CardContent>
-          </Card>
+            {/* Live Activity Feed */}
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg">Live Activity</CardTitle>
+                  <Button variant="ghost" size="sm">
+                    <Filter className="w-4 h-4" />
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-3 max-h-96 overflow-y-auto">
+                
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-green-50 border border-green-200">
+                  <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                    🎉
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-green-800">You received a new 5-star review from Alex!</p>
+                    <p className="text-sm text-green-600 mt-1">"Incredible transformation results"</p>
+                    <Badge variant="secondary" className="mt-2">2h ago</Badge>
+                  </div>
+                </div>
 
-          {/* Conversion Rate */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Conversion Rate
-              </CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {analyticsLoading ? '...' : `${analytics?.conversion_rate?.toFixed(1) || 0}%`}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Views to shortlists
-              </p>
-            </CardContent>
-          </Card>
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
+                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                    💬
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-blue-800">New client inquiry from Sarah (weight loss program)</p>
+                    <p className="text-sm text-blue-600 mt-1">Looking for 3x/week sessions</p>
+                    <Badge variant="secondary" className="mt-2">5h ago</Badge>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-purple-50 border border-purple-200">
+                  <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+                    👀
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-purple-800">5 clients viewed your profile in the past 24h</p>
+                    <p className="text-sm text-purple-600 mt-1">Your HIIT specialization is trending</p>
+                    <Badge variant="secondary" className="mt-2">1d ago</Badge>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-orange-50 border border-orange-200">
+                  <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+                    📈
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-orange-800">Your conversion rate improved by 15%</p>
+                    <p className="text-sm text-orange-600 mt-1">Keep up the great work!</p>
+                    <Badge variant="secondary" className="mt-2">2d ago</Badge>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-yellow-50 border border-yellow-200">
+                  <div className="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0">
+                    💡
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-yellow-800">Promo Tip: Add before/after photos</p>
+                    <p className="text-sm text-yellow-600 mt-1">Profiles with photos get 40% more views</p>
+                    <Badge variant="secondary" className="mt-2">3d ago</Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Upcoming Sessions */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5" />
+                  Upcoming Sessions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-4">
+                  <div className="text-3xl font-bold text-primary">5</div>
+                  <p className="text-sm text-muted-foreground">Next 7 days</p>
+                  <Button variant="outline" className="mt-3 w-full">
+                    View Calendar
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
-        {/* Match Quality Stats */}
+        {/* Match Quality Stats - Full Width */}
         {analytics?.match_tier_stats && (
-          <Card className="mb-8">
+          <Card className="mt-8">
             <CardHeader>
               <CardTitle>Match Quality Distribution</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div className="text-center p-4 rounded-lg bg-green-50 border border-green-200">
+                  <div className="text-3xl font-bold text-green-600 mb-2">
                     {analytics.match_tier_stats.perfect_matches || 0}
                   </div>
-                  <p className="text-xs text-muted-foreground">Perfect Matches</p>
+                  <p className="text-sm font-medium text-green-800">Perfect Matches</p>
+                  <p className="text-xs text-green-600 mt-1">90%+ compatibility</p>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">
+                <div className="text-center p-4 rounded-lg bg-blue-50 border border-blue-200">
+                  <div className="text-3xl font-bold text-blue-600 mb-2">
                     {analytics.match_tier_stats.great_matches || 0}
                   </div>
-                  <p className="text-xs text-muted-foreground">Great Matches</p>
+                  <p className="text-sm font-medium text-blue-800">Great Matches</p>
+                  <p className="text-xs text-blue-600 mt-1">75-89% compatibility</p>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-yellow-600">
+                <div className="text-center p-4 rounded-lg bg-yellow-50 border border-yellow-200">
+                  <div className="text-3xl font-bold text-yellow-600 mb-2">
                     {analytics.match_tier_stats.good_matches || 0}
                   </div>
-                  <p className="text-xs text-muted-foreground">Good Matches</p>
+                  <p className="text-sm font-medium text-yellow-800">Good Matches</p>
+                  <p className="text-xs text-yellow-600 mt-1">60-74% compatibility</p>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-orange-600">
+                <div className="text-center p-4 rounded-lg bg-orange-50 border border-orange-200">
+                  <div className="text-3xl font-bold text-orange-600 mb-2">
                     {analytics.match_tier_stats.potential_matches || 0}
                   </div>
-                  <p className="text-xs text-muted-foreground">Potential Matches</p>
+                  <p className="text-sm font-medium text-orange-800">Potential Matches</p>
+                  <p className="text-xs text-orange-600 mt-1">45-59% compatibility</p>
                 </div>
               </div>
             </CardContent>
@@ -338,21 +517,21 @@ const TrainerDashboard = () => {
 
         {/* Shortlisted Clients */}
         {shortlistedClients && shortlistedClients.length > 0 && (
-          <Card className="mb-8">
+          <Card className="mt-8">
             <CardHeader>
               <CardTitle>Recent Shortlisted Clients</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {shortlistedClients.slice(0, 5).map((client, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                  <div key={index} className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border">
                     <div>
                       <p className="font-medium">Client #{client.id.slice(0, 8)}</p>
                       <p className="text-sm text-muted-foreground">
                         {client.primary_goals?.length ? `Goals: ${client.primary_goals.join(', ')}` : 'No goals specified'}
                       </p>
                     </div>
-                    <Badge variant="secondary">
+                    <Badge variant={((client as any).discovery_call_booked ? 'default' : 'secondary')}>
                       {(client as any).discovery_call_booked ? 'Call Booked' : 'Available'}
                     </Badge>
                   </div>
@@ -361,77 +540,6 @@ const TrainerDashboard = () => {
             </CardContent>
           </Card>
         )}
-        {/* Additional Dashboard Grid for Sessions and Actions */}
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
-          {/* Upcoming Sessions */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Upcoming Sessions
-              </CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">5</div>
-              <p className="text-xs text-muted-foreground">
-                Next 7 days
-              </p>
-              <Button variant="outline" size="sm" className="mt-3 w-full">
-                View Calendar
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Quick Actions */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Quick Actions
-              </CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <Button variant="outline" size="sm" className="w-full">
-                Add Testimonial
-              </Button>
-              <Button variant="outline" size="sm" className="w-full">
-                Update Rates
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Recent Activity */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                <div>
-                  <p className="font-medium">New client inquiry from Sarah M.</p>
-                  <p className="text-sm text-muted-foreground">Interested in weight loss program</p>
-                </div>
-                <Badge variant="secondary">2h ago</Badge>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                <div>
-                  <p className="font-medium">Profile viewed by 5 potential clients</p>
-                  <p className="text-sm text-muted-foreground">Your HIIT specialization is popular</p>
-                </div>
-                <Badge variant="secondary">1d ago</Badge>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                <div>
-                  <p className="font-medium">New 5-star review received</p>
-                  <p className="text-sm text-muted-foreground">"Amazing trainer, highly recommend!"</p>
-                </div>
-                <Badge variant="secondary">3d ago</Badge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
