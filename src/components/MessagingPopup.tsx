@@ -275,6 +275,8 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
 
       if (messageError || !savedMessage) {
         console.error('Error saving message:', messageError);
+        console.error('Message error details:', messageError?.message, messageError?.details);
+        alert(`Failed to send message: ${messageError?.message || 'Unknown error'}`);
         return;
       }
 
