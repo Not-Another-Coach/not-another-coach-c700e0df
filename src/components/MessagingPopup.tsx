@@ -110,6 +110,13 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
     }
   }, [isTrainer, profile?.id, selectedClient]);
 
+  // Auto-refresh messages when popup opens or trainer is selected
+  useEffect(() => {
+    if (selectedTrainerId && profile?.id) {
+      loadMessages(selectedTrainerId);
+    }
+  }, [selectedTrainerId, profile?.id]);
+
   const loadTrainerConversations = async () => {
     if (!profile?.id) return;
     setLoadingContacts(true);
