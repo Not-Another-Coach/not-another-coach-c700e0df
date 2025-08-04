@@ -10,6 +10,7 @@ import { useTrainerList } from '@/hooks/useTrainerList';
 import { useProfile } from '@/hooks/useProfile';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
+import { ProfileAvatar } from '@/components/ui/profile-avatar';
 
 interface Message {
   id: string;
@@ -137,7 +138,7 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
         const clientIds = conversations.map(conv => conv.client_id);
         const { data: clientProfiles } = await supabase
           .from('profiles')
-          .select('id, first_name, last_name, training_location_preference')
+          .select('id, first_name, last_name, training_location_preference, profile_photo_url')
           .in('id', clientIds);
 
         // Combine conversation data with profile data
@@ -151,6 +152,7 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
             firstName: clientProfile?.first_name,
             lastName: clientProfile?.last_name,
             location: clientProfile?.training_location_preference || 'Location not specified',
+            profilePhotoUrl: clientProfile?.profile_photo_url,
             lastMessageAt: conv.last_message_at
           };
         });
@@ -165,7 +167,12 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
 
   const contacts = isTrainer 
     ? trainerContacts
-    : trainers.filter(trainer => savedTrainerIds.includes(trainer.id)); // Clients see shortlisted trainers
+    : trainers.filter(trainer => savedTrainerIds.includes(trainer.id)).map(trainer => ({
+        ...trainer,
+        profilePhotoUrl: trainer.profilePhotoUrl,
+        firstName: trainer.firstName,
+        lastName: trainer.lastName
+      })); // Clients see shortlisted trainers
 
   // Filter contacts based on search
   const filteredContacts = contacts.filter(contact => 
@@ -490,12 +497,13 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
                         className="w-full justify-start h-auto p-3 mb-2 hover:bg-muted/50"
                         onClick={() => handleSelectTrainer(contact.id)}
                       >
-                        <div className="flex items-center gap-3 w-full">
-                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                            <span className="text-sm font-medium">
-                              {contact.firstName?.[0]}{contact.lastName?.[0]}
-                            </span>
-                          </div>
+                         <div className="flex items-center gap-3 w-full">
+                           <ProfileAvatar
+                             profilePhotoUrl={contact.profilePhotoUrl}
+                             firstName={contact.firstName}
+                             lastName={contact.lastName}
+                             size="md"
+                           />
                           <div className="flex-1 text-left">
                             <p className="font-medium text-sm">{contact.name}</p>
                             <p className="text-xs text-muted-foreground">
@@ -539,13 +547,14 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
             // Chat View
             <div className="flex-1 flex flex-col">
               {selectedContact && (
-                <div className="p-3 border-b bg-muted/30">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                      <span className="text-xs font-medium">
-                        {selectedContact.firstName?.[0]}{selectedContact.lastName?.[0]}
-                      </span>
-                    </div>
+                 <div className="p-3 border-b bg-muted/30">
+                   <div className="flex items-center gap-2">
+                     <ProfileAvatar
+                       profilePhotoUrl={selectedContact.profilePhotoUrl}
+                       firstName={selectedContact.firstName}
+                       lastName={selectedContact.lastName}
+                       size="sm"
+                     />
                     <div>
                       <p className="font-medium text-sm">{selectedContact.name}</p>
                       <p className="text-xs text-muted-foreground">{selectedContact.location}</p>

@@ -8,6 +8,7 @@ interface TrainerOption {
   lastName?: string;
   location?: string;
   specializations?: string[];
+  profilePhotoUrl?: string;
 }
 
 export function useTrainerList() {
@@ -19,7 +20,7 @@ export function useTrainerList() {
       try {
         const { data, error } = await supabase
           .from('profiles')
-          .select('id, first_name, last_name, location, specializations')
+          .select('id, first_name, last_name, location, specializations, profile_photo_url')
           .eq('user_type', 'trainer')
           .order('first_name');
 
@@ -34,7 +35,8 @@ export function useTrainerList() {
           firstName: trainer.first_name,
           lastName: trainer.last_name,
           location: trainer.location,
-          specializations: trainer.specializations
+          specializations: trainer.specializations,
+          profilePhotoUrl: trainer.profile_photo_url
         })) || [];
 
         setTrainers(trainerOptions);
