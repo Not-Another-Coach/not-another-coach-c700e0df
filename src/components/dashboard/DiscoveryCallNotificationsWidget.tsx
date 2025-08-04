@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, User, CheckCircle, X, Bell } from 'lucide-react';
+import { Calendar, Clock, User, CheckCircle, X, Bell, Edit } from 'lucide-react';
 import { useDiscoveryCallNotifications } from '@/hooks/useDiscoveryCallNotifications';
 import { useProfile } from '@/hooks/useProfile';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { ClientRescheduleModal } from './ClientRescheduleModal';
 
 export const DiscoveryCallNotificationsWidget = () => {
   const { profile } = useProfile();
@@ -18,6 +19,9 @@ export const DiscoveryCallNotificationsWidget = () => {
     cancelCall,
     getNotificationMessage
   } = useDiscoveryCallNotifications();
+
+  const [selectedCall, setSelectedCall] = useState<any>(null);
+  const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
 
   const isTrainer = profile?.user_type === 'trainer';
 
@@ -137,8 +141,22 @@ export const DiscoveryCallNotificationsWidget = () => {
                       )}
                     </div>
                     
+                    
                     <div className="flex items-center gap-2">
-                      {isUpcoming && (
+                      {isUpcoming && !isTrainer && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedCall(call);
+                            setIsRescheduleModalOpen(true);
+                          }}
+                        >
+                          <Edit className="w-4 h-4 mr-1" />
+                          Reschedule
+                        </Button>
+                      )}
+                      {isUpcoming && isTrainer && (
                         <Button
                           variant="outline"
                           size="sm"
@@ -214,6 +232,28 @@ export const DiscoveryCallNotificationsWidget = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Client Reschedule Modal */}
+      {selectedCall && (
+        <ClientRescheduleModal
+          isOpen={isRescheduleModalOpen}
+          onClose={() => {
+            setIsRescheduleModalOpen(false);
+            setSelectedCall(null);
+          }}
+          discoveryCall={selectedCall}
+          trainer={{
+            id: selectedCall.trainer_id,
+            name: selectedCall.trainer ? `${selectedCall.trainer.first_name} ${selectedCall.trainer.last_name}` : 'Trainer',
+            firstName: selectedCall.trainer?.first_name,
+            lastName: selectedCall.trainer?.last_name
+          }}
+          onCallUpdated={() => {
+            // Refresh the data - you might need to add a refetch function
+            window.location.reload();
+          }}
+        />
+      )}
     </div>
   );
 };
