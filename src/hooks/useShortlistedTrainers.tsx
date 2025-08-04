@@ -43,12 +43,15 @@ export function useShortlistedTrainers() {
       let discoveryCallsData = [];
       if (data && data.length > 0) {
         const trainerIds = data.map(item => item.trainer_id);
-        const { data: callsData } = await supabase
+        console.log('Fetching discovery calls for trainers:', trainerIds);
+        const { data: callsData, error: callsError } = await supabase
           .from('discovery_calls')
           .select('*')
           .eq('client_id', user.id)
           .in('trainer_id', trainerIds)
           .in('status', ['scheduled', 'rescheduled']);
+        
+        console.log('Discovery calls query result:', { callsData, callsError });
         discoveryCallsData = callsData || [];
       }
 
@@ -73,11 +76,16 @@ export function useShortlistedTrainers() {
         });
         
         // Merge discovery call data with shortlisted trainers
-        const mergedData = validShortlisted.map(shortlisted => ({
-          ...shortlisted,
-          discovery_call: discoveryCallsData.find(call => call.trainer_id === shortlisted.trainer_id) || null
-        }));
+        const mergedData = validShortlisted.map(shortlisted => {
+          const discoveryCall = discoveryCallsData.find(call => call.trainer_id === shortlisted.trainer_id) || null;
+          console.log(`Trainer ${shortlisted.trainer_id} discovery call:`, discoveryCall);
+          return {
+            ...shortlisted,
+            discovery_call: discoveryCall
+          };
+        });
         
+        console.log('Final merged shortlisted data:', mergedData);
         setShortlistedTrainers(mergedData);
       }
     } catch (error) {
