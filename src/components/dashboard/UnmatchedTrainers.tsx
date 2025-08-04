@@ -37,33 +37,50 @@ export function UnmatchedTrainers({ profile }: UnmatchedTrainersProps) {
       if (!user) return;
 
       try {
+        console.log('Fetching unmatched trainers for user:', user.id);
+        
         // Get trainers that the client hasn't engaged with
         const { data: engagements } = await supabase
           .from('client_trainer_engagement')
           .select('trainer_id')
           .eq('client_id', user.id);
 
+        console.log('Client engagement data:', engagements);
         const engagedTrainerIds = engagements?.map(e => e.trainer_id) || [];
+        console.log('Engaged trainer IDs:', engagedTrainerIds);
 
         // Get all trainers with completed profiles excluding those already engaged
         let query = supabase
           .from('profiles')
-          .select('id, first_name, last_name, tagline, bio, location, specializations, training_types, hourly_rate, rating, total_ratings, profile_photo_url, is_verified')
-          .eq('user_type', 'trainer')
-          .or('profile_published.eq.true,profile_setup_completed.eq.true');
+          .select('id, first_name, last_name, tagline, bio, location, specializations, training_types, hourly_rate, rating, total_ratings, profile_photo_url, is_verified, profile_setup_completed, profile_published, user_type')
+          .eq('user_type', 'trainer');
 
+        // Don't exclude current user since we want to show all trainers in this view
         if (engagedTrainerIds.length > 0) {
           query = query.not('id', 'in', `(${engagedTrainerIds.join(',')})`);
         }
 
         const { data: trainersData, error } = await query.order('rating', { ascending: false });
 
+        console.log('All trainers query result:', trainersData);
+        console.log('Query error:', error);
+
         if (error) {
           console.error('Error fetching unmatched trainers:', error);
           return;
         }
 
-        setTrainers(trainersData || []);
+        // Filter trainers who have either profile published or setup completed
+        const filteredTrainers = trainersData?.filter(trainer => 
+          trainer.profile_published === true || trainer.profile_setup_completed === true
+        ) || [];
+
+        console.log('Filtered trainers (published or setup completed):', filteredTrainers);
+        console.log('Louise Whitton specifically:', filteredTrainers.find(t => 
+          t.first_name === 'Louise' && t.last_name === 'Whitton'
+        ));
+
+        setTrainers(filteredTrainers);
       } catch (error) {
         console.error('Error fetching unmatched trainers:', error);
       } finally {
