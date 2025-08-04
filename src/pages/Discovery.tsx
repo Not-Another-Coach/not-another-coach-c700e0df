@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { useEnhancedTrainerMatching } from '@/hooks/useEnhancedTrainerMatching';
+import { useSavedTrainers } from '@/hooks/useSavedTrainers';
 import { useJourneyProgress } from '@/hooks/useJourneyProgress';
 import { SwipeableCard } from '@/components/SwipeableCard';
 import { Button } from '@/components/ui/button';
@@ -86,8 +87,9 @@ export default function Discovery() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { profile } = useProfile();
-  const { progress: journeyProgress, updateProgress } = useJourneyProgress();
-  
+  const { saveTrainer } = useSavedTrainers();
+  const { updateProgress, advanceToStage } = useJourneyProgress();
+  const { progress: journeyProgress } = useJourneyProgress();
   const [currentTrainerIndex, setCurrentTrainerIndex] = useState(0);
   const [likedTrainers, setLikedTrainers] = useState<string[]>([]);
   const [passedTrainers, setPassedTrainers] = useState<string[]>([]);
@@ -123,11 +125,18 @@ export default function Discovery() {
   const handleSwipe = useCallback((direction: 'left' | 'right', trainer: Trainer) => {
     if (direction === 'right') {
       setLikedTrainers(prev => [...prev, trainer.id]);
+      // Actually save the trainer using the saved trainers hook
+      const saveTrainerToDb = async () => {
+        const success = await saveTrainer(trainer.id);
+        if (success) {
+          toast({
+            title: "❤️ Liked!",
+            description: `You liked ${trainer.name}. They've been added to your matches!`,
+          });
+        }
+      };
+      saveTrainerToDb();
       updateProgress('discovery', 'like_trainer', { trainerId: trainer.id });
-      toast({
-        title: "❤️ Liked!",
-        description: `You liked ${trainer.name}. They've been added to your matches!`,
-      });
     } else {
       setPassedTrainers(prev => [...prev, trainer.id]);
       updateProgress('discovery', 'pass_trainer', { trainerId: trainer.id });
@@ -135,7 +144,7 @@ export default function Discovery() {
 
     // Move to next trainer
     setCurrentTrainerIndex(prev => prev + 1);
-  }, []);
+  }, [saveTrainer, updateProgress]);
 
   const handleLike = () => {
     if (currentTrainerIndex < matchedTrainers.length) {

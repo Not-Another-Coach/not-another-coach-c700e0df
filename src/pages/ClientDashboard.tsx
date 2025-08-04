@@ -17,6 +17,7 @@ import { UnmatchedTrainers } from "@/components/dashboard/UnmatchedTrainers";
 import { SwipeResultsSection } from "@/components/dashboard/SwipeResultsSection";
 import { ClientSurveyWidget } from "@/components/dashboard/ClientSurveyWidget";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
+import { FloatingMessageButton } from "@/components/FloatingMessageButton";
 import { ClientJourneyBreadcrumb } from "@/components/ClientJourneyBreadcrumb";
 import { useClientJourneyProgress } from "@/hooks/useClientJourneyProgress";
 import { Heart, Settings, Search, MessageCircle, Menu, Users, Shuffle, Shield } from "lucide-react";
@@ -211,6 +212,9 @@ export default function ClientDashboard() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Floating Message Button */}
+      <FloatingMessageButton />
     </div>
   );
 }

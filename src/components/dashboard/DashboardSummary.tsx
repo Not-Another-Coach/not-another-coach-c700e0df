@@ -250,10 +250,17 @@ export function DashboardSummary({ profile, onTabChange }: DashboardSummaryProps
                             {match.trainer.specialties.slice(0, 2).join(' • ')}
                           </p>
                           <div className="flex gap-2">
-                            <Button size="sm" variant="outline">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => navigate(`/trainer/${match.trainer.id}`)}
+                            >
                               View Profile
                             </Button>
-                            <Button size="sm">
+                            <Button 
+                              size="sm"
+                              onClick={() => navigate(`/messages/${match.trainer.id}`)}
+                            >
                               Send Message
                             </Button>
                           </div>
