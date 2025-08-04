@@ -554,7 +554,6 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                     <TrainerCard
                       trainer={match.trainer}
                       onViewProfile={handleViewProfile}
-                      onMessage={handleMessage}
                       matchScore={match.score}
                       matchReasons={match.matchReasons}
                       matchDetails={match.matchDetails}
@@ -576,11 +575,19 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                     </Button>
                     
                     {/* Action Buttons for Shortlisted Trainers */}
-                    <div className="mt-4 grid grid-cols-2 gap-2">
+                    <div className="mt-4 grid grid-cols-3 gap-2">
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="flex items-center gap-1 text-xs"
+                        onClick={() => handleViewProfile(match.trainer.id)}
+                      >
+                        View Profile
+                      </Button>
                       <Button 
                         size="sm" 
                         variant="default" 
-                        className="flex items-center gap-2"
+                        className="flex items-center gap-1 text-xs"
                         onClick={() => handleMessage(match.trainer.id)}
                       >
                         <MessageCircle className="h-3 w-3" />
@@ -589,7 +596,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                       <Button 
                         size="sm" 
                         variant="outline" 
-                        className="flex items-center gap-2"
+                        className="flex items-center gap-1 text-xs"
                       >
                         <Phone className="h-3 w-3" />
                         Book Call
