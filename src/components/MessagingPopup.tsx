@@ -39,6 +39,7 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [canMessage, setCanMessage] = useState(true);
+  const [sending, setSending] = useState(false);
   
   const { profile } = useProfile();
   const { savedTrainers, savedTrainerIds } = useSavedTrainers();
@@ -223,8 +224,11 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
   };
 
   const handleSendMessage = async () => {
-    if (!message.trim() || !selectedTrainerId || !profile?.id) return;
+    if (!message.trim() || !selectedTrainerId || !profile?.id || sending) return;
 
+    setSending(true);
+    const currentMessage = message.trim();
+    
     try {
       // Find or create conversation
       let conversationId: string;
@@ -292,6 +296,8 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
 
     } catch (error) {
       console.error('Error sending message:', error);
+    } finally {
+      setSending(false);
     }
   };
 
@@ -474,13 +480,13 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
                       placeholder="Type your message..."
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                      onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
                       className="flex-1 text-sm"
                     />
                     <Button 
                       size="sm" 
                       onClick={handleSendMessage}
-                      disabled={!message.trim()}
+                      disabled={!message.trim() || sending}
                     >
                       <Send className="w-4 h-4" />
                     </Button>
