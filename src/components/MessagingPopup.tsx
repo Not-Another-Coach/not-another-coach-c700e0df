@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MessageCircle, X, Send, Users, Heart } from 'lucide-react';
+import { MessageCircle, X, Send, Users, Heart, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,7 @@ import { useSavedTrainers } from '@/hooks/useSavedTrainers';
 import { useTrainerList } from '@/hooks/useTrainerList';
 import { useProfile } from '@/hooks/useProfile';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Message {
   id: string;
@@ -37,6 +38,7 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
   const [selectedTrainerId, setSelectedTrainerId] = useState<string | null>(null);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
+  const [canMessage, setCanMessage] = useState(true);
   
   const { profile } = useProfile();
   const { savedTrainers, savedTrainerIds } = useSavedTrainers();
@@ -53,8 +55,45 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
     if (selectedClient) {
       setSelectedTrainerId(selectedClient.user_id);
       setView('chat');
+      // For trainers messaging clients, check if client has messaged first
+      if (isTrainer) {
+        checkIfClientMessagedFirst(selectedClient.user_id);
+      }
     }
-  }, [selectedClient]);
+  }, [selectedClient, isTrainer]);
+
+  // Check if client has sent the first message (for trainer-client conversations)
+  const checkIfClientMessagedFirst = async (clientId: string) => {
+    if (!profile?.id || !isTrainer) return;
+    
+    try {
+      // Check if there's a conversation between trainer and client
+      const { data: conversation } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('trainer_id', profile.id)
+        .eq('client_id', clientId)
+        .single();
+
+      if (!conversation) {
+        setCanMessage(false);
+        return;
+      }
+
+      // Check if client has sent any messages in this conversation
+      const { data: clientMessages } = await supabase
+        .from('messages')
+        .select('id')
+        .eq('conversation_id', conversation.id)
+        .eq('sender_id', clientId)
+        .limit(1);
+
+      setCanMessage(clientMessages && clientMessages.length > 0);
+    } catch (error) {
+      console.error('Error checking conversation:', error);
+      setCanMessage(false);
+    }
+  };
   
   // Get contacts based on user type
   const contacts = isTrainer 
@@ -232,7 +271,15 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
               )}
 
               <ScrollArea className="flex-1 p-3">
-                {messages.length === 0 ? (
+                {!canMessage && isTrainer ? (
+                  <div className="text-center text-muted-foreground py-8">
+                    <Lock className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm font-medium">Client must message first</p>
+                    <p className="text-xs mt-1">
+                      This client needs to initiate the conversation before you can reply
+                    </p>
+                  </div>
+                ) : messages.length === 0 ? (
                   <div className="text-center text-muted-foreground py-8">
                     <MessageCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
                     <p className="text-sm">Start the conversation!</p>
@@ -264,24 +311,26 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
                 )}
               </ScrollArea>
 
-              <div className="p-3 border-t">
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Type your message..."
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                    className="flex-1 text-sm"
-                  />
-                  <Button 
-                    size="sm" 
-                    onClick={handleSendMessage}
-                    disabled={!message.trim()}
-                  >
-                    <Send className="w-4 h-4" />
-                  </Button>
+              {canMessage && (
+                <div className="p-3 border-t">
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Type your message..."
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                      className="flex-1 text-sm"
+                    />
+                    <Button 
+                      size="sm" 
+                      onClick={handleSendMessage}
+                      disabled={!message.trim()}
+                    >
+                      <Send className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
         </CardContent>
