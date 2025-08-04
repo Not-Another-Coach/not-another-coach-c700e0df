@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Plus, ExternalLink, DollarSign, PoundSterling, Euro, Calendar } from "lucide-react";
+import { Trash2, Plus, ExternalLink, DollarSign, PoundSterling, Euro, Calendar, Sparkles } from "lucide-react";
 
 interface RatesSectionProps {
   formData: any;
@@ -29,6 +29,7 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
     formData.selected_rate_types || ['hourly']
   );
   const [packages, setPackages] = useState<TrainingPackage[]>(formData.package_options || []);
+  const [communicationAIHelperOpen, setCommunicationAIHelperOpen] = useState(false);
   const [newPackage, setNewPackage] = useState({
     name: "",
     sessions: "",
@@ -438,7 +439,50 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="communication_style">How do you work best with clients? *</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="communication_style">How do you work best with clients? *</Label>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCommunicationAIHelperOpen(!communicationAIHelperOpen)}
+              >
+                <Sparkles className="h-4 w-4 mr-2" />
+                AI Helper
+              </Button>
+            </div>
+            
+            {communicationAIHelperOpen && (
+              <Card className="border-primary/20 bg-primary/5">
+                <CardContent className="p-4 space-y-3">
+                  <p className="text-sm font-medium">Communication style suggestions:</p>
+                  <div className="space-y-2">
+                    {[
+                      "I believe in regular check-ins and clear communication to keep you motivated and on track. I prefer a collaborative approach where we work together to create sustainable habits that fit your lifestyle.",
+                      "My communication style is supportive and encouraging. I provide detailed feedback on your progress and am always available for questions. I believe in celebrating small wins while keeping you focused on long-term goals.",
+                      "I work best with clients who appreciate direct, honest feedback combined with plenty of encouragement. I like to establish clear expectations upfront and maintain consistent communication throughout our journey together.",
+                      "I believe in being your biggest cheerleader while also holding you accountable. I prefer frequent touchpoints to adjust our approach as needed and ensure you always feel supported in your fitness journey."
+                    ].map((suggestion, index) => (
+                      <Card
+                        key={index}
+                        className="cursor-pointer hover:bg-primary/10 transition-colors border-primary/10"
+                        onClick={() => {
+                          updateFormData({ communication_style: suggestion });
+                          setCommunicationAIHelperOpen(false);
+                        }}
+                      >
+                        <CardContent className="p-3">
+                          <p className="text-sm leading-relaxed">{suggestion}</p>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    💡 Click any suggestion to use it, or use it as inspiration for your own description
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+            
             <Textarea
               id="communication_style"
               value={formData.communication_style || ""}
@@ -488,17 +532,6 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
               <Switch
                 checked={formData.weekly_programming_only || false}
                 onCheckedChange={(checked) => updateFormData({ weekly_programming_only: checked })}
-              />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div>
-                <Label className="font-normal">AI Enhanced Coaching</Label>
-                <p className="text-sm text-muted-foreground">Leverage AI tools for personalized insights and enhanced coaching</p>
-              </div>
-              <Switch
-                checked={formData.ai_enhanced_coaching || false}
-                onCheckedChange={(checked) => updateFormData({ ai_enhanced_coaching: checked })}
               />
             </div>
           </div>
