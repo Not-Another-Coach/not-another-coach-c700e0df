@@ -4,6 +4,24 @@ import { useAuth } from '@/hooks/useAuth';
 
 export type AppRole = 'admin' | 'trainer' | 'client';
 
+export interface AdminAction {
+  id: string;
+  action_type: string;
+  action_details: any;
+  reason?: string;
+  created_at: string;
+  admin_id: string;
+}
+
+export interface LoginHistory {
+  id: string;
+  login_at: string;
+  ip_address?: unknown;
+  user_agent?: string;
+  success: boolean;
+  failure_reason?: string;
+}
+
 export interface UserWithRoles {
   id: string;
   first_name?: string;
@@ -11,6 +29,15 @@ export interface UserWithRoles {
   user_type: string;
   created_at: string;
   roles: AppRole[];
+  account_status?: string;
+  suspended_at?: string;
+  suspended_until?: string;
+  suspended_reason?: string;
+  admin_notes?: string;
+  last_login_at?: string;
+  communication_restricted?: boolean;
+  communication_restricted_reason?: string;
+  force_password_reset?: boolean;
 }
 
 export function useUserRoles() {
@@ -42,10 +69,15 @@ export function useUserRoles() {
 
     setLoading(true);
     try {
-      // Fetch all profiles
+      // Fetch all profiles with additional admin fields
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, first_name, last_name, user_type, created_at')
+        .select(`
+          id, first_name, last_name, user_type, created_at,
+          account_status, suspended_at, suspended_until, suspended_reason,
+          admin_notes, last_login_at, communication_restricted,
+          communication_restricted_reason, force_password_reset
+        `)
         .order('created_at', { ascending: false });
 
       if (profilesError) throw profilesError;
@@ -136,6 +168,158 @@ export function useUserRoles() {
     }
   };
 
+  const suspendUser = async (userId: string, reason: string, durationDays?: number) => {
+    if (!isAdmin) return { error: 'Unauthorized' };
+
+    try {
+      const { error } = await supabase.rpc('suspend_user', {
+        p_user_id: userId,
+        p_reason: reason,
+        p_duration_days: durationDays
+      });
+
+      if (error) throw error;
+
+      await fetchUsers();
+      return { success: true };
+    } catch (error) {
+      console.error('Error suspending user:', error);
+      return { error: error.message };
+    }
+  };
+
+  const reactivateUser = async (userId: string, reason?: string) => {
+    if (!isAdmin) return { error: 'Unauthorized' };
+
+    try {
+      const { error } = await supabase.rpc('reactivate_user', {
+        p_user_id: userId,
+        p_reason: reason
+      });
+
+      if (error) throw error;
+
+      await fetchUsers();
+      return { success: true };
+    } catch (error) {
+      console.error('Error reactivating user:', error);
+      return { error: error.message };
+    }
+  };
+
+  const updateAdminNotes = async (userId: string, notes: string) => {
+    if (!isAdmin) return { error: 'Unauthorized' };
+
+    try {
+      const { error } = await supabase.rpc('update_admin_notes', {
+        p_user_id: userId,
+        p_notes: notes
+      });
+
+      if (error) throw error;
+
+      await fetchUsers();
+      return { success: true };
+    } catch (error) {
+      console.error('Error updating admin notes:', error);
+      return { error: error.message };
+    }
+  };
+
+  const restrictCommunication = async (userId: string, reason: string) => {
+    if (!isAdmin) return { error: 'Unauthorized' };
+
+    try {
+      const { error } = await supabase.rpc('restrict_communication', {
+        p_user_id: userId,
+        p_reason: reason
+      });
+
+      if (error) throw error;
+
+      await fetchUsers();
+      return { success: true };
+    } catch (error) {
+      console.error('Error restricting communication:', error);
+      return { error: error.message };
+    }
+  };
+
+  const getLoginHistory = async (userId: string): Promise<LoginHistory[]> => {
+    if (!isAdmin) return [];
+
+    try {
+      const { data, error } = await supabase
+        .from('login_history')
+        .select('*')
+        .eq('user_id', userId)
+        .order('login_at', { ascending: false })
+        .limit(20);
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching login history:', error);
+      return [];
+    }
+  };
+
+  const getAdminActions = async (userId: string): Promise<AdminAction[]> => {
+    if (!isAdmin) return [];
+
+    try {
+      const { data, error } = await supabase
+        .from('admin_actions_log')
+        .select('*')
+        .eq('target_user_id', userId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching admin actions:', error);
+      return [];
+    }
+  };
+
+  const updateProfile = async (userId: string, updates: any) => {
+    if (!isAdmin) return { error: 'Unauthorized' };
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', userId);
+
+      if (error) throw error;
+
+      await fetchUsers();
+      return { success: true };
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      return { error: error.message };
+    }
+  };
+
+  const forcePasswordReset = async (userId: string) => {
+    if (!isAdmin) return { error: 'Unauthorized' };
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ force_password_reset: true })
+        .eq('id', userId);
+
+      if (error) throw error;
+
+      await fetchUsers();
+      return { success: true };
+    } catch (error) {
+      console.error('Error forcing password reset:', error);
+      return { error: error.message };
+    }
+  };
+
   return {
     users,
     loading,
@@ -143,6 +327,14 @@ export function useUserRoles() {
     fetchUsers,
     addRole,
     removeRole,
-    deleteUser
+    deleteUser,
+    suspendUser,
+    reactivateUser,
+    updateAdminNotes,
+    restrictCommunication,
+    getLoginHistory,
+    getAdminActions,
+    updateProfile,
+    forcePasswordReset
   };
 }
