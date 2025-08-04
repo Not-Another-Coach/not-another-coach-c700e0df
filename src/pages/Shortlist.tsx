@@ -4,12 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Star, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { format } from 'date-fns';
 import { StartConversationButton } from '@/components/StartConversationButton';
 import { BookDiscoveryCallButton } from '@/components/discovery-call/BookDiscoveryCallButton';
+import { EditDiscoveryCallButton } from '@/components/discovery-call/EditDiscoveryCallButton';
 
 export default function Shortlist() {
   const navigate = useNavigate();
-  const { shortlistedTrainers, loading, removeFromShortlist } = useShortlistedTrainers();
+  const { shortlistedTrainers, loading, removeFromShortlist, refetchShortlisted } = useShortlistedTrainers();
 
   if (loading) {
     return (
@@ -85,9 +87,15 @@ export default function Shortlist() {
                       <Badge variant="default" className="bg-green-100 text-green-800">
                         Chat Enabled
                       </Badge>
-                      <Badge variant="default" className="bg-blue-100 text-blue-800">
-                        Discovery Call Available
-                      </Badge>
+                      {shortlisted.discovery_call ? (
+                        <Badge variant="default" className="bg-blue-100 text-blue-800">
+                          Call Scheduled
+                        </Badge>
+                      ) : (
+                        <Badge variant="default" className="bg-blue-100 text-blue-800">
+                          Discovery Call Available
+                        </Badge>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-2">
@@ -97,23 +105,43 @@ export default function Shortlist() {
                         size="sm"
                         variant="outline"
                       />
-                      <BookDiscoveryCallButton 
-                        trainer={{
-                          id: shortlisted.trainer_id,
-                          name: `Trainer ${shortlisted.trainer_id}`,
-                          firstName: `Trainer`,
-                          lastName: shortlisted.trainer_id
-                        }}
-                        variant="default"
-                        size="sm"
-                      />
+                      {shortlisted.discovery_call ? (
+                        <EditDiscoveryCallButton 
+                          trainer={{
+                            id: shortlisted.trainer_id,
+                            name: `Trainer ${shortlisted.trainer_id}`,
+                            firstName: `Trainer`,
+                            lastName: shortlisted.trainer_id
+                          }}
+                          discoveryCall={shortlisted.discovery_call}
+                          variant="default"
+                          size="sm"
+                          onCallUpdated={refetchShortlisted}
+                        />
+                      ) : (
+                        <BookDiscoveryCallButton 
+                          trainer={{
+                            id: shortlisted.trainer_id,
+                            name: `Trainer ${shortlisted.trainer_id}`,
+                            firstName: `Trainer`,
+                            lastName: shortlisted.trainer_id
+                          }}
+                          variant="default"
+                          size="sm"
+                          onCallBooked={refetchShortlisted}
+                        />
+                      )}
                     </div>
 
-                    {shortlisted.discovery_call_booked_at && (
+                    {shortlisted.discovery_call ? (
+                      <div className="p-3 bg-blue-50 rounded-lg text-sm text-blue-800">
+                        Discovery call scheduled for {format(new Date(shortlisted.discovery_call.scheduled_for), 'MMM d, yyyy \'at\' h:mm a')}
+                      </div>
+                    ) : shortlisted.discovery_call_booked_at ? (
                       <div className="p-3 bg-green-50 rounded-lg text-sm text-green-800">
                         Discovery call booked on {new Date(shortlisted.discovery_call_booked_at).toLocaleDateString()}
                       </div>
-                    )}
+                    ) : null}
                   </div>
                 </CardContent>
               </Card>

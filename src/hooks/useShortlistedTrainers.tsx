@@ -14,6 +14,12 @@ interface ShortlistedTrainer {
   discovery_call_booked_at?: string;
   created_at: string;
   updated_at: string;
+  discovery_call?: {
+    id: string;
+    scheduled_for: string;
+    status: string;
+    duration_minutes: number;
+  };
 }
 
 export function useShortlistedTrainers() {
@@ -27,9 +33,24 @@ export function useShortlistedTrainers() {
     try {
       const { data, error } = await supabase
         .from('shortlisted_trainers')
-        .select('*')
+        .select(`
+          *
+        `)
         .eq('user_id', user.id)
         .order('shortlisted_at', { ascending: false });
+
+      // Also fetch discovery calls for these trainers
+      let discoveryCallsData = [];
+      if (data && data.length > 0) {
+        const trainerIds = data.map(item => item.trainer_id);
+        const { data: callsData } = await supabase
+          .from('discovery_calls')
+          .select('*')
+          .eq('client_id', user.id)
+          .in('trainer_id', trainerIds)
+          .in('status', ['scheduled', 'rescheduled']);
+        discoveryCallsData = callsData || [];
+      }
 
       if (error) {
         console.error('Error fetching shortlisted trainers:', error);
@@ -51,7 +72,13 @@ export function useShortlistedTrainers() {
           return isValidUUID;
         });
         
-        setShortlistedTrainers(validShortlisted);
+        // Merge discovery call data with shortlisted trainers
+        const mergedData = validShortlisted.map(shortlisted => ({
+          ...shortlisted,
+          discovery_call: discoveryCallsData.find(call => call.trainer_id === shortlisted.trainer_id) || null
+        }));
+        
+        setShortlistedTrainers(mergedData);
       }
     } catch (error) {
       console.error('Error fetching shortlisted trainers:', error);

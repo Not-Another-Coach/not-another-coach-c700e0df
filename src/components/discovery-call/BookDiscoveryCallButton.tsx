@@ -14,13 +14,15 @@ interface BookDiscoveryCallButtonProps {
   variant?: 'default' | 'outline' | 'secondary';
   size?: 'sm' | 'md' | 'lg';
   className?: string;
+  onCallBooked?: () => void;
 }
 
 export const BookDiscoveryCallButton = ({ 
   trainer, 
   variant = 'default',
   size = 'md',
-  className = ''
+  className = '',
+  onCallBooked
 }: BookDiscoveryCallButtonProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -45,6 +47,10 @@ export const BookDiscoveryCallButton = ({
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         trainer={trainer}
+        onCallBooked={() => {
+          setIsModalOpen(false);
+          onCallBooked?.();
+        }}
       />
     </>
   );

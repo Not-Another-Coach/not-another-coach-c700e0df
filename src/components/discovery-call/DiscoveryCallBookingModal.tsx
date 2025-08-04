@@ -22,6 +22,7 @@ interface DiscoveryCallBookingModalProps {
     lastName?: string;
     profilePhotoUrl?: string;
   };
+  onCallBooked?: () => void;
 }
 
 type BookingStep = 'date' | 'time' | 'notes' | 'confirmation';
@@ -29,7 +30,8 @@ type BookingStep = 'date' | 'time' | 'notes' | 'confirmation';
 export const DiscoveryCallBookingModal = ({ 
   isOpen, 
   onClose, 
-  trainer 
+  trainer,
+  onCallBooked
 }: DiscoveryCallBookingModalProps) => {
   const [currentStep, setCurrentStep] = useState<BookingStep>('date');
   const [selectedDate, setSelectedDate] = useState<Date>();
@@ -308,7 +310,10 @@ export const DiscoveryCallBookingModal = ({
               </p>
             </div>
 
-            <Button onClick={handleClose} className="w-full">
+            <Button onClick={() => {
+              onCallBooked?.();
+              handleClose();
+            }} className="w-full">
               Done
             </Button>
           </div>
