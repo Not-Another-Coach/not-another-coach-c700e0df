@@ -149,6 +149,11 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
     savedTrainerIds.includes(match.trainer.id)
   );
 
+  // Get shortlisted trainers
+  const shortlistedTrainers = matchedTrainers.filter(match => 
+    isShortlisted(match.trainer.id)
+  );
+
   // Mock matched trainers (those with mutual interest)
   const mutualMatches = matchedTrainers.filter(match => match.score >= 80);
 
@@ -264,10 +269,14 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
 
       {/* Tabs for different views */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="recommended" className="flex items-center gap-2">
             <Target className="h-4 w-4" />
             <span className="hidden sm:inline">Recommended</span>
+          </TabsTrigger>
+          <TabsTrigger value="matched" className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            <span className="hidden sm:inline">Match</span>
           </TabsTrigger>
           <TabsTrigger value="list" className="flex items-center gap-2">
             <List className="h-4 w-4" />
@@ -277,9 +286,9 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
             <Heart className="h-4 w-4" />
             <span className="hidden sm:inline">Saved</span>
           </TabsTrigger>
-          <TabsTrigger value="matched" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            <span className="hidden sm:inline">Matched</span>
+          <TabsTrigger value="shortlisted" className="flex items-center gap-2">
+            <Star className="h-4 w-4" />
+            <span className="hidden sm:inline">Shortlisted</span>
           </TabsTrigger>
         </TabsList>
 
@@ -470,6 +479,74 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                 </p>
                 <Button onClick={() => navigate('/discovery')}>
                   Start Swiping
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        {/* Shortlisted Trainers */}
+        <TabsContent value="shortlisted" className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold">Your Shortlisted Trainers</h2>
+            <Badge variant="outline">{shortlistCount}/4 shortlisted</Badge>
+          </div>
+          {shortlistedTrainers.length > 0 ? (
+            <div className="space-y-4">
+              <div className="text-sm text-muted-foreground">
+                These are your top trainer choices. You can chat with them and book discovery calls.
+              </div>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {shortlistedTrainers.map((match) => (
+                  <div key={match.trainer.id} className="relative">
+                    <TrainerCard
+                      trainer={match.trainer}
+                      onViewProfile={handleViewProfile}
+                      onMessage={handleMessage}
+                      matchScore={match.score}
+                      matchReasons={match.matchReasons}
+                      matchDetails={match.matchDetails}
+                    />
+                    <Badge 
+                      className="absolute top-2 right-2 bg-yellow-500 text-white"
+                    >
+                      ⭐ Shortlisted
+                    </Badge>
+                    
+                    {/* Action Buttons for Shortlisted Trainers */}
+                    <div className="mt-4 grid grid-cols-2 gap-2">
+                      <Button 
+                        size="sm" 
+                        variant="default" 
+                        className="flex items-center gap-2"
+                        onClick={() => handleMessage(match.trainer.id)}
+                      >
+                        <MessageCircle className="h-3 w-3" />
+                        Chat
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="flex items-center gap-2"
+                      >
+                        <Phone className="h-3 w-3" />
+                        Book Call
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="p-8 text-center">
+                <Star className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No shortlisted trainers yet</h3>
+                <p className="text-muted-foreground mb-4">
+                  Add up to 4 trainers to your shortlist from your saved trainers to unlock chat and discovery call features.
+                </p>
+                <Button onClick={() => setActiveTab('saved')}>
+                  View Saved Trainers
                 </Button>
               </CardContent>
             </Card>
