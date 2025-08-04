@@ -437,7 +437,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                         matchDetails={match.matchDetails}
                       />
                       <Badge 
-                        className="absolute top-2 right-2 bg-primary text-primary-foreground"
+                        className="absolute top-2 right-1/2 transform translate-x-1/2 bg-primary text-primary-foreground z-10"
                       >
                         ⚡{match.score}% Match
                       </Badge>
@@ -571,7 +571,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
               {savedTrainers.map((match) => (
                 <div key={match.trainer.id} className="relative">
                   {/* Comparison Checkbox */}
-                  <div className="absolute bottom-2 left-2 z-10">
+                  <div className="absolute top-2 right-2 z-10">
                     <Checkbox
                       checked={selectedForComparison.includes(match.trainer.id)}
                       onCheckedChange={() => handleComparisonToggle(match.trainer.id)}
@@ -666,7 +666,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                 {shortlistedTrainers.map((match) => (
                   <div key={match.trainer.id} className="relative">
                     {/* Comparison Checkbox */}
-                    <div className="absolute bottom-2 left-2 z-10">
+                    <div className="absolute top-2 right-2 z-20">
                       <Checkbox
                         checked={selectedForComparison.includes(match.trainer.id)}
                         onCheckedChange={() => handleComparisonToggle(match.trainer.id)}
@@ -683,7 +683,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                       matchDetails={match.matchDetails}
                     />
                     <Badge 
-                      className="absolute top-2 right-2 bg-yellow-500 text-white"
+                      className="absolute top-2 right-14 bg-yellow-500 text-white z-10"
                     >
                       ⭐ Shortlisted
                     </Badge>
@@ -692,7 +692,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="absolute top-12 left-2 bg-white/90 backdrop-blur hover:bg-red-50 hover:text-red-600"
+                      className="absolute top-2 left-2 bg-white/90 backdrop-blur hover:bg-red-50 hover:text-red-600 z-10"
                       onClick={() => handleRemoveFromShortlist(match.trainer.id, match.trainer.name)}
                     >
                       <X className="h-4 w-4" />
