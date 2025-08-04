@@ -966,6 +966,7 @@ export type Database = {
         Row: {
           availability_schedule: Json
           created_at: string
+          discovery_call_availability_schedule: Json | null
           discovery_call_duration: number
           id: string
           offers_discovery_call: boolean
@@ -976,6 +977,7 @@ export type Database = {
         Insert: {
           availability_schedule?: Json
           created_at?: string
+          discovery_call_availability_schedule?: Json | null
           discovery_call_duration?: number
           id?: string
           offers_discovery_call?: boolean
@@ -986,6 +988,7 @@ export type Database = {
         Update: {
           availability_schedule?: Json
           created_at?: string
+          discovery_call_availability_schedule?: Json | null
           discovery_call_duration?: number
           id?: string
           offers_discovery_call?: boolean

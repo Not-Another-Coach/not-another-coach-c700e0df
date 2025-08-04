@@ -51,7 +51,7 @@ export function useDiscoveryCallSettings() {
       if (data) {
         setSettings({
           ...data,
-          availability_schedule: data.availability_schedule as DiscoveryCallSettings['availability_schedule']
+          availability_schedule: data.discovery_call_availability_schedule as DiscoveryCallSettings['availability_schedule']
         });
       } else {
         // Create default settings if none exist
@@ -92,7 +92,7 @@ export function useDiscoveryCallSettings() {
           trainer_id: user.id,
           offers_discovery_call: updatedSettings.offers_discovery_call,
           discovery_call_duration: updatedSettings.discovery_call_duration,
-          availability_schedule: updatedSettings.availability_schedule,
+          discovery_call_availability_schedule: updatedSettings.availability_schedule,
           prep_notes: updatedSettings.prep_notes
         })
         .select()
@@ -110,7 +110,7 @@ export function useDiscoveryCallSettings() {
 
       setSettings({
         ...data,
-        availability_schedule: data.availability_schedule as DiscoveryCallSettings['availability_schedule']
+        availability_schedule: data.discovery_call_availability_schedule as DiscoveryCallSettings['availability_schedule']
       });
       toast({
         title: "Settings updated",
