@@ -55,9 +55,12 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
     if (selectedClient) {
       setSelectedTrainerId(selectedClient.user_id);
       setView('chat');
-      // For trainers messaging clients, check if client has messaged first
+      // For trainers messaging clients, check if client has messaged first and load messages
       if (isTrainer) {
         checkIfClientMessagedFirst(selectedClient.user_id);
+        loadMessages(selectedClient.user_id);
+      } else {
+        loadMessages(selectedClient.user_id);
       }
     }
   }, [selectedClient, isTrainer]);
@@ -96,8 +99,62 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
   };
   
   // Get contacts based on user type
+  const [trainerContacts, setTrainerContacts] = useState<any[]>([]);
+  const [loadingContacts, setLoadingContacts] = useState(false);
+
+  // Load conversations for trainers
+  useEffect(() => {
+    if (isTrainer && profile?.id && !selectedClient) {
+      loadTrainerConversations();
+    }
+  }, [isTrainer, profile?.id, selectedClient]);
+
+  const loadTrainerConversations = async () => {
+    if (!profile?.id) return;
+    setLoadingContacts(true);
+    
+    try {
+      // Get conversations where trainer is involved and client has sent messages
+      const { data: conversations } = await supabase
+        .from('conversations')
+        .select('id, client_id, last_message_at')
+        .eq('trainer_id', profile.id)
+        .not('last_message_at', 'is', null)
+        .order('last_message_at', { ascending: false });
+
+      if (conversations && conversations.length > 0) {
+        // Get client profiles separately
+        const clientIds = conversations.map(conv => conv.client_id);
+        const { data: clientProfiles } = await supabase
+          .from('profiles')
+          .select('id, first_name, last_name, training_location_preference')
+          .in('id', clientIds);
+
+        // Combine conversation data with profile data
+        const contacts = conversations.map(conv => {
+          const clientProfile = clientProfiles?.find(profile => profile.id === conv.client_id);
+          return {
+            id: conv.client_id,
+            name: clientProfile?.first_name && clientProfile?.last_name
+              ? `${clientProfile.first_name} ${clientProfile.last_name}`
+              : `Client ${conv.client_id.slice(0, 8)}`,
+            firstName: clientProfile?.first_name,
+            lastName: clientProfile?.last_name,
+            location: clientProfile?.training_location_preference || 'Location not specified',
+            lastMessageAt: conv.last_message_at
+          };
+        });
+        setTrainerContacts(contacts);
+      }
+    } catch (error) {
+      console.error('Error loading trainer conversations:', error);
+    } finally {
+      setLoadingContacts(false);
+    }
+  };
+
   const contacts = isTrainer 
-    ? [] // For now, trainers see empty list - in real app would show clients who messaged them
+    ? trainerContacts
     : trainers.filter(trainer => savedTrainerIds.includes(trainer.id)); // Clients see shortlisted trainers
 
   // Handle the selected contact - either from trainer list or selectedClient
@@ -112,14 +169,57 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
         location: selectedClient.client_profile?.training_location_preference || 'Location not specified'
       }
     : selectedTrainerId 
-      ? trainers.find(t => t.id === selectedTrainerId)
+      ? (isTrainer 
+          ? trainerContacts.find(c => c.id === selectedTrainerId)
+          : trainers.find(t => t.id === selectedTrainerId)
+        )
       : null;
 
   const handleSelectTrainer = (trainerId: string) => {
     setSelectedTrainerId(trainerId);
     setView('chat');
-    // Load existing messages for this trainer (in real app, from database)
-    setMessages([]);
+    loadMessages(trainerId);
+  };
+
+  // Load messages for the selected conversation
+  const loadMessages = async (clientId: string) => {
+    if (!profile?.id) return;
+    
+    try {
+      // Get the conversation
+      const { data: conversation } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq(isTrainer ? 'trainer_id' : 'client_id', profile.id)
+        .eq(isTrainer ? 'client_id' : 'trainer_id', clientId)
+        .single();
+
+      if (!conversation) {
+        setMessages([]);
+        return;
+      }
+
+      // Get messages for this conversation
+      const { data: messagesData } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('conversation_id', conversation.id)
+        .order('created_at', { ascending: true });
+
+      if (messagesData) {
+        const formattedMessages: Message[] = messagesData.map(msg => ({
+          id: msg.id,
+          content: msg.content,
+          sender: msg.sender_id === profile.id ? 'user' : 'trainer',
+          timestamp: new Date(msg.created_at),
+          trainerId: clientId
+        }));
+        setMessages(formattedMessages);
+      }
+    } catch (error) {
+      console.error('Error loading messages:', error);
+      setMessages([]);
+    }
   };
 
   const handleSendMessage = () => {
