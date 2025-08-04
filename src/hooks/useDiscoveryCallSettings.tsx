@@ -94,6 +94,8 @@ export function useDiscoveryCallSettings() {
           discovery_call_duration: updatedSettings.discovery_call_duration,
           discovery_call_availability_schedule: updatedSettings.availability_schedule,
           prep_notes: updatedSettings.prep_notes
+        }, {
+          onConflict: 'trainer_id'
         })
         .select()
         .single();
