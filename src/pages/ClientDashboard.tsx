@@ -12,6 +12,7 @@ import { EditPreferencesSection } from "@/components/dashboard/EditPreferencesSe
 import { ExploreMatchSection } from "@/components/dashboard/ExploreMatchSection";
 import { MessagesSection } from "@/components/dashboard/MessagesSection";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
+import { RoleSwitcher } from "@/components/RoleSwitcher";
 import { ClientJourneyBreadcrumb } from "@/components/ClientJourneyBreadcrumb";
 import { useClientJourneyProgress } from "@/hooks/useClientJourneyProgress";
 import { Heart, Settings, Search, MessageCircle, Menu } from "lucide-react";
@@ -90,6 +91,7 @@ export default function ClientDashboard() {
               <Heart className="h-4 w-4" />
               Saved ({savedTrainerIds.length})
             </Button>
+            <RoleSwitcher />
             <ProfileDropdown 
               profile={profile} 
               onSignOut={handleSignOut}
