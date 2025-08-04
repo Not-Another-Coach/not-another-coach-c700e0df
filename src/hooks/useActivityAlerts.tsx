@@ -30,11 +30,9 @@ export function useActivityAlerts() {
     console.log('Fetching alerts for user:', user.id);
     setLoading(true);
     try {
-      // Get general alerts
       const { data: alertsData, error } = await supabase
         .from('alerts')
         .select('*')
-        .eq('created_by', user.id)
         .eq('is_active', true)
         .order('created_at', { ascending: false })
         .limit(10);
