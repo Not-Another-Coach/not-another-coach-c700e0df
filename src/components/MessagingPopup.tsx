@@ -21,13 +21,22 @@ interface Message {
 interface MessagingPopupProps {
   isOpen: boolean;
   onClose: () => void;
+  selectedClient?: {
+    id: string;
+    user_id: string;
+    client_profile?: {
+      first_name?: string;
+      last_name?: string;
+      primary_goals?: string[];
+      training_location_preference?: string;
+    };
+  } | null;
 }
 
-export const MessagingPopup = ({ isOpen, onClose }: MessagingPopupProps) => {
+export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPopupProps) => {
   const [selectedTrainerId, setSelectedTrainerId] = useState<string | null>(null);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
-  const [view, setView] = useState<'list' | 'chat'>('list');
   
   const { profile } = useProfile();
   const { savedTrainers, savedTrainerIds } = useSavedTrainers();
@@ -35,14 +44,37 @@ export const MessagingPopup = ({ isOpen, onClose }: MessagingPopupProps) => {
 
   const isTrainer = profile?.user_type === 'trainer';
   
+  // If trainer provided a selectedClient, start directly in chat mode
+  const initialView = selectedClient ? 'chat' : 'list';
+  const [view, setView] = useState<'list' | 'chat'>(initialView);
+  
+  // Set the selected trainer/client based on provided data
+  useEffect(() => {
+    if (selectedClient) {
+      setSelectedTrainerId(selectedClient.user_id);
+      setView('chat');
+    }
+  }, [selectedClient]);
+  
   // Get contacts based on user type
   const contacts = isTrainer 
     ? [] // For now, trainers see empty list - in real app would show clients who messaged them
     : trainers.filter(trainer => savedTrainerIds.includes(trainer.id)); // Clients see shortlisted trainers
 
-  const selectedContact = selectedTrainerId 
-    ? trainers.find(t => t.id === selectedTrainerId)
-    : null;
+  // Handle the selected contact - either from trainer list or selectedClient
+  const selectedContact = selectedClient 
+    ? {
+        id: selectedClient.user_id,
+        name: selectedClient.client_profile?.first_name && selectedClient.client_profile?.last_name 
+          ? `${selectedClient.client_profile.first_name} ${selectedClient.client_profile.last_name}`
+          : `Client ${selectedClient.user_id.slice(0, 8)}`,
+        firstName: selectedClient.client_profile?.first_name,
+        lastName: selectedClient.client_profile?.last_name,
+        location: selectedClient.client_profile?.training_location_preference || 'Location not specified'
+      }
+    : selectedTrainerId 
+      ? trainers.find(t => t.id === selectedTrainerId)
+      : null;
 
   const handleSelectTrainer = (trainerId: string) => {
     setSelectedTrainerId(trainerId);

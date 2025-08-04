@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/hooks/useProfile';
 import { format } from 'date-fns';
 import { Users, MessageCircle, Calendar, Video, Phone, UserPlus } from 'lucide-react';
+import { MessagingPopup } from '@/components/MessagingPopup';
 
 interface Prospect {
   id: string;
@@ -33,6 +34,8 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
   const { profile } = useProfile();
   const [prospects, setProspects] = useState<Prospect[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isMessagingOpen, setIsMessagingOpen] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<Prospect | null>(null);
 
   useEffect(() => {
     if (profile?.id) {
@@ -258,8 +261,8 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
                         size="sm"
                         variant="outline"
                         onClick={() => {
-                          // TODO: Implement messaging functionality
-                          console.log('Message prospect:', prospect.user_id);
+                          setSelectedClient(prospect);
+                          setIsMessagingOpen(true);
                         }}
                       >
                         <MessageCircle className="w-3 h-3 mr-1" />
@@ -315,6 +318,16 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
           </div>
         )}
       </CardContent>
+      
+      {/* Messaging Popup */}
+      <MessagingPopup 
+        isOpen={isMessagingOpen}
+        onClose={() => {
+          setIsMessagingOpen(false);
+          setSelectedClient(null);
+        }}
+        selectedClient={selectedClient}
+      />
     </Card>
   );
 }
