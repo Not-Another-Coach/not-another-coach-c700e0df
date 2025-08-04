@@ -34,12 +34,19 @@ export function ActiveClientsSection({ onCountChange }: ActiveClientsSectionProp
   useEffect(() => {
     if (profile?.id) {
       fetchActiveClients();
+    } else {
+      setLoading(false);
     }
   }, [profile?.id]);
 
   const fetchActiveClients = async () => {
-    if (!profile?.id) return;
+    if (!profile?.id) {
+      setLoading(false);
+      return;
+    }
 
+    setLoading(true);
+    
     try {
       // First get the engagement data
       const { data: engagementData, error: engagementError } = await supabase
@@ -51,11 +58,14 @@ export function ActiveClientsSection({ onCountChange }: ActiveClientsSectionProp
 
       if (engagementError) {
         console.error('Error fetching engagement data:', engagementError);
+        setActiveClients([]);
+        onCountChange?.(0);
         return;
       }
 
       if (!engagementData || engagementData.length === 0) {
         setActiveClients([]);
+        onCountChange?.(0);
         return;
       }
 
