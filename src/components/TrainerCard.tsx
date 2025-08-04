@@ -6,6 +6,8 @@ import { Star, MapPin, Clock, Users, Award, Target, Dumbbell, Heart, HeartOff } 
 import { MatchBadge } from "@/components/MatchBadge";
 import { MatchProgressIndicator } from "@/components/MatchProgressIndicator";
 import { useSavedTrainers } from "@/hooks/useSavedTrainers";
+import { useContentVisibility } from "@/hooks/useContentVisibility";
+import { useEngagementStage } from "@/hooks/useEngagementStage";
 
 export interface Trainer {
   id: string;
@@ -40,7 +42,18 @@ interface TrainerCardProps {
 
 export const TrainerCard = ({ trainer, onViewProfile, matchScore = 0, matchReasons = [], matchDetails = [] }: TrainerCardProps) => {
   const { isTrainerSaved, saveTrainer, unsaveTrainer } = useSavedTrainers();
+  const { stage } = useEngagementStage(trainer.id);
+  const { getVisibility } = useContentVisibility({
+    trainerId: trainer.id,
+    engagementStage: stage
+  });
+  
   const isSaved = isTrainerSaved(trainer.id);
+  const profileImageVisibility = getVisibility('profile_image');
+  
+  // Mask name based on visibility settings
+  const shouldShowName = profileImageVisibility === 'visible';
+  const displayName = shouldShowName ? trainer.name : 'PT Professional';
 
   const handleToggleSave = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -89,7 +102,7 @@ export const TrainerCard = ({ trainer, onViewProfile, matchScore = 0, matchReaso
           
           <div className="flex-1">
             <h3 className="font-semibold text-lg text-foreground group-hover:text-primary transition-colors">
-              {trainer.name}
+              {displayName}
             </h3>
             <div className="flex items-center gap-2 mb-2">
               <div className="flex items-center gap-1">
