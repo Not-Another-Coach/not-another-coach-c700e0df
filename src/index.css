@@ -2,6 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Visibility Matrix Blur Effects */
+.blur-soft {
+  filter: blur(4px);
+  transition: filter 0.3s ease;
+}
+
+.blur-medium {
+  filter: blur(8px);
+  transition: filter 0.3s ease;
+}
+
+.blur-strong {
+  filter: blur(12px);
+  transition: filter 0.3s ease;
+}
+
+.backdrop-blur-custom {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 */

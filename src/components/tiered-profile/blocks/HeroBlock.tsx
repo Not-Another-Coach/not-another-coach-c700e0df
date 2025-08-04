@@ -1,9 +1,10 @@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ProfileImage } from '@/components/ui/profile-image';
 import { Heart, MapPin, Clock, Award, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { EngagementStage } from '@/hooks/useEngagementStage';
+import { useContentVisibility } from '@/hooks/useContentVisibility';
 
 interface HeroBlockProps {
   trainer: any;
@@ -22,6 +23,11 @@ export const HeroBlock = ({
   onLike, 
   isUpdatingStage 
 }: HeroBlockProps) => {
+  const { getVisibility } = useContentVisibility({
+    trainerId: trainer.id,
+    engagementStage: stage
+  });
+
   const getAvailabilityStatus = () => {
     if (trainer.client_status === 'paused') return { text: 'Not taking clients', color: 'bg-red-500' };
     if (trainer.client_status === 'waitlist') return { text: 'Waitlist only', color: 'bg-orange-500' };
@@ -29,16 +35,20 @@ export const HeroBlock = ({
   };
 
   const availability = getAvailabilityStatus();
+  const profileImageVisibility = getVisibility('profile_image');
 
   return (
     <div className="space-y-4">
       <div className="flex items-start gap-4">
-        <Avatar className="w-16 h-16">
-          <AvatarImage src={trainer.profile_photo_url} />
-          <AvatarFallback>
-            {trainer.first_name?.[0]}{trainer.last_name?.[0]}
-          </AvatarFallback>
-        </Avatar>
+        <ProfileImage
+          src={trainer.profile_photo_url}
+          alt={`${trainer.first_name} ${trainer.last_name}`}
+          visibility={profileImageVisibility}
+          size="xl"
+          variant="circle"
+          fallbackInitials={`${trainer.first_name?.[0] || ''}${trainer.last_name?.[0] || ''}`}
+          lockMessage="Profile photo available after connection"
+        />
 
         <div className="flex-1 space-y-2">
           <div className="flex items-center gap-2">

@@ -1,8 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Lock, Package, Calendar, DollarSign } from 'lucide-react';
+import { BlurableImage } from '@/components/ui/blurable-image';
+import { Lock, Package, Calendar, DollarSign, Image } from 'lucide-react';
 import { EngagementStage } from '@/hooks/useEngagementStage';
+import { useContentVisibility } from '@/hooks/useContentVisibility';
 
 interface GalleryPackagesBlockProps {
   trainer: any;
@@ -11,6 +13,14 @@ interface GalleryPackagesBlockProps {
 }
 
 export const GalleryPackagesBlock = ({ trainer, canViewPricing, stage }: GalleryPackagesBlockProps) => {
+  const { getVisibility } = useContentVisibility({
+    trainerId: trainer.id,
+    engagementStage: stage
+  });
+
+  const beforeAfterVisibility = getVisibility('before_after_images');
+  const packageImagesVisibility = getVisibility('package_images');
+
   return (
     <Card>
       <CardHeader>
@@ -21,16 +31,39 @@ export const GalleryPackagesBlock = ({ trainer, canViewPricing, stage }: Gallery
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Before/After Gallery - Hidden until discovery completed */}
-        {!canViewPricing && (
-          <div className="bg-muted/50 rounded-lg p-6 text-center space-y-2">
-            <Lock className="w-8 h-8 mx-auto text-muted-foreground" />
-            <h4 className="font-medium">Before/After Gallery Locked</h4>
-            <p className="text-sm text-muted-foreground">
-              Complete a discovery call to see client transformation photos
-            </p>
+        {/* Before/After Gallery with visibility controls */}
+        <div className="space-y-3">
+          <h4 className="font-medium flex items-center gap-2">
+            <Image className="w-4 h-4" />
+            Client Transformations
+          </h4>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {trainer.before_after_photos && trainer.before_after_photos.length > 0 ? (
+              trainer.before_after_photos.slice(0, 6).map((photo: any, index: number) => (
+                <BlurableImage
+                  key={index}
+                  src={photo.url || photo}
+                  alt={`Transformation ${index + 1}`}
+                  visibility={beforeAfterVisibility}
+                  className="aspect-square rounded-lg object-cover"
+                  lockMessage="Transformation photos shared after discovery call"
+                />
+              ))
+            ) : (
+              // Placeholder transformation photos
+              Array.from({ length: 3 }).map((_, index) => (
+                <BlurableImage
+                  key={`placeholder-${index}`}
+                  src="/placeholder.svg"
+                  alt={`Sample transformation ${index + 1}`}
+                  visibility={beforeAfterVisibility}
+                  className="aspect-square rounded-lg object-cover"
+                  lockMessage="Transformation photos shared after discovery call"
+                />
+              ))
+            )}
           </div>
-        )}
+        </div>
 
         {/* Package Options */}
         {trainer.package_options && trainer.package_options.length > 0 ? (
