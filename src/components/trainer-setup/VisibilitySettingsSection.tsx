@@ -3,9 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Eye, EyeOff, Lock, Settings } from 'lucide-react';
+import { Eye, EyeOff, Lock, Settings, ExternalLink } from 'lucide-react';
 import { useVisibilityMatrix, ContentType, VisibilityState, EngagementStage } from '@/hooks/useVisibilityMatrix';
 import { useProfile } from '@/hooks/useProfile';
+import { ProfilePreviewModal } from './ProfilePreviewModal';
 import { toast } from 'sonner';
 
 const contentTypeLabels: Record<ContentType, string> = {
@@ -36,6 +37,7 @@ export const VisibilitySettingsSection = () => {
   const { updateVisibilitySettings, initializeDefaults, loading } = useVisibilityMatrix();
   const [settings, setSettings] = useState<Record<string, VisibilityState>>({});
   const [hasInitialized, setHasInitialized] = useState(false);
+  const [previewStage, setPreviewStage] = useState<EngagementStage | null>(null);
 
   const contentTypes: ContentType[] = [
     'profile_image',
@@ -135,8 +137,21 @@ export const VisibilitySettingsSection = () => {
               <tr>
                 <th className="text-left p-2 border-b">Content Type</th>
                 {engagementStages.map(stage => (
-                  <th key={stage} className="text-center p-2 border-b text-xs">
-                    {engagementStageLabels[stage]}
+                  <th key={stage} className="text-center p-2 border-b">
+                    <div className="space-y-2">
+                      <div className="text-xs font-medium">
+                        {engagementStageLabels[stage]}
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPreviewStage(stage)}
+                        className="h-7 text-xs px-2"
+                      >
+                        <ExternalLink className="w-3 h-3 mr-1" />
+                        Preview
+                      </Button>
+                    </div>
                   </th>
                 ))}
               </tr>
@@ -206,6 +221,16 @@ export const VisibilitySettingsSection = () => {
             </div>
           </div>
         </div>
+
+        {/* Profile Preview Modal */}
+        {previewStage && (
+          <ProfilePreviewModal
+            isOpen={!!previewStage}
+            onClose={() => setPreviewStage(null)}
+            trainer={profile}
+            stage={previewStage}
+          />
+        )}
       </CardContent>
     </Card>
   );
