@@ -80,7 +80,7 @@ const ClientSurvey = () => {
     "Availability & Start Date"
   ];
 
-  // Redirect if not client
+  // Redirect if not client or if survey is already completed
   useEffect(() => {
     if (!loading && !profileLoading && user && profile) {
       if (profile.user_type !== 'client') {
@@ -88,8 +88,11 @@ const ClientSurvey = () => {
         return;
       }
       
-      // Allow users to edit their survey even if completed
-      // Remove the automatic redirect to discovery
+      // If survey is already completed, redirect to dashboard
+      if ((profile as any).client_survey_completed) {
+        navigate('/client/dashboard');
+        return;
+      }
     }
   }, [user, profile, loading, profileLoading, navigate]);
 
