@@ -143,6 +143,80 @@ export type Database = {
         }
         Relationships: []
       }
+      conversations: {
+        Row: {
+          client_id: string
+          client_last_read_at: string | null
+          created_at: string
+          id: string
+          last_message_at: string | null
+          trainer_id: string
+          trainer_last_read_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          client_last_read_at?: string | null
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          trainer_id: string
+          trainer_last_read_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          client_last_read_at?: string | null
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          trainer_id?: string
+          trainer_last_read_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          message_type: string
+          metadata: Json | null
+          read_at: string | null
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          message_type?: string
+          metadata?: Json | null
+          read_at?: string | null
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          message_type?: string
+          metadata?: Json | null
+          read_at?: string | null
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       package_ways_of_working: {
         Row: {
           client_expectations_items: Json | null
