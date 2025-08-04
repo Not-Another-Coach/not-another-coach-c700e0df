@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from '@/hooks/use-toast';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,6 +22,7 @@ export default function Auth() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
+  const [rememberMe, setRememberMe] = useState(false);
   const [signupForm, setSignupForm] = useState({
     email: '',
     password: '',
@@ -33,6 +35,18 @@ export default function Auth() {
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+
+  // Load saved credentials on component mount
+  useEffect(() => {
+    const savedCredentials = localStorage.getItem('savedCredentials');
+    const savedRememberMe = localStorage.getItem('rememberMe') === 'true';
+    
+    if (savedCredentials && savedRememberMe) {
+      const { email } = JSON.parse(savedCredentials);
+      setLoginForm(prev => ({ ...prev, email }));
+      setRememberMe(true);
+    }
+  }, []);
 
   // Check if this is a password recovery URL
   useEffect(() => {
@@ -68,6 +82,17 @@ export default function Auth() {
         variant: "destructive",
       });
     } else {
+      // Handle remember me functionality
+      if (rememberMe) {
+        localStorage.setItem('savedCredentials', JSON.stringify({ 
+          email: loginForm.email 
+        }));
+        localStorage.setItem('rememberMe', 'true');
+      } else {
+        localStorage.removeItem('savedCredentials');
+        localStorage.removeItem('rememberMe');
+      }
+
       toast({
         title: "Welcome back!",
         description: "You have successfully logged in.",
@@ -237,7 +262,7 @@ export default function Auth() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">PT Match Finder</CardTitle>
+          <CardTitle className="text-2xl font-bold">Not Another Coach</CardTitle>
           <CardDescription>Let's find your fitness fit 💪</CardDescription>
         </CardHeader>
         <CardContent>
@@ -347,12 +372,27 @@ export default function Auth() {
                       value={loginForm.password}
                       onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
                       required
-                    />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Login
-                  </Button>
+                     />
+                   </div>
+                   
+                   <div className="flex items-center space-x-2">
+                     <Checkbox 
+                       id="remember-me"
+                       checked={rememberMe}
+                       onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                     />
+                     <Label 
+                       htmlFor="remember-me" 
+                       className="text-sm font-normal cursor-pointer"
+                     >
+                       Remember me
+                     </Label>
+                   </div>
+                   
+                   <Button type="submit" className="w-full" disabled={isLoading}>
+                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                     Login
+                   </Button>
                 </form>
                 
                 <div className="text-center">
