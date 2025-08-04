@@ -263,7 +263,7 @@ export default function Auth() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Not Another Coach</CardTitle>
-          <CardDescription>Let's find your fitness fit 💪</CardDescription>
+          <CardDescription>Not another app. Not another coach. This is personal.</CardDescription>
         </CardHeader>
         <CardContent>
           {showPasswordReset ? (
