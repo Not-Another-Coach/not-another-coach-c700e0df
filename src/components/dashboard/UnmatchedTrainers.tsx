@@ -50,15 +50,29 @@ export function UnmatchedTrainers({ profile }: UnmatchedTrainersProps) {
         const engagedTrainerIds = engagements?.map(e => e.trainer_id) || [];
         console.log('Engaged trainer IDs:', engagedTrainerIds);
 
-        // Get all trainers with completed profiles excluding those already engaged
+        // Get trainers that the client has saved/liked
+        const { data: savedTrainers } = await supabase
+          .from('saved_trainers')
+          .select('trainer_id')
+          .eq('user_id', user.id);
+
+        console.log('Saved trainers data:', savedTrainers);
+        const savedTrainerIds = savedTrainers?.map(s => s.trainer_id) || [];
+        console.log('Saved trainer IDs:', savedTrainerIds);
+
+        // Combine both lists to exclude trainers already engaged with or saved
+        const excludedTrainerIds = [...new Set([...engagedTrainerIds, ...savedTrainerIds])];
+        console.log('All excluded trainer IDs:', excludedTrainerIds);
+
+        // Get all trainers with completed profiles excluding those already engaged or saved
         let query = supabase
           .from('profiles')
           .select('id, first_name, last_name, tagline, bio, location, specializations, training_types, hourly_rate, rating, total_ratings, profile_photo_url, is_verified, profile_setup_completed, profile_published, user_type')
           .eq('user_type', 'trainer');
 
         // Don't exclude current user since we want to show all trainers in this view
-        if (engagedTrainerIds.length > 0) {
-          query = query.not('id', 'in', `(${engagedTrainerIds.join(',')})`);
+        if (excludedTrainerIds.length > 0) {
+          query = query.not('id', 'in', `(${excludedTrainerIds.join(',')})`);
         }
 
         const { data: trainersData, error } = await query.order('rating', { ascending: false });
