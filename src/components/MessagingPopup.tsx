@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MessageCircle, X, Send, Users, Heart, Lock } from 'lucide-react';
+import { MessageCircle, X, Send, Users, Heart, Lock, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -40,6 +40,8 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
   const [messages, setMessages] = useState<Message[]>([]);
   const [canMessage, setCanMessage] = useState(true);
   const [sending, setSending] = useState(false);
+  const [searchFilter, setSearchFilter] = useState('');
+  const [unreadCounts, setUnreadCounts] = useState<{ [key: string]: number }>({});
   
   const { profile } = useProfile();
   const { savedTrainers, savedTrainerIds } = useSavedTrainers();
@@ -164,6 +166,100 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
   const contacts = isTrainer 
     ? trainerContacts
     : trainers.filter(trainer => savedTrainerIds.includes(trainer.id)); // Clients see shortlisted trainers
+
+  // Filter contacts based on search
+  const filteredContacts = contacts.filter(contact => 
+    contact.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
+    (contact.location && contact.location.toLowerCase().includes(searchFilter.toLowerCase()))
+  );
+
+  // Load unread counts for all contacts
+  const loadUnreadCounts = async () => {
+    if (!profile?.id) return;
+    
+    const counts: { [key: string]: number } = {};
+    
+    for (const contact of contacts) {
+      try {
+        const { data: conversation } = await supabase
+          .from('conversations')
+          .select('id')
+          .eq(isTrainer ? 'trainer_id' : 'client_id', profile.id)
+          .eq(isTrainer ? 'client_id' : 'trainer_id', contact.id)
+          .maybeSingle();
+
+        if (conversation) {
+          // Get unread messages count
+          const { count } = await supabase
+            .from('messages')
+            .select('*', { count: 'exact', head: true })
+            .eq('conversation_id', conversation.id)
+            .neq('sender_id', profile.id)
+            .is('read_at', null);
+          
+          counts[contact.id] = count || 0;
+        } else {
+          counts[contact.id] = 0;
+        }
+      } catch (error) {
+        console.error('Error loading unread count for contact:', contact.id, error);
+        counts[contact.id] = 0;
+      }
+    }
+    
+    setUnreadCounts(counts);
+  };
+
+  // Mark messages as read when viewing conversation
+  const markMessagesAsRead = async (contactId: string) => {
+    if (!profile?.id) return;
+    
+    try {
+      const { data: conversation } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq(isTrainer ? 'trainer_id' : 'client_id', profile.id)
+        .eq(isTrainer ? 'client_id' : 'trainer_id', contactId)
+        .maybeSingle();
+
+      if (conversation) {
+        // Mark messages as read
+        await supabase
+          .from('messages')
+          .update({ read_at: new Date().toISOString() })
+          .eq('conversation_id', conversation.id)
+          .neq('sender_id', profile.id)
+          .is('read_at', null);
+
+        // Update conversation read timestamp
+        await supabase
+          .from('conversations')
+          .update({
+            [isTrainer ? 'trainer_last_read_at' : 'client_last_read_at']: new Date().toISOString()
+          })
+          .eq('id', conversation.id);
+
+        // Update local unread counts
+        setUnreadCounts(prev => ({ ...prev, [contactId]: 0 }));
+      }
+    } catch (error) {
+      console.error('Error marking messages as read:', error);
+    }
+  };
+
+  // Load unread counts when contacts change
+  useEffect(() => {
+    if (profile?.id && contacts.length > 0) {
+      loadUnreadCounts();
+    }
+  }, [profile?.id, contacts.length]);
+
+  // Mark messages as read when viewing a conversation
+  useEffect(() => {
+    if (selectedTrainerId && profile?.id && view === 'chat') {
+      markMessagesAsRead(selectedTrainerId);
+    }
+  }, [selectedTrainerId, profile?.id, view]);
 
   // Handle the selected contact - either from trainer list or selectedClient
   const selectedContact = selectedClient 
@@ -354,7 +450,7 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
           {view === 'list' ? (
             // Trainer List View
             <div className="flex-1">
-              <div className="p-4 border-b bg-muted/30">
+              <div className="p-4 border-b bg-muted/30 space-y-3">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   {isTrainer ? (
                     <>
@@ -371,12 +467,23 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
                     {contacts.length}
                   </Badge>
                 </div>
+                
+                {/* Search Filter */}
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search contacts..."
+                    value={searchFilter}
+                    onChange={(e) => setSearchFilter(e.target.value)}
+                    className="pl-9 h-8 text-sm"
+                  />
+                </div>
               </div>
 
               <ScrollArea className="flex-1">
-                {contacts.length > 0 ? (
+                {filteredContacts.length > 0 ? (
                   <div className="p-2">
-                    {contacts.map((contact) => (
+                    {filteredContacts.map((contact) => (
                       <Button
                         key={contact.id}
                         variant="ghost"
@@ -395,11 +502,16 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
                               {contact.location || 'Available for chat'}
                             </p>
                           </div>
-                          <div className="flex-shrink-0">
-                            <Badge variant="outline" className="text-xs">
-                              Message
-                            </Badge>
-                          </div>
+                           <div className="flex-shrink-0 flex items-center gap-2">
+                             {unreadCounts[contact.id] > 0 && (
+                               <Badge variant="destructive" className="text-xs min-w-[20px] h-5 flex items-center justify-center rounded-full">
+                                 {unreadCounts[contact.id]}
+                               </Badge>
+                             )}
+                             <Badge variant="outline" className="text-xs">
+                               Message
+                             </Badge>
+                           </div>
                         </div>
                       </Button>
                     ))}
@@ -408,12 +520,15 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
                   <div className="flex flex-col items-center justify-center h-full p-4 text-center">
                     <Users className="w-12 h-12 text-muted-foreground/50 mb-2" />
                     <p className="text-sm font-medium text-muted-foreground">
-                      {isTrainer ? 'No client conversations' : 'No shortlisted trainers'}
+                      {searchFilter ? 'No contacts found' : (isTrainer ? 'No client conversations' : 'No shortlisted trainers')}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {isTrainer 
-                        ? 'When clients message you, they\'ll appear here'
-                        : 'Like trainers to add them to your shortlist and start messaging'
+                      {searchFilter 
+                        ? 'Try adjusting your search terms'
+                        : (isTrainer 
+                            ? 'When clients message you, they\'ll appear here'
+                            : 'Like trainers to add them to your shortlist and start messaging'
+                          )
                       }
                     </p>
                   </div>
