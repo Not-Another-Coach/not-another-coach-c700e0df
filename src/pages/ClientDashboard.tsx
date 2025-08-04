@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
-import { useSavedTrainers } from "@/hooks/useSavedTrainers";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -25,7 +24,7 @@ import { Heart, Settings, Search, MessageCircle, Menu, Users, Shuffle, Shield } 
 export default function ClientDashboard() {
   const { user, signOut, loading } = useAuth();
   const { profile, loading: profileLoading, isClient, isTrainer } = useProfile();
-  const { savedTrainerIds } = useSavedTrainers();
+  
   const { isAdmin } = useUserRoles();
   const { progress: journeyProgress, loading: journeyLoading } = useClientJourneyProgress();
   const navigate = useNavigate();
@@ -100,15 +99,6 @@ export default function ClientDashboard() {
               </Button>
             )}
             
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => navigate('/saved')}
-              className="flex items-center gap-2"
-            >
-              <Heart className="h-4 w-4" />
-              Saved ({savedTrainerIds.length})
-            </Button>
             
             <ProfileDropdown 
               profile={profile} 

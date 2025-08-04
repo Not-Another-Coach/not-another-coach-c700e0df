@@ -255,9 +255,9 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
             <List className="h-4 w-4" />
             <span className="hidden sm:inline">List View</span>
           </TabsTrigger>
-          <TabsTrigger value="liked" className="flex items-center gap-2">
+          <TabsTrigger value="saved" className="flex items-center gap-2">
             <Heart className="h-4 w-4" />
-            <span className="hidden sm:inline">Liked</span>
+            <span className="hidden sm:inline">Saved</span>
           </TabsTrigger>
           <TabsTrigger value="matched" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
@@ -331,11 +331,22 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
           </div>
         </TabsContent>
 
-        {/* Liked Profiles */}
-        <TabsContent value="liked" className="space-y-4">
+        {/* Saved Trainers */}
+        <TabsContent value="saved" className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Your Liked Trainers</h2>
-            <Badge variant="outline">{savedTrainers.length} saved</Badge>
+            <h2 className="text-xl font-semibold">Your Saved Trainers</h2>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline">{savedTrainers.length} saved</Badge>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate('/saved')}
+                className="flex items-center gap-2"
+              >
+                <Heart className="h-4 w-4" />
+                View All Saved
+              </Button>
+            </div>
           </div>
           {savedTrainers.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -357,7 +368,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                 <Heart className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <h3 className="text-lg font-semibold mb-2">No saved trainers yet</h3>
                 <p className="text-muted-foreground mb-4">
-                  Like trainers to save them for later and build your shortlist
+                  Like trainers by clicking the heart icon to save them for later and build your shortlist
                 </p>
                 <Button onClick={() => setActiveTab('recommended')}>
                   Explore Trainers
