@@ -576,7 +576,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                       checked={selectedForComparison.includes(match.trainer.id)}
                       onCheckedChange={() => handleComparisonToggle(match.trainer.id)}
                       disabled={!selectedForComparison.includes(match.trainer.id) && selectedForComparison.length >= 4}
-                      className="bg-white/90 backdrop-blur border-2"
+                      className="bg-white border-2 shadow-sm"
                     />
                   </div>
 
@@ -671,7 +671,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                         checked={selectedForComparison.includes(match.trainer.id)}
                         onCheckedChange={() => handleComparisonToggle(match.trainer.id)}
                         disabled={!selectedForComparison.includes(match.trainer.id) && selectedForComparison.length >= 4}
-                        className="bg-white/90 backdrop-blur border-2"
+                        className="bg-white border-2 shadow-sm"
                       />
                     </div>
 
