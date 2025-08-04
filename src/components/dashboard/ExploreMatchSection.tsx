@@ -5,6 +5,7 @@ import { useSavedTrainers } from "@/hooks/useSavedTrainers";
 import { useShortlistedTrainers } from "@/hooks/useShortlistedTrainers";
 import { useRealTrainers } from "@/hooks/useRealTrainers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +26,8 @@ import {
   Shuffle,
   MapPin,
   Phone,
-  MessageCircle
+  MessageCircle,
+  X
 } from "lucide-react";
 import trainerSarah from "@/assets/trainer-sarah.jpg";
 import trainerMike from "@/assets/trainer-mike.jpg";
@@ -102,8 +104,8 @@ const sampleTrainers = [
 
 export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
   const navigate = useNavigate();
-  const { savedTrainerIds } = useSavedTrainers();
-  const { shortlistTrainer, isShortlisted, shortlistCount, canShortlistMore } = useShortlistedTrainers();
+  const { savedTrainerIds, unsaveTrainer } = useSavedTrainers();
+  const { shortlistTrainer, isShortlisted, shortlistCount, canShortlistMore, removeFromShortlist } = useShortlistedTrainers();
   
   // Use real trainers from database
   const { trainers: realTrainers, loading: trainersLoading } = useRealTrainers();
@@ -144,9 +146,9 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
     clientSurveyData
   );
 
-  // Get saved trainers
+  // Get saved trainers (excluding those already shortlisted)
   const savedTrainers = matchedTrainers.filter(match => 
-    savedTrainerIds.includes(match.trainer.id)
+    savedTrainerIds.includes(match.trainer.id) && !isShortlisted(match.trainer.id)
   );
 
   // Get shortlisted trainers
@@ -203,6 +205,60 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
       toast.error('Failed to shortlist trainer');
     } else {
       toast.success('Trainer added to shortlist!');
+    }
+  };
+
+  const handleRemoveFromShortlist = async (trainerId: string, trainerName: string) => {
+    // Show confirmation dialog asking if they want to keep the trainer saved
+    const keepSaved = await new Promise<boolean>((resolve) => {
+      const dialog = document.createElement('div');
+      dialog.innerHTML = `
+        <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div class="bg-white rounded-lg p-6 max-w-md mx-4">
+            <h3 class="text-lg font-semibold mb-2">Remove from Shortlist</h3>
+            <p class="text-gray-600 mb-4">
+              Do you want to keep ${trainerName} in your saved trainers for future reference?
+            </p>
+            <div class="flex gap-2 justify-end">
+              <button id="remove-all" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+                Remove from Both
+              </button>
+              <button id="keep-saved" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                Keep Saved
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(dialog);
+
+      const handleKeepSaved = () => {
+        document.body.removeChild(dialog);
+        resolve(true);
+      };
+
+      const handleRemoveAll = () => {
+        document.body.removeChild(dialog);
+        resolve(false);
+      };
+
+      dialog.querySelector('#keep-saved')?.addEventListener('click', handleKeepSaved);
+      dialog.querySelector('#remove-all')?.addEventListener('click', handleRemoveAll);
+    });
+
+    // Remove from shortlist
+    const result = await removeFromShortlist(trainerId);
+    if (result.error) {
+      toast.error('Failed to remove from shortlist');
+      return;
+    }
+
+    // If user chose to remove from saved as well
+    if (!keepSaved) {
+      await unsaveTrainer(trainerId);
+      toast.success(`${trainerName} removed from shortlist and saved trainers`);
+    } else {
+      toast.success(`${trainerName} removed from shortlist but kept in saved trainers`);
     }
   };
 
@@ -512,6 +568,16 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                     >
                       ⭐ Shortlisted
                     </Badge>
+                    
+                    {/* Remove from Shortlist Button */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="absolute top-2 left-2 bg-white/90 backdrop-blur hover:bg-red-50 hover:text-red-600"
+                      onClick={() => handleRemoveFromShortlist(match.trainer.id, match.trainer.name)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
                     
                     {/* Action Buttons for Shortlisted Trainers */}
                     <div className="mt-4 grid grid-cols-2 gap-2">
