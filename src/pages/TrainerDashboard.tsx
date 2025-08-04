@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { useCoachAnalytics } from "@/hooks/useCoachAnalytics";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,12 +18,15 @@ import {
   Settings,
   CheckCircle,
   AlertCircle,
-  Clock
+  Clock,
+  Eye,
+  Heart
 } from "lucide-react";
 
 const TrainerDashboard = () => {
   const { user, signOut, loading } = useAuth();
   const { profile, loading: profileLoading, isTrainer, updateProfile } = useProfile();
+  const { analytics, shortlistedClients, loading: analyticsLoading } = useCoachAnalytics(profile?.id);
   const navigate = useNavigate();
   const [availabilityStatus, setAvailabilityStatus] = useState<'accepting' | 'waitlist' | 'unavailable'>('accepting');
 
@@ -219,26 +223,7 @@ const TrainerDashboard = () => {
         </Card>
 
         {/* Dashboard Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-
-          {/* Client Requests */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Client Requests
-              </CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">3</div>
-              <p className="text-xs text-muted-foreground">
-                New this week
-              </p>
-              <Button variant="outline" size="sm" className="mt-3 w-full">
-                View Requests
-              </Button>
-            </CardContent>
-          </Card>
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
 
           {/* Profile Views */}
           <Card>
@@ -246,35 +231,137 @@ const TrainerDashboard = () => {
               <CardTitle className="text-sm font-medium">
                 Profile Views
               </CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              <Eye className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">127</div>
+              <div className="text-2xl font-bold">
+                {analyticsLoading ? '...' : analytics?.total_views || 0}
+              </div>
               <p className="text-xs text-muted-foreground">
-                +12% from last week
+                Total profile views
               </p>
             </CardContent>
           </Card>
 
-          {/* Rating */}
+          {/* Likes */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Rating
+                Likes
+              </CardTitle>
+              <Heart className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {analyticsLoading ? '...' : analytics?.total_likes || 0}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Total likes received
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Shortlisted */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Shortlisted
               </CardTitle>
               <Star className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold flex items-center gap-1">
-                {profile?.rating || 0}
-                <Star className="h-5 w-5 fill-primary text-primary" />
+              <div className="text-2xl font-bold">
+                {analyticsLoading ? '...' : analytics?.total_shortlists || 0}
               </div>
               <p className="text-xs text-muted-foreground">
-                {profile?.total_ratings || 0} reviews
+                Times shortlisted
               </p>
             </CardContent>
           </Card>
 
+          {/* Conversion Rate */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Conversion Rate
+              </CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {analyticsLoading ? '...' : `${analytics?.conversion_rate?.toFixed(1) || 0}%`}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Views to shortlists
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Match Quality Stats */}
+        {analytics?.match_tier_stats && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Match Quality Distribution</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600">
+                    {analytics.match_tier_stats.perfect_matches || 0}
+                  </div>
+                  <p className="text-xs text-muted-foreground">Perfect Matches</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600">
+                    {analytics.match_tier_stats.great_matches || 0}
+                  </div>
+                  <p className="text-xs text-muted-foreground">Great Matches</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-yellow-600">
+                    {analytics.match_tier_stats.good_matches || 0}
+                  </div>
+                  <p className="text-xs text-muted-foreground">Good Matches</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-orange-600">
+                    {analytics.match_tier_stats.potential_matches || 0}
+                  </div>
+                  <p className="text-xs text-muted-foreground">Potential Matches</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Shortlisted Clients */}
+        {shortlistedClients && shortlistedClients.length > 0 && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Recent Shortlisted Clients</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {shortlistedClients.slice(0, 5).map((client, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                    <div>
+                      <p className="font-medium">Client #{client.id.slice(0, 8)}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {client.primary_goals?.length ? `Goals: ${client.primary_goals.join(', ')}` : 'No goals specified'}
+                      </p>
+                    </div>
+                    <Badge variant="secondary">
+                      {(client as any).discovery_call_booked ? 'Call Booked' : 'Available'}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        {/* Additional Dashboard Grid for Sessions and Actions */}
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
           {/* Upcoming Sessions */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
