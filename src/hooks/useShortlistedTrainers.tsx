@@ -54,6 +54,41 @@ export function useShortlistedTrainers() {
     }
   }, [user, fetchShortlistedTrainers]);
 
+  
+  // Helper function to update client journey when shortlisting
+  const updateClientJourney = useCallback(async () => {
+    if (!user) return;
+
+    try {
+      // Check current journey stage
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('client_journey_stage')
+        .eq('id', user.id)
+        .single();
+
+      // Only update if currently in early stages
+      if (!profile?.client_journey_stage || profile.client_journey_stage === 'preferences_identified') {
+        await supabase
+          .from('profiles')
+          .update({ client_journey_stage: 'exploring_coaches' })
+          .eq('id', user.id);
+
+        // Track the journey step
+        await supabase
+          .from('user_journey_tracking')
+          .upsert({
+            user_id: user.id,
+            stage: 'exploring_coaches',
+            step_name: 'trainer_shortlisted',
+            metadata: { action: 'shortlisted_trainer' }
+          });
+      }
+    } catch (error) {
+      console.error('Error updating client journey:', error);
+    }
+  }, [user]);
+
   const shortlistTrainer = useCallback(async (trainerId: string, notes?: string) => {
     if (!user) {
       toast.error('Please log in to shortlist trainers');
@@ -93,6 +128,10 @@ export function useShortlistedTrainers() {
       }
 
       setShortlistedTrainers(prev => [data, ...prev]);
+      
+      // Update client journey progress
+      await updateClientJourney();
+      
       toast.success('Trainer shortlisted! Chat and discovery call options are now available.');
       return { data };
     } catch (error) {
@@ -100,7 +139,7 @@ export function useShortlistedTrainers() {
       toast.error('Failed to shortlist trainer');
       return { error };
     }
-  }, [user, shortlistedTrainers]);
+  }, [user, shortlistedTrainers, updateClientJourney]);
 
   const removeFromShortlist = useCallback(async (trainerId: string) => {
     if (!user) return { error: 'No user logged in' };
@@ -180,6 +219,27 @@ export function useShortlistedTrainers() {
       setShortlistedTrainers(prev => 
         prev.map(st => st.trainer_id === trainerId ? data : st)
       );
+
+      // Update client journey to discovery call booked stage
+      try {
+        await supabase
+          .from('profiles')
+          .update({ client_journey_stage: 'discovery_call_booked' })
+          .eq('id', user.id);
+
+        // Track the journey step
+        await supabase
+          .from('user_journey_tracking')
+          .upsert({
+            user_id: user.id,
+            stage: 'discovery_call_booked',
+            step_name: 'discovery_call_booked',
+            metadata: { trainer_id: trainerId, action: 'booked_discovery_call' }
+          });
+      } catch (journeyError) {
+        console.error('Error updating journey for discovery call:', journeyError);
+      }
+
       toast.success('Discovery call booking confirmed!');
       return { data };
     } catch (error) {

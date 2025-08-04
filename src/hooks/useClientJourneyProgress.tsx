@@ -112,6 +112,14 @@ export const useClientJourneyProgress = () => {
 
       if (savedError) throw savedError;
 
+      // Get shortlisted trainers count
+      const { data: shortlistedTrainers, error: shortlistedError } = await supabase
+        .from('shortlisted_trainers')
+        .select('id, discovery_call_booked_at')
+        .eq('user_id', user.id);
+
+      if (shortlistedError) throw shortlistedError;
+
       // Determine current stage based on data
       let currentStage: ClientJourneyStage = 'preferences_identified';
       
@@ -123,14 +131,14 @@ export const useClientJourneyProgress = () => {
         return;
       }
 
-      // Stage 2: Has liked at least one coach or saved trainers
-      const hasLikedCoaches = engagements?.some(e => e.liked_at) || (savedTrainers?.length || 0) > 0;
+      // Stage 2: Has liked at least one coach, saved trainers, or shortlisted trainers
+      const hasLikedCoaches = engagements?.some(e => e.liked_at) || (savedTrainers?.length || 0) > 0 || (shortlistedTrainers?.length || 0) > 0;
       if (hasLikedCoaches) {
         currentStage = 'exploring_coaches';
       }
 
-      // Stage 3: Has discovery call booked (matched stage)
-      const hasDiscoveryCall = engagements?.some(e => e.matched_at);
+      // Stage 3: Has discovery call booked (matched stage or shortlisted with discovery call booked)
+      const hasDiscoveryCall = engagements?.some(e => e.matched_at) || shortlistedTrainers?.some(st => st.discovery_call_booked_at);
       if (hasDiscoveryCall) {
         currentStage = 'discovery_call_booked';
       }
@@ -218,7 +226,16 @@ export const useClientJourneyProgress = () => {
           nextAction = 'Start exploring coaches that match your preferences';
           break;
         case 'exploring_coaches':
-          nextAction = hasLikedCoaches ? 'Book a discovery call with your favorite coaches' : 'Like coaches you\'re interested in';
+          const hasShortlisted = (shortlistedTrainers?.length || 0) > 0;
+          const hasDiscoveryCallBooked = shortlistedTrainers?.some(st => st.discovery_call_booked_at);
+          
+          if (hasShortlisted && !hasDiscoveryCallBooked) {
+            nextAction = 'Book discovery calls with your shortlisted coaches';
+          } else if (hasLikedCoaches) {
+            nextAction = 'Shortlist your favorite coaches to unlock discovery calls';
+          } else {
+            nextAction = 'Like and shortlist coaches you\'re interested in';
+          }
           break;
         case 'discovery_call_booked':
           nextAction = 'Complete your discovery call and choose your coach';
