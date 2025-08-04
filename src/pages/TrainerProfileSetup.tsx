@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { usePackageWaysOfWorking } from "@/hooks/usePackageWaysOfWorking";
@@ -25,6 +25,7 @@ const TrainerProfileSetup = () => {
   const { packageWorkflows, loading: waysOfWorkingLoading } = usePackageWaysOfWorking();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -163,6 +164,28 @@ const TrainerProfileSetup = () => {
       }));
     }
   }, [profile?.id]);
+
+  // Handle tab navigation from URL parameters
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab) {
+      const tabMap: Record<string, number> = {
+        'basic': 1,
+        'qualifications': 2,
+        'expertise': 3,
+        'client-fit': 4,
+        'rates': 5,
+        'testimonials': 6,
+        'ways-of-working': 7,
+        'management': 8
+      };
+      
+      const stepNumber = tabMap[tab];
+      if (stepNumber && stepNumber !== currentStep) {
+        setCurrentStep(stepNumber);
+      }
+    }
+  }, [searchParams]);
 
   // Stable update function
   const updateFormData = (updates: Partial<typeof formData>) => {

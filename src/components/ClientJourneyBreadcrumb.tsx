@@ -44,8 +44,8 @@ export const ClientJourneyBreadcrumb = ({
                 <React.Fragment key={step.id}>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div className={cn(
-                        "flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium transition-all whitespace-nowrap",
+                       <div className={cn(
+                        "flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium transition-all whitespace-nowrap relative",
                         step.completed 
                           ? "bg-green-100 text-green-800 border border-green-200" 
                           : step.current
@@ -53,10 +53,16 @@ export const ClientJourneyBreadcrumb = ({
                             ? "bg-orange-100 text-orange-800 border border-orange-200"
                             : "bg-primary/10 text-primary border border-primary/20 animate-pulse"
                           : "bg-muted/50 text-muted-foreground"
-                      )}>
-                        <span className="text-sm">{step.icon}</span>
-                        <span className="hidden sm:inline">{step.title}</span>
-                      </div>
+                       )}>
+                         <span className="text-sm">{step.icon}</span>
+                         <span className={cn(
+                           "hidden sm:inline",
+                           step.current ? "font-bold" : ""
+                         )}>{step.title}</span>
+                         {step.current && (
+                           <div className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                         )}
+                       </div>
                     </TooltipTrigger>
                     <TooltipContent>
                       <p className="font-medium">{step.title}</p>
@@ -116,27 +122,33 @@ export const ClientJourneyBreadcrumb = ({
             {progress.steps.map((step, index) => (
               <Tooltip key={step.id}>
                 <TooltipTrigger asChild>
-                  <div className={cn(
-                    "flex items-center gap-3 p-3 rounded-lg transition-all cursor-help border",
-                    step.completed 
-                      ? "bg-green-50 text-green-800 border-green-200 shadow-sm" 
-                      : step.current
-                      ? step.hasData
-                        ? "bg-orange-50 text-orange-800 border-orange-200 shadow-md"
-                        : "bg-primary/10 text-primary border-primary/20 shadow-md animate-pulse"
-                      : "bg-muted/50 text-muted-foreground border-muted"
-                  )}>
-                    <div className={cn(
-                      "text-lg flex-shrink-0",
-                      step.completed && "animate-bounce"
-                    )}>
-                      {step.icon}
-                    </div>
-                    <div className="min-w-0">
-                      <div className="font-medium text-sm truncate">{step.title}</div>
-                      <div className="text-xs opacity-75">{step.description}</div>
-                    </div>
-                  </div>
+                   <div className={cn(
+                     "flex items-center gap-3 p-3 rounded-lg transition-all cursor-help border relative",
+                     step.completed 
+                       ? "bg-green-50 text-green-800 border-green-200 shadow-sm" 
+                       : step.current
+                       ? step.hasData
+                         ? "bg-orange-50 text-orange-800 border-orange-200 shadow-md"
+                         : "bg-primary/10 text-primary border-primary/20 shadow-md animate-pulse"
+                       : "bg-muted/50 text-muted-foreground border-muted"
+                   )}>
+                     <div className={cn(
+                       "text-lg flex-shrink-0",
+                       step.completed && "animate-bounce"
+                     )}>
+                       {step.icon}
+                     </div>
+                     <div className="min-w-0">
+                       <div className={cn(
+                         "font-medium text-sm truncate",
+                         step.current ? "font-bold" : ""
+                       )}>{step.title}</div>
+                       <div className="text-xs opacity-75">{step.description}</div>
+                     </div>
+                     {step.current && (
+                       <div className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                     )}
+                   </div>
                 </TooltipTrigger>
                 <TooltipContent side="top">
                   <p className="font-medium">{step.title}</p>

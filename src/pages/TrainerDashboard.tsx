@@ -37,6 +37,8 @@ import {
   Filter,
   Shield
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const TrainerDashboard = () => {
   const { user, signOut, loading } = useAuth();
@@ -45,6 +47,7 @@ const TrainerDashboard = () => {
   const { isAdmin } = useUserRoles();
   const navigate = useNavigate();
   const [availabilityStatus, setAvailabilityStatus] = useState<'accepting' | 'waitlist' | 'unavailable'>('accepting');
+  const [nextAvailableDate, setNextAvailableDate] = useState('');
 
   // Sync availability status with profile data
   useEffect(() => {
@@ -58,6 +61,11 @@ const TrainerDashboard = () => {
       const newStatus = statusMap[profile.client_status] || 'accepting';
       console.log('Setting availability status to:', newStatus);
       setAvailabilityStatus(newStatus);
+      
+      // Initialize next available date from profile
+      if ((profile as any).next_available_date) {
+        setNextAvailableDate((profile as any).next_available_date);
+      }
     }
   }, [profile?.client_status]);
 
@@ -119,6 +127,11 @@ const TrainerDashboard = () => {
     
     const result = await updateProfile({ client_status: clientStatusMap[status] });
     console.log('Status update result:', result);
+  };
+
+  const handleNextAvailableDateChange = async (date: string) => {
+    setNextAvailableDate(date);
+    await updateProfile({ next_available_date: date || null } as any);
   };
 
   if (loading || profileLoading) {
@@ -327,15 +340,27 @@ const TrainerDashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid md:grid-cols-3 gap-3">
-                  <Button className="h-12 justify-start gap-3" variant="default">
+                  <Button 
+                    className="h-12 justify-start gap-3" 
+                    variant="default"
+                    onClick={() => navigate('/trainer/profile-setup?tab=testimonials')}
+                  >
                     <Plus className="h-4 w-4" />
                     Add Testimonial
                   </Button>
-                  <Button className="h-12 justify-start gap-3" variant="default">
+                  <Button 
+                    className="h-12 justify-start gap-3" 
+                    variant="default"
+                    onClick={() => navigate('/trainer/profile-setup?tab=rates')}
+                  >
                     <DollarSign className="h-4 w-4" />
                     Update Rates
                   </Button>
-                  <Button className="h-12 justify-start gap-3" variant="default">
+                  <Button 
+                    className="h-12 justify-start gap-3" 
+                    variant="default"
+                    onClick={() => navigate('/trainer/profile-setup?tab=rates')}
+                  >
                     <Package className="h-4 w-4" />
                     Add New Package
                   </Button>
@@ -352,31 +377,52 @@ const TrainerDashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-3 gap-4">
-                  <Button 
-                    variant={availabilityStatus === 'accepting' ? 'default' : 'outline'}
-                    onClick={() => handleStatusChange('accepting')}
-                    className="flex items-center gap-2 h-12"
-                  >
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    Accepting
-                  </Button>
-                  <Button 
-                    variant={availabilityStatus === 'waitlist' ? 'default' : 'outline'}
-                    onClick={() => handleStatusChange('waitlist')}
-                    className="flex items-center gap-2 h-12"
-                  >
-                    <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                    Waitlist
-                  </Button>
-                  <Button 
-                    variant={availabilityStatus === 'unavailable' ? 'default' : 'outline'}
-                    onClick={() => handleStatusChange('unavailable')}
-                    className="flex items-center gap-2 h-12"
-                  >
-                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                    Unavailable
-                  </Button>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-3 gap-4">
+                    <Button 
+                      variant={availabilityStatus === 'accepting' ? 'default' : 'outline'}
+                      onClick={() => handleStatusChange('accepting')}
+                      className="flex items-center gap-2 h-12"
+                    >
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      Accepting
+                    </Button>
+                    <Button 
+                      variant={availabilityStatus === 'waitlist' ? 'default' : 'outline'}
+                      onClick={() => handleStatusChange('waitlist')}
+                      className="flex items-center gap-2 h-12"
+                    >
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                      Waitlist
+                    </Button>
+                    <Button 
+                      variant={availabilityStatus === 'unavailable' ? 'default' : 'outline'}
+                      onClick={() => handleStatusChange('unavailable')}
+                      className="flex items-center gap-2 h-12"
+                    >
+                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                      Unavailable
+                    </Button>
+                  </div>
+                  
+                  {availabilityStatus === 'waitlist' && (
+                    <div className="space-y-2">
+                      <Label htmlFor="next-available" className="text-sm font-medium">
+                        Next Available Date (optional)
+                      </Label>
+                      <Input
+                        id="next-available"
+                        type="date"
+                        value={nextAvailableDate}
+                        onChange={(e) => handleNextAvailableDateChange(e.target.value)}
+                        className="max-w-xs"
+                        placeholder="Select next available date"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        This date will be shown to potential clients when they view your profile
+                      </p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

@@ -42,8 +42,8 @@ export default function Auth() {
     const savedRememberMe = localStorage.getItem('rememberMe') === 'true';
     
     if (savedCredentials && savedRememberMe) {
-      const { email } = JSON.parse(savedCredentials);
-      setLoginForm(prev => ({ ...prev, email }));
+      const { email, password } = JSON.parse(savedCredentials);
+      setLoginForm(prev => ({ ...prev, email, password: password || '' }));
       setRememberMe(true);
     }
   }, []);
@@ -85,7 +85,8 @@ export default function Auth() {
       // Handle remember me functionality
       if (rememberMe) {
         localStorage.setItem('savedCredentials', JSON.stringify({ 
-          email: loginForm.email 
+          email: loginForm.email,
+          password: loginForm.password
         }));
         localStorage.setItem('rememberMe', 'true');
       } else {

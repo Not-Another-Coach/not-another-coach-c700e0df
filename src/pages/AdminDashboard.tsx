@@ -47,7 +47,7 @@ export const AdminDashboard = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/trainer/dashboard')}
             className="flex items-center gap-2"
           >
             <Home className="w-4 h-4" />

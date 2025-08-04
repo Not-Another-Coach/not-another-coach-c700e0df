@@ -125,7 +125,15 @@ export const ProgressBreadcrumb = ({
                     step.current && !step.completed && !isPartial ? "text-primary" : ""
                   )}
                 />
-                <span className="text-sm font-medium">{step.title}</span>
+                <span className={cn(
+                  "text-sm font-medium",
+                  step.current ? "font-bold" : ""
+                )}>{step.title}</span>
+                {step.current && (
+                  <div className="ml-auto">
+                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                  </div>
+                )}
               </div>
             );
           })}
