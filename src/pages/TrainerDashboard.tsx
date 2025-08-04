@@ -5,6 +5,9 @@ import { useProfile } from "@/hooks/useProfile";
 import { useCoachAnalytics } from "@/hooks/useCoachAnalytics";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { useUserRoles } from "@/hooks/useUserRoles";
+import { useWaitlist } from "@/hooks/useWaitlist";
+import { AvailabilitySettings } from "@/components/coach/AvailabilitySettings";
+import { WaitlistManagement } from "@/components/coach/WaitlistManagement";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,6 +44,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -49,6 +53,7 @@ const TrainerDashboard = () => {
   const { profile, loading: profileLoading, isTrainer, updateProfile } = useProfile();
   const { analytics, shortlistedClients, loading: analyticsLoading } = useCoachAnalytics(profile?.id);
   const { isAdmin } = useUserRoles();
+  const { waitlistEntries } = useWaitlist();
   const navigate = useNavigate();
   const [availabilityStatus, setAvailabilityStatus] = useState<'accepting' | 'waitlist' | 'unavailable'>('accepting');
   const [nextAvailableDate, setNextAvailableDate] = useState<Date | undefined>();
@@ -265,8 +270,16 @@ const TrainerDashboard = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Two Column Layout */}
-        <div className="grid lg:grid-cols-3 gap-8">
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="overview">Dashboard</TabsTrigger>
+            <TabsTrigger value="waitlist">Waitlist ({waitlistEntries?.length || 0})</TabsTrigger>
+            <TabsTrigger value="availability">Availability</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="overview" className="mt-6">
+            {/* Two Column Layout */}
+            <div className="grid lg:grid-cols-3 gap-8">
           
           {/* Left Column: Key Stats + Performance */}
           <div className="lg:col-span-2 space-y-6">
@@ -645,6 +658,16 @@ const TrainerDashboard = () => {
             </CardContent>
           </Card>
         )}
+          </TabsContent>
+          
+          <TabsContent value="waitlist" className="mt-6">
+            <WaitlistManagement />
+          </TabsContent>
+          
+          <TabsContent value="availability" className="mt-6">
+            <AvailabilitySettings />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

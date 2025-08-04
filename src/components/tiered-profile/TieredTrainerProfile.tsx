@@ -8,6 +8,9 @@ import { useEngagementStage, EngagementStage } from '@/hooks/useEngagementStage'
 import { useProfile } from '@/hooks/useProfile';
 import { useSavedTrainers } from '@/hooks/useSavedTrainers';
 import { useContentVisibility } from '@/hooks/useContentVisibility';
+import { useWaitlist } from '@/hooks/useWaitlist';
+import { WaitlistJoinButton } from '@/components/waitlist/WaitlistJoinButton';
+import { WaitlistStatusBadge } from '@/components/waitlist/WaitlistStatusBadge';
 import { HeroBlock } from './blocks/HeroBlock';
 import { MiniBioBlock } from './blocks/MiniBioBlock';
 import { SpecialismsBlock } from './blocks/SpecialismsBlock';
@@ -56,7 +59,10 @@ export const TieredTrainerProfile = ({
       }
     : dbCanViewContent;
   const { savedTrainers, saveTrainer, unsaveTrainer, isTrainerSaved } = useSavedTrainers();
+  const { getCoachAvailability, checkClientWaitlistStatus } = useWaitlist();
   const [isUpdatingStage, setIsUpdatingStage] = useState(false);
+  const [coachAvailability, setCoachAvailability] = useState<any>(null);
+  const [clientWaitlistStatus, setClientWaitlistStatus] = useState<any>(null);
 
   const isSaved = isTrainerSaved(trainer.id);
   const isClient = profile?.user_type === 'client';
