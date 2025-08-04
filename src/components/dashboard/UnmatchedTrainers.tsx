@@ -132,7 +132,7 @@ export function UnmatchedTrainers({ profile }: UnmatchedTrainersProps) {
         <User className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
         <h3 className="text-lg font-semibold mb-2">No New Trainers Available</h3>
         <p className="text-muted-foreground">
-          You've seen all available trainers in your area. Check back later for new additions!
+          You've seen all available trainers. Check back later for new additions!
         </p>
       </div>
     );
