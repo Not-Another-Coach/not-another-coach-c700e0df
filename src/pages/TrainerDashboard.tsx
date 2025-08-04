@@ -5,6 +5,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useCoachAnalytics } from "@/hooks/useCoachAnalytics";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { VisibilitySettingsSection } from "@/components/trainer-setup/VisibilitySettingsSection";
+import { useUserRoles } from "@/hooks/useUserRoles";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,13 +35,15 @@ import {
   TrendingDown,
   ArrowUpRight,
   CreditCard,
-  Filter
+  Filter,
+  Shield
 } from "lucide-react";
 
 const TrainerDashboard = () => {
   const { user, signOut, loading } = useAuth();
   const { profile, loading: profileLoading, isTrainer, updateProfile } = useProfile();
   const { analytics, shortlistedClients, loading: analyticsLoading } = useCoachAnalytics(profile?.id);
+  const { isAdmin } = useUserRoles();
   const navigate = useNavigate();
   const [availabilityStatus, setAvailabilityStatus] = useState<'accepting' | 'waitlist' | 'unavailable'>('accepting');
 
@@ -136,6 +139,17 @@ const TrainerDashboard = () => {
       <div className="flex justify-between items-center p-4 border-b">
         <div className="flex items-center gap-4">
           <h1 className="text-xl font-bold">Mission Control</h1>
+          {isAdmin && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => navigate('/admin/dashboard')}
+              className="flex items-center gap-2"
+            >
+              <Shield className="w-4 h-4" />
+              Admin Panel
+            </Button>
+          )}
         </div>
         <div className="flex items-center gap-3">
           {profile && (

@@ -13,6 +13,7 @@ import Discovery from "./pages/Discovery";
 import SavedTrainers from "./pages/SavedTrainers";
 import TrainerDashboard from "./pages/TrainerDashboard";
 import TrainerProfileSetup from "./pages/TrainerProfileSetup";
+import { AdminDashboard } from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/saved" element={<SavedTrainers />} />
             <Route path="/trainer/dashboard" element={<TrainerDashboard />} />
             <Route path="/trainer/profile-setup" element={<TrainerProfileSetup />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
