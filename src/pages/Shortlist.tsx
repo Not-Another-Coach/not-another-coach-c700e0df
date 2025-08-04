@@ -2,8 +2,9 @@ import { useShortlistedTrainers } from '@/hooks/useShortlistedTrainers';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Star, MessageCircle, Phone, Trash2 } from 'lucide-react';
+import { ArrowLeft, Star, Phone, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { StartConversationButton } from '@/components/StartConversationButton';
 
 export default function Shortlist() {
   const navigate = useNavigate();
@@ -89,10 +90,12 @@ export default function Shortlist() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-2">
-                      <Button size="sm" variant="outline">
-                        <MessageCircle className="h-4 w-4 mr-2" />
-                        Start Chat
-                      </Button>
+                      <StartConversationButton 
+                        trainerId={shortlisted.trainer_id}
+                        trainerName={`Trainer ${shortlisted.trainer_id}`}
+                        size="sm"
+                        variant="outline"
+                      />
                       <Button 
                         size="sm" 
                         variant="default"

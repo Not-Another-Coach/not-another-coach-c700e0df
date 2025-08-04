@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   MessageCircle, 
   Send, 
@@ -19,48 +20,14 @@ import {
   Plus,
   Search
 } from "lucide-react";
-import trainerSarah from "@/assets/trainer-sarah.jpg";
-import trainerMike from "@/assets/trainer-mike.jpg";
+import { useConversations } from "@/hooks/useConversations";
+import { useShortlistedTrainers } from "@/hooks/useShortlistedTrainers";
+import { useAuth } from "@/hooks/useAuth";
+import { format } from "date-fns";
 
 interface MessagesSectionProps {
   profile: any;
 }
-
-// Mock message data
-const mockConversations = [
-  {
-    id: "1",
-    trainer: {
-      id: "1",
-      name: "Sarah Johnson",
-      image: trainerSarah,
-      specialties: ["Weight Loss", "Strength Training"],
-      status: "online"
-    },
-    lastMessage: "I'd love to discuss your goals in more detail. When would be a good time for a discovery call?",
-    timestamp: "2 hours ago",
-    unread: 2,
-    hasDiscoveryCall: true,
-    callScheduled: true,
-    callDate: "Tomorrow at 2:00 PM"
-  },
-  {
-    id: "2",
-    trainer: {
-      id: "2",
-      name: "Mike Rodriguez",
-      image: trainerMike,
-      specialties: ["Muscle Building", "Powerlifting"],
-      status: "away",
-      lastSeen: "Usually replies within 4 hours"
-    },
-    lastMessage: "Thanks for your interest! I have some great programs that would suit your goals.",
-    timestamp: "1 day ago",
-    unread: 0,
-    hasDiscoveryCall: false,
-    callScheduled: false
-  }
-];
 
 const messagePrompts = [
   "Hi! I'm interested in learning more about your training approach.",
@@ -71,29 +38,48 @@ const messagePrompts = [
 ];
 
 export function MessagesSection({ profile }: MessagesSectionProps) {
+  const { user } = useAuth();
+  const { conversations, loading, sendMessage, markAsRead, getUnreadCount } = useConversations();
+  const { shortlistedTrainers, bookDiscoveryCall } = useShortlistedTrainers();
+  
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredConversations = mockConversations.filter(conv =>
-    conv.trainer.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredConversations = conversations.filter(conv =>
+    conv.otherUser?.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    conv.otherUser?.last_name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const selectedConv = mockConversations.find(conv => conv.id === selectedConversation);
+  const selectedConv = conversations.find(conv => conv.id === selectedConversation);
 
-  const handleSendMessage = () => {
-    if (!newMessage.trim()) return;
-    console.log("Sending message:", newMessage);
-    setNewMessage("");
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !selectedConversation) return;
+    
+    const result = await sendMessage(selectedConversation, newMessage);
+    if (!result.error) {
+      setNewMessage("");
+    }
   };
 
-  const handleScheduleCall = (trainerId: string) => {
-    console.log("Scheduling call with trainer:", trainerId);
+  const handleScheduleCall = async (trainerId: string) => {
+    const result = await bookDiscoveryCall(trainerId);
+    if (!result.error) {
+      // Call was scheduled successfully
+    }
   };
 
-  const handleRateDiscoveryCall = (trainerId: string) => {
-    console.log("Rating discovery call with trainer:", trainerId);
+  const handleSelectConversation = (conversationId: string) => {
+    setSelectedConversation(conversationId);
+    markAsRead(conversationId);
   };
+
+  // Auto-select first conversation if none selected
+  useEffect(() => {
+    if (!selectedConversation && conversations.length > 0) {
+      setSelectedConversation(conversations[0].id);
+    }
+  }, [conversations, selectedConversation]);
 
   return (
     <div className="space-y-6">
@@ -138,43 +124,49 @@ export function MessagesSection({ profile }: MessagesSectionProps) {
                       className={`p-4 cursor-pointer hover:bg-muted/50 transition-colors ${
                         selectedConversation === conversation.id ? 'bg-muted' : ''
                       }`}
-                      onClick={() => setSelectedConversation(conversation.id)}
+                      onClick={() => handleSelectConversation(conversation.id)}
                     >
                       <div className="flex items-start gap-3">
                         <div className="relative">
                           <Avatar className="h-10 w-10">
-                            <AvatarImage src={conversation.trainer.image} />
+                            <AvatarImage src={conversation.otherUser?.profile_photo_url} />
                             <AvatarFallback>
-                              {conversation.trainer.name.split(' ').map(n => n[0]).join('')}
+                              {conversation.otherUser ? 
+                                `${conversation.otherUser.first_name?.[0] || ''}${conversation.otherUser.last_name?.[0] || ''}` : 
+                                'UN'
+                              }
                             </AvatarFallback>
                           </Avatar>
-                          {conversation.trainer.status === 'online' && (
-                            <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-background" />
-                          )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between mb-1">
-                            <h3 className="font-medium truncate">{conversation.trainer.name}</h3>
+                            <h3 className="font-medium truncate">
+                              {conversation.otherUser ? 
+                                `${conversation.otherUser.first_name || ''} ${conversation.otherUser.last_name || ''}`.trim() : 
+                                'Unknown User'
+                              }
+                            </h3>
                             <div className="flex items-center gap-1">
-                              {conversation.unread > 0 && (
+                              {getUnreadCount(conversation) > 0 && (
                                 <Badge className="bg-primary text-primary-foreground text-xs">
-                                  {conversation.unread}
+                                  {getUnreadCount(conversation)}
                                 </Badge>
                               )}
                             </div>
                           </div>
                           <p className="text-sm text-muted-foreground truncate">
-                            {conversation.lastMessage}
+                            {conversation.messages.length > 0 
+                              ? conversation.messages[conversation.messages.length - 1].content
+                              : 'No messages yet'
+                            }
                           </p>
                           <div className="flex items-center justify-between mt-2">
                             <span className="text-xs text-muted-foreground">
-                              {conversation.timestamp}
+                              {conversation.last_message_at ? 
+                                format(new Date(conversation.last_message_at), 'MMM d, h:mm a') : 
+                                format(new Date(conversation.created_at), 'MMM d, h:mm a')
+                              }
                             </span>
-                            {conversation.callScheduled && (
-                              <Badge variant="outline" className="text-xs">
-                                Call scheduled
-                              </Badge>
-                            )}
                           </div>
                         </div>
                       </div>
@@ -204,93 +196,99 @@ export function MessagesSection({ profile }: MessagesSectionProps) {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10">
-                      <AvatarImage src={selectedConv.trainer.image} />
+                      <AvatarImage src={selectedConv.otherUser?.profile_photo_url} />
                       <AvatarFallback>
-                        {selectedConv.trainer.name.split(' ').map(n => n[0]).join('')}
+                        {selectedConv.otherUser ? 
+                          `${selectedConv.otherUser.first_name?.[0] || ''}${selectedConv.otherUser.last_name?.[0] || ''}` : 
+                          'UN'
+                        }
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <h3 className="font-semibold">{selectedConv.trainer.name}</h3>
+                      <h3 className="font-semibold">
+                        {selectedConv.otherUser ? 
+                          `${selectedConv.otherUser.first_name || ''} ${selectedConv.otherUser.last_name || ''}`.trim() : 
+                          'Unknown User'
+                        }
+                      </h3>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <div className={`w-2 h-2 rounded-full ${
-                          selectedConv.trainer.status === 'online' ? 'bg-green-500' : 'bg-gray-400'
-                        }`} />
-                        {selectedConv.trainer.status === 'online' ? 'Online' : selectedConv.trainer.lastSeen}
+                        <div className="w-2 h-2 rounded-full bg-gray-400" />
+                        Usually replies within a few hours
                       </div>
                     </div>
                   </div>
                   
                   <div className="flex gap-2">
-                    {selectedConv.hasDiscoveryCall && !selectedConv.callScheduled && (
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleScheduleCall(selectedConv.trainer.id)}
-                      >
-                        <Calendar className="h-4 w-4 mr-2" />
-                        Schedule Call
-                      </Button>
-                    )}
-                    {selectedConv.callScheduled && (
-                      <Button variant="outline" size="sm">
-                        <Video className="h-4 w-4 mr-2" />
-                        Join Call
-                      </Button>
-                    )}
+                    {/* Check if this trainer is shortlisted and has discovery call enabled */}
+                    {(() => {
+                      const isTrainer = selectedConv.trainer_id !== user?.id;
+                      const shortlistedTrainer = shortlistedTrainers.find(st => 
+                        st.trainer_id === (isTrainer ? selectedConv.trainer_id : selectedConv.client_id)
+                      );
+                      return shortlistedTrainer?.discovery_call_enabled && !shortlistedTrainer?.discovery_call_booked_at && (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleScheduleCall(isTrainer ? selectedConv.trainer_id : selectedConv.client_id)}
+                        >
+                          <Calendar className="h-4 w-4 mr-2" />
+                          Schedule Call
+                        </Button>
+                      );
+                    })()}
                   </div>
                 </div>
-
-                {/* Discovery Call Status */}
-                {selectedConv.callScheduled && (
-                  <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 mt-3">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Calendar className="h-4 w-4 text-primary" />
-                      <span className="font-medium text-primary">Discovery Call Scheduled</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {selectedConv.callDate}
-                    </p>
-                  </div>
-                )}
               </CardHeader>
 
               {/* Messages Area */}
-              <CardContent className="flex-1 p-4 space-y-4 overflow-y-auto">
-                {/* Example messages */}
+              <ScrollArea className="flex-1 p-4">
                 <div className="space-y-4">
-                  <div className="flex justify-end">
-                    <div className="bg-primary text-primary-foreground rounded-lg p-3 max-w-[80%]">
-                      <p className="text-sm">Hi! I'm interested in learning more about your training approach for weight loss.</p>
-                      <span className="text-xs opacity-70 mt-1 block">You • 2 hours ago</span>
+                  {selectedConv.messages.length > 0 ? (
+                    selectedConv.messages.map((message) => (
+                      <div key={message.id} className={`flex ${message.sender_id === user?.id ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`rounded-lg p-3 max-w-[80%] ${
+                          message.sender_id === user?.id 
+                            ? 'bg-primary text-primary-foreground' 
+                            : 'bg-muted'
+                        }`}>
+                          <p className="text-sm">{message.content}</p>
+                          <span className={`text-xs mt-1 block ${
+                            message.sender_id === user?.id ? 'opacity-70' : 'text-muted-foreground'
+                          }`}>
+                            {message.sender_id === user?.id ? 'You' : selectedConv.otherUser ? 
+                              `${selectedConv.otherUser.first_name || ''} ${selectedConv.otherUser.last_name || ''}`.trim() : 
+                              'Unknown'
+                            } • {format(new Date(message.created_at), 'MMM d, h:mm a')}
+                          </span>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8">
+                      <MessageCircle className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                      <p className="text-muted-foreground">No messages yet. Start the conversation!</p>
                     </div>
-                  </div>
-                  
-                  <div className="flex justify-start">
-                    <div className="bg-muted rounded-lg p-3 max-w-[80%]">
-                      <p className="text-sm">{selectedConv.lastMessage}</p>
-                      <span className="text-xs text-muted-foreground mt-1 block">{selectedConv.trainer.name} • {selectedConv.timestamp}</span>
-                    </div>
-                  </div>
+                  )}
                 </div>
+              </ScrollArea>
 
-                {/* Message Prompts */}
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-muted-foreground">Quick prompts:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {messagePrompts.map((prompt, index) => (
-                      <Button
-                        key={index}
-                        variant="outline"
-                        size="sm"
-                        className="text-xs"
-                        onClick={() => setNewMessage(prompt)}
-                      >
-                        {prompt}
-                      </Button>
-                    ))}
-                  </div>
+              {/* Message Prompts */}
+              <div className="p-4 border-t space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">Quick prompts:</p>
+                <div className="flex flex-wrap gap-2">
+                  {messagePrompts.map((prompt, index) => (
+                    <Button
+                      key={index}
+                      variant="outline"
+                      size="sm"
+                      className="text-xs"
+                      onClick={() => setNewMessage(prompt)}
+                    >
+                      {prompt}
+                    </Button>
+                  ))}
                 </div>
-              </CardContent>
+              </div>
 
               {/* Message Input */}
               <div className="border-t p-4">
