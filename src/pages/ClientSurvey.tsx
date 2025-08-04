@@ -88,8 +88,8 @@ const ClientSurvey = () => {
         return;
       }
       
-      // If survey is already completed, redirect to dashboard
-      if ((profile as any).client_survey_completed) {
+      // Only redirect if both survey completion flags are true to avoid loops
+      if ((profile as any).client_survey_completed && profile.quiz_completed) {
         navigate('/client/dashboard');
         return;
       }
@@ -286,10 +286,11 @@ const ClientSurvey = () => {
       if (currentStep < totalSteps) {
         setCurrentStep(currentStep + 1);
       } else {
-        // Complete the survey
+        // Complete the survey - update both completion flags
         await updateProfile({ 
           ...formData, 
           client_survey_completed: true,
+          quiz_completed: true,
           client_survey_step: totalSteps
         } as any);
         

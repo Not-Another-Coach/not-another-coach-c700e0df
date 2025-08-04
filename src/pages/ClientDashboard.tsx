@@ -44,10 +44,13 @@ export default function ClientDashboard() {
     }
   }, [user, profile, loading, profileLoading, isTrainer, navigate, location.pathname]);
 
-  // Redirect clients to client survey if not completed
+  // Redirect clients to client survey if not completed (check both flags)
   useEffect(() => {
-    if (!loading && !profileLoading && user && profile && isClient() && !profile.quiz_completed) {
-      navigate('/client-survey');
+    if (!loading && !profileLoading && user && profile && isClient()) {
+      const surveyCompleted = profile.quiz_completed && (profile as any).client_survey_completed;
+      if (!surveyCompleted) {
+        navigate('/client-survey');
+      }
     }
   }, [user, profile, loading, profileLoading, isClient, navigate]);
 
