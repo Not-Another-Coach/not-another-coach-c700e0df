@@ -325,7 +325,7 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg flex items-center gap-2">
               <MessageCircle className="w-5 h-5" />
-              {view === 'chat' && selectedContact ? selectedContact.name : 'Messages'}
+              Messages
             </CardTitle>
             <div className="flex items-center gap-2">
               {view === 'chat' && (
