@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -7,11 +8,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useWaitlist } from '@/hooks/useWaitlist';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { Users, MessageCircle, Calendar, UserPlus, Archive, Clock } from 'lucide-react';
+import { Users, MessageCircle, Calendar, UserPlus, Archive, Clock, Settings, ExternalLink } from 'lucide-react';
 
 export function WaitlistManagement() {
   const { waitlistEntries, updateWaitlistEntry, loading } = useWaitlist();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [selectedEntry, setSelectedEntry] = useState<any>(null);
   const [notes, setNotes] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
@@ -119,13 +121,43 @@ export function WaitlistManagement() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Users className="w-5 h-5" />
-          My Waitlist ({waitlistEntries.length})
-        </CardTitle>
-      </CardHeader>
+    <div className="space-y-6">
+      {/* Profile Management Link */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Settings className="w-5 h-5" />
+            Profile Management
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border">
+            <div>
+              <h4 className="font-medium">Update Your Profile Settings</h4>
+              <p className="text-sm text-muted-foreground">
+                Manage your visibility, availability, and other profile settings
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => navigate('/trainer/profile-setup?tab=management')}
+              className="flex items-center gap-2"
+            >
+              <ExternalLink className="w-4 h-4" />
+              Go to Profile Management
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Waitlist */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="w-5 h-5" />
+            My Waitlist ({waitlistEntries.length})
+          </CardTitle>
+        </CardHeader>
       <CardContent>
         {waitlistEntries.length === 0 ? (
           <div className="text-center py-8">
@@ -275,5 +307,6 @@ export function WaitlistManagement() {
         )}
       </CardContent>
     </Card>
+    </div>
   );
 }

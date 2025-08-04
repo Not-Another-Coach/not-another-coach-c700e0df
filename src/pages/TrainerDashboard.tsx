@@ -8,6 +8,7 @@ import { useUserRoles } from "@/hooks/useUserRoles";
 import { useWaitlist } from "@/hooks/useWaitlist";
 import { AvailabilitySettings } from "@/components/coach/AvailabilitySettings";
 import { WaitlistManagement } from "@/components/coach/WaitlistManagement";
+import { ActiveClientsSection } from "@/components/coach/ActiveClientsSection";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -274,7 +275,7 @@ const TrainerDashboard = () => {
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="overview">Dashboard</TabsTrigger>
             <TabsTrigger value="waitlist">Waitlist ({waitlistEntries?.length || 0})</TabsTrigger>
-            <TabsTrigger value="availability">Availability</TabsTrigger>
+            <TabsTrigger value="clients">Active Clients</TabsTrigger>
           </TabsList>
           
           <TabsContent value="overview" className="mt-6">
@@ -409,7 +410,7 @@ const TrainerDashboard = () => {
             </Card>
 
             {/* Availability Status Management */}
-            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/trainer/profile-setup?tab=management')}>
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Settings className="h-5 w-5" />
@@ -421,7 +422,10 @@ const TrainerDashboard = () => {
                   <div className="grid grid-cols-3 gap-4">
                     <Button 
                       variant={availabilityStatus === 'accepting' ? 'default' : 'outline'}
-                      onClick={() => handleStatusChange('accepting')}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStatusChange('accepting');
+                      }}
                       className="flex items-center gap-2 h-12"
                     >
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
@@ -429,7 +433,10 @@ const TrainerDashboard = () => {
                     </Button>
                     <Button 
                       variant={availabilityStatus === 'waitlist' ? 'default' : 'outline'}
-                      onClick={() => handleStatusChange('waitlist')}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStatusChange('waitlist');
+                      }}
                       className="flex items-center gap-2 h-12"
                     >
                       <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
@@ -437,7 +444,10 @@ const TrainerDashboard = () => {
                     </Button>
                     <Button 
                       variant={availabilityStatus === 'unavailable' ? 'default' : 'outline'}
-                      onClick={() => handleStatusChange('unavailable')}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStatusChange('unavailable');
+                      }}
                       className="flex items-center gap-2 h-12"
                     >
                       <div className="w-2 h-2 bg-red-500 rounded-full"></div>
@@ -480,10 +490,21 @@ const TrainerDashboard = () => {
                         This date will be shown to potential clients when they view your profile
                       </p>
                     </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                     )}
+                 </div>
+                 
+                 <div className="pt-4 border-t">
+                   <Button 
+                     variant="outline" 
+                     onClick={() => navigate('/trainer/profile-setup?tab=management')}
+                     className="w-full"
+                   >
+                     <Settings className="w-4 h-4 mr-2" />
+                     Advanced Settings
+                   </Button>
+                 </div>
+               </CardContent>
+             </Card>
           </div>
 
           {/* Right Column: Live Activity Feed + Actions */}
@@ -664,8 +685,8 @@ const TrainerDashboard = () => {
             <WaitlistManagement />
           </TabsContent>
           
-          <TabsContent value="availability" className="mt-6">
-            <AvailabilitySettings />
+          <TabsContent value="clients" className="mt-6">
+            <ActiveClientsSection />
           </TabsContent>
         </Tabs>
       </div>
