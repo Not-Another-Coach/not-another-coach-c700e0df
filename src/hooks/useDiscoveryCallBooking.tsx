@@ -195,8 +195,9 @@ export function useDiscoveryCallBooking() {
       }
 
       // Create activity alert for trainer
+      console.log('Creating activity alert for trainer:', trainerId);
       try {
-        await supabase
+        const alertResult = await supabase
           .from('alerts')
           .insert({
             alert_type: 'discovery_call_booked',
@@ -211,6 +212,11 @@ export function useDiscoveryCallBooking() {
             },
             is_active: true
           });
+        
+        console.log('Alert creation result:', alertResult);
+        if (alertResult.error) {
+          console.error('Error creating activity alert:', alertResult.error);
+        }
       } catch (alertError) {
         console.error('Error creating activity alert:', alertError);
       }

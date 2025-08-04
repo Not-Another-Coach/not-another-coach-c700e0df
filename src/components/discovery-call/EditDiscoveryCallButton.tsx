@@ -61,6 +61,7 @@ export const EditDiscoveryCallButton = ({
       return;
     }
 
+    const scheduledDate = new Date(discoveryCall.scheduled_for);
     setLoading(true);
     try {
       const { error } = await supabase
@@ -79,6 +80,32 @@ export const EditDiscoveryCallButton = ({
           variant: "destructive",
         });
         return;
+      }
+
+      // Create activity alert for trainer about cancellation
+      console.log('Creating cancellation alert for trainer:', trainer.id);
+      try {
+        const alertResult = await supabase
+          .from('alerts')
+          .insert({
+            alert_type: 'discovery_call_cancelled',
+            title: 'Discovery Call Cancelled',
+            content: `A client has cancelled their discovery call scheduled for ${format(scheduledDate, 'MMM d, yyyy \'at\' h:mm a')}. Reason: ${cancellationReason.trim()}`,
+            created_by: trainer.id,
+            target_audience: { trainers: true },
+            metadata: {
+              discovery_call_id: discoveryCall.id,
+              cancellation_reason: cancellationReason.trim()
+            },
+            is_active: true
+          });
+        
+        console.log('Cancellation alert creation result:', alertResult);
+        if (alertResult.error) {
+          console.error('Error creating cancellation alert:', alertResult.error);
+        }
+      } catch (alertError) {
+        console.error('Error creating cancellation alert:', alertError);
       }
 
       // Send cancellation email to trainer
@@ -120,6 +147,31 @@ export const EditDiscoveryCallButton = ({
   };
 
   const handleRescheduleComplete = async () => {
+    // Create activity alert for trainer about rescheduling
+    console.log('Creating reschedule alert for trainer:', trainer.id);
+    try {
+      const alertResult = await supabase
+        .from('alerts')
+        .insert({
+          alert_type: 'discovery_call_rescheduled',
+          title: 'Discovery Call Rescheduled',
+          content: `A client has rescheduled their discovery call. The previous booking has been cancelled and a new one has been made.`,
+          created_by: trainer.id,
+          target_audience: { trainers: true },
+          metadata: {
+            old_discovery_call_id: discoveryCall.id
+          },
+          is_active: true
+        });
+      
+      console.log('Reschedule alert creation result:', alertResult);
+      if (alertResult.error) {
+        console.error('Error creating reschedule alert:', alertResult.error);
+      }
+    } catch (alertError) {
+      console.error('Error creating reschedule alert:', alertError);
+    }
+
     // Cancel the old booking
     try {
       await supabase

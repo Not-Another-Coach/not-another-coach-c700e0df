@@ -4,7 +4,7 @@ import { useAuth } from './useAuth';
 
 interface ActivityAlert {
   id: string;
-  type: 'discovery_call_booked' | 'client_inquiry' | 'profile_view' | 'testimonial' | 'conversion';
+  type: 'discovery_call_booked' | 'discovery_call_cancelled' | 'discovery_call_rescheduled' | 'client_inquiry' | 'profile_view' | 'testimonial' | 'conversion';
   title: string;
   description: string;
   metadata?: any;
@@ -27,6 +27,7 @@ export function useActivityAlerts() {
   const fetchAlerts = async () => {
     if (!user) return;
     
+    console.log('Fetching alerts for user:', user.id);
     setLoading(true);
     try {
       // Get general alerts
@@ -37,6 +38,8 @@ export function useActivityAlerts() {
         .eq('is_active', true)
         .order('created_at', { ascending: false })
         .limit(10);
+
+      console.log('Alerts query result:', { alertsData, error });
 
       if (error) {
         console.error('Error fetching alerts:', error);
@@ -102,6 +105,10 @@ export function useActivityAlerts() {
     switch (type) {
       case 'discovery_call_booked':
         return '📞';
+      case 'discovery_call_cancelled':
+        return '❌';
+      case 'discovery_call_rescheduled':
+        return '🔄';
       case 'client_inquiry':
         return '💬';
       case 'profile_view':
@@ -119,6 +126,10 @@ export function useActivityAlerts() {
     switch (type) {
       case 'discovery_call_booked':
         return 'bg-blue-50 border-blue-200';
+      case 'discovery_call_cancelled':
+        return 'bg-red-50 border-red-200';
+      case 'discovery_call_rescheduled':
+        return 'bg-orange-50 border-orange-200';
       case 'client_inquiry':
         return 'bg-green-50 border-green-200';
       case 'profile_view':
