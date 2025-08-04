@@ -19,6 +19,7 @@ export const FloatingMessageButton = () => {
   return (
     <>
       <Button
+        data-messaging-button
         onClick={() => setIsPopupOpen(true)}
         className="fixed bottom-6 right-6 z-40 rounded-full w-14 h-14 shadow-lg hover:shadow-xl transition-all"
         size="lg"

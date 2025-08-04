@@ -176,7 +176,11 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
   };
 
   const handleMessage = (trainerId: string) => {
-    navigate(`/messages/${trainerId}`);
+    // Open messaging popup instead of navigating
+    const messagingButton = document.querySelector('[data-messaging-button]') as HTMLButtonElement;
+    if (messagingButton) {
+      messagingButton.click();
+    }
   };
 
   return (

@@ -1,16 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Clock, MapPin, Star, Award, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TieredTrainerProfile } from '@/components/tiered-profile/TieredTrainerProfile';
+import { MessagingPopup } from '@/components/MessagingPopup';
 import { useTrainerList } from '@/hooks/useTrainerList';
 
 export const TrainerProfile = () => {
   const { trainerId } = useParams<{ trainerId: string }>();
   const navigate = useNavigate();
   const { trainers, loading } = useTrainerList();
+  const [isMessagingOpen, setIsMessagingOpen] = useState(false);
 
   const trainer = trainers.find(t => t.id === trainerId);
 
@@ -69,10 +71,13 @@ export const TrainerProfile = () => {
       {/* Trainer Profile Component */}
       <TieredTrainerProfile 
         trainer={trainer}
-        onMessage={() => {
-          // TODO: Implement messaging functionality
-          console.log('Message trainer:', trainer.id);
-        }}
+        onMessage={() => setIsMessagingOpen(true)}
+      />
+
+      {/* Messaging Popup */}
+      <MessagingPopup 
+        isOpen={isMessagingOpen}
+        onClose={() => setIsMessagingOpen(false)}
       />
     </div>
   );

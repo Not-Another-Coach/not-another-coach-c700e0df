@@ -259,7 +259,13 @@ export function DashboardSummary({ profile, onTabChange }: DashboardSummaryProps
                             </Button>
                             <Button 
                               size="sm"
-                              onClick={() => navigate(`/messages/${match.trainer.id}`)}
+                              onClick={() => {
+                                // Open messaging popup instead of navigating
+                                const messagingButton = document.querySelector('[data-messaging-button]') as HTMLButtonElement;
+                                if (messagingButton) {
+                                  messagingButton.click();
+                                }
+                              }}
                             >
                               Send Message
                             </Button>
