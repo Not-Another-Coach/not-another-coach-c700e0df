@@ -34,13 +34,14 @@ interface MatchDetail {
 
 interface TrainerCardProps {
   trainer: Trainer;
-  onViewProfile: (trainerId: string) => void;
+  onViewProfile?: (trainerId: string) => void;
+  onMessage?: (trainerId: string) => void;
   matchScore?: number;
   matchReasons?: string[];
   matchDetails?: MatchDetail[];
 }
 
-export const TrainerCard = ({ trainer, onViewProfile, matchScore = 0, matchReasons = [], matchDetails = [] }: TrainerCardProps) => {
+export const TrainerCard = ({ trainer, onViewProfile, onMessage, matchScore = 0, matchReasons = [], matchDetails = [] }: TrainerCardProps) => {
   const { isTrainerSaved, saveTrainer, unsaveTrainer } = useSavedTrainers();
   const { stage } = useEngagementStage(trainer.id);
   const { getVisibility } = useContentVisibility({
@@ -220,6 +221,7 @@ export const TrainerCard = ({ trainer, onViewProfile, matchScore = 0, matchReaso
             variant="outline" 
             size="sm" 
             className="flex-1"
+            onClick={() => onMessage ? onMessage(trainer.id) : window.location.href = `/messages/${trainer.id}`}
           >
             Message
           </Button>
@@ -227,7 +229,7 @@ export const TrainerCard = ({ trainer, onViewProfile, matchScore = 0, matchReaso
             variant="hero" 
             size="sm" 
             className="flex-1"
-            onClick={() => window.location.href = `/trainer/${trainer.id}`}
+            onClick={() => onViewProfile ? onViewProfile(trainer.id) : window.location.href = `/trainer/${trainer.id}`}
           >
             View Profile
           </Button>

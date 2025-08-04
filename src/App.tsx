@@ -15,6 +15,7 @@ import TrainerDashboard from "./pages/TrainerDashboard";
 import TrainerProfileSetup from "./pages/TrainerProfileSetup";
 import { AdminDashboard } from "./pages/AdminDashboard";
 import { TrainerProfile } from "./pages/TrainerProfile";
+import { Messaging } from "./pages/Messaging";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/trainer/profile-setup" element={<TrainerProfileSetup />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/trainer/:trainerId" element={<TrainerProfile />} />
+            <Route path="/messages/:trainerId?" element={<Messaging />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
