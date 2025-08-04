@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { cn } from "@/lib/utils";
 import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -298,6 +299,20 @@ export function ClientSurveyWidget({ profile }: ClientSurveyWidgetProps) {
     return Math.round((currentStep / totalSteps) * 100);
   };
 
+  const calculateOverallCompletion = () => {
+    let completedSteps = 0;
+    for (let i = 1; i <= totalSteps; i++) {
+      if (getStepCompletion(i) === 'completed') {
+        completedSteps++;
+      }
+    }
+    return Math.round((completedSteps / totalSteps) * 100);
+  };
+
+  const isFullyComplete = () => {
+    return calculateOverallCompletion() === 100;
+  };
+
   const renderCurrentSection = () => {
     const commonProps = {
       formData,
@@ -333,9 +348,14 @@ export function ClientSurveyWidget({ profile }: ClientSurveyWidgetProps) {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
         <div className="flex-1 min-w-0">
-          <h1 className="text-3xl font-bold">Update Your Preferences</h1>
+          <h1 className="text-3xl font-bold">
+            {isFullyComplete() ? 'Update Your Preferences' : 'Complete Your Preferences'}
+          </h1>
           <p className="text-muted-foreground">
-            Step {currentStep} of {totalSteps}: {stepTitles[currentStep - 1]}
+            {isFullyComplete() 
+              ? 'Edit your training preferences to improve your matches' 
+              : `Step ${currentStep} of ${totalSteps}: ${stepTitles[currentStep - 1]}`
+            }
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={() => handleSave()}>
@@ -344,80 +364,155 @@ export function ClientSurveyWidget({ profile }: ClientSurveyWidgetProps) {
         </Button>
       </div>
 
-      {/* Progress Bar */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-3">
-            <span className="text-sm font-medium whitespace-nowrap">
-              {calculateProgress()}% Complete
-            </span>
-            <div className="flex-1">
-              <Progress value={calculateProgress()} className="h-2" />
+      {/* Progress Bar - only show if not fully complete */}
+      {!isFullyComplete() && (
+        <Card>
+          <CardContent className="p-4 space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+              <span className="text-sm font-medium whitespace-nowrap">
+                {calculateOverallCompletion()}% Complete
+              </span>
+              <div className="flex-1">
+                <Progress value={calculateOverallCompletion()} className="h-2" />
+              </div>
             </div>
-          </div>
-          
-          {/* Step indicators - More mobile friendly */}
-          <div className="grid grid-cols-4 sm:flex sm:justify-between gap-2 sm:gap-1 mt-3">
-            {stepTitles.map((title, index) => {
-              const stepNumber = index + 1;
-              const completion = getStepCompletion(stepNumber);
-              const isCurrent = stepNumber === currentStep;
-              
-              let statusColor = 'text-muted-foreground';
-              let borderColor = 'border-muted-foreground';
-              let bgColor = 'bg-transparent';
-              let showIcon = false;
-              let isPartial = false;
+            
+            {/* Step indicators - More mobile friendly */}
+            <div className="grid grid-cols-4 sm:flex sm:justify-between gap-2 sm:gap-1 mt-3">
+              {stepTitles.map((title, index) => {
+                const stepNumber = index + 1;
+                const completion = getStepCompletion(stepNumber);
+                const isCurrent = stepNumber === currentStep;
+                
+                let statusColor = 'text-muted-foreground';
+                let borderColor = 'border-muted-foreground';
+                let bgColor = 'bg-transparent';
+                let showIcon = false;
+                let isPartial = false;
 
-              if (completion === 'completed') {
-                statusColor = 'text-green-600';
-                borderColor = 'border-green-600';
-                bgColor = 'bg-green-600';
-                showIcon = true;
-              } else if (completion === 'partial') {
-                statusColor = 'text-amber-600';
-                borderColor = 'border-amber-600';
-                bgColor = 'bg-amber-600';
-                showIcon = true;
-                isPartial = true;
-              } else if (isCurrent) {
-                statusColor = 'text-primary';
-                borderColor = 'border-primary';
-                bgColor = 'bg-primary';
-              }
-              
-              return (
-                <div
-                  key={stepNumber}
-                  className={`flex flex-col items-center text-xs cursor-pointer transition-all hover:scale-105 ${statusColor} p-1`}
-                  onClick={() => setCurrentStep(stepNumber)}
-                  title={`Go to step ${stepNumber}: ${title}`}
-                >
+                if (completion === 'completed') {
+                  statusColor = 'text-green-600';
+                  borderColor = 'border-green-600';
+                  bgColor = 'bg-green-600';
+                  showIcon = true;
+                } else if (completion === 'partial') {
+                  statusColor = 'text-amber-600';
+                  borderColor = 'border-amber-600';
+                  bgColor = 'bg-amber-600';
+                  showIcon = true;
+                  isPartial = true;
+                } else if (isCurrent) {
+                  statusColor = 'text-primary';
+                  borderColor = 'border-primary';
+                  bgColor = 'bg-primary';
+                }
+                
+                return (
                   <div
-                    className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center mb-1 ${borderColor} ${
-                      completion === 'completed' || completion === 'partial' || isCurrent 
-                        ? `${bgColor} text-white`
-                        : 'bg-transparent'
-                    }`}
+                    key={stepNumber}
+                    className={`flex flex-col items-center text-xs cursor-pointer transition-all hover:scale-105 ${statusColor} p-1 relative`}
+                    onClick={() => setCurrentStep(stepNumber)}
+                    title={`Go to step ${stepNumber}: ${title}`}
                   >
-                    {showIcon ? (
-                      isPartial ? <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4" /> : <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4" />
-                    ) : (
-                      <span className="text-xs sm:text-sm font-medium">{stepNumber}</span>
+                    <div
+                      className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center mb-1 ${borderColor} ${
+                        completion === 'completed' || completion === 'partial' || isCurrent 
+                          ? `${bgColor} text-white`
+                          : 'bg-transparent'
+                      }`}
+                    >
+                      {showIcon ? (
+                        isPartial ? <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4" /> : <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                      ) : (
+                        <span className={cn(
+                          "text-xs sm:text-sm font-medium",
+                          isCurrent ? "font-bold" : ""
+                        )}>{stepNumber}</span>
+                      )}
+                    </div>
+                    <span className={cn(
+                      "text-center text-xs leading-tight max-w-16 sm:max-w-20 hidden sm:block",
+                      isCurrent ? "font-bold" : ""
+                    )}>
+                      {title}
+                    </span>
+                    <span className={cn(
+                      "text-center text-xs leading-tight max-w-16 sm:hidden",
+                      isCurrent ? "font-bold" : ""
+                    )}>
+                      {title.split(' ')[0]}
+                    </span>
+                    {isCurrent && (
+                      <div className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full animate-pulse"></div>
                     )}
                   </div>
-                  <span className="text-center text-xs leading-tight max-w-16 sm:max-w-20 hidden sm:block">
-                    {title}
-                  </span>
-                  <span className="text-center text-xs leading-tight max-w-16 sm:hidden">
-                    {title.split(' ')[0]}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Step indicators for completed surveys */}
+      {isFullyComplete() && (
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <span className="text-sm font-medium text-green-600">✓ Preferences Complete</span>
+              <span className="text-sm text-muted-foreground">•</span>
+              <span className="text-sm text-muted-foreground">
+                Currently editing: {stepTitles[currentStep - 1]}
+              </span>
+            </div>
+            
+            {/* Clickable step indicators */}
+            <div className="grid grid-cols-4 sm:flex sm:justify-between gap-2 sm:gap-1">
+              {stepTitles.map((title, index) => {
+                const stepNumber = index + 1;
+                const completion = getStepCompletion(stepNumber);
+                const isCurrent = stepNumber === currentStep;
+                
+                return (
+                  <div
+                    key={stepNumber}
+                    className={`flex flex-col items-center text-xs cursor-pointer transition-all hover:scale-105 ${
+                      isCurrent ? 'text-primary' : 'text-green-600'
+                    } p-1`}
+                    onClick={() => setCurrentStep(stepNumber)}
+                    title={`Go to step ${stepNumber}: ${title}`}
+                  >
+                    <div
+                      className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center mb-1 ${
+                        isCurrent 
+                          ? 'border-primary bg-primary text-white' 
+                          : 'border-green-600 bg-green-600 text-white'
+                      }`}
+                    >
+                      {isCurrent ? (
+                        <span className="text-xs sm:text-sm font-bold">{stepNumber}</span>
+                      ) : (
+                        <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                      )}
+                    </div>
+                    <span className={cn(
+                      "text-center text-xs leading-tight max-w-16 sm:max-w-20 hidden sm:block",
+                      isCurrent ? "font-bold" : ""
+                    )}>
+                      {title}
+                    </span>
+                    <span className={cn(
+                      "text-center text-xs leading-tight max-w-16 sm:hidden",
+                      isCurrent ? "font-bold" : ""
+                    )}>
+                      {title.split(' ')[0]}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Current Section */}
       <Card>
