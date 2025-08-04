@@ -44,12 +44,16 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
     if (!profile?.id) return;
 
     try {
+      console.log('Fetching prospects for trainer:', profile.id);
+      
       // Get shortlisted clients for this trainer
       const { data: shortlistedData, error: shortlistedError } = await supabase
         .from('shortlisted_trainers')
         .select('*')
         .eq('trainer_id', profile.id.toString())
         .order('shortlisted_at', { ascending: false });
+
+      console.log('Shortlisted data for trainer:', shortlistedData, 'Error:', shortlistedError);
 
       if (shortlistedError) {
         console.error('Error fetching shortlisted clients:', shortlistedError);

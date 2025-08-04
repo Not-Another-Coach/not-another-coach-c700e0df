@@ -35,7 +35,23 @@ export function useShortlistedTrainers() {
         console.error('Error fetching shortlisted trainers:', error);
         toast.error('Failed to load shortlisted trainers');
       } else {
-        setShortlistedTrainers(data || []);
+        // Filter out any shortlisted trainers with invalid trainer IDs (non-UUIDs)
+        const validShortlisted = (data || []).filter(item => {
+          // Check if trainer_id is a valid UUID (has proper format)
+          const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(item.trainer_id);
+          if (!isValidUUID) {
+            console.warn('Removing invalid trainer ID from shortlist:', item.trainer_id);
+            // Remove the invalid entry from the database
+            supabase
+              .from('shortlisted_trainers')
+              .delete()
+              .eq('id', item.id)
+              .then(() => console.log('Removed invalid shortlist entry:', item.id));
+          }
+          return isValidUUID;
+        });
+        
+        setShortlistedTrainers(validShortlisted);
       }
     } catch (error) {
       console.error('Error fetching shortlisted trainers:', error);
