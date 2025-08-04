@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Plus, ExternalLink, DollarSign, PoundSterling, Euro, Calendar, Sparkles } from "lucide-react";
+import { Trash2, Plus, ExternalLink, DollarSign, PoundSterling, Euro, Calendar, Sparkles, Edit } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface RatesSectionProps {
   formData: any;
@@ -30,6 +31,15 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
   );
   const [packages, setPackages] = useState<TrainingPackage[]>(formData.package_options || []);
   const [communicationAIHelperOpen, setCommunicationAIHelperOpen] = useState(false);
+  const [editingPackage, setEditingPackage] = useState<TrainingPackage | null>(null);
+  const [editPackageData, setEditPackageData] = useState({
+    name: "",
+    sessions: "",
+    price: "",
+    description: "",
+    terms: "",
+    inclusions: [] as string[]
+  });
   const [newPackage, setNewPackage] = useState({
     name: "",
     sessions: "",
@@ -69,6 +79,46 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
     const updatedPackages = packages.filter(pkg => pkg.id !== id);
     setPackages(updatedPackages);
     updateFormData({ package_options: updatedPackages });
+  };
+
+  const startEditPackage = (pkg: TrainingPackage) => {
+    setEditingPackage(pkg);
+    setEditPackageData({
+      name: pkg.name,
+      sessions: pkg.sessions?.toString() || "",
+      price: pkg.price.toString(),
+      description: pkg.description,
+      terms: "", // You may want to store terms in the package object
+      inclusions: [] // You may want to store inclusions in the package object
+    });
+  };
+
+  const saveEditedPackage = () => {
+    if (editingPackage && editPackageData.name && editPackageData.price && editPackageData.description) {
+      const updatedPackage: TrainingPackage = {
+        ...editingPackage,
+        name: editPackageData.name,
+        sessions: editPackageData.sessions ? parseInt(editPackageData.sessions) : undefined,
+        price: parseFloat(editPackageData.price),
+        description: editPackageData.description
+      };
+      
+      const updatedPackages = packages.map(pkg => 
+        pkg.id === editingPackage.id ? updatedPackage : pkg
+      );
+      setPackages(updatedPackages);
+      updateFormData({ package_options: updatedPackages });
+      
+      setEditingPackage(null);
+      setEditPackageData({
+        name: "",
+        sessions: "",
+        price: "",
+        description: "",
+        terms: "",
+        inclusions: []
+      });
+    }
   };
 
   const testBookingLink = () => {
@@ -230,16 +280,106 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
                        </div>
                        <p className="text-sm text-muted-foreground">{pkg.description}</p>
                      </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removePackage(pkg.id)}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardContent>
+                     <div className="flex items-center gap-2">
+                       <Dialog>
+                         <DialogTrigger asChild>
+                           <Button
+                             variant="ghost"
+                             size="sm"
+                             onClick={() => startEditPackage(pkg)}
+                             className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                           >
+                             <Edit className="h-4 w-4" />
+                           </Button>
+                         </DialogTrigger>
+                         <DialogContent className="max-w-md">
+                           <DialogHeader>
+                             <DialogTitle>Edit Package</DialogTitle>
+                           </DialogHeader>
+                           <div className="space-y-4">
+                             <div className="space-y-2">
+                               <Label htmlFor="edit_package_name">Package Name</Label>
+                               <Input
+                                 id="edit_package_name"
+                                 value={editPackageData.name}
+                                 onChange={(e) => setEditPackageData({ ...editPackageData, name: e.target.value })}
+                                 placeholder="e.g., 10 PT Sessions Bundle"
+                               />
+                             </div>
+
+                             <div className="space-y-2">
+                               <Label htmlFor="edit_package_sessions">Number of Sessions (Optional)</Label>
+                               <Input
+                                 id="edit_package_sessions"
+                                 type="number"
+                                 value={editPackageData.sessions}
+                                 onChange={(e) => setEditPackageData({ ...editPackageData, sessions: e.target.value })}
+                                 placeholder="10"
+                                 min="1"
+                               />
+                             </div>
+                             
+                             <div className="space-y-2">
+                               <Label htmlFor="edit_package_price">Price</Label>
+                               <div className="relative">
+                                 <div className="absolute left-3 top-3 text-muted-foreground">
+                                   {currency === 'GBP' ? '£' : currency === 'USD' ? '$' : '€'}
+                                 </div>
+                                 <Input
+                                   id="edit_package_price"
+                                   type="number"
+                                   value={editPackageData.price}
+                                   onChange={(e) => setEditPackageData({ ...editPackageData, price: e.target.value })}
+                                   placeholder="299"
+                                   className="pl-8"
+                                   min="0"
+                                   step="0.01"
+                                 />
+                               </div>
+                             </div>
+                             
+                             <div className="space-y-2">
+                               <Label htmlFor="edit_package_description">Description</Label>
+                               <Textarea
+                                 id="edit_package_description"
+                                 value={editPackageData.description}
+                                 onChange={(e) => setEditPackageData({ ...editPackageData, description: e.target.value })}
+                                 placeholder="e.g., 10 x 1-hour PT sessions with personalized nutrition plan"
+                                 rows={3}
+                                 className="resize-none"
+                               />
+                             </div>
+                             
+                             <div className="flex gap-2">
+                               <Button 
+                                 onClick={saveEditedPackage}
+                                 disabled={!editPackageData.name || !editPackageData.price || !editPackageData.description}
+                                 className="flex-1"
+                               >
+                                 Save Changes
+                               </Button>
+                               <Button 
+                                 variant="outline" 
+                                 onClick={() => setEditingPackage(null)}
+                                 className="flex-1"
+                               >
+                                 Cancel
+                               </Button>
+                             </div>
+                           </div>
+                         </DialogContent>
+                       </Dialog>
+                       <Button
+                         variant="ghost"
+                         size="sm"
+                         onClick={() => removePackage(pkg.id)}
+                         className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                       >
+                         <Trash2 className="h-4 w-4" />
+                       </Button>
+                     </div>
+                   </div>
+                 </CardContent>
               </Card>
             ))}
           </div>
