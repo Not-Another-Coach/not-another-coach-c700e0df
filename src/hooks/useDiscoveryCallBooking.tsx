@@ -27,28 +27,42 @@ export function useDiscoveryCallBooking() {
 
   const generateTimeSlots = (date: Date, trainerSettings: any): TimeSlot[] => {
     const dayName = date.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-    const schedule = trainerSettings?.availability_schedule?.[dayName];
+    const schedule = trainerSettings?.discovery_call_availability_schedule?.[dayName];
     
-    if (!schedule?.enabled) {
+    if (!schedule?.enabled || !schedule?.slots || schedule.slots.length === 0) {
       return [];
     }
 
-    // Generate basic time slots (this will be enhanced in Phase 3 with real calendar integration)
-    const baseSlots = [
-      '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'
-    ];
-
-    return baseSlots.map(time => {
-      const [hours, minutes] = time.split(':').map(Number);
-      const datetime = new Date(date);
-      datetime.setHours(hours, minutes, 0, 0);
+    // Use the actual time slots defined by the trainer
+    const slots: TimeSlot[] = [];
+    
+    schedule.slots.forEach((slot: { start: string; end: string }) => {
+      // Generate 15-minute slots within the defined time range
+      const startTime = new Date(`2000-01-01T${slot.start}:00`);
+      const endTime = new Date(`2000-01-01T${slot.end}:00`);
+      const duration = trainerSettings.discovery_call_duration || 15;
       
-      return {
-        time,
-        available: datetime > new Date(), // Only future slots are available
-        datetime
-      };
+      while (startTime < endTime) {
+        const timeString = startTime.toLocaleTimeString('en-GB', { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        });
+        
+        const datetime = new Date(date);
+        datetime.setHours(startTime.getHours(), startTime.getMinutes(), 0, 0);
+        
+        slots.push({
+          time: timeString,
+          available: datetime > new Date(), // Only future slots are available
+          datetime
+        });
+        
+        // Add the duration to get the next slot
+        startTime.setMinutes(startTime.getMinutes() + duration);
+      }
     });
+
+    return slots.sort((a, b) => a.datetime.getTime() - b.datetime.getTime());
   };
 
   const getTrainerSettings = async (trainerId: string) => {
@@ -73,11 +87,14 @@ export function useDiscoveryCallBooking() {
   };
 
   const getAvailableSlots = async (trainerId: string, date: Date) => {
+    console.log('Getting available slots for trainer:', trainerId, 'on date:', date);
     setLoading(true);
     try {
       const trainerSettings = await getTrainerSettings(trainerId);
+      console.log('Trainer settings:', trainerSettings);
       
       if (!trainerSettings) {
+        console.log('No trainer settings found');
         return [];
       }
 
@@ -95,6 +112,8 @@ export function useDiscoveryCallBooking() {
         .lte('scheduled_for', endOfDay.toISOString())
         .in('status', ['scheduled', 'rescheduled']);
 
+      console.log('Existing bookings:', existingBookings);
+
       const bookedTimes = new Set(
         existingBookings?.map(booking => 
           new Date(booking.scheduled_for).toLocaleTimeString('en-GB', { 
@@ -105,11 +124,15 @@ export function useDiscoveryCallBooking() {
       );
 
       const allSlots = generateTimeSlots(date, trainerSettings);
+      console.log('Generated slots:', allSlots);
       
-      return allSlots.map(slot => ({
+      const finalSlots = allSlots.map(slot => ({
         ...slot,
         available: slot.available && !bookedTimes.has(slot.time)
       }));
+      
+      console.log('Final available slots:', finalSlots);
+      return finalSlots;
     } catch (error) {
       console.error('Error getting available slots:', error);
       return [];
