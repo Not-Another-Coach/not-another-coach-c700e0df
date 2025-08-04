@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useSavedTrainers } from "@/hooks/useSavedTrainers";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +14,7 @@ import { ExploreMatchSection } from "@/components/dashboard/ExploreMatchSection"
 import { MessagesSection } from "@/components/dashboard/MessagesSection";
 import { UnmatchedTrainers } from "@/components/dashboard/UnmatchedTrainers";
 import { SwipeResultsSection } from "@/components/dashboard/SwipeResultsSection";
+import { InlineSurveyEditor } from "@/components/dashboard/InlineSurveyEditor";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { ClientJourneyBreadcrumb } from "@/components/ClientJourneyBreadcrumb";
 import { useClientJourneyProgress } from "@/hooks/useClientJourneyProgress";
@@ -170,16 +172,7 @@ export default function ClientDashboard() {
           </TabsContent>
 
           <TabsContent value="preferences" className="space-y-6">
-            <div className="text-center py-12">
-              <Settings className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Update Your Preferences</h3>
-              <p className="text-muted-foreground mb-6">
-                Complete the survey to update your training preferences and improve your matches.
-              </p>
-              <Button onClick={() => navigate('/client-survey')} size="lg">
-                Go to Survey
-              </Button>
-            </div>
+            <InlineSurveyEditor profile={profile} />
           </TabsContent>
 
           <TabsContent value="explore" className="space-y-6">
