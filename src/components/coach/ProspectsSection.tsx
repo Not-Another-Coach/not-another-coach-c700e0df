@@ -52,10 +52,13 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
     }
 
     console.log('Starting to fetch prospects for trainer:', profile.id);
+    console.log('Trainer profile object:', profile);
     setLoading(true);
 
     try {
       // Get shortlisted clients for this trainer
+      console.log('Querying shortlisted_trainers with trainer_id:', profile.id.toString());
+      
       const { data: shortlistedData, error: shortlistedError } = await supabase
         .from('shortlisted_trainers')
         .select('*')
