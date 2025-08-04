@@ -188,6 +188,87 @@ export type Database = {
         }
         Relationships: []
       }
+      coach_availability_settings: {
+        Row: {
+          allow_discovery_calls_on_waitlist: boolean
+          auto_follow_up_days: number
+          availability_status: Database["public"]["Enums"]["coach_availability_status"]
+          coach_id: string
+          created_at: string
+          id: string
+          next_available_date: string | null
+          updated_at: string
+          waitlist_message: string | null
+        }
+        Insert: {
+          allow_discovery_calls_on_waitlist?: boolean
+          auto_follow_up_days?: number
+          availability_status?: Database["public"]["Enums"]["coach_availability_status"]
+          coach_id: string
+          created_at?: string
+          id?: string
+          next_available_date?: string | null
+          updated_at?: string
+          waitlist_message?: string | null
+        }
+        Update: {
+          allow_discovery_calls_on_waitlist?: boolean
+          auto_follow_up_days?: number
+          availability_status?: Database["public"]["Enums"]["coach_availability_status"]
+          coach_id?: string
+          created_at?: string
+          id?: string
+          next_available_date?: string | null
+          updated_at?: string
+          waitlist_message?: string | null
+        }
+        Relationships: []
+      }
+      coach_waitlists: {
+        Row: {
+          client_goals: string | null
+          client_id: string
+          coach_id: string
+          coach_notes: string | null
+          created_at: string
+          estimated_start_date: string | null
+          follow_up_scheduled_date: string | null
+          id: string
+          joined_at: string
+          last_contacted_at: string | null
+          status: Database["public"]["Enums"]["waitlist_status"]
+          updated_at: string
+        }
+        Insert: {
+          client_goals?: string | null
+          client_id: string
+          coach_id: string
+          coach_notes?: string | null
+          created_at?: string
+          estimated_start_date?: string | null
+          follow_up_scheduled_date?: string | null
+          id?: string
+          joined_at?: string
+          last_contacted_at?: string | null
+          status?: Database["public"]["Enums"]["waitlist_status"]
+          updated_at?: string
+        }
+        Update: {
+          client_goals?: string | null
+          client_id?: string
+          coach_id?: string
+          coach_notes?: string | null
+          created_at?: string
+          estimated_start_date?: string | null
+          follow_up_scheduled_date?: string | null
+          id?: string
+          joined_at?: string
+          last_contacted_at?: string | null
+          status?: Database["public"]["Enums"]["waitlist_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       conversations: {
         Row: {
           client_id: string
@@ -895,6 +976,47 @@ export type Database = {
         }
         Relationships: []
       }
+      waitlist_interactions: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          interaction_type: string
+          message: string | null
+          scheduled_for: string | null
+          waitlist_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          interaction_type: string
+          message?: string | null
+          scheduled_for?: string | null
+          waitlist_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          interaction_type?: string
+          message?: string | null
+          scheduled_for?: string | null
+          waitlist_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "waitlist_interactions_waitlist_id_fkey"
+            columns: ["waitlist_id"]
+            isOneToOne: false
+            referencedRelation: "coach_waitlists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -978,6 +1100,7 @@ export type Database = {
     Enums: {
       app_role: "admin" | "trainer" | "client"
       client_status_enum: "open" | "waitlist" | "paused"
+      coach_availability_status: "accepting" | "waitlist" | "unavailable"
       content_type:
         | "profile_image"
         | "before_after_images"
@@ -994,6 +1117,7 @@ export type Database = {
       user_type: "client" | "trainer" | "admin"
       verification_status_enum: "pending" | "verified" | "rejected"
       visibility_state: "hidden" | "blurred" | "visible"
+      waitlist_status: "active" | "contacted" | "converted" | "archived"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1123,6 +1247,7 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "trainer", "client"],
       client_status_enum: ["open", "waitlist", "paused"],
+      coach_availability_status: ["accepting", "waitlist", "unavailable"],
       content_type: [
         "profile_image",
         "before_after_images",
@@ -1141,6 +1266,7 @@ export const Constants = {
       user_type: ["client", "trainer", "admin"],
       verification_status_enum: ["pending", "verified", "rejected"],
       visibility_state: ["hidden", "blurred", "visible"],
+      waitlist_status: ["active", "contacted", "converted", "archived"],
     },
   },
 } as const
