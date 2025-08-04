@@ -755,6 +755,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -776,6 +800,23 @@ export type Database = {
         Args: { client_uuid: string; trainer_uuid: string }
         Returns: Database["public"]["Enums"]["engagement_stage"]
       }
+      get_user_roles: {
+        Args: { _user_id: string }
+        Returns: {
+          role: Database["public"]["Enums"]["app_role"]
+        }[]
+      }
+      grant_admin_role: {
+        Args: { _user_id: string }
+        Returns: undefined
+      }
+      has_role: {
+        Args: {
+          _user_id: string
+          _role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: boolean
+      }
       initialize_trainer_visibility_defaults: {
         Args: { p_trainer_id: string }
         Returns: undefined
@@ -794,6 +835,7 @@ export type Database = {
       }
     }
     Enums: {
+      app_role: "admin" | "trainer" | "client"
       client_status_enum: "open" | "waitlist" | "paused"
       content_type:
         | "profile_image"
@@ -938,6 +980,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "trainer", "client"],
       client_status_enum: ["open", "waitlist", "paused"],
       content_type: [
         "profile_image",
