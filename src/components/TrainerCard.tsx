@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Star, MapPin, Clock, Users, Award, Target, Dumbbell, Heart } from "lucide-react";
 import { MatchBadge } from "@/components/MatchBadge";
@@ -214,27 +214,6 @@ export const TrainerCard = ({ trainer, onViewProfile, onMessage, matchScore = 0,
           <strong>Certified:</strong> {trainer.certifications.join(", ")}
         </div>
       </CardContent>
-      
-      <CardFooter className="px-6 pb-6 pt-0">
-        <div className="flex gap-2 w-full">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="flex-1"
-            onClick={() => onMessage ? onMessage(trainer.id) : window.location.href = `/messages/${trainer.id}`}
-          >
-            Message
-          </Button>
-          <Button 
-            variant="hero" 
-            size="sm" 
-            className="flex-1"
-            onClick={() => onViewProfile ? onViewProfile(trainer.id) : window.location.href = `/trainer/${trainer.id}`}
-          >
-            View Profile
-          </Button>
-        </div>
-      </CardFooter>
     </Card>
   );
 };
