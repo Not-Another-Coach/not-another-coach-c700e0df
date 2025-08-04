@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { TrainerCard } from "@/components/TrainerCard";
 import { NewsAlertsSection } from "@/components/dashboard/NewsAlertsSection";
+import { DiscoveryCallNotificationsWidget } from "@/components/dashboard/DiscoveryCallNotificationsWidget";
 import { 
   Heart, 
   Settings, 
@@ -295,32 +296,11 @@ export function DashboardSummary({ profile, onTabChange }: DashboardSummaryProps
 
         {/* Right Sidebar */}
         <div className="space-y-4">
+          {/* Discovery Call Notifications */}
+          <DiscoveryCallNotificationsWidget />
+          
           {/* News & Alerts Section */}
           <NewsAlertsSection />
-          
-          {/* Messages Waiting */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MessageCircle className="h-5 w-5" />
-                Messages
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8">
-                <MessageCircle className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground text-sm">
-                  No messages yet. Start connecting with trainers to begin conversations!
-                </p>
-                <Button 
-                  className="mt-4"
-                  onClick={() => onTabChange('messages')}
-                >
-                  View Messages
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </div>
     </div>

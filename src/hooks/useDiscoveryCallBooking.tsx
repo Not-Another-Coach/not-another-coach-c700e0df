@@ -158,9 +158,32 @@ export function useDiscoveryCallBooking() {
         return null;
       }
 
+      // Send confirmation emails in the background
+      try {
+        // Send confirmation email to client
+        await supabase.functions.invoke('send-discovery-call-email', {
+          body: {
+            type: 'confirmation',
+            discoveryCallId: data.id
+          }
+        });
+
+        // Send notification email to trainer
+        await supabase.functions.invoke('send-discovery-call-email', {
+          body: {
+            type: 'trainer_notification',
+            discoveryCallId: data.id,
+            notificationType: 'new_booking'
+          }
+        });
+      } catch (emailError) {
+        console.error('Error sending confirmation emails:', emailError);
+        // Don't fail the booking if emails fail
+      }
+
       toast({
         title: "Discovery call booked!",
-        description: "Your discovery call has been successfully scheduled.",
+        description: "Confirmation emails have been sent to you and the trainer.",
       });
 
       return data;

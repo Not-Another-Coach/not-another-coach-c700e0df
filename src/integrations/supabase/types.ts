@@ -302,6 +302,47 @@ export type Database = {
         }
         Relationships: []
       }
+      discovery_call_notifications: {
+        Row: {
+          created_at: string
+          discovery_call_id: string
+          email_id: string | null
+          error_message: string | null
+          id: string
+          notification_type: string
+          recipient_email: string
+          sent_at: string
+        }
+        Insert: {
+          created_at?: string
+          discovery_call_id: string
+          email_id?: string | null
+          error_message?: string | null
+          id?: string
+          notification_type: string
+          recipient_email: string
+          sent_at?: string
+        }
+        Update: {
+          created_at?: string
+          discovery_call_id?: string
+          email_id?: string | null
+          error_message?: string | null
+          id?: string
+          notification_type?: string
+          recipient_email?: string
+          sent_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discovery_call_notifications_discovery_call_id_fkey"
+            columns: ["discovery_call_id"]
+            isOneToOne: false
+            referencedRelation: "discovery_calls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       discovery_calls: {
         Row: {
           booking_notes: string | null
@@ -312,6 +353,8 @@ export type Database = {
           duration_minutes: number
           id: string
           prep_notes: string | null
+          reminder_1h_sent: string | null
+          reminder_24h_sent: string | null
           scheduled_for: string
           status: Database["public"]["Enums"]["discovery_call_status"]
           trainer_id: string
@@ -326,6 +369,8 @@ export type Database = {
           duration_minutes?: number
           id?: string
           prep_notes?: string | null
+          reminder_1h_sent?: string | null
+          reminder_24h_sent?: string | null
           scheduled_for: string
           status?: Database["public"]["Enums"]["discovery_call_status"]
           trainer_id: string
@@ -340,6 +385,8 @@ export type Database = {
           duration_minutes?: number
           id?: string
           prep_notes?: string | null
+          reminder_1h_sent?: string | null
+          reminder_24h_sent?: string | null
           scheduled_for?: string
           status?: Database["public"]["Enums"]["discovery_call_status"]
           trainer_id?: string
