@@ -86,9 +86,12 @@ export const useJourneyProgress = () => {
         .from('profiles')
         .select('journey_stage, onboarding_step, total_onboarding_steps, quiz_completed, journey_progress')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error('Error fetching profile:', profileError);
+        throw profileError;
+      }
 
       // Get completed journey steps
       const { data: completedSteps, error: stepsError } = await supabase
