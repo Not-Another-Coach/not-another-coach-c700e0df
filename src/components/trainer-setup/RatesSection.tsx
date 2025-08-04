@@ -6,8 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Plus, ExternalLink, DollarSign, PoundSterling, Euro, Calendar, Sparkles, Edit } from "lucide-react";
+import { Trash2, Plus, ExternalLink, DollarSign, PoundSterling, Euro, Calendar, Sparkles, Edit, Clock, Info } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useDiscoveryCallSettings } from "@/hooks/useDiscoveryCallSettings";
 
 interface RatesSectionProps {
   formData: any;
@@ -44,6 +46,9 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
     terms: "",
     inclusions: [] as string[]
   });
+
+  // Use the discovery call settings hook
+  const { settings: discoverySettings, loading: discoveryLoading, updateSettings } = useDiscoveryCallSettings();
 
   const addPackage = () => {
     if (newPackage.name && newPackage.price && newPackage.description) {
@@ -503,57 +508,145 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
       </Card>
       </div>
 
-      {/* Discovery Call */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <Label>Free Discovery Call</Label>
-            <p className="text-sm text-muted-foreground">
-              Offer a 15-minute consultation call to potential clients
-            </p>
-          </div>
-          <Switch
-            checked={formData.free_discovery_call || false}
-            onCheckedChange={(checked) => updateFormData({ free_discovery_call: checked })}
-          />
-        </div>
-
-        {formData.free_discovery_call && (
-          <Card className="border-green-200 bg-green-50">
-            <CardContent className="p-4 space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="calendar_link">Booking Link</Label>
-                <Input
-                  id="calendar_link"
-                  value={formData.calendar_link || ""}
-                  onChange={(e) => updateFormData({ calendar_link: e.target.value })}
-                  placeholder="https://calendly.com/your-username or your booking link"
-                  type="url"
+      {/* Discovery Call Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calendar className="w-5 h-5" />
+            Discovery Call Settings
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Configure your free discovery call offerings for potential clients
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {discoveryLoading ? (
+            <div className="animate-pulse space-y-4">
+              <div className="h-4 bg-muted rounded w-3/4"></div>
+              <div className="h-8 bg-muted rounded"></div>
+              <div className="h-4 bg-muted rounded w-1/2"></div>
+            </div>
+          ) : discoverySettings ? (
+            <>
+              {/* Toggle Discovery Calls */}
+              <div className="flex items-center justify-between space-x-2">
+                <div className="space-y-1">
+                  <Label htmlFor="offers-discovery-call" className="text-base font-medium">
+                    Offer Free Discovery Call
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Allow potential clients to book a free discovery call with you
+                  </p>
+                </div>
+                <Switch
+                  id="offers-discovery-call"
+                  checked={discoverySettings.offers_discovery_call}
+                  onCheckedChange={(checked) => 
+                    updateSettings({ offers_discovery_call: checked })
+                  }
                 />
-                {formData.calendar_link && (
-                  <div className="flex items-center gap-2">
-                    {isValidUrl(formData.calendar_link) ? (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={testBookingLink}
-                      >
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        Test Link
-                      </Button>
-                    ) : (
-                      <p className="text-xs text-red-600">Please enter a valid URL</p>
-                    )}
-                  </div>
-                )}
               </div>
-              <p className="text-xs text-green-700">
-                💡 Popular booking platforms: Calendly, Acuity Scheduling, Square Appointments
-              </p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+
+              {discoverySettings.offers_discovery_call && (
+                <>
+                  {/* Duration Selection */}
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      <Clock className="w-4 h-4" />
+                      Call Duration
+                    </Label>
+                    <Select
+                      value={discoverySettings.discovery_call_duration.toString()}
+                      onValueChange={(value) => 
+                        updateSettings({ discovery_call_duration: parseInt(value) })
+                      }
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select duration" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="15">15 minutes</SelectItem>
+                        <SelectItem value="20">20 minutes</SelectItem>
+                        <SelectItem value="30">30 minutes</SelectItem>
+                        <SelectItem value="45">45 minutes</SelectItem>
+                        <SelectItem value="60">60 minutes</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Prep Notes */}
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      <Info className="w-4 h-4" />
+                      Preparation Notes (Optional)
+                    </Label>
+                    <Textarea
+                      placeholder="What should clients know before the call? What should they prepare?"
+                      value={discoverySettings.prep_notes || ''}
+                      onChange={(e) => updateSettings({ prep_notes: e.target.value })}
+                      className="min-h-[100px]"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      These notes will be shown to clients when they book a discovery call
+                    </p>
+                  </div>
+
+                  {/* Legacy calendar link field for backward compatibility */}
+                  <div className="space-y-2">
+                    <Label htmlFor="calendar_link">Booking Link (Temporary)</Label>
+                    <Input
+                      id="calendar_link"
+                      value={formData.calendar_link || ""}
+                      onChange={(e) => updateFormData({ calendar_link: e.target.value })}
+                      placeholder="https://calendly.com/your-username or your booking link"
+                      type="url"
+                    />
+                    {formData.calendar_link && (
+                      <div className="flex items-center gap-2">
+                        {isValidUrl(formData.calendar_link) ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={testBookingLink}
+                          >
+                            <ExternalLink className="h-4 w-4 mr-2" />
+                            Test Link
+                          </Button>
+                        ) : (
+                          <p className="text-xs text-red-600">Please enter a valid URL</p>
+                        )}
+                      </div>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      💡 This will be replaced with integrated calendar booking in Phase 3
+                    </p>
+                  </div>
+
+                  {/* Info Box */}
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-start gap-3">
+                      <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                      <div className="space-y-2 text-sm">
+                        <p className="font-medium text-blue-900">
+                          Coming in Future Phases:
+                        </p>
+                        <ul className="text-blue-800 space-y-1 list-disc list-inside">
+                          <li>Set your availability schedule (Phase 2)</li>
+                          <li>Calendly & Google Calendar integration (Phase 3)</li>
+                          <li>Automated email notifications (Phase 4)</li>
+                          <li>Dashboard management (Phase 5)</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground">Unable to load discovery call settings.</p>
+          )}
+        </CardContent>
+      </Card>
 
 
       {/* Communication Style */}

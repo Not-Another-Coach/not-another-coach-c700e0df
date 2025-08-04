@@ -302,6 +302,66 @@ export type Database = {
         }
         Relationships: []
       }
+      discovery_calls: {
+        Row: {
+          booking_notes: string | null
+          calendar_event_id: string | null
+          cancellation_reason: string | null
+          client_id: string
+          created_at: string
+          duration_minutes: number
+          id: string
+          prep_notes: string | null
+          scheduled_for: string
+          status: Database["public"]["Enums"]["discovery_call_status"]
+          trainer_id: string
+          updated_at: string
+        }
+        Insert: {
+          booking_notes?: string | null
+          calendar_event_id?: string | null
+          cancellation_reason?: string | null
+          client_id: string
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          prep_notes?: string | null
+          scheduled_for: string
+          status?: Database["public"]["Enums"]["discovery_call_status"]
+          trainer_id: string
+          updated_at?: string
+        }
+        Update: {
+          booking_notes?: string | null
+          calendar_event_id?: string | null
+          cancellation_reason?: string | null
+          client_id?: string
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          prep_notes?: string | null
+          scheduled_for?: string
+          status?: Database["public"]["Enums"]["discovery_call_status"]
+          trainer_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discovery_calls_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discovery_calls_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       login_history: {
         Row: {
           failure_reason: string | null
@@ -855,6 +915,47 @@ export type Database = {
         }
         Relationships: []
       }
+      trainer_availability_settings: {
+        Row: {
+          availability_schedule: Json
+          created_at: string
+          discovery_call_duration: number
+          id: string
+          offers_discovery_call: boolean
+          prep_notes: string | null
+          trainer_id: string
+          updated_at: string
+        }
+        Insert: {
+          availability_schedule?: Json
+          created_at?: string
+          discovery_call_duration?: number
+          id?: string
+          offers_discovery_call?: boolean
+          prep_notes?: string | null
+          trainer_id: string
+          updated_at?: string
+        }
+        Update: {
+          availability_schedule?: Json
+          created_at?: string
+          discovery_call_duration?: number
+          id?: string
+          offers_discovery_call?: boolean
+          prep_notes?: string | null
+          trainer_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainer_availability_settings_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trainer_visibility_settings: {
         Row: {
           content_type: Database["public"]["Enums"]["content_type"]
@@ -1112,6 +1213,11 @@ export type Database = {
         | "testimonial_images"
         | "certification_images"
         | "gallery_images"
+      discovery_call_status:
+        | "scheduled"
+        | "completed"
+        | "cancelled"
+        | "rescheduled"
       engagement_stage:
         | "browsing"
         | "liked"
@@ -1259,6 +1365,12 @@ export const Constants = {
         "testimonial_images",
         "certification_images",
         "gallery_images",
+      ],
+      discovery_call_status: [
+        "scheduled",
+        "completed",
+        "cancelled",
+        "rescheduled",
       ],
       engagement_stage: [
         "browsing",
