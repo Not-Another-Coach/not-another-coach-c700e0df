@@ -11,11 +11,12 @@ import { DashboardSummary } from "@/components/dashboard/DashboardSummary";
 import { EditPreferencesSection } from "@/components/dashboard/EditPreferencesSection";
 import { ExploreMatchSection } from "@/components/dashboard/ExploreMatchSection";
 import { MessagesSection } from "@/components/dashboard/MessagesSection";
+import { UnmatchedTrainers } from "@/components/dashboard/UnmatchedTrainers";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { RoleSwitcher } from "@/components/RoleSwitcher";
 import { ClientJourneyBreadcrumb } from "@/components/ClientJourneyBreadcrumb";
 import { useClientJourneyProgress } from "@/hooks/useClientJourneyProgress";
-import { Heart, Settings, Search, MessageCircle, Menu } from "lucide-react";
+import { Heart, Settings, Search, MessageCircle, Menu, Users } from "lucide-react";
 
 export default function ClientDashboard() {
   const { user, signOut, loading } = useAuth();
@@ -129,7 +130,7 @@ export default function ClientDashboard() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           {/* Tab Navigation */}
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            <TabsList className="grid w-full sm:w-auto grid-cols-4 lg:grid-cols-4">
+            <TabsList className="grid w-full sm:w-auto grid-cols-5 lg:grid-cols-5">
               <TabsTrigger value="summary" className="flex items-center gap-2">
                 <Menu className="h-4 w-4" />
                 <span className="hidden sm:inline">Dashboard</span>
@@ -140,6 +141,10 @@ export default function ClientDashboard() {
               >
                 <Settings className="h-4 w-4" />
                 <span className="hidden sm:inline">Preferences</span>
+              </TabsTrigger>
+              <TabsTrigger value="unmatched" className="flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                <span className="hidden sm:inline">New PTs</span>
               </TabsTrigger>
               <TabsTrigger value="explore" className="flex items-center gap-2">
                 <Search className="h-4 w-4" />
@@ -175,6 +180,12 @@ export default function ClientDashboard() {
 
           <TabsContent value="preferences" className="space-y-6">
             <EditPreferencesSection 
+              profile={profile}
+            />
+          </TabsContent>
+
+          <TabsContent value="unmatched" className="space-y-6">
+            <UnmatchedTrainers 
               profile={profile}
             />
           </TabsContent>
