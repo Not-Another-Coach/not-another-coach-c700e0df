@@ -591,50 +591,192 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
                     </p>
                   </div>
 
-                  {/* Legacy calendar link field for backward compatibility */}
-                  <div className="space-y-2">
-                    <Label htmlFor="calendar_link">Booking Link (Temporary)</Label>
-                    <Input
-                      id="calendar_link"
-                      value={formData.calendar_link || ""}
-                      onChange={(e) => updateFormData({ calendar_link: e.target.value })}
-                      placeholder="https://calendly.com/your-username or your booking link"
-                      type="url"
-                    />
-                    {formData.calendar_link && (
-                      <div className="flex items-center gap-2">
-                        {isValidUrl(formData.calendar_link) ? (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={testBookingLink}
-                          >
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            Test Link
-                          </Button>
-                        ) : (
-                          <p className="text-xs text-red-600">Please enter a valid URL</p>
-                        )}
+                  {/* Booking Method Selection */}
+                  <div className="space-y-4">
+                    <Label className="text-base font-medium">Booking Method</Label>
+                    
+                    {/* Calendly Option */}
+                    <div className="space-y-2">
+                      <Label htmlFor="calendar_link">Booking Link (Calendly, etc.)</Label>
+                      <Input
+                        id="calendar_link"
+                        value={formData.calendar_link || ""}
+                        onChange={(e) => updateFormData({ calendar_link: e.target.value })}
+                        placeholder="https://calendly.com/your-username or your booking link"
+                        type="url"
+                      />
+                      {formData.calendar_link && (
+                        <div className="flex items-center gap-2">
+                          {isValidUrl(formData.calendar_link) ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={testBookingLink}
+                            >
+                              <ExternalLink className="h-4 w-4 mr-2" />
+                              Test Link
+                            </Button>
+                          ) : (
+                            <p className="text-xs text-red-600">Please enter a valid URL</p>
+                          )}
+                        </div>
+                      )}
+                      <p className="text-xs text-muted-foreground">
+                        Add your Calendly link or other booking system URL
+                      </p>
+                    </div>
+
+                    {/* Availability Schedule - Only show if no booking link */}
+                    {!formData.calendar_link && (
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-base font-medium">Set Your Weekly Availability</Label>
+                          <Badge variant="outline" className="text-xs">
+                            For discovery calls only
+                          </Badge>
+                        </div>
+
+                        <div className="space-y-3">
+                          {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map((day) => {
+                            const daySchedule = discoverySettings.availability_schedule?.[day] || { enabled: false, slots: [] };
+                            const dayLabel = day.charAt(0).toUpperCase() + day.slice(1);
+                            
+                            return (
+                              <div key={day} className="border rounded-lg p-3">
+                                <div className="flex items-center justify-between mb-2">
+                                  <div className="flex items-center space-x-3">
+                                    <Switch
+                                      checked={daySchedule.enabled}
+                                      onCheckedChange={(enabled) => {
+                                        const newSchedule = {
+                                          ...discoverySettings.availability_schedule,
+                                          [day]: { ...daySchedule, enabled }
+                                        };
+                                        updateSettings({ availability_schedule: newSchedule });
+                                      }}
+                                    />
+                                    <Label className="font-medium">{dayLabel}</Label>
+                                  </div>
+                                  {daySchedule.enabled && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => {
+                                        const newSlot = { start: '09:00', end: '10:00' };
+                                        const newSchedule = {
+                                          ...discoverySettings.availability_schedule,
+                                          [day]: {
+                                            ...daySchedule,
+                                            slots: [...daySchedule.slots, newSlot]
+                                          }
+                                        };
+                                        updateSettings({ availability_schedule: newSchedule });
+                                      }}
+                                    >
+                                      <Plus className="w-4 h-4 mr-1" />
+                                      Add Slot
+                                    </Button>
+                                  )}
+                                </div>
+
+                                {daySchedule.enabled && (
+                                  <div className="space-y-2 ml-8">
+                                    {daySchedule.slots.length === 0 ? (
+                                      <p className="text-sm text-muted-foreground">
+                                        No time slots set. Click "Add Slot" to add availability.
+                                      </p>
+                                    ) : (
+                                      daySchedule.slots.map((slot, slotIndex) => (
+                                        <div key={slotIndex} className="flex items-center space-x-2">
+                                          <Select
+                                            value={slot.start}
+                                            onValueChange={(value) => {
+                                              const newSlots = daySchedule.slots.map((s, i) => 
+                                                i === slotIndex ? { ...s, start: value } : s
+                                              );
+                                              const newSchedule = {
+                                                ...discoverySettings.availability_schedule,
+                                                [day]: { ...daySchedule, slots: newSlots }
+                                              };
+                                              updateSettings({ availability_schedule: newSchedule });
+                                            }}
+                                          >
+                                            <SelectTrigger className="w-24">
+                                              <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                              {['09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:00', '19:30', '20:00'].map(time => (
+                                                <SelectItem key={time} value={time}>{time}</SelectItem>
+                                              ))}
+                                            </SelectContent>
+                                          </Select>
+                                          <span className="text-sm text-muted-foreground">to</span>
+                                          <Select
+                                            value={slot.end}
+                                            onValueChange={(value) => {
+                                              const newSlots = daySchedule.slots.map((s, i) => 
+                                                i === slotIndex ? { ...s, end: value } : s
+                                              );
+                                              const newSchedule = {
+                                                ...discoverySettings.availability_schedule,
+                                                [day]: { ...daySchedule, slots: newSlots }
+                                              };
+                                              updateSettings({ availability_schedule: newSchedule });
+                                            }}
+                                          >
+                                            <SelectTrigger className="w-24">
+                                              <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                              {['09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:00', '19:30', '20:00'].map(time => (
+                                                <SelectItem key={time} value={time}>{time}</SelectItem>
+                                              ))}
+                                            </SelectContent>
+                                          </Select>
+                                          <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() => {
+                                              const newSlots = daySchedule.slots.filter((_, i) => i !== slotIndex);
+                                              const newSchedule = {
+                                                ...discoverySettings.availability_schedule,
+                                                [day]: { ...daySchedule, slots: newSlots }
+                                              };
+                                              updateSettings({ availability_schedule: newSchedule });
+                                            }}
+                                          >
+                                            <Trash2 className="w-4 h-4 text-red-500" />
+                                          </Button>
+                                        </div>
+                                      ))
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
                     )}
-                    <p className="text-xs text-muted-foreground">
-                      💡 This will be replaced with integrated calendar booking in Phase 3
-                    </p>
                   </div>
 
-                  {/* Info Box */}
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  {/* Status Summary */}
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                     <div className="flex items-start gap-3">
-                      <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                      <Info className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
                       <div className="space-y-2 text-sm">
-                        <p className="font-medium text-blue-900">
-                          Coming in Future Phases:
+                        <p className="font-medium text-green-900">
+                          Discovery Call Setup
                         </p>
-                        <ul className="text-blue-800 space-y-1 list-disc list-inside">
-                          <li>Set your availability schedule (Phase 2)</li>
-                          <li>Calendly & Google Calendar integration (Phase 3)</li>
-                          <li>Automated email notifications (Phase 4)</li>
-                          <li>Dashboard management (Phase 5)</li>
+                        <ul className="text-green-800 space-y-1">
+                          <li>✓ Discovery calls enabled</li>
+                          <li>✓ {discoverySettings.discovery_call_duration} minute duration set</li>
+                          {formData.calendar_link ? (
+                            <li>✓ External booking link configured</li>
+                          ) : (
+                            <li>✓ Manual availability schedule available</li>
+                          )}
+                          {discoverySettings.prep_notes && <li>✓ Preparation notes added</li>}
                         </ul>
                       </div>
                     </div>
