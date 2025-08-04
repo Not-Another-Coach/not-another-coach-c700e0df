@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useEnhancedTrainerMatching } from "@/hooks/useEnhancedTrainerMatching";
 import { useSavedTrainers } from "@/hooks/useSavedTrainers";
+import { useRealTrainers } from "@/hooks/useRealTrainers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -82,6 +83,9 @@ export function DashboardSummary({ profile, onTabChange }: DashboardSummaryProps
   const navigate = useNavigate();
   const { savedTrainerIds } = useSavedTrainers();
   
+  // Use real trainers from database
+  const { trainers: realTrainers, loading: trainersLoading } = useRealTrainers();
+  
   // Get enhanced matched trainers using client survey data
   const clientSurveyData = {
     primary_goals: profile.primary_goals,
@@ -103,8 +107,11 @@ export function DashboardSummary({ profile, onTabChange }: DashboardSummaryProps
     flexible_scheduling: profile.flexible_scheduling,
   };
 
+  // Combine real trainers with sample trainers for better matching experience
+  const allTrainers = [...realTrainers, ...sampleTrainers];
+
   const { matchedTrainers, topMatches } = useEnhancedTrainerMatching(
-    sampleTrainers, 
+    allTrainers, 
     profile.quiz_answers,
     clientSurveyData
   );
