@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useEnhancedTrainerMatching } from "@/hooks/useEnhancedTrainerMatching";
 import { useSavedTrainers } from "@/hooks/useSavedTrainers";
+import { useShortlistedTrainers } from "@/hooks/useShortlistedTrainers";
 import { useRealTrainers } from "@/hooks/useRealTrainers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TrainerCard } from "@/components/TrainerCard";
 import { SwipeableCard } from "@/components/SwipeableCard";
+import { toast } from "sonner";
 import { 
   Search, 
   Filter, 
@@ -19,10 +21,11 @@ import {
   Star, 
   Grid3X3,
   List,
-  Shuffle,
   Target,
-  Clock,
-  MapPin
+  Shuffle,
+  MapPin,
+  Phone,
+  MessageCircle
 } from "lucide-react";
 import trainerSarah from "@/assets/trainer-sarah.jpg";
 import trainerMike from "@/assets/trainer-mike.jpg";
@@ -100,6 +103,7 @@ const sampleTrainers = [
 export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
   const navigate = useNavigate();
   const { savedTrainerIds } = useSavedTrainers();
+  const { shortlistTrainer, isShortlisted, shortlistCount, canShortlistMore } = useShortlistedTrainers();
   
   // Use real trainers from database
   const { trainers: realTrainers, loading: trainersLoading } = useRealTrainers();
@@ -180,6 +184,20 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
     const messagingButton = document.querySelector('[data-messaging-button]') as HTMLButtonElement;
     if (messagingButton) {
       messagingButton.click();
+    }
+  };
+
+  const handleShortlist = async (trainerId: string) => {
+    if (!canShortlistMore) {
+      toast.error('You can only shortlist up to 4 trainers');
+      return;
+    }
+    
+    const result = await shortlistTrainer(trainerId);
+    if (result.error) {
+      toast.error('Failed to shortlist trainer');
+    } else {
+      toast.success('Trainer added to shortlist!');
     }
   };
 
@@ -337,6 +355,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
             <h2 className="text-xl font-semibold">Your Saved Trainers</h2>
             <div className="flex items-center gap-2">
               <Badge variant="outline">{savedTrainers.length} saved</Badge>
+              <Badge variant="outline">{shortlistCount}/4 shortlisted</Badge>
               <Button 
                 variant="outline" 
                 size="sm"
@@ -351,15 +370,48 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
           {savedTrainers.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {savedTrainers.map((match) => (
-                <TrainerCard
-                  key={match.trainer.id}
-                  trainer={match.trainer}
-                  onViewProfile={handleViewProfile}
-                  onMessage={handleMessage}
-                  matchScore={match.score}
-                  matchReasons={match.matchReasons}
-                  matchDetails={match.matchDetails}
-                />
+                <div key={match.trainer.id} className="relative">
+                  <TrainerCard
+                    trainer={match.trainer}
+                    onViewProfile={handleViewProfile}
+                    onMessage={handleMessage}
+                    matchScore={match.score}
+                    matchReasons={match.matchReasons}
+                    matchDetails={match.matchDetails}
+                  />
+                  
+                  {/* Shortlist Action Buttons */}
+                  <div className="mt-4 space-y-2">
+                    {isShortlisted(match.trainer.id) ? (
+                      <div className="space-y-2">
+                        <Badge variant="default" className="w-full justify-center bg-green-100 text-green-800 border-green-200">
+                          ✓ Shortlisted
+                        </Badge>
+                        <div className="grid grid-cols-2 gap-2">
+                          <Button size="sm" variant="outline" className="text-xs" onClick={() => handleMessage(match.trainer.id)}>
+                            <MessageCircle className="h-3 w-3 mr-1" />
+                            Chat
+                          </Button>
+                          <Button size="sm" variant="outline" className="text-xs">
+                            <Phone className="h-3 w-3 mr-1" />
+                            Book Call
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <Button 
+                        size="sm" 
+                        variant="default" 
+                        className="w-full"
+                        onClick={() => handleShortlist(match.trainer.id)}
+                        disabled={!canShortlistMore}
+                      >
+                        <Star className="h-3 w-3 mr-1" />
+                        {canShortlistMore ? 'Add to Shortlist' : 'Shortlist Full'}
+                      </Button>
+                    )}
+                  </div>
+                </div>
               ))}
             </div>
           ) : (
