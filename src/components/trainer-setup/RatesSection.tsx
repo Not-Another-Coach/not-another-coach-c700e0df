@@ -490,6 +490,17 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
                 onCheckedChange={(checked) => updateFormData({ weekly_programming_only: checked })}
               />
             </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="font-normal">AI Enhanced Coaching</Label>
+                <p className="text-sm text-muted-foreground">Leverage AI tools for personalized insights and enhanced coaching</p>
+              </div>
+              <Switch
+                checked={formData.ai_enhanced_coaching || false}
+                onCheckedChange={(checked) => updateFormData({ ai_enhanced_coaching: checked })}
+              />
+            </div>
           </div>
         </CardContent>
       </Card>

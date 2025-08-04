@@ -69,6 +69,7 @@ const TrainerProfileSetup = () => {
     video_checkins: false,
     messaging_support: false,
     weekly_programming_only: false,
+    ai_enhanced_coaching: false,
     
     // Testimonials & Case Studies
     testimonials: [],
@@ -158,6 +159,7 @@ const TrainerProfileSetup = () => {
         video_checkins: (profile as any).video_checkins || false,
         messaging_support: (profile as any).messaging_support || false,
         weekly_programming_only: (profile as any).weekly_programming_only || false,
+        ai_enhanced_coaching: (profile as any).ai_enhanced_coaching || false,
         testimonials: (profile as any).testimonials || [],
         delivery_format: (profile as any).delivery_format || "hybrid",
       }));
@@ -212,7 +214,7 @@ const TrainerProfileSetup = () => {
         if (!formData.communication_style || formData.communication_style.trim().length < 20) {
           newErrors.communication_style = "Please describe how you work best with clients (minimum 20 characters)";
         }
-        const hasCommunicationMethod = formData.video_checkins || formData.messaging_support || formData.weekly_programming_only;
+        const hasCommunicationMethod = formData.video_checkins || formData.messaging_support || formData.weekly_programming_only || formData.ai_enhanced_coaching;
         if (!hasCommunicationMethod) {
           newErrors.communication_methods = "Please select at least one communication method you offer";
         }
@@ -247,7 +249,7 @@ const TrainerProfileSetup = () => {
       case 5:
         const hasRate = formData.hourly_rate && formData.hourly_rate > 0;
         const hasCommunicationStyle = formData.communication_style && formData.communication_style.trim().length >= 20;
-        const hasCommunicationMethod = formData.video_checkins || formData.messaging_support || formData.weekly_programming_only;
+        const hasCommunicationMethod = formData.video_checkins || formData.messaging_support || formData.weekly_programming_only || formData.ai_enhanced_coaching;
         const hasPackages = formData.package_options && formData.package_options.length > 0;
         const hasAllRateRequirements = hasRate && hasCommunicationStyle && hasCommunicationMethod && hasPackages;
         const hasPartialRate = hasRate || hasCommunicationStyle || hasCommunicationMethod || hasPackages;
@@ -318,8 +320,8 @@ const TrainerProfileSetup = () => {
         'delivery_format', 'journey_stage', 'certifying_body', 'proof_upload_urls',
         'ideal_client_age_range', 'ideal_client_fitness_level', 
         'ideal_client_personality', 'training_vibe', 'calendar_link',
-        'next_available_date', 'communication_style', 'video_checkins',
-        'messaging_support', 'weekly_programming_only', 'ways_of_working_onboarding',
+         'next_available_date', 'communication_style', 'video_checkins',
+        'messaging_support', 'weekly_programming_only', 'ai_enhanced_coaching', 'ways_of_working_onboarding',
         'ways_of_working_first_week', 'ways_of_working_ongoing_structure',
         'ways_of_working_tracking_tools', 'ways_of_working_client_expectations',
         'ways_of_working_what_i_bring', 'ways_of_working_visibility',
