@@ -222,21 +222,77 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
     }
   };
 
-  const handleSendMessage = () => {
-    if (!message.trim() || !selectedTrainerId) return;
+  const handleSendMessage = async () => {
+    if (!message.trim() || !selectedTrainerId || !profile?.id) return;
 
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      content: message.trim(),
-      sender: 'user',
-      timestamp: new Date(),
-      trainerId: selectedTrainerId
-    };
+    try {
+      // Find or create conversation
+      let conversationId: string;
+      
+      const { data: existingConversation } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq(isTrainer ? 'trainer_id' : 'client_id', profile.id)
+        .eq(isTrainer ? 'client_id' : 'trainer_id', selectedTrainerId)
+        .single();
 
-    setMessages(prev => [...prev, newMessage]);
-    setMessage('');
+      if (existingConversation) {
+        conversationId = existingConversation.id;
+      } else {
+        // Create new conversation
+        const { data: newConversation, error } = await supabase
+          .from('conversations')
+          .insert({
+            client_id: isTrainer ? selectedTrainerId : profile.id,
+            trainer_id: isTrainer ? profile.id : selectedTrainerId
+          })
+          .select('id')
+          .single();
 
-    // In a real app, this would save to database and send to trainer
+        if (error || !newConversation) {
+          console.error('Error creating conversation:', error);
+          return;
+        }
+        conversationId = newConversation.id;
+      }
+
+      // Save message to database
+      const { data: savedMessage, error: messageError } = await supabase
+        .from('messages')
+        .insert({
+          conversation_id: conversationId,
+          sender_id: profile.id,
+          content: message.trim(),
+          message_type: 'text'
+        })
+        .select('*')
+        .single();
+
+      if (messageError || !savedMessage) {
+        console.error('Error saving message:', messageError);
+        return;
+      }
+
+      // Add message to local state
+      const newMessage: Message = {
+        id: savedMessage.id,
+        content: savedMessage.content,
+        sender: 'user',
+        timestamp: new Date(savedMessage.created_at),
+        trainerId: selectedTrainerId
+      };
+
+      setMessages(prev => [...prev, newMessage]);
+      setMessage('');
+
+      // If this is the first message from client to trainer, refresh trainer's contact list
+      if (!isTrainer && !existingConversation) {
+        // This will help trainers see the new conversation
+      }
+
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
   };
 
   const handleBackToList = () => {
