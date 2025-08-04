@@ -4,7 +4,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useCoachAnalytics } from "@/hooks/useCoachAnalytics";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
-import { VisibilitySettingsSection } from "@/components/trainer-setup/VisibilitySettingsSection";
 import { useUserRoles } from "@/hooks/useUserRoles";
 
 import { Button } from "@/components/ui/button";
@@ -381,9 +380,6 @@ const TrainerDashboard = () => {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Content Visibility Matrix */}
-            <VisibilitySettingsSection />
           </div>
 
           {/* Right Column: Live Activity Feed + Actions */}
