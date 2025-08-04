@@ -80,6 +80,8 @@ export function useVisibilityMatrix(): VisibilityMatrixHook {
           content_type: contentType,
           engagement_stage: engagementStage,
           visibility_state: visibilityState
+        }, {
+          onConflict: 'trainer_id,content_type,engagement_stage'
         });
 
       if (error) {
