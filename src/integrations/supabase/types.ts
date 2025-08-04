@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_actions_log: {
+        Row: {
+          action_details: Json | null
+          action_type: string
+          admin_id: string
+          created_at: string
+          id: string
+          reason: string | null
+          target_user_id: string
+        }
+        Insert: {
+          action_details?: Json | null
+          action_type: string
+          admin_id: string
+          created_at?: string
+          id?: string
+          reason?: string | null
+          target_user_id: string
+        }
+        Update: {
+          action_details?: Json | null
+          action_type?: string
+          admin_id?: string
+          created_at?: string
+          id?: string
+          reason?: string | null
+          target_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_actions_log_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_actions_log_target_user_id_fkey"
+            columns: ["target_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       alerts: {
         Row: {
           alert_type: string
@@ -176,6 +221,44 @@ export type Database = {
         }
         Relationships: []
       }
+      login_history: {
+        Row: {
+          failure_reason: string | null
+          id: string
+          ip_address: unknown | null
+          login_at: string
+          success: boolean
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          failure_reason?: string | null
+          id?: string
+          ip_address?: unknown | null
+          login_at?: string
+          success?: boolean
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          failure_reason?: string | null
+          id?: string
+          ip_address?: unknown | null
+          login_at?: string
+          success?: boolean
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "login_history_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           content: string
@@ -267,6 +350,8 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_status: string | null
+          admin_notes: string | null
           admin_verification_notes: string | null
           availability_schedule: Json | null
           availability_slots: Json | null
@@ -291,6 +376,8 @@ export type Database = {
           client_survey_completed_at: string | null
           client_survey_step: number | null
           coaching_styles: string[] | null
+          communication_restricted: boolean | null
+          communication_restricted_reason: string | null
           communication_style: string | null
           created_at: string
           delivery_format: string | null
@@ -299,6 +386,7 @@ export type Database = {
           first_name: string | null
           fitness_goals: string[] | null
           flexible_scheduling: boolean | null
+          force_password_reset: boolean | null
           free_discovery_call: boolean | null
           hourly_rate: number | null
           id: string
@@ -312,9 +400,12 @@ export type Database = {
           journey_progress: Json | null
           journey_stage: string | null
           languages: string[] | null
+          last_failed_login_at: string | null
+          last_login_at: string | null
           last_name: string | null
           last_verification_request: string | null
           location: string | null
+          login_attempts: number | null
           max_clients: number | null
           messaging_support: boolean | null
           motivation_factors: string[] | null
@@ -345,6 +436,9 @@ export type Database = {
           special_credentials: string[] | null
           specializations: string[] | null
           start_timeline: string | null
+          suspended_at: string | null
+          suspended_reason: string | null
+          suspended_until: string | null
           tagline: string | null
           terms_agreed: boolean | null
           testimonials: Json | null
@@ -376,6 +470,8 @@ export type Database = {
           year_certified: number | null
         }
         Insert: {
+          account_status?: string | null
+          admin_notes?: string | null
           admin_verification_notes?: string | null
           availability_schedule?: Json | null
           availability_slots?: Json | null
@@ -400,6 +496,8 @@ export type Database = {
           client_survey_completed_at?: string | null
           client_survey_step?: number | null
           coaching_styles?: string[] | null
+          communication_restricted?: boolean | null
+          communication_restricted_reason?: string | null
           communication_style?: string | null
           created_at?: string
           delivery_format?: string | null
@@ -408,6 +506,7 @@ export type Database = {
           first_name?: string | null
           fitness_goals?: string[] | null
           flexible_scheduling?: boolean | null
+          force_password_reset?: boolean | null
           free_discovery_call?: boolean | null
           hourly_rate?: number | null
           id: string
@@ -421,9 +520,12 @@ export type Database = {
           journey_progress?: Json | null
           journey_stage?: string | null
           languages?: string[] | null
+          last_failed_login_at?: string | null
+          last_login_at?: string | null
           last_name?: string | null
           last_verification_request?: string | null
           location?: string | null
+          login_attempts?: number | null
           max_clients?: number | null
           messaging_support?: boolean | null
           motivation_factors?: string[] | null
@@ -454,6 +556,9 @@ export type Database = {
           special_credentials?: string[] | null
           specializations?: string[] | null
           start_timeline?: string | null
+          suspended_at?: string | null
+          suspended_reason?: string | null
+          suspended_until?: string | null
           tagline?: string | null
           terms_agreed?: boolean | null
           testimonials?: Json | null
@@ -485,6 +590,8 @@ export type Database = {
           year_certified?: number | null
         }
         Update: {
+          account_status?: string | null
+          admin_notes?: string | null
           admin_verification_notes?: string | null
           availability_schedule?: Json | null
           availability_slots?: Json | null
@@ -509,6 +616,8 @@ export type Database = {
           client_survey_completed_at?: string | null
           client_survey_step?: number | null
           coaching_styles?: string[] | null
+          communication_restricted?: boolean | null
+          communication_restricted_reason?: string | null
           communication_style?: string | null
           created_at?: string
           delivery_format?: string | null
@@ -517,6 +626,7 @@ export type Database = {
           first_name?: string | null
           fitness_goals?: string[] | null
           flexible_scheduling?: boolean | null
+          force_password_reset?: boolean | null
           free_discovery_call?: boolean | null
           hourly_rate?: number | null
           id?: string
@@ -530,9 +640,12 @@ export type Database = {
           journey_progress?: Json | null
           journey_stage?: string | null
           languages?: string[] | null
+          last_failed_login_at?: string | null
+          last_login_at?: string | null
           last_name?: string | null
           last_verification_request?: string | null
           location?: string | null
+          login_attempts?: number | null
           max_clients?: number | null
           messaging_support?: boolean | null
           motivation_factors?: string[] | null
@@ -563,6 +676,9 @@ export type Database = {
           special_credentials?: string[] | null
           specializations?: string[] | null
           start_timeline?: string | null
+          suspended_at?: string | null
+          suspended_reason?: string | null
+          suspended_until?: string | null
           tagline?: string | null
           terms_agreed?: boolean | null
           testimonials?: Json | null
@@ -821,9 +937,34 @@ export type Database = {
         Args: { p_trainer_id: string }
         Returns: undefined
       }
+      log_admin_action: {
+        Args: {
+          p_target_user_id: string
+          p_action_type: string
+          p_action_details?: Json
+          p_reason?: string
+        }
+        Returns: undefined
+      }
+      reactivate_user: {
+        Args: { p_user_id: string; p_reason?: string }
+        Returns: undefined
+      }
       request_profile_verification: {
         Args: { trainer_id: string }
         Returns: boolean
+      }
+      restrict_communication: {
+        Args: { p_user_id: string; p_reason: string }
+        Returns: undefined
+      }
+      suspend_user: {
+        Args: { p_user_id: string; p_reason: string; p_duration_days?: number }
+        Returns: undefined
+      }
+      update_admin_notes: {
+        Args: { p_user_id: string; p_notes: string }
+        Returns: undefined
       }
       update_engagement_stage: {
         Args: {
