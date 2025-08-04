@@ -658,6 +658,44 @@ export type Database = {
         }
         Relationships: []
       }
+      trainer_visibility_settings: {
+        Row: {
+          content_type: Database["public"]["Enums"]["content_type"]
+          created_at: string | null
+          engagement_stage: Database["public"]["Enums"]["engagement_stage"]
+          id: string
+          trainer_id: string
+          updated_at: string | null
+          visibility_state: Database["public"]["Enums"]["visibility_state"]
+        }
+        Insert: {
+          content_type: Database["public"]["Enums"]["content_type"]
+          created_at?: string | null
+          engagement_stage: Database["public"]["Enums"]["engagement_stage"]
+          id?: string
+          trainer_id: string
+          updated_at?: string | null
+          visibility_state?: Database["public"]["Enums"]["visibility_state"]
+        }
+        Update: {
+          content_type?: Database["public"]["Enums"]["content_type"]
+          created_at?: string | null
+          engagement_stage?: Database["public"]["Enums"]["engagement_stage"]
+          id?: string
+          trainer_id?: string
+          updated_at?: string | null
+          visibility_state?: Database["public"]["Enums"]["visibility_state"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainer_visibility_settings_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_alert_interactions: {
         Row: {
           alert_id: string
@@ -722,6 +760,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_content_visibility: {
+        Args: {
+          p_trainer_id: string
+          p_content_type: Database["public"]["Enums"]["content_type"]
+          p_engagement_stage: Database["public"]["Enums"]["engagement_stage"]
+        }
+        Returns: Database["public"]["Enums"]["visibility_state"]
+      }
       get_current_user_type: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -729,6 +775,10 @@ export type Database = {
       get_engagement_stage: {
         Args: { client_uuid: string; trainer_uuid: string }
         Returns: Database["public"]["Enums"]["engagement_stage"]
+      }
+      initialize_trainer_visibility_defaults: {
+        Args: { p_trainer_id: string }
+        Returns: undefined
       }
       request_profile_verification: {
         Args: { trainer_id: string }
@@ -745,6 +795,13 @@ export type Database = {
     }
     Enums: {
       client_status_enum: "open" | "waitlist" | "paused"
+      content_type:
+        | "profile_image"
+        | "before_after_images"
+        | "package_images"
+        | "testimonial_images"
+        | "certification_images"
+        | "gallery_images"
       engagement_stage:
         | "browsing"
         | "liked"
@@ -753,6 +810,7 @@ export type Database = {
         | "active_client"
       user_type: "client" | "trainer" | "admin"
       verification_status_enum: "pending" | "verified" | "rejected"
+      visibility_state: "hidden" | "blurred" | "visible"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -881,6 +939,14 @@ export const Constants = {
   public: {
     Enums: {
       client_status_enum: ["open", "waitlist", "paused"],
+      content_type: [
+        "profile_image",
+        "before_after_images",
+        "package_images",
+        "testimonial_images",
+        "certification_images",
+        "gallery_images",
+      ],
       engagement_stage: [
         "browsing",
         "liked",
@@ -890,6 +956,7 @@ export const Constants = {
       ],
       user_type: ["client", "trainer", "admin"],
       verification_status_enum: ["pending", "verified", "rejected"],
+      visibility_state: ["hidden", "blurred", "visible"],
     },
   },
 } as const
