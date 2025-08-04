@@ -137,10 +137,6 @@ export default function ClientDashboard() {
               <TabsTrigger 
                 value="preferences" 
                 className="flex items-center gap-2"
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigate('/client-survey');
-                }}
               >
                 <Settings className="h-4 w-4" />
                 <span className="hidden sm:inline">Preferences</span>
@@ -177,7 +173,18 @@ export default function ClientDashboard() {
             />
           </TabsContent>
 
-          {/* Preferences tab navigates to survey, so no TabsContent needed */}
+          <TabsContent value="preferences" className="space-y-6">
+            <div className="text-center py-12">
+              <Settings className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Update Your Preferences</h3>
+              <p className="text-muted-foreground mb-6">
+                Complete the survey to update your training preferences and improve your matches.
+              </p>
+              <Button onClick={() => navigate('/client-survey')} size="lg">
+                Go to Survey
+              </Button>
+            </div>
+          </TabsContent>
 
           <TabsContent value="explore" className="space-y-6">
             <UnmatchedTrainers 
