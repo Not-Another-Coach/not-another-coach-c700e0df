@@ -137,7 +137,6 @@ export default function ClientDashboard() {
               <TabsTrigger 
                 value="preferences" 
                 className="flex items-center gap-2"
-                onClick={() => navigate('/client-survey')}
               >
                 <Settings className="h-4 w-4" />
                 <span className="hidden sm:inline">Preferences</span>
@@ -174,7 +173,11 @@ export default function ClientDashboard() {
             />
           </TabsContent>
 
-          {/* Note: Preferences tab now navigates to survey, so no TabsContent needed */}
+          <TabsContent value="preferences" className="space-y-6">
+            <EditPreferencesSection 
+              profile={profile}
+            />
+          </TabsContent>
 
           <TabsContent value="explore" className="space-y-6">
             <ExploreMatchSection 
