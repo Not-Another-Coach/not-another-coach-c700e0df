@@ -571,7 +571,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
               {savedTrainers.map((match) => (
                 <div key={match.trainer.id} className="relative">
                   {/* Comparison Checkbox */}
-                  <div className="absolute top-2 left-2 z-10">
+                  <div className="absolute bottom-2 left-2 z-10">
                     <Checkbox
                       checked={selectedForComparison.includes(match.trainer.id)}
                       onCheckedChange={() => handleComparisonToggle(match.trainer.id)}
@@ -666,7 +666,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                 {shortlistedTrainers.map((match) => (
                   <div key={match.trainer.id} className="relative">
                     {/* Comparison Checkbox */}
-                    <div className="absolute top-2 left-2 z-10">
+                    <div className="absolute bottom-2 left-2 z-10">
                       <Checkbox
                         checked={selectedForComparison.includes(match.trainer.id)}
                         onCheckedChange={() => handleComparisonToggle(match.trainer.id)}
