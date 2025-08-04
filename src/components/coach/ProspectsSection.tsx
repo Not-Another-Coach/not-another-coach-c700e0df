@@ -24,6 +24,11 @@ interface Prospect {
     training_location_preference?: string;
   };
   engagement_stage?: string;
+  discovery_call?: {
+    scheduled_for: string;
+    duration_minutes: number;
+    status: string;
+  };
 }
 
 interface ProspectsSectionProps {
@@ -91,7 +96,7 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
       const clientIds = shortlistedData.map(item => item.user_id);
       console.log('Client IDs to fetch:', clientIds);
       
-      const [profilesResult, engagementResult] = await Promise.all([
+      const [profilesResult, engagementResult, discoveryCallsResult] = await Promise.all([
         supabase
           .from('profiles')
           .select('id, first_name, last_name, primary_goals, training_location_preference')
@@ -100,14 +105,22 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
           .from('client_trainer_engagement')
           .select('client_id, stage')
           .eq('trainer_id', profile.id)
+          .in('client_id', clientIds),
+        supabase
+          .from('discovery_calls')
+          .select('client_id, scheduled_for, duration_minutes, status')
+          .eq('trainer_id', profile.id)
           .in('client_id', clientIds)
+          .in('status', ['scheduled', 'rescheduled'])
       ]);
 
       const { data: profilesData, error: profilesError } = profilesResult;
       const { data: engagementData, error: engagementError } = engagementResult;
+      const { data: discoveryCallsData, error: discoveryCallsError } = discoveryCallsResult;
 
       console.log('Profiles data:', profilesData);
       console.log('Engagement data:', engagementData);
+      console.log('Discovery calls data:', discoveryCallsData);
 
       if (profilesError) {
         console.error('Error fetching profiles:', profilesError);
@@ -115,6 +128,10 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
 
       if (engagementError) {
         console.error('Error fetching engagement data:', engagementError);
+      }
+
+      if (discoveryCallsError) {
+        console.error('Error fetching discovery calls data:', discoveryCallsError);
       }
 
       // Filter out clients who are already active clients
@@ -129,7 +146,8 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
       const mergedData = filteredShortlisted.map(shortlisted => ({
         ...shortlisted,
         client_profile: profilesData?.find(profile => profile.id === shortlisted.user_id) || null,
-        engagement_stage: engagementData?.find(eng => eng.client_id === shortlisted.user_id)?.stage || 'browsing'
+        engagement_stage: engagementData?.find(eng => eng.client_id === shortlisted.user_id)?.stage || 'browsing',
+        discovery_call: discoveryCallsData?.find(call => call.client_id === shortlisted.user_id) || null
       }));
 
       console.log('Final merged prospects data:', mergedData);
@@ -145,9 +163,9 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
     }
   };
 
-  const getStageInfo = (stage?: string, discoveryCallEnabled?: boolean, discoveryCallBooked?: string) => {
-    if (discoveryCallBooked) {
-      return { label: 'Call Booked', variant: 'default' as const, color: 'bg-blue-100 text-blue-800' };
+  const getStageInfo = (stage?: string, discoveryCallEnabled?: boolean, discoveryCall?: any) => {
+    if (discoveryCall) {
+      return { label: 'Call Scheduled', variant: 'default' as const, color: 'bg-blue-100 text-blue-800' };
     }
     if (discoveryCallEnabled) {
       return { label: 'Call Available', variant: 'secondary' as const, color: 'bg-green-100 text-green-800' };
@@ -163,6 +181,11 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
       default:
         return { label: 'Shortlisted', variant: 'outline' as const, color: 'bg-gray-100 text-gray-800' };
     }
+  };
+
+  const formatDiscoveryCallDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return format(date, 'MMM d, yyyy \'at\' h:mm a');
   };
 
   if (loading) {
@@ -203,7 +226,7 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
               const stageInfo = getStageInfo(
                 prospect.engagement_stage, 
                 prospect.discovery_call_enabled, 
-                prospect.discovery_call_booked_at
+                prospect.discovery_call
               );
               
               return (
@@ -230,10 +253,10 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
                           <Calendar className="w-3 h-3" />
                           Shortlisted {format(new Date(prospect.shortlisted_at), 'MMM d, yyyy')}
                         </span>
-                        {prospect.discovery_call_booked_at && (
+                        {prospect.discovery_call && (
                           <span className="flex items-center gap-1">
                             <Video className="w-3 h-3" />
-                            Call booked {format(new Date(prospect.discovery_call_booked_at), 'MMM d, yyyy')}
+                            Call scheduled for {format(new Date(prospect.discovery_call.scheduled_for), 'MMM d, yyyy \'at\' h:mm a')}
                           </span>
                         )}
                       </div>
@@ -270,7 +293,7 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
                       </Button>
                     )}
                     
-                    {prospect.discovery_call_enabled && !prospect.discovery_call_booked_at && (
+                    {prospect.discovery_call_enabled && !prospect.discovery_call && (
                       <Button
                         size="sm"
                         variant="outline"
@@ -284,7 +307,7 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
                       </Button>
                     )}
                     
-                    {prospect.discovery_call_booked_at && (
+                    {prospect.discovery_call && (
                       <Button
                         size="sm"
                         variant="outline"

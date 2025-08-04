@@ -1,0 +1,141 @@
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from './useAuth';
+
+interface ActivityAlert {
+  id: string;
+  type: 'discovery_call_booked' | 'client_inquiry' | 'profile_view' | 'testimonial' | 'conversion';
+  title: string;
+  description: string;
+  metadata?: any;
+  created_at: string;
+  icon: string;
+  color: string;
+}
+
+export function useActivityAlerts() {
+  const [alerts, setAlerts] = useState<ActivityAlert[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      fetchAlerts();
+    }
+  }, [user]);
+
+  const fetchAlerts = async () => {
+    if (!user) return;
+    
+    setLoading(true);
+    try {
+      // Get general alerts
+      const { data: alertsData, error } = await supabase
+        .from('alerts')
+        .select('*')
+        .eq('created_by', user.id)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (error) {
+        console.error('Error fetching alerts:', error);
+        return;
+      }
+
+      // Transform alerts data
+      const transformedAlerts: ActivityAlert[] = (alertsData || []).map(alert => ({
+        id: alert.id,
+        type: alert.alert_type as any,
+        title: alert.title,
+        description: alert.content,
+        metadata: alert.metadata,
+        created_at: alert.created_at,
+        icon: getIconForType(alert.alert_type),
+        color: getColorForType(alert.alert_type)
+      }));
+
+      setAlerts(transformedAlerts);
+    } catch (error) {
+      console.error('Error in fetchAlerts:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createAlert = async (
+    type: ActivityAlert['type'],
+    title: string,
+    description: string,
+    metadata?: any
+  ) => {
+    if (!user) return false;
+
+    try {
+      const { error } = await supabase
+        .from('alerts')
+        .insert({
+          alert_type: type,
+          title,
+          content: description,
+          created_by: user.id,
+          target_audience: { trainers: true },
+          metadata: metadata || {},
+          is_active: true
+        });
+
+      if (error) {
+        console.error('Error creating alert:', error);
+        return false;
+      }
+
+      // Refresh alerts
+      await fetchAlerts();
+      return true;
+    } catch (error) {
+      console.error('Error in createAlert:', error);
+      return false;
+    }
+  };
+
+  const getIconForType = (type: string): string => {
+    switch (type) {
+      case 'discovery_call_booked':
+        return '📞';
+      case 'client_inquiry':
+        return '💬';
+      case 'profile_view':
+        return '👀';
+      case 'testimonial':
+        return '🎉';
+      case 'conversion':
+        return '📈';
+      default:
+        return '🔔';
+    }
+  };
+
+  const getColorForType = (type: string): string => {
+    switch (type) {
+      case 'discovery_call_booked':
+        return 'bg-blue-50 border-blue-200';
+      case 'client_inquiry':
+        return 'bg-green-50 border-green-200';
+      case 'profile_view':
+        return 'bg-purple-50 border-purple-200';
+      case 'testimonial':
+        return 'bg-yellow-50 border-yellow-200';
+      case 'conversion':
+        return 'bg-orange-50 border-orange-200';
+      default:
+        return 'bg-gray-50 border-gray-200';
+    }
+  };
+
+  return {
+    alerts,
+    loading,
+    createAlert,
+    refetch: fetchAlerts
+  };
+}

@@ -41,9 +41,8 @@ serve(async (req) => {
       .from('discovery_calls')
       .select(`
         *,
-        client:client_id(id, first_name, last_name, email),
-        trainer:trainer_id(id, first_name, last_name, email),
-        trainer_settings:trainer_availability_settings!trainer_id(prep_notes)
+        client:profiles!client_id(id, first_name, last_name),
+        trainer:profiles!trainer_id(id, first_name, last_name)
       `)
       .eq('id', discoveryCallId)
       .single()
@@ -56,11 +55,24 @@ serve(async (req) => {
       )
     }
 
+    // Get client and trainer emails from auth.users
+    const { data: clientAuth } = await supabase.auth.admin.getUserById(discoveryCall.client_id)
+    const { data: trainerAuth } = await supabase.auth.admin.getUserById(discoveryCall.trainer_id)
+
+    // Get trainer settings separately
+    const { data: trainerSettings } = await supabase
+      .from('trainer_availability_settings')
+      .select('prep_notes')
+      .eq('trainer_id', discoveryCall.trainer_id)
+      .single()
+
     const client = discoveryCall.client as any
     const trainer = discoveryCall.trainer as any
-    const trainerSettings = discoveryCall.trainer_settings?.[0] as any
+    
+    const clientEmail = clientAuth?.user?.email
+    const trainerEmail = trainerAuth?.user?.email
 
-    if (!client?.email || !trainer?.email) {
+    if (!clientEmail || !trainerEmail) {
       console.error('Missing email addresses for client or trainer')
       return new Response(
         JSON.stringify({ error: 'Missing email addresses' }),
@@ -104,7 +116,7 @@ serve(async (req) => {
           })
         )
         subject = `Discovery call confirmed with ${trainerName}`
-        recipientEmail = client.email
+        recipientEmail = clientEmail
         break
 
       case 'reminder':
@@ -121,7 +133,7 @@ serve(async (req) => {
           })
         )
         subject = `Reminder: Discovery call with ${trainerName} ${timeUntil || 'coming up'}`
-        recipientEmail = client.email
+        recipientEmail = clientEmail
         break
 
       case 'trainer_notification':
@@ -142,7 +154,7 @@ serve(async (req) => {
           : notificationType === 'cancellation'
           ? `Discovery call cancelled by ${clientName}`
           : `Discovery call rescheduled by ${clientName}`
-        recipientEmail = trainer.email
+        recipientEmail = trainerEmail
         break
 
       default:

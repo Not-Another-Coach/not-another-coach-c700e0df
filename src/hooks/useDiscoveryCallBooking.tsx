@@ -181,6 +181,40 @@ export function useDiscoveryCallBooking() {
         return null;
       }
 
+      // Update shortlisted trainer record to mark discovery call as booked
+      try {
+        await supabase
+          .from('shortlisted_trainers')
+          .update({
+            discovery_call_booked_at: new Date().toISOString()
+          })
+          .eq('trainer_id', trainerId)
+          .eq('user_id', user.id);
+      } catch (updateError) {
+        console.error('Error updating shortlisted trainer record:', updateError);
+      }
+
+      // Create activity alert for trainer
+      try {
+        await supabase
+          .from('alerts')
+          .insert({
+            alert_type: 'discovery_call_booked',
+            title: 'New Discovery Call Booked!',
+            content: `A client has booked a discovery call for ${selectedDateTime.toLocaleDateString()} at ${selectedDateTime.toLocaleTimeString()}`,
+            created_by: trainerId,
+            target_audience: { trainers: true },
+            metadata: {
+              client_id: user.id,
+              discovery_call_id: data.id,
+              scheduled_for: selectedDateTime.toISOString()
+            },
+            is_active: true
+          });
+      } catch (alertError) {
+        console.error('Error creating activity alert:', alertError);
+      }
+
       // Send confirmation emails in the background
       try {
         // Send confirmation email to client
