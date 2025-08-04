@@ -66,6 +66,7 @@ export const ProfilePreviewModal: React.FC<ProfilePreviewModalProps> = ({
           <TieredTrainerProfile
             trainer={trainer}
             className="border rounded-lg"
+            previewStage={stage}
           />
         </div>
       </DialogContent>

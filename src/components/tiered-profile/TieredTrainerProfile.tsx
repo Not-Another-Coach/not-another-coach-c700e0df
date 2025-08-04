@@ -4,9 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Heart, MessageCircle, Calendar, Lock, Star, MapPin, Clock, Award } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useEngagementStage } from '@/hooks/useEngagementStage';
+import { useEngagementStage, EngagementStage } from '@/hooks/useEngagementStage';
 import { useProfile } from '@/hooks/useProfile';
 import { useSavedTrainers } from '@/hooks/useSavedTrainers';
+import { useContentVisibility } from '@/hooks/useContentVisibility';
 import { HeroBlock } from './blocks/HeroBlock';
 import { MiniBioBlock } from './blocks/MiniBioBlock';
 import { SpecialismsBlock } from './blocks/SpecialismsBlock';
@@ -22,16 +23,38 @@ interface TieredTrainerProfileProps {
   onViewProfile?: () => void;
   onMessage?: () => void;
   className?: string;
+  previewStage?: EngagementStage; // For preview mode
 }
 
 export const TieredTrainerProfile = ({ 
   trainer, 
   onViewProfile, 
   onMessage,
-  className 
+  className,
+  previewStage
 }: TieredTrainerProfileProps) => {
   const { profile } = useProfile();
-  const { stage, updateEngagementStage, canViewContent, loading } = useEngagementStage(trainer.id);
+  const { stage: dbStage, updateEngagementStage, canViewContent: dbCanViewContent, loading } = useEngagementStage(trainer.id);
+  
+  // Use preview stage if provided, otherwise use database stage
+  const stage = previewStage || dbStage;
+  
+  // Use content visibility with the current stage (preview or actual)
+  const { canViewContent: previewCanViewContent } = useContentVisibility({
+    trainerId: trainer.id,
+    engagementStage: stage
+  });
+  
+  // Create a unified canViewContent function that works for both preview and normal mode
+  const canViewContent = previewStage 
+    ? (requiredStage: EngagementStage) => {
+        // In preview mode, check if current stage meets the requirement
+        const stageOrder: EngagementStage[] = ['browsing', 'liked', 'matched', 'discovery_completed', 'active_client'];
+        const currentIndex = stageOrder.indexOf(stage);
+        const requiredIndex = stageOrder.indexOf(requiredStage);
+        return currentIndex >= requiredIndex;
+      }
+    : dbCanViewContent;
   const { savedTrainers, saveTrainer, unsaveTrainer, isTrainerSaved } = useSavedTrainers();
   const [isUpdatingStage, setIsUpdatingStage] = useState(false);
 
