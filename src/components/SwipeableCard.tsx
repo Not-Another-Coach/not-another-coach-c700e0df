@@ -108,17 +108,26 @@ export const SwipeableCard = ({ trainer, onSwipe, matchScore = 0, matchReasons =
           </div>
         </motion.div>
 
-        {/* Like Button */}
+        {/* Like Button - Heart in top left */}
         <Button
           variant="ghost"
           size="sm"
-          className="absolute top-6 left-6 z-20 bg-white/80 backdrop-blur hover:bg-white/90"
-          onClick={(e) => {
-            e.stopPropagation();
-            onSwipe('right', trainer);
-          }}
+          className={cn(
+            "absolute top-4 left-4 z-20 rounded-full w-12 h-12 p-0",
+            "bg-white/90 backdrop-blur shadow-sm border border-white/20",
+            "hover:bg-red-50 hover:border-red-200 transition-all duration-200",
+            isSaved ? "bg-red-50 border-red-200" : ""
+          )}
+          onClick={handleToggleSave}
         >
-          <Heart className="h-4 w-4 text-red-500 hover:fill-red-500 transition-colors" />
+          <Heart 
+            className={cn(
+              "h-5 w-5 transition-all duration-200",
+              isSaved 
+                ? "text-red-500 fill-red-500" 
+                : "text-red-400 hover:text-red-500 hover:fill-red-500"
+            )} 
+          />
         </Button>
 
         {/* Match Badge */}

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { MapPin, Star, Heart, MessageCircle, User } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useSavedTrainers } from '@/hooks/useSavedTrainers';
 
 interface UnmatchedTrainer {
   id: string;
@@ -91,24 +92,17 @@ export function UnmatchedTrainers({ profile }: UnmatchedTrainersProps) {
     fetchUnmatchedTrainers();
   }, [user]);
 
+  const { saveTrainer } = useSavedTrainers();
+
   const handleLikeTrainer = async (trainerId: string) => {
     if (!user) return;
 
     try {
-      // Create engagement record with 'liked' stage
-      const { error } = await supabase.rpc('update_engagement_stage', {
-        client_uuid: user.id,
-        trainer_uuid: trainerId,
-        new_stage: 'liked'
-      });
-
-      if (error) {
-        console.error('Error liking trainer:', error);
-        return;
+      const success = await saveTrainer(trainerId);
+      if (success) {
+        // Remove trainer from unmatched list
+        setTrainers(prev => prev.filter(t => t.id !== trainerId));
       }
-
-      // Remove trainer from unmatched list
-      setTrainers(prev => prev.filter(t => t.id !== trainerId));
     } catch (error) {
       console.error('Error liking trainer:', error);
     }
