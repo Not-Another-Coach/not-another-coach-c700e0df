@@ -108,18 +108,17 @@ export const SwipeableCard = ({ trainer, onSwipe, matchScore = 0, matchReasons =
           </div>
         </motion.div>
 
-        {/* Save Button */}
+        {/* Like Button */}
         <Button
           variant="ghost"
           size="sm"
           className="absolute top-6 left-6 z-20 bg-white/80 backdrop-blur hover:bg-white/90"
-          onClick={handleToggleSave}
+          onClick={(e) => {
+            e.stopPropagation();
+            onSwipe('right', trainer);
+          }}
         >
-          {isSaved ? (
-            <BookmarkCheck className="h-4 w-4 text-blue-500" />
-          ) : (
-            <Bookmark className="h-4 w-4 text-gray-500" />
-          )}
+          <Heart className="h-4 w-4 text-red-500 hover:fill-red-500 transition-colors" />
         </Button>
 
         {/* Match Badge */}
