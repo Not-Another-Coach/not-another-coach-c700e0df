@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useSavedTrainers } from "@/hooks/useSavedTrainers";
+import { useUserRoles } from "@/hooks/useUserRoles";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -18,12 +19,13 @@ import { ClientSurveyWidget } from "@/components/dashboard/ClientSurveyWidget";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { ClientJourneyBreadcrumb } from "@/components/ClientJourneyBreadcrumb";
 import { useClientJourneyProgress } from "@/hooks/useClientJourneyProgress";
-import { Heart, Settings, Search, MessageCircle, Menu, Users, Shuffle } from "lucide-react";
+import { Heart, Settings, Search, MessageCircle, Menu, Users, Shuffle, Shield } from "lucide-react";
 
 export default function ClientDashboard() {
   const { user, signOut, loading } = useAuth();
   const { profile, loading: profileLoading, isClient, isTrainer } = useProfile();
   const { savedTrainerIds } = useSavedTrainers();
+  const { isAdmin } = useUserRoles();
   const { progress: journeyProgress, loading: journeyLoading } = useClientJourneyProgress();
   const navigate = useNavigate();
   const location = useLocation();
@@ -85,6 +87,18 @@ export default function ClientDashboard() {
             <h1 className="text-xl font-bold">Your Fitness Journey</h1>
           </div>
           <div className="flex items-center gap-3">
+            {isAdmin && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate('/admin/dashboard')}
+                className="flex items-center gap-2"
+              >
+                <Shield className="w-4 h-4" />
+                Admin
+              </Button>
+            )}
+            
             <Button 
               variant="outline" 
               size="sm"
