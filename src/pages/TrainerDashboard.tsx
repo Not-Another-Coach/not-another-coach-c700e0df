@@ -9,6 +9,7 @@ import { useWaitlist } from "@/hooks/useWaitlist";
 import { AvailabilitySettings } from "@/components/coach/AvailabilitySettings";
 import { WaitlistManagement } from "@/components/coach/WaitlistManagement";
 import { ActiveClientsSection } from "@/components/coach/ActiveClientsSection";
+import { ProspectsSection } from "@/components/coach/ProspectsSection";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -272,8 +273,9 @@ const TrainerDashboard = () => {
 
       <div className="max-w-7xl mx-auto px-6 py-8">
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview">Dashboard</TabsTrigger>
+            <TabsTrigger value="prospects">Prospects</TabsTrigger>
             <TabsTrigger value="waitlist">Waitlist ({waitlistEntries?.length || 0})</TabsTrigger>
             <TabsTrigger value="clients">Active Clients</TabsTrigger>
           </TabsList>
@@ -679,6 +681,10 @@ const TrainerDashboard = () => {
             </CardContent>
           </Card>
         )}
+          </TabsContent>
+          
+          <TabsContent value="prospects" className="mt-6">
+            <ProspectsSection />
           </TabsContent>
           
           <TabsContent value="waitlist" className="mt-6">
