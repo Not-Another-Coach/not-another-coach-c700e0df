@@ -14,7 +14,7 @@ import { ExploreMatchSection } from "@/components/dashboard/ExploreMatchSection"
 import { MessagesSection } from "@/components/dashboard/MessagesSection";
 import { UnmatchedTrainers } from "@/components/dashboard/UnmatchedTrainers";
 import { SwipeResultsSection } from "@/components/dashboard/SwipeResultsSection";
-import { InlineSurveyEditor } from "@/components/dashboard/InlineSurveyEditor";
+import { ClientSurveyWidget } from "@/components/dashboard/ClientSurveyWidget";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { ClientJourneyBreadcrumb } from "@/components/ClientJourneyBreadcrumb";
 import { useClientJourneyProgress } from "@/hooks/useClientJourneyProgress";
@@ -172,7 +172,7 @@ export default function ClientDashboard() {
           </TabsContent>
 
           <TabsContent value="preferences" className="space-y-6">
-            <InlineSurveyEditor profile={profile} />
+            <ClientSurveyWidget profile={profile} />
           </TabsContent>
 
           <TabsContent value="explore" className="space-y-6">

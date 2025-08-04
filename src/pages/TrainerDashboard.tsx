@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useCoachAnalytics } from "@/hooks/useCoachAnalytics";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
-import { RoleSwitcher } from "@/components/RoleSwitcher";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -125,7 +125,6 @@ const TrainerDashboard = () => {
           <h1 className="text-xl font-bold">PT Dashboard</h1>
         </div>
         <div className="flex items-center gap-3">
-          <RoleSwitcher />
           {profile && (
             <ProfileDropdown 
               profile={profile} 
