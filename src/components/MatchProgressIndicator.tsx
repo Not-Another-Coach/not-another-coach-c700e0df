@@ -162,22 +162,6 @@ export const MatchProgressIndicator = ({
             </div>
           </div>
         )}
-
-        {/* Next Action */}
-        {!hasScheduledCall && (
-          <div className="mt-2 pt-2 border-t border-border/50">
-            <div className="flex items-center gap-1 text-xs text-primary">
-              <Zap className="h-3 w-3" />
-              <span className="font-medium">
-                {!isShortlisted ? "Save to shortlist" :
-                 !hasContacted ? "Send message" :
-                 !hasScheduledCall ? "Schedule discovery call" :
-                 "Book trial session"}
-              </span>
-              <ArrowRight className="h-3 w-3" />
-            </div>
-          </div>
-        )}
       </CardContent>
     </Card>
   );
