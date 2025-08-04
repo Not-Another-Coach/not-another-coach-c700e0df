@@ -36,16 +36,25 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
 
   useEffect(() => {
     if (profile?.id) {
+      console.log('Profile loaded, fetching prospects for trainer:', profile.id);
       fetchProspects();
+    } else {
+      console.log('No profile ID available');
+      setLoading(false);
     }
   }, [profile?.id]);
 
   const fetchProspects = async () => {
-    if (!profile?.id) return;
+    if (!profile?.id) {
+      console.log('No profile ID for fetching prospects');
+      setLoading(false);
+      return;
+    }
+
+    console.log('Starting to fetch prospects for trainer:', profile.id);
+    setLoading(true);
 
     try {
-      console.log('Fetching prospects for trainer:', profile.id);
-      
       // Get shortlisted clients for this trainer
       const { data: shortlistedData, error: shortlistedError } = await supabase
         .from('shortlisted_trainers')
@@ -53,22 +62,28 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
         .eq('trainer_id', profile.id.toString())
         .order('shortlisted_at', { ascending: false });
 
-      console.log('Shortlisted data for trainer:', shortlistedData, 'Error:', shortlistedError);
+      console.log('Raw shortlisted data:', shortlistedData);
+      console.log('Shortlisted error:', shortlistedError);
 
       if (shortlistedError) {
         console.error('Error fetching shortlisted clients:', shortlistedError);
-        return;
-      }
-
-      if (!shortlistedData || shortlistedData.length === 0) {
-        console.log('No shortlisted data found for trainer:', profile.id);
         setProspects([]);
         onCountChange?.(0);
         return;
       }
 
+      if (!shortlistedData || shortlistedData.length === 0) {
+        console.log('No shortlisted clients found for trainer:', profile.id);
+        setProspects([]);
+        onCountChange?.(0);
+        return;
+      }
+
+      console.log('Found shortlisted clients:', shortlistedData.length);
+
       // Get client profiles and engagement stages
       const clientIds = shortlistedData.map(item => item.user_id);
+      console.log('Client IDs to fetch:', clientIds);
       
       const [profilesResult, engagementResult] = await Promise.all([
         supabase
@@ -85,9 +100,11 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
       const { data: profilesData, error: profilesError } = profilesResult;
       const { data: engagementData, error: engagementError } = engagementResult;
 
+      console.log('Profiles data:', profilesData);
+      console.log('Engagement data:', engagementData);
+
       if (profilesError) {
         console.error('Error fetching profiles:', profilesError);
-        return;
       }
 
       if (engagementError) {
@@ -100,6 +117,8 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
         return !engagement || engagement.stage !== 'active_client';
       });
 
+      console.log('Filtered shortlisted clients:', filteredShortlisted.length);
+
       // Merge the data
       const mergedData = filteredShortlisted.map(shortlisted => ({
         ...shortlisted,
@@ -107,10 +126,14 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
         engagement_stage: engagementData?.find(eng => eng.client_id === shortlisted.user_id)?.stage || 'browsing'
       }));
 
+      console.log('Final merged prospects data:', mergedData);
+
       setProspects(mergedData as Prospect[]);
       onCountChange?.(mergedData.length);
     } catch (error) {
-      console.error('Error fetching prospects:', error);
+      console.error('Error in fetchProspects:', error);
+      setProspects([]);
+      onCountChange?.(0);
     } finally {
       setLoading(false);
     }
