@@ -806,99 +806,100 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
           )}
         </TabsContent>
 
-        {/* Discover Tab - Discovery functionality without nested tabs */}
+        {/* Discover Tab - Discovery functionality using TrainerCard layout */}
         <TabsContent value="discover" className="space-y-6">
-          <div className="space-y-6">
-            {/* Discovery Opportunities */}
-            <div className="flex items-center justify-between">
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
               <h2 className="text-xl font-semibold">Discovery Opportunities</h2>
               <Badge variant="outline">{actualShortlistedTrainers.length} available</Badge>
             </div>
             
             {actualShortlistedTrainers.length > 0 ? (
-              <div className="grid md:grid-cols-2 gap-6">
-                {actualShortlistedTrainers.map((shortlisted) => {
-                  // Find the trainer data from our matched trainers
-                  const trainerMatch = matchedTrainers.find(match => match.trainer.id === shortlisted.trainer_id);
-                  const trainer = trainerMatch?.trainer || {
-                    id: shortlisted.trainer_id,
-                    name: `Trainer ${shortlisted.trainer_id}`,
-                    specialties: [],
-                    rating: 0,
-                    reviews: 0,
-                    experience: '',
-                    location: '',
-                    hourlyRate: 0,
-                    image: '',
-                    certifications: [],
-                    description: '',
-                    availability: '',
-                    trainingType: []
-                  };
-                  
-                  return (
-                    <Card key={shortlisted.trainer_id} className="border-l-4 border-l-primary">
-                      <CardHeader>
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <CardTitle>Trainer #{shortlisted.trainer_id}</CardTitle>
-                            <p className="text-sm text-muted-foreground">
-                              Shortlisted {new Date(shortlisted.shortlisted_at).toLocaleDateString()}
-                            </p>
-                          </div>
+              <div className="space-y-4">
+                <div className="text-sm text-muted-foreground">
+                  Chat with your shortlisted trainers and book discovery calls to learn more about their approach.
+                </div>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {actualShortlistedTrainers.map((shortlisted) => {
+                    // Find the trainer data from our matched trainers
+                    const trainerMatch = matchedTrainers.find(match => match.trainer.id === shortlisted.trainer_id);
+                    const trainer = trainerMatch?.trainer || {
+                      id: shortlisted.trainer_id,
+                      name: `Trainer ${shortlisted.trainer_id}`,
+                      specialties: [],
+                      rating: 0,
+                      reviews: 0,
+                      experience: '',
+                      location: '',
+                      hourlyRate: 0,
+                      image: '',
+                      certifications: [],
+                      description: '',
+                      availability: '',
+                      trainingType: []
+                    };
+                    
+                    return (
+                      <div key={shortlisted.trainer_id} className="relative">
+                        <TrainerCard
+                          trainer={trainer}
+                          onViewProfile={handleViewProfile}
+                          matchScore={trainerMatch?.score || 0}
+                          matchReasons={trainerMatch?.matchReasons || []}
+                          matchDetails={trainerMatch?.matchDetails || []}
+                        />
+                        <Badge 
+                          className="absolute top-2 right-2 bg-blue-500 text-white z-10"
+                        >
+                          🔍 Discovery
+                        </Badge>
+                        
+                        {/* Action Buttons for Discovery */}
+                        <div className="mt-4 grid grid-cols-3 gap-2">
                           <Button 
                             size="sm" 
-                            variant="outline"
-                            onClick={() => handleRemoveFromShortlist(shortlisted.trainer_id, trainer.name)}
+                            variant="outline" 
+                            className="flex items-center gap-1 text-xs"
+                            onClick={() => handleViewProfile(shortlisted.trainer_id)}
                           >
-                            <X className="h-4 w-4" />
+                            View Profile
                           </Button>
+                          <Button 
+                            size="sm" 
+                            variant="default" 
+                            className="flex items-center gap-1 text-xs"
+                            onClick={() => handleMessage(shortlisted.trainer_id)}
+                          >
+                            <MessageCircle className="h-3 w-3" />
+                            Chat
+                          </Button>
+                          {shortlisted.discovery_call ? (
+                            <EditDiscoveryCallButton
+                              discoveryCall={shortlisted.discovery_call}
+                              trainer={{
+                                id: shortlisted.trainer_id,
+                                name: trainer.name
+                              }}
+                              size="sm"
+                              variant="outline"
+                              className="text-xs"
+                            />
+                          ) : (
+                            <BookDiscoveryCallButton
+                              trainer={{
+                                id: shortlisted.trainer_id,
+                                name: trainer.name
+                              }}
+                              size="sm"
+                              variant="outline"
+                              className="text-xs"
+                            />
+                          )}
                         </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          <div className="flex gap-2">
-                            <Badge variant="default" className="bg-green-100 text-green-800">
-                              Chat Enabled
-                            </Badge>
-                            <Badge variant="default" className="bg-blue-100 text-blue-800">
-                              Discovery Call Available
-                            </Badge>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-2">
-                            <Button variant="outline" size="sm" onClick={() => handleMessage(shortlisted.trainer_id)}>
-                              <MessageCircle className="h-4 w-4 mr-2" />
-                              Chat
-                            </Button>
-                            {shortlisted.discovery_call ? (
-                              <EditDiscoveryCallButton
-                                discoveryCall={shortlisted.discovery_call}
-                                trainer={{
-                                  id: shortlisted.trainer_id,
-                                  name: trainer.name
-                                }}
-                                size="sm"
-                                variant="outline"
-                                className="text-xs"
-                              />
-                            ) : (
-                              <BookDiscoveryCallButton
-                                trainer={{
-                                  id: shortlisted.trainer_id,
-                                  name: trainer.name
-                                }}
-                                size="sm"
-                                variant="outline"
-                                className="text-xs"
-                              />
-                            )}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             ) : (
               <Card>
