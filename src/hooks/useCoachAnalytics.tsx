@@ -65,24 +65,25 @@ export function useCoachAnalytics(trainerId?: string) {
     if (!user || !trainerId) return;
 
     try {
-      // Get clients who have shortlisted this trainer
-      const { data: shortlistData, error: shortlistError } = await supabase
-        .from('shortlisted_trainers')
-        .select('user_id, discovery_call_booked_at')
-        .eq('trainer_id', trainerId);
+      // Get clients who have shortlisted this trainer from the engagement table
+      const { data: engagementData, error: engagementError } = await supabase
+        .from('client_trainer_engagement')
+        .select('client_id, created_at')
+        .eq('trainer_id', trainerId)
+        .eq('stage', 'shortlisted');
 
-      if (shortlistError) {
-        console.error('Error fetching shortlisted clients:', shortlistError);
+      if (engagementError) {
+        console.error('Error fetching shortlisted clients:', engagementError);
         return;
       }
 
-      if (!shortlistData || shortlistData.length === 0) {
+      if (!engagementData || engagementData.length === 0) {
         setShortlistedClients([]);
         return;
       }
 
       // Get limited client info for those who shortlisted (excluding identity info)
-      const clientIds = shortlistData.map(s => s.user_id);
+      const clientIds = engagementData.map(e => e.client_id);
       const { data: clientData, error: clientError } = await supabase
         .from('profiles')
         .select(`
@@ -105,12 +106,19 @@ export function useCoachAnalytics(trainerId?: string) {
         return;
       }
 
+      // Check for discovery calls
+      const { data: discoveryCallData } = await supabase
+        .from('discovery_calls')
+        .select('client_id')
+        .eq('trainer_id', trainerId)
+        .in('client_id', clientIds);
+
       // Combine with discovery call info
       const enrichedClients = clientData?.map(client => {
-        const shortlistInfo = shortlistData.find(s => s.user_id === client.id);
+        const hasDiscoveryCall = discoveryCallData?.some(dc => dc.client_id === client.id);
         return {
           ...client,
-          discovery_call_booked: !!shortlistInfo?.discovery_call_booked_at
+          discovery_call_booked: hasDiscoveryCall
         };
       }) || [];
 

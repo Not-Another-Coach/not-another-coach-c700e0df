@@ -15,9 +15,12 @@ export type VisibilityState = 'hidden' | 'blurred' | 'visible';
 export type EngagementStage = 
   | 'browsing' 
   | 'liked' 
+  | 'shortlisted'
   | 'matched' 
   | 'discovery_completed' 
-  | 'active_client';
+  | 'active_client'
+  | 'unmatched'
+  | 'declined';
 
 interface VisibilityMatrixHook {
   getContentVisibility: (

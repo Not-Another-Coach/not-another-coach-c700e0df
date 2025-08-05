@@ -21,9 +21,12 @@ const contentTypeLabels: Record<ContentType, string> = {
 const engagementStageLabels: Record<EngagementStage, string> = {
   browsing: 'Browsing',
   liked: 'Liked',
+  shortlisted: 'Shortlisted',
   matched: 'Matched',
   discovery_completed: 'Discovery Done',
-  active_client: 'Active Client'
+  active_client: 'Active Client',
+  unmatched: 'Unmatched',
+  declined: 'Declined'
 };
 
 const visibilityStateLabels: Record<VisibilityState, { label: string; icon: any; color: string }> = {
@@ -51,6 +54,7 @@ export const VisibilitySettingsSection = () => {
   const engagementStages: EngagementStage[] = [
     'browsing', 
     'liked', 
+    'shortlisted',
     'matched', 
     'discovery_completed', 
     'active_client'

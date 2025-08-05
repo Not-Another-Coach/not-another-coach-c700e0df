@@ -16,7 +16,7 @@ interface Prospect {
   stage: string;
   created_at: string;
   notes?: string;
-  user_id?: string; // For compatibility with MessagingPopup
+  user_id: string; // For compatibility with MessagingPopup
   client_profile?: {
     first_name?: string;
     last_name?: string;

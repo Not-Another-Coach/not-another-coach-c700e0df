@@ -22,6 +22,11 @@ const stageLabels: Record<EngagementStage, { label: string; description: string;
     description: 'How your profile appears after a client likes you',
     color: 'bg-purple-100 text-purple-800'
   },
+  shortlisted: { 
+    label: 'Shortlisted Stage', 
+    description: 'How your profile appears when a client shortlists you',
+    color: 'bg-indigo-100 text-indigo-800'
+  },
   matched: { 
     label: 'Matched Stage', 
     description: 'How your profile appears when you match with a client',
@@ -36,6 +41,16 @@ const stageLabels: Record<EngagementStage, { label: string; description: string;
     label: 'Active Client', 
     description: 'How your profile appears to your active clients',
     color: 'bg-emerald-100 text-emerald-800'
+  },
+  unmatched: { 
+    label: 'Unmatched Stage', 
+    description: 'How your profile appears after an unmatch',
+    color: 'bg-gray-100 text-gray-800'
+  },
+  declined: { 
+    label: 'Declined Stage', 
+    description: 'How your profile appears after being declined',
+    color: 'bg-red-100 text-red-800'
   }
 };
 

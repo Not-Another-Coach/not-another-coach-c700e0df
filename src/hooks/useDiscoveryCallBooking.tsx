@@ -182,17 +182,15 @@ export function useDiscoveryCallBooking() {
         return null;
       }
 
-      // Update shortlisted trainer record to mark discovery call as booked
+      // Update engagement stage to indicate discovery call is booked
       try {
-        await supabase
-          .from('shortlisted_trainers')
-          .update({
-            discovery_call_booked_at: new Date().toISOString()
-          })
-          .eq('trainer_id', trainerId)
-          .eq('user_id', user.id);
+        await supabase.rpc('update_engagement_stage', {
+          client_uuid: user.id,
+          trainer_uuid: trainerId,
+          new_stage: 'matched'
+        });
       } catch (updateError) {
-        console.error('Error updating shortlisted trainer record:', updateError);
+        console.error('Error updating engagement stage:', updateError);
       }
 
       // Create activity alert for trainer (skip if this is a reschedule)
