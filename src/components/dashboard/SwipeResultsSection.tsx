@@ -128,6 +128,12 @@ export function SwipeResultsSection({ profile }: SwipeResultsSectionProps) {
   const shortlistedOnly = shortlistedTrainers.filter(trainer => {
     const hasBookedCall = trainer.discovery_call_booked_at !== null;
     const hasScheduledCall = completedDiscoveryCalls.some(call => call.trainer_id === trainer.trainer_id);
+    console.log(`Trainer ${trainer.trainer_id}:`, {
+      discovery_call_booked_at: trainer.discovery_call_booked_at,
+      hasBookedCall,
+      hasScheduledCall,
+      shouldBeInShortlisted: !hasBookedCall && !hasScheduledCall
+    });
     return !hasBookedCall && !hasScheduledCall;
   });
   
@@ -145,6 +151,9 @@ export function SwipeResultsSection({ profile }: SwipeResultsSectionProps) {
       callStatus: discoveryCall ? discoveryCall.status : 'scheduled'
     };
   });
+  
+  console.log('Shortlisted only count:', shortlistedOnly.length);
+  console.log('Discovery booked/completed count:', discoveryBookedOrCompleted.length);
 
   const handleChooseCoach = async (trainerId: string) => {
     // TODO: Implement coach selection logic
