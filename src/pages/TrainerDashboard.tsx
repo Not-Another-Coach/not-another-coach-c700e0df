@@ -10,6 +10,7 @@ import { AvailabilitySettings } from "@/components/coach/AvailabilitySettings";
 import { WaitlistManagement } from "@/components/coach/WaitlistManagement";
 import { CoachFeedbackSummary } from "@/components/coach/CoachFeedbackSummary";
 import { ActiveClientsSection } from "@/components/coach/ActiveClientsSection";
+import { CoachSelectionRequests } from "@/components/coach-selection/CoachSelectionRequests";
 import { ProspectsSection } from "@/components/coach/ProspectsSection";
 import { FloatingMessageButton } from "@/components/FloatingMessageButton";
 import { LiveActivityFeed } from "@/components/dashboard/LiveActivityFeed";
@@ -611,7 +612,10 @@ const TrainerDashboard = () => {
           </TabsContent>
           
           <TabsContent value="prospects" className="mt-6">
-            <ProspectsSection onCountChange={setProspectsCount} />
+            <div className="space-y-6">
+              <CoachSelectionRequests />
+              <ProspectsSection onCountChange={setProspectsCount} />
+            </div>
           </TabsContent>
           
           <TabsContent value="waitlist" className="mt-6">
