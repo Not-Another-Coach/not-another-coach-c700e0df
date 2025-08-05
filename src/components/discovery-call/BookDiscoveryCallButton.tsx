@@ -34,7 +34,7 @@ export const BookDiscoveryCallButton = ({
   };
 
   // Don't render if trainer doesn't offer discovery calls
-  if (trainer.offers_discovery_call === false) {
+  if (!trainer.offers_discovery_call) {
     return null;
   }
 
