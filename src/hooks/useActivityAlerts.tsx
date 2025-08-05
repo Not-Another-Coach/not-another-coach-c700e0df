@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { useProfile } from './useProfile';
 
 interface ActivityAlert {
   id: string;
@@ -17,6 +18,7 @@ export function useActivityAlerts() {
   const [alerts, setAlerts] = useState<ActivityAlert[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+  const { profile } = useProfile();
 
   useEffect(() => {
     if (user) {
@@ -81,17 +83,27 @@ export function useActivityAlerts() {
         return;
       }
 
-      // Transform alerts data
-      const transformedAlerts: ActivityAlert[] = (alertsData || []).map(alert => ({
-        id: alert.id,
-        type: alert.alert_type as any,
-        title: alert.title,
-        description: alert.content,
-        metadata: alert.metadata,
-        created_at: alert.created_at,
-        icon: getIconForType(alert.alert_type),
-        color: getColorForType(alert.alert_type)
-      }));
+      // Transform alerts data and filter based on user type
+      const transformedAlerts: ActivityAlert[] = (alertsData || [])
+        .filter(alert => {
+          // Filter out discovery call alerts for clients
+          if (profile?.user_type === 'client') {
+            const discoveryCallTypes = ['discovery_call_booked', 'discovery_call_cancelled', 'discovery_call_rescheduled'];
+            return !discoveryCallTypes.includes(alert.alert_type);
+          }
+          // Show all alerts for trainers and other user types
+          return true;
+        })
+        .map(alert => ({
+          id: alert.id,
+          type: alert.alert_type as any,
+          title: alert.title,
+          description: alert.content,
+          metadata: alert.metadata,
+          created_at: alert.created_at,
+          icon: getIconForType(alert.alert_type),
+          color: getColorForType(alert.alert_type)
+        }));
 
       setAlerts(transformedAlerts);
     } catch (error) {
