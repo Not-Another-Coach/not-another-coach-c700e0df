@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Loader2, Save, Check, StickyNote, X } from 'lucide-react';
+import { Loader2, Save, Check, StickyNote } from 'lucide-react';
 import { useDiscoveryCallNotes } from '@/hooks/useDiscoveryCallNotes';
 import { useProfile } from '@/hooks/useProfile';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 interface DiscoveryCallNotesTakerProps {
   clientId: string;
@@ -109,10 +110,14 @@ export function DiscoveryCallNotesTaker({
                 </span>
               </div>
               {hasContent && (
-                <div className="text-xs text-muted-foreground max-w-full break-words whitespace-pre-wrap">
-                  {content.trim().length > 500 
-                    ? `${content.trim().substring(0, 500)}...` 
-                    : content.trim()}
+                <div className="text-xs text-muted-foreground overflow-hidden break-all whitespace-pre-wrap" style={{ wordWrap: 'break-word', overflowWrap: 'anywhere' }}>
+                  {/* Strip HTML tags for preview and show plain text */}
+                  {(() => {
+                    const plainText = content.replace(/<[^>]*>/g, '').trim();
+                    return plainText.length > 500 
+                      ? `${plainText.substring(0, 500)}...` 
+                      : plainText;
+                  })()}
                 </div>
               )}
             </div>
@@ -153,17 +158,33 @@ export function DiscoveryCallNotesTaker({
               )}
             </div>
             
-            <Textarea
-              value={content}
-              onChange={(e) => handleContentChange(e.target.value)}
-              placeholder="Add your private notes about this client's goals, preferences, concerns, or any observations from your conversation..."
-              className="min-h-[300px] resize-none"
-              disabled={saving}
-            />
-            
-            <p className="text-xs text-muted-foreground">
-              These notes are private and only visible to you. Auto-saves after 2 seconds of inactivity.
-            </p>
+            <div className="flex-1 flex flex-col gap-4">
+              <ReactQuill
+                value={content}
+                onChange={handleContentChange}
+                placeholder="Add your private notes about this client's goals, preferences, concerns, or any observations from your conversation..."
+                style={{ height: '300px' }}
+                modules={{
+                  toolbar: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    [{ 'color': [] }, { 'background': [] }],
+                    ['clean']
+                  ],
+                }}
+                formats={[
+                  'header', 'bold', 'italic', 'underline', 'strike',
+                  'list', 'bullet', 'color', 'background'
+                ]}
+              />
+              
+              <div className="mt-12"> {/* Add margin to account for editor height */}
+                <p className="text-xs text-muted-foreground">
+                  These notes are private and only visible to you. Auto-saves after 2 seconds of inactivity.
+                </p>
+              </div>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
