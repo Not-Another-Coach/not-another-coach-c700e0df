@@ -144,9 +144,9 @@ const TrainerDashboard = () => {
     
     // Map status to client_status enum
     const clientStatusMap = {
-      'accepting': 'open' as const,
-      'waitlist': 'waitlist' as const,
-      'unavailable': 'paused' as const
+      'accepting': 'onboarding' as const,
+      'waitlist': 'browsing' as const,
+      'unavailable': 'decision_pending' as const
     };
     
     const result = await updateProfile({ client_status: clientStatusMap[status] });

@@ -26,7 +26,7 @@ interface Profile {
   training_types: string[] | null;
   terms_agreed: boolean | null;
   profile_setup_completed: boolean | null;
-  client_status: 'open' | 'waitlist' | 'paused' | null;
+  client_status: 'onboarding' | 'survey_completed' | 'browsing' | 'shortlisted' | 'discovery_booked' | 'decision_pending' | 'coach_selected' | null;
 }
 
 export function useProfile() {

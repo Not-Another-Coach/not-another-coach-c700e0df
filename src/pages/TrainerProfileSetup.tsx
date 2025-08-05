@@ -85,7 +85,7 @@ const TrainerProfileSetup = () => {
     ways_of_working_completed: false,
     
     // Profile Management
-    client_status: "open" as "open" | "waitlist" | "paused",
+    client_status: "onboarding" as "onboarding" | "survey_completed" | "browsing" | "shortlisted" | "discovery_booked" | "decision_pending" | "coach_selected",
     terms_agreed: false,
   });
 
@@ -132,7 +132,7 @@ const TrainerProfileSetup = () => {
         training_types: profile.training_types || [],
         location: profile.location || "",
         hourly_rate: profile.hourly_rate,
-        client_status: profile.client_status || "open",
+        client_status: profile.client_status || "onboarding",
         terms_agreed: profile.terms_agreed || false,
         // Initialize ways of working data from profile
         ways_of_working_onboarding: (profile as any).ways_of_working_onboarding || [],

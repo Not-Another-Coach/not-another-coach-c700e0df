@@ -44,8 +44,8 @@ export const TrainerProfilePreview = ({ formData }: TrainerProfilePreviewProps) 
                 <span className="text-sm text-muted-foreground">(23 reviews)</span>
               </div>
               <Badge variant="secondary" className="mb-2">
-                {formData.client_status === 'open' ? 'Accepting Clients' : 
-                 formData.client_status === 'waitlist' ? 'Waitlist Only' : 'Not Available'}
+                {formData.client_status === 'onboarding' ? 'Accepting Clients' : 
+                 formData.client_status === 'browsing' ? 'Waitlist Only' : 'Not Available'}
               </Badge>
             </div>
 
