@@ -91,7 +91,11 @@ export function useTrainerEngagement() {
   };
 
   const getShortlistedTrainers = () => {
-    return engagements.filter(e => e.stage === 'shortlisted' || e.stage === 'discovery_call_booked');
+    return engagements.filter(e => 
+      e.stage === 'shortlisted' || 
+      e.stage === 'discovery_call_booked' || 
+      e.stage === 'discovery_completed'
+    );
   };
 
   const getMatchedTrainers = () => {

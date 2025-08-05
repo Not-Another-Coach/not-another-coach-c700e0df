@@ -126,6 +126,11 @@ export function SwipeResultsSection({ profile }: SwipeResultsSectionProps) {
 
   console.log('shortlistedTrainers:', shortlistedTrainers);
   console.log('completedDiscoveryCalls:', completedDiscoveryCalls);
+  
+  // Debug: log each trainer and their stage
+  shortlistedTrainers.forEach(trainer => {
+    console.log(`DEBUG - Trainer ${trainer.trainer_id}: stage = ${trainer.stage}`);
+  });
 
   // Filter shortlisted trainers: those with 'shortlisted' stage go to shortlisted tab
   const shortlistedOnly = shortlistedTrainers.filter(trainer => {
