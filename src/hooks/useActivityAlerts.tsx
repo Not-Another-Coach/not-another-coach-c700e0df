@@ -21,6 +21,41 @@ export function useActivityAlerts() {
   useEffect(() => {
     if (user) {
       fetchAlerts();
+      
+      // Set up real-time subscription for alerts
+      const channel = supabase
+        .channel('alerts-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'alerts'
+          },
+          (payload) => {
+            console.log('New alert received:', payload);
+            // Refresh alerts when a new one is inserted
+            fetchAlerts();
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'alerts'
+          },
+          (payload) => {
+            console.log('Alert updated:', payload);
+            // Refresh alerts when one is updated
+            fetchAlerts();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
   }, [user]);
 
