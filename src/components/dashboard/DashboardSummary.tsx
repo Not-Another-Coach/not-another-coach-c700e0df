@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useEnhancedTrainerMatching } from "@/hooks/useEnhancedTrainerMatching";
 import { useSavedTrainers } from "@/hooks/useSavedTrainers";
 import { useRealTrainers } from "@/hooks/useRealTrainers";
+import { useActiveDiscoveryCallsCount } from "@/hooks/useActiveDiscoveryCallsCount";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -83,6 +84,7 @@ const sampleTrainers = [
 export function DashboardSummary({ profile, onTabChange }: DashboardSummaryProps) {
   const navigate = useNavigate();
   const { savedTrainerIds } = useSavedTrainers();
+  const { count: activeDiscoveryCallsCount } = useActiveDiscoveryCallsCount();
   
   // Use real trainers from database
   const { trainers: realTrainers, loading: trainersLoading } = useRealTrainers();
@@ -169,7 +171,7 @@ export function DashboardSummary({ profile, onTabChange }: DashboardSummaryProps
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-primary">0</div>
+            <div className="text-2xl font-bold text-primary">{activeDiscoveryCallsCount}</div>
             <p className="text-sm text-muted-foreground">Discovery Calls</p>
           </CardContent>
         </Card>
