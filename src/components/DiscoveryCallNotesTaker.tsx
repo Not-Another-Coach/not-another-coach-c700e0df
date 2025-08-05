@@ -1,12 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Loader2, Save, Check, StickyNote, ChevronDown, ChevronUp } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Loader2, Save, Check, StickyNote, X } from 'lucide-react';
 import { useDiscoveryCallNotes } from '@/hooks/useDiscoveryCallNotes';
 import { useProfile } from '@/hooks/useProfile';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface DiscoveryCallNotesTakerProps {
   clientId: string;
@@ -26,39 +25,14 @@ export function DiscoveryCallNotesTaker({
   const [content, setContent] = useState('');
   const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (note?.note_content) {
       setContent(note.note_content);
-      // If there's existing content, don't auto-expand
-      setIsExpanded(false);
     }
   }, [note]);
-
-  // Auto-resize textarea based on content
-  const adjustTextareaHeight = () => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      // Reset height to auto to get the correct scrollHeight
-      textarea.style.height = 'auto';
-      
-      // Calculate the new height based on content
-      const scrollHeight = textarea.scrollHeight;
-      const minHeight = compact ? 120 : 200; // minimum height in pixels
-      const maxHeight = 400; // maximum height in pixels
-      
-      // Set the height within our constraints
-      const newHeight = Math.min(Math.max(scrollHeight, minHeight), maxHeight);
-      textarea.style.height = `${newHeight}px`;
-    }
-  };
-
-  useEffect(() => {
-    adjustTextareaHeight();
-  }, [content, isExpanded, compact]);
 
   const handleContentChange = (value: string) => {
     setContent(value);
@@ -80,9 +54,6 @@ export function DiscoveryCallNotesTaker({
     }, 2000);
 
     setAutoSaveTimeout(timeout);
-    
-    // Adjust height after content change
-    setTimeout(adjustTextareaHeight, 0);
   };
 
   const formatLastSaved = (date: Date) => {
@@ -111,46 +82,53 @@ export function DiscoveryCallNotesTaker({
 
   if (loading) {
     return (
-      <Card className={className}>
-        <CardContent className="p-4 flex items-center justify-center">
-          <Loader2 className="h-4 w-4 animate-spin" />
-          <span className="ml-2 text-sm text-muted-foreground">Loading notes...</span>
-        </CardContent>
-      </Card>
+      <div className={className}>
+        <Button variant="ghost" size="sm" disabled>
+          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+          Loading notes...
+        </Button>
+      </div>
     );
   }
 
   return (
-    <Card className={className}>
-      <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
-        <CardHeader className={compact ? "pb-3" : ""}>
-          <div className="flex items-center justify-between">
-            <CollapsibleTrigger asChild>
-              <Button variant="ghost" className="p-0 h-auto justify-start">
-                <div className="flex items-center gap-2">
-                  <StickyNote className="h-4 w-4" />
-                  <span className={compact ? "text-base" : "text-lg"}>
-                    Notes
-                    {clientName && (
-                      <span className="text-sm font-normal text-muted-foreground ml-2">
-                        for {clientName}
-                      </span>
-                    )}
+    <div className={className}>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogTrigger asChild>
+          <Button variant="ghost" size="sm" className="h-auto py-2">
+            <div className="flex items-center gap-2">
+              <StickyNote className="h-4 w-4" />
+              <span className="text-sm">
+                Notes
+                {clientName && (
+                  <span className="font-normal text-muted-foreground ml-1">
+                    for {clientName}
                   </span>
-                  {hasContent && !isExpanded && (
-                    <Badge variant="outline" className="text-xs ml-2">
-                      {content.trim().length > 50 ? `${content.trim().substring(0, 50)}...` : content.trim()}
-                    </Badge>
-                  )}
-                  {isExpanded ? (
-                    <ChevronUp className="h-4 w-4 ml-1" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 ml-1" />
-                  )}
-                </div>
-              </Button>
-            </CollapsibleTrigger>
-            
+                )}
+              </span>
+              {hasContent && (
+                <Badge variant="outline" className="text-xs ml-2">
+                  {content.trim().length > 20 ? `${content.trim().substring(0, 20)}...` : content.trim()}
+                </Badge>
+              )}
+            </div>
+          </Button>
+        </DialogTrigger>
+        
+        <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <StickyNote className="h-5 w-5" />
+              Notes
+              {clientName && (
+                <span className="font-normal text-muted-foreground">
+                  for {clientName}
+                </span>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="flex-1 flex flex-col gap-4">
             <div className="flex items-center gap-2">
               {saving && (
                 <Badge variant="secondary" className="text-xs">
@@ -170,26 +148,21 @@ export function DiscoveryCallNotesTaker({
                 </Badge>
               )}
             </div>
-          </div>
-        </CardHeader>
-        
-        <CollapsibleContent>
-          <CardContent className={compact ? "pt-0" : ""}>
+            
             <Textarea
-              ref={textareaRef}
               value={content}
               onChange={(e) => handleContentChange(e.target.value)}
               placeholder="Add your private notes about this client's goals, preferences, concerns, or any observations from your conversation..."
-              className={`resize-none overflow-y-auto ${compact ? 'min-h-[120px]' : 'min-h-[200px]'} max-h-[400px]`}
+              className="min-h-[300px] resize-none"
               disabled={saving}
-              style={{ height: 'auto' }}
             />
-            <p className="text-xs text-muted-foreground mt-2">
+            
+            <p className="text-xs text-muted-foreground">
               These notes are private and only visible to you. Auto-saves after 2 seconds of inactivity.
             </p>
-          </CardContent>
-        </CollapsibleContent>
-      </Collapsible>
-    </Card>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }
