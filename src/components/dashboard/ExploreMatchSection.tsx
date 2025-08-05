@@ -163,110 +163,10 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
     clientSurveyData
   );
 
-  // Get saved trainers - fetch fresh data for any missing trainers
-  const [savedTrainersData, setSavedTrainersData] = useState([]);
-  const [loadingSavedTrainers, setLoadingSavedTrainers] = useState(false);
-
-  useEffect(() => {
-    const fetchSavedTrainersData = async () => {
-      if (savedTrainerIds.length === 0) {
-        setSavedTrainersData([]);
-        return;
-      }
-
-      setLoadingSavedTrainers(true);
-      try {
-        // Use a Map to ensure no duplicates
-        const savedTrainersMap = new Map();
-        
-        // First, add trainers from matchedTrainers that are saved
-        matchedTrainers.forEach(match => {
-          if (savedTrainerIds.includes(match.trainer.id) && !isShortlisted(match.trainer.id)) {
-            savedTrainersMap.set(match.trainer.id, match);
-          }
-        });
-        
-        // Find missing saved trainer IDs that aren't already in our map
-        const missingSavedIds = savedTrainerIds.filter(id => 
-          !savedTrainersMap.has(id) && !isShortlisted(id)
-        );
-        
-        // Fetch missing trainer data directly from database
-        if (missingSavedIds.length > 0) {
-          const { data: missingTrainers, error } = await supabase
-            .from('profiles')
-            .select(`
-              id,
-              first_name,
-              last_name,
-              bio,
-              location,
-              specializations,
-              qualifications,
-              hourly_rate,
-              rating,
-              total_ratings,
-              training_types,
-              profile_photo_url,
-              is_verified,
-              trainer_availability_settings!inner(offers_discovery_call)
-            `)
-            .in('id', missingSavedIds)
-            .eq('user_type', 'trainer')
-            .eq('profile_published', true);
-
-          if (!error && missingTrainers) {
-            missingTrainers.forEach(trainer => {
-              // Only add if not already in map
-              if (!savedTrainersMap.has(trainer.id)) {
-                // Transform database trainer to our format
-                const transformedTrainer = {
-                  id: trainer.id,
-                  name: `${trainer.first_name || ''} ${trainer.last_name || ''}`.trim() || 'Private Trainer',
-                  specialties: trainer.specializations || ['Personal Training'],
-                  rating: parseFloat(String(trainer.rating || '4.5')),
-                  reviews: trainer.total_ratings || 0,
-                  experience: '3+ years', // Default since not in DB
-                  location: trainer.location || 'Location TBD',
-                  hourlyRate: parseFloat(String(trainer.hourly_rate || '75')),
-                  image: trainer.profile_photo_url || '/placeholder.svg',
-                  certifications: trainer.qualifications || ['Certified Personal Trainer'],
-                  description: trainer.bio || 'Professional personal trainer ready to help you achieve your fitness goals.',
-                  availability: 'Flexible',
-                  trainingType: trainer.training_types || ['1-on-1', 'Virtual'],
-                  offers_discovery_call: trainer.trainer_availability_settings?.[0]?.offers_discovery_call || false
-                };
-
-                savedTrainersMap.set(trainer.id, {
-                  trainer: transformedTrainer,
-                  score: 85,
-                  matchReasons: ['Previously saved trainer', 'Good availability match'],
-                  matchDetails: []
-                });
-              }
-            });
-          }
-        }
-        
-        // Convert map values to array (ensures no duplicates)
-        setSavedTrainersData(Array.from(savedTrainersMap.values()));
-      } catch (error) {
-        console.error('Error fetching saved trainers:', error);
-        // Fallback to existing logic if database fetch fails - also ensure no duplicates
-        const fallbackMap = new Map();
-        matchedTrainers.forEach(match => {
-          if (savedTrainerIds.includes(match.trainer.id) && !isShortlisted(match.trainer.id)) {
-            fallbackMap.set(match.trainer.id, match);
-          }
-        });
-        setSavedTrainersData(Array.from(fallbackMap.values()));
-      } finally {
-        setLoadingSavedTrainers(false);
-      }
-    };
-
-    fetchSavedTrainersData();
-  }, [savedTrainerIds, matchedTrainers, isShortlisted]);
+  // Get saved trainers - simple approach using existing matched trainers + engagement status
+  const savedTrainers = matchedTrainers.filter(match => 
+    savedTrainerIds.includes(match.trainer.id) && !isShortlisted(match.trainer.id)
+  );
 
   // Get shortlisted trainers
   const shortlistedTrainers = matchedTrainers.filter(match => 
@@ -666,17 +566,9 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
               </Button>
             )}
           </div>
-          {loadingSavedTrainers ? (
+          {savedTrainers.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="animate-pulse">
-                  <div className="bg-muted rounded-lg h-80"></div>
-                </div>
-              ))}
-            </div>
-          ) : savedTrainersData.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {savedTrainersData.map((match) => (
+              {savedTrainers.map((match) => (
                 <div key={match.trainer.id} className="relative">
                   {/* Comparison Checkbox */}
                   <div className="absolute top-2 right-2 z-10">
