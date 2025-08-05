@@ -302,6 +302,36 @@ export type Database = {
         }
         Relationships: []
       }
+      discovery_call_notes: {
+        Row: {
+          client_id: string
+          created_at: string
+          discovery_call_id: string | null
+          id: string
+          note_content: string | null
+          trainer_id: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          discovery_call_id?: string | null
+          id?: string
+          note_content?: string | null
+          trainer_id: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          discovery_call_id?: string | null
+          id?: string
+          note_content?: string | null
+          trainer_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       discovery_call_notifications: {
         Row: {
           created_at: string

@@ -7,6 +7,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { format } from 'date-fns';
 import { Users, MessageCircle, Calendar, Video, Phone, UserPlus } from 'lucide-react';
 import { MessagingPopup } from '@/components/MessagingPopup';
+import { DiscoveryCallNotesTaker } from '@/components/DiscoveryCallNotesTaker';
 
 interface Prospect {
   id: string;
@@ -334,6 +335,17 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
                         Convert to Client
                       </Button>
                     )}
+                  </div>
+                  
+                  {/* Discovery Call Notes */}
+                  <div className="mt-4">
+                    <DiscoveryCallNotesTaker 
+                      clientId={prospect.user_id}
+                      clientName={prospect.client_profile?.first_name && prospect.client_profile?.last_name
+                        ? `${prospect.client_profile.first_name} ${prospect.client_profile.last_name}`
+                        : undefined}
+                      compact={true}
+                    />
                   </div>
                 </div>
               );

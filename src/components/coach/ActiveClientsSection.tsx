@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/hooks/useProfile';
 import { format } from 'date-fns';
 import { Users, MessageCircle, Calendar, UserCheck } from 'lucide-react';
+import { DiscoveryCallNotesTaker } from '@/components/DiscoveryCallNotesTaker';
 
 interface ActiveClient {
   id: string;
@@ -191,6 +192,17 @@ export function ActiveClientsSection({ onCountChange }: ActiveClientsSectionProp
                     <Users className="w-3 h-3 mr-1" />
                     View Profile
                   </Button>
+                </div>
+                
+                {/* Discovery Call Notes */}
+                <div className="mt-4">
+                  <DiscoveryCallNotesTaker 
+                    clientId={client.client_id}
+                    clientName={client.client_profile?.first_name && client.client_profile?.last_name
+                      ? `${client.client_profile.first_name} ${client.client_profile.last_name}`
+                      : undefined}
+                    compact={true}
+                  />
                 </div>
               </div>
             ))}
