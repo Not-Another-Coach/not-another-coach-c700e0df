@@ -163,10 +163,81 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
     clientSurveyData
   );
 
-  // Get saved trainers - simple approach using existing matched trainers + engagement status
-  const savedTrainers = matchedTrainers.filter(match => 
-    savedTrainerIds.includes(match.trainer.id) && !isShortlisted(match.trainer.id)
+  // Filter matched trainers to exclude saved ones from Browse tab
+  const browseTrainers = matchedTrainers.filter(match => 
+    !savedTrainerIds.includes(match.trainer.id)
   );
+
+  // Get saved trainers - fetch from database for any liked trainer
+  const [savedTrainers, setSavedTrainers] = useState([]);
+  const [loadingSavedTrainers, setLoadingSavedTrainers] = useState(false);
+
+  useEffect(() => {
+    const fetchSavedTrainers = async () => {
+      if (savedTrainerIds.length === 0) {
+        setSavedTrainers([]);
+        return;
+      }
+
+      setLoadingSavedTrainers(true);
+      try {
+        // Fetch all saved trainers from database
+        const { data: trainers, error } = await supabase
+          .from('profiles')
+          .select(`
+            id,
+            first_name,
+            last_name,
+            bio,
+            location,
+            specializations,
+            qualifications,
+            hourly_rate,
+            rating,
+            total_ratings,
+            training_types,
+            profile_photo_url,
+            is_verified,
+            trainer_availability_settings!inner(offers_discovery_call)
+          `)
+          .in('id', savedTrainerIds.filter(id => !isShortlisted(id)))
+          .eq('user_type', 'trainer')
+          .eq('profile_published', true);
+
+        if (!error && trainers) {
+          const formattedTrainers = trainers.map(trainer => ({
+            trainer: {
+              id: trainer.id,
+              name: `${trainer.first_name || ''} ${trainer.last_name || ''}`.trim() || 'Private Trainer',
+              specialties: trainer.specializations || ['Personal Training'],
+              rating: parseFloat(String(trainer.rating || '4.5')),
+              reviews: trainer.total_ratings || 0,
+              experience: '3+ years',
+              location: trainer.location || 'Location TBD',
+              hourlyRate: parseFloat(String(trainer.hourly_rate || '75')),
+              image: trainer.profile_photo_url || '/placeholder.svg',
+              certifications: trainer.qualifications || ['Certified Personal Trainer'],
+              description: trainer.bio || 'Professional personal trainer ready to help you achieve your fitness goals.',
+              availability: 'Flexible',
+              trainingType: trainer.training_types || ['1-on-1', 'Virtual'],
+              offers_discovery_call: trainer.trainer_availability_settings?.[0]?.offers_discovery_call || false
+            },
+            score: 85,
+            matchReasons: ['Previously saved trainer'],
+            matchDetails: []
+          }));
+          setSavedTrainers(formattedTrainers);
+        }
+      } catch (error) {
+        console.error('Error fetching saved trainers:', error);
+        setSavedTrainers([]);
+      } finally {
+        setLoadingSavedTrainers(false);
+      }
+    };
+
+    fetchSavedTrainers();
+  }, [savedTrainerIds, isShortlisted]);
 
   // Get shortlisted trainers
   const shortlistedTrainers = matchedTrainers.filter(match => 
@@ -440,7 +511,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
               <div>
                 <h2 className="text-xl font-semibold mb-4">Recommended For You</h2>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filterTrainers(topMatches).map((match) => (
+                  {filterTrainers(browseTrainers.filter(match => topMatches.includes(match))).map((match) => (
                     <div key={match.trainer.id} className="relative">
                       <TrainerCard
                         trainer={match.trainer}
@@ -463,7 +534,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                 <div>
                   <h2 className="text-xl font-semibold mb-4">Good Matches</h2>
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filterTrainers(goodMatches).slice(0, 6).map((match) => (
+                    {filterTrainers(browseTrainers.filter(match => goodMatches.includes(match))).slice(0, 6).map((match) => (
                       <TrainerCard
                         key={match.trainer.id}
                         trainer={match.trainer}
@@ -532,10 +603,10 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold">All Trainers</h2>
-                <Badge variant="outline">{filterTrainers(matchedTrainers).length} trainers</Badge>
+                <Badge variant="outline">{filterTrainers(browseTrainers).length} trainers</Badge>
               </div>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filterTrainers(matchedTrainers).map((match) => (
+                {filterTrainers(browseTrainers).map((match) => (
                   <TrainerCard
                     key={match.trainer.id}
                     trainer={match.trainer}
@@ -566,7 +637,15 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
               </Button>
             )}
           </div>
-          {savedTrainers.length > 0 ? (
+          {loadingSavedTrainers ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="bg-muted rounded-lg h-80"></div>
+                </div>
+              ))}
+            </div>
+          ) : savedTrainers.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {savedTrainers.map((match) => (
                 <div key={match.trainer.id} className="relative">
