@@ -124,6 +124,9 @@ export function SwipeResultsSection({ profile }: SwipeResultsSectionProps) {
     loadDiscoveryCalls();
   }, [user, getFeedback]);
 
+  console.log('shortlistedTrainers:', shortlistedTrainers);
+  console.log('completedDiscoveryCalls:', completedDiscoveryCalls);
+
   // Filter shortlisted trainers: those without discovery calls go to shortlisted tab
   const shortlistedOnly = shortlistedTrainers.filter(trainer => {
     const hasBookedCall = trainer.discovery_call_booked_at !== null;
@@ -234,6 +237,24 @@ export function SwipeResultsSection({ profile }: SwipeResultsSectionProps) {
           <p className="text-muted-foreground">Loading your trainers...</p>
         </div>
       </div>
+    );
+  }
+
+  // If no shortlisted trainers at all, show discovery prompt
+  if (shortlistedTrainers.length === 0) {
+    return (
+      <Card>
+        <CardContent className="p-8 text-center">
+          <Star className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+          <h3 className="text-lg font-semibold mb-2">No shortlisted trainers</h3>
+          <p className="text-muted-foreground mb-4">
+            Discover and shortlist trainers to unlock chat and discovery call features
+          </p>
+          <Button onClick={() => navigate('/discovery')}>
+            Discover Trainers
+          </Button>
+        </CardContent>
+      </Card>
     );
   }
 
