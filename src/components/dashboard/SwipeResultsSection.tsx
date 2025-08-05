@@ -20,7 +20,7 @@ import trainerEmma from "@/assets/trainer-emma.jpg";
 
 const mockLikedTrainers = [
   {
-    id: "1",
+    id: "550e8400-e29b-41d4-a716-446655440001",
     name: "Sarah Johnson",
     specialties: ["Weight Loss", "Strength Training", "Nutrition"],
     rating: 4.9,
@@ -35,7 +35,7 @@ const mockLikedTrainers = [
     trainingType: ["In-Person", "Online"]
   },
   {
-    id: "3",
+    id: "550e8400-e29b-41d4-a716-446655440003",
     name: "Emma Chen",
     specialties: ["Yoga", "Flexibility", "Mindfulness", "Rehabilitation"],
     rating: 4.9,
@@ -53,7 +53,7 @@ const mockLikedTrainers = [
 
 const mockUnlikedTrainers = [
   {
-    id: "2", 
+    id: "550e8400-e29b-41d4-a716-446655440002", 
     name: "Mike Rodriguez",
     specialties: ["Muscle Building", "Powerlifting", "Sports Performance"],
     rating: 4.8,
