@@ -10,6 +10,7 @@ import { Trash2, Plus, ExternalLink, DollarSign, PoundSterling, Euro, Calendar, 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useDiscoveryCallSettings } from "@/hooks/useDiscoveryCallSettings";
+import { useToast } from "@/hooks/use-toast";
 
 interface RatesSectionProps {
   formData: any;
@@ -25,6 +26,23 @@ interface TrainingPackage {
   currency: string;
   description: string;
 }
+
+// Helper function to check if two time slots overlap
+const checkTimeOverlap = (slot1: { start: string; end: string }, slot2: { start: string; end: string }) => {
+  // Convert time strings to minutes for easier comparison
+  const timeToMinutes = (time: string) => {
+    const [hours, minutes] = time.split(':').map(Number);
+    return hours * 60 + minutes;
+  };
+
+  const slot1Start = timeToMinutes(slot1.start);
+  const slot1End = timeToMinutes(slot1.end);
+  const slot2Start = timeToMinutes(slot2.start);
+  const slot2End = timeToMinutes(slot2.end);
+
+  // Check if slots overlap: slot1 starts before slot2 ends AND slot2 starts before slot1 ends
+  return slot1Start < slot2End && slot2Start < slot1End;
+};
 
 export function RatesSection({ formData, updateFormData, errors }: RatesSectionProps) {
   const [currency, setCurrency] = useState<'GBP' | 'USD' | 'EUR'>('GBP');
@@ -49,6 +67,7 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
 
   // Use the discovery call settings hook
   const { settings: discoverySettings, loading: discoveryLoading, updateSettings } = useDiscoveryCallSettings();
+  const { toast } = useToast();
 
   const addPackage = () => {
     if (newPackage.name && newPackage.price && newPackage.description) {
@@ -663,6 +682,21 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
                                       variant="outline"
                                       onClick={() => {
                                         const newSlot = { start: '07:00', end: '08:00' };
+                                        
+                                        // Check for overlaps with existing slots
+                                        const hasOverlap = daySchedule.slots.some(existingSlot => 
+                                          checkTimeOverlap(newSlot, existingSlot)
+                                        );
+                                        
+                                        if (hasOverlap) {
+                                          toast({
+                                            title: "Time Slot Overlap",
+                                            description: "This time slot overlaps with an existing slot. Please choose a different time.",
+                                            variant: "destructive",
+                                          });
+                                          return;
+                                        }
+                                        
                                         const newSchedule = {
                                           ...discoverySettings.availability_schedule,
                                           [day]: {
@@ -691,8 +725,25 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
                                           <Select
                                             value={slot.start}
                                             onValueChange={(value) => {
+                                              const updatedSlot = { ...slot, start: value };
+                                              const otherSlots = daySchedule.slots.filter((_, i) => i !== slotIndex);
+                                              
+                                              // Check for overlaps with other slots
+                                              const hasOverlap = otherSlots.some(existingSlot => 
+                                                checkTimeOverlap(updatedSlot, existingSlot)
+                                              );
+                                              
+                                              if (hasOverlap) {
+                                                toast({
+                                                  title: "Time Slot Overlap",
+                                                  description: "This time slot would overlap with another slot. Please choose a different time.",
+                                                  variant: "destructive",
+                                                });
+                                                return;
+                                              }
+                                              
                                               const newSlots = daySchedule.slots.map((s, i) => 
-                                                i === slotIndex ? { ...s, start: value } : s
+                                                i === slotIndex ? updatedSlot : s
                                               );
                                               const newSchedule = {
                                                 ...discoverySettings.availability_schedule,
@@ -714,8 +765,25 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
                                           <Select
                                             value={slot.end}
                                             onValueChange={(value) => {
+                                              const updatedSlot = { ...slot, end: value };
+                                              const otherSlots = daySchedule.slots.filter((_, i) => i !== slotIndex);
+                                              
+                                              // Check for overlaps with other slots
+                                              const hasOverlap = otherSlots.some(existingSlot => 
+                                                checkTimeOverlap(updatedSlot, existingSlot)
+                                              );
+                                              
+                                              if (hasOverlap) {
+                                                toast({
+                                                  title: "Time Slot Overlap",
+                                                  description: "This time slot would overlap with another slot. Please choose a different time.",
+                                                  variant: "destructive",
+                                                });
+                                                return;
+                                              }
+                                              
                                               const newSlots = daySchedule.slots.map((s, i) => 
-                                                i === slotIndex ? { ...s, end: value } : s
+                                                i === slotIndex ? updatedSlot : s
                                               );
                                               const newSchedule = {
                                                 ...discoverySettings.availability_schedule,
