@@ -635,7 +635,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                 <p className="text-muted-foreground mb-4">
                   Like trainers by clicking the heart icon to save them for later and build your shortlist
                 </p>
-                <Button onClick={() => setBrowseView('recommended')}>
+                <Button onClick={() => setActiveTab('browse')}>
                   Explore Trainers
                 </Button>
               </CardContent>
@@ -787,8 +787,8 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                 <p className="text-muted-foreground mb-4">
                   Add up to 4 trainers to your shortlist from your saved trainers to unlock chat and discovery call features.
                 </p>
-                <Button onClick={() => setActiveTab('saved')}>
-                  View Saved Trainers
+                <Button onClick={() => setActiveTab('shortlisted')}>
+                  View Shortlisted Trainers
                 </Button>
               </CardContent>
             </Card>
@@ -899,8 +899,8 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                   <p className="text-muted-foreground mb-4">
                     Add trainers to your shortlist to unlock discovery call features
                   </p>
-                  <Button onClick={() => setActiveTab('saved')}>
-                    View Saved Trainers
+                  <Button onClick={() => setActiveTab('shortlisted')}>
+                    View Shortlisted Trainers
                   </Button>
                 </CardContent>
               </Card>
