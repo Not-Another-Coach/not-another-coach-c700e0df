@@ -2,60 +2,58 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Star, MessageSquare, Calendar, Eye } from 'lucide-react';
-import { useDiscoveryCallFeedback } from '@/hooks/useDiscoveryCallFeedback';
+import { useFeedbackQuestions } from '@/hooks/useFeedbackQuestions';
 import { format } from 'date-fns';
 
-interface FeedbackData {
+interface FeedbackResponse {
   id: string;
-  conversation_helpful: number;
-  asked_right_questions: number;
-  professionalism: number;
-  coach_notes?: string;
+  response_value?: string;
+  response_data: Record<string, any>;
   submitted_at: string;
-  coach_viewed_at?: string;
+  discovery_call_feedback_questions: {
+    id: string;
+    question_text: string;
+    question_type: string;
+    question_group: string;
+  };
   discovery_calls: {
     scheduled_for: string;
   };
 }
 
 export function CoachFeedbackSummary() {
-  const [feedbackData, setFeedbackData] = useState<FeedbackData[]>([]);
+  const [feedbackData, setFeedbackData] = useState<FeedbackResponse[]>([]);
   const [loading, setLoading] = useState(true);
-  const { getTrainerFeedback, markFeedbackAsViewed } = useDiscoveryCallFeedback();
+  const { getTrainerFeedback } = useFeedbackQuestions();
 
   useEffect(() => {
     const loadFeedback = async () => {
       const { data } = await getTrainerFeedback();
       if (data) {
         setFeedbackData(data);
-        
-        // Mark unviewed feedback as viewed
-        const unviewedFeedback = data.filter(f => !f.coach_viewed_at);
-        unviewedFeedback.forEach(feedback => {
-          markFeedbackAsViewed(feedback.id);
-        });
       }
       setLoading(false);
     };
 
     loadFeedback();
-  }, [getTrainerFeedback, markFeedbackAsViewed]);
+  }, [getTrainerFeedback]);
 
   const calculateAverages = () => {
     if (feedbackData.length === 0) return null;
 
-    const totals = feedbackData.reduce((acc, feedback) => ({
-      helpful: acc.helpful + feedback.conversation_helpful,
-      questions: acc.questions + feedback.asked_right_questions,
-      professional: acc.professional + feedback.professionalism,
-    }), { helpful: 0, questions: 0, professional: 0 });
+    const starRatingResponses = feedbackData.filter(
+      response => response.discovery_call_feedback_questions.question_type === 'star_rating'
+    );
 
-    const count = feedbackData.length;
-    return {
-      conversationHelpful: (totals.helpful / count).toFixed(1),
-      askedRightQuestions: (totals.questions / count).toFixed(1),
-      professionalism: (totals.professional / count).toFixed(1),
-    };
+    if (starRatingResponses.length === 0) return null;
+
+    const total = starRatingResponses.reduce((sum, response) => {
+      const rating = parseInt(response.response_value || '0');
+      return sum + rating;
+    }, 0);
+
+    const average = (total / starRatingResponses.length).toFixed(1);
+    return { overallRating: average };
   };
 
   const renderStars = (rating: number) => (
@@ -120,18 +118,13 @@ export function CoachFeedbackSummary() {
       <CardContent className="space-y-6">
         {/* Summary Stats */}
         {averages && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-muted/50 rounded-lg">
+          <div className="grid grid-cols-1 gap-4 p-4 bg-muted/50 rounded-lg">
             <div className="text-center">
-              <p className="text-sm text-muted-foreground mb-1">Conversation Helpful</p>
-              {renderStars(parseFloat(averages.conversationHelpful))}
-            </div>
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground mb-1">Asked Right Questions</p>
-              {renderStars(parseFloat(averages.askedRightQuestions))}
-            </div>
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground mb-1">Professionalism</p>
-              {renderStars(parseFloat(averages.professionalism))}
+              <p className="text-sm text-muted-foreground mb-1">Overall Rating</p>
+              {renderStars(parseFloat(averages.overallRating))}
+              <p className="text-xs text-muted-foreground mt-1">
+                Based on {feedbackData.filter(r => r.discovery_call_feedback_questions.question_type === 'star_rating').length} star ratings
+              </p>
             </div>
           </div>
         )}
@@ -139,49 +132,33 @@ export function CoachFeedbackSummary() {
         {/* Individual Feedback */}
         <div className="space-y-4">
           <h4 className="font-medium">Recent Feedback</h4>
-          {feedbackData.slice(0, 5).map((feedback) => (
-            <div key={feedback.id} className="border rounded-lg p-4 space-y-3">
+          {feedbackData.slice(0, 5).map((response) => (
+            <div key={response.id} className="border rounded-lg p-4 space-y-3">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Calendar className="w-3 h-3" />
                   <span>
-                    Call on {format(new Date(feedback.discovery_calls.scheduled_for), 'MMM d, yyyy')}
+                    Call on {format(new Date(response.discovery_calls.scheduled_for), 'MMM d, yyyy')}
                   </span>
-                  {!feedback.coach_viewed_at && (
-                    <Badge variant="secondary" className="text-xs">
-                      <Eye className="w-3 h-3 mr-1" />
-                      New
-                    </Badge>
-                  )}
+                  <Badge variant="outline" className="text-xs">
+                    {response.discovery_call_feedback_questions.question_type.replace('_', ' ')}
+                  </Badge>
                 </div>
                 <span className="text-xs text-muted-foreground">
-                  {format(new Date(feedback.submitted_at), 'MMM d, yyyy')}
+                  {format(new Date(response.submitted_at), 'MMM d, yyyy')}
                 </span>
               </div>
               
-              <div className="grid grid-cols-3 gap-4 text-sm">
-                <div>
-                  <p className="text-muted-foreground mb-1">Helpful</p>
-                  {renderStars(feedback.conversation_helpful)}
-                </div>
-                <div>
-                  <p className="text-muted-foreground mb-1">Questions</p>
-                  {renderStars(feedback.asked_right_questions)}
-                </div>
-                <div>
-                  <p className="text-muted-foreground mb-1">Professional</p>
-                  {renderStars(feedback.professionalism)}
-                </div>
-              </div>
-              
-              {feedback.coach_notes && (
-                <div>
-                  <p className="text-sm font-medium mb-1">Client Notes:</p>
+              <div className="space-y-2">
+                <p className="text-sm font-medium">{response.discovery_call_feedback_questions.question_text}</p>
+                {response.discovery_call_feedback_questions.question_type === 'star_rating' && response.response_value ? (
+                  <div>{renderStars(parseInt(response.response_value))}</div>
+                ) : response.response_value ? (
                   <p className="text-sm text-muted-foreground bg-muted/50 p-3 rounded">
-                    "{feedback.coach_notes}"
+                    "{response.response_value}"
                   </p>
-                </div>
-              )}
+                ) : null}
+              </div>
             </div>
           ))}
           

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MessageCircle, Calendar, X } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { DiscoveryCallFeedbackForm } from '@/components/discovery-call/DiscoveryCallFeedbackForm';
+import { DynamicDiscoveryCallFeedbackForm } from '@/components/discovery-call/DynamicDiscoveryCallFeedbackForm';
 import { useDiscoveryCallFeedback } from '@/hooks/useDiscoveryCallFeedback';
 import { format } from 'date-fns';
 
@@ -121,7 +121,7 @@ export function DiscoveryCallFeedbackPrompt({
             <DialogTitle>Discovery Call Feedback</DialogTitle>
           </DialogHeader>
           {selectedCall && (
-            <DiscoveryCallFeedbackForm
+            <DynamicDiscoveryCallFeedbackForm
               discoveryCallId={selectedCall.id}
               trainerId={selectedCall.trainer_id}
               trainerName={`${selectedCall.trainer_profile.first_name} ${selectedCall.trainer_profile.last_name}`}

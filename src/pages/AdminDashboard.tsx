@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UserManagement } from '@/components/admin/UserManagement';
+import { FeedbackQuestionBuilder } from '@/components/admin/FeedbackQuestionBuilder';
 import { VisibilitySettingsSection } from '@/components/trainer-setup/VisibilitySettingsSection';
 import { Settings, Users, Shield, BarChart3, ArrowLeft, Home, Eye } from 'lucide-react';
 import { useUserRoles } from '@/hooks/useUserRoles';
@@ -69,10 +70,14 @@ export const AdminDashboard = () => {
       </div>
 
       <Tabs defaultValue="users" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="users" className="flex items-center gap-2">
             <Users className="w-4 h-4" />
             Users & Roles
+          </TabsTrigger>
+          <TabsTrigger value="feedback" className="flex items-center gap-2">
+            <Settings className="w-4 h-4" />
+            Feedback Builder
           </TabsTrigger>
           <TabsTrigger value="visibility" className="flex items-center gap-2">
             <Eye className="w-4 h-4" />
@@ -88,9 +93,13 @@ export const AdminDashboard = () => {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="users">
-          <UserManagement />
-        </TabsContent>
+          <TabsContent value="users">
+            <UserManagement />
+          </TabsContent>
+
+          <TabsContent value="feedback">
+            <FeedbackQuestionBuilder />
+          </TabsContent>
 
         <TabsContent value="visibility">
           <Card>

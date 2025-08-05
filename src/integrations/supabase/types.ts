@@ -392,6 +392,104 @@ export type Database = {
         }
         Relationships: []
       }
+      discovery_call_feedback_questions: {
+        Row: {
+          audience: string
+          created_at: string
+          created_by: string | null
+          display_order: number
+          help_text: string | null
+          id: string
+          is_archived: boolean
+          is_mandatory: boolean
+          options: Json | null
+          placeholder_text: string | null
+          question_group: string | null
+          question_text: string
+          question_type: string
+          updated_at: string
+          visible_to_pt: boolean
+        }
+        Insert: {
+          audience: string
+          created_at?: string
+          created_by?: string | null
+          display_order?: number
+          help_text?: string | null
+          id?: string
+          is_archived?: boolean
+          is_mandatory?: boolean
+          options?: Json | null
+          placeholder_text?: string | null
+          question_group?: string | null
+          question_text: string
+          question_type: string
+          updated_at?: string
+          visible_to_pt?: boolean
+        }
+        Update: {
+          audience?: string
+          created_at?: string
+          created_by?: string | null
+          display_order?: number
+          help_text?: string | null
+          id?: string
+          is_archived?: boolean
+          is_mandatory?: boolean
+          options?: Json | null
+          placeholder_text?: string | null
+          question_group?: string | null
+          question_text?: string
+          question_type?: string
+          updated_at?: string
+          visible_to_pt?: boolean
+        }
+        Relationships: []
+      }
+      discovery_call_feedback_responses: {
+        Row: {
+          client_id: string
+          created_at: string
+          discovery_call_id: string
+          id: string
+          question_id: string
+          response_data: Json | null
+          response_value: string | null
+          submitted_at: string
+          trainer_id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          discovery_call_id: string
+          id?: string
+          question_id: string
+          response_data?: Json | null
+          response_value?: string | null
+          submitted_at?: string
+          trainer_id: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          discovery_call_id?: string
+          id?: string
+          question_id?: string
+          response_data?: Json | null
+          response_value?: string | null
+          submitted_at?: string
+          trainer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discovery_call_feedback_responses_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "discovery_call_feedback_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       discovery_call_notes: {
         Row: {
           client_id: string
@@ -1345,6 +1443,10 @@ export type Database = {
       }
       reactivate_user: {
         Args: { p_user_id: string; p_reason?: string }
+        Returns: undefined
+      }
+      reorder_feedback_questions: {
+        Args: { question_ids: string[] }
         Returns: undefined
       }
       request_profile_verification: {
