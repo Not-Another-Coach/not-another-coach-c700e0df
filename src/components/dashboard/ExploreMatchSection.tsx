@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useEnhancedTrainerMatching } from "@/hooks/useEnhancedTrainerMatching";
 import { useSavedTrainers } from "@/hooks/useSavedTrainers";
@@ -19,6 +19,7 @@ import { ComparisonView } from "@/components/ComparisonView";
 import { BookDiscoveryCallButton } from "@/components/discovery-call/BookDiscoveryCallButton";
 import { EditDiscoveryCallButton } from "@/components/discovery-call/EditDiscoveryCallButton";
 import { ClientRescheduleModal } from "./ClientRescheduleModal";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { 
   Search, 
@@ -162,65 +163,104 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
     clientSurveyData
   );
 
-  // Get saved trainers (including ones not in current match results)
-  const savedTrainers = [];
-  
-  // Debug logging
-  console.log('Debug - savedTrainerIds:', savedTrainerIds);
-  console.log('Debug - matchedTrainers count:', matchedTrainers.length);
-  console.log('Debug - allTrainers count:', allTrainers.length);
-  
-  // First, add trainers from matchedTrainers that are saved
-  const savedFromMatched = matchedTrainers.filter(match => 
-    savedTrainerIds.includes(match.trainer.id) && !isShortlisted(match.trainer.id)
-  );
-  savedTrainers.push(...savedFromMatched);
-  
-  // Then, add any saved trainers that aren't in matchedTrainers (create placeholder entries)
-  const savedIdsFromMatched = savedFromMatched.map(s => s.trainer.id);
-  const missingSavedIds = savedTrainerIds.filter(id => 
-    !savedIdsFromMatched.includes(id) && !isShortlisted(id)
-  );
-  
-  console.log('Debug - savedFromMatched:', savedFromMatched.length);
-  console.log('Debug - missingSavedIds:', missingSavedIds);
-  
-  // Create placeholder entries for missing saved trainers
-  missingSavedIds.forEach(trainerId => {
-    // Try to find the trainer in allTrainers first
-    const trainerData = allTrainers.find(t => t.id === trainerId);
-    if (trainerData) {
-      savedTrainers.push({
-        trainer: trainerData,
-        score: 0,
-        matchReasons: [],
-        matchDetails: []
-      });
-    } else {
-      // Create a placeholder for unknown trainers with realistic values
-      savedTrainers.push({
-        trainer: {
-          id: trainerId,
-          name: "Private Trainer",
-          specialties: ["Personal Training"],
-          rating: 4.5,
-          reviews: 12,
-          experience: "3+ years",
-          location: "Location TBD",
-          hourlyRate: 75,
-          image: "/placeholder.svg",
-          certifications: ["Certified Personal Trainer"],
-          description: "This trainer's full profile is available after initial contact.",
-          availability: "Flexible",
-          trainingType: ["1-on-1", "Virtual"],
-          offers_discovery_call: true
-        },
-        score: 85,
-        matchReasons: ["Previously saved trainer", "Good availability match"],
-        matchDetails: []
-      });
-    }
-  });
+  // Get saved trainers - fetch fresh data for any missing trainers
+  const [savedTrainersData, setSavedTrainersData] = useState([]);
+  const [loadingSavedTrainers, setLoadingSavedTrainers] = useState(false);
+
+  useEffect(() => {
+    const fetchSavedTrainersData = async () => {
+      if (savedTrainerIds.length === 0) {
+        setSavedTrainersData([]);
+        return;
+      }
+
+      setLoadingSavedTrainers(true);
+      try {
+        const savedTrainers = [];
+        
+        // First, add trainers from matchedTrainers that are saved
+        const savedFromMatched = matchedTrainers.filter(match => 
+          savedTrainerIds.includes(match.trainer.id) && !isShortlisted(match.trainer.id)
+        );
+        savedTrainers.push(...savedFromMatched);
+        
+        // Find missing saved trainer IDs that aren't in matchedTrainers
+        const savedIdsFromMatched = savedFromMatched.map(s => s.trainer.id);
+        const missingSavedIds = savedTrainerIds.filter(id => 
+          !savedIdsFromMatched.includes(id) && !isShortlisted(id)
+        );
+        
+        // Fetch missing trainer data directly from database
+        if (missingSavedIds.length > 0) {
+          const { data: missingTrainers, error } = await supabase
+            .from('profiles')
+            .select(`
+              id,
+              first_name,
+              last_name,
+              bio,
+              location,
+              specializations,
+              qualifications,
+              hourly_rate,
+              rating,
+              total_ratings,
+              training_types,
+              profile_photo_url,
+              is_verified,
+              trainer_availability_settings!inner(offers_discovery_call)
+            `)
+            .in('id', missingSavedIds)
+            .eq('user_type', 'trainer')
+            .eq('profile_published', true);
+
+          if (!error && missingTrainers) {
+            missingTrainers.forEach(trainer => {
+              // Transform database trainer to our format
+              const transformedTrainer = {
+                id: trainer.id,
+                name: `${trainer.first_name || ''} ${trainer.last_name || ''}`.trim() || 'Private Trainer',
+                specialties: trainer.specializations || ['Personal Training'],
+                rating: parseFloat(String(trainer.rating || '4.5')),
+                reviews: trainer.total_ratings || 0,
+                experience: '3+ years', // Default since not in DB
+                location: trainer.location || 'Location TBD',
+                hourlyRate: parseFloat(String(trainer.hourly_rate || '75')),
+                image: trainer.profile_photo_url || '/placeholder.svg',
+                certifications: trainer.qualifications || ['Certified Personal Trainer'],
+                description: trainer.bio || 'Professional personal trainer ready to help you achieve your fitness goals.',
+                availability: 'Flexible',
+                trainingType: trainer.training_types || ['1-on-1', 'Virtual'],
+                offers_discovery_call: trainer.trainer_availability_settings?.[0]?.offers_discovery_call || false
+              };
+
+              savedTrainers.push({
+                trainer: transformedTrainer,
+                score: 85,
+                matchReasons: ['Previously saved trainer', 'Good availability match'],
+                matchDetails: []
+              });
+            });
+          }
+        }
+        
+        setSavedTrainersData(savedTrainers);
+      } catch (error) {
+        console.error('Error fetching saved trainers:', error);
+        // Fallback to existing logic if database fetch fails
+        const fallbackSavedTrainers = [];
+        const savedFromMatched = matchedTrainers.filter(match => 
+          savedTrainerIds.includes(match.trainer.id) && !isShortlisted(match.trainer.id)
+        );
+        fallbackSavedTrainers.push(...savedFromMatched);
+        setSavedTrainersData(fallbackSavedTrainers);
+      } finally {
+        setLoadingSavedTrainers(false);
+      }
+    };
+
+    fetchSavedTrainersData();
+  }, [savedTrainerIds, matchedTrainers, isShortlisted]);
 
   // Get shortlisted trainers
   const shortlistedTrainers = matchedTrainers.filter(match => 
@@ -620,9 +660,17 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
               </Button>
             )}
           </div>
-          {savedTrainers.length > 0 ? (
+          {loadingSavedTrainers ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {savedTrainers.map((match) => (
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="bg-muted rounded-lg h-80"></div>
+                </div>
+              ))}
+            </div>
+          ) : savedTrainersData.length > 0 ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {savedTrainersData.map((match) => (
                 <div key={match.trainer.id} className="relative">
                   {/* Comparison Checkbox */}
                   <div className="absolute top-2 right-2 z-10">
