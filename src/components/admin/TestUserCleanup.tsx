@@ -2,13 +2,15 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, Trash2, RefreshCw, Users } from 'lucide-react';
+import { AlertCircle, Trash2, RefreshCw, Users, Database } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 export const TestUserCleanup = () => {
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isCheckingUsers, setIsCheckingUsers] = useState(false);
+  const [existingUsers, setExistingUsers] = useState<any[]>([]);
   const [results, setResults] = useState<any>(null);
   const { toast } = useToast();
 
@@ -25,7 +27,42 @@ export const TestUserCleanup = () => {
     'trainerE@test.com'
   ];
 
-  const deleteTestUsers = async () => {
+  const checkExistingUsers = async () => {
+    setIsCheckingUsers(true);
+    try {
+      // Query to find existing test users
+      const { data, error } = await supabase
+        .from('profiles')
+        .select(`
+          id,
+          first_name,
+          last_name,
+          user_type,
+          created_at
+        `)
+        .or(testEmails.map(email => `id.in.(select id from auth.users where email ilike '${email}')`).join(','));
+
+      if (error) {
+        throw error;
+      }
+
+      setExistingUsers(data || []);
+      toast({
+        title: "User check completed",
+        description: `Found ${data?.length || 0} test users`,
+      });
+    } catch (error) {
+      toast({
+        title: "Check failed",
+        description: error instanceof Error ? error.message : "Unknown error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCheckingUsers(false);
+    }
+  };
+
+  const deleteViaEdgeFunction = async () => {
     setIsDeleting(true);
     setResults(null);
 
@@ -50,7 +87,7 @@ export const TestUserCleanup = () => {
       });
     } catch (error) {
       toast({
-        title: "Cleanup failed",
+        title: "Edge function cleanup failed",
         description: error instanceof Error ? error.message : "Unknown error occurred",
         variant: "destructive",
       });
@@ -59,8 +96,20 @@ export const TestUserCleanup = () => {
     }
   };
 
+  const simplifyTestEmails = () => {
+    // Create a simple list that can be copy-pasted for manual deletion
+    const emailList = testEmails.join('\n');
+    navigator.clipboard.writeText(emailList);
+    
+    toast({
+      title: "Email list copied",
+      description: "Test email addresses have been copied to clipboard for manual deletion",
+    });
+  };
+
   const resetResults = () => {
     setResults(null);
+    setExistingUsers([]);
   };
 
   return (
@@ -87,6 +136,47 @@ export const TestUserCleanup = () => {
           </div>
         </div>
 
+        {/* Existing Users Check */}
+        <div className="space-y-3">
+          <Button
+            onClick={checkExistingUsers}
+            disabled={isCheckingUsers}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            {isCheckingUsers ? (
+              <RefreshCw className="w-4 h-4 animate-spin" />
+            ) : (
+              <Database className="w-4 h-4" />
+            )}
+            {isCheckingUsers ? 'Checking...' : 'Check Existing Test Users'}
+          </Button>
+          
+          {existingUsers.length > 0 && (
+            <Alert>
+              <Database className="h-4 w-4" />
+              <AlertDescription>
+                <div className="space-y-2">
+                  <strong>Found {existingUsers.length} existing test users:</strong>
+                  <div className="text-sm space-y-1">
+                    {existingUsers.map((user) => (
+                      <div key={user.id} className="flex items-center gap-2">
+                        <Badge variant={user.user_type === 'trainer' ? 'default' : 'secondary'}>
+                          {user.user_type}
+                        </Badge>
+                        <span>{user.first_name} {user.last_name}</span>
+                        <span className="text-muted-foreground text-xs">
+                          (ID: {user.id.slice(0, 8)}...)
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+        </div>
+
         {/* Warning */}
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
@@ -97,9 +187,9 @@ export const TestUserCleanup = () => {
         </Alert>
 
         {/* Action Buttons */}
-        <div className="flex gap-3">
+        <div className="flex gap-3 flex-wrap">
           <Button
-            onClick={deleteTestUsers}
+            onClick={deleteViaEdgeFunction}
             disabled={isDeleting}
             variant="destructive"
             className="flex items-center gap-2"
@@ -109,15 +199,43 @@ export const TestUserCleanup = () => {
             ) : (
               <Trash2 className="w-4 h-4" />
             )}
-            {isDeleting ? 'Deleting...' : 'Delete Test Users'}
+            {isDeleting ? 'Deleting...' : 'Delete via Edge Function'}
+          </Button>
+
+          <Button
+            onClick={simplifyTestEmails}
+            disabled={isDeleting}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <Database className="w-4 h-4" />
+            Copy Email List
           </Button>
           
-          {results && (
+          {(results || existingUsers.length > 0) && (
             <Button onClick={resetResults} variant="outline">
               Clear Results
             </Button>
           )}
         </div>
+
+        {/* Manual Instructions */}
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            <div className="space-y-2">
+              <strong>Alternative: Manual Database Cleanup</strong>
+              <p className="text-sm">
+                If the automated cleanup fails, you can manually delete these users in the Supabase dashboard:
+              </p>
+              <ol className="text-sm list-decimal list-inside space-y-1">
+                <li>Go to the Supabase dashboard → Authentication → Users</li>
+                <li>Search for each test email and delete the user</li>
+                <li>This will automatically clean up the profiles table via triggers</li>
+              </ol>
+            </div>
+          </AlertDescription>
+        </Alert>
 
         {/* Results */}
         {results && (
@@ -180,8 +298,8 @@ export const TestUserCleanup = () => {
         )}
 
         <div className="text-xs text-muted-foreground">
-          <strong>How it works:</strong> This function finds all users with the test email addresses (case-insensitive) 
-          and deletes them from both the authentication system and profiles table.
+          <strong>How it works:</strong> The edge function finds all users with the test email addresses (case-insensitive) 
+          and deletes them from both the authentication system and profiles table. The direct method requires admin database functions.
         </div>
       </CardContent>
     </Card>
