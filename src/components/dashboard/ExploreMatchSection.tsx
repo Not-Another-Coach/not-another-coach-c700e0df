@@ -162,14 +162,56 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
     clientSurveyData
   );
 
-  // Get saved trainers (excluding those already shortlisted)
-  console.log('Debug - savedTrainerIds:', savedTrainerIds);
-  console.log('Debug - matchedTrainers:', matchedTrainers.map(m => ({ id: m.trainer.id, name: m.trainer.name })));
-  console.log('Debug - isShortlisted check for each:', savedTrainerIds.map(id => ({ id, isShortlisted: isShortlisted(id) })));
+  // Get saved trainers (including ones not in current match results)
+  const savedTrainers = [];
   
-  const savedTrainers = matchedTrainers.filter(match => 
+  // First, add trainers from matchedTrainers that are saved
+  const savedFromMatched = matchedTrainers.filter(match => 
     savedTrainerIds.includes(match.trainer.id) && !isShortlisted(match.trainer.id)
   );
+  savedTrainers.push(...savedFromMatched);
+  
+  // Then, add any saved trainers that aren't in matchedTrainers (create placeholder entries)
+  const savedIdsFromMatched = savedFromMatched.map(s => s.trainer.id);
+  const missingSavedIds = savedTrainerIds.filter(id => 
+    !savedIdsFromMatched.includes(id) && !isShortlisted(id)
+  );
+  
+  // Create placeholder entries for missing saved trainers
+  missingSavedIds.forEach(trainerId => {
+    // Try to find the trainer in allTrainers first
+    const trainerData = allTrainers.find(t => t.id === trainerId);
+    if (trainerData) {
+      savedTrainers.push({
+        trainer: trainerData,
+        score: 0,
+        matchReasons: [],
+        matchDetails: []
+      });
+    } else {
+      // Create a placeholder for unknown trainers
+      savedTrainers.push({
+        trainer: {
+          id: trainerId,
+          name: `Trainer ${trainerId.slice(0, 8)}`,
+          specialties: ["Unknown"],
+          rating: 0,
+          reviews: 0,
+          experience: "Unknown",
+          location: "Unknown",
+          hourlyRate: 0,
+          image: "",
+          certifications: [],
+          description: "This trainer's profile is currently unavailable.",
+          availability: "Unknown",
+          trainingType: []
+        },
+        score: 0,
+        matchReasons: ["Previously saved trainer"],
+        matchDetails: []
+      });
+    }
+  });
 
   // Get shortlisted trainers
   const shortlistedTrainers = matchedTrainers.filter(match => 
