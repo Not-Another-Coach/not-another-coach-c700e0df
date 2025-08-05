@@ -125,16 +125,27 @@ export function SwipeResultsSection({ profile }: SwipeResultsSectionProps) {
   }, [user, getFeedback]);
 
   // Filter shortlisted trainers: those without discovery calls go to shortlisted tab
-  const shortlistedOnly = shortlistedTrainers.filter(trainer => 
-    !trainer.discovery_call_booked_at && 
-    !completedDiscoveryCalls.some(call => call.trainer_id === trainer.trainer_id)
-  );
+  const shortlistedOnly = shortlistedTrainers.filter(trainer => {
+    const hasBookedCall = trainer.discovery_call_booked_at !== null;
+    const hasScheduledCall = completedDiscoveryCalls.some(call => call.trainer_id === trainer.trainer_id);
+    
+    console.log('Trainer filtering:', {
+      trainer_id: trainer.trainer_id,
+      discovery_call_booked_at: trainer.discovery_call_booked_at,
+      hasBookedCall,
+      hasScheduledCall,
+      shouldBeInShortlisted: !hasBookedCall && !hasScheduledCall
+    });
+    
+    return !hasBookedCall && !hasScheduledCall;
+  });
   
   // Trainers with discovery calls (scheduled or completed) go to discovery tab
-  const discoveryBookedOrCompleted = shortlistedTrainers.filter(trainer => 
-    trainer.discovery_call_booked_at || 
-    completedDiscoveryCalls.some(call => call.trainer_id === trainer.trainer_id)
-  ).map(trainer => {
+  const discoveryBookedOrCompleted = shortlistedTrainers.filter(trainer => {
+    const hasBookedCall = trainer.discovery_call_booked_at !== null;
+    const hasScheduledCall = completedDiscoveryCalls.some(call => call.trainer_id === trainer.trainer_id);
+    return hasBookedCall || hasScheduledCall;
+  }).map(trainer => {
     const discoveryCall = completedDiscoveryCalls.find(call => call.trainer_id === trainer.trainer_id);
     return {
       ...trainer,
