@@ -26,6 +26,7 @@ export interface UserWithRoles {
   id: string;
   first_name?: string;
   last_name?: string;
+  email?: string;
   user_type: string;
   created_at: string;
   roles: AppRole[];
@@ -69,7 +70,7 @@ export function useUserRoles() {
 
     setLoading(true);
     try {
-      // Fetch all profiles with additional admin fields
+      // Fetch all profiles joined with auth.users to get email
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select(`
@@ -82,6 +83,25 @@ export function useUserRoles() {
 
       if (profilesError) throw profilesError;
 
+      // Fetch emails from auth.users for each profile
+      const profilesWithEmails = await Promise.all(
+        profiles?.map(async (profile) => {
+          try {
+            const { data: authUser } = await supabase.auth.admin.getUserById(profile.id);
+            return {
+              ...profile,
+              email: authUser?.user?.email || null
+            };
+          } catch (error) {
+            console.error(`Error fetching email for user ${profile.id}:`, error);
+            return {
+              ...profile,
+              email: null
+            };
+          }
+        }) || []
+      );
+
       // Fetch all user roles
       const { data: userRoles, error: rolesError } = await supabase
         .from('user_roles')
@@ -90,11 +110,11 @@ export function useUserRoles() {
       if (rolesError) throw rolesError;
 
       // Combine profiles with their roles
-      const usersWithRoles: UserWithRoles[] = profiles?.map(profile => ({
+      const usersWithRoles: UserWithRoles[] = profilesWithEmails.map(profile => ({
         ...profile,
         roles: userRoles?.filter(role => role.user_id === profile.id)
           .map(role => role.role as AppRole) || []
-      })) || [];
+      }));
 
       setUsers(usersWithRoles);
     } catch (error) {
@@ -286,12 +306,27 @@ export function useUserRoles() {
     if (!isAdmin) return { error: 'Unauthorized' };
 
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update(updates)
-        .eq('id', userId);
+      // Separate email updates from profile updates
+      const { email, ...profileUpdates } = updates;
 
-      if (error) throw error;
+      // Update profile fields
+      if (Object.keys(profileUpdates).length > 0) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update(profileUpdates)
+          .eq('id', userId);
+
+        if (profileError) throw profileError;
+      }
+
+      // Update email in auth.users if provided
+      if (email) {
+        const { error: emailError } = await supabase.auth.admin.updateUserById(userId, {
+          email: email
+        });
+
+        if (emailError) throw emailError;
+      }
 
       await fetchUsers();
       return { success: true };

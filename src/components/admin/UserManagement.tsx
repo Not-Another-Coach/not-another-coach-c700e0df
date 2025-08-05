@@ -277,6 +277,7 @@ export const UserManagement = () => {
     setEditingProfile({
       first_name: user.first_name,
       last_name: user.last_name,
+      email: user.email,
       user_type: user.user_type
     });
     setNotesForm(user.admin_notes || '');
@@ -337,7 +338,10 @@ export const UserManagement = () => {
                             : 'Unnamed User'
                           }
                         </div>
-                        <div className="text-sm text-muted-foreground font-mono">
+                        <div className="text-sm text-muted-foreground">
+                          {user.email || 'No email'}
+                        </div>
+                        <div className="text-xs text-muted-foreground font-mono">
                           {user.id.slice(0, 8)}...
                         </div>
                       </div>
@@ -472,6 +476,15 @@ export const UserManagement = () => {
                                     <Input
                                       value={editingProfile.last_name || ''}
                                       onChange={(e) => setEditingProfile(prev => ({ ...prev, last_name: e.target.value }))}
+                                    />
+                                  </div>
+                                  <div className="space-y-2 col-span-2">
+                                    <Label>Email Address</Label>
+                                    <Input
+                                      type="email"
+                                      value={editingProfile.email || ''}
+                                      onChange={(e) => setEditingProfile(prev => ({ ...prev, email: e.target.value }))}
+                                      placeholder="user@example.com"
                                     />
                                   </div>
                                   <div className="space-y-2">
