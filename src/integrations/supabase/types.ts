@@ -302,6 +302,96 @@ export type Database = {
         }
         Relationships: []
       }
+      discovery_call_feedback: {
+        Row: {
+          asked_right_questions: number | null
+          client_id: string
+          coach_notes: string | null
+          coach_viewed_at: string | null
+          comfort_level: string | null
+          comparison_notes: string | null
+          conversation_helpful: number | null
+          created_at: string
+          discovery_call_id: string
+          id: string
+          professionalism: number | null
+          share_with_coach: boolean
+          submitted_at: string
+          trainer_id: string
+          updated_at: string
+          what_stood_out: string | null
+          would_consider_training: string | null
+        }
+        Insert: {
+          asked_right_questions?: number | null
+          client_id: string
+          coach_notes?: string | null
+          coach_viewed_at?: string | null
+          comfort_level?: string | null
+          comparison_notes?: string | null
+          conversation_helpful?: number | null
+          created_at?: string
+          discovery_call_id: string
+          id?: string
+          professionalism?: number | null
+          share_with_coach?: boolean
+          submitted_at?: string
+          trainer_id: string
+          updated_at?: string
+          what_stood_out?: string | null
+          would_consider_training?: string | null
+        }
+        Update: {
+          asked_right_questions?: number | null
+          client_id?: string
+          coach_notes?: string | null
+          coach_viewed_at?: string | null
+          comfort_level?: string | null
+          comparison_notes?: string | null
+          conversation_helpful?: number | null
+          created_at?: string
+          discovery_call_id?: string
+          id?: string
+          professionalism?: number | null
+          share_with_coach?: boolean
+          submitted_at?: string
+          trainer_id?: string
+          updated_at?: string
+          what_stood_out?: string | null
+          would_consider_training?: string | null
+        }
+        Relationships: []
+      }
+      discovery_call_feedback_notifications: {
+        Row: {
+          client_id: string
+          created_at: string
+          discovery_call_id: string
+          id: string
+          notification_type: string
+          scheduled_for: string
+          sent_at: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          discovery_call_id: string
+          id?: string
+          notification_type: string
+          scheduled_for: string
+          sent_at?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          discovery_call_id?: string
+          id?: string
+          notification_type?: string
+          scheduled_for?: string
+          sent_at?: string | null
+        }
+        Relationships: []
+      }
       discovery_call_notes: {
         Row: {
           client_id: string
