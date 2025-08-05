@@ -50,8 +50,9 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
     } else {
       console.log('No profile ID available');
       setLoading(false);
+      onCountChange?.(0);
     }
-  }, [profile?.id]);
+  }, [profile?.id, onCountChange]);
 
   const fetchProspects = async () => {
     if (!profile?.id) {

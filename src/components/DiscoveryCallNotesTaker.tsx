@@ -180,7 +180,7 @@ export function DiscoveryCallNotesTaker({
               value={content}
               onChange={(e) => handleContentChange(e.target.value)}
               placeholder="Add your private notes about this client's goals, preferences, concerns, or any observations from your conversation..."
-              className={`resize-none overflow-hidden ${compact ? 'min-h-[120px]' : 'min-h-[200px]'}`}
+              className={`resize-none overflow-y-auto ${compact ? 'min-h-[120px]' : 'min-h-[200px]'} max-h-[400px]`}
               disabled={saving}
               style={{ height: 'auto' }}
             />
