@@ -106,36 +106,30 @@ export default function Shortlist() {
                         variant="outline"
                       />
                       {shortlisted.discovery_call ? (
-                        <>
-                          <EditDiscoveryCallButton 
-                            trainer={{
-                              id: shortlisted.trainer_id,
-                              name: `Trainer ${shortlisted.trainer_id}`,
-                              firstName: `Trainer`,
-                              lastName: shortlisted.trainer_id
-                            }}
-                            discoveryCall={shortlisted.discovery_call}
-                            variant="default"
-                            size="sm"
-                            onCallUpdated={refetchShortlisted}
-                          />
-                          {console.log('Showing EditDiscoveryCallButton for trainer:', shortlisted.trainer_id, 'with discovery call:', shortlisted.discovery_call)}
-                        </>
+                        <EditDiscoveryCallButton 
+                          trainer={{
+                            id: shortlisted.trainer_id,
+                            name: `Trainer ${shortlisted.trainer_id}`,
+                            firstName: `Trainer`,
+                            lastName: shortlisted.trainer_id
+                          }}
+                          discoveryCall={shortlisted.discovery_call}
+                          variant="default"
+                          size="sm"
+                          onCallUpdated={refetchShortlisted}
+                        />
                       ) : (
-                        <>
-                          <BookDiscoveryCallButton 
-                            trainer={{
-                              id: shortlisted.trainer_id,
-                              name: `Trainer ${shortlisted.trainer_id}`,
-                              firstName: `Trainer`,
-                              lastName: shortlisted.trainer_id
-                            }}
-                            variant="default"
-                            size="sm"
-                            onCallBooked={refetchShortlisted}
-                          />
-                          {console.log('Showing BookDiscoveryCallButton for trainer:', shortlisted.trainer_id, 'discovery_call_booked_at:', shortlisted.discovery_call_booked_at)}
-                        </>
+                        <BookDiscoveryCallButton 
+                          trainer={{
+                            id: shortlisted.trainer_id,
+                            name: `Trainer ${shortlisted.trainer_id}`,
+                            firstName: `Trainer`,
+                            lastName: shortlisted.trainer_id
+                          }}
+                          variant="default"
+                          size="sm"
+                          onCallBooked={refetchShortlisted}
+                        />
                       )}
                     </div>
 
