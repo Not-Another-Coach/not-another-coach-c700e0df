@@ -16,6 +16,7 @@ import { TrainerCard } from "@/components/TrainerCard";
 import { SwipeableCard } from "@/components/SwipeableCard";
 import { ComparisonView } from "@/components/ComparisonView";
 import { BookDiscoveryCallButton } from "@/components/discovery-call/BookDiscoveryCallButton";
+import { EditDiscoveryCallButton } from "@/components/discovery-call/EditDiscoveryCallButton";
 import { toast } from "sonner";
 import { 
   Search, 
@@ -109,7 +110,7 @@ const sampleTrainers = [
 export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
   const navigate = useNavigate();
   const { savedTrainerIds, unsaveTrainer } = useSavedTrainers();
-  const { shortlistTrainer, isShortlisted, shortlistCount, canShortlistMore, removeFromShortlist, bookDiscoveryCall } = useShortlistedTrainers();
+  const { shortlistTrainer, isShortlisted, shortlistCount, canShortlistMore, removeFromShortlist, bookDiscoveryCall, shortlistedTrainers: actualShortlistedTrainers } = useShortlistedTrainers();
   
   // Use real trainers from database
   const { trainers: realTrainers, loading: trainersLoading } = useRealTrainers();
@@ -663,78 +664,113 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
               )}
             </div>
           </div>
-          {shortlistedTrainers.length > 0 ? (
+          {actualShortlistedTrainers.length > 0 ? (
             <div className="space-y-4">
               <div className="text-sm text-muted-foreground">
                 These are your top trainer choices. You can chat with them and book discovery calls.
               </div>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {shortlistedTrainers.map((match) => (
-                  <div key={match.trainer.id} className="relative">
-                    {/* Comparison Checkbox */}
-                    <div className="absolute top-2 right-2 z-20">
-                      <Checkbox
-                        checked={selectedForComparison.includes(match.trainer.id)}
-                        onCheckedChange={() => handleComparisonToggle(match.trainer.id)}
-                        disabled={!selectedForComparison.includes(match.trainer.id) && selectedForComparison.length >= 4}
-                        className="bg-white border-2 shadow-sm"
-                      />
-                    </div>
+                {actualShortlistedTrainers.map((shortlisted) => {
+                  // Find the trainer data from our matched trainers
+                  const trainerMatch = matchedTrainers.find(match => match.trainer.id === shortlisted.trainer_id);
+                  const trainer = trainerMatch?.trainer || {
+                    id: shortlisted.trainer_id,
+                    name: `Trainer ${shortlisted.trainer_id}`,
+                    specialties: [],
+                    rating: 0,
+                    reviews: 0,
+                    experience: '',
+                    location: '',
+                    hourlyRate: 0,
+                    image: '',
+                    certifications: [],
+                    description: '',
+                    availability: '',
+                    trainingType: []
+                  };
+                  
+                  return (
+                    <div key={shortlisted.trainer_id} className="relative">
+                      {/* Comparison Checkbox */}
+                      <div className="absolute top-2 right-2 z-20">
+                        <Checkbox
+                          checked={selectedForComparison.includes(shortlisted.trainer_id)}
+                          onCheckedChange={() => handleComparisonToggle(shortlisted.trainer_id)}
+                          disabled={!selectedForComparison.includes(shortlisted.trainer_id) && selectedForComparison.length >= 4}
+                          className="bg-white border-2 shadow-sm"
+                        />
+                      </div>
 
-                    <TrainerCard
-                      trainer={match.trainer}
-                      onViewProfile={handleViewProfile}
-                      matchScore={match.score}
-                      matchReasons={match.matchReasons}
-                      matchDetails={match.matchDetails}
-                    />
-                    <Badge 
-                      className="absolute top-2 right-14 bg-yellow-500 text-white z-10"
-                    >
-                      ⭐ Shortlisted
-                    </Badge>
-                    
-                    {/* Remove from Shortlist Button */}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="absolute top-2 left-2 bg-white/90 backdrop-blur hover:bg-red-50 hover:text-red-600 z-10"
-                      onClick={() => handleRemoveFromShortlist(match.trainer.id, match.trainer.name)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                    
-                    {/* Action Buttons for Shortlisted Trainers */}
-                    <div className="mt-4 grid grid-cols-3 gap-2">
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        className="flex items-center gap-1 text-xs"
-                        onClick={() => handleViewProfile(match.trainer.id)}
-                      >
-                        View Profile
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="default" 
-                        className="flex items-center gap-1 text-xs"
-                        onClick={() => handleMessage(match.trainer.id)}
-                      >
-                        <MessageCircle className="h-3 w-3" />
-                        Chat
-                      </Button>
-                      <BookDiscoveryCallButton 
-                        trainer={{
-                          id: match.trainer.id,
-                          name: match.trainer.name
-                        }}
-                        size="sm"
-                        variant="outline"
-                        className="text-xs"
+                      <TrainerCard
+                        trainer={trainer}
+                        onViewProfile={handleViewProfile}
+                        matchScore={trainerMatch?.score || 0}
+                        matchReasons={trainerMatch?.matchReasons || []}
+                        matchDetails={trainerMatch?.matchDetails || []}
                       />
+                      <Badge 
+                        className="absolute top-2 right-14 bg-yellow-500 text-white z-10"
+                      >
+                        ⭐ Shortlisted
+                      </Badge>
+                      
+                      {/* Remove from Shortlist Button */}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="absolute top-2 left-2 bg-white/90 backdrop-blur hover:bg-red-50 hover:text-red-600 z-10"
+                        onClick={() => handleRemoveFromShortlist(shortlisted.trainer_id, trainer.name)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                      
+                      {/* Action Buttons for Shortlisted Trainers */}
+                      <div className="mt-4 grid grid-cols-3 gap-2">
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="flex items-center gap-1 text-xs"
+                          onClick={() => handleViewProfile(shortlisted.trainer_id)}
+                        >
+                          View Profile
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="default" 
+                          className="flex items-center gap-1 text-xs"
+                          onClick={() => handleMessage(shortlisted.trainer_id)}
+                        >
+                          <MessageCircle className="h-3 w-3" />
+                          Chat
+                        </Button>
+                        {shortlisted.discovery_call ? (
+                          <EditDiscoveryCallButton 
+                            trainer={{
+                              id: shortlisted.trainer_id,
+                              name: trainer.name,
+                              firstName: trainer.name.split(' ')[0] || 'Trainer',
+                              lastName: trainer.name.split(' ')[1] || shortlisted.trainer_id
+                            }}
+                            discoveryCall={shortlisted.discovery_call}
+                            variant="outline"
+                            size="sm"
+                            className="text-xs"
+                          />
+                        ) : (
+                          <BookDiscoveryCallButton 
+                            trainer={{
+                              id: shortlisted.trainer_id,
+                              name: trainer.name
+                            }}
+                            size="sm"
+                            variant="outline"
+                            className="text-xs"
+                          />
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ) : (
