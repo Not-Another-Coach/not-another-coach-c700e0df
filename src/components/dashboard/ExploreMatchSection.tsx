@@ -553,30 +553,17 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
         <TabsContent value="saved" className="space-y-4">
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
             <h2 className="text-xl font-semibold">Your Saved Trainers</h2>
-            <div className="flex items-center gap-2 flex-wrap">
-              <Badge variant="outline">{savedTrainers.length} saved</Badge>
-              <Badge variant="outline">{shortlistCount}/4 shortlisted</Badge>
-              {selectedForComparison.length >= 2 && (
-                <Button 
-                  variant="default" 
-                  size="sm"
-                  onClick={handleStartComparison}
-                  className="flex items-center gap-2"
-                >
-                  <BarChart3 className="h-4 w-4" />
-                  Compare ({selectedForComparison.length})
-                </Button>
-              )}
+            {selectedForComparison.length >= 2 && (
               <Button 
-                variant="outline" 
+                variant="default" 
                 size="sm"
-                onClick={() => navigate('/saved')}
+                onClick={handleStartComparison}
                 className="flex items-center gap-2"
               >
-                <Heart className="h-4 w-4" />
-                View All Saved
+                <BarChart3 className="h-4 w-4" />
+                Compare ({selectedForComparison.length})
               </Button>
-            </div>
+            )}
           </div>
           {savedTrainers.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
