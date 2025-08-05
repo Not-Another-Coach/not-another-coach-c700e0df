@@ -8,6 +8,7 @@ import { useUserRoles } from "@/hooks/useUserRoles";
 import { useWaitlist } from "@/hooks/useWaitlist";
 import { AvailabilitySettings } from "@/components/coach/AvailabilitySettings";
 import { WaitlistManagement } from "@/components/coach/WaitlistManagement";
+import { CoachFeedbackSummary } from "@/components/coach/CoachFeedbackSummary";
 import { ActiveClientsSection } from "@/components/coach/ActiveClientsSection";
 import { ProspectsSection } from "@/components/coach/ProspectsSection";
 import { FloatingMessageButton } from "@/components/FloatingMessageButton";
@@ -509,9 +510,12 @@ const TrainerDashboard = () => {
                      <Settings className="w-4 h-4 mr-2" />
                      Advanced Settings
                    </Button>
-                 </div>
-               </CardContent>
-             </Card>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Coach Feedback Summary */}
+            <CoachFeedbackSummary />
           </div>
 
           {/* Right Column: Live Activity Feed + Actions */}

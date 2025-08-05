@@ -18,8 +18,10 @@ import { ClientSurveyWidget } from "@/components/dashboard/ClientSurveyWidget";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { FloatingMessageButton } from "@/components/FloatingMessageButton";
 import { ClientJourneyBreadcrumb } from "@/components/ClientJourneyBreadcrumb";
+import { DiscoveryCallFeedbackPrompt } from "@/components/dashboard/DiscoveryCallFeedbackPrompt";
 import { useClientJourneyProgress } from "@/hooks/useClientJourneyProgress";
 import { Heart, Settings, Search, MessageCircle, Menu, Users, Shuffle, Shield } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function ClientDashboard() {
   const { user, signOut, loading } = useAuth();
@@ -30,6 +32,8 @@ export default function ClientDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
   const [activeTab, setActiveTab] = useState("summary");
+  const [completedDiscoveryCalls, setCompletedDiscoveryCalls] = useState([]);
+  const [dismissedFeedbackPrompts, setDismissedFeedbackPrompts] = useState<string[]>([]);
 
   // Redirect if not logged in
   useEffect(() => {
@@ -49,6 +53,40 @@ export default function ClientDashboard() {
       }
     }
   }, [user, profile, loading, profileLoading, isTrainer, navigate, location.pathname]);
+
+  // Load completed discovery calls for feedback prompts
+  useEffect(() => {
+    const loadCompletedCalls = async () => {
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('discovery_calls')
+        .select(`
+          id,
+          trainer_id,
+          scheduled_for,
+          status,
+          profiles!discovery_calls_trainer_id_fkey(first_name, last_name)
+        `)
+        .eq('client_id', user.id)
+        .eq('status', 'completed')
+        .order('scheduled_for', { ascending: false });
+
+      if (data && !error) {
+        const formattedCalls = data.map(call => ({
+          ...call,
+          trainer_profile: call.profiles
+        }));
+        setCompletedDiscoveryCalls(formattedCalls);
+      }
+    };
+
+    loadCompletedCalls();
+  }, [user]);
+
+  const handleDismissFeedback = (callId: string) => {
+    setDismissedFeedbackPrompts(prev => [...prev, callId]);
+  };
 
   // Redirect clients to client survey if not completed (check both flags)
   useEffect(() => {
@@ -170,6 +208,16 @@ export default function ClientDashboard() {
 
           {/* Tab Content */}
           <TabsContent value="summary" className="space-y-6">
+            {/* Discovery Call Feedback Prompts */}
+            {completedDiscoveryCalls.length > 0 && (
+              <DiscoveryCallFeedbackPrompt 
+                completedCalls={completedDiscoveryCalls.filter(call => 
+                  !dismissedFeedbackPrompts.includes(call.id)
+                )}
+                onDismiss={handleDismissFeedback}
+              />
+            )}
+            
             <DashboardSummary 
               profile={profile}
               onTabChange={setActiveTab}
