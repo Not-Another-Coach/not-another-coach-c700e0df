@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UserManagement } from '@/components/admin/UserManagement';
 import { FeedbackQuestionBuilder } from '@/components/admin/FeedbackQuestionBuilder';
+import { BulkUserUpload } from '@/components/admin/BulkUserUpload';
 import { VisibilitySettingsSection } from '@/components/trainer-setup/VisibilitySettingsSection';
-import { Settings, Users, Shield, BarChart3, ArrowLeft, Home, Eye } from 'lucide-react';
+import { Settings, Users, Shield, BarChart3, ArrowLeft, Home, Eye, Upload } from 'lucide-react';
 import { useUserRoles } from '@/hooks/useUserRoles';
 
 export const AdminDashboard = () => {
@@ -70,10 +71,14 @@ export const AdminDashboard = () => {
       </div>
 
       <Tabs defaultValue="users" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="users" className="flex items-center gap-2">
             <Users className="w-4 h-4" />
             Users & Roles
+          </TabsTrigger>
+          <TabsTrigger value="bulk-upload" className="flex items-center gap-2">
+            <Upload className="w-4 h-4" />
+            Bulk Upload
           </TabsTrigger>
           <TabsTrigger value="feedback" className="flex items-center gap-2">
             <Settings className="w-4 h-4" />
@@ -95,6 +100,10 @@ export const AdminDashboard = () => {
 
           <TabsContent value="users">
             <UserManagement />
+          </TabsContent>
+
+          <TabsContent value="bulk-upload">
+            <BulkUserUpload />
           </TabsContent>
 
           <TabsContent value="feedback">
