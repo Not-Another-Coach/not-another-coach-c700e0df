@@ -192,8 +192,8 @@ export default function ClientDashboard() {
                 <span className="hidden sm:inline">Explore</span>
               </TabsTrigger>
               <TabsTrigger value="swipe" className="flex items-center gap-2">
-                <Shuffle className="h-4 w-4" />
-                <span className="hidden sm:inline">Swipe</span>
+                <Users className="h-4 w-4" />
+                <span className="hidden sm:inline">Trainers</span>
               </TabsTrigger>
               <TabsTrigger value="messages" className="flex items-center gap-2">
                 <MessageCircle className="h-4 w-4" />

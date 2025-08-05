@@ -1,11 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TrainerCard } from "@/components/TrainerCard";
-import { Heart, X, Shuffle, Users } from "lucide-react";
+import { Heart, X, Shuffle, Users, Phone, MessageCircle, Star, CheckCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useShortlistedTrainers } from "@/hooks/useShortlistedTrainers";
+import { useDiscoveryCallFeedback } from "@/hooks/useDiscoveryCallFeedback";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { DiscoveryCallFeedbackModal } from "@/components/discovery-call/DiscoveryCallFeedbackModal";
 
 // Mock data - in real app this would come from swipe history API
 import trainerSarah from "@/assets/trainer-sarah.jpg";
@@ -69,11 +75,83 @@ interface SwipeResultsSectionProps {
 
 export function SwipeResultsSection({ profile }: SwipeResultsSectionProps) {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("liked");
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const { shortlistedTrainers, loading, removeFromShortlist, refetchShortlisted } = useShortlistedTrainers();
+  const { submitFeedback, getFeedback } = useDiscoveryCallFeedback();
+  
+  const [activeTab, setActiveTab] = useState("shortlisted");
+  const [completedDiscoveryCalls, setCompletedDiscoveryCalls] = useState([]);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState<{[key: string]: boolean}>({});
+  const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
+  const [selectedCall, setSelectedCall] = useState<any>(null);
+
+  // Load completed discovery calls
+  useEffect(() => {
+    const loadCompletedCalls = async () => {
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('discovery_calls')
+        .select(`
+          id,
+          trainer_id,
+          scheduled_for,
+          status,
+          profiles!discovery_calls_trainer_id_fkey(first_name, last_name)
+        `)
+        .eq('client_id', user.id)
+        .eq('status', 'completed')
+        .order('scheduled_for', { ascending: false });
+
+      if (data && !error) {
+        setCompletedDiscoveryCalls(data);
+        
+        // Check feedback status for each completed call
+        const feedbackStatus = {};
+        for (const call of data) {
+          const { data: feedback } = await getFeedback(call.id);
+          feedbackStatus[call.trainer_id] = !!feedback;
+        }
+        setFeedbackSubmitted(feedbackStatus);
+      }
+    };
+
+    loadCompletedCalls();
+  }, [user, getFeedback]);
+
+  // Filter shortlisted trainers into those with and without completed discovery calls
+  const shortlistedOnly = shortlistedTrainers.filter(trainer => 
+    !completedDiscoveryCalls.some(call => call.trainer_id === trainer.trainer_id)
+  );
+  
+  const discoveryCompleted = completedDiscoveryCalls.map(call => {
+    const shortlistedTrainer = shortlistedTrainers.find(t => t.trainer_id === call.trainer_id);
+    return {
+      ...call,
+      shortlistedData: shortlistedTrainer,
+      hasFeedback: feedbackSubmitted[call.trainer_id] || false
+    };
+  });
+
+  const handleChooseCoach = async (trainerId: string) => {
+    // TODO: Implement coach selection logic
+    toast({
+      title: "Feature Coming Soon",
+      description: "Coach selection and onboarding process will be available soon.",
+    });
+  };
+
+  const handleMoveBackToShortlist = async (trainerId: string) => {
+    // This would reset the discovery call status for the trainer
+    toast({
+      title: "Feature Coming Soon", 
+      description: "Moving trainers back to shortlist will be available soon.",
+    });
+  };
 
   const handleViewProfile = (trainerId: string) => {
-    console.log("View profile:", trainerId);
-    // This would navigate to trainer detail page
+    navigate(`/trainer/${trainerId}`);
   };
 
   const handleReLike = (trainerId: string) => {
@@ -81,128 +159,259 @@ export function SwipeResultsSection({ profile }: SwipeResultsSectionProps) {
     console.log("Re-liked trainer:", trainerId);
   };
 
+  const handleOpenFeedbackModal = (call: any) => {
+    setSelectedCall({
+      id: call.id,
+      trainer_id: call.trainer_id,
+      trainer_name: `${call.profiles?.first_name || 'Trainer'} ${call.profiles?.last_name || call.trainer_id}`,
+      scheduled_for: call.scheduled_for,
+    });
+    setFeedbackModalOpen(true);
+  };
+
+  const handleFeedbackSubmitted = () => {
+    if (selectedCall) {
+      setFeedbackSubmitted(prev => ({ ...prev, [selectedCall.trainer_id]: true }));
+    }
+    // Refresh data
+    if (user) {
+      const loadCompletedCalls = async () => {
+        const { data, error } = await supabase
+          .from('discovery_calls')
+          .select(`
+            id,
+            trainer_id,
+            scheduled_for,
+            status,
+            profiles!discovery_calls_trainer_id_fkey(first_name, last_name)
+          `)
+          .eq('client_id', user.id)
+          .eq('status', 'completed')
+          .order('scheduled_for', { ascending: false });
+
+        if (data && !error) {
+          setCompletedDiscoveryCalls(data);
+          
+          // Check feedback status for each completed call
+          const feedbackStatus = {};
+          for (const call of data) {
+            const { data: feedback } = await getFeedback(call.id);
+            feedbackStatus[call.trainer_id] = !!feedback;
+          }
+          setFeedbackSubmitted(feedbackStatus);
+        }
+      };
+      loadCompletedCalls();
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading your trainers...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Your Swipe History</h1>
+          <h1 className="text-3xl font-bold">Your Trainers</h1>
           <p className="text-muted-foreground">
-            Review your liked and passed trainers from discovery sessions
+            Manage your shortlisted trainers and those you've spoken with
           </p>
         </div>
         <Button onClick={() => navigate('/discovery')}>
           <Shuffle className="h-4 w-4 mr-2" />
-          Continue Swiping
+          Discover More
         </Button>
       </div>
 
-      {/* Tabs for liked/unliked */}
+      {/* Tabs for shortlisted/discovery completed */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="liked" className="flex items-center gap-2">
-            <Heart className="h-4 w-4" />
-            <span>Liked ({mockLikedTrainers.length})</span>
+        <TabsList className={`grid w-full ${discoveryCompleted.length > 0 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+          <TabsTrigger value="shortlisted" className="flex items-center gap-2">
+            <Star className="h-4 w-4" />
+            <span>Shortlisted ({shortlistedOnly.length})</span>
           </TabsTrigger>
-          <TabsTrigger value="unliked" className="flex items-center gap-2">
-            <X className="h-4 w-4" />
-            <span>Passed ({mockUnlikedTrainers.length})</span>
-          </TabsTrigger>
+          {discoveryCompleted.length > 0 && (
+            <TabsTrigger value="discovery" className="flex items-center gap-2">
+              <Phone className="h-4 w-4" />
+              <span>Discovery Calls ({discoveryCompleted.length})</span>
+            </TabsTrigger>
+          )}
         </TabsList>
 
-        {/* Liked Trainers */}
-        <TabsContent value="liked" className="space-y-4">
+        {/* Shortlisted Trainers */}
+        <TabsContent value="shortlisted" className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Trainers You Liked</h2>
-            <Badge variant="outline">{mockLikedTrainers.length} trainers</Badge>
+            <h2 className="text-xl font-semibold">Shortlisted Trainers</h2>
+            <Badge variant="outline">{shortlistedOnly.length} trainers</Badge>
           </div>
           
-          {mockLikedTrainers.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mockLikedTrainers.map((trainer) => (
-                <div key={trainer.id} className="relative">
-                  <TrainerCard
-                    trainer={trainer}
-                    onViewProfile={handleViewProfile}
-                  />
-                  <Badge 
-                    className="absolute top-2 right-2 bg-green-500 text-white"
-                  >
-                    ❤️ Liked
-                  </Badge>
-                </div>
+          {shortlistedOnly.length > 0 ? (
+            <div className="grid md:grid-cols-2 gap-6">
+              {shortlistedOnly.map((trainer) => (
+                <Card key={trainer.id} className="border-l-4 border-l-primary">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <CardTitle>Trainer #{trainer.trainer_id}</CardTitle>
+                        <p className="text-sm text-muted-foreground">
+                          Shortlisted {new Date(trainer.shortlisted_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => removeFromShortlist(trainer.trainer_id)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex gap-2">
+                        <Badge variant="default" className="bg-green-100 text-green-800">
+                          Chat Enabled
+                        </Badge>
+                        <Badge variant="default" className="bg-blue-100 text-blue-800">
+                          Discovery Call Available
+                        </Badge>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button variant="outline" size="sm">
+                          <MessageCircle className="h-4 w-4 mr-2" />
+                          Chat
+                        </Button>
+                        <Button variant="default" size="sm">
+                          <Phone className="h-4 w-4 mr-2" />
+                          Book Call
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           ) : (
             <Card>
               <CardContent className="p-8 text-center">
-                <Heart className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No liked trainers yet</h3>
+                <Star className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No shortlisted trainers</h3>
                 <p className="text-muted-foreground mb-4">
-                  Start swiping to like trainers and build your matches
+                  Discover and shortlist trainers to unlock chat and discovery call features
                 </p>
                 <Button onClick={() => navigate('/discovery')}>
-                  Start Swiping
+                  Discover Trainers
                 </Button>
               </CardContent>
             </Card>
           )}
         </TabsContent>
 
-        {/* Passed/Unliked Trainers */}
-        <TabsContent value="unliked" className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Trainers You Passed</h2>
-            <Badge variant="outline">{mockUnlikedTrainers.length} trainers</Badge>
-          </div>
-          
-          {mockUnlikedTrainers.length > 0 ? (
-            <div className="space-y-4">
-              <div className="text-sm text-muted-foreground">
-                Changed your mind? You can give these trainers another chance.
-              </div>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {mockUnlikedTrainers.map((trainer) => (
-                  <div key={trainer.id} className="relative">
-                    <TrainerCard
-                      trainer={trainer}
-                      onViewProfile={handleViewProfile}
-                    />
-                    <div className="absolute top-2 right-2 flex gap-1">
-                      <Badge variant="secondary">
-                        Passed
-                      </Badge>
-                    </div>
-                    <div className="absolute bottom-2 right-2">
-                      <Button
-                        size="sm"
-                        onClick={() => handleReLike(trainer.id)}
-                        className="bg-green-500 hover:bg-green-600 text-white"
-                      >
-                        <Heart className="h-3 w-3 mr-1" />
-                        Like
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+        {/* Discovery Calls Completed */}
+        {discoveryCompleted.length > 0 && (
+          <TabsContent value="discovery" className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">Discovery Calls Completed</h2>
+              <Badge variant="outline">{discoveryCompleted.length} trainers</Badge>
             </div>
-          ) : (
-            <Card>
-              <CardContent className="p-8 text-center">
-                <X className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No passed trainers</h3>
-                <p className="text-muted-foreground mb-4">
-                  Trainers you pass on will appear here for a second chance
-                </p>
-                <Button onClick={() => navigate('/discovery')}>
-                  Start Swiping
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
+            
+            <div className="grid md:grid-cols-2 gap-6">
+              {discoveryCompleted.map((call) => (
+                <Card key={call.id} className="border-l-4 border-l-blue-500">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <CardTitle className="flex items-center gap-2">
+                          {call.profiles?.first_name} {call.profiles?.last_name}
+                          <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Call Complete
+                          </Badge>
+                        </CardTitle>
+                        <p className="text-sm text-muted-foreground">
+                          Discovery call on {new Date(call.scheduled_for).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {/* Feedback Status */}
+                      {call.hasFeedback ? (
+                        <div className="p-3 bg-green-50 rounded-lg">
+                          <div className="flex items-center gap-2 text-green-800">
+                            <CheckCircle className="h-4 w-4" />
+                            <span className="text-sm font-medium">Feedback submitted</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="p-3 bg-amber-50 rounded-lg">
+                          <div className="text-amber-800 text-sm">
+                            Please submit feedback before choosing this coach
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Action Buttons */}
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleMoveBackToShortlist(call.trainer_id)}
+                        >
+                          Move to Shortlist
+                        </Button>
+                        <Button 
+                          variant="default" 
+                          size="sm"
+                          disabled={!call.hasFeedback}
+                          onClick={() => handleChooseCoach(call.trainer_id)}
+                          className={call.hasFeedback ? "bg-green-600 hover:bg-green-700" : ""}
+                        >
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Choose Coach
+                        </Button>
+                      </div>
+
+                      {!call.hasFeedback && (
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full"
+                          onClick={() => handleOpenFeedbackModal(call)}
+                        >
+                          Submit Feedback
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+        )}
+
       </Tabs>
+
+      {/* Feedback Modal */}
+      {selectedCall && (
+        <DiscoveryCallFeedbackModal
+          open={feedbackModalOpen}
+          onOpenChange={setFeedbackModalOpen}
+          discoveryCall={selectedCall}
+          onFeedbackSubmitted={handleFeedbackSubmitted}
+        />
+      )}
     </div>
   );
 }
