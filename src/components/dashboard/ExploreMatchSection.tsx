@@ -176,18 +176,19 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
 
       setLoadingSavedTrainers(true);
       try {
-        const savedTrainers = [];
+        // Use a Map to ensure no duplicates
+        const savedTrainersMap = new Map();
         
         // First, add trainers from matchedTrainers that are saved
-        const savedFromMatched = matchedTrainers.filter(match => 
-          savedTrainerIds.includes(match.trainer.id) && !isShortlisted(match.trainer.id)
-        );
-        savedTrainers.push(...savedFromMatched);
+        matchedTrainers.forEach(match => {
+          if (savedTrainerIds.includes(match.trainer.id) && !isShortlisted(match.trainer.id)) {
+            savedTrainersMap.set(match.trainer.id, match);
+          }
+        });
         
-        // Find missing saved trainer IDs that aren't in matchedTrainers
-        const savedIdsFromMatched = savedFromMatched.map(s => s.trainer.id);
+        // Find missing saved trainer IDs that aren't already in our map
         const missingSavedIds = savedTrainerIds.filter(id => 
-          !savedIdsFromMatched.includes(id) && !isShortlisted(id)
+          !savedTrainersMap.has(id) && !isShortlisted(id)
         );
         
         // Fetch missing trainer data directly from database
@@ -216,44 +217,49 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
 
           if (!error && missingTrainers) {
             missingTrainers.forEach(trainer => {
-              // Transform database trainer to our format
-              const transformedTrainer = {
-                id: trainer.id,
-                name: `${trainer.first_name || ''} ${trainer.last_name || ''}`.trim() || 'Private Trainer',
-                specialties: trainer.specializations || ['Personal Training'],
-                rating: parseFloat(String(trainer.rating || '4.5')),
-                reviews: trainer.total_ratings || 0,
-                experience: '3+ years', // Default since not in DB
-                location: trainer.location || 'Location TBD',
-                hourlyRate: parseFloat(String(trainer.hourly_rate || '75')),
-                image: trainer.profile_photo_url || '/placeholder.svg',
-                certifications: trainer.qualifications || ['Certified Personal Trainer'],
-                description: trainer.bio || 'Professional personal trainer ready to help you achieve your fitness goals.',
-                availability: 'Flexible',
-                trainingType: trainer.training_types || ['1-on-1', 'Virtual'],
-                offers_discovery_call: trainer.trainer_availability_settings?.[0]?.offers_discovery_call || false
-              };
+              // Only add if not already in map
+              if (!savedTrainersMap.has(trainer.id)) {
+                // Transform database trainer to our format
+                const transformedTrainer = {
+                  id: trainer.id,
+                  name: `${trainer.first_name || ''} ${trainer.last_name || ''}`.trim() || 'Private Trainer',
+                  specialties: trainer.specializations || ['Personal Training'],
+                  rating: parseFloat(String(trainer.rating || '4.5')),
+                  reviews: trainer.total_ratings || 0,
+                  experience: '3+ years', // Default since not in DB
+                  location: trainer.location || 'Location TBD',
+                  hourlyRate: parseFloat(String(trainer.hourly_rate || '75')),
+                  image: trainer.profile_photo_url || '/placeholder.svg',
+                  certifications: trainer.qualifications || ['Certified Personal Trainer'],
+                  description: trainer.bio || 'Professional personal trainer ready to help you achieve your fitness goals.',
+                  availability: 'Flexible',
+                  trainingType: trainer.training_types || ['1-on-1', 'Virtual'],
+                  offers_discovery_call: trainer.trainer_availability_settings?.[0]?.offers_discovery_call || false
+                };
 
-              savedTrainers.push({
-                trainer: transformedTrainer,
-                score: 85,
-                matchReasons: ['Previously saved trainer', 'Good availability match'],
-                matchDetails: []
-              });
+                savedTrainersMap.set(trainer.id, {
+                  trainer: transformedTrainer,
+                  score: 85,
+                  matchReasons: ['Previously saved trainer', 'Good availability match'],
+                  matchDetails: []
+                });
+              }
             });
           }
         }
         
-        setSavedTrainersData(savedTrainers);
+        // Convert map values to array (ensures no duplicates)
+        setSavedTrainersData(Array.from(savedTrainersMap.values()));
       } catch (error) {
         console.error('Error fetching saved trainers:', error);
-        // Fallback to existing logic if database fetch fails
-        const fallbackSavedTrainers = [];
-        const savedFromMatched = matchedTrainers.filter(match => 
-          savedTrainerIds.includes(match.trainer.id) && !isShortlisted(match.trainer.id)
-        );
-        fallbackSavedTrainers.push(...savedFromMatched);
-        setSavedTrainersData(fallbackSavedTrainers);
+        // Fallback to existing logic if database fetch fails - also ensure no duplicates
+        const fallbackMap = new Map();
+        matchedTrainers.forEach(match => {
+          if (savedTrainerIds.includes(match.trainer.id) && !isShortlisted(match.trainer.id)) {
+            fallbackMap.set(match.trainer.id, match);
+          }
+        });
+        setSavedTrainersData(Array.from(fallbackMap.values()));
       } finally {
         setLoadingSavedTrainers(false);
       }
