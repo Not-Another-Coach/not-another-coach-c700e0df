@@ -86,9 +86,9 @@ export function SwipeResultsSection({ profile }: SwipeResultsSectionProps) {
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
   const [selectedCall, setSelectedCall] = useState<any>(null);
 
-  // Load completed discovery calls
+  // Load discovery calls (both scheduled and completed)
   useEffect(() => {
-    const loadCompletedCalls = async () => {
+    const loadDiscoveryCalls = async () => {
       if (!user) return;
 
       const { data, error } = await supabase
@@ -101,38 +101,48 @@ export function SwipeResultsSection({ profile }: SwipeResultsSectionProps) {
           profiles!discovery_calls_trainer_id_fkey(first_name, last_name)
         `)
         .eq('client_id', user.id)
-        .eq('status', 'completed')
+        .in('status', ['scheduled', 'completed'])
         .order('scheduled_for', { ascending: false });
 
       if (data && !error) {
         setCompletedDiscoveryCalls(data);
         
-        // Check feedback status for each completed call
+        // Check feedback status for completed calls only
         const feedbackStatus = {};
         for (const call of data) {
-          const { data: feedback } = await getFeedback(call.id);
-          feedbackStatus[call.trainer_id] = !!feedback;
+          if (call.status === 'completed') {
+            const { data: feedback } = await getFeedback(call.id);
+            feedbackStatus[call.trainer_id] = !!feedback;
+          } else {
+            feedbackStatus[call.trainer_id] = false;
+          }
         }
         setFeedbackSubmitted(feedbackStatus);
       }
     };
 
-    loadCompletedCalls();
+    loadDiscoveryCalls();
   }, [user, getFeedback]);
 
-  // Filter shortlisted trainers into those with and without completed discovery calls
+  // Filter shortlisted trainers: those without discovery calls go to shortlisted tab
   const shortlistedOnly = shortlistedTrainers.filter(trainer => 
+    !trainer.discovery_call_booked_at && 
     !completedDiscoveryCalls.some(call => call.trainer_id === trainer.trainer_id)
   );
   
-  const discoveryCompleted = completedDiscoveryCalls.map(call => {
-    const shortlistedTrainer = shortlistedTrainers.find(t => t.trainer_id === call.trainer_id);
+  // Trainers with discovery calls (scheduled or completed) go to discovery tab
+  const discoveryBookedOrCompleted = shortlistedTrainers.filter(trainer => 
+    trainer.discovery_call_booked_at || 
+    completedDiscoveryCalls.some(call => call.trainer_id === trainer.trainer_id)
+  ).map(trainer => {
+    const discoveryCall = completedDiscoveryCalls.find(call => call.trainer_id === trainer.trainer_id);
     return {
-      ...call,
-      shortlistedData: shortlistedTrainer,
-      hasFeedback: feedbackSubmitted[call.trainer_id] || false
+      ...trainer,
+      discoveryCall,
+      hasFeedback: discoveryCall ? (feedbackSubmitted[trainer.trainer_id] || false) : false,
+      callStatus: discoveryCall ? discoveryCall.status : 'scheduled'
     };
-  }).filter(call => call.shortlistedData); // Only show calls for trainers that were shortlisted
+  });
 
   const handleChooseCoach = async (trainerId: string) => {
     // TODO: Implement coach selection logic
@@ -220,15 +230,15 @@ export function SwipeResultsSection({ profile }: SwipeResultsSectionProps) {
     <div className="space-y-6">
       {/* Tabs for shortlisted/discovery completed */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className={`grid w-full ${discoveryCompleted.length > 0 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+        <TabsList className={`grid w-full ${discoveryBookedOrCompleted.length > 0 ? 'grid-cols-2' : 'grid-cols-1'}`}>
           <TabsTrigger value="shortlisted" className="flex items-center gap-2">
             <Star className="h-4 w-4" />
             <span>Shortlisted ({shortlistedOnly.length})</span>
           </TabsTrigger>
-          {discoveryCompleted.length > 0 && (
+          {discoveryBookedOrCompleted.length > 0 && (
             <TabsTrigger value="discovery" className="flex items-center gap-2">
               <Phone className="h-4 w-4" />
-              <span>Discovery Calls ({discoveryCompleted.length})</span>
+              <span>Discovery Calls ({discoveryBookedOrCompleted.length})</span>
             </TabsTrigger>
           )}
         </TabsList>
@@ -303,25 +313,28 @@ export function SwipeResultsSection({ profile }: SwipeResultsSectionProps) {
           )}
         </TabsContent>
 
-        {/* Discovery Calls Completed */}
-        {discoveryCompleted.length > 0 && (
+        {/* Discovery Calls */}
+        {discoveryBookedOrCompleted.length > 0 && (
           <TabsContent value="discovery" className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Discovery Calls Completed</h2>
-            <Badge variant="outline">{discoveryCompleted.length} trainers</Badge>
+            <h2 className="text-xl font-semibold">Discovery Calls</h2>
+            <Badge variant="outline">{discoveryBookedOrCompleted.length} trainers</Badge>
           </div>
             
           <div className="grid md:grid-cols-2 gap-6">
-            {discoveryCompleted.map((call) => (
-              <Card key={call.id} className="border-l-4 border-l-blue-500">
+            {discoveryBookedOrCompleted.map((trainer) => (
+              <Card key={trainer.id} className="border-l-4 border-l-blue-500">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div>
                       <CardTitle>
-                        {call.profiles?.first_name} {call.profiles?.last_name}
+                        Trainer #{trainer.trainer_id}
                       </CardTitle>
                       <p className="text-sm text-muted-foreground">
-                        Discovery call on {new Date(call.scheduled_for).toLocaleDateString()}
+                        {trainer.discoveryCall ? 
+                          `Discovery call on ${new Date(trainer.discoveryCall.scheduled_for).toLocaleDateString()}` :
+                          `Discovery call booked on ${new Date(trainer.discovery_call_booked_at).toLocaleDateString()}`
+                        }
                       </p>
                     </div>
                   </div>
@@ -331,9 +344,9 @@ export function SwipeResultsSection({ profile }: SwipeResultsSectionProps) {
                     <div className="flex gap-2">
                       <Badge variant="secondary" className="bg-blue-100 text-blue-800">
                         <CheckCircle className="h-3 w-3 mr-1" />
-                        Call Complete
+                        {trainer.callStatus === 'completed' ? 'Call Complete' : 'Call Scheduled'}
                       </Badge>
-                      {call.hasFeedback && (
+                      {trainer.hasFeedback && (
                         <Badge variant="default" className="bg-green-100 text-green-800">
                           <CheckCircle className="h-3 w-3 mr-1" />
                           Feedback Submitted
@@ -345,28 +358,38 @@ export function SwipeResultsSection({ profile }: SwipeResultsSectionProps) {
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={() => handleMoveBackToShortlist(call.trainer_id)}
+                        onClick={() => handleMoveBackToShortlist(trainer.trainer_id)}
                       >
                         <MessageCircle className="h-4 w-4 mr-2" />
                         Move Back
                       </Button>
-                      {call.hasFeedback ? (
-                        <Button 
-                          variant="default" 
-                          size="sm"
-                          onClick={() => handleChooseCoach(call.trainer_id)}
-                          className="bg-green-600 hover:bg-green-700"
-                        >
-                          <CheckCircle className="h-4 w-4 mr-2" />
-                          Choose Coach
-                        </Button>
+                      {trainer.callStatus === 'completed' ? (
+                        trainer.hasFeedback ? (
+                          <Button 
+                            variant="default" 
+                            size="sm"
+                            onClick={() => handleChooseCoach(trainer.trainer_id)}
+                            className="bg-green-600 hover:bg-green-700"
+                          >
+                            <CheckCircle className="h-4 w-4 mr-2" />
+                            Choose Coach
+                          </Button>
+                        ) : (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleOpenFeedbackModal(trainer.discoveryCall)}
+                          >
+                            Submit Feedback
+                          </Button>
+                        )
                       ) : (
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => handleOpenFeedbackModal(call)}
+                          onClick={() => handleViewProfile(trainer.trainer_id)}
                         >
-                          Submit Feedback
+                          View Profile
                         </Button>
                       )}
                     </div>
