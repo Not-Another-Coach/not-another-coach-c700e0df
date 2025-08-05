@@ -1410,6 +1410,13 @@ export type Database = {
         Args: { client_uuid: string; trainer_uuid: string }
         Returns: Database["public"]["Enums"]["engagement_stage"]
       }
+      get_user_emails_for_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          user_id: string
+          email: string
+        }[]
+      }
       get_user_roles: {
         Args: { _user_id: string }
         Returns: {

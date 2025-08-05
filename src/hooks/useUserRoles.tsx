@@ -70,7 +70,7 @@ export function useUserRoles() {
 
     setLoading(true);
     try {
-      // Fetch all profiles joined with auth.users to get email
+      // Fetch all profiles with additional admin fields
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select(`
@@ -83,24 +83,19 @@ export function useUserRoles() {
 
       if (profilesError) throw profilesError;
 
-      // Fetch emails from auth.users for each profile
-      const profilesWithEmails = await Promise.all(
-        profiles?.map(async (profile) => {
-          try {
-            const { data: authUser } = await supabase.auth.admin.getUserById(profile.id);
-            return {
-              ...profile,
-              email: authUser?.user?.email || null
-            };
-          } catch (error) {
-            console.error(`Error fetching email for user ${profile.id}:`, error);
-            return {
-              ...profile,
-              email: null
-            };
-          }
-        }) || []
-      );
+      // Fetch user emails using the database function
+      const { data: userEmails, error: emailsError } = await supabase
+        .rpc('get_user_emails_for_admin');
+
+      if (emailsError) {
+        console.error('Error fetching emails:', emailsError);
+      }
+
+      // Create a map of user IDs to emails for easier lookup
+      const emailMap = new Map();
+      userEmails?.forEach(item => {
+        emailMap.set(item.user_id, item.email);
+      });
 
       // Fetch all user roles
       const { data: userRoles, error: rolesError } = await supabase
@@ -109,12 +104,13 @@ export function useUserRoles() {
 
       if (rolesError) throw rolesError;
 
-      // Combine profiles with their roles
-      const usersWithRoles: UserWithRoles[] = profilesWithEmails.map(profile => ({
+      // Combine profiles with their roles and emails
+      const usersWithRoles: UserWithRoles[] = profiles?.map(profile => ({
         ...profile,
+        email: emailMap.get(profile.id) || null,
         roles: userRoles?.filter(role => role.user_id === profile.id)
           .map(role => role.role as AppRole) || []
-      }));
+      })) || [];
 
       setUsers(usersWithRoles);
     } catch (error) {
