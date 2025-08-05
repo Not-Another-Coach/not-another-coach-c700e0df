@@ -77,7 +77,12 @@ export function useShortlistedTrainers() {
         
         // Merge discovery call data with shortlisted trainers
         const mergedData = validShortlisted.map(shortlisted => {
-          const discoveryCall = discoveryCallsData.find(call => call.trainer_id === shortlisted.trainer_id) || null;
+          console.log('MERGE DEBUG - Looking for discovery call for trainer:', shortlisted.trainer_id, typeof shortlisted.trainer_id);
+          console.log('MERGE DEBUG - Available discovery calls:', discoveryCallsData.map(call => ({ id: call.trainer_id, type: typeof call.trainer_id })));
+          const discoveryCall = discoveryCallsData.find(call => {
+            console.log('MERGE DEBUG - Comparing:', call.trainer_id, 'vs', shortlisted.trainer_id, 'equal?', call.trainer_id === shortlisted.trainer_id);
+            return call.trainer_id === shortlisted.trainer_id;
+          }) || null;
           console.log(`Trainer ${shortlisted.trainer_id} discovery call:`, discoveryCall);
           return {
             ...shortlisted,
