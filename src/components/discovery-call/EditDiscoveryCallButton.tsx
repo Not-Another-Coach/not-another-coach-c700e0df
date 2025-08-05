@@ -229,12 +229,12 @@ export const EditDiscoveryCallButton = ({
           Edit/Cancel Booking
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md" aria-describedby="discovery-call-details">
         <DialogHeader>
           <DialogTitle>Manage Discovery Call</DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-4">
+        <div id="discovery-call-details" className="space-y-4">
           <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
