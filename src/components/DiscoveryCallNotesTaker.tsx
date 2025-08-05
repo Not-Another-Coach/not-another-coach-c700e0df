@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -28,6 +28,7 @@ export function DiscoveryCallNotesTaker({
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (note?.note_content) {
@@ -36,6 +37,28 @@ export function DiscoveryCallNotesTaker({
       setIsExpanded(false);
     }
   }, [note]);
+
+  // Auto-resize textarea based on content
+  const adjustTextareaHeight = () => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      // Reset height to auto to get the correct scrollHeight
+      textarea.style.height = 'auto';
+      
+      // Calculate the new height based on content
+      const scrollHeight = textarea.scrollHeight;
+      const minHeight = compact ? 120 : 200; // minimum height in pixels
+      const maxHeight = 400; // maximum height in pixels
+      
+      // Set the height within our constraints
+      const newHeight = Math.min(Math.max(scrollHeight, minHeight), maxHeight);
+      textarea.style.height = `${newHeight}px`;
+    }
+  };
+
+  useEffect(() => {
+    adjustTextareaHeight();
+  }, [content, isExpanded, compact]);
 
   const handleContentChange = (value: string) => {
     setContent(value);
@@ -57,6 +80,9 @@ export function DiscoveryCallNotesTaker({
     }, 2000);
 
     setAutoSaveTimeout(timeout);
+    
+    // Adjust height after content change
+    setTimeout(adjustTextareaHeight, 0);
   };
 
   const formatLastSaved = (date: Date) => {
@@ -150,11 +176,13 @@ export function DiscoveryCallNotesTaker({
         <CollapsibleContent>
           <CardContent className={compact ? "pt-0" : ""}>
             <Textarea
+              ref={textareaRef}
               value={content}
               onChange={(e) => handleContentChange(e.target.value)}
               placeholder="Add your private notes about this client's goals, preferences, concerns, or any observations from your conversation..."
-              className={`resize-none ${compact ? 'min-h-[120px]' : 'min-h-[200px]'}`}
+              className={`resize-none overflow-hidden ${compact ? 'min-h-[120px]' : 'min-h-[200px]'}`}
               disabled={saving}
+              style={{ height: 'auto' }}
             />
             <p className="text-xs text-muted-foreground mt-2">
               These notes are private and only visible to you. Auto-saves after 2 seconds of inactivity.
