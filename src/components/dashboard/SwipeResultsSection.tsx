@@ -11,6 +11,7 @@ import { useDiscoveryCallFeedback } from "@/hooks/useDiscoveryCallFeedback";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useTrainerEngagement } from "@/hooks/useTrainerEngagement";
 import { DiscoveryCallFeedbackModal } from "@/components/discovery-call/DiscoveryCallFeedbackModal";
 
 // Mock data - in real app this would come from swipe history API
@@ -78,6 +79,7 @@ export function SwipeResultsSection({ profile }: SwipeResultsSectionProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const { shortlistedTrainers, loading, removeFromShortlist, refetchShortlisted } = useShortlistedTrainers();
+  const { getOnlyShortlistedTrainers, getDiscoveryStageTrainers } = useTrainerEngagement();
   const { submitFeedback, getFeedback } = useDiscoveryCallFeedback();
   
   const [activeTab, setActiveTab] = useState("shortlisted");
@@ -127,31 +129,47 @@ export function SwipeResultsSection({ profile }: SwipeResultsSectionProps) {
   console.log('shortlistedTrainers:', shortlistedTrainers);
   console.log('completedDiscoveryCalls:', completedDiscoveryCalls);
   
-  // Debug: log each trainer and their stage  
-  console.log('=== DETAILED TRAINER DEBUG ===');
-  shortlistedTrainers.forEach(trainer => {
-    console.log(`ALL TRAINERS - ID: ${trainer.trainer_id}, stage: ${trainer.stage}, name: Lou Whitton/Alex Johnson/Sarah Smith check`);
-  });
+  // Get the specific engagement stages directly
+  const onlyShortlistedEngagements = getOnlyShortlistedTrainers();
+  const discoveryStageEngagements = getDiscoveryStageTrainers();
+  
+  console.log('=== ENGAGEMENT STAGE DEBUG ===');
+  console.log('Only shortlisted engagements:', onlyShortlistedEngagements.map(e => ({id: e.trainerId, stage: e.stage})));
+  console.log('Discovery stage engagements:', discoveryStageEngagements.map(e => ({id: e.trainerId, stage: e.stage})));
 
-  // Filter shortlisted trainers: those with 'shortlisted' stage go to shortlisted tab
-  const shortlistedOnly = shortlistedTrainers.filter(trainer => {
-    // Get the engagement stage from trainer data
-    const stage = trainer.stage || 'shortlisted'; // fallback for backward compatibility
-    console.log(`SHORTLIST FILTER - Trainer ${trainer.trainer_id}: stage = ${stage}`);
-    return stage === 'shortlisted';
+  // Convert engagement data to the format needed by the UI for shortlisted tab
+  const shortlistedOnly = onlyShortlistedEngagements.map(engagement => {
+    return {
+      id: `shortlist-${engagement.trainerId}`,
+      user_id: user?.id || '',
+      trainer_id: engagement.trainerId,
+      stage: engagement.stage,
+      shortlisted_at: engagement.createdAt,
+      notes: engagement.notes,
+      chat_enabled: true,
+      discovery_call_enabled: true,
+      created_at: engagement.createdAt,
+      updated_at: engagement.updatedAt,
+    };
   });
   
-  // Trainers with discovery_call_booked stage go to discovery tab
-  const discoveryBookedOrCompleted = shortlistedTrainers.filter(trainer => {
-    const stage = trainer.stage || 'shortlisted'; // fallback for backward compatibility
-    console.log(`DISCOVERY FILTER - Trainer ${trainer.trainer_id}: stage = ${stage}`);
-    return stage === 'discovery_call_booked' || stage === 'discovery_completed';
-  }).map(trainer => {
-    const discoveryCall = completedDiscoveryCalls.find(call => call.trainer_id === trainer.trainer_id);
+  // Convert engagement data to the format needed by the UI for discovery tab
+  const discoveryBookedOrCompleted = discoveryStageEngagements.map(engagement => {
+    const discoveryCall = completedDiscoveryCalls.find(call => call.trainer_id === engagement.trainerId);
     return {
-      ...trainer,
+      id: `discovery-${engagement.trainerId}`,
+      user_id: user?.id || '',
+      trainer_id: engagement.trainerId,
+      stage: engagement.stage,
+      shortlisted_at: engagement.createdAt,
+      discovery_call_booked_at: engagement.createdAt,
+      notes: engagement.notes,
+      chat_enabled: true,
+      discovery_call_enabled: true,
+      created_at: engagement.createdAt,
+      updated_at: engagement.updatedAt,
       discoveryCall,
-      hasFeedback: discoveryCall ? (feedbackSubmitted[trainer.trainer_id] || false) : false,
+      hasFeedback: discoveryCall ? (feedbackSubmitted[engagement.trainerId] || false) : false,
       callStatus: discoveryCall ? discoveryCall.status : 'scheduled'
     };
   });

@@ -91,8 +91,24 @@ export function useTrainerEngagement() {
   };
 
   const getShortlistedTrainers = () => {
+    // Return ALL trainers that are beyond the browsing/liked stage
+    // This includes shortlisted, discovery_call_booked, and discovery_completed
+    // The consuming component will filter these based on their specific needs
     return engagements.filter(e => 
       e.stage === 'shortlisted' || 
+      e.stage === 'discovery_call_booked' || 
+      e.stage === 'discovery_completed'
+    );
+  };
+
+  const getOnlyShortlistedTrainers = () => {
+    // Return only trainers with 'shortlisted' stage
+    return engagements.filter(e => e.stage === 'shortlisted');
+  };
+
+  const getDiscoveryStageTrainers = () => {
+    // Return only trainers with discovery call stages
+    return engagements.filter(e => 
       e.stage === 'discovery_call_booked' || 
       e.stage === 'discovery_completed'
     );
@@ -142,6 +158,8 @@ export function useTrainerEngagement() {
     getEngagementStage,
     getLikedTrainers,
     getShortlistedTrainers,
+    getOnlyShortlistedTrainers,
+    getDiscoveryStageTrainers,
     getMatchedTrainers,
     getActiveClients,
     isTrainerLiked,
