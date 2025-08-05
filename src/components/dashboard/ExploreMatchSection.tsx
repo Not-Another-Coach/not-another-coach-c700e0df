@@ -48,7 +48,7 @@ interface ExploreMatchSectionProps {
 // Sample trainer data
 const sampleTrainers = [
   {
-    id: "1",
+    id: "550e8400-e29b-41d4-a716-446655440001",
     name: "Sarah Johnson",
     specialties: ["Weight Loss", "Strength Training", "Nutrition"],
     rating: 4.9,
@@ -63,7 +63,7 @@ const sampleTrainers = [
     trainingType: ["In-Person", "Online"]
   },
   {
-    id: "2", 
+    id: "550e8400-e29b-41d4-a716-446655440002",
     name: "Mike Rodriguez",
     specialties: ["Muscle Building", "Powerlifting", "Sports Performance"],
     rating: 4.8,
@@ -78,7 +78,7 @@ const sampleTrainers = [
     trainingType: ["In-Person", "Hybrid"]
   },
   {
-    id: "3",
+    id: "550e8400-e29b-41d4-a716-446655440003",
     name: "Emma Chen",
     specialties: ["Yoga", "Flexibility", "Mindfulness", "Rehabilitation"],
     rating: 4.9,
@@ -93,7 +93,7 @@ const sampleTrainers = [
     trainingType: ["Online", "In-Person"]
   },
   {
-    id: "4",
+    id: "4f90441a-20de-4f62-99aa-2440b12228dd",
     name: "Alex Thompson", 
     specialties: ["CrossFit", "HIIT", "Endurance", "Functional Training"],
     rating: 4.7,
