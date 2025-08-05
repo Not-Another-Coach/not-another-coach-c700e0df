@@ -44,6 +44,37 @@ const checkTimeOverlap = (slot1: { start: string; end: string }, slot2: { start:
   return slot1Start < slot2End && slot2Start < slot1End;
 };
 
+// Helper function to find a non-overlapping default time slot
+const findAvailableDefaultSlot = (existingSlots: { start: string; end: string }[]) => {
+  const timeSlots = [
+    { start: '07:00', end: '08:00' },
+    { start: '08:00', end: '09:00' },
+    { start: '09:00', end: '10:00' },
+    { start: '10:00', end: '11:00' },
+    { start: '11:00', end: '12:00' },
+    { start: '12:00', end: '13:00' },
+    { start: '13:00', end: '14:00' },
+    { start: '14:00', end: '15:00' },
+    { start: '15:00', end: '16:00' },
+    { start: '16:00', end: '17:00' },
+    { start: '17:00', end: '18:00' },
+    { start: '18:00', end: '19:00' },
+    { start: '19:00', end: '20:00' },
+  ];
+
+  for (const timeSlot of timeSlots) {
+    const hasOverlap = existingSlots.some(existingSlot => 
+      checkTimeOverlap(timeSlot, existingSlot)
+    );
+    if (!hasOverlap) {
+      return timeSlot;
+    }
+  }
+  
+  // If all standard slots overlap, return a late evening slot
+  return { start: '20:00', end: '21:00' };
+};
+
 export function RatesSection({ formData, updateFormData, errors }: RatesSectionProps) {
   const [currency, setCurrency] = useState<'GBP' | 'USD' | 'EUR'>('GBP');
   const [selectedRateTypes, setSelectedRateTypes] = useState<('hourly' | 'class' | 'monthly')[]>(
@@ -681,21 +712,8 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
                                       size="sm"
                                       variant="outline"
                                       onClick={() => {
-                                        const newSlot = { start: '07:00', end: '08:00' };
-                                        
-                                        // Check for overlaps with existing slots
-                                        const hasOverlap = daySchedule.slots.some(existingSlot => 
-                                          checkTimeOverlap(newSlot, existingSlot)
-                                        );
-                                        
-                                        if (hasOverlap) {
-                                          toast({
-                                            title: "Time Slot Overlap",
-                                            description: "This time slot overlaps with an existing slot. Please choose a different time.",
-                                            variant: "destructive",
-                                          });
-                                          return;
-                                        }
+                                        // Find a non-overlapping default time slot
+                                        const newSlot = findAvailableDefaultSlot(daySchedule.slots);
                                         
                                         const newSchedule = {
                                           ...discoverySettings.availability_schedule,
@@ -720,8 +738,20 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
                                         No time slots set. Click "Add Slot" to add availability.
                                       </p>
                                     ) : (
-                                      daySchedule.slots.map((slot, slotIndex) => (
-                                        <div key={slotIndex} className="flex items-center space-x-2">
+                                       daySchedule.slots.map((slot, slotIndex) => {
+                                         // Check if this slot overlaps with any other slot
+                                         const otherSlots = daySchedule.slots.filter((_, i) => i !== slotIndex);
+                                         const hasOverlap = otherSlots.some(existingSlot => 
+                                           checkTimeOverlap(slot, existingSlot)
+                                         );
+                                         
+                                         return (
+                                         <div key={slotIndex} className={`flex items-center space-x-2 ${hasOverlap ? 'bg-red-50 border border-red-200 rounded p-2' : ''}`}>
+                                           {hasOverlap && (
+                                             <Badge variant="destructive" className="text-xs">
+                                               Overlaps
+                                             </Badge>
+                                           )}
                                           <Select
                                             value={slot.start}
                                             onValueChange={(value) => {
@@ -814,18 +844,19 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
                                             }}
                                           >
                                             <Trash2 className="w-4 h-4 text-red-500" />
-                                          </Button>
-                                        </div>
-                                      ))
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
+                                           </Button>
+                                         </div>
+                                         );
+                                       })
+                                     )}
+                                   </div>
+                                 )}
+                               </div>
+                             );
+                           })}
+                         </div>
+                       </div>
+                     )}
                   </div>
 
                   {/* Status Summary */}
