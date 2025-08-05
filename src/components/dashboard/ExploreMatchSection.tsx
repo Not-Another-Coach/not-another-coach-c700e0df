@@ -17,6 +17,7 @@ import { SwipeableCard } from "@/components/SwipeableCard";
 import { ComparisonView } from "@/components/ComparisonView";
 import { BookDiscoveryCallButton } from "@/components/discovery-call/BookDiscoveryCallButton";
 import { EditDiscoveryCallButton } from "@/components/discovery-call/EditDiscoveryCallButton";
+import { ClientRescheduleModal } from "./ClientRescheduleModal";
 import { toast } from "sonner";
 import { 
   Search, 
@@ -125,6 +126,10 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
   // Comparison functionality
   const [selectedForComparison, setSelectedForComparison] = useState<string[]>([]);
   const [showComparison, setShowComparison] = useState(false);
+
+  // Reschedule modal state
+  const [selectedDiscoveryCall, setSelectedDiscoveryCall] = useState<any>(null);
+  const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
 
   // Get enhanced matched trainers using client survey data
   const clientSurveyData = {
@@ -744,18 +749,25 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                           Chat
                         </Button>
                         {shortlisted.discovery_call ? (
-                          <EditDiscoveryCallButton 
-                            trainer={{
-                              id: shortlisted.trainer_id,
-                              name: trainer.name,
-                              firstName: trainer.name.split(' ')[0] || 'Trainer',
-                              lastName: trainer.name.split(' ')[1] || shortlisted.trainer_id
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="flex items-center gap-1 text-xs"
+                            onClick={() => {
+                              setSelectedDiscoveryCall({
+                                ...shortlisted.discovery_call,
+                                trainer: {
+                                  id: shortlisted.trainer_id,
+                                  name: trainer.name,
+                                  firstName: trainer.name.split(' ')[0] || 'Trainer',
+                                  lastName: trainer.name.split(' ')[1] || shortlisted.trainer_id
+                                }
+                              });
+                              setIsRescheduleModalOpen(true);
                             }}
-                            discoveryCall={shortlisted.discovery_call}
-                            variant="outline"
-                            size="sm"
-                            className="text-xs"
-                          />
+                          >
+                            Reschedule
+                          </Button>
                         ) : (
                           <BookDiscoveryCallButton 
                             trainer={{
@@ -790,6 +802,23 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
         </TabsContent>
 
       </Tabs>
+
+      {/* Client Reschedule Modal */}
+      {selectedDiscoveryCall && (
+        <ClientRescheduleModal
+          isOpen={isRescheduleModalOpen}
+          onClose={() => {
+            setIsRescheduleModalOpen(false);
+            setSelectedDiscoveryCall(null);
+          }}
+          discoveryCall={selectedDiscoveryCall}
+          trainer={selectedDiscoveryCall.trainer}
+          onCallUpdated={() => {
+            // Refresh the shortlisted trainers data
+            window.location.reload(); // Simple refresh for now
+          }}
+        />
+      )}
     </div>
   );
 }
