@@ -165,6 +165,11 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
   // Get saved trainers (including ones not in current match results)
   const savedTrainers = [];
   
+  // Debug logging
+  console.log('Debug - savedTrainerIds:', savedTrainerIds);
+  console.log('Debug - matchedTrainers count:', matchedTrainers.length);
+  console.log('Debug - allTrainers count:', allTrainers.length);
+  
   // First, add trainers from matchedTrainers that are saved
   const savedFromMatched = matchedTrainers.filter(match => 
     savedTrainerIds.includes(match.trainer.id) && !isShortlisted(match.trainer.id)
@@ -176,6 +181,9 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
   const missingSavedIds = savedTrainerIds.filter(id => 
     !savedIdsFromMatched.includes(id) && !isShortlisted(id)
   );
+  
+  console.log('Debug - savedFromMatched:', savedFromMatched.length);
+  console.log('Debug - missingSavedIds:', missingSavedIds);
   
   // Create placeholder entries for missing saved trainers
   missingSavedIds.forEach(trainerId => {
