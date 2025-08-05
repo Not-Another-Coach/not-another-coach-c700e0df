@@ -95,21 +95,25 @@ export function DiscoveryCallNotesTaker({
     <div className={className}>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
-          <Button variant="ghost" size="sm" className="h-auto py-2">
-            <div className="flex items-center gap-2">
-              <StickyNote className="h-4 w-4" />
-              <span className="text-sm">
-                Notes
-                {clientName && (
-                  <span className="font-normal text-muted-foreground ml-1">
-                    for {clientName}
-                  </span>
-                )}
-              </span>
+          <Button variant="ghost" size="sm" className="h-auto py-2 justify-start text-left">
+            <div className="flex flex-col items-start gap-1 w-full">
+              <div className="flex items-center gap-2">
+                <StickyNote className="h-4 w-4" />
+                <span className="text-sm font-medium">
+                  Notes
+                  {clientName && (
+                    <span className="font-normal text-muted-foreground ml-1">
+                      for {clientName}
+                    </span>
+                  )}
+                </span>
+              </div>
               {hasContent && (
-                <Badge variant="outline" className="text-xs ml-2">
-                  {content.trim().length > 20 ? `${content.trim().substring(0, 20)}...` : content.trim()}
-                </Badge>
+                <div className="text-xs text-muted-foreground max-w-full">
+                  {content.trim().length > 100 
+                    ? `${content.trim().substring(0, 100)}...` 
+                    : content.trim()}
+                </div>
               )}
             </div>
           </Button>
