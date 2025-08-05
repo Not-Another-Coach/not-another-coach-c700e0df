@@ -75,7 +75,7 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
           notes
         `)
         .eq('trainer_id', profile.id)
-        .in('stage', ['shortlisted', 'matched', 'discovery_completed'])
+        .in('stage', ['shortlisted', 'discovery_call_booked', 'matched', 'discovery_completed'])
         .order('created_at', { ascending: false });
 
       console.log('Engagement data:', engagementData);
