@@ -91,7 +91,7 @@ export function useTrainerEngagement() {
   };
 
   const getShortlistedTrainers = () => {
-    return engagements.filter(e => e.stage === 'shortlisted');
+    return engagements.filter(e => e.stage === 'shortlisted' || e.stage === 'discovery_call_booked');
   };
 
   const getMatchedTrainers = () => {
@@ -107,7 +107,8 @@ export function useTrainerEngagement() {
   };
 
   const isTrainerShortlisted = (trainerId: string) => {
-    return getEngagementStage(trainerId) === 'shortlisted';
+    const stage = getEngagementStage(trainerId);
+    return stage === 'shortlisted' || stage === 'discovery_call_booked';
   };
 
   const likeTrainer = async (trainerId: string) => {

@@ -127,20 +127,19 @@ export function SwipeResultsSection({ profile }: SwipeResultsSectionProps) {
   console.log('shortlistedTrainers:', shortlistedTrainers);
   console.log('completedDiscoveryCalls:', completedDiscoveryCalls);
 
-  // Filter shortlisted trainers: those without discovery calls go to shortlisted tab
+  // Filter shortlisted trainers: those with 'shortlisted' stage go to shortlisted tab
   const shortlistedOnly = shortlistedTrainers.filter(trainer => {
-    // A trainer goes to shortlisted tab if they don't have a booked discovery call
-    const hasBookedCall = trainer.discovery_call_booked_at !== null;
-    console.log(`SHORTLIST FILTER - Trainer ${trainer.trainer_id}: discovery_call_booked_at = ${trainer.discovery_call_booked_at}, hasBookedCall = ${hasBookedCall}`);
-    return !hasBookedCall;
+    // Get the engagement stage from trainer data
+    const stage = trainer.stage || 'shortlisted'; // fallback for backward compatibility
+    console.log(`SHORTLIST FILTER - Trainer ${trainer.trainer_id}: stage = ${stage}`);
+    return stage === 'shortlisted';
   });
   
-  // Trainers with discovery calls (booked) go to discovery tab
+  // Trainers with discovery_call_booked stage go to discovery tab
   const discoveryBookedOrCompleted = shortlistedTrainers.filter(trainer => {
-    // A trainer goes to discovery tab if they have a booked discovery call
-    const hasBookedCall = trainer.discovery_call_booked_at !== null;
-    console.log(`DISCOVERY FILTER - Trainer ${trainer.trainer_id}: discovery_call_booked_at = ${trainer.discovery_call_booked_at}, hasBookedCall = ${hasBookedCall}`);
-    return hasBookedCall;
+    const stage = trainer.stage || 'shortlisted'; // fallback for backward compatibility
+    console.log(`DISCOVERY FILTER - Trainer ${trainer.trainer_id}: stage = ${stage}`);
+    return stage === 'discovery_call_booked' || stage === 'discovery_completed';
   }).map(trainer => {
     const discoveryCall = completedDiscoveryCalls.find(call => call.trainer_id === trainer.trainer_id);
     return {

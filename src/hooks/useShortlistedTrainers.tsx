@@ -8,6 +8,7 @@ interface ShortlistedTrainer {
   id: string;
   user_id: string;
   trainer_id: string;
+  stage: string;
   shortlisted_at: string;
   notes?: string;
   chat_enabled: boolean;
@@ -44,6 +45,7 @@ export function useShortlistedTrainers() {
       id: `shortlist-${engagement.trainerId}`,
       user_id: user?.id || '',
       trainer_id: engagement.trainerId,
+      stage: engagement.stage,
       shortlisted_at: engagement.createdAt,
       notes: engagement.notes,
       chat_enabled: true,
