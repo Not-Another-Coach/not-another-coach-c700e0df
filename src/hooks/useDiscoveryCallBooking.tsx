@@ -145,7 +145,8 @@ export function useDiscoveryCallBooking() {
     trainerId: string, 
     selectedDateTime: Date, 
     duration: number,
-    notes?: string
+    notes?: string,
+    isReschedule?: boolean
   ) => {
     if (!user) {
       toast({
@@ -194,33 +195,37 @@ export function useDiscoveryCallBooking() {
         console.error('Error updating shortlisted trainer record:', updateError);
       }
 
-      // Create activity alert for trainer
-      console.log('Creating activity alert for trainer:', trainerId);
-      try {
-        const alertResult = await supabase
-          .from('alerts')
-          .insert({
-            alert_type: 'discovery_call_booked',
-            title: 'New Discovery Call Booked!',
-            content: `A client has booked a discovery call for ${selectedDateTime.toLocaleDateString()} at ${selectedDateTime.toLocaleTimeString()}`,
-            created_by: trainerId,
-            target_audience: ["trainers"],
-            metadata: {
-              client_id: user.id,
-              discovery_call_id: data.id,
-              scheduled_for: selectedDateTime.toISOString(),
-              trainer_id: trainerId
-            },
-            is_active: true,
-            priority: 1
-          });
-        
-        console.log('Alert creation result:', alertResult);
-        if (alertResult.error) {
-          console.error('Error creating activity alert:', alertResult.error);
+      // Create activity alert for trainer (skip if this is a reschedule)
+      if (!isReschedule) {
+        console.log('Creating activity alert for trainer:', trainerId);
+        try {
+          const alertResult = await supabase
+            .from('alerts')
+            .insert({
+              alert_type: 'discovery_call_booked',
+              title: 'New Discovery Call Booked!',
+              content: `A client has booked a discovery call for ${selectedDateTime.toLocaleDateString()} at ${selectedDateTime.toLocaleTimeString()}`,
+              created_by: trainerId,
+              target_audience: ["trainers"],
+              metadata: {
+                client_id: user.id,
+                discovery_call_id: data.id,
+                scheduled_for: selectedDateTime.toISOString(),
+                trainer_id: trainerId
+              },
+              is_active: true,
+              priority: 1
+            });
+          
+          console.log('Alert creation result:', alertResult);
+          if (alertResult.error) {
+            console.error('Error creating activity alert:', alertResult.error);
+          }
+        } catch (alertError) {
+          console.error('Error creating activity alert:', alertError);
         }
-      } catch (alertError) {
-        console.error('Error creating activity alert:', alertError);
+      } else {
+        console.log('Skipping alert creation for reschedule booking');
       }
 
       // Send confirmation emails in the background

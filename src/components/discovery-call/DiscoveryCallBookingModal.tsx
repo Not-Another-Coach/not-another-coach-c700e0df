@@ -23,6 +23,7 @@ interface DiscoveryCallBookingModalProps {
     profilePhotoUrl?: string;
   };
   onCallBooked?: () => void;
+  isReschedule?: boolean; // Add flag to indicate if this is a reschedule
 }
 
 type BookingStep = 'date' | 'time' | 'notes' | 'confirmation';
@@ -31,7 +32,8 @@ export const DiscoveryCallBookingModal = ({
   isOpen, 
   onClose, 
   trainer,
-  onCallBooked
+  onCallBooked,
+  isReschedule = false
 }: DiscoveryCallBookingModalProps) => {
   const [currentStep, setCurrentStep] = useState<BookingStep>('date');
   const [selectedDate, setSelectedDate] = useState<Date>();
@@ -106,7 +108,8 @@ export const DiscoveryCallBookingModal = ({
       trainer.id,
       selectedDateTime,
       trainerSettings.discovery_call_duration,
-      bookingNotes
+      bookingNotes,
+      isReschedule // Pass the isReschedule flag
     );
 
     if (result) {

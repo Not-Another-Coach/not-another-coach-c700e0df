@@ -206,6 +206,7 @@ export const ClientRescheduleModal = ({
         onClose={handleClose}
         trainer={trainer}
         onCallBooked={handleRescheduleComplete}
+        isReschedule={true}
       />
     );
   }
