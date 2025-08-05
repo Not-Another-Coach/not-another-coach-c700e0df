@@ -110,8 +110,8 @@ export function DiscoveryCallNotesTaker({
               </div>
               {hasContent && (
                 <div className="text-xs text-muted-foreground max-w-full">
-                  {content.trim().length > 100 
-                    ? `${content.trim().substring(0, 100)}...` 
+                  {content.trim().length > 500 
+                    ? `${content.trim().substring(0, 500)}...` 
                     : content.trim()}
                 </div>
               )}
