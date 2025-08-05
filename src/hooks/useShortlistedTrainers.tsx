@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTrainerEngagement } from '@/hooks/useTrainerEngagement';
 import { supabase } from '@/integrations/supabase/client';
@@ -37,25 +37,26 @@ export function useShortlistedTrainers() {
   const [loading, setLoading] = useState(true);
 
   // Convert engagement data to shortlisted trainers format
-  const engagementShortlisted = getEngagementShortlisted();
-  const shortlistedTrainers: ShortlistedTrainer[] = engagementShortlisted.map(engagement => {
-    const discoveryCall = discoveryCallsData.find(call => call.trainer_id === engagement.trainerId);
-    
-    return {
-      id: `shortlist-${engagement.trainerId}`,
-      user_id: user?.id || '',
-      trainer_id: engagement.trainerId,
-      stage: engagement.stage,
-      shortlisted_at: engagement.createdAt,
-      notes: engagement.notes,
-      chat_enabled: true,
-      discovery_call_enabled: true,
-      discovery_call_booked_at: discoveryCall?.created_at,
-      created_at: engagement.createdAt,
-      updated_at: engagement.updatedAt,
-      discovery_call: discoveryCall
-    };
-  });
+  const engagementShortlisted = useMemo(() => getEngagementShortlisted(), [getEngagementShortlisted]);
+  const shortlistedTrainers: ShortlistedTrainer[] = useMemo(() => 
+    engagementShortlisted.map(engagement => {
+      const discoveryCall = discoveryCallsData.find(call => call.trainer_id === engagement.trainerId);
+      
+      return {
+        id: `shortlist-${engagement.trainerId}`,
+        user_id: user?.id || '',
+        trainer_id: engagement.trainerId,
+        stage: engagement.stage,
+        shortlisted_at: engagement.createdAt,
+        notes: engagement.notes,
+        chat_enabled: true,
+        discovery_call_enabled: true,
+        discovery_call_booked_at: discoveryCall?.created_at,
+        created_at: engagement.createdAt,
+        updated_at: engagement.updatedAt,
+        discovery_call: discoveryCall
+      };
+    }), [engagementShortlisted, discoveryCallsData, user?.id]);
 
   const fetchDiscoveryCalls = useCallback(async () => {
     if (!user || engagementShortlisted.length === 0) {
@@ -80,7 +81,7 @@ export function useShortlistedTrainers() {
     } catch (error) {
       console.error('Error fetching discovery calls:', error);
     }
-  }, [user, engagementShortlisted]);
+  }, [user?.id, engagementShortlisted]);
 
   useEffect(() => {
     fetchDiscoveryCalls();
