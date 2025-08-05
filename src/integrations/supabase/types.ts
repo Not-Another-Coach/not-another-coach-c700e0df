@@ -1479,6 +1479,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      update_user_email_for_admin: {
+        Args: { target_user_id: string; new_email: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "trainer" | "client"

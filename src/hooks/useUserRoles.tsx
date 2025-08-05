@@ -315,11 +315,13 @@ export function useUserRoles() {
         if (profileError) throw profileError;
       }
 
-      // Update email in auth.users if provided
+      // Update email using the database function if provided
       if (email) {
-        const { error: emailError } = await supabase.auth.admin.updateUserById(userId, {
-          email: email
-        });
+        const { error: emailError } = await supabase
+          .rpc('update_user_email_for_admin', {
+            target_user_id: userId,
+            new_email: email
+          });
 
         if (emailError) throw emailError;
       }
