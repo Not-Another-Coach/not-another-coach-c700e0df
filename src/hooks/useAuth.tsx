@@ -19,47 +19,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Set up session management with single session enforcement
-    const setupSessionManagement = () => {
-      const currentSessionId = `session_${Date.now()}_${Math.random()}`;
-      
-      // Store this tab's session ID
-      sessionStorage.setItem('currentSessionId', currentSessionId);
-      
-      // Listen for session changes from other tabs
-      const handleStorageChange = (e: StorageEvent) => {
-        if (e.key === 'activeSessionId' && e.newValue !== currentSessionId) {
-          // Another tab has become active, log out this tab
-          console.log('Another session detected, logging out this tab');
-          supabase.auth.signOut({ scope: 'local' }); // Only log out locally, not globally
-          setSession(null);
-          setUser(null);
-        }
-      };
-      
-      window.addEventListener('storage', handleStorageChange);
-      
-      return () => {
-        window.removeEventListener('storage', handleStorageChange);
-        sessionStorage.removeItem('currentSessionId');
-      };
-    };
-
-    const cleanup = setupSessionManagement();
-    
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         console.log('Auth state change:', event, session?.user?.email);
-        
-        if (session) {
-          // When a new session is established, mark this tab as the active one
-          const currentSessionId = sessionStorage.getItem('currentSessionId');
-          if (currentSessionId) {
-            localStorage.setItem('activeSessionId', currentSessionId);
-          }
-        }
-        
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
@@ -68,23 +31,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        // Mark this tab as active if it has a session
-        const currentSessionId = sessionStorage.getItem('currentSessionId');
-        if (currentSessionId) {
-          localStorage.setItem('activeSessionId', currentSessionId);
-        }
-      }
-      
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
-    return () => {
-      subscription.unsubscribe();
-      cleanup();
-    };
+    return () => subscription.unsubscribe();
   }, []);
 
   const signUp = async (email: string, password: string, userData?: any) => {
@@ -106,15 +58,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email,
       password,
     });
-    
-    if (!error) {
-      // When signing in successfully, mark this tab as the active session
-      const currentSessionId = sessionStorage.getItem('currentSessionId');
-      if (currentSessionId) {
-        localStorage.setItem('activeSessionId', currentSessionId);
-      }
-    }
-    
     return { error };
   };
 

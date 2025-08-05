@@ -163,6 +163,10 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
   );
 
   // Get saved trainers (excluding those already shortlisted)
+  console.log('Debug - savedTrainerIds:', savedTrainerIds);
+  console.log('Debug - matchedTrainers:', matchedTrainers.map(m => ({ id: m.trainer.id, name: m.trainer.name })));
+  console.log('Debug - isShortlisted check for each:', savedTrainerIds.map(id => ({ id, isShortlisted: isShortlisted(id) })));
+  
   const savedTrainers = matchedTrainers.filter(match => 
     savedTrainerIds.includes(match.trainer.id) && !isShortlisted(match.trainer.id)
   );
