@@ -392,9 +392,9 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
             <Star className="h-4 w-4" />
             <span className="hidden sm:inline">Shortlisted</span>
           </TabsTrigger>
-          <TabsTrigger value="trainers" className="flex items-center gap-2">
+          <TabsTrigger value="discover" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
-            <span className="hidden sm:inline">Trainers</span>
+            <span className="hidden sm:inline">Discover</span>
           </TabsTrigger>
         </TabsList>
 
@@ -806,9 +806,115 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
           )}
         </TabsContent>
 
-        {/* Trainers Tab - Discovery/Check functionality */}
-        <TabsContent value="trainers" className="space-y-6">
-          <SwipeResultsSection profile={profile} />
+        {/* Discover Tab - Discovery functionality without nested tabs */}
+        <TabsContent value="discover" className="space-y-6">
+          <div className="space-y-6">
+            {/* Discovery Opportunities */}
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">Discovery Opportunities</h2>
+              <Badge variant="outline">{actualShortlistedTrainers.length} available</Badge>
+            </div>
+            
+            {actualShortlistedTrainers.length > 0 ? (
+              <div className="grid md:grid-cols-2 gap-6">
+                {actualShortlistedTrainers.map((shortlisted) => {
+                  // Find the trainer data from our matched trainers
+                  const trainerMatch = matchedTrainers.find(match => match.trainer.id === shortlisted.trainer_id);
+                  const trainer = trainerMatch?.trainer || {
+                    id: shortlisted.trainer_id,
+                    name: `Trainer ${shortlisted.trainer_id}`,
+                    specialties: [],
+                    rating: 0,
+                    reviews: 0,
+                    experience: '',
+                    location: '',
+                    hourlyRate: 0,
+                    image: '',
+                    certifications: [],
+                    description: '',
+                    availability: '',
+                    trainingType: []
+                  };
+                  
+                  return (
+                    <Card key={shortlisted.trainer_id} className="border-l-4 border-l-primary">
+                      <CardHeader>
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <CardTitle>Trainer #{shortlisted.trainer_id}</CardTitle>
+                            <p className="text-sm text-muted-foreground">
+                              Shortlisted {new Date(shortlisted.shortlisted_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleRemoveFromShortlist(shortlisted.trainer_id, trainer.name)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div className="flex gap-2">
+                            <Badge variant="default" className="bg-green-100 text-green-800">
+                              Chat Enabled
+                            </Badge>
+                            <Badge variant="default" className="bg-blue-100 text-blue-800">
+                              Discovery Call Available
+                            </Badge>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2">
+                            <Button variant="outline" size="sm" onClick={() => handleMessage(shortlisted.trainer_id)}>
+                              <MessageCircle className="h-4 w-4 mr-2" />
+                              Chat
+                            </Button>
+                            {shortlisted.discovery_call ? (
+                              <EditDiscoveryCallButton
+                                discoveryCall={shortlisted.discovery_call}
+                                trainer={{
+                                  id: shortlisted.trainer_id,
+                                  name: trainer.name
+                                }}
+                                size="sm"
+                                variant="outline"
+                                className="text-xs"
+                              />
+                            ) : (
+                              <BookDiscoveryCallButton
+                                trainer={{
+                                  id: shortlisted.trainer_id,
+                                  name: trainer.name
+                                }}
+                                size="sm"
+                                variant="outline"
+                                className="text-xs"
+                              />
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            ) : (
+              <Card>
+                <CardContent className="p-8 text-center">
+                  <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No discovery opportunities</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Add trainers to your shortlist to unlock discovery call features
+                  </p>
+                  <Button onClick={() => setActiveTab('saved')}>
+                    View Saved Trainers
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </TabsContent>
 
       </Tabs>
