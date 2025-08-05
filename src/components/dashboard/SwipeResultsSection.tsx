@@ -144,6 +144,12 @@ export function SwipeResultsSection({ profile }: SwipeResultsSectionProps) {
   const discoveryBookedOrCompleted = shortlistedTrainers.filter(trainer => {
     const hasBookedCall = trainer.discovery_call_booked_at !== null;
     const hasScheduledCall = completedDiscoveryCalls.some(call => call.trainer_id === trainer.trainer_id);
+    console.log(`Discovery filter - Trainer ${trainer.trainer_id}:`, {
+      discovery_call_booked_at: trainer.discovery_call_booked_at,
+      hasBookedCall,
+      hasScheduledCall,
+      shouldBeInDiscovery: hasBookedCall || hasScheduledCall
+    });
     return hasBookedCall || hasScheduledCall;
   }).map(trainer => {
     const discoveryCall = completedDiscoveryCalls.find(call => call.trainer_id === trainer.trainer_id);
