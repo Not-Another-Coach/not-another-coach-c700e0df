@@ -129,28 +129,18 @@ export function SwipeResultsSection({ profile }: SwipeResultsSectionProps) {
 
   // Filter shortlisted trainers: those without discovery calls go to shortlisted tab
   const shortlistedOnly = shortlistedTrainers.filter(trainer => {
+    // A trainer goes to shortlisted tab if they don't have a booked discovery call
     const hasBookedCall = trainer.discovery_call_booked_at !== null;
-    const hasScheduledCall = completedDiscoveryCalls.some(call => call.trainer_id === trainer.trainer_id);
-    console.log(`Trainer ${trainer.trainer_id}:`, {
-      discovery_call_booked_at: trainer.discovery_call_booked_at,
-      hasBookedCall,
-      hasScheduledCall,
-      shouldBeInShortlisted: !hasBookedCall && !hasScheduledCall
-    });
-    return !hasBookedCall && !hasScheduledCall;
+    console.log(`SHORTLIST FILTER - Trainer ${trainer.trainer_id}: discovery_call_booked_at = ${trainer.discovery_call_booked_at}, hasBookedCall = ${hasBookedCall}`);
+    return !hasBookedCall;
   });
   
-  // Trainers with discovery calls (scheduled or completed) go to discovery tab
+  // Trainers with discovery calls (booked) go to discovery tab
   const discoveryBookedOrCompleted = shortlistedTrainers.filter(trainer => {
+    // A trainer goes to discovery tab if they have a booked discovery call
     const hasBookedCall = trainer.discovery_call_booked_at !== null;
-    const hasScheduledCall = completedDiscoveryCalls.some(call => call.trainer_id === trainer.trainer_id);
-    console.log(`Discovery filter - Trainer ${trainer.trainer_id}:`, {
-      discovery_call_booked_at: trainer.discovery_call_booked_at,
-      hasBookedCall,
-      hasScheduledCall,
-      shouldBeInDiscovery: hasBookedCall || hasScheduledCall
-    });
-    return hasBookedCall || hasScheduledCall;
+    console.log(`DISCOVERY FILTER - Trainer ${trainer.trainer_id}: discovery_call_booked_at = ${trainer.discovery_call_booked_at}, hasBookedCall = ${hasBookedCall}`);
+    return hasBookedCall;
   }).map(trainer => {
     const discoveryCall = completedDiscoveryCalls.find(call => call.trainer_id === trainer.trainer_id);
     return {
