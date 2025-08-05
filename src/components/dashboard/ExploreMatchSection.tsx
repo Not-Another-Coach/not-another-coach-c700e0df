@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SwipeResultsSection } from "@/components/dashboard/SwipeResultsSection";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TrainerCard } from "@/components/TrainerCard";
@@ -378,7 +379,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
 
       {/* Tabs for different views */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="browse" className="flex items-center gap-2">
             <Search className="h-4 w-4" />
             <span className="hidden sm:inline">Browse</span>
@@ -390,6 +391,10 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
           <TabsTrigger value="shortlisted" className="flex items-center gap-2">
             <Star className="h-4 w-4" />
             <span className="hidden sm:inline">Shortlisted</span>
+          </TabsTrigger>
+          <TabsTrigger value="trainers" className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            <span className="hidden sm:inline">Trainers</span>
           </TabsTrigger>
         </TabsList>
 
@@ -799,6 +804,11 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
               </CardContent>
             </Card>
           )}
+        </TabsContent>
+
+        {/* Trainers Tab - Discovery/Check functionality */}
+        <TabsContent value="trainers" className="space-y-6">
+          <SwipeResultsSection profile={profile} />
         </TabsContent>
 
       </Tabs>

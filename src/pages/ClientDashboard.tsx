@@ -13,7 +13,6 @@ import { EditPreferencesSection } from "@/components/dashboard/EditPreferencesSe
 import { ExploreMatchSection } from "@/components/dashboard/ExploreMatchSection";
 import { MessagesSection } from "@/components/dashboard/MessagesSection";
 import { UnmatchedTrainers } from "@/components/dashboard/UnmatchedTrainers";
-import { SwipeResultsSection } from "@/components/dashboard/SwipeResultsSection";
 import { ClientSurveyWidget } from "@/components/dashboard/ClientSurveyWidget";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { FloatingMessageButton } from "@/components/FloatingMessageButton";
@@ -175,7 +174,7 @@ export default function ClientDashboard() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           {/* Tab Navigation */}
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            <TabsList className="grid w-full sm:w-auto grid-cols-5 lg:grid-cols-5">
+            <TabsList className="grid w-full sm:w-auto grid-cols-4 lg:grid-cols-4">
               <TabsTrigger value="summary" className="flex items-center gap-2">
                 <Menu className="h-4 w-4" />
                 <span className="hidden sm:inline">Dashboard</span>
@@ -190,10 +189,6 @@ export default function ClientDashboard() {
               <TabsTrigger value="explore" className="flex items-center gap-2">
                 <Search className="h-4 w-4" />
                 <span className="hidden sm:inline">Explore</span>
-              </TabsTrigger>
-              <TabsTrigger value="swipe" className="flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                <span className="hidden sm:inline">Trainers</span>
               </TabsTrigger>
               <TabsTrigger value="messages" className="flex items-center gap-2">
                 <MessageCircle className="h-4 w-4" />
@@ -237,11 +232,6 @@ export default function ClientDashboard() {
             />
           </TabsContent>
 
-          <TabsContent value="swipe" className="space-y-6">
-            <SwipeResultsSection 
-              profile={profile}
-            />
-          </TabsContent>
 
           <TabsContent value="messages" className="space-y-6">
             <MessagesSection 
