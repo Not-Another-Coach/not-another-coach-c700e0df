@@ -25,11 +25,6 @@ export function DiscoveryCallNotesTaker({
   const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
-  // Only show for trainers
-  if (profile?.user_type !== 'trainer') {
-    return null;
-  }
-
   useEffect(() => {
     if (note?.note_content) {
       setContent(note.note_content);
@@ -69,6 +64,11 @@ export function DiscoveryCallNotesTaker({
       return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
   };
+
+  // Only show for trainers
+  if (profile?.user_type !== 'trainer') {
+    return null;
+  }
 
   if (loading) {
     return (
