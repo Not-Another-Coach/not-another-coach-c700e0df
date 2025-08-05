@@ -28,8 +28,12 @@ export function useShortlistedTrainers() {
   const [loading, setLoading] = useState(true);
 
   const fetchShortlistedTrainers = useCallback(async () => {
-    if (!user) return;
+    if (!user) {
+      console.log('No user available for fetching shortlisted trainers');
+      return;
+    }
 
+    console.log('Fetching shortlisted trainers for user:', user.id);
     try {
       const { data, error } = await supabase
         .from('shortlisted_trainers')
@@ -38,6 +42,9 @@ export function useShortlistedTrainers() {
         `)
         .eq('user_id', user.id)
         .order('shortlisted_at', { ascending: false });
+
+      console.log('Shortlisted trainers raw data:', data);
+      console.log('Shortlisted trainers error:', error);
 
       // Also fetch discovery calls for these trainers
       let discoveryCallsData = [];
