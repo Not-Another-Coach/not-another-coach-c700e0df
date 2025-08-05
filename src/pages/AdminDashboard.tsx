@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UserManagement } from '@/components/admin/UserManagement';
 import { FeedbackQuestionBuilder } from '@/components/admin/FeedbackQuestionBuilder';
 import { BulkUserUpload } from '@/components/admin/BulkUserUpload';
+import { TestUserCleanup } from '@/components/admin/TestUserCleanup';
 import { VisibilitySettingsSection } from '@/components/trainer-setup/VisibilitySettingsSection';
 import { Settings, Users, Shield, BarChart3, ArrowLeft, Home, Eye, Upload } from 'lucide-react';
 import { useUserRoles } from '@/hooks/useUserRoles';
@@ -103,7 +104,10 @@ export const AdminDashboard = () => {
           </TabsContent>
 
           <TabsContent value="bulk-upload">
-            <BulkUserUpload />
+            <div className="space-y-6">
+              <BulkUserUpload />
+              <TestUserCleanup />
+            </div>
           </TabsContent>
 
           <TabsContent value="feedback">
