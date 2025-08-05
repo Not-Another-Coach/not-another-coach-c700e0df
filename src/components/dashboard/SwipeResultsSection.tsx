@@ -218,20 +218,6 @@ export function SwipeResultsSection({ profile }: SwipeResultsSectionProps) {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Your Trainers</h1>
-          <p className="text-muted-foreground">
-            Manage your shortlisted trainers and those you've spoken with
-          </p>
-        </div>
-        <Button onClick={() => navigate('/discovery')}>
-          <Shuffle className="h-4 w-4 mr-2" />
-          Discover More
-        </Button>
-      </div>
-
       {/* Tabs for shortlisted/discovery completed */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className={`grid w-full ${discoveryCompleted.length > 0 ? 'grid-cols-2' : 'grid-cols-1'}`}>
@@ -320,84 +306,84 @@ export function SwipeResultsSection({ profile }: SwipeResultsSectionProps) {
         {/* Discovery Calls Completed */}
         {discoveryCompleted.length > 0 && (
           <TabsContent value="discovery" className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Discovery Calls Completed</h2>
-              <Badge variant="outline">{discoveryCompleted.length} trainers</Badge>
-            </div>
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold">Discovery Calls Completed</h2>
+            <Badge variant="outline">{discoveryCompleted.length} trainers</Badge>
+          </div>
             
-            <div className="grid md:grid-cols-2 gap-6">
-              {discoveryCompleted.map((call) => (
-                <Card key={call.id} className="border-l-4 border-l-blue-500">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="flex items-center gap-2">
-                          {call.profiles?.first_name} {call.profiles?.last_name}
-                          <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            Call Complete
-                          </Badge>
-                        </CardTitle>
-                        <p className="text-sm text-muted-foreground">
-                          Discovery call on {new Date(call.scheduled_for).toLocaleDateString()}
-                        </p>
-                      </div>
+          <div className="grid md:grid-cols-2 gap-6">
+            {discoveryCompleted.map((call) => (
+              <Card key={call.id} className="border-l-4 border-l-blue-500">
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <CardTitle>
+                        {call.profiles?.first_name} {call.profiles?.last_name}
+                      </CardTitle>
+                      <p className="text-sm text-muted-foreground">
+                        Discovery call on {new Date(call.scheduled_for).toLocaleDateString()}
+                      </p>
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {/* Feedback Status */}
-                      {call.hasFeedback ? (
-                        <div className="p-3 bg-green-50 rounded-lg">
-                          <div className="flex items-center gap-2 text-green-800">
-                            <CheckCircle className="h-4 w-4" />
-                            <span className="text-sm font-medium">Feedback submitted</span>
-                          </div>
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Call Complete
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {/* Feedback Status */}
+                    {call.hasFeedback ? (
+                      <div className="p-3 bg-green-50 rounded-lg">
+                        <div className="flex items-center gap-2 text-green-800">
+                          <CheckCircle className="h-4 w-4" />
+                          <span className="text-sm font-medium">Feedback submitted</span>
                         </div>
-                      ) : (
-                        <div className="p-3 bg-amber-50 rounded-lg">
-                          <div className="text-amber-800 text-sm">
-                            Please submit feedback before choosing this coach
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Action Buttons */}
-                      <div className="grid grid-cols-2 gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleMoveBackToShortlist(call.trainer_id)}
-                        >
-                          Move to Shortlist
-                        </Button>
-                        <Button 
-                          variant="default" 
-                          size="sm"
-                          disabled={!call.hasFeedback}
-                          onClick={() => handleChooseCoach(call.trainer_id)}
-                          className={call.hasFeedback ? "bg-green-600 hover:bg-green-700" : ""}
-                        >
-                          <CheckCircle className="h-4 w-4 mr-2" />
-                          Choose Coach
-                        </Button>
                       </div>
+                    ) : (
+                      <div className="p-3 bg-amber-50 rounded-lg">
+                        <div className="text-amber-800 text-sm">
+                          Please submit feedback before choosing this coach
+                        </div>
+                      </div>
+                    )}
 
-                      {!call.hasFeedback && (
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="w-full"
-                          onClick={() => handleOpenFeedbackModal(call)}
-                        >
-                          Submit Feedback
-                        </Button>
-                      )}
+                    {/* Action Buttons */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleMoveBackToShortlist(call.trainer_id)}
+                      >
+                        Move to Shortlist
+                      </Button>
+                      <Button 
+                        variant="default" 
+                        size="sm"
+                        disabled={!call.hasFeedback}
+                        onClick={() => handleChooseCoach(call.trainer_id)}
+                        className={call.hasFeedback ? "bg-green-600 hover:bg-green-700" : ""}
+                      >
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Choose Coach
+                      </Button>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+
+                    {!call.hasFeedback && (
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full"
+                        onClick={() => handleOpenFeedbackModal(call)}
+                      >
+                        Submit Feedback
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
           </TabsContent>
         )}
 
