@@ -224,6 +224,63 @@ export type Database = {
         }
         Relationships: []
       }
+      coach_selection_requests: {
+        Row: {
+          client_id: string
+          client_message: string | null
+          created_at: string
+          id: string
+          package_duration: string | null
+          package_id: string
+          package_name: string
+          package_price: number | null
+          responded_at: string | null
+          status: string
+          suggested_alternative_package_id: string | null
+          suggested_alternative_package_name: string | null
+          suggested_alternative_package_price: number | null
+          trainer_id: string
+          trainer_response: string | null
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          client_message?: string | null
+          created_at?: string
+          id?: string
+          package_duration?: string | null
+          package_id: string
+          package_name: string
+          package_price?: number | null
+          responded_at?: string | null
+          status?: string
+          suggested_alternative_package_id?: string | null
+          suggested_alternative_package_name?: string | null
+          suggested_alternative_package_price?: number | null
+          trainer_id: string
+          trainer_response?: string | null
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          client_message?: string | null
+          created_at?: string
+          id?: string
+          package_duration?: string | null
+          package_id?: string
+          package_name?: string
+          package_price?: number | null
+          responded_at?: string | null
+          status?: string
+          suggested_alternative_package_id?: string | null
+          suggested_alternative_package_name?: string | null
+          suggested_alternative_package_price?: number | null
+          trainer_id?: string
+          trainer_response?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       coach_waitlists: {
         Row: {
           client_goals: string | null
@@ -1325,6 +1382,17 @@ export type Database = {
       client_has_sent_first_message: {
         Args: { conversation_uuid: string; client_uuid: string }
         Returns: boolean
+      }
+      create_coach_selection_request: {
+        Args: {
+          p_trainer_id: string
+          p_package_id: string
+          p_package_name: string
+          p_package_price: number
+          p_package_duration: string
+          p_client_message?: string
+        }
+        Returns: string
       }
       get_content_visibility: {
         Args: {
