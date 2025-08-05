@@ -33,7 +33,7 @@ export function useActivityAlerts() {
             table: 'alerts'
           },
           (payload) => {
-            console.log('New alert received:', payload);
+            console.log('🔔 New alert received via realtime:', payload);
             // Refresh alerts when a new one is inserted
             fetchAlerts();
           }
@@ -46,12 +46,14 @@ export function useActivityAlerts() {
             table: 'alerts'
           },
           (payload) => {
-            console.log('Alert updated:', payload);
+            console.log('📝 Alert updated via realtime:', payload);
             // Refresh alerts when one is updated
             fetchAlerts();
           }
         )
-        .subscribe();
+        .subscribe((status) => {
+          console.log('🟢 Realtime subscription status:', status);
+        });
 
       return () => {
         supabase.removeChannel(channel);

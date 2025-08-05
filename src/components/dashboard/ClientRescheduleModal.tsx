@@ -10,6 +10,7 @@ import { useDiscoveryCallBooking } from '@/hooks/useDiscoveryCallBooking';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { DiscoveryCallBookingModal } from '../discovery-call/DiscoveryCallBookingModal';
+import { useAuth } from '@/hooks/useAuth';
 
 interface ClientRescheduleModalProps {
   isOpen: boolean;
@@ -40,6 +41,7 @@ export const ClientRescheduleModal = ({
   trainer,
   onCallUpdated
 }: ClientRescheduleModalProps) => {
+  const { user } = useAuth();
   const [showOptions, setShowOptions] = useState(true);
   const [isRescheduling, setIsRescheduling] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
@@ -140,6 +142,7 @@ export const ClientRescheduleModal = ({
   const handleRescheduleComplete = async () => {
     // Create activity alert for trainer about rescheduling
     console.log('Creating reschedule alert for trainer:', trainer.id);
+    console.log('Current user:', user);
     try {
       const alertResult = await supabase
         .from('alerts')
@@ -147,11 +150,12 @@ export const ClientRescheduleModal = ({
           alert_type: 'discovery_call_rescheduled',
           title: 'Discovery Call Rescheduled',
           content: `A client has rescheduled their discovery call. The previous booking has been cancelled and a new one has been made.`,
-          created_by: trainer.id,
+          created_by: user?.id, // Current user (client) who is rescheduling
           target_audience: ["trainers"],
           metadata: {
             old_discovery_call_id: discoveryCall.id,
-            trainer_id: trainer.id
+            trainer_id: trainer.id,
+            client_id: user?.id
           },
           is_active: true,
           priority: 1
@@ -160,6 +164,8 @@ export const ClientRescheduleModal = ({
       console.log('Reschedule alert creation result:', alertResult);
       if (alertResult.error) {
         console.error('Error creating reschedule alert:', alertResult.error);
+      } else {
+        console.log('✅ Reschedule alert created successfully:', alertResult.data);
       }
     } catch (alertError) {
       console.error('Error creating reschedule alert:', alertError);
