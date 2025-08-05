@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useJourneyProgress } from '@/hooks/useJourneyProgress';
 import { useTrainerEngagement } from '@/hooks/useTrainerEngagement';
+import { useWaitlist } from '@/hooks/useWaitlist';
 import { toast } from '@/hooks/use-toast';
 
 export interface SavedTrainer {
@@ -20,6 +21,7 @@ export const useSavedTrainers = () => {
     updateEngagementStage,
     getEngagementStage 
   } = useTrainerEngagement();
+  const { removeFromWaitlist } = useWaitlist();
   
   const [loading, setLoading] = useState(true);
 
@@ -81,9 +83,12 @@ export const useSavedTrainers = () => {
       // Move back to browsing stage when unsaving
       await updateEngagementStage(trainerId, 'browsing');
       
+      // Also remove from waitlist if they're on one (per spec requirement)
+      await removeFromWaitlist(trainerId);
+      
       toast({
         title: "Trainer removed",
-        description: "Removed from your saved trainers list",
+        description: "Removed from your saved trainers list and any waitlists",
       });
       return true;
     } catch (error) {

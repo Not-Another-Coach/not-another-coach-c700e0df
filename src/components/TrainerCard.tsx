@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,6 +9,10 @@ import { MatchProgressIndicator } from "@/components/MatchProgressIndicator";
 import { useSavedTrainers } from "@/hooks/useSavedTrainers";
 import { useContentVisibility } from "@/hooks/useContentVisibility";
 import { useEngagementStage } from "@/hooks/useEngagementStage";
+import { useWaitlist } from "@/hooks/useWaitlist";
+import { useProfile } from "@/hooks/useProfile";
+import { WaitlistJoinButton } from "@/components/waitlist/WaitlistJoinButton";
+import { WaitlistStatusBadge } from "@/components/waitlist/WaitlistStatusBadge";
 
 export interface Trainer {
   id: string;
@@ -49,13 +54,34 @@ export const TrainerCard = ({ trainer, onViewProfile, onMessage, matchScore = 0,
     trainerId: trainer.id,
     engagementStage: stage
   });
+  const { getCoachAvailability, checkClientWaitlistStatus } = useWaitlist();
+  const { profile } = useProfile();
+  const [coachAvailability, setCoachAvailability] = useState<any>(null);
+  const [clientWaitlistStatus, setClientWaitlistStatus] = useState<any>(null);
   
   const isSaved = isTrainerSaved(trainer.id);
   const profileImageVisibility = getVisibility('profile_image');
+  const isClient = profile?.user_type === 'client';
   
   // Mask name based on visibility settings
   const shouldShowName = profileImageVisibility === 'visible';
   const displayName = shouldShowName ? trainer.name : 'PT Professional';
+
+  // Fetch coach availability and client waitlist status
+  useEffect(() => {
+    const fetchData = async () => {
+      if (trainer.id) {
+        const availability = await getCoachAvailability(trainer.id);
+        setCoachAvailability(availability);
+        
+        if (isClient) {
+          const waitlistStatus = await checkClientWaitlistStatus(trainer.id);
+          setClientWaitlistStatus(waitlistStatus);
+        }
+      }
+    };
+    fetchData();
+  }, [trainer.id, isClient, getCoachAvailability, checkClientWaitlistStatus]);
 
   const handleToggleSave = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -206,6 +232,26 @@ export const TrainerCard = ({ trainer, onViewProfile, onMessage, matchScore = 0,
               isShortlisted={isSaved}
               hasContacted={false} // TODO: Track actual contact status
               hasScheduledCall={false} // TODO: Track actual call status
+            />
+          </div>
+        )}
+
+        {/* Waitlist Status Badge - Show if client is on waitlist */}
+        {isClient && clientWaitlistStatus && (
+          <div className="mb-4">
+            <WaitlistStatusBadge coachId={trainer.id} />
+          </div>
+        )}
+
+        {/* Waitlist Join Button - Show if coach is on waitlist and client not already on waitlist */}
+        {isClient && coachAvailability?.availability_status === 'waitlist' && !clientWaitlistStatus && (
+          <div className="mb-4">
+            <WaitlistJoinButton
+              coachId={trainer.id}
+              coachName={trainer.name}
+              nextAvailableDate={coachAvailability?.next_available_date}
+              waitlistMessage={coachAvailability?.waitlist_message}
+              className="w-full"
             />
           </div>
         )}

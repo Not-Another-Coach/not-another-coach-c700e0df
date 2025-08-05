@@ -147,6 +147,24 @@ export function useWaitlist() {
     }
   }, [user, fetchWaitlistEntries]);
 
+  const removeFromWaitlist = useCallback(async (coachId: string) => {
+    if (!user) return { error: 'No user' };
+
+    try {
+      const { error } = await supabase
+        .from('coach_waitlists')
+        .delete()
+        .eq('client_id', user.id)
+        .eq('coach_id', coachId);
+
+      if (error) throw error;
+      return { success: true };
+    } catch (error) {
+      console.error('Error removing from waitlist:', error);
+      return { error };
+    }
+  }, [user]);
+
   const checkClientWaitlistStatus = useCallback(async (coachId: string) => {
     if (!user) return null;
 
@@ -201,6 +219,7 @@ export function useWaitlist() {
     loading,
     updateAvailabilitySettings,
     joinWaitlist,
+    removeFromWaitlist,
     updateWaitlistEntry,
     checkClientWaitlistStatus,
     getCoachAvailability,

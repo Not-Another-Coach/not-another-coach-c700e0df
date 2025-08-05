@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useWaitlist } from '@/hooks/useWaitlist';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { Users, MessageCircle, Calendar, UserPlus, Archive, Clock, Settings, ExternalLink } from 'lucide-react';
+import { Users, MessageCircle, Calendar, UserPlus, Archive, Clock, Settings, ExternalLink, Bell } from 'lucide-react';
 
 export function WaitlistManagement() {
   const { waitlistEntries, updateWaitlistEntry, loading } = useWaitlist();
@@ -59,6 +59,41 @@ export function WaitlistManagement() {
       }
     } catch (error) {
       console.error('Error updating waitlist entry:', error);
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleNotifySpaceAvailable = async (entryId: string) => {
+    setIsUpdating(true);
+    
+    try {
+      const result = await updateWaitlistEntry(entryId, { 
+        status: 'contacted',
+        last_contacted_at: new Date().toISOString()
+      });
+      
+      if (result.error) {
+        toast({
+          title: "Error",
+          description: "Failed to notify client.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Client Notified",
+          description: "The client has been notified that space is available and can now book a discovery call."
+        });
+        // TODO: Trigger in-app notification and email to client
+        // TODO: Unlock discovery call booking for this client
+      }
+    } catch (error) {
+      console.error('Error notifying client:', error);
       toast({
         title: "Error",
         description: "Something went wrong. Please try again.",
@@ -232,6 +267,15 @@ export function WaitlistManagement() {
                         >
                           <UserPlus className="w-3 h-3 mr-1" />
                           Open Slot + Invite
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleNotifySpaceAvailable(entry.id)}
+                          disabled={isUpdating}
+                        >
+                          <Bell className="w-3 h-3 mr-1" />
+                          Notify Space Available
                         </Button>
                       </>
                     )}

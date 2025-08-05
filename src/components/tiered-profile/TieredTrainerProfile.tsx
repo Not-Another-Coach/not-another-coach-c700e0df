@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -67,6 +67,22 @@ export const TieredTrainerProfile = ({
 
   const isSaved = isTrainerSaved(trainer.id);
   const isClient = profile?.user_type === 'client';
+
+  // Fetch coach availability and client waitlist status
+  useEffect(() => {
+    const fetchData = async () => {
+      if (trainer.id) {
+        const availability = await getCoachAvailability(trainer.id);
+        setCoachAvailability(availability);
+        
+        if (isClient) {
+          const waitlistStatus = await checkClientWaitlistStatus(trainer.id);
+          setClientWaitlistStatus(waitlistStatus);
+        }
+      }
+    };
+    fetchData();
+  }, [trainer.id, isClient, getCoachAvailability, checkClientWaitlistStatus]);
 
   const handleLikeTrainer = async () => {
     if (!isClient || stage !== 'browsing') return;
@@ -180,46 +196,69 @@ export const TieredTrainerProfile = ({
           <ReviewsBlock trainer={trainer} />
         )}
 
+        {/* Waitlist Status Badge - Show if client is on waitlist */}
+        {isClient && clientWaitlistStatus && (
+          <div className="flex justify-center">
+            <WaitlistStatusBadge coachId={trainer.id} />
+          </div>
+        )}
+
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
-          {stage === 'browsing' && isClient && (
-            <Button 
-              onClick={handleLikeTrainer}
-              disabled={isUpdatingStage}
+          {/* Show waitlist join button if coach is on waitlist status and client not already on waitlist */}
+          {isClient && coachAvailability?.availability_status === 'waitlist' && !clientWaitlistStatus && (
+            <WaitlistJoinButton
+              coachId={trainer.id}
+              coachName={trainer.name || `${trainer.firstName} ${trainer.lastName}`.trim()}
+              nextAvailableDate={coachAvailability?.next_available_date}
+              waitlistMessage={coachAvailability?.waitlist_message}
               className="flex-1"
-            >
-              <Heart className="w-4 h-4 mr-2" />
-              {isUpdatingStage ? 'Adding to Liked...' : 'Like Trainer'}
-            </Button>
+            />
           )}
 
-          {(stage === 'liked' || stage === 'matched') && (
+          {/* Regular action buttons - only show if coach is not on waitlist or client is already waitlisted */}
+          {(!coachAvailability || coachAvailability?.availability_status !== 'waitlist' || clientWaitlistStatus) && (
             <>
-              <Button onClick={handleMessage} className="flex-1">
-                <MessageCircle className="w-4 h-4 mr-2" />
-                Message
-              </Button>
-              
-              <BookDiscoveryCallButton 
-                trainer={{
-                  id: trainer.id,
-                  name: trainer.name,
-                  firstName: trainer.firstName,
-                  lastName: trainer.lastName,
-                  profilePhotoUrl: trainer.profilePhotoUrl,
-                  offers_discovery_call: trainer.offers_discovery_call
-                }}
-                variant="outline"
-                className="flex-1"
-              />
-            </>
-          )}
+              {stage === 'browsing' && isClient && (
+                <Button 
+                  onClick={handleLikeTrainer}
+                  disabled={isUpdatingStage}
+                  className="flex-1"
+                >
+                  <Heart className="w-4 h-4 mr-2" />
+                  {isUpdatingStage ? 'Adding to Liked...' : 'Like Trainer'}
+                </Button>
+              )}
 
-          {stage === 'discovery_completed' && (
-            <Button onClick={onViewProfile} className="flex-1">
-              <Award className="w-4 h-4 mr-2" />
-              Book Training Package
-            </Button>
+              {(stage === 'liked' || stage === 'matched') && (
+                <>
+                  <Button onClick={handleMessage} className="flex-1">
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    Message
+                  </Button>
+                  
+                  <BookDiscoveryCallButton 
+                    trainer={{
+                      id: trainer.id,
+                      name: trainer.name,
+                      firstName: trainer.firstName,
+                      lastName: trainer.lastName,
+                      profilePhotoUrl: trainer.profilePhotoUrl,
+                      offers_discovery_call: trainer.offers_discovery_call
+                    }}
+                    variant="outline"
+                    className="flex-1"
+                  />
+                </>
+              )}
+
+              {stage === 'discovery_completed' && (
+                <Button onClick={onViewProfile} className="flex-1">
+                  <Award className="w-4 h-4 mr-2" />
+                  Book Training Package
+                </Button>
+              )}
+            </>
           )}
 
           {onViewProfile && (
