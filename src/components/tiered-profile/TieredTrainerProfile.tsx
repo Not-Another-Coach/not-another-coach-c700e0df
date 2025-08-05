@@ -21,6 +21,7 @@ import { ReviewsBlock } from './blocks/ReviewsBlock';
 import { PricingLockMessage } from './PricingLockMessage';
 import { AskQuestionButton } from './AskQuestionButton';
 import { BookDiscoveryCallButton } from '@/components/discovery-call/BookDiscoveryCallButton';
+import { ChooseCoachButton } from '@/components/coach-selection/ChooseCoachButton';
 
 interface TieredTrainerProfileProps {
   trainer: any;
@@ -173,6 +174,18 @@ export const TieredTrainerProfile = ({
         {stage === 'browsing' || stage === 'liked' ? (
           <AskQuestionButton trainer={trainer} />
         ) : null}
+
+        {/* Choose Coach Button - Available after liking or discovery call */}
+        {(stage === 'liked' || stage === 'matched' || stage === 'discovery_completed') && (
+          <ChooseCoachButton 
+            trainer={trainer}
+            stage={stage}
+            onSuccess={() => {
+              // Refresh the component or handle success
+              window.location.reload();
+            }}
+          />
+        )}
 
         {/* Ways of Working Block - Visible from Stage 3 */}
         {canViewContent('matched') && (
