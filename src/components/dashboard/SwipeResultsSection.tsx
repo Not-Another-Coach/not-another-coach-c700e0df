@@ -132,7 +132,7 @@ export function SwipeResultsSection({ profile }: SwipeResultsSectionProps) {
       shortlistedData: shortlistedTrainer,
       hasFeedback: feedbackSubmitted[call.trainer_id] || false
     };
-  });
+  }).filter(call => call.shortlistedData); // Only show calls for trainers that were shortlisted
 
   const handleChooseCoach = async (trainerId: string) => {
     // TODO: Implement coach selection logic
@@ -324,61 +324,52 @@ export function SwipeResultsSection({ profile }: SwipeResultsSectionProps) {
                         Discovery call on {new Date(call.scheduled_for).toLocaleDateString()}
                       </p>
                     </div>
-                    <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                      <CheckCircle className="h-3 w-3 mr-1" />
-                      Call Complete
-                    </Badge>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {/* Feedback Status */}
-                    {call.hasFeedback ? (
-                      <div className="p-3 bg-green-50 rounded-lg">
-                        <div className="flex items-center gap-2 text-green-800">
-                          <CheckCircle className="h-4 w-4" />
-                          <span className="text-sm font-medium">Feedback submitted</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="p-3 bg-amber-50 rounded-lg">
-                        <div className="text-amber-800 text-sm">
-                          Please submit feedback before choosing this coach
-                        </div>
-                      </div>
-                    )}
+                    <div className="flex gap-2">
+                      <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Call Complete
+                      </Badge>
+                      {call.hasFeedback && (
+                        <Badge variant="default" className="bg-green-100 text-green-800">
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          Feedback Submitted
+                        </Badge>
+                      )}
+                    </div>
 
-                    {/* Action Buttons */}
                     <div className="grid grid-cols-2 gap-2">
                       <Button 
                         variant="outline" 
                         size="sm"
                         onClick={() => handleMoveBackToShortlist(call.trainer_id)}
                       >
-                        Move to Shortlist
+                        <MessageCircle className="h-4 w-4 mr-2" />
+                        Move Back
                       </Button>
-                      <Button 
-                        variant="default" 
-                        size="sm"
-                        disabled={!call.hasFeedback}
-                        onClick={() => handleChooseCoach(call.trainer_id)}
-                        className={call.hasFeedback ? "bg-green-600 hover:bg-green-700" : ""}
-                      >
-                        <CheckCircle className="h-4 w-4 mr-2" />
-                        Choose Coach
-                      </Button>
+                      {call.hasFeedback ? (
+                        <Button 
+                          variant="default" 
+                          size="sm"
+                          onClick={() => handleChooseCoach(call.trainer_id)}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Choose Coach
+                        </Button>
+                      ) : (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleOpenFeedbackModal(call)}
+                        >
+                          Submit Feedback
+                        </Button>
+                      )}
                     </div>
-
-                    {!call.hasFeedback && (
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="w-full"
-                        onClick={() => handleOpenFeedbackModal(call)}
-                      >
-                        Submit Feedback
-                      </Button>
-                    )}
                   </div>
                 </CardContent>
               </Card>
