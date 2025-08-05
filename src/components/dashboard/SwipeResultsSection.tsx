@@ -127,9 +127,10 @@ export function SwipeResultsSection({ profile }: SwipeResultsSectionProps) {
   console.log('shortlistedTrainers:', shortlistedTrainers);
   console.log('completedDiscoveryCalls:', completedDiscoveryCalls);
   
-  // Debug: log each trainer and their stage
+  // Debug: log each trainer and their stage  
+  console.log('=== DETAILED TRAINER DEBUG ===');
   shortlistedTrainers.forEach(trainer => {
-    console.log(`DEBUG - Trainer ${trainer.trainer_id}: stage = ${trainer.stage}`);
+    console.log(`ALL TRAINERS - ID: ${trainer.trainer_id}, stage: ${trainer.stage}, name: Lou Whitton/Alex Johnson/Sarah Smith check`);
   });
 
   // Filter shortlisted trainers: those with 'shortlisted' stage go to shortlisted tab
