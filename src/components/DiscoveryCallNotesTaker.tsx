@@ -109,7 +109,7 @@ export function DiscoveryCallNotesTaker({
                 </span>
               </div>
               {hasContent && (
-                <div className="text-xs text-muted-foreground max-w-full">
+                <div className="text-xs text-muted-foreground max-w-full break-words whitespace-pre-wrap">
                   {content.trim().length > 500 
                     ? `${content.trim().substring(0, 500)}...` 
                     : content.trim()}
