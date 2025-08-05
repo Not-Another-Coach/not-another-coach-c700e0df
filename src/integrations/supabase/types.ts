@@ -1498,6 +1498,9 @@ export type Database = {
         | "matched"
         | "discovery_completed"
         | "active_client"
+        | "shortlisted"
+        | "unmatched"
+        | "declined"
       user_type: "client" | "trainer" | "admin"
       verification_status_enum: "pending" | "verified" | "rejected"
       visibility_state: "hidden" | "blurred" | "visible"
@@ -1661,6 +1664,9 @@ export const Constants = {
         "matched",
         "discovery_completed",
         "active_client",
+        "shortlisted",
+        "unmatched",
+        "declined",
       ],
       user_type: ["client", "trainer", "admin"],
       verification_status_enum: ["pending", "verified", "rejected"],
