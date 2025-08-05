@@ -1111,69 +1111,6 @@ export type Database = {
         }
         Relationships: []
       }
-      saved_trainers: {
-        Row: {
-          id: string
-          notes: string | null
-          saved_at: string
-          trainer_id: string
-          user_id: string
-        }
-        Insert: {
-          id?: string
-          notes?: string | null
-          saved_at?: string
-          trainer_id: string
-          user_id: string
-        }
-        Update: {
-          id?: string
-          notes?: string | null
-          saved_at?: string
-          trainer_id?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      shortlisted_trainers: {
-        Row: {
-          chat_enabled: boolean
-          created_at: string
-          discovery_call_booked_at: string | null
-          discovery_call_enabled: boolean
-          id: string
-          notes: string | null
-          shortlisted_at: string
-          trainer_id: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          chat_enabled?: boolean
-          created_at?: string
-          discovery_call_booked_at?: string | null
-          discovery_call_enabled?: boolean
-          id?: string
-          notes?: string | null
-          shortlisted_at?: string
-          trainer_id: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          chat_enabled?: boolean
-          created_at?: string
-          discovery_call_booked_at?: string | null
-          discovery_call_enabled?: boolean
-          id?: string
-          notes?: string | null
-          shortlisted_at?: string
-          trainer_id?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       trainer_availability_settings: {
         Row: {
           availability_schedule: Json

@@ -1,0 +1,151 @@
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from './useAuth';
+
+export type EngagementStage = 'browsing' | 'liked' | 'shortlisted' | 'matched' | 'discovery_completed' | 'active_client' | 'unmatched' | 'declined';
+
+interface TrainerEngagement {
+  trainerId: string;
+  stage: EngagementStage;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  likedAt?: string;
+  matchedAt?: string;
+  discoveryCompletedAt?: string;
+  becameClientAt?: string;
+}
+
+export function useTrainerEngagement() {
+  const { user } = useAuth();
+  const [engagements, setEngagements] = useState<TrainerEngagement[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchEngagements = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('client_trainer_engagement')
+        .select('*')
+        .eq('client_id', user.id);
+
+      if (error) {
+        console.error('Error fetching engagements:', error);
+        return;
+      }
+
+      const engagementData: TrainerEngagement[] = data?.map(item => ({
+        trainerId: item.trainer_id,
+        stage: item.stage as EngagementStage,
+        notes: item.notes,
+        createdAt: item.created_at,
+        updatedAt: item.updated_at,
+        likedAt: item.liked_at,
+        matchedAt: item.matched_at,
+        discoveryCompletedAt: item.discovery_completed_at,
+        becameClientAt: item.became_client_at
+      })) || [];
+
+      setEngagements(engagementData);
+    } catch (error) {
+      console.error('Error fetching engagements:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEngagements();
+  }, [user]);
+
+  const updateEngagementStage = async (trainerId: string, newStage: EngagementStage) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase.rpc('update_engagement_stage', {
+        client_uuid: user.id,
+        trainer_uuid: trainerId,
+        new_stage: newStage
+      });
+
+      if (error) {
+        console.error('Error updating engagement stage:', error);
+        return;
+      }
+
+      // Refresh engagements
+      await fetchEngagements();
+    } catch (error) {
+      console.error('Error updating engagement stage:', error);
+    }
+  };
+
+  const getEngagementStage = (trainerId: string): EngagementStage => {
+    const engagement = engagements.find(e => e.trainerId === trainerId);
+    return engagement?.stage || 'browsing';
+  };
+
+  const getLikedTrainers = () => {
+    return engagements.filter(e => e.stage === 'liked');
+  };
+
+  const getShortlistedTrainers = () => {
+    return engagements.filter(e => e.stage === 'shortlisted');
+  };
+
+  const getMatchedTrainers = () => {
+    return engagements.filter(e => e.stage === 'matched');
+  };
+
+  const getActiveClients = () => {
+    return engagements.filter(e => e.stage === 'active_client');
+  };
+
+  const isTrainerLiked = (trainerId: string) => {
+    return getEngagementStage(trainerId) === 'liked';
+  };
+
+  const isTrainerShortlisted = (trainerId: string) => {
+    return getEngagementStage(trainerId) === 'shortlisted';
+  };
+
+  const likeTrainer = async (trainerId: string) => {
+    await updateEngagementStage(trainerId, 'liked');
+  };
+
+  const shortlistTrainer = async (trainerId: string) => {
+    await updateEngagementStage(trainerId, 'shortlisted');
+  };
+
+  const matchTrainer = async (trainerId: string) => {
+    await updateEngagementStage(trainerId, 'matched');
+  };
+
+  const unmatchTrainer = async (trainerId: string) => {
+    await updateEngagementStage(trainerId, 'unmatched');
+  };
+
+  const declineTrainer = async (trainerId: string) => {
+    await updateEngagementStage(trainerId, 'declined');
+  };
+
+  return {
+    engagements,
+    loading,
+    updateEngagementStage,
+    getEngagementStage,
+    getLikedTrainers,
+    getShortlistedTrainers,
+    getMatchedTrainers,
+    getActiveClients,
+    isTrainerLiked,
+    isTrainerShortlisted,
+    likeTrainer,
+    shortlistTrainer,
+    matchTrainer,
+    unmatchTrainer,
+    declineTrainer,
+    refresh: fetchEngagements
+  };
+}

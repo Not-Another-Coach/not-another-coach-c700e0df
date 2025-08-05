@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { MapPin, Star, Heart, MessageCircle, User } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { useSavedTrainers } from '@/hooks/useSavedTrainers';
+import { useTrainerEngagement } from '@/hooks/useTrainerEngagement';
 
 interface UnmatchedTrainer {
   id: string;
@@ -30,6 +30,7 @@ interface UnmatchedTrainersProps {
 
 export function UnmatchedTrainers({ profile }: UnmatchedTrainersProps) {
   const { user } = useAuth();
+  const { engagements, likeTrainer } = useTrainerEngagement();
   const [trainers, setTrainers] = useState<UnmatchedTrainer[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -40,39 +41,18 @@ export function UnmatchedTrainers({ profile }: UnmatchedTrainersProps) {
       try {
         console.log('Fetching unmatched trainers for user:', user.id);
         
-        // Get trainers that the client hasn't engaged with
-        const { data: engagements } = await supabase
-          .from('client_trainer_engagement')
-          .select('trainer_id')
-          .eq('client_id', user.id);
-
-        console.log('Client engagement data:', engagements);
-        const engagedTrainerIds = engagements?.map(e => e.trainer_id) || [];
+        // Get trainer IDs that the client has already engaged with
+        const engagedTrainerIds = engagements.map(e => e.trainerId);
         console.log('Engaged trainer IDs:', engagedTrainerIds);
 
-        // Get trainers that the client has saved/liked
-        const { data: savedTrainers } = await supabase
-          .from('saved_trainers')
-          .select('trainer_id')
-          .eq('user_id', user.id);
-
-        console.log('Saved trainers data:', savedTrainers);
-        const savedTrainerIds = savedTrainers?.map(s => s.trainer_id) || [];
-        console.log('Saved trainer IDs:', savedTrainerIds);
-
-        // Combine both lists to exclude trainers already engaged with or saved
-        const excludedTrainerIds = [...new Set([...engagedTrainerIds, ...savedTrainerIds])];
-        console.log('All excluded trainer IDs:', excludedTrainerIds);
-
-        // Get all trainers with completed profiles excluding those already engaged or saved
+        // Get all trainers with completed profiles excluding those already engaged
         let query = supabase
           .from('profiles')
           .select('id, first_name, last_name, tagline, bio, location, specializations, training_types, hourly_rate, rating, total_ratings, profile_photo_url, is_verified, profile_setup_completed, profile_published, user_type')
           .eq('user_type', 'trainer');
 
-        // Don't exclude current user since we want to show all trainers in this view
-        if (excludedTrainerIds.length > 0) {
-          query = query.not('id', 'in', `(${excludedTrainerIds.join(',')})`);
+        if (engagedTrainerIds.length > 0) {
+          query = query.not('id', 'in', `(${engagedTrainerIds.join(',')})`);
         }
 
         const { data: trainersData, error } = await query.order('rating', { ascending: false });
@@ -91,9 +71,6 @@ export function UnmatchedTrainers({ profile }: UnmatchedTrainersProps) {
         ) || [];
 
         console.log('Filtered trainers (published or setup completed):', filteredTrainers);
-        console.log('Louise Whitton specifically:', filteredTrainers.find(t => 
-          t.first_name === 'Louise' && t.last_name === 'Whitton'
-        ));
 
         setTrainers(filteredTrainers);
       } catch (error) {
@@ -104,19 +81,15 @@ export function UnmatchedTrainers({ profile }: UnmatchedTrainersProps) {
     };
 
     fetchUnmatchedTrainers();
-  }, [user]);
-
-  const { saveTrainer } = useSavedTrainers();
+  }, [user, engagements]);
 
   const handleLikeTrainer = async (trainerId: string) => {
     if (!user) return;
 
     try {
-      const success = await saveTrainer(trainerId);
-      if (success) {
-        // Remove trainer from unmatched list
-        setTrainers(prev => prev.filter(t => t.id !== trainerId));
-      }
+      await likeTrainer(trainerId);
+      // Remove trainer from unmatched list
+      setTrainers(prev => prev.filter(t => t.id !== trainerId));
     } catch (error) {
       console.error('Error liking trainer:', error);
     }

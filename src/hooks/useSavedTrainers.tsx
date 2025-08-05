@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useJourneyProgress } from '@/hooks/useJourneyProgress';
+import { useTrainerEngagement } from '@/hooks/useTrainerEngagement';
 import { toast } from '@/hooks/use-toast';
 
 export interface SavedTrainer {
@@ -14,39 +14,28 @@ export interface SavedTrainer {
 export const useSavedTrainers = () => {
   const { user } = useAuth();
   const { updateProgress, advanceToStage } = useJourneyProgress();
-  const [savedTrainers, setSavedTrainers] = useState<SavedTrainer[]>([]);
+  const { 
+    getLikedTrainers, 
+    likeTrainer: engagementLikeTrainer,
+    updateEngagementStage,
+    getEngagementStage 
+  } = useTrainerEngagement();
+  
   const [loading, setLoading] = useState(true);
 
-  // Fetch saved trainers for the current user
-  const fetchSavedTrainers = async () => {
-    if (!user) {
-      setSavedTrainers([]);
-      setLoading(false);
-      return;
-    }
+  // Map engagement data to saved trainers format
+  const savedTrainers = getLikedTrainers().map(engagement => ({
+    id: engagement.trainerId,
+    trainer_id: engagement.trainerId,
+    saved_at: engagement.createdAt,
+    notes: engagement.notes
+  }));
 
-    try {
-      const { data, error } = await supabase
-        .from('saved_trainers')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('saved_at', { ascending: false });
+  useEffect(() => {
+    setLoading(false);
+  }, []);
 
-      if (error) throw error;
-      setSavedTrainers(data || []);
-    } catch (error) {
-      console.error('Error fetching saved trainers:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load saved trainers",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Save a trainer
+  // Save a trainer using the engagement system
   const saveTrainer = async (trainerId: string, notes?: string) => {
     if (!user) {
       toast({
@@ -58,27 +47,7 @@ export const useSavedTrainers = () => {
     }
 
     try {
-      const { error } = await supabase
-        .from('saved_trainers')
-        .insert({
-          user_id: user.id,
-          trainer_id: trainerId,
-          notes,
-        });
-
-      if (error) {
-        if (error.code === '23505') { // Unique constraint violation
-          toast({
-            title: "Already saved",
-            description: "This trainer is already in your saved list",
-            variant: "destructive",
-          });
-          return false;
-        }
-        throw error;
-      }
-
-      await fetchSavedTrainers(); // Refresh the list
+      await engagementLikeTrainer(trainerId);
       
       // Track progress - first save advances to shortlisting stage
       if (savedTrainers.length === 0) {
@@ -104,20 +73,14 @@ export const useSavedTrainers = () => {
     }
   };
 
-  // Remove a saved trainer
+  // Remove a saved trainer using the engagement system
   const unsaveTrainer = async (trainerId: string) => {
     if (!user) return false;
 
     try {
-      const { error } = await supabase
-        .from('saved_trainers')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('trainer_id', trainerId);
-
-      if (error) throw error;
-
-      await fetchSavedTrainers(); // Refresh the list
+      // Move back to browsing stage when unsaving
+      await updateEngagementStage(trainerId, 'browsing');
+      
       toast({
         title: "Trainer removed",
         description: "Removed from your saved trainers list",
@@ -134,17 +97,13 @@ export const useSavedTrainers = () => {
     }
   };
 
-  // Check if a trainer is saved
+  // Check if a trainer is saved (liked)
   const isTrainerSaved = (trainerId: string) => {
-    return savedTrainers.some(saved => saved.trainer_id === trainerId);
+    return getEngagementStage(trainerId) === 'liked';
   };
 
   // Get saved trainer IDs for quick lookup
   const savedTrainerIds = savedTrainers.map(saved => saved.trainer_id);
-
-  useEffect(() => {
-    fetchSavedTrainers();
-  }, [user]);
 
   return {
     savedTrainers,
@@ -153,6 +112,6 @@ export const useSavedTrainers = () => {
     unsaveTrainer,
     isTrainerSaved,
     savedTrainerIds,
-    refetch: fetchSavedTrainers,
+    refetch: () => {}, // Engagement hook handles refetching
   };
 };

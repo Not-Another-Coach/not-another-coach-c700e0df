@@ -104,21 +104,13 @@ export const useClientJourneyProgress = () => {
 
       if (engagementError) throw engagementError;
 
-      // Get saved trainers count
-      const { data: savedTrainers, error: savedError } = await supabase
-        .from('saved_trainers')
-        .select('id')
-        .eq('user_id', user.id);
+      // Get discovery calls to check for booked calls
+      const { data: discoveryCalls, error: discoveryError } = await supabase
+        .from('discovery_calls')
+        .select('id, status')
+        .eq('client_id', user.id);
 
-      if (savedError) throw savedError;
-
-      // Get shortlisted trainers count
-      const { data: shortlistedTrainers, error: shortlistedError } = await supabase
-        .from('shortlisted_trainers')
-        .select('id, discovery_call_booked_at')
-        .eq('user_id', user.id);
-
-      if (shortlistedError) throw shortlistedError;
+      if (discoveryError) throw discoveryError;
 
       // Determine current stage based on data
       let currentStage: ClientJourneyStage = 'preferences_identified';
@@ -131,14 +123,14 @@ export const useClientJourneyProgress = () => {
         return;
       }
 
-      // Stage 2: Has liked at least one coach, saved trainers, or shortlisted trainers
-      const hasLikedCoaches = engagements?.some(e => e.liked_at) || (savedTrainers?.length || 0) > 0 || (shortlistedTrainers?.length || 0) > 0;
+      // Stage 2: Has liked at least one coach or has engagement records
+      const hasLikedCoaches = engagements?.some(e => e.liked_at) || (engagements?.length || 0) > 0;
       if (hasLikedCoaches) {
         currentStage = 'exploring_coaches';
       }
 
-      // Stage 3: Has discovery call booked (matched stage or shortlisted with discovery call booked)
-      const hasDiscoveryCall = engagements?.some(e => e.matched_at) || shortlistedTrainers?.some(st => st.discovery_call_booked_at);
+      // Stage 3: Has discovery call booked (matched stage or scheduled discovery call)
+      const hasDiscoveryCall = engagements?.some(e => e.matched_at) || discoveryCalls?.some(dc => dc.status === 'scheduled');
       if (hasDiscoveryCall) {
         currentStage = 'discovery_call_booked';
       }
@@ -226,10 +218,10 @@ export const useClientJourneyProgress = () => {
           nextAction = 'Start exploring coaches that match your preferences';
           break;
         case 'exploring_coaches':
-          const hasShortlisted = (shortlistedTrainers?.length || 0) > 0;
-          const hasDiscoveryCallBooked = shortlistedTrainers?.some(st => st.discovery_call_booked_at);
+          const hasShortlisted = engagements?.some(e => e.stage === 'shortlisted');
+          const hasDiscoveryCallBookedFromEngagement = discoveryCalls?.length > 0;
           
-          if (hasShortlisted && !hasDiscoveryCallBooked) {
+          if (hasShortlisted && !hasDiscoveryCallBookedFromEngagement) {
             nextAction = 'Book discovery calls with your shortlisted coaches';
           } else if (hasLikedCoaches) {
             nextAction = 'Shortlist your favorite coaches to unlock discovery calls';

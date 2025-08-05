@@ -11,20 +11,18 @@ import { DiscoveryCallNotesTaker } from '@/components/DiscoveryCallNotesTaker';
 
 interface Prospect {
   id: string;
-  user_id: string;
+  client_id: string;
   trainer_id: string;
-  shortlisted_at: string;
-  discovery_call_enabled: boolean;
-  discovery_call_booked_at?: string;
-  chat_enabled: boolean;
+  stage: string;
+  created_at: string;
   notes?: string;
+  user_id?: string; // For compatibility with MessagingPopup
   client_profile?: {
     first_name?: string;
     last_name?: string;
     primary_goals?: string[];
     training_location_preference?: string;
   };
-  engagement_stage?: string;
   discovery_call?: {
     scheduled_for: string;
     duration_minutes: number;
@@ -62,52 +60,52 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
     }
 
     console.log('Starting to fetch prospects for trainer:', profile.id);
-    console.log('Trainer profile object:', profile);
     setLoading(true);
 
     try {
-      // Get shortlisted clients for this trainer
-      console.log('Querying shortlisted_trainers with trainer_id:', profile.id.toString());
-      
-      const { data: shortlistedData, error: shortlistedError } = await supabase
-        .from('shortlisted_trainers')
-        .select('*')
-        .eq('trainer_id', profile.id.toString())
-        .order('shortlisted_at', { ascending: false });
+      // Get engaged clients for this trainer (shortlisted and above)
+      const { data: engagementData, error: engagementError } = await supabase
+        .from('client_trainer_engagement')
+        .select(`
+          client_id,
+          trainer_id,
+          stage,
+          created_at,
+          updated_at,
+          notes
+        `)
+        .eq('trainer_id', profile.id)
+        .in('stage', ['shortlisted', 'matched', 'discovery_completed'])
+        .order('created_at', { ascending: false });
 
-      console.log('Raw shortlisted data:', shortlistedData);
-      console.log('Shortlisted error:', shortlistedError);
+      console.log('Engagement data:', engagementData);
+      console.log('Engagement error:', engagementError);
 
-      if (shortlistedError) {
-        console.error('Error fetching shortlisted clients:', shortlistedError);
+      if (engagementError) {
+        console.error('Error fetching engaged clients:', engagementError);
         setProspects([]);
         onCountChange?.(0);
         return;
       }
 
-      if (!shortlistedData || shortlistedData.length === 0) {
-        console.log('No shortlisted clients found for trainer:', profile.id);
+      if (!engagementData || engagementData.length === 0) {
+        console.log('No engaged clients found for trainer:', profile.id);
         setProspects([]);
         onCountChange?.(0);
         return;
       }
 
-      console.log('Found shortlisted clients:', shortlistedData.length);
+      console.log('Found engaged clients:', engagementData.length);
 
-      // Get client profiles and engagement stages
-      const clientIds = shortlistedData.map(item => item.user_id);
+      // Get client profiles and discovery calls
+      const clientIds = engagementData.map(item => item.client_id);
       console.log('Client IDs to fetch:', clientIds);
       
-      const [profilesResult, engagementResult, discoveryCallsResult] = await Promise.all([
+      const [profilesResult, discoveryCallsResult] = await Promise.all([
         supabase
           .from('profiles')
           .select('id, first_name, last_name, primary_goals, training_location_preference')
           .in('id', clientIds),
-        supabase
-          .from('client_trainer_engagement')
-          .select('client_id, stage')
-          .eq('trainer_id', profile.id)
-          .in('client_id', clientIds),
         supabase
           .from('discovery_calls')
           .select('client_id, scheduled_for, duration_minutes, status')
@@ -117,39 +115,30 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
       ]);
 
       const { data: profilesData, error: profilesError } = profilesResult;
-      const { data: engagementData, error: engagementError } = engagementResult;
       const { data: discoveryCallsData, error: discoveryCallsError } = discoveryCallsResult;
 
       console.log('Profiles data:', profilesData);
-      console.log('Engagement data:', engagementData);
       console.log('Discovery calls data:', discoveryCallsData);
 
       if (profilesError) {
         console.error('Error fetching profiles:', profilesError);
       }
 
-      if (engagementError) {
-        console.error('Error fetching engagement data:', engagementError);
-      }
-
       if (discoveryCallsError) {
         console.error('Error fetching discovery calls data:', discoveryCallsError);
       }
 
-      // Filter out clients who are already active clients
-      const filteredShortlisted = shortlistedData.filter(item => {
-        const engagement = engagementData?.find(eng => eng.client_id === item.user_id);
-        return !engagement || engagement.stage !== 'active_client';
-      });
-
-      console.log('Filtered shortlisted clients:', filteredShortlisted.length);
-
       // Merge the data
-      const mergedData = filteredShortlisted.map(shortlisted => ({
-        ...shortlisted,
-        client_profile: profilesData?.find(profile => profile.id === shortlisted.user_id) || null,
-        engagement_stage: engagementData?.find(eng => eng.client_id === shortlisted.user_id)?.stage || 'browsing',
-        discovery_call: discoveryCallsData?.find(call => call.client_id === shortlisted.user_id) || null
+      const mergedData = engagementData.map(engagement => ({
+        id: `${engagement.client_id}-${engagement.trainer_id}`,
+        client_id: engagement.client_id,
+        user_id: engagement.client_id, // For compatibility
+        trainer_id: engagement.trainer_id,
+        stage: engagement.stage,
+        created_at: engagement.created_at,
+        notes: engagement.notes,
+        client_profile: profilesData?.find(profile => profile.id === engagement.client_id) || null,
+        discovery_call: discoveryCallsData?.find(call => call.client_id === engagement.client_id) || null
       }));
 
       console.log('Final merged prospects data:', mergedData);
@@ -165,29 +154,21 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
     }
   };
 
-  const getStageInfo = (stage?: string, discoveryCallEnabled?: boolean, discoveryCall?: any) => {
+  const getStageInfo = (stage?: string, discoveryCall?: any) => {
     if (discoveryCall) {
       return { label: 'Call Scheduled', variant: 'default' as const, color: 'bg-blue-100 text-blue-800' };
     }
-    if (discoveryCallEnabled) {
-      return { label: 'Call Available', variant: 'secondary' as const, color: 'bg-green-100 text-green-800' };
-    }
     
     switch (stage) {
-      case 'liked':
-        return { label: 'Liked', variant: 'secondary' as const, color: 'bg-yellow-100 text-yellow-800' };
+      case 'shortlisted':
+        return { label: 'Shortlisted', variant: 'outline' as const, color: 'bg-gray-100 text-gray-800' };
       case 'matched':
         return { label: 'Matched', variant: 'default' as const, color: 'bg-purple-100 text-purple-800' };
       case 'discovery_completed':
         return { label: 'Discovery Done', variant: 'default' as const, color: 'bg-orange-100 text-orange-800' };
       default:
-        return { label: 'Shortlisted', variant: 'outline' as const, color: 'bg-gray-100 text-gray-800' };
+        return { label: 'Prospect', variant: 'outline' as const, color: 'bg-gray-100 text-gray-800' };
     }
-  };
-
-  const formatDiscoveryCallDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return format(date, 'MMM d, yyyy \'at\' h:mm a');
   };
 
   if (loading) {
@@ -225,11 +206,7 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
         ) : (
           <div className="space-y-4">
             {prospects.map((prospect) => {
-              const stageInfo = getStageInfo(
-                prospect.engagement_stage, 
-                prospect.discovery_call_enabled, 
-                prospect.discovery_call
-              );
+              const stageInfo = getStageInfo(prospect.stage, prospect.discovery_call);
               
               return (
                 <div key={prospect.id} className="border rounded-lg p-4 space-y-3">
@@ -239,12 +216,12 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
                         <h4 className="font-medium">
                           {prospect.client_profile?.first_name && prospect.client_profile?.last_name
                             ? `${prospect.client_profile.first_name} ${prospect.client_profile.last_name}`
-                            : `Client ${prospect.user_id.slice(0, 8)}`}
+                            : `Client ${prospect.client_id.slice(0, 8)}`}
                         </h4>
                         <Badge variant={stageInfo.variant} className={stageInfo.color}>
                           {stageInfo.label}
                         </Badge>
-                        {prospect.chat_enabled && (
+                        {prospect.stage === 'matched' && (
                           <Badge variant="outline" className="bg-blue-50 text-blue-700">
                             Chat Active
                           </Badge>
@@ -253,7 +230,9 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
-                          Shortlisted {format(new Date(prospect.shortlisted_at), 'MMM d, yyyy')}
+                          {prospect.stage === 'shortlisted' && `Shortlisted ${format(new Date(prospect.created_at), 'MMM d, yyyy')}`}
+                          {prospect.stage === 'matched' && `Matched ${format(new Date(prospect.created_at), 'MMM d, yyyy')}`}
+                          {prospect.stage === 'discovery_completed' && `Discovery completed`}
                         </span>
                         {prospect.discovery_call && (
                           <span className="flex items-center gap-1">
@@ -281,7 +260,7 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
                   </div>
                   
                   <div className="flex items-center gap-2 pt-2 border-t">
-                    {prospect.chat_enabled && (
+                    {prospect.stage === 'matched' && (
                       <Button
                         size="sm"
                         variant="outline"
@@ -295,13 +274,12 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
                       </Button>
                     )}
                     
-                    {prospect.discovery_call_enabled && !prospect.discovery_call && (
+                    {prospect.stage === 'shortlisted' && !prospect.discovery_call && (
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => {
-                          // TODO: Implement discovery call booking
-                          console.log('Book discovery call:', prospect.user_id);
+                          console.log('Book discovery call:', prospect.client_id);
                         }}
                       >
                         <Phone className="w-3 h-3 mr-1" />
@@ -314,8 +292,7 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
                         size="sm"
                         variant="outline"
                         onClick={() => {
-                          // TODO: Implement join call functionality
-                          console.log('Join call:', prospect.user_id);
+                          console.log('Join call:', prospect.client_id);
                         }}
                       >
                         <Video className="w-3 h-3 mr-1" />
@@ -323,13 +300,12 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
                       </Button>
                     )}
                     
-                    {prospect.engagement_stage === 'discovery_completed' && (
+                    {prospect.stage === 'discovery_completed' && (
                       <Button
                         size="sm"
                         variant="default"
                         onClick={() => {
-                          // TODO: Implement convert to client functionality
-                          console.log('Convert to client:', prospect.user_id);
+                          console.log('Convert to client:', prospect.client_id);
                         }}
                       >
                         <UserPlus className="w-3 h-3 mr-1" />
@@ -341,7 +317,7 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
                   {/* Discovery Call Notes */}
                   <div className="mt-4">
                     <DiscoveryCallNotesTaker 
-                      clientId={prospect.user_id}
+                      clientId={prospect.client_id}
                       clientName={prospect.client_profile?.first_name && prospect.client_profile?.last_name
                         ? `${prospect.client_profile.first_name} ${prospect.client_profile.last_name}`
                         : undefined}

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useTrainerEngagement } from '@/hooks/useTrainerEngagement';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -24,93 +25,66 @@ interface ShortlistedTrainer {
 
 export function useShortlistedTrainers() {
   const { user } = useAuth();
-  const [shortlistedTrainers, setShortlistedTrainers] = useState<ShortlistedTrainer[]>([]);
+  const { 
+    getShortlistedTrainers: getEngagementShortlisted, 
+    shortlistTrainer: engagementShortlistTrainer,
+    updateEngagementStage,
+    loading: engagementLoading 
+  } = useTrainerEngagement();
+  
+  const [discoveryCallsData, setDiscoveryCallsData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchShortlistedTrainers = useCallback(async () => {
-    if (!user) {
-      console.log('No user available for fetching shortlisted trainers');
+  // Convert engagement data to shortlisted trainers format
+  const engagementShortlisted = getEngagementShortlisted();
+  const shortlistedTrainers: ShortlistedTrainer[] = engagementShortlisted.map(engagement => {
+    const discoveryCall = discoveryCallsData.find(call => call.trainer_id === engagement.trainerId);
+    
+    return {
+      id: `shortlist-${engagement.trainerId}`,
+      user_id: user?.id || '',
+      trainer_id: engagement.trainerId,
+      shortlisted_at: engagement.createdAt,
+      notes: engagement.notes,
+      chat_enabled: true,
+      discovery_call_enabled: true,
+      discovery_call_booked_at: discoveryCall?.created_at,
+      created_at: engagement.createdAt,
+      updated_at: engagement.updatedAt,
+      discovery_call: discoveryCall
+    };
+  });
+
+  const fetchDiscoveryCalls = useCallback(async () => {
+    if (!user || engagementShortlisted.length === 0) {
+      setDiscoveryCallsData([]);
       return;
     }
 
-    console.log('Fetching shortlisted trainers for user:', user.id);
     try {
-      const { data, error } = await supabase
-        .from('shortlisted_trainers')
-        .select(`
-          *
-        `)
-        .eq('user_id', user.id)
-        .order('shortlisted_at', { ascending: false });
-
-      console.log('Shortlisted trainers raw data:', data);
-      console.log('Shortlisted trainers error:', error);
-
-      // Also fetch discovery calls for these trainers
-      let discoveryCallsData = [];
-      if (data && data.length > 0) {
-        const trainerIds = data.map(item => item.trainer_id);
-        console.log('Fetching discovery calls for trainers:', trainerIds);
-        const { data: callsData, error: callsError } = await supabase
-          .from('discovery_calls')
-          .select('*')
-          .eq('client_id', user.id)
-          .in('trainer_id', trainerIds)
-          .in('status', ['scheduled', 'rescheduled']);
-        
-        console.log('Discovery calls query result:', { callsData, callsError });
-        discoveryCallsData = callsData || [];
-      }
-
-      if (error) {
-        console.error('Error fetching shortlisted trainers:', error);
-        toast.error('Failed to load shortlisted trainers');
+      const trainerIds = engagementShortlisted.map(e => e.trainerId);
+      const { data: callsData, error: callsError } = await supabase
+        .from('discovery_calls')
+        .select('*')
+        .eq('client_id', user.id)
+        .in('trainer_id', trainerIds)
+        .in('status', ['scheduled', 'rescheduled']);
+      
+      if (callsError) {
+        console.error('Error fetching discovery calls:', callsError);
       } else {
-        // Filter out any shortlisted trainers with invalid trainer IDs (non-UUIDs)
-        const validShortlisted = (data || []).filter(item => {
-          // Check if trainer_id is a valid UUID (has proper format)
-          const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(item.trainer_id);
-          if (!isValidUUID) {
-            console.warn('Removing invalid trainer ID from shortlist:', item.trainer_id);
-            // Remove the invalid entry from the database
-            supabase
-              .from('shortlisted_trainers')
-              .delete()
-              .eq('id', item.id)
-              .then(() => console.log('Removed invalid shortlist entry:', item.id));
-          }
-          return isValidUUID;
-        });
-        
-        // Merge discovery call data with shortlisted trainers
-        const mergedData = validShortlisted.map(shortlisted => {
-          const discoveryCall = discoveryCallsData.find(call => call.trainer_id === shortlisted.trainer_id) || null;
-          return {
-            ...shortlisted,
-            discovery_call: discoveryCall
-          };
-        });
-        
-        setShortlistedTrainers(mergedData);
+        setDiscoveryCallsData(callsData || []);
       }
     } catch (error) {
-      console.error('Error fetching shortlisted trainers:', error);
-      toast.error('Failed to load shortlisted trainers');
-    } finally {
-      setLoading(false);
+      console.error('Error fetching discovery calls:', error);
     }
-  }, [user]);
+  }, [user, engagementShortlisted]);
 
   useEffect(() => {
-    if (user) {
-      fetchShortlistedTrainers();
-    } else {
-      setShortlistedTrainers([]);
-      setLoading(false);
-    }
-  }, [user, fetchShortlistedTrainers]);
+    fetchDiscoveryCalls();
+    setLoading(engagementLoading);
+  }, [fetchDiscoveryCalls, engagementLoading]);
 
-  
   // Helper function to update client journey when shortlisting
   const updateClientJourney = useCallback(async () => {
     if (!user) return;
@@ -165,55 +139,26 @@ export function useShortlistedTrainers() {
     }
 
     try {
-      const { data, error } = await supabase
-        .from('shortlisted_trainers')
-        .insert({
-          user_id: user.id,
-          trainer_id: trainerId,
-          notes,
-          chat_enabled: true,
-          discovery_call_enabled: true
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error shortlisting trainer:', error);
-        toast.error('Failed to shortlist trainer');
-        return { error };
-      }
-
-      setShortlistedTrainers(prev => [data, ...prev]);
+      await engagementShortlistTrainer(trainerId);
       
       // Update client journey progress
       await updateClientJourney();
       
       toast.success('Trainer shortlisted! Chat and discovery call options are now available.');
-      return { data };
+      return { data: { trainer_id: trainerId } };
     } catch (error) {
       console.error('Error shortlisting trainer:', error);
       toast.error('Failed to shortlist trainer');
       return { error };
     }
-  }, [user, shortlistedTrainers, updateClientJourney]);
+  }, [user, shortlistedTrainers, engagementShortlistTrainer, updateClientJourney]);
 
   const removeFromShortlist = useCallback(async (trainerId: string) => {
     if (!user) return { error: 'No user logged in' };
 
     try {
-      const { error } = await supabase
-        .from('shortlisted_trainers')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('trainer_id', trainerId);
-
-      if (error) {
-        console.error('Error removing from shortlist:', error);
-        toast.error('Failed to remove from shortlist');
-        return { error };
-      }
-
-      setShortlistedTrainers(prev => prev.filter(st => st.trainer_id !== trainerId));
+      // Move back to liked stage when removing from shortlist
+      await updateEngagementStage(trainerId, 'liked');
       toast.success('Trainer removed from shortlist');
       return { success: true };
     } catch (error) {
@@ -221,7 +166,7 @@ export function useShortlistedTrainers() {
       toast.error('Failed to remove from shortlist');
       return { error };
     }
-  }, [user]);
+  }, [user, updateEngagementStage]);
 
   const isShortlisted = useCallback((trainerId: string) => {
     return shortlistedTrainers.some(st => st.trainer_id === trainerId);
@@ -231,50 +176,21 @@ export function useShortlistedTrainers() {
     if (!user) return { error: 'No user logged in' };
 
     try {
-      const { data, error } = await supabase
-        .from('shortlisted_trainers')
-        .update({ notes })
-        .eq('user_id', user.id)
-        .eq('trainer_id', trainerId)
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error updating notes:', error);
-        return { error };
-      }
-
-      setShortlistedTrainers(prev => 
-        prev.map(st => st.trainer_id === trainerId ? data : st)
-      );
-      return { data };
+      // Update engagement notes
+      await updateEngagementStage(trainerId, 'shortlisted');
+      return { data: { trainer_id: trainerId, notes } };
     } catch (error) {
       console.error('Error updating notes:', error);
       return { error };
     }
-  }, [user]);
+  }, [user, updateEngagementStage]);
 
   const bookDiscoveryCall = useCallback(async (trainerId: string) => {
     if (!user) return { error: 'No user logged in' };
 
     try {
-      const { data, error } = await supabase
-        .from('shortlisted_trainers')
-        .update({ discovery_call_booked_at: new Date().toISOString() })
-        .eq('user_id', user.id)
-        .eq('trainer_id', trainerId)
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error booking discovery call:', error);
-        toast.error('Failed to book discovery call');
-        return { error };
-      }
-
-      setShortlistedTrainers(prev => 
-        prev.map(st => st.trainer_id === trainerId ? data : st)
-      );
+      // Move to matched stage when booking discovery call
+      await updateEngagementStage(trainerId, 'matched');
 
       // Update client journey to discovery call booked stage
       try {
@@ -297,13 +213,14 @@ export function useShortlistedTrainers() {
       }
 
       toast.success('Discovery call booking confirmed!');
-      return { data };
+      await fetchDiscoveryCalls(); // Refresh discovery calls
+      return { data: { trainer_id: trainerId } };
     } catch (error) {
       console.error('Error booking discovery call:', error);
       toast.error('Failed to book discovery call');
       return { error };
     }
-  }, [user]);
+  }, [user, updateEngagementStage, fetchDiscoveryCalls]);
 
   return {
     shortlistedTrainers,
@@ -313,7 +230,7 @@ export function useShortlistedTrainers() {
     isShortlisted,
     updateShortlistNotes,
     bookDiscoveryCall,
-    refetchShortlisted: fetchShortlistedTrainers,
+    refetchShortlisted: fetchDiscoveryCalls,
     shortlistCount: shortlistedTrainers.length,
     shortlistLimit: 4,
     canShortlistMore: shortlistedTrainers.length < 4
