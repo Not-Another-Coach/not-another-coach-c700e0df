@@ -787,8 +787,8 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                 <p className="text-muted-foreground mb-4">
                   Add up to 4 trainers to your shortlist from your saved trainers to unlock chat and discovery call features.
                 </p>
-                <Button onClick={() => setActiveTab('shortlisted')}>
-                  View Shortlisted Trainers
+                <Button onClick={() => setActiveTab('saved')}>
+                  View Saved Trainers
                 </Button>
               </CardContent>
             </Card>
