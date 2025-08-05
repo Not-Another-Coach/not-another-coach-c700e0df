@@ -9,6 +9,7 @@ interface TrainerOption {
   location?: string;
   specializations?: string[];
   profilePhotoUrl?: string;
+  offers_discovery_call?: boolean;
 }
 
 export function useTrainerList() {
@@ -20,7 +21,17 @@ export function useTrainerList() {
       try {
         const { data, error } = await supabase
           .from('profiles')
-          .select('id, first_name, last_name, location, specializations, profile_photo_url')
+          .select(`
+            id, 
+            first_name, 
+            last_name, 
+            location, 
+            specializations, 
+            profile_photo_url,
+            trainer_availability_settings(
+              offers_discovery_call
+            )
+          `)
           .eq('user_type', 'trainer')
           .order('first_name');
 
@@ -36,7 +47,8 @@ export function useTrainerList() {
           lastName: trainer.last_name,
           location: trainer.location,
           specializations: trainer.specializations,
-          profilePhotoUrl: trainer.profile_photo_url
+          profilePhotoUrl: trainer.profile_photo_url,
+          offers_discovery_call: trainer.trainer_availability_settings?.[0]?.offers_discovery_call || false
         })) || [];
 
         setTrainers(trainerOptions);

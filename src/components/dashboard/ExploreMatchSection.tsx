@@ -615,7 +615,8 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                           <BookDiscoveryCallButton 
                             trainer={{
                               id: match.trainer.id,
-                              name: match.trainer.name
+                              name: match.trainer.name,
+                              offers_discovery_call: match.trainer.offers_discovery_call
                             }}
                             size="sm"
                             variant="outline"
@@ -777,7 +778,8 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                           <BookDiscoveryCallButton 
                             trainer={{
                               id: shortlisted.trainer_id,
-                              name: trainer.name
+                              name: trainer.name,
+                              offers_discovery_call: trainer.offers_discovery_call
                             }}
                             size="sm"
                             variant="outline"
@@ -888,7 +890,8 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                             <BookDiscoveryCallButton
                               trainer={{
                                 id: shortlisted.trainer_id,
-                                name: trainer.name
+                                name: trainer.name,
+                                offers_discovery_call: trainer.offers_discovery_call
                               }}
                               size="sm"
                               variant="outline"

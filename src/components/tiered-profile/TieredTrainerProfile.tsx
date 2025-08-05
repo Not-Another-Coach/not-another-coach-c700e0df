@@ -206,7 +206,8 @@ export const TieredTrainerProfile = ({
                   name: trainer.name,
                   firstName: trainer.firstName,
                   lastName: trainer.lastName,
-                  profilePhotoUrl: trainer.profilePhotoUrl
+                  profilePhotoUrl: trainer.profilePhotoUrl,
+                  offers_discovery_call: trainer.offers_discovery_call
                 }}
                 variant="outline"
                 className="flex-1"

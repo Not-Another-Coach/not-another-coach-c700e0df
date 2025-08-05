@@ -32,7 +32,10 @@ export function useRealTrainers() {
             training_types,
             profile_photo_url,
             is_verified,
-            verification_status
+            verification_status,
+            trainer_availability_settings!inner(
+              offers_discovery_call
+            )
           `)
           .eq('user_type', 'trainer')
           .eq('profile_published', true)
@@ -60,7 +63,8 @@ export function useRealTrainers() {
             certifications: trainer.qualifications || [],
             description: trainer.bio || "Professional fitness trainer dedicated to helping you achieve your goals.",
             availability: "Available",
-            trainingType: trainer.training_types || ["In-Person", "Online"]
+            trainingType: trainer.training_types || ["In-Person", "Online"],
+            offers_discovery_call: trainer.trainer_availability_settings?.[0]?.offers_discovery_call || false
           };
         }) || [];
 

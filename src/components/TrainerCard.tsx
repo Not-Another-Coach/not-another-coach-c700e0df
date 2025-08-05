@@ -23,6 +23,7 @@ export interface Trainer {
   description: string;
   availability: string;
   trainingType: string[];
+  offers_discovery_call?: boolean;
 }
 
 interface MatchDetail {

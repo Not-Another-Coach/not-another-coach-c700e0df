@@ -10,6 +10,7 @@ interface BookDiscoveryCallButtonProps {
     firstName?: string;
     lastName?: string;
     profilePhotoUrl?: string;
+    offers_discovery_call?: boolean;
   };
   variant?: 'default' | 'outline' | 'secondary';
   size?: 'sm' | 'md' | 'lg';
@@ -31,6 +32,11 @@ export const BookDiscoveryCallButton = ({
     md: 'px-4 py-2',
     lg: 'px-6 py-3 text-lg'
   };
+
+  // Don't render if trainer doesn't offer discovery calls
+  if (trainer.offers_discovery_call === false) {
+    return null;
+  }
 
   return (
     <>
