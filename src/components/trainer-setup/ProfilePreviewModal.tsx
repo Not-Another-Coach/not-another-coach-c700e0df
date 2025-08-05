@@ -27,6 +27,11 @@ const stageLabels: Record<EngagementStage, { label: string; description: string;
     description: 'How your profile appears when a client shortlists you',
     color: 'bg-indigo-100 text-indigo-800'
   },
+  discovery_call_booked: { 
+    label: 'Discovery Call Booked', 
+    description: 'How your profile appears when a discovery call is booked',
+    color: 'bg-amber-100 text-amber-800'
+  },
   matched: { 
     label: 'Matched Stage', 
     description: 'How your profile appears when you match with a client',
