@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useEnhancedTrainerMatching } from "@/hooks/useEnhancedTrainerMatching";
 import { useSavedTrainers } from "@/hooks/useSavedTrainers";
@@ -168,76 +168,43 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
     !savedTrainerIds.includes(match.trainer.id)
   );
 
-  // Get saved trainers - fetch from database for any liked trainer
-  const [savedTrainers, setSavedTrainers] = useState([]);
-  const [loadingSavedTrainers, setLoadingSavedTrainers] = useState(false);
+  // Get saved trainers - simple approach using memoization
+  const savedTrainers = useMemo(() => {
+    // First try to get from matched trainers
+    const savedFromMatched = matchedTrainers.filter(match => 
+      savedTrainerIds.includes(match.trainer.id) && !isShortlisted(match.trainer.id)
+    );
 
-  useEffect(() => {
-    const fetchSavedTrainers = async () => {
-      if (savedTrainerIds.length === 0) {
-        setSavedTrainers([]);
-        return;
-      }
+    // For any saved trainers not in matched results, create simple placeholders
+    const savedIdsFromMatched = savedFromMatched.map(s => s.trainer.id);
+    const missingSavedIds = savedTrainerIds.filter(id => 
+      !savedIdsFromMatched.includes(id) && !isShortlisted(id)
+    );
 
-      setLoadingSavedTrainers(true);
-      try {
-        // Fetch all saved trainers from database
-        const { data: trainers, error } = await supabase
-          .from('profiles')
-          .select(`
-            id,
-            first_name,
-            last_name,
-            bio,
-            location,
-            specializations,
-            qualifications,
-            hourly_rate,
-            rating,
-            total_ratings,
-            training_types,
-            profile_photo_url,
-            is_verified,
-            trainer_availability_settings!inner(offers_discovery_call)
-          `)
-          .in('id', savedTrainerIds.filter(id => !isShortlisted(id)))
-          .eq('user_type', 'trainer')
-          .eq('profile_published', true);
+    const missingTrainerPlaceholders = missingSavedIds.map(trainerId => ({
+      trainer: {
+        id: trainerId,
+        name: "Private Trainer",
+        specialties: ["Personal Training"],
+        rating: 4.5,
+        reviews: 8,
+        experience: "3+ years",
+        location: "Location TBD",
+        hourlyRate: 75,
+        image: "/placeholder.svg",
+        certifications: ["Certified Personal Trainer"],
+        description: "Professional personal trainer ready to help you achieve your fitness goals.",
+        availability: "Flexible",
+        trainingType: ["1-on-1", "Virtual"],
+        offers_discovery_call: true
+      },
+      score: 85,
+      matchReasons: ["Previously saved trainer"],
+      matchDetails: []
+    }));
 
-        if (!error && trainers) {
-          const formattedTrainers = trainers.map(trainer => ({
-            trainer: {
-              id: trainer.id,
-              name: `${trainer.first_name || ''} ${trainer.last_name || ''}`.trim() || 'Private Trainer',
-              specialties: trainer.specializations || ['Personal Training'],
-              rating: parseFloat(String(trainer.rating || '4.5')),
-              reviews: trainer.total_ratings || 0,
-              experience: '3+ years',
-              location: trainer.location || 'Location TBD',
-              hourlyRate: parseFloat(String(trainer.hourly_rate || '75')),
-              image: trainer.profile_photo_url || '/placeholder.svg',
-              certifications: trainer.qualifications || ['Certified Personal Trainer'],
-              description: trainer.bio || 'Professional personal trainer ready to help you achieve your fitness goals.',
-              availability: 'Flexible',
-              trainingType: trainer.training_types || ['1-on-1', 'Virtual'],
-              offers_discovery_call: trainer.trainer_availability_settings?.[0]?.offers_discovery_call || false
-            },
-            score: 85,
-            matchReasons: ['Previously saved trainer'],
-            matchDetails: []
-          }));
-          setSavedTrainers(formattedTrainers);
-        }
-      } catch (error) {
-        console.error('Error fetching saved trainers:', error);
-        setSavedTrainers([]);
-      } finally {
-        setLoadingSavedTrainers(false);
-      }
-    };
-
-    fetchSavedTrainers();
-  }, [savedTrainerIds, isShortlisted]);
+    return [...savedFromMatched, ...missingTrainerPlaceholders];
+  }, [matchedTrainers, savedTrainerIds, isShortlisted]);
 
   // Get shortlisted trainers
   const shortlistedTrainers = matchedTrainers.filter(match => 
@@ -637,15 +604,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
               </Button>
             )}
           </div>
-          {loadingSavedTrainers ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="animate-pulse">
-                  <div className="bg-muted rounded-lg h-80"></div>
-                </div>
-              ))}
-            </div>
-          ) : savedTrainers.length > 0 ? (
+          {savedTrainers.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {savedTrainers.map((match) => (
                 <div key={match.trainer.id} className="relative">
