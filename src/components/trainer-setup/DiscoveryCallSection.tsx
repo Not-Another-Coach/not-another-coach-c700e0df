@@ -69,6 +69,38 @@ export const DiscoveryCallSection = () => {
   const addTimeSlot = (dayKey: string) => {
     const daySchedule = settings.availability_schedule[dayKey];
     const newSlot = { start: '07:00', end: '08:00' };
+    
+    // Check for duplicates or overlaps
+    const hasConflict = daySchedule.slots.some(existingSlot => 
+      (newSlot.start >= existingSlot.start && newSlot.start < existingSlot.end) ||
+      (newSlot.end > existingSlot.start && newSlot.end <= existingSlot.end) ||
+      (newSlot.start <= existingSlot.start && newSlot.end >= existingSlot.end)
+    );
+    
+    if (hasConflict) {
+      // Find a non-conflicting time slot
+      let startHour = 7;
+      let foundSlot = false;
+      
+      while (startHour < 21 && !foundSlot) {
+        const testStart = `${startHour.toString().padStart(2, '0')}:00`;
+        const testEnd = `${(startHour + 1).toString().padStart(2, '0')}:00`;
+        
+        const hasTestConflict = daySchedule.slots.some(existingSlot =>
+          (testStart >= existingSlot.start && testStart < existingSlot.end) ||
+          (testEnd > existingSlot.start && testEnd <= existingSlot.end) ||
+          (testStart <= existingSlot.start && testEnd >= existingSlot.end)
+        );
+        
+        if (!hasTestConflict) {
+          newSlot.start = testStart;
+          newSlot.end = testEnd;
+          foundSlot = true;
+        }
+        startHour++;
+      }
+    }
+    
     const newSchedule = {
       ...settings.availability_schedule,
       [dayKey]: {
@@ -97,14 +129,30 @@ export const DiscoveryCallSection = () => {
     const newSlots = daySchedule.slots.map((slot, index) => 
       index === slotIndex ? { ...slot, [field]: value } : slot
     );
-    const newSchedule = {
-      ...settings.availability_schedule,
-      [dayKey]: {
-        ...daySchedule,
-        slots: newSlots
-      }
-    };
-    updateSettings({ availability_schedule: newSchedule });
+    
+    // Validate for overlaps (excluding the current slot being edited)
+    const currentSlot = newSlots[slotIndex];
+    const otherSlots = newSlots.filter((_, index) => index !== slotIndex);
+    
+    const hasConflict = otherSlots.some(existingSlot =>
+      (currentSlot.start >= existingSlot.start && currentSlot.start < existingSlot.end) ||
+      (currentSlot.end > existingSlot.start && currentSlot.end <= existingSlot.end) ||
+      (currentSlot.start <= existingSlot.start && currentSlot.end >= existingSlot.end)
+    );
+    
+    // Also validate that start is before end
+    const isValidTimeRange = currentSlot.start < currentSlot.end;
+    
+    if (!hasConflict && isValidTimeRange) {
+      const newSchedule = {
+        ...settings.availability_schedule,
+        [dayKey]: {
+          ...daySchedule,
+          slots: newSlots
+        }
+      };
+      updateSettings({ availability_schedule: newSchedule });
+    }
   };
 
   return (
@@ -268,49 +316,65 @@ export const DiscoveryCallSection = () => {
                               <p className="text-sm text-muted-foreground">
                                 No time slots set. Click "Add Slot" to add availability.
                               </p>
-                            ) : (
-                              daySchedule.slots.map((slot, slotIndex) => (
-                                <div key={slotIndex} className="flex items-center space-x-2">
-                                  <Select
-                                    value={slot.start}
-                                    onValueChange={(value) => updateTimeSlot(key, slotIndex, 'start', value)}
-                                    disabled={saving}
-                                  >
-                                    <SelectTrigger className="w-24">
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {commonTimeSlots.map(time => (
-                                        <SelectItem key={time} value={time}>{time}</SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                  <span className="text-sm text-muted-foreground">to</span>
-                                  <Select
-                                    value={slot.end}
-                                    onValueChange={(value) => updateTimeSlot(key, slotIndex, 'end', value)}
-                                    disabled={saving}
-                                  >
-                                    <SelectTrigger className="w-24">
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {commonTimeSlots.map(time => (
-                                        <SelectItem key={time} value={time}>{time}</SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => removeTimeSlot(key, slotIndex)}
-                                    disabled={saving}
-                                  >
-                                    <Trash2 className="w-4 h-4 text-red-500" />
-                                  </Button>
-                                </div>
-                              ))
-                            )}
+                             ) : (
+                               daySchedule.slots.map((slot, slotIndex) => {
+                                 // Check if this slot has conflicts with others
+                                 const otherSlots = daySchedule.slots.filter((_, index) => index !== slotIndex);
+                                 const hasConflict = otherSlots.some(existingSlot =>
+                                   (slot.start >= existingSlot.start && slot.start < existingSlot.end) ||
+                                   (slot.end > existingSlot.start && slot.end <= existingSlot.end) ||
+                                   (slot.start <= existingSlot.start && slot.end >= existingSlot.end)
+                                 );
+                                 const hasInvalidRange = slot.start >= slot.end;
+                                 
+                                 return (
+                                   <div key={slotIndex} className="flex items-center space-x-2">
+                                     <Select
+                                       value={slot.start}
+                                       onValueChange={(value) => updateTimeSlot(key, slotIndex, 'start', value)}
+                                       disabled={saving}
+                                     >
+                                       <SelectTrigger className={`w-28 ${hasConflict || hasInvalidRange ? 'border-red-300' : ''}`}>
+                                         <SelectValue />
+                                       </SelectTrigger>
+                                       <SelectContent className="bg-background border z-50">
+                                         {commonTimeSlots.map(time => (
+                                           <SelectItem key={time} value={time}>{time}</SelectItem>
+                                         ))}
+                                       </SelectContent>
+                                     </Select>
+                                     <span className="text-sm text-muted-foreground">to</span>
+                                     <Select
+                                       value={slot.end}
+                                       onValueChange={(value) => updateTimeSlot(key, slotIndex, 'end', value)}
+                                       disabled={saving}
+                                     >
+                                       <SelectTrigger className={`w-28 ${hasConflict || hasInvalidRange ? 'border-red-300' : ''}`}>
+                                         <SelectValue />
+                                       </SelectTrigger>
+                                       <SelectContent className="bg-background border z-50">
+                                         {commonTimeSlots.map(time => (
+                                           <SelectItem key={time} value={time}>{time}</SelectItem>
+                                         ))}
+                                       </SelectContent>
+                                     </Select>
+                                     <Button
+                                       size="sm"
+                                       variant="ghost"
+                                       onClick={() => removeTimeSlot(key, slotIndex)}
+                                       disabled={saving}
+                                     >
+                                       <Trash2 className="w-4 h-4 text-red-500" />
+                                     </Button>
+                                     {(hasConflict || hasInvalidRange) && (
+                                       <span className="text-xs text-red-500 ml-2">
+                                         {hasInvalidRange ? 'End time must be after start time' : 'Time slot overlaps with another'}
+                                       </span>
+                                     )}
+                                   </div>
+                                 );
+                               })
+                             )}
                           </div>
                         )}
                       </div>
