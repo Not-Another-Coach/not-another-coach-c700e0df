@@ -775,9 +775,7 @@ export type Database = {
           certifying_body: string | null
           client_journey_stage: string | null
           client_personality_type: string[] | null
-          client_status:
-            | Database["public"]["Enums"]["client_status_enum"]
-            | null
+          client_status: Database["public"]["Enums"]["client_status"] | null
           client_survey_completed: boolean | null
           client_survey_completed_at: string | null
           client_survey_step: number | null
@@ -895,9 +893,7 @@ export type Database = {
           certifying_body?: string | null
           client_journey_stage?: string | null
           client_personality_type?: string[] | null
-          client_status?:
-            | Database["public"]["Enums"]["client_status_enum"]
-            | null
+          client_status?: Database["public"]["Enums"]["client_status"] | null
           client_survey_completed?: boolean | null
           client_survey_completed_at?: string | null
           client_survey_step?: number | null
@@ -1015,9 +1011,7 @@ export type Database = {
           certifying_body?: string | null
           client_journey_stage?: string | null
           client_personality_type?: string[] | null
-          client_status?:
-            | Database["public"]["Enums"]["client_status_enum"]
-            | null
+          client_status?: Database["public"]["Enums"]["client_status"] | null
           client_survey_completed?: boolean | null
           client_survey_completed_at?: string | null
           client_survey_step?: number | null
@@ -1476,6 +1470,14 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "trainer" | "client"
+      client_status:
+        | "onboarding"
+        | "survey_completed"
+        | "browsing"
+        | "shortlisted"
+        | "discovery_booked"
+        | "decision_pending"
+        | "coach_selected"
       client_status_enum: "open" | "waitlist" | "paused"
       coach_availability_status: "accepting" | "waitlist" | "unavailable"
       content_type:
@@ -1628,6 +1630,15 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "trainer", "client"],
+      client_status: [
+        "onboarding",
+        "survey_completed",
+        "browsing",
+        "shortlisted",
+        "discovery_booked",
+        "decision_pending",
+        "coach_selected",
+      ],
       client_status_enum: ["open", "waitlist", "paused"],
       coach_availability_status: ["accepting", "waitlist", "unavailable"],
       content_type: [
