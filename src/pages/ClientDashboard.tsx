@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardSummary } from "@/components/dashboard/DashboardSummary";
 import { EditPreferencesSection } from "@/components/dashboard/EditPreferencesSection";
-import { ExploreMatchSection } from "@/components/dashboard/ExploreMatchSection";
+import { ExploreAllTrainers } from "@/components/dashboard/ExploreAllTrainers";
 import { ClientSurveyWidget } from "@/components/dashboard/ClientSurveyWidget";
 import MyTrainers from "./MyTrainers";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
@@ -164,7 +164,7 @@ export default function ClientDashboard() {
 
           {activeTab === "explore" && (
             <div className="space-y-6">
-              <ExploreMatchSection 
+              <ExploreAllTrainers 
                 profile={profile}
               />
             </div>
