@@ -188,8 +188,11 @@ export default function SavedTrainers() {
   };
 
   const handleBookDiscoveryCall = async (trainerId: string) => {
-    await bookDiscoveryCall(trainerId);
-    toast.success('Discovery call booking initiated!');
+    // Open messaging instead of booking discovery call
+    const result = await createConversation(trainerId);
+    if (!result.error) {
+      navigate('/messaging');
+    }
   };
 
   const handleStartComparison = () => {
@@ -327,6 +330,7 @@ export default function SavedTrainers() {
                   isShortlisted={isShortlisted(trainer.id)}
                   onStartConversation={handleStartConversation}
                   onBookDiscoveryCall={handleBookDiscoveryCall}
+                  trainerOffersDiscoveryCalls={trainer.offers_discovery_call || false}
                 />
 
                 {/* Saved Date */}

@@ -427,7 +427,7 @@ export const TrainerCard = ({
                 onClick={() => onAddToShortlist(trainer.id)} 
                 className="w-full"
                 size="sm"
-                disabled={false} // Let the parent handle disabling logic
+                disabled={false}
               >
                 <Star className="h-3 w-3 mr-1" />
                 Add to Shortlist
