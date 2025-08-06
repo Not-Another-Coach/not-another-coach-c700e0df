@@ -157,34 +157,6 @@ export function WaitlistManagement() {
 
   return (
     <div className="space-y-6">
-      {/* Profile Management Link */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Settings className="w-5 h-5" />
-            Profile Management
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border">
-            <div>
-              <h4 className="font-medium">Update Your Profile Settings</h4>
-              <p className="text-sm text-muted-foreground">
-                Manage your visibility, availability, and other profile settings
-              </p>
-            </div>
-            <Button
-              variant="outline"
-              onClick={() => navigate('/trainer/profile-setup?tab=management')}
-              className="flex items-center gap-2"
-            >
-              <ExternalLink className="w-4 h-4" />
-              Go to Profile Management
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Waitlist */}
       <Card>
         <CardHeader>

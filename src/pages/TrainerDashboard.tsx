@@ -177,8 +177,69 @@ const TrainerDashboard = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="flex justify-between items-center p-4 border-b">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-6">
           <h1 className="text-xl font-bold">Mission Control</h1>
+          
+          {/* Status indicators moved here */}
+          <div className="flex items-center gap-4">
+            {/* Profile Status */}
+            <div className="flex items-center gap-2">
+              {isProfileComplete ? (
+                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+              ) : (
+                <div className="w-3 h-3 bg-amber-500 rounded-full animate-pulse"></div>
+              )}
+              <span className="text-sm font-medium">
+                {isProfileComplete ? 'Profile Complete' : `Profile ${profileCompletion}% Complete`}
+              </span>
+            </div>
+            
+            <Separator orientation="vertical" className="h-4" />
+            
+            {/* Availability Status */}
+            <div className="flex items-center gap-2">
+              {availabilityStatus === 'accepting' && (
+                <>
+                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm font-medium text-green-700">Accepting Clients</span>
+                </>
+              )}
+              {availabilityStatus === 'waitlist' && (
+                <>
+                  <div className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm font-medium text-yellow-700">Waitlist Only</span>
+                </>
+              )}
+              {availabilityStatus === 'unavailable' && (
+                <>
+                  <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                  <span className="text-sm font-medium text-red-700">Not Available</span>
+                </>
+              )}
+            </div>
+            
+            {nextAvailableDate && availabilityStatus === 'waitlist' && (
+              <>
+                <Separator orientation="vertical" className="h-4" />
+                
+                <div className="flex items-center gap-2">
+                  <CalendarIcon className="w-3 h-3 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">
+                    Available: {format(nextAvailableDate, 'MMM d, yyyy')}
+                  </span>
+                </div>
+              </>
+            )}
+             
+            <Separator orientation="vertical" className="h-4" />
+            
+            {/* Next Billing */}
+            <div className="flex items-center gap-2">
+              <CreditCard className="w-3 h-3 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Next Billing: Sep 1</span>
+            </div>
+          </div>
+          
           {isAdmin && (
             <Button 
               variant="outline" 
@@ -192,89 +253,20 @@ const TrainerDashboard = () => {
           )}
         </div>
         <div className="flex items-center gap-3">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => navigate('/trainer/profile-setup')}
+          >
+            <Settings className="w-4 h-4 mr-2" />
+            Profile Management
+          </Button>
           {profile && (
             <ProfileDropdown 
               profile={profile} 
               onSignOut={handleSignOut}
             />
           )}
-        </div>
-      </div>
-
-      {/* Account Health Bar */}
-      <div className="bg-gradient-to-r from-primary/5 to-accent/5 border-b">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-6">
-              {/* Profile Status */}
-              <div className="flex items-center gap-2">
-                {isProfileComplete ? (
-                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                ) : (
-                  <div className="w-3 h-3 bg-amber-500 rounded-full animate-pulse"></div>
-                )}
-                <span className="text-sm font-medium">
-                  {isProfileComplete ? 'Profile Complete' : `Profile ${profileCompletion}% Complete`}
-                </span>
-              </div>
-              
-              <Separator orientation="vertical" className="h-4" />
-              
-              {/* Availability Status */}
-              <div className="flex items-center gap-2">
-                {availabilityStatus === 'accepting' && (
-                  <>
-                    <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-sm font-medium text-green-700">Accepting Clients</span>
-                  </>
-                )}
-                {availabilityStatus === 'waitlist' && (
-                  <>
-                    <div className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse"></div>
-                    <span className="text-sm font-medium text-yellow-700">Waitlist Only</span>
-                  </>
-                )}
-                {availabilityStatus === 'unavailable' && (
-                  <>
-                    <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                    <span className="text-sm font-medium text-red-700">Not Available</span>
-                  </>
-                )}
-              </div>
-              
-              {nextAvailableDate && availabilityStatus === 'waitlist' && (
-                <>
-                  <Separator orientation="vertical" className="h-4" />
-                  
-                  <div className="flex items-center gap-2">
-                    <CalendarIcon className="w-3 h-3 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">
-                      Available: {format(nextAvailableDate, 'MMM d, yyyy')}
-                    </span>
-                  </div>
-                </>
-              )}
-               
-              <Separator orientation="vertical" className="h-4" />
-              
-              {/* Next Billing */}
-              <div className="flex items-center gap-2">
-                <CreditCard className="w-3 h-3 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">Next Billing: Sep 1</span>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => navigate('/trainer/profile-setup')}
-              >
-                <Settings className="w-4 h-4 mr-2" />
-                Manage
-              </Button>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -311,71 +303,78 @@ const TrainerDashboard = () => {
               </CardContent>
             </Card>
 
-            {/* Performance Metrics with Visual Cues */}
+            {/* Performance Metrics with Color Coding */}
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
               
-              {/* Profile Views with Trend */}
-              <Card className="relative overflow-hidden">
+              {/* Profile Views - Blue */}
+              <Card className="relative overflow-hidden border-blue-200">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Profile Views</CardTitle>
-                  <Eye className="h-4 w-4 text-blue-500" />
+                  <div className="p-2 bg-blue-100 rounded-full">
+                    <Eye className="h-4 w-4 text-blue-600" />
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{analyticsLoading ? '...' : analytics?.total_views || 256}</div>
+                  <div className="text-2xl font-bold text-blue-700">{analyticsLoading ? '...' : analytics?.total_views || 256}</div>
                   <div className="flex items-center gap-1 mt-1">
                     <ArrowUpRight className="h-3 w-3 text-green-500" />
                     <span className="text-xs text-green-600 font-medium">+12 this week</span>
                   </div>
-                  {/* Mini sparkline effect */}
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-blue-200 to-blue-300"></div>
+                  <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-blue-100 via-blue-300 to-blue-500"></div>
                 </CardContent>
               </Card>
 
-              {/* Likes with Trend */}
-              <Card className="relative overflow-hidden">
+              {/* Likes - Red */}
+              <Card className="relative overflow-hidden border-red-200">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Likes</CardTitle>
-                  <Heart className="h-4 w-4 text-red-500" />
+                  <div className="p-2 bg-red-100 rounded-full">
+                    <Heart className="h-4 w-4 text-red-600" />
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{analyticsLoading ? '...' : analytics?.total_likes || 42}</div>
+                  <div className="text-2xl font-bold text-red-700">{analyticsLoading ? '...' : analytics?.total_likes || 42}</div>
                   <div className="flex items-center gap-1 mt-1">
                     <ArrowUpRight className="h-3 w-3 text-green-500" />
                     <span className="text-xs text-green-600 font-medium">+5 this week</span>
                   </div>
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-red-200 to-red-300"></div>
+                  <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-red-100 via-red-300 to-red-500"></div>
                 </CardContent>
               </Card>
 
-              {/* Shortlisted with Trend */}
-              <Card className="relative overflow-hidden">
+              {/* Shortlisted - Yellow */}
+              <Card className="relative overflow-hidden border-yellow-200">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Shortlisted</CardTitle>
-                  <Star className="h-4 w-4 text-yellow-500" />
+                  <div className="p-2 bg-yellow-100 rounded-full">
+                    <Star className="h-4 w-4 text-yellow-600" />
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{analyticsLoading ? '...' : analytics?.total_shortlists || 18}</div>
+                  <div className="text-2xl font-bold text-yellow-700">{analyticsLoading ? '...' : analytics?.total_shortlists || 18}</div>
                   <div className="flex items-center gap-1 mt-1">
                     <ArrowUpRight className="h-3 w-3 text-green-500" />
                     <span className="text-xs text-green-600 font-medium">+3 this week</span>
                   </div>
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-yellow-200 to-yellow-300"></div>
+                  <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-yellow-100 via-yellow-300 to-yellow-500"></div>
                 </CardContent>
               </Card>
 
-              {/* Conversion Rate */}
-              <Card className="relative overflow-hidden">
+              {/* Conversion Rate - Green */}
+              <Card className="relative overflow-hidden border-green-200">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-green-500" />
+                  <div className="p-2 bg-green-100 rounded-full">
+                    <TrendingUp className="h-4 w-4 text-green-600" />
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{analyticsLoading ? '...' : `${analytics?.conversion_rate?.toFixed(1) || 7.2}%`}</div>
+                  <div className="text-2xl font-bold text-green-700">{analyticsLoading ? '...' : `${analytics?.conversion_rate?.toFixed(1) || 7.2}%`}</div>
                   <div className="flex items-center gap-1 mt-1">
                     <ArrowUpRight className="h-3 w-3 text-green-500" />
                     <span className="text-xs text-green-600 font-medium">+1.3% this week</span>
                   </div>
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-green-200 to-green-300"></div>
+                  <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-green-100 via-green-300 to-green-500"></div>
                 </CardContent>
               </Card>
             </div>
