@@ -433,9 +433,37 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
   };
 
   const getShortlistedSelectedTrainersData = () => {
-    // Filter from shortlisted trainers instead of allTrainers  
-    const shortlistedTrainerData = shortlistedTrainers.map(match => match.trainer);
-    return shortlistedTrainerData.filter(trainer => shortlistedComparison.includes(trainer.id));
+    // Build trainer data from shortlisted trainers directly, handling missing trainers in allTrainers
+    const shortlistedTrainerData = actualShortlistedTrainers
+      .filter(shortlisted => shortlistedComparison.includes(shortlisted.trainer_id))
+      .map(shortlisted => {
+        // Find the trainer data from all trainers (sample + real)
+        let trainer = allTrainers.find(t => t.id === shortlisted.trainer_id);
+        
+        // If not found in allTrainers, create a fallback trainer object
+        if (!trainer) {
+          console.warn(`Creating fallback trainer data for ${shortlisted.trainer_id}`);
+          trainer = {
+            id: shortlisted.trainer_id,
+            name: `Trainer ${shortlisted.trainer_id.slice(0, 8)}...`,
+            specialties: ["General Fitness"],
+            rating: 4.5,
+            reviews: 0,
+            experience: 'Not specified',
+            location: 'Location not specified',
+            hourlyRate: 75,
+            image: '/placeholder.svg',
+            certifications: ['Certified Personal Trainer'],
+            description: 'Experienced personal trainer focused on helping you achieve your fitness goals.',
+            availability: 'Flexible',
+            trainingType: ['In-Person', 'Online']
+          };
+        }
+        
+        return trainer;
+      });
+    
+    return shortlistedTrainerData;
   };
 
   const handleStartSavedComparison = () => {
@@ -449,10 +477,13 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
 
   const handleStartShortlistedComparison = () => {
     const selectedTrainersData = getShortlistedSelectedTrainersData();
+    console.log('Starting shortlisted comparison with trainers:', selectedTrainersData.map(t => ({ id: t.id, name: t.name })));
     if (selectedTrainersData.length >= 2) {
       setSelectedForComparison(shortlistedComparison);
       setComparisonContext('shortlisted');
       setShowComparison(true);
+    } else {
+      toast.error('Please select at least 2 trainers to compare');
     }
   };
 
