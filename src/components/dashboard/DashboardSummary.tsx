@@ -293,8 +293,8 @@ export function DashboardSummary({ profile, onTabChange }: DashboardSummaryProps
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid gap-4">
-              {topMatches.slice(0, 2).map((match) => (
+            <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+              {topMatches.slice(0, 3).map((match) => (
                 <div key={match.trainer.id} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
                   <div className="flex items-start gap-4">
                     <img 

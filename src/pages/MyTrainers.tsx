@@ -865,7 +865,7 @@ export default function MyTrainers() {
 
       {/* Trainers Grid */}
       {filteredTrainers.length > 0 ? (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           {filteredTrainers.map((trainerData) => (
             <div key={`${trainerData.trainer.id}-${trainerData.status}`} className="space-y-3">
               <TrainerCard

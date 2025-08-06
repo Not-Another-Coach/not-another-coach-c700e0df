@@ -468,7 +468,7 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
       {/* Trainers Grid/List */}
       {paginatedTrainers.length > 0 ? (
         <>
-          <div className={viewMode === 'grid' ? "grid md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}>
+          <div className={viewMode === 'grid' ? "grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6" : "space-y-4"}>
             {paginatedTrainers.map((trainer) => (
               <div key={trainer.id} className="space-y-3">
                 <TrainerCard
