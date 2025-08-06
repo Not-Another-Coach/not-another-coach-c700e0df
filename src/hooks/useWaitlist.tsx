@@ -169,23 +169,35 @@ export function useWaitlist() {
   const removeFromWaitlist = useCallback(async (coachId: string) => {
     if (!user) return { error: 'No user' };
 
+    console.log('🔥 removeFromWaitlist called:', { coachId, userId: user.id });
+
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('coach_waitlists')
         .delete()
         .eq('client_id', user.id)
-        .eq('coach_id', coachId);
+        .eq('coach_id', coachId)
+        .select(); // Add select to see what was deleted
 
-      if (error) throw error;
-      return { success: true };
+      console.log('🔥 removeFromWaitlist result:', { data, error });
+
+      if (error) {
+        console.error('🔥 removeFromWaitlist database error:', error);
+        throw error;
+      }
+      
+      console.log('🔥 removeFromWaitlist successful, deleted rows:', data?.length || 0);
+      return { success: true, deletedRows: data };
     } catch (error) {
-      console.error('Error removing from waitlist:', error);
+      console.error('🔥 removeFromWaitlist catch error:', error);
       return { error };
     }
   }, [user]);
 
   const checkClientWaitlistStatus = useCallback(async (coachId: string) => {
     if (!user) return null;
+
+    console.log('🔥 checkClientWaitlistStatus called:', { coachId, userId: user.id });
 
     try {
       const { data, error } = await supabase
@@ -195,10 +207,15 @@ export function useWaitlist() {
         .eq('coach_id', coachId)
         .maybeSingle();
 
-      if (error) throw error;
+      console.log('🔥 checkClientWaitlistStatus result:', { data, error });
+
+      if (error) {
+        console.error('🔥 checkClientWaitlistStatus database error:', error);
+        throw error;
+      }
       return data;
     } catch (error) {
-      console.error('Error checking waitlist status:', error);
+      console.error('🔥 checkClientWaitlistStatus catch error:', error);
       return null;
     }
   }, [user]);
