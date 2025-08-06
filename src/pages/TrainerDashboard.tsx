@@ -617,18 +617,31 @@ const TrainerDashboard = () => {
               </CardContent>
             </Card>
 
-            {/* Engagement Streak - At Bottom */}
-            <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <Award className="w-6 h-6 text-green-600" />
-                  <div>
-                    <p className="font-semibold text-green-800">🔥 3 Week Streak!</p>
-                    <p className="text-xs text-green-600">You've updated your profile consistently</p>
+        {/* Shortlisted Clients - Show only on dashboard view */}
+        {activeView === 'dashboard' && shortlistedClients && shortlistedClients.length > 0 && (
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle>Recent Shortlisted Clients</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {shortlistedClients.slice(0, 5).map((client, index) => (
+                  <div key={index} className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border">
+                    <div>
+                      <p className="font-medium">Client #{client.id.slice(0, 8)}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {client.primary_goals?.length ? `Goals: ${client.primary_goals.join(', ')}` : 'No goals specified'}
+                      </p>
+                    </div>
+                    <Badge variant={((client as any).discovery_call_booked ? 'default' : 'secondary')}>
+                      {(client as any).discovery_call_booked ? 'Call Booked' : 'Available'}
+                    </Badge>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
           </div>
         )}

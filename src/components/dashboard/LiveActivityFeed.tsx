@@ -42,6 +42,21 @@ export const LiveActivityFeed = () => {
         </div>
       </CardHeader>
       <CardContent className="space-y-3 max-h-96 overflow-y-auto">
+        {/* 3 Week Streak Achievement - Always show as first item */}
+        <div className="flex items-start gap-3 p-3 rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200">
+          <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0 text-white">
+            🔥
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-green-800">3 Week Streak!</p>
+            <p className="text-sm mt-1 text-green-600">You've updated your profile consistently</p>
+            <Badge variant="secondary" className="mt-2 bg-green-100 text-green-700">
+              Achievement Unlocked
+            </Badge>
+          </div>
+        </div>
+
+        {/* Regular activity alerts */}
         {alerts.length === 0 ? (
           <div className="text-center py-6 text-muted-foreground">
             <p>No recent activity</p>
