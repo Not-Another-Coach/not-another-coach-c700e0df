@@ -763,10 +763,22 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                       {/* Show Add to Shortlist if not already shortlisted */}
                       {!isShortlisted(match.trainer.id) && (
                         <Button
-                          onClick={async () => {
-                            console.log('🟢 Add to Shortlist clicked for trainer:', match.trainer.id);
+                          onClick={async (e) => {
+                            console.log('🔥 BUTTON CLICK DEBUG: Add to Shortlist clicked');
+                            console.log('🔥 Event object:', e);
+                            console.log('🔥 Trainer ID:', match.trainer.id);
+                            console.log('🔥 Can shortlist more:', canShortlistMore);
+                            console.log('🔥 Shortlist count:', shortlistCount);
+                            
+                            if (!canShortlistMore) {
+                              console.log('🔥 Cannot shortlist more - returning early');
+                              return;
+                            }
+                            
+                            console.log('🔥 About to call shortlistTrainer function');
                             try {
                               const result = await shortlistTrainer(match.trainer.id);
+                              console.log('🔥 Shortlist result:', result);
                               if (result.error) {
                                 console.error('❌ Failed to shortlist trainer:', result.error);
                                 toast.error('Failed to add to shortlist');
@@ -790,10 +802,14 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                       
                       {/* Always show Remove from Saved button */}
                       <Button
-                        onClick={async () => {
-                          console.log('🟢 Remove from Saved clicked for trainer:', match.trainer.id);
+                        onClick={async (e) => {
+                          console.log('🔥 BUTTON CLICK DEBUG: Remove from Saved clicked');
+                          console.log('🔥 Event object:', e);
+                          console.log('🔥 Trainer ID:', match.trainer.id);
+                          console.log('🔥 About to call unsaveTrainer function');
                           try {
                             const result = await unsaveTrainer(match.trainer.id);
+                            console.log('🔥 Unsave result:', result);
                             if (result) {
                               console.log('✅ Successfully removed from saved:', match.trainer.id);
                               toast.success('Trainer removed from saved list!');

@@ -133,11 +133,19 @@ export const TrainerCard = ({
 
   const handleToggleSave = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    console.log(`Heart clicked for trainer ${trainer.id}, currently saved: ${isSaved}, cardState: ${cardState}`);
-    const success = isSaved 
-      ? await unsaveTrainer(trainer.id)
-      : await saveTrainer(trainer.id);
-    console.log(`Save/unsave result for ${trainer.id}:`, success);
+    console.log('🔥 HEART BUTTON CLICK DEBUG');
+    console.log('🔥 Event object:', e);
+    console.log(`🔥 Heart clicked for trainer ${trainer.id}, currently saved: ${isSaved}, cardState: ${cardState}`);
+    console.log('🔥 About to call save/unsave function');
+    
+    try {
+      const success = isSaved 
+        ? await unsaveTrainer(trainer.id)
+        : await saveTrainer(trainer.id);
+      console.log(`🔥 Save/unsave result for ${trainer.id}:`, success);
+    } catch (error) {
+      console.error('🔥 Error in handleToggleSave:', error);
+    }
   };
 
   const handleComparisonClick = (checked: boolean) => {

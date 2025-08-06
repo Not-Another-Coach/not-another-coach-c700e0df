@@ -383,7 +383,13 @@ export function SwipeResultsSection({ profile }: SwipeResultsSectionProps) {
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => handleStartConversation(trainer.trainer_id)}
+                          onClick={(e) => {
+                            console.log('🔥 CHAT BUTTON CLICK DEBUG');
+                            console.log('🔥 Event object:', e);
+                            console.log('🔥 Trainer ID:', trainer.trainer_id);
+                            console.log('🔥 About to call handleStartConversation');
+                            handleStartConversation(trainer.trainer_id);
+                          }}
                         >
                           <MessageCircle className="h-4 w-4 mr-2" />
                           Chat
@@ -391,7 +397,13 @@ export function SwipeResultsSection({ profile }: SwipeResultsSectionProps) {
                         <Button 
                           variant="default" 
                           size="sm"
-                          onClick={() => handleBookDiscoveryCall(trainer.trainer_id)}
+                          onClick={(e) => {
+                            console.log('🔥 BOOK CALL BUTTON CLICK DEBUG');
+                            console.log('🔥 Event object:', e);
+                            console.log('🔥 Trainer ID:', trainer.trainer_id);
+                            console.log('🔥 About to call handleBookDiscoveryCall');
+                            handleBookDiscoveryCall(trainer.trainer_id);
+                          }}
                         >
                           <Phone className="h-4 w-4 mr-2" />
                           Book Call

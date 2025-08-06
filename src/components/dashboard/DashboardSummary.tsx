@@ -262,11 +262,18 @@ export function DashboardSummary({ profile, onTabChange }: DashboardSummaryProps
                             </Button>
                             <Button 
                               size="sm"
-                              onClick={() => {
+                              onClick={(e) => {
+                                console.log('🔥 DASHBOARD SEND MESSAGE BUTTON CLICK DEBUG');
+                                console.log('🔥 Event object:', e);
+                                console.log('🔥 About to trigger messaging popup');
+                                
                                 // Open messaging popup instead of navigating
                                 const messagingButton = document.querySelector('[data-messaging-button]') as HTMLButtonElement;
                                 if (messagingButton) {
+                                  console.log('🔥 Found messaging button, clicking it');
                                   messagingButton.click();
+                                } else {
+                                  console.error('🔥 Could not find messaging button');
                                 }
                               }}
                             >
