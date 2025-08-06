@@ -901,17 +901,26 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                           >
                             Reschedule
                           </Button>
-                        ) : (
+                        ) : matchData.trainer.offers_discovery_call ? (
                           <BookDiscoveryCallButton 
                             trainer={{
                               id: shortlisted.trainer_id,
                               name: matchData.trainer.name,
-                              offers_discovery_call: matchData.trainer.offers_discovery_call ?? true
+                              offers_discovery_call: matchData.trainer.offers_discovery_call
                             }}
                             size="sm"
                             variant="outline"
                             className="text-xs"
                           />
+                        ) : (
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            disabled
+                            className="flex items-center gap-1 text-xs opacity-50 cursor-not-allowed"
+                          >
+                            No Discovery Call
+                          </Button>
                         )}
                       </div>
                     </div>
