@@ -500,6 +500,19 @@ export default function MyTrainers() {
         const clientAlreadyOnWaitlist = waitlistStatus !== null;
         const offersDiscoveryCall = trainer.offers_discovery_call;
         
+        // Debug logging specifically for Linda
+        if (trainerId === 'bb19a665-f35f-4828-a62c-90ce437bfb18') {
+          console.log('🔍 LINDA DEBUG - CTAs:', {
+            trainerId,
+            availability,
+            waitlistStatus,
+            isOnWaitlist,
+            clientAlreadyOnWaitlist,
+            offersDiscoveryCall,
+            trainerName: trainer.name
+          });
+        }
+        
         return (
           <div className="space-y-2">
             <div className="grid grid-cols-2 gap-2">
