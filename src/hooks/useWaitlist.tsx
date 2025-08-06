@@ -193,6 +193,19 @@ export function useWaitlist() {
         .maybeSingle();
 
       if (error) throw error;
+      
+      // If no settings exist, return default availability status
+      if (!data) {
+        return {
+          coach_id: coachId,
+          availability_status: 'accepting' as CoachAvailabilityStatus,
+          allow_discovery_calls_on_waitlist: true,
+          auto_follow_up_days: 14,
+          next_available_date: null,
+          waitlist_message: null
+        };
+      }
+      
       return data;
     } catch (error) {
       console.error('Error fetching coach availability:', error);
