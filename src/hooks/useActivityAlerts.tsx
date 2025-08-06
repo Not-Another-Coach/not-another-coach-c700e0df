@@ -83,7 +83,7 @@ export function useActivityAlerts() {
         return;
       }
 
-      // Transform alerts data and filter based on user type
+      // Transform alerts data and filter based on user type and targeting
       const transformedAlerts: ActivityAlert[] = (alertsData || [])
         .filter(alert => {
           // Filter out discovery call alerts for clients
@@ -91,7 +91,21 @@ export function useActivityAlerts() {
             const discoveryCallTypes = ['discovery_call_booked', 'discovery_call_cancelled', 'discovery_call_rescheduled'];
             return !discoveryCallTypes.includes(alert.alert_type);
           }
-          // Show all alerts for trainers and other user types
+          
+          // For trainers, show alerts targeted to them
+          if (profile?.user_type === 'trainer') {
+            // Show alerts where user is the creator (coach) or specifically targeted
+            if (alert.created_by === user.id) return true;
+            
+            // Type-safe checking of target_audience
+            const targetAudience = alert.target_audience as any;
+            if (targetAudience?.coaches && Array.isArray(targetAudience.coaches)) {
+              return targetAudience.coaches.includes(user.id);
+            }
+            // Show general trainer alerts
+            if (targetAudience?.trainers) return true;
+          }
+          
           return true;
         })
         .map(alert => ({
