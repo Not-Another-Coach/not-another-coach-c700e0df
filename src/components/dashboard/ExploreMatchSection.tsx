@@ -887,6 +887,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                       isShortlisted={true}
                       hasDiscoveryCall={!!shortlisted.discovery_call}
                       discoveryCallData={shortlisted.discovery_call}
+                      trainerOffersDiscoveryCalls={matchData.trainer.offers_discovery_call || false}
                       onStartConversation={(trainerId) => {
                         console.log('Start conversation with:', trainerId);
                       }}

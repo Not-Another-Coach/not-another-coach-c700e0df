@@ -168,6 +168,7 @@ export default function Shortlist() {
                   isShortlisted={true}
                   hasDiscoveryCall={!!shortlisted.discovery_call}
                   discoveryCallData={shortlisted.discovery_call}
+                  trainerOffersDiscoveryCalls={trainerData.offers_discovery_call || false}
                   // Don't pass onAddToShortlist since they're already shortlisted
                   onStartConversation={(trainerId) => {
                     // Handle start conversation logic

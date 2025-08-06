@@ -64,6 +64,7 @@ interface TrainerCardProps {
   isShortlisted?: boolean;
   hasDiscoveryCall?: boolean;
   discoveryCallData?: any;
+  trainerOffersDiscoveryCalls?: boolean;
 }
 
 export const TrainerCard = ({ 
@@ -87,7 +88,8 @@ export const TrainerCard = ({
   onEditDiscoveryCall,
   isShortlisted = false,
   hasDiscoveryCall = false,
-  discoveryCallData
+  discoveryCallData,
+  trainerOffersDiscoveryCalls = false
 }: TrainerCardProps) => {
   const { isTrainerSaved, saveTrainer, unsaveTrainer } = useSavedTrainers();
   const { stage } = useEngagementStage(trainer.id);
@@ -445,27 +447,39 @@ export const TrainerCard = ({
                       Chat
                     </Button>
                   )}
-                  {hasDiscoveryCall && onEditDiscoveryCall ? (
+                  {trainerOffersDiscoveryCalls ? (
+                    hasDiscoveryCall && onEditDiscoveryCall ? (
+                      <Button 
+                        size="sm" 
+                        variant="default" 
+                        className="text-xs"
+                        onClick={() => onEditDiscoveryCall(trainer.id)}
+                      >
+                        <Calendar className="h-3 w-3 mr-1" />
+                        Edit Call
+                      </Button>
+                    ) : onBookDiscoveryCall ? (
+                      <Button 
+                        size="sm" 
+                        variant="default" 
+                        className="text-xs"
+                        onClick={() => onBookDiscoveryCall(trainer.id)}
+                      >
+                        <Calendar className="h-3 w-3 mr-1" />
+                        Discovery Call
+                      </Button>
+                    ) : null
+                  ) : (
                     <Button 
                       size="sm" 
-                      variant="default" 
-                      className="text-xs"
-                      onClick={() => onEditDiscoveryCall(trainer.id)}
+                      variant="outline" 
+                      className="text-xs opacity-50 cursor-not-allowed"
+                      disabled={true}
                     >
                       <Calendar className="h-3 w-3 mr-1" />
-                      Edit Call
+                      Discovery Calls Not Available
                     </Button>
-                  ) : onBookDiscoveryCall ? (
-                    <Button 
-                      size="sm" 
-                      variant="default" 
-                      className="text-xs"
-                      onClick={() => onBookDiscoveryCall(trainer.id)}
-                    >
-                      <Calendar className="h-3 w-3 mr-1" />
-                      Discovery Call
-                    </Button>
-                  ) : null}
+                  )}
                 </div>
               </div>
             )}
