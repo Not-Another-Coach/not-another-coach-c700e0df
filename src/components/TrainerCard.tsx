@@ -449,16 +449,39 @@ export const TrainerCard = ({
                     </Button>
                   )}
                   {trainerOffersDiscoveryCalls ? (
-                    hasDiscoveryCall && onEditDiscoveryCall ? (
-                      <Button 
-                        size="sm" 
-                        variant="default" 
-                        className="text-xs"
-                        onClick={() => onEditDiscoveryCall(trainer.id)}
-                      >
-                        <Calendar className="h-3 w-3 mr-1" />
-                        Edit Call
-                      </Button>
+                    hasDiscoveryCall ? (
+                      // Check discovery call status to determine button text and action
+                      discoveryCallData?.status === 'scheduled' ? (
+                        <Button 
+                          size="sm" 
+                          variant="default" 
+                          className="text-xs"
+                          onClick={() => onEditDiscoveryCall && onEditDiscoveryCall(trainer.id)}
+                        >
+                          <Calendar className="h-3 w-3 mr-1" />
+                          Reschedule
+                        </Button>
+                      ) : discoveryCallData?.status === 'completed' || discoveryCallData?.status === 'cancelled' ? (
+                        <Button 
+                          size="sm" 
+                          variant="default" 
+                          className="text-xs"
+                          onClick={() => onBookDiscoveryCall && onBookDiscoveryCall(trainer.id)}
+                        >
+                          <Calendar className="h-3 w-3 mr-1" />
+                          Book New Call
+                        </Button>
+                      ) : (
+                        <Button 
+                          size="sm" 
+                          variant="default" 
+                          className="text-xs"
+                          onClick={() => onEditDiscoveryCall && onEditDiscoveryCall(trainer.id)}
+                        >
+                          <Calendar className="h-3 w-3 mr-1" />
+                          Edit Call
+                        </Button>
+                      )
                     ) : onBookDiscoveryCall ? (
                       <Button 
                         size="sm" 
