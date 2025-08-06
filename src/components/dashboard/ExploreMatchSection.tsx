@@ -858,7 +858,22 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                       {/* Show Add to Shortlist if not already shortlisted */}
                       {!isShortlisted(match.trainer.id) && (
                         <Button
-                          onClick={() => shortlistTrainer(match.trainer.id)}
+                          onClick={async () => {
+                            console.log('🟢 Add to Shortlist clicked for trainer:', match.trainer.id);
+                            try {
+                              const result = await shortlistTrainer(match.trainer.id);
+                              if (result.error) {
+                                console.error('❌ Failed to shortlist trainer:', result.error);
+                                toast.error('Failed to add to shortlist');
+                              } else {
+                                console.log('✅ Successfully shortlisted trainer:', match.trainer.id);
+                                toast.success('Trainer added to shortlist!');
+                              }
+                            } catch (error) {
+                              console.error('❌ Error shortlisting trainer:', error);
+                              toast.error('Failed to add to shortlist');
+                            }
+                          }}
                           className="w-full"
                           size="sm"
                           disabled={!canShortlistMore}
@@ -880,7 +895,22 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                               size="sm" 
                               variant="outline" 
                               className="text-xs"
-                              onClick={() => handleCreateConversation(match.trainer.id)}
+                              onClick={async () => {
+                                console.log('🟢 Chat button clicked for trainer:', match.trainer.id);
+                                try {
+                                  const result = await createConversation(match.trainer.id);
+                                  if (!result.error) {
+                                    console.log('✅ Conversation created, navigating to messaging');
+                                    navigate('/messaging');
+                                  } else {
+                                    console.error('❌ Failed to create conversation:', result.error);
+                                    toast.error('Failed to start conversation');
+                                  }
+                                } catch (error) {
+                                  console.error('❌ Error creating conversation:', error);
+                                  toast.error('Failed to start conversation');
+                                }
+                              }}
                             >
                               <MessageCircle className="h-3 w-3 mr-1" />
                               Chat
@@ -889,7 +919,28 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                               size="sm" 
                               variant="default" 
                               className="text-xs"
-                              onClick={() => handleCreateConversation(match.trainer.id)}
+                              onClick={async () => {
+                                console.log('🟢 Discovery Call button clicked for trainer:', match.trainer.id);
+                                try {
+                                  const result = await bookDiscoveryCall(match.trainer.id);
+                                  if (result.error) {
+                                    console.error('❌ Failed to book discovery call:', result.error);
+                                    toast.error('Failed to book discovery call');
+                                  } else {
+                                    console.log('✅ Discovery call booked successfully');
+                                    toast.success('Discovery call booked!');
+                                    
+                                    // Also create conversation after booking
+                                    const conversationResult = await createConversation(match.trainer.id);
+                                    if (!conversationResult.error) {
+                                      console.log('✅ Conversation created after discovery call booking');
+                                    }
+                                  }
+                                } catch (error) {
+                                  console.error('❌ Error booking discovery call:', error);
+                                  toast.error('Failed to book discovery call');
+                                }
+                              }}
                             >
                               <Calendar className="h-3 w-3 mr-1" />
                               Discovery Call
@@ -1013,9 +1064,11 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                                   navigate('/messaging');
                                 } else {
                                   console.error('❌ Failed to create conversation:', result.error);
+                                  toast.error('Failed to start conversation');
                                 }
                               } catch (error) {
                                 console.error('❌ Error in chat handler:', error);
+                                toast.error('Failed to start conversation');
                               }
                             }}
                           >
@@ -1030,10 +1083,14 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                               console.log('🟢 Discovery call button clicked for trainer:', shortlisted.trainer_id);
                               try {
                                 const result = await bookDiscoveryCall(shortlisted.trainer_id);
-                                console.log('📅 Discovery call booking result:', result);
-                                
-                                // If booking was successful or already had a call, create conversation too
-                                if (result) {
+                                if (result.error) {
+                                  console.error('❌ Failed to book discovery call:', result.error);
+                                  toast.error('Failed to book discovery call');
+                                } else {
+                                  console.log('📅 Discovery call booking result:', result);
+                                  toast.success('Discovery call booked!');
+                                  
+                                  // If booking was successful, create conversation too
                                   const conversationResult = await createConversation(shortlisted.trainer_id);
                                   if (!conversationResult.error) {
                                     console.log('✅ Conversation created after discovery call booking');
@@ -1041,6 +1098,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                                 }
                               } catch (error) {
                                 console.error('❌ Error in discovery call handler:', error);
+                                toast.error('Failed to book discovery call');
                               }
                             }}
                           >
