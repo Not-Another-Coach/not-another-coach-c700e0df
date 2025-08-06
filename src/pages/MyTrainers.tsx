@@ -58,9 +58,17 @@ export default function MyTrainers() {
     shortlistedTrainers: actualShortlistedTrainers 
   } = useShortlistedTrainers();
   const { createConversation } = useConversations();
-  const { getEngagementStage, getLikedTrainers, getOnlyShortlistedTrainers, getDiscoveryStageTrainers, getMatchedTrainers } = useTrainerEngagement();
+  const { 
+    getEngagementStage, 
+    getLikedTrainers, 
+    getOnlyShortlistedTrainers, 
+    getDiscoveryStageTrainers, 
+    getMatchedTrainers,
+    updateEngagementStage,
+    likeTrainer 
+  } = useTrainerEngagement();
   const { hasActiveDiscoveryCall, getDiscoveryCallForTrainer } = useDiscoveryCallData();
-  const { getCoachAvailability, checkClientWaitlistStatus, joinWaitlist } = useWaitlist();
+  const { getCoachAvailability, checkClientWaitlistStatus, joinWaitlist, removeFromWaitlist } = useWaitlist();
 
   // State for filtering and UI
   const [activeFilter, setActiveFilter] = useState<'all' | 'saved' | 'shortlisted' | 'discovery'>('all');
@@ -508,6 +516,30 @@ export default function MyTrainers() {
     toast.info('Choose coach feature coming soon!');
   };
 
+  const handleMoveToSaved = async (trainerId: string) => {
+    console.log('🔥 Move to saved clicked:', trainerId);
+    try {
+      await likeTrainer(trainerId);
+      toast.success('Trainer moved to saved list!');
+    } catch (error) {
+      console.error('Error moving trainer to saved:', error);
+      toast.error('Failed to move trainer to saved');
+    }
+  };
+
+  const handleRemoveCompletely = async (trainerId: string) => {
+    console.log('🔥 Remove completely clicked:', trainerId);
+    try {
+      await updateEngagementStage(trainerId, 'browsing');
+      // Also remove from waitlist if they're on one
+      await removeFromWaitlist(trainerId);
+      toast.success('Trainer removed completely!');
+    } catch (error) {
+      console.error('Error removing trainer completely:', error);
+      toast.error('Failed to remove trainer');
+    }
+  };
+
   // Render CTAs based on trainer status
   const renderCTAs = (trainerData: typeof trainersWithStatus[0]) => {
     const { trainer, status } = trainerData;
@@ -629,49 +661,62 @@ export default function MyTrainers() {
                   <X className="h-3 w-3 mr-1" />
                   No Call Available
                 </Button>
-              )}
-            </div>
-            <Button
-              onClick={() => handleRemoveFromShortlist(trainer.id)}
-              className="w-full"
-              size="sm"
-              variant="outline"
-            >
-              <X className="h-3 w-3 mr-1" />
-              Remove from Shortlist
-            </Button>
-          </div>
-        );
+               )}
+             </div>
+             
+             {/* Additional management options */}
+             <div className="grid grid-cols-2 gap-2">
+               <Button
+                 onClick={() => handleMoveToSaved(trainer.id)}
+                 className="w-full"
+                 size="sm"
+                 variant="outline"
+               >
+                 <Heart className="h-3 w-3 mr-1" />
+                 Move to Saved
+               </Button>
+                <Button
+                  onClick={() => handleRemoveCompletely(trainer.id)}
+                  className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
+                  size="sm"
+                  variant="outline"
+                >
+                  <X className="h-3 w-3 mr-1" />
+                  Remove Completely
+                </Button>
+             </div>
+           </div>
+         );
 
-      case 'discovery':
-        const discoveryCall = getDiscoveryCallForTrainer(trainer.id);
-        const callDate = discoveryCall ? new Date(discoveryCall.scheduled_for) : null;
-        const isCallInPast = callDate ? callDate < new Date() : false;
-        const engagementStage = getEngagementStage(trainer.id);
-        const isDiscoveryInProgress = engagementStage === 'discovery_in_progress';
-        
-        // Check if trainer has waitlist enabled
-        const trainerAvailabilityForCTA = trainerAvailability[trainer.id];
-        const hasWaitlistEnabled = trainerAvailabilityForCTA?.availability_status === 'waitlist';
-        
-        console.log(`🔥 Discovery CTA Debug for ${trainer.name}:`);
-        console.log(`🔥 - Trainer ID: ${trainer.id}`);
-        console.log(`🔥 - Trainer availability data:`, trainerAvailabilityForCTA);
-        console.log(`🔥 - Has waitlist enabled: ${hasWaitlistEnabled}`);
-        console.log(`🔥 - Discovery call exists: ${!!discoveryCall}`);
-        console.log(`🔥 - Call in past: ${isCallInPast}`);
-        console.log(`🔥 - Is discovery in progress: ${isDiscoveryInProgress}`);
-        
-        return (
-          <div className="space-y-2">
-            <div className="grid grid-cols-2 gap-2">
-              <Button 
-                size="sm" 
-                variant="outline"
-                onClick={() => handleStartConversation(trainer.id)}
-              >
-                <MessageCircle className="h-3 w-3 mr-1" />
-                Message
+       case 'discovery':
+         const discoveryCall = getDiscoveryCallForTrainer(trainer.id);
+         const callDate = discoveryCall ? new Date(discoveryCall.scheduled_for) : null;
+         const isCallInPast = callDate ? callDate < new Date() : false;
+         const engagementStage = getEngagementStage(trainer.id);
+         const isDiscoveryInProgress = engagementStage === 'discovery_in_progress';
+         
+         // Check if trainer has waitlist enabled
+         const trainerAvailabilityForCTA = trainerAvailability[trainer.id];
+         const hasWaitlistEnabled = trainerAvailabilityForCTA?.availability_status === 'waitlist';
+         
+         console.log(`🔥 Discovery CTA Debug for ${trainer.name}:`);
+         console.log(`🔥 - Trainer ID: ${trainer.id}`);
+         console.log(`🔥 - Trainer availability data:`, trainerAvailabilityForCTA);
+         console.log(`🔥 - Has waitlist enabled: ${hasWaitlistEnabled}`);
+         console.log(`🔥 - Discovery call exists: ${!!discoveryCall}`);
+         console.log(`🔥 - Call in past: ${isCallInPast}`);
+         console.log(`🔥 - Is discovery in progress: ${isDiscoveryInProgress}`);
+         
+         return (
+           <div className="space-y-2">
+             <div className="grid grid-cols-2 gap-2">
+               <Button 
+                 size="sm" 
+                 variant="outline"
+                 onClick={() => handleStartConversation(trainer.id)}
+               >
+                 <MessageCircle className="h-3 w-3 mr-1" />
+                 Message
               </Button>
               
               {/* Show waitlist button if trainer has waitlist and client not on it */}
@@ -732,9 +777,31 @@ export default function MyTrainers() {
                 </Button>
               )}
             </div>
-            
-            {/* Bottom button - only show Choose as Coach if no waitlist */}
-            {!hasWaitlistEnabled && (isDiscoveryInProgress ? (
+             
+             {/* Additional management options for discovery stage */}
+             <div className="grid grid-cols-2 gap-2 mt-2">
+               <Button
+                 onClick={() => handleMoveToSaved(trainer.id)}
+                 className="w-full"
+                 size="sm"
+                 variant="outline"
+               >
+                 <Heart className="h-3 w-3 mr-1" />
+                 Move to Saved
+               </Button>
+                <Button
+                  onClick={() => handleRemoveCompletely(trainer.id)}
+                  className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
+                  size="sm"
+                  variant="outline"
+                >
+                  <X className="h-3 w-3 mr-1" />
+                  Remove Completely
+                </Button>
+             </div>
+
+             {/* Bottom button - only show Choose as Coach if no waitlist */}
+             {!hasWaitlistEnabled && (isDiscoveryInProgress ? (
               <Button
                 onClick={() => navigate(`/trainer/${trainer.id}`)}
                 className="w-full"
