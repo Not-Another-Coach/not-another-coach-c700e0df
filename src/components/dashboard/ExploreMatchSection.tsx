@@ -410,6 +410,12 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
     setSavedComparison(prev => prev.filter(id => savedTrainerIds.includes(id)));
   }, [savedTrainers]);
 
+  // Clean up shortlisted comparison state when shortlisted trainers change
+  useEffect(() => {
+    const shortlistedTrainerIds = actualShortlistedTrainers.map(shortlisted => shortlisted.trainer_id);
+    setShortlistedComparison(prev => prev.filter(id => shortlistedTrainerIds.includes(id)));
+  }, [actualShortlistedTrainers]);
+
   const handleShortlistedComparisonToggle = (trainerId: string) => {
     setShortlistedComparison(prev => 
       prev.includes(trainerId) 
