@@ -4,7 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Star, MapPin, Clock, Users, Award, Target, Dumbbell, Heart, X, MessageCircle, Calendar, ExternalLink } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Star, MapPin, Clock, Users, Award, Target, Dumbbell, Heart, X, MessageCircle, Calendar, ExternalLink, MoreVertical } from "lucide-react";
 import { MatchBadge } from "@/components/MatchBadge";
 import { MatchProgressIndicator } from "@/components/MatchProgressIndicator";
 import { useSavedTrainers } from "@/hooks/useSavedTrainers";
@@ -69,6 +70,10 @@ interface TrainerCardProps {
   discoveryCallData?: any;
   trainerOffersDiscoveryCalls?: boolean;
   waitlistRefreshKey?: number; // Add refresh key for waitlist components
+  
+  // Management actions
+  onMoveToSaved?: (trainerId: string) => void;
+  onRemoveCompletely?: (trainerId: string) => void;
 }
 
 export const TrainerCard = ({ 
@@ -95,7 +100,9 @@ export const TrainerCard = ({
   hasDiscoveryCall = false,
   discoveryCallData,
   trainerOffersDiscoveryCalls = false,
-  waitlistRefreshKey = 0
+  waitlistRefreshKey = 0,
+  onMoveToSaved,
+  onRemoveCompletely
 }: TrainerCardProps) => {
   const navigate = useNavigate();
   const { isTrainerSaved, saveTrainer, unsaveTrainer } = useSavedTrainers();
@@ -234,30 +241,64 @@ export const TrainerCard = ({
       <CardContent className="p-6 pt-20"> {/* Increased top padding to create space between labels and content */}
         {/* Line 1: Interactive elements */}
         <div className="absolute top-2 left-2 right-2 flex justify-between z-20">
-          {/* Left: Heart/Save or Remove button */}
-          {showRemoveButton ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="bg-white/90 backdrop-blur hover:bg-red-50 hover:text-red-600"
-              onClick={handleRemoveClick}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          ) : (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="bg-white/80 backdrop-blur hover:bg-white/90 transition-all"
-              onClick={handleToggleSave}
-            >
-              {isSaved || cardState === 'saved' ? (
-                <Heart className="h-4 w-4 text-red-500 fill-current" />
-              ) : (
-                <Heart className="h-4 w-4 text-gray-400 hover:text-red-500 transition-colors" />
-              )}
-            </Button>
-          )}
+          {/* Left: Heart/Save button with management dropdown */}
+          <div className="flex items-center gap-1">
+            {showRemoveButton ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="bg-white/90 backdrop-blur hover:bg-red-50 hover:text-red-600"
+                onClick={handleRemoveClick}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            ) : (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="bg-white/80 backdrop-blur hover:bg-white/90 transition-all"
+                onClick={handleToggleSave}
+              >
+                {isSaved || cardState === 'saved' ? (
+                  <Heart className="h-4 w-4 text-red-500 fill-current" />
+                ) : (
+                  <Heart className="h-4 w-4 text-gray-400 hover:text-red-500 transition-colors" />
+                )}
+              </Button>
+            )}
+            
+            {/* Management dropdown - only show for shortlisted/discovery trainers */}
+            {(cardState === 'shortlisted' || cardState === 'discovery') && (onMoveToSaved || onRemoveCompletely) && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="bg-white/80 backdrop-blur hover:bg-white/90 transition-all p-1 h-8 w-8"
+                  >
+                    <MoreVertical className="h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-48">
+                  {onMoveToSaved && (
+                    <DropdownMenuItem onClick={() => onMoveToSaved(trainer.id)}>
+                      <Heart className="h-3 w-3 mr-2" />
+                      Move to Saved
+                    </DropdownMenuItem>
+                  )}
+                  {onRemoveCompletely && (
+                    <DropdownMenuItem 
+                      onClick={() => onRemoveCompletely(trainer.id)}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <X className="h-3 w-3 mr-2" />
+                      Remove Completely
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
 
           {/* Right: Comparison checkbox or Match badge */}
           {showComparisonCheckbox ? (

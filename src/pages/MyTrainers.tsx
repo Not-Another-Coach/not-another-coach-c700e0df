@@ -664,27 +664,6 @@ export default function MyTrainers() {
                )}
              </div>
              
-             {/* Additional management options */}
-             <div className="grid grid-cols-2 gap-2">
-               <Button
-                 onClick={() => handleMoveToSaved(trainer.id)}
-                 className="w-full"
-                 size="sm"
-                 variant="outline"
-               >
-                 <Heart className="h-3 w-3 mr-1" />
-                 Move to Saved
-               </Button>
-                <Button
-                  onClick={() => handleRemoveCompletely(trainer.id)}
-                  className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
-                  size="sm"
-                  variant="outline"
-                >
-                  <X className="h-3 w-3 mr-1" />
-                  Remove Completely
-                </Button>
-             </div>
            </div>
          );
 
@@ -776,64 +755,42 @@ export default function MyTrainers() {
                   No Call Available
                 </Button>
               )}
-            </div>
-             
-             {/* Additional management options for discovery stage */}
-             <div className="grid grid-cols-2 gap-2 mt-2">
+             </div>
+              
+              {/* Bottom button - only show Choose as Coach if no waitlist */}
+              {!hasWaitlistEnabled && (isDiscoveryInProgress ? (
                <Button
-                 onClick={() => handleMoveToSaved(trainer.id)}
+                 onClick={() => navigate(`/trainer/${trainer.id}`)}
                  className="w-full"
                  size="sm"
                  variant="outline"
                >
-                 <Heart className="h-3 w-3 mr-1" />
-                 Move to Saved
+                 <Phone className="h-3 w-3 mr-1" />
+                 View Full Profile
                </Button>
-                <Button
-                  onClick={() => handleRemoveCompletely(trainer.id)}
-                  className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
-                  size="sm"
-                  variant="outline"
-                >
-                  <X className="h-3 w-3 mr-1" />
-                  Remove Completely
-                </Button>
-             </div>
-
-             {/* Bottom button - only show Choose as Coach if no waitlist */}
-             {!hasWaitlistEnabled && (isDiscoveryInProgress ? (
-              <Button
-                onClick={() => navigate(`/trainer/${trainer.id}`)}
-                className="w-full"
-                size="sm"
-                variant="outline"
-              >
-                <Phone className="h-3 w-3 mr-1" />
-                View Full Profile
-              </Button>
-            ) : isCallInPast ? (
-              <Button
-                onClick={() => navigate(`/trainer/${trainer.id}`)}
-                className="w-full"
-                size="sm"
-                variant="outline"
-              >
-                <Phone className="h-3 w-3 mr-1" />
-                View Details
-              </Button>
-            ) : (
-              <Button
-                onClick={() => handleChooseCoach(trainer.id)}
-                className="w-full"
-                size="sm"
-                variant="default"
-              >
-                <UserCheck className="h-3 w-3 mr-1" />
-                Choose as Coach
-              </Button>
-            ))}
-          </div>
-        );
+             ) : isCallInPast ? (
+               <Button
+                 onClick={() => navigate(`/trainer/${trainer.id}`)}
+                 className="w-full"
+                 size="sm"
+                 variant="outline"
+               >
+                 <Phone className="h-3 w-3 mr-1" />
+                 View Details
+               </Button>
+             ) : (
+               <Button
+                 onClick={() => handleChooseCoach(trainer.id)}
+                 className="w-full"
+                 size="sm"
+                 variant="default"
+               >
+                 <UserCheck className="h-3 w-3 mr-1" />
+                 Choose as Coach
+               </Button>
+             ))}
+            </div>
+          );
 
       default:
         return null;
@@ -922,6 +879,8 @@ export default function MyTrainers() {
                 onStartConversation={handleStartConversation}
                 onBookDiscoveryCall={handleBookDiscoveryCall}
                 waitlistRefreshKey={waitlistRefreshKey}
+                onMoveToSaved={handleMoveToSaved}
+                onRemoveCompletely={handleRemoveCompletely}
               />
               
               
