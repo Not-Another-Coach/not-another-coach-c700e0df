@@ -884,6 +884,18 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                       comparisonDisabled={!shortlistedComparison.includes(shortlisted.trainer_id) && shortlistedComparison.length >= 4}
                       showRemoveButton={true}
                       onRemove={(trainerId) => handleRemoveFromShortlist(trainerId, matchData.trainer.name)}
+                      isShortlisted={true}
+                      hasDiscoveryCall={!!shortlisted.discovery_call}
+                      discoveryCallData={shortlisted.discovery_call}
+                      onStartConversation={(trainerId) => {
+                        console.log('Start conversation with:', trainerId);
+                      }}
+                      onBookDiscoveryCall={(trainerId) => {
+                        console.log('Book discovery call with:', trainerId);
+                      }}
+                      onEditDiscoveryCall={(trainerId) => {
+                        console.log('Edit discovery call with:', trainerId);
+                      }}
                     />
                   );
                 })}
