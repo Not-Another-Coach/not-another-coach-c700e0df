@@ -6,9 +6,10 @@ import { Clock } from 'lucide-react';
 interface WaitlistStatusBadgeProps {
   coachId: string;
   className?: string;
+  refreshKey?: number; // Add refresh key to force re-checks
 }
 
-export function WaitlistStatusBadge({ coachId, className }: WaitlistStatusBadgeProps) {
+export function WaitlistStatusBadge({ coachId, className, refreshKey }: WaitlistStatusBadgeProps) {
   const [waitlistEntry, setWaitlistEntry] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const { checkClientWaitlistStatus } = useWaitlist();
@@ -22,7 +23,7 @@ export function WaitlistStatusBadge({ coachId, className }: WaitlistStatusBadgeP
     };
 
     checkStatus();
-  }, [coachId, checkClientWaitlistStatus]);
+  }, [coachId, checkClientWaitlistStatus, refreshKey]); // Include refreshKey in dependency array
 
   if (loading || !waitlistEntry) {
     return null;

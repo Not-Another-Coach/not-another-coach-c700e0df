@@ -212,7 +212,7 @@ export const TieredTrainerProfile = ({
         {/* Waitlist Status Badge - Show if client is on waitlist */}
         {isClient && clientWaitlistStatus && (
           <div className="flex justify-center">
-            <WaitlistStatusBadge coachId={trainer.id} />
+            <WaitlistStatusBadge coachId={trainer.id} refreshKey={0} />
           </div>
         )}
 

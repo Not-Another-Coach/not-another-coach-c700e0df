@@ -63,6 +63,7 @@ export default function MyTrainers() {
 
   // State for filtering and UI
   const [activeFilter, setActiveFilter] = useState<'all' | 'saved' | 'shortlisted' | 'discovery'>('all');
+  const [waitlistRefreshKey, setWaitlistRefreshKey] = useState(0); // Add refresh key for waitlist components
   const [selectedForComparison, setSelectedForComparison] = useState<string[]>([]);
   const [trainerAvailability, setTrainerAvailability] = useState<{[key: string]: any}>({});
 
@@ -673,6 +674,7 @@ export default function MyTrainers() {
                   coachName={trainer.name}
                   nextAvailableDate={trainerAvailabilityForCTA?.next_available_date}
                   waitlistMessage={trainerAvailabilityForCTA?.waitlist_message}
+                  onWaitlistChange={() => setWaitlistRefreshKey(prev => prev + 1)}
                 />
               ) : discoveryCall && !isCallInPast ? (
                 <Button 
@@ -832,8 +834,9 @@ export default function MyTrainers() {
                 comparisonDisabled={!selectedForComparison.includes(trainerData.trainer.id) && selectedForComparison.length >= 4}
                 onStartConversation={handleStartConversation}
                 onBookDiscoveryCall={handleBookDiscoveryCall}
-                trainerOffersDiscoveryCalls={trainerData.trainer.offers_discovery_call}
+                waitlistRefreshKey={waitlistRefreshKey}
               />
+              
               
               {/* Status Badge */}
               <div className="flex items-center justify-between">

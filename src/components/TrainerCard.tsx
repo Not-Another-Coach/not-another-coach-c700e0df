@@ -68,6 +68,7 @@ interface TrainerCardProps {
   hasDiscoveryCall?: boolean;
   discoveryCallData?: any;
   trainerOffersDiscoveryCalls?: boolean;
+  waitlistRefreshKey?: number; // Add refresh key for waitlist components
 }
 
 export const TrainerCard = ({ 
@@ -84,7 +85,6 @@ export const TrainerCard = ({
   comparisonDisabled = false,
   showRemoveButton = false,
   onRemove,
-  // CTA props
   onAddToShortlist,
   onStartConversation,
   onBookDiscoveryCall,
@@ -94,7 +94,8 @@ export const TrainerCard = ({
   isShortlisted = false,
   hasDiscoveryCall = false,
   discoveryCallData,
-  trainerOffersDiscoveryCalls = false
+  trainerOffersDiscoveryCalls = false,
+  waitlistRefreshKey = 0
 }: TrainerCardProps) => {
   const navigate = useNavigate();
   const { isTrainerSaved, saveTrainer, unsaveTrainer } = useSavedTrainers();
@@ -402,7 +403,7 @@ export const TrainerCard = ({
         {/* Waitlist Status Badge - Show if client is on waitlist */}
         {isClient && clientWaitlistStatus && (
           <div className="mb-4">
-            <WaitlistStatusBadge coachId={trainer.id} />
+            <WaitlistStatusBadge coachId={trainer.id} refreshKey={waitlistRefreshKey} />
           </div>
         )}
 

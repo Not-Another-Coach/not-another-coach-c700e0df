@@ -13,6 +13,7 @@ interface WaitlistJoinButtonProps {
   nextAvailableDate?: string;
   waitlistMessage?: string;
   className?: string;
+  onWaitlistChange?: () => void; // Add callback for when waitlist status changes
 }
 
 export function WaitlistJoinButton({ 
@@ -20,7 +21,8 @@ export function WaitlistJoinButton({
   coachName, 
   nextAvailableDate, 
   waitlistMessage,
-  className 
+  className,
+  onWaitlistChange
 }: WaitlistJoinButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [coachNote, setCoachNote] = useState('');
@@ -66,6 +68,7 @@ export function WaitlistJoinButton({
         setIsOnWaitlist(true);
         setIsOpen(false);
         setCoachNote('');
+        onWaitlistChange?.(); // Trigger refresh of other components
       }
     } catch (error) {
       console.error('🔥 WaitlistJoinButton catch error:', error);
@@ -104,6 +107,7 @@ export function WaitlistJoinButton({
         // Force a refresh of the waitlist status
         const status = await checkClientWaitlistStatus(coachId);
         setIsOnWaitlist(!!status);
+        onWaitlistChange?.(); // Trigger refresh of other components
       }
     } catch (error) {
       console.error('🔥 Remove from waitlist catch error:', error);
