@@ -31,11 +31,11 @@ import {
   X,
   BarChart3,
   Clock,
-  Edit,
-  UserCheck
+  Edit
 } from "lucide-react";
 import { DiscoveryCallBookingModal } from "@/components/discovery-call/DiscoveryCallBookingModal";
 import { ClientRescheduleModal } from "@/components/dashboard/ClientRescheduleModal";
+import { ChooseCoachButton } from "@/components/coach-selection/ChooseCoachButton";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -513,7 +513,7 @@ export default function MyTrainers() {
 
   const handleChooseCoach = (trainerId: string) => {
     console.log('🔥 Choose coach clicked:', trainerId);
-    toast.info('Choose coach feature coming soon!');
+    // This will now be handled by the ChooseCoachButton component
   };
 
   const handleMoveToSaved = async (trainerId: string) => {
@@ -717,23 +717,17 @@ export default function MyTrainers() {
                   Reschedule Call
                 </Button>
               ) : isDiscoveryInProgress ? (
-                <Button 
-                  size="sm" 
-                  variant="default"
-                  onClick={() => handleChooseCoach(trainer.id)}
-                >
-                  <UserCheck className="h-3 w-3 mr-1" />
-                  Choose Coach
-                </Button>
+                <ChooseCoachButton
+                  trainer={trainer}
+                  stage={getEngagementStage(trainer.id)}
+                  className="w-full"
+                />
               ) : discoveryCall && isCallInPast ? (
-                <Button 
-                  size="sm" 
-                  variant="default"
-                  onClick={() => handleChooseCoach(trainer.id)}
-                >
-                  <UserCheck className="h-3 w-3 mr-1" />
-                  Choose Coach
-                </Button>
+                <ChooseCoachButton
+                  trainer={trainer}
+                  stage={getEngagementStage(trainer.id)}
+                  className="w-full"
+                />
               ) : trainerData.trainer.offers_discovery_call ? (
                 <Button 
                   size="sm" 
@@ -778,17 +772,13 @@ export default function MyTrainers() {
                  <Phone className="h-3 w-3 mr-1" />
                  View Details
                </Button>
-             ) : (
-               <Button
-                 onClick={() => handleChooseCoach(trainer.id)}
-                 className="w-full"
-                 size="sm"
-                 variant="default"
-               >
-                 <UserCheck className="h-3 w-3 mr-1" />
-                 Choose as Coach
-               </Button>
-             ))}
+              ) : (
+                <ChooseCoachButton
+                  trainer={trainer}
+                  stage={getEngagementStage(trainer.id)}
+                  className="w-full"
+                />
+              ))}
             </div>
           );
 
