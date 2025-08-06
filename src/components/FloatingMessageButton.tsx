@@ -8,6 +8,7 @@ import { useProfile } from '@/hooks/useProfile';
 
 export const FloatingMessageButton = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [preSelectedTrainerId, setPreSelectedTrainerId] = useState<string | null>(null);
   const { savedTrainers } = useSavedTrainers();
   const { profile } = useProfile();
   
@@ -15,6 +16,20 @@ export const FloatingMessageButton = () => {
   
   // For trainers, show different badge logic (would be based on unread messages in real app)
   const badgeCount = isTrainer ? 0 : savedTrainers.length;
+
+  // Listen for global message events to open popup with specific trainer
+  React.useEffect(() => {
+    const handleMessageEvent = (event: CustomEvent) => {
+      setPreSelectedTrainerId(event.detail.trainerId);
+      setIsPopupOpen(true);
+    };
+
+    window.addEventListener('openMessagePopup', handleMessageEvent as EventListener);
+    
+    return () => {
+      window.removeEventListener('openMessagePopup', handleMessageEvent as EventListener);
+    };
+  }, []);
 
   return (
     <>
@@ -37,7 +52,11 @@ export const FloatingMessageButton = () => {
 
       <MessagingPopup 
         isOpen={isPopupOpen}
-        onClose={() => setIsPopupOpen(false)}
+        onClose={() => {
+          setIsPopupOpen(false);
+          setPreSelectedTrainerId(null);
+        }}
+        preSelectedTrainerId={preSelectedTrainerId}
       />
     </>
   );

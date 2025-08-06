@@ -24,6 +24,7 @@ interface Message {
 interface MessagingPopupProps {
   isOpen: boolean;
   onClose: () => void;
+  preSelectedTrainerId?: string | null; // New prop for pre-selecting a trainer
   selectedClient?: {
     id: string;
     user_id: string;
@@ -36,7 +37,7 @@ interface MessagingPopupProps {
   } | null;
 }
 
-export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPopupProps) => {
+export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selectedClient }: MessagingPopupProps) => {
   const [selectedTrainerId, setSelectedTrainerId] = useState<string | null>(null);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -68,8 +69,13 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
       } else {
         loadMessages(selectedClient.user_id);
       }
+    } else if (preSelectedTrainerId && !isTrainer) {
+      // For clients with a pre-selected trainer, go directly to chat
+      setSelectedTrainerId(preSelectedTrainerId);
+      setView('chat');
+      loadMessages(preSelectedTrainerId);
     }
-  }, [selectedClient, isTrainer]);
+  }, [selectedClient, preSelectedTrainerId, isTrainer]);
 
   // Check if client has sent the first message (for trainer-client conversations)
   const checkIfClientMessagedFirst = async (clientId: string) => {
@@ -169,19 +175,40 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
 
   const contacts = isTrainer 
     ? trainerContacts
-    : conversations
-        .filter(conv => conv.client_id === profile?.id) // Only conversations where this user is the client
-        .map(conv => ({
-          id: conv.trainer_id,
-          name: conv.otherUser?.first_name && conv.otherUser?.last_name 
-            ? `${conv.otherUser.first_name} ${conv.otherUser.last_name}`
-            : `Trainer ${conv.trainer_id.slice(0, 8)}`,
-          firstName: conv.otherUser?.first_name,
-          lastName: conv.otherUser?.last_name,
-          location: 'Available for chat',
-          profilePhotoUrl: conv.otherUser?.profile_photo_url,
-          lastMessageAt: conv.last_message_at
-        })); // Clients only see trainers they've actually messaged
+    : (() => {
+        // For clients, show conversations + pre-selected trainer if not in conversations
+        const conversationContacts = conversations
+          .filter(conv => conv.client_id === profile?.id)
+          .map(conv => ({
+            id: conv.trainer_id,
+            name: conv.otherUser?.first_name && conv.otherUser?.last_name 
+              ? `${conv.otherUser.first_name} ${conv.otherUser.last_name}`
+              : `Trainer ${conv.trainer_id.slice(0, 8)}`,
+            firstName: conv.otherUser?.first_name,
+            lastName: conv.otherUser?.last_name,
+            location: 'Available for chat',
+            profilePhotoUrl: conv.otherUser?.profile_photo_url,
+            lastMessageAt: conv.last_message_at
+          }));
+
+        // If there's a pre-selected trainer not in conversations, add them
+        if (preSelectedTrainerId && !conversationContacts.find(c => c.id === preSelectedTrainerId)) {
+          const preSelectedTrainer = trainers.find(t => t.id === preSelectedTrainerId);
+          if (preSelectedTrainer) {
+            conversationContacts.unshift({
+              id: preSelectedTrainer.id,
+              name: preSelectedTrainer.name || `Trainer ${preSelectedTrainer.id.slice(0, 8)}`,
+              firstName: preSelectedTrainer.firstName,
+              lastName: preSelectedTrainer.lastName,
+              location: 'Start new conversation',
+              profilePhotoUrl: preSelectedTrainer.profilePhotoUrl,
+              lastMessageAt: null
+            });
+          }
+        }
+
+        return conversationContacts;
+      })();
 
   // Filter contacts based on search
   const filteredContacts = contacts.filter(contact => 

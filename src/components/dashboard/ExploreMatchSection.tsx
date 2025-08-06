@@ -242,11 +242,11 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
   };
 
   const handleMessage = (trainerId: string) => {
-    // Open messaging popup instead of navigating
-    const messagingButton = document.querySelector('[data-messaging-button]') as HTMLButtonElement;
-    if (messagingButton) {
-      messagingButton.click();
-    }
+    // Dispatch a custom event to open messaging popup with specific trainer
+    const event = new CustomEvent('openMessagePopup', {
+      detail: { trainerId }
+    });
+    window.dispatchEvent(event);
   };
 
   const handleShortlist = async (trainerId: string) => {
