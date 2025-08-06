@@ -15,7 +15,6 @@ import { useProfile } from "@/hooks/useProfile";
 import { WaitlistJoinButton } from "@/components/waitlist/WaitlistJoinButton";
 import { WaitlistStatusBadge } from "@/components/waitlist/WaitlistStatusBadge";
 import { useNavigate } from "react-router-dom";
-import { StartConversationButton } from "@/components/StartConversationButton";
 
 export interface Trainer {
   id: string;
@@ -438,24 +437,28 @@ export const TrainerCard = ({
           <div className="mb-4 space-y-2">
             {/* Message button for discovery trainers */}
             {cardState === 'discovery' && (
-              <StartConversationButton
-                trainerId={trainer.id}
-                trainerName={displayName}
-                size="sm"
+              <Button
+                onClick={() => onStartConversation?.(trainer.id)}
                 className="w-full"
+                size="sm"
                 variant="outline"
-              />
+              >
+                <MessageCircle className="h-4 w-4 mr-2" />
+                Message
+              </Button>
             )}
             
             {/* Shortlist actions */}
             {cardState === 'shortlisted' && (
               <div className="grid grid-cols-2 gap-2">
-                <StartConversationButton
-                  trainerId={trainer.id}
-                  trainerName={displayName}
+                <Button
+                  onClick={() => onStartConversation?.(trainer.id)}
                   size="sm"
                   variant="outline"
-                />
+                >
+                  <MessageCircle className="h-3 w-3 mr-1" />
+                  Message
+                </Button>
                 {onBookDiscoveryCall && trainer.offers_discovery_call && (
                   <Button
                     onClick={() => onBookDiscoveryCall(trainer.id)}
