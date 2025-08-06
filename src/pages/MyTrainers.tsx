@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { ComparisonView } from "@/components/ComparisonView";
 import { useSavedTrainers } from "@/hooks/useSavedTrainers";
 import { useShortlistedTrainers } from "@/hooks/useShortlistedTrainers";
 import { useTrainerEngagement } from "@/hooks/useTrainerEngagement";
@@ -65,6 +66,7 @@ export default function MyTrainers() {
   const [activeFilter, setActiveFilter] = useState<'all' | 'saved' | 'shortlisted' | 'discovery'>('all');
   const [waitlistRefreshKey, setWaitlistRefreshKey] = useState(0); // Add refresh key for waitlist components
   const [selectedForComparison, setSelectedForComparison] = useState<string[]>([]);
+  const [showComparison, setShowComparison] = useState(false);
   const [trainerAvailability, setTrainerAvailability] = useState<{[key: string]: any}>({});
 
   // Listen for filter events from dashboard
@@ -464,8 +466,13 @@ export default function MyTrainers() {
   };
 
   const handleStartComparison = () => {
-    // TODO: Implement comparison view
-    toast.info('Comparison feature coming soon!');
+    if (selectedForComparison.length >= 2) {
+      setShowComparison(true);
+    }
+  };
+
+  const getSelectedTrainersData = () => {
+    return allTrainers.filter(trainer => selectedForComparison.includes(trainer.id));
   };
 
   const handleJoinWaitlist = async (trainerId: string) => {
@@ -779,6 +786,19 @@ export default function MyTrainers() {
   console.log('📋 Filtered trainers:', filteredTrainers.length);
   console.log('🗨️ Conversations:', conversations.length);
   console.log('📱 Trainer availability status for Linda:', trainerAvailability['bb19a665-f35f-4828-a62c-90ce437bfb18']);
+
+  // Show comparison view if active
+  if (showComparison) {
+    return (
+      <ComparisonView 
+        trainers={getSelectedTrainersData()}
+        onClose={() => {
+          setShowComparison(false);
+          setSelectedForComparison([]);
+        }}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
