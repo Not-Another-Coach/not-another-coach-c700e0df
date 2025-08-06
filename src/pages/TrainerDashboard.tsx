@@ -424,7 +424,7 @@ const TrainerDashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid md:grid-cols-3 gap-3">
+                <div className="grid md:grid-cols-4 gap-3">
                   <Button 
                     className="h-12 justify-start gap-3" 
                     variant="default"
@@ -448,6 +448,14 @@ const TrainerDashboard = () => {
                   >
                     <Package className="h-4 w-4" />
                     Add New Package
+                  </Button>
+                  <Button 
+                    className="h-12 justify-start gap-3" 
+                    variant="default"
+                    onClick={() => navigate('/trainer/profile-setup?tab=management')}
+                  >
+                    <Settings className="h-4 w-4" />
+                    Manage Availability
                   </Button>
                 </div>
               </CardContent>
@@ -493,129 +501,6 @@ const TrainerDashboard = () => {
                 </CardContent>
               </Card>
             )}
-
-            {/* Availability Management Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Settings className="h-5 w-5" />
-                  Availability Management
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="availability-status" className="text-sm font-medium">
-                    Current Status
-                  </Label>
-                  <div className="flex items-center gap-2">
-                    {availabilityStatus === 'accepting' && (
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                        <span className="text-sm text-green-600 font-medium">Accepting New Clients</span>
-                      </div>
-                    )}
-                    {availabilityStatus === 'waitlist' && (
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
-                        <span className="text-sm text-yellow-600 font-medium">Waitlist Only</span>
-                      </div>
-                    )}
-                    {availabilityStatus === 'unavailable' && (
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                        <span className="text-sm text-red-600 font-medium">Not Available</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-3 gap-2">
-                  <Button
-                    variant={availabilityStatus === 'accepting' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => handleStatusChange('accepting')}
-                    className="flex items-center gap-2"
-                  >
-                    <CheckCircle className="w-3 h-3" />
-                    Accepting
-                  </Button>
-                  <Button
-                    variant={availabilityStatus === 'waitlist' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => handleStatusChange('waitlist')}
-                    className="flex items-center gap-2"
-                  >
-                    <Clock className="w-3 h-3" />
-                    Waitlist
-                  </Button>
-                  <Button
-                    variant={availabilityStatus === 'unavailable' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => handleStatusChange('unavailable')}
-                    className="flex items-center gap-2"
-                  >
-                    <AlertCircle className="w-3 h-3" />
-                    Unavailable
-                  </Button>
-                </div>
-                
-                {availabilityStatus === 'waitlist' && (
-                  <div className="space-y-2 p-3 bg-muted/30 rounded-lg border">
-                    <Label className="text-sm font-medium">Next Available Date</Label>
-                    <div className="flex items-center gap-2">
-                      <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-[240px] justify-start text-left font-normal",
-                              !nextAvailableDate && "text-muted-foreground"
-                            )}
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {nextAvailableDate ? format(nextAvailableDate, "PPP") : "Pick a date"}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={nextAvailableDate}
-                            onSelect={handleNextAvailableDateChange}
-                            disabled={(date) => date < new Date()}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      {nextAvailableDate && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleNextAvailableDateChange(undefined)}
-                        >
-                          Clear
-                        </Button>
-                      )}
-                    </div>
-                     {nextAvailableDate && (
-                       <p className="text-xs text-muted-foreground">
-                         Clients will be notified when you become available again.
-                       </p>
-                     )}
-                  </div>
-                )}
-                
-                <div className="pt-4 border-t">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => navigate('/trainer/profile-setup?tab=management')}
-                    className="w-full"
-                  >
-                    <Settings className="w-4 h-4 mr-2" />
-                    Advanced Settings
-                  </Button>
-               </div>
-              </CardContent>
-            </Card>
 
         {/* Shortlisted Clients - Show only on dashboard view */}
         {activeView === 'dashboard' && shortlistedClients && shortlistedClients.length > 0 && (
