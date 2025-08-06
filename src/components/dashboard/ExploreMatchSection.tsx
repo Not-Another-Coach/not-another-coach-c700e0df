@@ -213,7 +213,26 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
       matchDetails: []
     }));
 
-    return [...savedFromMatched, ...missingTrainerPlaceholders];
+    const allSavedTrainers = [...savedFromMatched, ...missingTrainerPlaceholders];
+    
+    // Deduplicate by trainer ID to prevent duplicate keys and checkbox conflicts
+    const uniqueTrainers = allSavedTrainers.reduce((acc, current) => {
+      const existingIndex = acc.findIndex(item => item.trainer.id === current.trainer.id);
+      if (existingIndex === -1) {
+        acc.push(current);
+      } else {
+        console.warn(`Duplicate trainer found: ${current.trainer.id} - ${current.trainer.name}. Keeping the better match.`);
+        // Keep the one with higher score or more data
+        if (current.score > acc[existingIndex].score || current.matchDetails.length > 0) {
+          acc[existingIndex] = current;
+        }
+      }
+      return acc;
+    }, [] as typeof allSavedTrainers);
+
+    console.log('Deduplicated saved trainers:', uniqueTrainers.map(t => ({ id: t.trainer.id, name: t.trainer.name })));
+    
+    return uniqueTrainers;
   }, [matchedTrainers, savedTrainerIds, isShortlisted]);
 
   // Get shortlisted trainers
@@ -369,13 +388,19 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
   const [shortlistedComparison, setShortlistedComparison] = useState<string[]>([]);
 
   const handleSavedComparisonToggle = (trainerId: string) => {
-    setSavedComparison(prev => 
-      prev.includes(trainerId) 
+    console.log('handleSavedComparisonToggle called for trainer:', trainerId);
+    console.log('Current savedComparison state:', savedComparison);
+    
+    setSavedComparison(prev => {
+      const newState = prev.includes(trainerId) 
         ? prev.filter(id => id !== trainerId)
         : prev.length < 4 
           ? [...prev, trainerId] 
-          : prev
-    );
+          : prev;
+      
+      console.log('New savedComparison state:', newState);
+      return newState;
+    });
   };
 
   const handleShortlistedComparisonToggle = (trainerId: string) => {
@@ -694,21 +719,24 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
           </div>
           {savedTrainers.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {savedTrainers.map((match) => (
-                <TrainerCard
-                  key={`saved-${match.trainer.id}`} // More unique key
-                  trainer={match.trainer}
-                  onViewProfile={handleViewProfile}
-                  matchScore={match.score}
-                  matchReasons={match.matchReasons}
-                  matchDetails={match.matchDetails}
-                  cardState={isShortlisted(match.trainer.id) ? "shortlisted" : "saved"}
-                  showComparisonCheckbox={true}
-                  comparisonChecked={savedComparison.includes(match.trainer.id)}
-                  onComparisonToggle={handleSavedComparisonToggle}
-                  comparisonDisabled={!savedComparison.includes(match.trainer.id) && savedComparison.length >= 4}
-                />
-              ))}
+              {savedTrainers.map((match, index) => {
+                console.log(`Rendering saved trainer ${index}:`, match.trainer.id, match.trainer.name);
+                return (
+                  <TrainerCard
+                    key={`saved-${match.trainer.id}-${index}`} // Even more unique key
+                    trainer={match.trainer}
+                    onViewProfile={handleViewProfile}
+                    matchScore={match.score}
+                    matchReasons={match.matchReasons}
+                    matchDetails={match.matchDetails}
+                    cardState={isShortlisted(match.trainer.id) ? "shortlisted" : "saved"}
+                    showComparisonCheckbox={true}
+                    comparisonChecked={savedComparison.includes(match.trainer.id)}
+                    onComparisonToggle={handleSavedComparisonToggle}
+                    comparisonDisabled={!savedComparison.includes(match.trainer.id) && savedComparison.length >= 4}
+                  />
+                );
+              })}
             </div>
           ) : (
             <Card>

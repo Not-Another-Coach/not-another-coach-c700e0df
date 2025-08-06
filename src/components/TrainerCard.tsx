@@ -114,7 +114,8 @@ export const TrainerCard = ({
       : await saveTrainer(trainer.id);
   };
 
-  const handleComparisonClick = () => {
+  const handleComparisonClick = (checked: boolean) => {
+    console.log(`Comparison toggle for trainer ${trainer.id}:`, checked);
     if (onComparisonToggle) {
       onComparisonToggle(trainer.id);
     }
