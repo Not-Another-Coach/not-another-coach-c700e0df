@@ -309,6 +309,8 @@ export default function MyTrainers() {
         );
 
       case 'shortlisted':
+        const offersDiscoveryCall = trainerData.trainer.offers_discovery_call;
+        
         return (
           <div className="space-y-2">
             <div className="grid grid-cols-2 gap-2">
@@ -322,8 +324,11 @@ export default function MyTrainers() {
               </Button>
               <Button 
                 size="sm" 
-                variant="default"
-                onClick={() => handleBookDiscoveryCall(trainer.id)}
+                variant={offersDiscoveryCall ? "default" : "outline"}
+                onClick={() => offersDiscoveryCall ? handleBookDiscoveryCall(trainer.id) : null}
+                disabled={!offersDiscoveryCall}
+                className={!offersDiscoveryCall ? "opacity-50 cursor-not-allowed" : ""}
+                title={!offersDiscoveryCall ? "This trainer doesn't offer discovery calls" : "Book a discovery call"}
               >
                 <Calendar className="h-3 w-3 mr-1" />
                 Book Call
