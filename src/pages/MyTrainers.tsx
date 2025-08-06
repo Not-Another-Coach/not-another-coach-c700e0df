@@ -27,9 +27,12 @@ import {
   Users,
   X,
   BarChart3,
-  Clock
+  Clock,
+  Edit,
+  UserCheck
 } from "lucide-react";
 import { DiscoveryCallBookingModal } from "@/components/discovery-call/DiscoveryCallBookingModal";
+import { ClientRescheduleModal } from "@/components/dashboard/ClientRescheduleModal";
 import { toast } from "sonner";
 
 export default function MyTrainers() {
@@ -51,7 +54,7 @@ export default function MyTrainers() {
   } = useShortlistedTrainers();
   const { createConversation } = useConversations();
   const { getEngagementStage, getLikedTrainers, getOnlyShortlistedTrainers } = useTrainerEngagement();
-  const { hasActiveDiscoveryCall } = useDiscoveryCallData();
+  const { hasActiveDiscoveryCall, getDiscoveryCallForTrainer } = useDiscoveryCallData();
   const { getCoachAvailability, checkClientWaitlistStatus, joinWaitlist } = useWaitlist();
 
   // State for filtering and UI
@@ -291,6 +294,8 @@ export default function MyTrainers() {
   };
 
   const [selectedTrainerForCall, setSelectedTrainerForCall] = useState<string | null>(null);
+  const [selectedCallForReschedule, setSelectedCallForReschedule] = useState<any>(null);
+  const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
 
   const handleBookDiscoveryCall = async (trainerId: string) => {
     console.log('🔥 Book discovery call clicked:', trainerId);
@@ -334,6 +339,20 @@ export default function MyTrainers() {
       console.error('Error joining waitlist:', error);
       toast.error('Failed to join waitlist');
     }
+  };
+
+  const handleRescheduleCall = (trainerId: string) => {
+    console.log('🔥 Reschedule call clicked:', trainerId);
+    const discoveryCall = getDiscoveryCallForTrainer(trainerId);
+    if (discoveryCall) {
+      setSelectedCallForReschedule(discoveryCall);
+      setIsRescheduleModalOpen(true);
+    }
+  };
+
+  const handleChooseCoach = (trainerId: string) => {
+    console.log('🔥 Choose coach clicked:', trainerId);
+    toast.info('Choose coach feature coming soon!');
   };
 
   // Render CTAs based on trainer status
@@ -434,6 +453,10 @@ export default function MyTrainers() {
         );
 
       case 'discovery':
+        const discoveryCall = getDiscoveryCallForTrainer(trainer.id);
+        const callDate = discoveryCall ? new Date(discoveryCall.scheduled_for) : null;
+        const isCallInPast = callDate ? callDate < new Date() : false;
+        
         return (
           <div className="space-y-2">
             <div className="grid grid-cols-2 gap-2">
@@ -445,23 +468,60 @@ export default function MyTrainers() {
                 <MessageCircle className="h-3 w-3 mr-1" />
                 Chat
               </Button>
-              <Button 
-                size="sm" 
-                variant="default"
+              
+              {/* Show reschedule button for scheduled calls, or choose coach for past calls */}
+              {discoveryCall && !isCallInPast ? (
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => handleRescheduleCall(trainer.id)}
+                >
+                  <Edit className="h-3 w-3 mr-1" />
+                  Reschedule
+                </Button>
+              ) : isCallInPast ? (
+                <Button 
+                  size="sm" 
+                  variant="default"
+                  onClick={() => handleChooseCoach(trainer.id)}
+                >
+                  <UserCheck className="h-3 w-3 mr-1" />
+                  Choose Coach
+                </Button>
+              ) : (
+                <Button 
+                  size="sm" 
+                  variant="default"
+                  onClick={() => navigate(`/trainer/${trainer.id}`)}
+                >
+                  <Phone className="h-3 w-3 mr-1" />
+                  View Details
+                </Button>
+              )}
+            </div>
+            
+            {/* Bottom button changes based on call timing */}
+            {isCallInPast ? (
+              <Button
                 onClick={() => navigate(`/trainer/${trainer.id}`)}
+                className="w-full"
+                size="sm"
+                variant="outline"
               >
                 <Phone className="h-3 w-3 mr-1" />
                 View Details
               </Button>
-            </div>
-            <Button
-              onClick={() => toast.info('Choose coach feature coming soon!')}
-              className="w-full"
-              size="sm"
-              variant="default"
-            >
-              Choose as Coach
-            </Button>
+            ) : (
+              <Button
+                onClick={() => handleChooseCoach(trainer.id)}
+                className="w-full"
+                size="sm"
+                variant="default"
+              >
+                <UserCheck className="h-3 w-3 mr-1" />
+                Choose as Coach
+              </Button>
+            )}
           </div>
         );
 
@@ -585,6 +645,28 @@ export default function MyTrainers() {
           }}
           onCallBooked={() => {
             // Refresh engagement data
+            window.location.reload();
+          }}
+        />
+      )}
+
+      {/* Client Reschedule Modal */}
+      {selectedCallForReschedule && (
+        <ClientRescheduleModal
+          isOpen={isRescheduleModalOpen}
+          onClose={() => {
+            setIsRescheduleModalOpen(false);
+            setSelectedCallForReschedule(null);
+          }}
+          discoveryCall={selectedCallForReschedule}
+          trainer={{
+            id: selectedCallForReschedule.trainer_id,
+            name: allTrainers.find(t => t.id === selectedCallForReschedule.trainer_id)?.name || 'Unknown',
+            firstName: allTrainers.find(t => t.id === selectedCallForReschedule.trainer_id)?.name?.split(' ')[0],
+            lastName: allTrainers.find(t => t.id === selectedCallForReschedule.trainer_id)?.name?.split(' ')[1]
+          }}
+          onCallUpdated={() => {
+            // Refresh page to update discovery call data
             window.location.reload();
           }}
         />
