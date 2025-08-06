@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { DiscoveryCallBookingModal } from "@/components/discovery-call/DiscoveryCallBookingModal";
 import { ClientRescheduleModal } from "@/components/dashboard/ClientRescheduleModal";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export default function MyTrainers() {
@@ -77,50 +78,71 @@ export default function MyTrainers() {
     };
   }, []);
 
-  // Fetch availability data for shortlisted trainers (simplified - no API calls for waitlist status)
+  // Batch fetch availability data for all shortlisted trainers (much more efficient)
   useEffect(() => {
-    const fetchAvailabilityData = async () => {
+    const fetchAllAvailabilityData = async () => {
       const shortlistedTrainers = getOnlyShortlistedTrainers();
-      console.log('🔧 Fetching availability for shortlisted trainers:', shortlistedTrainers.length);
+      const trainerIds = shortlistedTrainers.map(engagement => engagement.trainerId);
+      
+      console.log('🔧 Batch fetching availability for trainers:', trainerIds.length);
       
       // Don't block UI if no shortlisted trainers
-      if (shortlistedTrainers.length === 0) {
+      if (trainerIds.length === 0) {
         console.log('📋 No shortlisted trainers to fetch availability for');
         return;
       }
       
-      for (const engagement of shortlistedTrainers) {
-        const trainerId = engagement.trainerId;
+      try {
+        // Batch fetch all availability settings in one query
+        console.log('🔧 Making single batch query for all trainers');
+        const { data: availabilityData, error } = await supabase
+          .from('coach_availability_settings')
+          .select('*')
+          .in('coach_id', trainerIds);
         
-        try {
-          console.log(`🔧 Fetching availability for trainer: ${trainerId}`);
-          const availability = await getCoachAvailability(trainerId);
-          console.log(`✅ Got availability for ${trainerId}:`, availability);
-          setTrainerAvailability(prev => ({
-            ...prev,
-            [trainerId]: availability
-          }));
-        } catch (error) {
-          console.warn(`⚠️ Failed to get availability for trainer ${trainerId}:`, error);
-          // Set to null but don't block the UI
-          setTrainerAvailability(prev => ({
-            ...prev,
-            [trainerId]: null
-          }));
+        if (error) {
+          console.warn('⚠️ Failed to batch fetch availability:', error);
+          return;
         }
+        
+        console.log('✅ Successfully fetched availability data:', availabilityData);
+        
+        // Convert array to object for easy lookup
+        const availabilityMap: {[key: string]: any} = {};
+        availabilityData?.forEach(item => {
+          availabilityMap[item.coach_id] = item;
+        });
+        
+        // Set availability for all trainers (null for ones not found)
+        const newAvailability: {[key: string]: any} = {};
+        trainerIds.forEach(trainerId => {
+          newAvailability[trainerId] = availabilityMap[trainerId] || null;
+        });
+        
+        setTrainerAvailability(newAvailability);
+        console.log('🎯 Set availability for trainers:', Object.keys(newAvailability));
+        
+      } catch (error) {
+        console.warn('⚠️ Batch availability fetch failed:', error);
+        // Set all to null but don't block the UI
+        const fallbackAvailability: {[key: string]: any} = {};
+        trainerIds.forEach(trainerId => {
+          fallbackAvailability[trainerId] = null;
+        });
+        setTrainerAvailability(fallbackAvailability);
       }
     };
     
     // Add timeout to prevent hanging
     const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Availability fetch timeout')), 10000)
+      setTimeout(() => reject(new Error('Batch availability fetch timeout')), 5000)
     );
     
-    Promise.race([fetchAvailabilityData(), timeoutPromise])
+    Promise.race([fetchAllAvailabilityData(), timeoutPromise])
       .catch(error => {
         console.warn('⚠️ Availability fetch timed out or failed:', error);
       });
-  }, [getOnlyShortlistedTrainers, getCoachAvailability]);
+  }, [getOnlyShortlistedTrainers]);
 
   // Simplified trainer aggregation based on client's engagement status
   const trainersWithStatus = useMemo(() => {
