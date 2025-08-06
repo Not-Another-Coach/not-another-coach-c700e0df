@@ -29,6 +29,13 @@ interface Prospect {
     duration_minutes: number;
     status: string;
   };
+  selection_request?: {
+    client_id: string;
+    package_name: string;
+    package_price: number;
+    status: string;
+    created_at: string;
+  };
 }
 
 interface ProspectsSectionProps {
@@ -78,7 +85,7 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
         `)
         .eq('trainer_id', profile.id)
         .in('stage', ['shortlisted', 'discovery_call_booked', 'discovery_in_progress', 'matched', 'discovery_completed', 'declined', 'unmatched'])
-        .order('created_at', { ascending: false });
+        .order('updated_at', { ascending: false });
 
       console.log('Engagement data:', engagementData);
       console.log('Engagement error:', engagementError);
@@ -101,11 +108,11 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
 
       console.log('Found engaged clients:', engagementData.length);
 
-      // Get client profiles and discovery calls
+      // Get client profiles, discovery calls, and coach selection requests
       const clientIds = engagementData.map(item => item.client_id);
       console.log('Client IDs to fetch:', clientIds);
       
-      const [profilesResult, discoveryCallsResult] = await Promise.all([
+      const [profilesResult, discoveryCallsResult, selectionRequestsResult] = await Promise.all([
         supabase
           .from('profiles')
           .select('id, first_name, last_name, primary_goals, training_location_preference')
@@ -115,14 +122,21 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
           .select('client_id, scheduled_for, duration_minutes, status')
           .eq('trainer_id', profile.id)
           .in('client_id', clientIds)
-          .in('status', ['scheduled', 'rescheduled'])
+          .in('status', ['scheduled', 'rescheduled']),
+        supabase
+          .from('coach_selection_requests')
+          .select('client_id, package_name, package_price, status, created_at')
+          .eq('trainer_id', profile.id)
+          .in('client_id', clientIds)
       ]);
 
       const { data: profilesData, error: profilesError } = profilesResult;
       const { data: discoveryCallsData, error: discoveryCallsError } = discoveryCallsResult;
+      const { data: selectionRequestsData, error: selectionRequestsError } = selectionRequestsResult;
 
       console.log('Profiles data:', profilesData);
       console.log('Discovery calls data:', discoveryCallsData);
+      console.log('Selection requests data:', selectionRequestsData);
 
       if (profilesError) {
         console.error('Error fetching profiles:', profilesError);
@@ -130,6 +144,10 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
 
       if (discoveryCallsError) {
         console.error('Error fetching discovery calls data:', discoveryCallsError);
+      }
+
+      if (selectionRequestsError) {
+        console.error('Error fetching selection requests data:', selectionRequestsError);
       }
 
       // Merge the data
@@ -142,7 +160,8 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
         created_at: engagement.created_at,
         notes: engagement.notes,
         client_profile: profilesData?.find(profile => profile.id === engagement.client_id) || null,
-        discovery_call: discoveryCallsData?.find(call => call.client_id === engagement.client_id) || null
+        discovery_call: discoveryCallsData?.find(call => call.client_id === engagement.client_id) || null,
+        selection_request: selectionRequestsData?.find(req => req.client_id === engagement.client_id) || null
       })) as Prospect[];
 
       // Separate active and lost prospects
@@ -226,9 +245,14 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
                     <Badge variant={stageInfo.variant} className={stageInfo.color}>
                       {stageInfo.label}
                     </Badge>
-                    {prospect.stage === 'matched' && (
+                     {prospect.stage === 'matched' && (
                       <Badge variant="outline" className="bg-blue-50 text-blue-700">
-                        Chat Active
+                        2-Way Chat Active
+                      </Badge>
+                    )}
+                    {prospect.selection_request && (
+                      <Badge variant="outline" className="bg-green-50 text-green-700">
+                        Coach Chosen - {prospect.selection_request.package_name}
                       </Badge>
                     )}
                   </div>
@@ -258,7 +282,17 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
                       <strong>Location Preference:</strong> {prospect.client_profile.training_location_preference}
                     </p>
                   )}
-                  {prospect.notes && (
+                   {prospect.selection_request && (
+                    <div className="mt-2 p-2 bg-green-50 rounded border border-green-200">
+                      <p className="text-sm font-medium text-green-900">
+                        Package Selected: {prospect.selection_request.package_name} - ${prospect.selection_request.package_price}
+                      </p>
+                      <p className="text-xs text-green-700">
+                        Status: {prospect.selection_request.status} • {format(new Date(prospect.selection_request.created_at), 'MMM d, yyyy')}
+                      </p>
+                    </div>
+                  )}
+                   {prospect.notes && (
                     <p className="text-sm text-muted-foreground mt-2">
                       <strong>Notes:</strong> {prospect.notes}
                     </p>

@@ -216,10 +216,10 @@ export const ChooseCoachModal = ({
               <div className="bg-blue-50 p-4 rounded-lg">
                 <h4 className="font-medium text-blue-900 mb-2">What happens next?</h4>
                 <ol className="text-sm text-blue-800 space-y-1">
-                  <li>1. We'll send your request to {trainerName}</li>
-                  <li>2. They'll review and confirm the package</li>
-                  <li>3. Once confirmed, you can proceed to payment</li>
-                  <li>4. Your training journey begins!</li>
+                  <li>1. Your request will be sent to {trainerName}</li>
+                  <li>2. They'll review and approve your selected package</li>
+                  <li>3. Once approved, payment form will be enabled</li>
+                  <li>4. After payment, your onboarding begins!</li>
                 </ol>
               </div>
 

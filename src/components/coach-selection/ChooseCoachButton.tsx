@@ -3,9 +3,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Heart, Clock, CheckCircle } from 'lucide-react';
 import { ChooseCoachModal } from './ChooseCoachModal';
+import { PaymentForm } from '@/components/payment/PaymentForm';
 import { useCoachSelection } from '@/hooks/useCoachSelection';
 import { useProfile } from '@/hooks/useProfile';
-import { EngagementStage } from '@/hooks/useEngagementStage';
+import { useEngagementStage, EngagementStage } from '@/hooks/useEngagementStage';
 
 interface ChooseCoachButtonProps {
   trainer: {
@@ -29,12 +30,15 @@ export const ChooseCoachButton = ({
 }: ChooseCoachButtonProps) => {
   const { profile } = useProfile();
   const { getSelectionRequest } = useCoachSelection();
+  const { updateEngagementStage } = useEngagementStage(trainer.id);
   const [showModal, setShowModal] = useState(false);
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [selectionRequest, setSelectionRequest] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
   const isClient = profile?.user_type === 'client';
-  const canChooseCoach = isClient && (stage === 'liked' || stage === 'matched' || stage === 'discovery_completed');
+  // Show button when there's 2-way chat (matched) or discovery call booked/completed, but not if on waitlist
+  const canChooseCoach = isClient && (stage === 'matched' || stage === 'discovery_call_booked' || stage === 'discovery_completed');
 
   useEffect(() => {
     const fetchSelectionRequest = async () => {
@@ -70,14 +74,14 @@ export const ChooseCoachButton = ({
     const statusConfig = {
       pending: {
         icon: Clock,
-        label: 'Request Pending',
-        description: 'Waiting for coach confirmation',
+        label: 'Waiting for PT Approval',
+        description: 'Coach is reviewing your request',
         color: 'bg-yellow-500'
       },
       accepted: {
         icon: CheckCircle,
-        label: 'Request Accepted',
-        description: 'Ready to proceed to payment',
+        label: 'Coach Approved',
+        description: 'Client now awaiting payment',
         color: 'bg-green-500'
       },
       declined: {
@@ -107,7 +111,10 @@ export const ChooseCoachButton = ({
           <p className="text-sm text-muted-foreground">{config.description}</p>
           
           {selectionRequest.status === 'accepted' && (
-            <Button className="w-full">
+            <Button 
+              className="w-full"
+              onClick={() => setShowPaymentForm(true)}
+            >
               Proceed to Payment
             </Button>
           )}
@@ -142,6 +149,19 @@ export const ChooseCoachButton = ({
           trainer={trainer}
           onSuccess={handleSuccess}
         />
+        
+        <PaymentForm
+          open={showPaymentForm}
+          onOpenChange={setShowPaymentForm}
+          packageName={selectionRequest?.package_name || ''}
+          packagePrice={selectionRequest?.package_price || 0}
+          packageDuration={selectionRequest?.package_duration || ''}
+          trainerName={trainer.name || `${trainer.firstName || ''} ${trainer.lastName || ''}`.trim()}
+          onPaymentSuccess={async () => {
+            await updateEngagementStage('active_client');
+            handleSuccess();
+          }}
+        />
       </div>
     );
   }
@@ -163,6 +183,19 @@ export const ChooseCoachButton = ({
         onOpenChange={setShowModal}
         trainer={trainer}
         onSuccess={handleSuccess}
+      />
+      
+      <PaymentForm
+        open={showPaymentForm}
+        onOpenChange={setShowPaymentForm}
+        packageName={selectionRequest?.package_name || ''}
+        packagePrice={selectionRequest?.package_price || 0}
+        packageDuration={selectionRequest?.package_duration || ''}
+        trainerName={trainer.name || `${trainer.firstName || ''} ${trainer.lastName || ''}`.trim()}
+        onPaymentSuccess={async () => {
+          await updateEngagementStage('active_client');
+          handleSuccess();
+        }}
       />
     </div>
   );

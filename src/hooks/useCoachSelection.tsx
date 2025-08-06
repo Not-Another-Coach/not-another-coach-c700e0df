@@ -131,9 +131,9 @@ export function useCoachSelection() {
       }
 
       const statusMessages = {
-        accepted: 'Request accepted!',
-        declined: 'Request declined',
-        alternative_suggested: 'Alternative package suggested'
+        accepted: 'Request accepted! Client now awaiting payment.',
+        declined: 'Request declined and client notified',
+        alternative_suggested: 'Alternative package suggested to client'
       };
 
       toast.success(statusMessages[status]);
