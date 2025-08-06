@@ -7,6 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { SessionNotification } from "@/components/SessionNotification";
 import Home from "./pages/Home";
 import ClientDashboard from "./pages/ClientDashboard";
+import MyTrainers from "./pages/MyTrainers";
 import Auth from "./pages/Auth";
 import ClientSurvey from "./pages/ClientSurvey";
 import ClientJourney from "./pages/ClientJourney";
@@ -32,6 +33,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/client/dashboard" element={<ClientDashboard />} />
+            <Route path="/my-trainers" element={<MyTrainers />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/client-survey" element={<ClientSurvey />} />
             <Route path="/client/journey" element={<ClientJourney />} />

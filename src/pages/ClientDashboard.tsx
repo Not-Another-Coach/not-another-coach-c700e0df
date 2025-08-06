@@ -196,8 +196,17 @@ export default function ClientDashboard() {
               </TabsTrigger>
             </TabsList>
 
-            {/* Tab-specific actions - Removed Swipe Mode button since we now have Swipe tab */}
+            {/* Quick Actions */}
             <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate('/my-trainers')}
+                className="flex items-center gap-2"
+              >
+                <Users className="h-4 w-4" />
+                My Trainers
+              </Button>
             </div>
           </div>
 

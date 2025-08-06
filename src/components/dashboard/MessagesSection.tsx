@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,7 +19,8 @@ import {
   CheckCircle,
   AlertCircle,
   Plus,
-  Search
+  Search,
+  Users
 } from "lucide-react";
 import { useConversations } from "@/hooks/useConversations";
 import { useShortlistedTrainers } from "@/hooks/useShortlistedTrainers";
@@ -38,6 +40,7 @@ const messagePrompts = [
 ];
 
 export function MessagesSection({ profile }: MessagesSectionProps) {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { conversations, loading, sendMessage, markAsRead, getUnreadCount } = useConversations();
   const { shortlistedTrainers, bookDiscoveryCall } = useShortlistedTrainers();
@@ -178,9 +181,13 @@ export function MessagesSection({ profile }: MessagesSectionProps) {
                 <div className="p-8 text-center">
                   <MessageCircle className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                   <h3 className="text-lg font-semibold mb-2">No conversations yet</h3>
-                  <p className="text-muted-foreground text-sm">
+                  <p className="text-muted-foreground text-sm mb-4">
                     Start connecting with trainers to begin conversations
                   </p>
+                  <Button onClick={() => navigate('/my-trainers')}>
+                    <Users className="h-4 w-4 mr-2" />
+                    View My Trainers
+                  </Button>
                 </div>
               )}
             </CardContent>
