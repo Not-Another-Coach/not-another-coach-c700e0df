@@ -20,13 +20,17 @@ export const FloatingMessageButton = () => {
   // Listen for global message events to open popup with specific trainer
   React.useEffect(() => {
     const handleMessageEvent = (event: CustomEvent) => {
+      console.log('🔥 FloatingMessageButton received openMessagePopup event:', event.detail);
       setPreSelectedTrainerId(event.detail.trainerId);
       setIsPopupOpen(true);
+      console.log('🔥 FloatingMessageButton setting popup open to true');
     };
 
+    console.log('🔥 FloatingMessageButton adding event listener for openMessagePopup');
     window.addEventListener('openMessagePopup', handleMessageEvent as EventListener);
     
     return () => {
+      console.log('🔥 FloatingMessageButton removing event listener');
       window.removeEventListener('openMessagePopup', handleMessageEvent as EventListener);
     };
   }, []);
@@ -35,7 +39,10 @@ export const FloatingMessageButton = () => {
     <>
       <Button
         data-messaging-button
-        onClick={() => setIsPopupOpen(true)}
+        onClick={() => {
+          console.log('🔥 FloatingMessageButton clicked directly');
+          setIsPopupOpen(true);
+        }}
         className="fixed bottom-6 right-6 z-40 rounded-full w-14 h-14 shadow-lg hover:shadow-xl transition-all"
         size="lg"
       >
@@ -50,9 +57,10 @@ export const FloatingMessageButton = () => {
         )}
       </Button>
 
-      <MessagingPopup 
+      <MessagingPopup
         isOpen={isPopupOpen}
         onClose={() => {
+          console.log('🔥 MessagingPopup closing');
           setIsPopupOpen(false);
           setPreSelectedTrainerId(null);
         }}

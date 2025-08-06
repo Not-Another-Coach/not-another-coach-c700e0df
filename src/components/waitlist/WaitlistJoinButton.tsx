@@ -29,18 +29,23 @@ export function WaitlistJoinButton({
   const { toast } = useToast();
 
   const handleJoinWaitlist = async () => {
+    console.log('🔥 WaitlistJoinButton clicked for coach:', coachId);
     setIsJoining(true);
     
     try {
+      console.log('🔥 Calling joinWaitlist with note:', coachNote);
       const result = await joinWaitlist(coachId, coachNote);
+      console.log('🔥 WaitlistJoinButton result:', result);
       
       if (result.error) {
+        console.error('🔥 WaitlistJoinButton error:', result.error);
         toast({
           title: "Error",
-          description: "Failed to join waitlist. Please try again.",
+          description: typeof result.error === 'string' ? result.error : "Failed to join waitlist. Please try again.",
           variant: "destructive"
         });
       } else {
+        console.log('🔥 WaitlistJoinButton success');
         toast({
           title: "Joined Waitlist!",
           description: `You've been added to ${coachName}'s waitlist. They'll reach out closer to your potential start date.`,
@@ -49,7 +54,7 @@ export function WaitlistJoinButton({
         setCoachNote('');
       }
     } catch (error) {
-      console.error('Error joining waitlist:', error);
+      console.error('🔥 WaitlistJoinButton catch error:', error);
       toast({
         title: "Error",
         description: "Something went wrong. Please try again.",
@@ -70,9 +75,14 @@ export function WaitlistJoinButton({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      console.log('🔥 WaitlistJoinButton dialog open state changing to:', open);
+      setIsOpen(open);
+    }}>
       <DialogTrigger asChild>
-        <Button variant="outline" className={className}>
+        <Button variant="outline" className={className} onClick={() => {
+          console.log('🔥 WaitlistJoinButton trigger clicked');
+        }}>
           <Users className="w-4 h-4 mr-2" />
           Join Waitlist
         </Button>
