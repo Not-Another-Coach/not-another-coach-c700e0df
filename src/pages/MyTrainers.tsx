@@ -96,33 +96,51 @@ export default function MyTrainers() {
 
     // Get only shortlisted trainers (stage: 'shortlisted') - not including discovery stage
     const onlyShortlistedTrainers = getOnlyShortlistedTrainers();
-    onlyShortlistedTrainers.forEach(engagement => {
-      const trainer = allTrainers.find(t => t.id === engagement.trainerId);
-      if (trainer) {
-        // Check if already exists in the list (upgrade from saved to shortlisted)
-        const existingIndex = allTrainerData.findIndex(t => t.trainer.id === engagement.trainerId);
-        
-        if (existingIndex >= 0) {
-          // Upgrade existing trainer to shortlisted status
-          allTrainerData[existingIndex] = {
-            trainer,
-            status: 'shortlisted',
-            engagement,
-            statusLabel: 'Shortlisted',
-            statusColor: 'bg-yellow-100 text-yellow-800'
-          };
-        } else {
-          // Add as new shortlisted trainer
-          allTrainerData.push({
-            trainer,
-            status: 'shortlisted',
-            engagement,
-            statusLabel: 'Shortlisted',
-            statusColor: 'bg-yellow-100 text-yellow-800'
-          });
-        }
+    for (const engagement of onlyShortlistedTrainers) {
+      let trainer = allTrainers.find(t => t.id === engagement.trainerId);
+      
+      // If trainer not found in allTrainers, create a placeholder with basic info
+      if (!trainer) {
+        trainer = {
+          id: engagement.trainerId,
+          name: 'Loading trainer...',
+          specialties: [],
+          rating: 0,
+          reviews: 0,
+          experience: '',
+          location: 'Loading...',
+          hourlyRate: 0,
+          image: '',
+          certifications: [],
+          description: 'Loading trainer information...',
+          availability: 'Unknown',
+          trainingType: ['Loading...']
+        };
       }
-    });
+      
+      // Check if already exists in the list (upgrade from saved to shortlisted)
+      const existingIndex = allTrainerData.findIndex(t => t.trainer.id === engagement.trainerId);
+      
+      if (existingIndex >= 0) {
+        // Upgrade existing trainer to shortlisted status
+        allTrainerData[existingIndex] = {
+          trainer,
+          status: 'shortlisted',
+          engagement,
+          statusLabel: 'Shortlisted',
+          statusColor: 'bg-yellow-100 text-yellow-800'
+        };
+      } else {
+        // Add as new shortlisted trainer
+        allTrainerData.push({
+          trainer,
+          status: 'shortlisted',
+          engagement,
+          statusLabel: 'Shortlisted',
+          statusColor: 'bg-yellow-100 text-yellow-800'
+        });
+      }
+    }
 
     // Get trainers with active discovery calls (scheduled/rescheduled, not cancelled)
     // This includes trainers from engagement stage OR with active discovery calls
