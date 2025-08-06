@@ -130,17 +130,15 @@ export const TrainerCard = ({
   // Get match quality badge based on match score
   const getMatchQualityBadge = () => {
     if (matchScore >= 85) {
-      return (
-        <Badge className="absolute top-12 left-2 bg-green-500 text-white z-10">
-          🎯 Great Match
-        </Badge>
-      );
+      return {
+        text: "🎯 Great Match",
+        className: "bg-green-500 text-white"
+      };
     } else if (matchScore >= 70) {
-      return (
-        <Badge className="absolute top-12 left-2 bg-blue-500 text-white z-10">
-          ✨ Good Match
-        </Badge>
-      );
+      return {
+        text: "✨ Good Match", 
+        className: "bg-blue-500 text-white"
+      };
     }
     return null;
   };
@@ -149,31 +147,42 @@ export const TrainerCard = ({
   const getStateBadge = () => {
     switch (cardState) {
       case 'matched':
-        return (
-          <Badge className="absolute top-16 left-2 bg-green-500 text-white z-10">
-            💚 Mutual Match!
-          </Badge>
-        );
+        return {
+          text: "💚 Mutual Match!",
+          className: "bg-green-500 text-white"
+        };
       case 'shortlisted':
-        return (
-          <Badge className="absolute top-16 left-2 bg-yellow-500 text-white z-10">
-            ⭐ Shortlisted
-          </Badge>
-        );
+        return {
+          text: "⭐ Shortlisted",
+          className: "bg-yellow-500 text-white"
+        };
       case 'discovery':
-        return (
-          <Badge className="absolute top-16 left-2 bg-blue-500 text-white z-10">
-            🔍 Discovery
-          </Badge>
-        );
+        return {
+          text: "🔍 Discovery",
+          className: "bg-blue-500 text-white"
+        };
       default:
         return null;
     }
   };
 
+  // Get all active badges for consistent layout
+  const getActiveBadges = () => {
+    const badges = [];
+    const matchBadge = getMatchQualityBadge();
+    const stateBadge = getStateBadge();
+    
+    if (matchBadge) badges.push(matchBadge);
+    if (stateBadge) badges.push(stateBadge);
+    
+    return badges;
+  };
+
+  const activeBadges = getActiveBadges();
+
   return (
     <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-card to-muted/30 border-0 relative overflow-hidden">
-      <CardContent className="p-6 pt-20"> {/* Add top padding for three header lines */}
+      <CardContent className="p-6 pt-16"> {/* Reduced top padding since badges are now inline */}
         {/* Line 1: Interactive elements */}
         <div className="absolute top-2 left-2 right-2 flex justify-between z-20">
           {/* Left: Heart/Save or Remove button */}
@@ -215,11 +224,16 @@ export const TrainerCard = ({
           ) : null}
         </div>
 
-        {/* Line 2: Match quality badge */}
-        {getMatchQualityBadge()}
-        
-        {/* Line 3: State badge */}
-        {getStateBadge()}
+        {/* Line 2: Consistent badge layout - side by side, not overlapping */}
+        {activeBadges.length > 0 && (
+          <div className="absolute top-8 left-2 right-2 flex gap-2 flex-wrap z-10">
+            {activeBadges.map((badge, index) => (
+              <Badge key={index} className={`text-xs ${badge.className}`}>
+                {badge.text}
+              </Badge>
+            ))}
+          </div>
+        )}
         
         {/* Main content */}
         <div className="flex items-start gap-4 mb-4">
