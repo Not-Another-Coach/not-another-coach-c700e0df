@@ -127,24 +127,42 @@ export const TrainerCard = ({
     }
   };
 
-  // Get the appropriate badge based on card state
+  // Get match quality badge based on match score
+  const getMatchQualityBadge = () => {
+    if (matchScore >= 85) {
+      return (
+        <Badge className="absolute top-12 left-2 bg-green-500 text-white z-10">
+          🎯 Great Match
+        </Badge>
+      );
+    } else if (matchScore >= 70) {
+      return (
+        <Badge className="absolute top-12 left-2 bg-blue-500 text-white z-10">
+          ✨ Good Match
+        </Badge>
+      );
+    }
+    return null;
+  };
+
+  // Get the appropriate state badge based on card state
   const getStateBadge = () => {
     switch (cardState) {
       case 'matched':
         return (
-          <Badge className="absolute top-8 left-2 bg-green-500 text-white z-10">
-            Mutual Match!
+          <Badge className="absolute top-16 left-2 bg-green-500 text-white z-10">
+            💚 Mutual Match!
           </Badge>
         );
       case 'shortlisted':
         return (
-          <Badge className="absolute top-8 left-2 bg-yellow-500 text-white z-10">
+          <Badge className="absolute top-16 left-2 bg-yellow-500 text-white z-10">
             ⭐ Shortlisted
           </Badge>
         );
       case 'discovery':
         return (
-          <Badge className="absolute top-8 left-2 bg-blue-500 text-white z-10">
+          <Badge className="absolute top-16 left-2 bg-blue-500 text-white z-10">
             🔍 Discovery
           </Badge>
         );
@@ -155,7 +173,7 @@ export const TrainerCard = ({
 
   return (
     <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-card to-muted/30 border-0 relative overflow-hidden">
-      <CardContent className="p-6 pt-16"> {/* Add top padding for two header lines */}
+      <CardContent className="p-6 pt-20"> {/* Add top padding for three header lines */}
         {/* Line 1: Interactive elements */}
         <div className="absolute top-2 left-2 right-2 flex justify-between z-20">
           {/* Left: Heart/Save or Remove button */}
@@ -197,7 +215,10 @@ export const TrainerCard = ({
           ) : null}
         </div>
 
-        {/* Line 2: State badge */}
+        {/* Line 2: Match quality badge */}
+        {getMatchQualityBadge()}
+        
+        {/* Line 3: State badge */}
         {getStateBadge()}
         
         {/* Main content */}
