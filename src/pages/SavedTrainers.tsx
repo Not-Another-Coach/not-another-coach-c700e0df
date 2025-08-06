@@ -334,7 +334,8 @@ export default function SavedTrainers() {
                 />
 
                 {/* External CTAs - Add these below the card as they were before */}
-                <div className="mt-3 space-y-2">
+                <div className="mt-3 space-y-2 border border-dashed border-red-300 p-2">
+                  <div className="text-xs text-red-600">Debug: isShortlisted={String(isShortlisted(trainer.id))}, canShortlist={String(canShortlistMore)}</div>
                   {/* Show Add to Shortlist if not already shortlisted */}
                   {!isShortlisted(trainer.id) && (
                     <Button
