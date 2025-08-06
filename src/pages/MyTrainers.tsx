@@ -193,8 +193,8 @@ export default function MyTrainers() {
       }
     });
     
-    // Also check trainers from engagement data that might have discovery calls
-    trainersWithStatus.forEach(trainerData => {
+    // Also check trainers from already processed engagement data that might have discovery calls
+    allTrainerData.forEach(trainerData => {
       if (hasActiveDiscoveryCall(trainerData.trainer.id)) {
         trainersWithDiscoveryCalls.add(trainerData.trainer.id);
       }
