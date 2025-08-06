@@ -624,6 +624,10 @@ export default function MyTrainers() {
         const engagementStage = getEngagementStage(trainer.id);
         const isDiscoveryInProgress = engagementStage === 'discovery_in_progress';
         
+        // Check if trainer has waitlist enabled
+        const trainerAvailabilityForCTA = trainerAvailability[trainer.id];
+        const hasWaitlistEnabled = trainerAvailabilityForCTA?.availability_status === 'waitlist';
+        
         return (
           <div className="space-y-2">
             <div className="grid grid-cols-2 gap-2">
@@ -633,11 +637,21 @@ export default function MyTrainers() {
                 onClick={() => handleStartConversation(trainer.id)}
               >
                 <MessageCircle className="h-3 w-3 mr-1" />
-                Chat
+                Message
               </Button>
               
-              {/* Different actions based on whether it's a discovery call or discovery in progress */}
-              {isDiscoveryInProgress ? (
+              {/* Show waitlist button if trainer has waitlist and client not on it */}
+              {hasWaitlistEnabled ? (
+                <Button 
+                  size="sm" 
+                  variant="default"
+                  onClick={() => handleJoinWaitlist(trainer.id)}
+                  className="bg-orange-500 hover:bg-orange-600"
+                >
+                  <Clock className="h-3 w-3 mr-1" />
+                  Join Waitlist
+                </Button>
+              ) : isDiscoveryInProgress ? (
                 <Button 
                   size="sm" 
                   variant="default"
@@ -676,8 +690,8 @@ export default function MyTrainers() {
               )}
             </div>
             
-            {/* Bottom button changes based on discovery type */}
-            {isDiscoveryInProgress ? (
+            {/* Bottom button - only show Choose as Coach if no waitlist */}
+            {!hasWaitlistEnabled && (isDiscoveryInProgress ? (
               <Button
                 onClick={() => navigate(`/trainer/${trainer.id}`)}
                 className="w-full"
@@ -707,7 +721,7 @@ export default function MyTrainers() {
                 <UserCheck className="h-3 w-3 mr-1" />
                 Choose as Coach
               </Button>
-            )}
+            ))}
           </div>
         );
 

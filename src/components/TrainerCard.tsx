@@ -432,61 +432,6 @@ export const TrainerCard = ({
           </div>
         )}
 
-        {/* Action Buttons based on card state */}
-        {cardState !== 'default' && (
-          <div className="mb-4 space-y-2">
-            {/* Message button for discovery trainers */}
-            {cardState === 'discovery' && (
-              <Button
-                onClick={() => onStartConversation?.(trainer.id)}
-                className="w-full"
-                size="sm"
-                variant="outline"
-              >
-                <MessageCircle className="h-4 w-4 mr-2" />
-                Message
-              </Button>
-            )}
-            
-            {/* Shortlist actions */}
-            {cardState === 'shortlisted' && (
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  onClick={() => onStartConversation?.(trainer.id)}
-                  size="sm"
-                  variant="outline"
-                >
-                  <MessageCircle className="h-3 w-3 mr-1" />
-                  Message
-                </Button>
-                {onBookDiscoveryCall && trainer.offers_discovery_call && (
-                  <Button
-                    onClick={() => onBookDiscoveryCall(trainer.id)}
-                    size="sm"
-                    variant="default"
-                  >
-                    <Calendar className="h-3 w-3 mr-1" />
-                    Book Call
-                  </Button>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Waitlist Join Button - Show for any client not on waitlist regardless of card state */}
-        {isClient && coachAvailability?.availability_status === 'waitlist' && !clientWaitlistStatus && (
-          <div className="mb-4">
-            <WaitlistJoinButton
-              coachId={trainer.id}
-              coachName={displayName}
-              nextAvailableDate={coachAvailability?.next_available_date}
-              waitlistMessage={coachAvailability?.waitlist_message}
-              className="w-full"
-            />
-          </div>
-        )}
-
         {/* Certifications */}
         <div className="text-xs text-muted-foreground mb-4">
           <strong>Certified:</strong> {trainer.certifications.join(", ")}
