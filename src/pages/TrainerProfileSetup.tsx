@@ -85,7 +85,6 @@ const TrainerProfileSetup = () => {
     ways_of_working_completed: false,
     
     // Profile Management
-    client_status: "onboarding" as "onboarding" | "survey_completed" | "browsing" | "shortlisted" | "discovery_booked" | "decision_pending" | "coach_selected",
     terms_agreed: false,
   });
 
@@ -132,7 +131,6 @@ const TrainerProfileSetup = () => {
         training_types: profile.training_types || [],
         location: profile.location || "",
         hourly_rate: profile.hourly_rate,
-        client_status: profile.client_status || "onboarding",
         terms_agreed: profile.terms_agreed || false,
         // Initialize ways of working data from profile
         ways_of_working_onboarding: (profile as any).ways_of_working_onboarding || [],
@@ -328,7 +326,7 @@ const TrainerProfileSetup = () => {
         'first_name', 'last_name', 'bio', 'profile_photo_url', 'location',
         'specializations', 'qualifications', 'tagline', 'hourly_rate', 'class_rate',
         'training_types', 'terms_agreed', 'profile_setup_completed',
-        'client_status', 'user_type', 'is_verified', 'rating', 'total_ratings',
+        'user_type', 'is_verified', 'rating', 'total_ratings',
         'fitness_goals', 'quiz_completed', 'quiz_answers', 'quiz_completed_at',
         'verification_status', 'profile_published', 'before_after_photos',
         'availability_schedule', 'max_clients', 'package_options', 
