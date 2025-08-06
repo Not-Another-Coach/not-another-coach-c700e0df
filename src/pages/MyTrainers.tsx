@@ -40,6 +40,7 @@ export default function MyTrainers() {
   const { user } = useAuth();
   const { profile } = useProfile();
   const { trainers: allTrainers } = useRealTrainers();
+  const { conversations } = useConversations();
   
   // Hooks for trainer management
   const { savedTrainerIds, unsaveTrainer } = useSavedTrainers();
@@ -182,9 +183,10 @@ export default function MyTrainers() {
       }
     }
 
-    // Get trainers with active discovery calls (scheduled/rescheduled, not cancelled)
-    // AND trainers with discovery_in_progress stage
-    // Check all possible trainers who might have discovery calls or be in discovery_in_progress, not just those in allTrainers
+    // Get trainers for discovery section - includes:
+    // 1. Trainers with active discovery calls (scheduled/rescheduled, not cancelled)  
+    // 2. Trainers with discovery-related engagement stages
+    // 3. Shortlisted trainers who have exchanged messages (indicating discovery conversations)
     const trainersWithDiscoveryCalls = new Set<string>();
     
     // First, collect all trainer IDs that have active discovery calls
@@ -201,11 +203,27 @@ export default function MyTrainers() {
       }
     });
     
-    // Also include trainers with discovery_in_progress stage
+    // Include trainers with discovery-related engagement stages
     const discoveryStageTrainers = getDiscoveryStageTrainers();
     discoveryStageTrainers.forEach((engagement: any) => {
-      if (engagement.stage === 'discovery_in_progress' || engagement.stage === 'discovery_call_booked' || engagement.stage === 'discovery_completed') {
+      if (engagement.stage === 'discovery_in_progress' || 
+          engagement.stage === 'discovery_call_booked' || 
+          engagement.stage === 'discovery_completed') {
         trainersWithDiscoveryCalls.add(engagement.trainerId);
+      }
+    });
+    
+    // ALSO include shortlisted trainers who have active conversations (indicating discovery in progress)
+    allTrainerData.forEach(trainerData => {
+      if (trainerData.status === 'shortlisted') {
+        // Check if this trainer has any messages with the client
+        const hasConversation = conversations.some(conv => 
+          (conv.client_id === user?.id && conv.trainer_id === trainerData.trainer.id) ||
+          (conv.trainer_id === user?.id && conv.client_id === trainerData.trainer.id)
+        );
+        if (hasConversation) {
+          trainersWithDiscoveryCalls.add(trainerData.trainer.id);
+        }
       }
     });
     
@@ -257,7 +275,7 @@ export default function MyTrainers() {
     });
 
     return allTrainerData;
-  }, [allTrainers, getLikedTrainers, getOnlyShortlistedTrainers, getDiscoveryStageTrainers, hasActiveDiscoveryCall]);
+  }, [allTrainers, getLikedTrainers, getOnlyShortlistedTrainers, getDiscoveryStageTrainers, hasActiveDiscoveryCall, conversations, user]);
 
   // Filter trainers based on active filter
   const filteredTrainers = useMemo(() => {
@@ -430,7 +448,7 @@ export default function MyTrainers() {
         );
 
       case 'shortlisted':
-        const offersDiscoveryCall = trainerData.trainer.offers_discovery_call;
+        // Note: offers_discovery_call is not available on trainer object, this is checked elsewhere
         const trainerId = trainer.id;
         const availability = trainerAvailability[trainerId];
         const waitlistStatus = trainerWaitlistStatus[trainerId];
@@ -474,11 +492,10 @@ export default function MyTrainers() {
               ) : (
                 <Button 
                   size="sm" 
-                  variant={offersDiscoveryCall ? "default" : "outline"}
-                  onClick={() => offersDiscoveryCall ? handleBookDiscoveryCall(trainer.id) : null}
-                  disabled={!offersDiscoveryCall}
-                  className={!offersDiscoveryCall ? "opacity-50 cursor-not-allowed" : ""}
-                  title={!offersDiscoveryCall ? "This trainer doesn't offer discovery calls" : "Book a discovery call"}
+                  variant="default"
+                  onClick={() => handleBookDiscoveryCall(trainer.id)}
+                  className=""
+                  title="Book a discovery call with this trainer"
                 >
                   <Calendar className="h-3 w-3 mr-1" />
                   Book Call
@@ -607,6 +624,9 @@ export default function MyTrainers() {
   console.log('🔍 Current user:', user?.id, user?.email);
   console.log('📊 Counts:', counts);
   console.log('📋 Filtered trainers:', filteredTrainers.length);
+  console.log('🗨️ Conversations:', conversations.length);
+  console.log('📱 Trainer availability status for Linda:', trainerAvailability['bb19a665-f35f-4828-a62c-90ce437bfb18']);
+  console.log('📋 Waitlist status for Linda:', trainerWaitlistStatus['bb19a665-f35f-4828-a62c-90ce437bfb18']);
 
   return (
     <div className="space-y-6">
