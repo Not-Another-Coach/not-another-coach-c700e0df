@@ -151,6 +151,22 @@ export function useTrainerEngagement() {
     await updateEngagementStage(trainerId, 'declined');
   };
 
+  const bookDiscoveryCall = async (trainerId: string) => {
+    await updateEngagementStage(trainerId, 'discovery_call_booked');
+  };
+
+  const completeDiscoveryCall = async (trainerId: string) => {
+    await updateEngagementStage(trainerId, 'discovery_completed');
+  };
+
+  const proceedWithCoach = async (trainerId: string) => {
+    await updateEngagementStage(trainerId, 'matched');
+  };
+
+  const rejectCoach = async (trainerId: string) => {
+    await updateEngagementStage(trainerId, 'declined');
+  };
+
   return {
     engagements,
     loading,
@@ -169,6 +185,10 @@ export function useTrainerEngagement() {
     matchTrainer,
     unmatchTrainer,
     declineTrainer,
+    bookDiscoveryCall,
+    completeDiscoveryCall,
+    proceedWithCoach,
+    rejectCoach,
     refresh: fetchEngagements
   };
 }

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useEnhancedTrainerMatching } from "@/hooks/useEnhancedTrainerMatching";
 import { useSavedTrainers } from "@/hooks/useSavedTrainers";
 import { useShortlistedTrainers } from "@/hooks/useShortlistedTrainers";
+import { useTrainerEngagement } from "@/hooks/useTrainerEngagement";
 import { useRealTrainers } from "@/hooks/useRealTrainers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -114,6 +115,9 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
   const navigate = useNavigate();
   const { savedTrainerIds, unsaveTrainer } = useSavedTrainers();
   const { shortlistTrainer, isShortlisted, shortlistCount, canShortlistMore, removeFromShortlist, bookDiscoveryCall, shortlistedTrainers: actualShortlistedTrainers } = useShortlistedTrainers();
+  
+  // Import engagement functions for updating trainer status
+  const { proceedWithCoach, rejectCoach } = useTrainerEngagement();
   
   // Use real trainers from database
   const { trainers: realTrainers, loading: trainersLoading } = useRealTrainers();
@@ -891,11 +895,21 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                       onStartConversation={(trainerId) => {
                         console.log('Start conversation with:', trainerId);
                       }}
-                      onBookDiscoveryCall={(trainerId) => {
+                      onBookDiscoveryCall={async (trainerId) => {
                         console.log('Book discovery call with:', trainerId);
+                        // Move profile to discovery tab when booking call
+                        await bookDiscoveryCall(trainerId);
                       }}
                       onEditDiscoveryCall={(trainerId) => {
                         console.log('Edit discovery call with:', trainerId);
+                      }}
+                      onProceedWithCoach={async (trainerId) => {
+                        console.log('Proceed with coach:', trainerId);
+                        await proceedWithCoach(trainerId);
+                      }}
+                      onRejectCoach={async (trainerId) => {
+                        console.log('Reject coach:', trainerId);
+                        await rejectCoach(trainerId);
                       }}
                     />
                   );
