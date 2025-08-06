@@ -645,6 +645,14 @@ export default function MyTrainers() {
         const trainerAvailabilityForCTA = trainerAvailability[trainer.id];
         const hasWaitlistEnabled = trainerAvailabilityForCTA?.availability_status === 'waitlist';
         
+        console.log(`🔥 Discovery CTA Debug for ${trainer.name}:`);
+        console.log(`🔥 - Trainer ID: ${trainer.id}`);
+        console.log(`🔥 - Trainer availability data:`, trainerAvailabilityForCTA);
+        console.log(`🔥 - Has waitlist enabled: ${hasWaitlistEnabled}`);
+        console.log(`🔥 - Discovery call exists: ${!!discoveryCall}`);
+        console.log(`🔥 - Call in past: ${isCallInPast}`);
+        console.log(`🔥 - Is discovery in progress: ${isDiscoveryInProgress}`);
+        
         return (
           <div className="space-y-2">
             <div className="grid grid-cols-2 gap-2">
@@ -662,7 +670,10 @@ export default function MyTrainers() {
                 <Button 
                   size="sm" 
                   variant="default"
-                  onClick={() => handleJoinWaitlist(trainer.id)}
+                  onClick={() => {
+                    console.log(`🔥 Discovery section waitlist button clicked for ${trainer.id}`);
+                    handleJoinWaitlist(trainer.id);
+                  }}
                   className="bg-orange-500 hover:bg-orange-600"
                 >
                   <Clock className="h-3 w-3 mr-1" />
