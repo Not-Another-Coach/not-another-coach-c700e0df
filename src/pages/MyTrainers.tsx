@@ -6,6 +6,7 @@ import { useTrainerEngagement } from "@/hooks/useTrainerEngagement";
 import { useConversations } from "@/hooks/useConversations";
 import { useRealTrainers } from "@/hooks/useRealTrainers";
 import { useAuth } from "@/hooks/useAuth";
+import { useDiscoveryCallData } from "@/hooks/useDiscoveryCallData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -47,7 +48,8 @@ export default function MyTrainers() {
     shortlistedTrainers: actualShortlistedTrainers 
   } = useShortlistedTrainers();
   const { createConversation } = useConversations();
-  const { getEngagementStage, getLikedTrainers, getDiscoveryStageTrainers } = useTrainerEngagement();
+  const { getEngagementStage, getLikedTrainers, getOnlyShortlistedTrainers } = useTrainerEngagement();
+  const { hasActiveDiscoveryCall } = useDiscoveryCallData();
 
   // State for filtering and UI
   const [activeFilter, setActiveFilter] = useState<'all' | 'saved' | 'shortlisted' | 'discovery'>('all');
@@ -67,18 +69,24 @@ export default function MyTrainers() {
     };
   }, []);
 
-  // Get all trainer engagements and build unified trainer list
+  // Simplified trainer aggregation based on client's engagement status
   const trainersWithStatus = useMemo(() => {
-    const allTrainerData = [];
+    const allTrainerData: Array<{
+      trainer: any;
+      status: 'saved' | 'shortlisted' | 'discovery';
+      engagement?: any;
+      statusLabel: string;
+      statusColor: string;
+    }> = [];
 
-    // Get saved trainers (liked stage)
+    // Get liked/saved trainers (stage: 'liked')
     const likedTrainers = getLikedTrainers();
     likedTrainers.forEach(engagement => {
       const trainer = allTrainers.find(t => t.id === engagement.trainerId);
       if (trainer) {
         allTrainerData.push({
           trainer,
-          status: 'saved' as const,
+          status: 'saved',
           engagement,
           statusLabel: 'Saved',
           statusColor: 'bg-blue-100 text-blue-800'
@@ -86,28 +94,29 @@ export default function MyTrainers() {
       }
     });
 
-    // Get shortlisted trainers
-    actualShortlistedTrainers.forEach(shortlisted => {
-      // Check if already added as saved (upgrade status)
-      const existingIndex = allTrainerData.findIndex(t => t.trainer.id === shortlisted.trainer_id);
-      const trainer = allTrainers.find(t => t.id === shortlisted.trainer_id);
-      
+    // Get only shortlisted trainers (stage: 'shortlisted') - not including discovery stage
+    const onlyShortlistedTrainers = getOnlyShortlistedTrainers();
+    onlyShortlistedTrainers.forEach(engagement => {
+      const trainer = allTrainers.find(t => t.id === engagement.trainerId);
       if (trainer) {
+        // Check if already exists in the list (upgrade from saved to shortlisted)
+        const existingIndex = allTrainerData.findIndex(t => t.trainer.id === engagement.trainerId);
+        
         if (existingIndex >= 0) {
-          // Upgrade existing saved trainer to shortlisted
+          // Upgrade existing trainer to shortlisted status
           allTrainerData[existingIndex] = {
             trainer,
-            status: 'shortlisted' as const,
-            engagement: shortlisted,
+            status: 'shortlisted',
+            engagement,
             statusLabel: 'Shortlisted',
             statusColor: 'bg-yellow-100 text-yellow-800'
           };
         } else {
-          // Add new shortlisted trainer
+          // Add as new shortlisted trainer
           allTrainerData.push({
             trainer,
-            status: 'shortlisted' as const,
-            engagement: shortlisted,
+            status: 'shortlisted',
+            engagement,
             statusLabel: 'Shortlisted',
             statusColor: 'bg-yellow-100 text-yellow-800'
           });
@@ -115,28 +124,28 @@ export default function MyTrainers() {
       }
     });
 
-    // Get discovery stage trainers
-    const discoveryTrainers = getDiscoveryStageTrainers();
-    discoveryTrainers.forEach(engagement => {
-      const existingIndex = allTrainerData.findIndex(t => t.trainer.id === engagement.trainerId);
-      const trainer = allTrainers.find(t => t.id === engagement.trainerId);
-      
-      if (trainer) {
+    // Get trainers with active discovery calls (scheduled/rescheduled, not cancelled)
+    // This includes trainers from engagement stage OR with active discovery calls
+    allTrainers.forEach(trainer => {
+      if (hasActiveDiscoveryCall(trainer.id)) {
+        // Check if already exists in the list
+        const existingIndex = allTrainerData.findIndex(t => t.trainer.id === trainer.id);
+        
         if (existingIndex >= 0) {
           // Upgrade existing trainer to discovery status
           allTrainerData[existingIndex] = {
             trainer,
-            status: 'discovery' as const,
-            engagement,
+            status: 'discovery',
+            engagement: allTrainerData[existingIndex].engagement,
             statusLabel: 'Discovery Call',
             statusColor: 'bg-purple-100 text-purple-800'
           };
         } else {
-          // Add new discovery trainer
+          // Add as new discovery trainer
           allTrainerData.push({
             trainer,
-            status: 'discovery' as const,
-            engagement,
+            status: 'discovery',
+            engagement: null,
             statusLabel: 'Discovery Call',
             statusColor: 'bg-purple-100 text-purple-800'
           });
@@ -145,7 +154,7 @@ export default function MyTrainers() {
     });
 
     return allTrainerData;
-  }, [allTrainers, getLikedTrainers, actualShortlistedTrainers, getDiscoveryStageTrainers]);
+  }, [allTrainers, getLikedTrainers, getOnlyShortlistedTrainers, hasActiveDiscoveryCall]);
 
   // Filter trainers based on active filter
   const filteredTrainers = useMemo(() => {
