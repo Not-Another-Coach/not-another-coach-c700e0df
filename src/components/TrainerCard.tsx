@@ -185,6 +185,7 @@ export const TrainerCard = ({
           {/* Right: Comparison checkbox or Match badge */}
           {showComparisonCheckbox ? (
             <Checkbox
+              id={`comparison-${trainer.id}`}
               checked={comparisonChecked}
               onCheckedChange={handleComparisonClick}
               disabled={comparisonDisabled}
