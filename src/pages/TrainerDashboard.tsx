@@ -45,7 +45,11 @@ import {
   ArrowUpRight,
   CreditCard,
   Filter,
-  Shield
+  Shield,
+  ChevronDown,
+  Home,
+  UserSearch,
+  Goal
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -54,6 +58,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 const TrainerDashboard = () => {
   const { user, signOut, loading } = useAuth();
@@ -67,6 +72,8 @@ const TrainerDashboard = () => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [prospectsCount, setProspectsCount] = useState(0);
   const [activeClientsCount, setActiveClientsCount] = useState(0);
+  const [activeView, setActiveView] = useState('dashboard');
+  const [showProspectsDropdown, setShowProspectsDropdown] = useState(false);
 
   // Sync availability status with profile data
   useEffect(() => {
@@ -180,6 +187,63 @@ const TrainerDashboard = () => {
         <div className="flex items-center gap-6">
           <h1 className="text-xl font-bold">Mission Control</h1>
           
+          {/* Navigation Menu */}
+          <nav className="flex items-center gap-1">
+            <Button
+              variant={activeView === 'dashboard' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setActiveView('dashboard')}
+              className="flex items-center gap-2"
+            >
+              <Home className="w-4 h-4" />
+              Dashboard
+            </Button>
+            
+            <DropdownMenu open={showProspectsDropdown} onOpenChange={setShowProspectsDropdown}>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant={activeView === 'prospects' || activeView === 'waitlist' ? 'default' : 'ghost'}
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <UserSearch className="w-4 h-4" />
+                  Prospects ({prospectsCount + (waitlistEntries?.length || 0)})
+                  <ChevronDown className="w-3 h-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuItem onClick={() => { setActiveView('prospects'); setShowProspectsDropdown(false); }}>
+                  <UserSearch className="w-4 h-4 mr-2" />
+                  Active Prospects ({prospectsCount})
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => { setActiveView('waitlist'); setShowProspectsDropdown(false); }}>
+                  <Users className="w-4 h-4 mr-2" />
+                  Waitlist ({waitlistEntries?.length || 0})
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            
+            <Button
+              variant={activeView === 'clients' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setActiveView('clients')}
+              className="flex items-center gap-2"
+            >
+              <Users className="w-4 h-4" />
+              Active Clients ({activeClientsCount})
+            </Button>
+            
+            <Button
+              variant={activeView === 'goals' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setActiveView('goals')}
+              className="flex items-center gap-2"
+            >
+              <Goal className="w-4 h-4" />
+              Goals
+            </Button>
+          </nav>
+          
           {/* Status indicators moved here */}
           <div className="flex items-center gap-4">
             {/* Profile Status */}
@@ -271,15 +335,9 @@ const TrainerDashboard = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
-        <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview">Dashboard</TabsTrigger>
-            <TabsTrigger value="prospects">Prospects ({prospectsCount})</TabsTrigger>
-            <TabsTrigger value="waitlist">Waitlist ({waitlistEntries?.length || 0})</TabsTrigger>
-            <TabsTrigger value="clients">Active Clients ({activeClientsCount})</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="overview" className="mt-6">
+        {/* Content based on active view */}
+        {activeView === 'dashboard' && (
+          <>
             {/* Two Column Layout */}
             <div className="grid lg:grid-cols-3 gap-8">
           
@@ -422,64 +480,81 @@ const TrainerDashboard = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Settings className="h-5 w-5" />
-                  Availability Settings
+                  Availability Management
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-3 gap-4">
-                    <Button 
-                      variant={availabilityStatus === 'accepting' ? 'default' : 'outline'}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleStatusChange('accepting');
-                      }}
-                      className="flex items-center gap-2 h-12"
-                    >
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      Accepting
-                    </Button>
-                    <Button 
-                      variant={availabilityStatus === 'waitlist' ? 'default' : 'outline'}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleStatusChange('waitlist');
-                      }}
-                      className="flex items-center gap-2 h-12"
-                    >
-                      <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                      Waitlist
-                    </Button>
-                    <Button 
-                      variant={availabilityStatus === 'unavailable' ? 'default' : 'outline'}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleStatusChange('unavailable');
-                      }}
-                      className="flex items-center gap-2 h-12"
-                    >
-                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                      Unavailable
-                    </Button>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="availability-status" className="text-sm font-medium">
+                    Current Status
+                  </Label>
+                  <div className="flex items-center gap-2">
+                    {availabilityStatus === 'accepting' && (
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                        <span className="text-sm text-green-600 font-medium">Accepting New Clients</span>
+                      </div>
+                    )}
+                    {availabilityStatus === 'waitlist' && (
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+                        <span className="text-sm text-yellow-600 font-medium">Waitlist Only</span>
+                      </div>
+                    )}
+                    {availabilityStatus === 'unavailable' && (
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                        <span className="text-sm text-red-600 font-medium">Not Available</span>
+                      </div>
+                    )}
                   </div>
-                  
-                  {availabilityStatus === 'waitlist' && (
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium">
-                        Next Available Date (optional)
-                      </Label>
-                      
+                </div>
+                
+                <div className="grid grid-cols-3 gap-2">
+                  <Button
+                    variant={availabilityStatus === 'accepting' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => handleStatusChange('accepting')}
+                    className="flex items-center gap-2"
+                  >
+                    <CheckCircle className="w-3 h-3" />
+                    Accepting
+                  </Button>
+                  <Button
+                    variant={availabilityStatus === 'waitlist' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => handleStatusChange('waitlist')}
+                    className="flex items-center gap-2"
+                  >
+                    <Clock className="w-3 h-3" />
+                    Waitlist
+                  </Button>
+                  <Button
+                    variant={availabilityStatus === 'unavailable' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => handleStatusChange('unavailable')}
+                    className="flex items-center gap-2"
+                  >
+                    <AlertCircle className="w-3 h-3" />
+                    Unavailable
+                  </Button>
+                </div>
+                
+                {availabilityStatus === 'waitlist' && (
+                  <div className="space-y-2 p-3 bg-muted/30 rounded-lg border">
+                    <Label className="text-sm font-medium">Next Available Date</Label>
+                    <div className="flex items-center gap-2">
                       <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
                         <PopoverTrigger asChild>
                           <Button
                             variant="outline"
                             className={cn(
-                              "w-full max-w-xs justify-start text-left font-normal h-10",
+                              "w-[240px] justify-start text-left font-normal",
                               !nextAvailableDate && "text-muted-foreground"
                             )}
                           >
                             <CalendarIcon className="mr-2 h-4 w-4" />
-                            {nextAvailableDate ? format(nextAvailableDate, "PPP") : <span>Select date</span>}
+                            {nextAvailableDate ? format(nextAvailableDate, "PPP") : "Pick a date"}
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
@@ -489,28 +564,37 @@ const TrainerDashboard = () => {
                             onSelect={handleNextAvailableDateChange}
                             disabled={(date) => date < new Date()}
                             initialFocus
-                            className={cn("p-3 pointer-events-auto")}
                           />
                         </PopoverContent>
                       </Popover>
-                      
-                      <p className="text-xs text-muted-foreground">
-                        This date will be shown to potential clients when they view your profile
-                      </p>
+                      {nextAvailableDate && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleNextAvailableDateChange(undefined)}
+                        >
+                          Clear
+                        </Button>
+                      )}
                     </div>
+                     {nextAvailableDate && (
+                       <p className="text-xs text-muted-foreground">
+                         Clients will be notified when you become available again.
+                       </p>
                      )}
-                 </div>
-                 
-                 <div className="pt-4 border-t">
-                   <Button 
-                     variant="outline" 
-                     onClick={() => navigate('/trainer/profile-setup?tab=management')}
-                     className="w-full"
-                   >
-                     <Settings className="w-4 h-4 mr-2" />
-                     Advanced Settings
-                   </Button>
-                </div>
+                  </div>
+                )}
+                
+                <div className="pt-4 border-t">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => navigate('/trainer/profile-setup?tab=management')}
+                    className="w-full"
+                  >
+                    <Settings className="w-4 h-4 mr-2" />
+                    Advanced Settings
+                  </Button>
+               </div>
               </CardContent>
             </Card>
 
@@ -608,23 +692,43 @@ const TrainerDashboard = () => {
             </CardContent>
           </Card>
         )}
-          </TabsContent>
-          
-          <TabsContent value="prospects" className="mt-6">
-            <div className="space-y-6">
-              <CoachSelectionRequests />
-              <ProspectsSection onCountChange={setProspectsCount} />
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="waitlist" className="mt-6">
-            <WaitlistManagement />
-          </TabsContent>
-          
-          <TabsContent value="clients" className="mt-6">
-            <ActiveClientsSection onCountChange={setActiveClientsCount} />
-          </TabsContent>
-        </Tabs>
+          </>
+        )}
+        
+        {activeView === 'prospects' && (
+          <div className="space-y-6">
+            <CoachSelectionRequests />
+            <ProspectsSection onCountChange={setProspectsCount} />
+          </div>
+        )}
+        
+        {activeView === 'waitlist' && (
+          <WaitlistManagement />
+        )}
+        
+        {activeView === 'clients' && (
+          <ActiveClientsSection onCountChange={setActiveClientsCount} />
+        )}
+        
+        {activeView === 'goals' && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Goal className="w-5 h-5" />
+                Goals & Targets
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8">
+                <Goal className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-muted-foreground mb-2">Goals Section</h3>
+                <p className="text-sm text-muted-foreground">
+                  Set and track your coaching goals and targets.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Floating Message Button */}
