@@ -61,7 +61,6 @@ export default function MyTrainers() {
   // State for filtering and UI
   const [activeFilter, setActiveFilter] = useState<'all' | 'saved' | 'shortlisted' | 'discovery'>('all');
   const [selectedForComparison, setSelectedForComparison] = useState<string[]>([]);
-  const [trainerWaitlistStatus, setTrainerWaitlistStatus] = useState<{[key: string]: any}>({});
   const [trainerAvailability, setTrainerAvailability] = useState<{[key: string]: any}>({});
 
   // Listen for filter events from dashboard
@@ -78,43 +77,23 @@ export default function MyTrainers() {
     };
   }, []);
 
-  // Fetch waitlist status and availability for shortlisted trainers
+  // Fetch availability data for shortlisted trainers (simplified - no API calls for waitlist status)
   useEffect(() => {
-    const fetchWaitlistData = async () => {
+    const fetchAvailabilityData = async () => {
       const shortlistedTrainers = getOnlyShortlistedTrainers();
       
       for (const engagement of shortlistedTrainers) {
         const trainerId = engagement.trainerId;
         
         try {
-          const [availability, waitlistStatus] = await Promise.all([
-            getCoachAvailability(trainerId).catch(err => {
-              console.warn(`Failed to get availability for trainer ${trainerId}:`, err);
-              return null;
-            }),
-            checkClientWaitlistStatus(trainerId).catch(err => {
-              console.warn(`Failed to get waitlist status for trainer ${trainerId}:`, err);
-              return null;
-            })
-          ]);
-          
+          const availability = await getCoachAvailability(trainerId);
           setTrainerAvailability(prev => ({
             ...prev,
             [trainerId]: availability
           }));
-          
-          setTrainerWaitlistStatus(prev => ({
-            ...prev,
-            [trainerId]: waitlistStatus
-          }));
         } catch (error) {
-          console.error(`Error fetching data for trainer ${trainerId}:`, error);
-          // Set default values when fetch fails
+          console.warn(`Failed to get availability for trainer ${trainerId}:`, error);
           setTrainerAvailability(prev => ({
-            ...prev,
-            [trainerId]: null
-          }));
-          setTrainerWaitlistStatus(prev => ({
             ...prev,
             [trainerId]: null
           }));
@@ -122,8 +101,8 @@ export default function MyTrainers() {
       }
     };
     
-    fetchWaitlistData();
-  }, [getOnlyShortlistedTrainers, getCoachAvailability, checkClientWaitlistStatus]);
+    fetchAvailabilityData();
+  }, [getOnlyShortlistedTrainers, getCoachAvailability]);
 
   // Simplified trainer aggregation based on client's engagement status
   const trainersWithStatus = useMemo(() => {
@@ -452,11 +431,7 @@ export default function MyTrainers() {
         toast.error('Failed to join waitlist');
       } else {
         toast.success('Joined waitlist! The trainer will contact you when available.');
-        // Refresh waitlist status
-        setTrainerWaitlistStatus(prev => ({
-          ...prev,
-          [trainerId]: { status: 'active' }
-        }));
+        // Note: No need to update local state since we're using client-side logic
       }
     } catch (error) {
       console.error('Error joining waitlist:', error);
@@ -508,25 +483,32 @@ export default function MyTrainers() {
         );
 
       case 'shortlisted':
-        const trainerId = trainer.id;
-        const availability = trainerAvailability[trainerId];
-        const waitlistStatus = trainerWaitlistStatus[trainerId];
+        const shortlistedTrainerId = trainer.id;
+        const availability = trainerAvailability[shortlistedTrainerId];
+        const shortlistedEngagementStage = getEngagementStage(shortlistedTrainerId);
+        const hasActiveCall = hasActiveDiscoveryCall(shortlistedTrainerId);
+        
+        // Determine if should show waitlist button using client-side logic
         const isOnWaitlist = availability?.availability_status === 'waitlist';
-        const clientAlreadyOnWaitlist = waitlistStatus !== null;
+        const allowDiscoveryOnWaitlist = availability?.allow_discovery_calls_on_waitlist === true;
         const offersDiscoveryCall = trainer.offers_discovery_call;
         
-        // Debug logging specifically for Linda
-        if (trainerId === 'bb19a665-f35f-4828-a62c-90ce437bfb18') {
-          console.log('🔍 LINDA DEBUG - CTAs:', {
-            trainerId,
-            availability,
-            waitlistStatus,
-            isOnWaitlist,
-            clientAlreadyOnWaitlist,
-            offersDiscoveryCall,
-            trainerName: trainer.name
-          });
-        }
+        // Show waitlist button if:
+        // - Trainer is on waitlist AND
+        // - Client is shortlisted (current stage) AND  
+        // - No discovery call booked yet
+        const shouldShowWaitlist = isOnWaitlist && 
+                                   shortlistedEngagementStage === 'shortlisted' && 
+                                   !hasActiveCall;
+        
+        // Show discovery call button if:
+        // - Trainer offers discovery calls AND
+        // - Either not on waitlist OR allows discovery calls on waitlist AND
+        // - No discovery call booked yet
+        const shouldShowDiscoveryCall = offersDiscoveryCall && 
+                                        (!isOnWaitlist || allowDiscoveryOnWaitlist) && 
+                                        shortlistedEngagementStage === 'shortlisted' && 
+                                        !hasActiveCall;
         
         return (
           <div className="space-y-2">
@@ -540,10 +522,7 @@ export default function MyTrainers() {
                 Chat
               </Button>
               
-              {/* Show waitlist button if trainer is on waitlist and client isn't already on it */}
-              {/* If fetch failed and this is Linda, assume she's on waitlist */}
-              {(isOnWaitlist && !clientAlreadyOnWaitlist) || 
-               (trainerId === 'bb19a665-f35f-4828-a62c-90ce437bfb18' && availability === null && waitlistStatus === null) ? (
+              {shouldShowWaitlist ? (
                 <Button 
                   size="sm" 
                   variant="default"
@@ -553,18 +532,7 @@ export default function MyTrainers() {
                   <Clock className="h-3 w-3 mr-1" />
                   Join Waitlist
                 </Button>
-              ) : isOnWaitlist && clientAlreadyOnWaitlist ? (
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  disabled
-                  className="opacity-50 cursor-not-allowed"
-                  title="You're already on this trainer's waitlist"
-                >
-                  <Clock className="h-3 w-3 mr-1" />
-                  On Waitlist
-                </Button>
-              ) : offersDiscoveryCall ? (
+              ) : shouldShowDiscoveryCall ? (
                 <Button 
                   size="sm" 
                   variant="default"
@@ -574,16 +542,26 @@ export default function MyTrainers() {
                   <Calendar className="h-3 w-3 mr-1" />
                   Book Call
                 </Button>
-              ) : (
+              ) : hasActiveCall ? (
                 <Button 
                   size="sm" 
                   variant="outline"
                   disabled
                   className="opacity-50 cursor-not-allowed"
-                  title="This trainer does not offer discovery calls"
+                  title="Discovery call already scheduled"
                 >
                   <Calendar className="h-3 w-3 mr-1" />
-                  No Calls
+                  Call Booked
+                </Button>
+              ) : (
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => navigate(`/trainer/${trainer.id}`)}
+                  title="View trainer profile"
+                >
+                  <Phone className="h-3 w-3 mr-1" />
+                  View Profile
                 </Button>
               )}
             </div>
@@ -711,7 +689,6 @@ export default function MyTrainers() {
   console.log('📋 Filtered trainers:', filteredTrainers.length);
   console.log('🗨️ Conversations:', conversations.length);
   console.log('📱 Trainer availability status for Linda:', trainerAvailability['bb19a665-f35f-4828-a62c-90ce437bfb18']);
-  console.log('📋 Waitlist status for Linda:', trainerWaitlistStatus['bb19a665-f35f-4828-a62c-90ce437bfb18']);
 
   return (
     <div className="space-y-6">
