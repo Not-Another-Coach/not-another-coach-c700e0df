@@ -161,6 +161,11 @@ export const TrainerCard = ({
           text: "🔍 Discovery",
           className: "bg-blue-500 text-white"
         };
+      case 'saved':
+        return {
+          text: "💾 Saved",
+          className: "bg-purple-500 text-white"
+        };
       default:
         return null;
     }
@@ -172,13 +177,20 @@ export const TrainerCard = ({
     const matchBadge = getMatchQualityBadge();
     const stateBadge = getStateBadge();
     
-    if (matchBadge) badges.push(matchBadge);
+    // Always show state badge if available, regardless of match score
     if (stateBadge) badges.push(stateBadge);
+    // Show match badge only if it meets threshold
+    if (matchBadge) badges.push(matchBadge);
     
     return badges;
   };
 
   const activeBadges = getActiveBadges();
+
+  // Debug logging for troubleshooting
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`TrainerCard ${trainer.name}: cardState=${cardState}, matchScore=${matchScore}, badges=${activeBadges.length}`);
+  }
 
   return (
     <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-card to-muted/30 border-0 relative overflow-hidden">
@@ -224,9 +236,9 @@ export const TrainerCard = ({
           ) : null}
         </div>
 
-        {/* Line 2: Consistent badge layout - side by side, not overlapping */}
+        {/* Line 2: Consistent badge layout - moved down to avoid overlap with X button */}
         {activeBadges.length > 0 && (
-          <div className="absolute top-8 left-2 right-2 flex gap-2 flex-wrap z-10">
+          <div className="absolute top-12 left-2 right-2 flex gap-2 flex-wrap z-10">
             {activeBadges.map((badge, index) => (
               <Badge key={index} className={`text-xs ${badge.className}`}>
                 {badge.text}
