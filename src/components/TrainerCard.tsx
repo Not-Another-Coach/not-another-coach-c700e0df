@@ -381,18 +381,6 @@ export const TrainerCard = ({
           </div>
         )}
 
-        {/* Match Progress Indicator */}
-        {matchScore > 0 && (
-          <div className="mb-4">
-            <MatchProgressIndicator
-              matchScore={matchScore}
-              matchReasons={matchReasons}
-              isShortlisted={isSaved}
-              hasContacted={false} // TODO: Track actual contact status
-              hasScheduledCall={false} // TODO: Track actual call status
-            />
-          </div>
-        )}
 
         {/* Waitlist Status Badge - Show if client is on waitlist */}
         {isClient && clientWaitlistStatus && (
