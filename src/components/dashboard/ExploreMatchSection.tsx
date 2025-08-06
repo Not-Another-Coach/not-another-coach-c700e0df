@@ -965,19 +965,41 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                       />
                       
                       {/* External CTAs for Shortlisted Trainers */}
-                      <div className="space-y-2 border-4 border-blue-500 bg-blue-100 p-4 rounded-lg">
-                        <div className="text-lg text-blue-900 font-bold">🔵 DEBUG: SHORTLIST CTAs HERE 🔵</div>
-                        <div className="text-sm text-blue-700">Trainer ID: {shortlisted.trainer_id}</div>
-                        <div className="flex items-center justify-center gap-2 py-2 bg-green-50 text-green-800 rounded-lg border border-green-200">
-                          <Star className="h-3 w-3 fill-current" />
-                          <span className="text-xs font-medium">Shortlisted</span>
+                      <div className="space-y-2 p-3 bg-background border rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Star className="h-3 w-3 fill-current text-primary" />
+                            <span className="text-xs font-medium text-primary">Shortlisted</span>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+                            onClick={() => handleRemoveFromShortlist(shortlisted.trainer_id, matchData.trainer.name)}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
                         </div>
+                        
                         <div className="grid grid-cols-2 gap-2">
                           <Button 
                             size="sm" 
                             variant="outline" 
-                            className="text-xs"
-                            onClick={() => handleCreateConversation(shortlisted.trainer_id)}
+                            className="text-xs h-8"
+                            onClick={async () => {
+                              console.log('🟢 Chat button clicked for trainer:', shortlisted.trainer_id);
+                              try {
+                                const result = await createConversation(shortlisted.trainer_id);
+                                if (!result.error) {
+                                  console.log('✅ Conversation created, navigating to messaging');
+                                  navigate('/messaging');
+                                } else {
+                                  console.error('❌ Failed to create conversation:', result.error);
+                                }
+                              } catch (error) {
+                                console.error('❌ Error in chat handler:', error);
+                              }
+                            }}
                           >
                             <MessageCircle className="h-3 w-3 mr-1" />
                             Chat
@@ -985,16 +1007,27 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                           <Button 
                             size="sm" 
                             variant="default" 
-                            className="text-xs"
+                            className="text-xs h-8"
                             onClick={async () => {
-                              console.log('Discovery call clicked for trainer:', shortlisted.trainer_id);
-                              await bookDiscoveryCall(shortlisted.trainer_id);
-                              // Also create conversation for messaging
-                              await handleCreateConversation(shortlisted.trainer_id);
+                              console.log('🟢 Discovery call button clicked for trainer:', shortlisted.trainer_id);
+                              try {
+                                const result = await bookDiscoveryCall(shortlisted.trainer_id);
+                                console.log('📅 Discovery call booking result:', result);
+                                
+                                // If booking was successful or already had a call, create conversation too
+                                if (result) {
+                                  const conversationResult = await createConversation(shortlisted.trainer_id);
+                                  if (!conversationResult.error) {
+                                    console.log('✅ Conversation created after discovery call booking');
+                                  }
+                                }
+                              } catch (error) {
+                                console.error('❌ Error in discovery call handler:', error);
+                              }
                             }}
                           >
                             <Calendar className="h-3 w-3 mr-1" />
-                            Discovery Call
+                            {shortlisted.discovery_call ? 'View Call' : 'Book Call'}
                           </Button>
                         </div>
                       </div>
