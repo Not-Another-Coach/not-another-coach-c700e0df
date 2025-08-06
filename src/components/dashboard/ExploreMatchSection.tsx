@@ -112,7 +112,7 @@ const sampleTrainers = [
 
 export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
   const navigate = useNavigate();
-  const { savedTrainerIds, unsaveTrainer } = useSavedTrainers();
+  const { savedTrainerIds, unsaveTrainer, isTrainerSaved } = useSavedTrainers();
   const { shortlistTrainer, isShortlisted, shortlistCount, canShortlistMore, removeFromShortlist, bookDiscoveryCall, shortlistedTrainers: actualShortlistedTrainers } = useShortlistedTrainers();
   
   // Use real trainers from database
@@ -678,16 +678,21 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                 <div>
                   <h2 className="text-xl font-semibold mb-4">Good Matches</h2>
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filterTrainers(browseTrainers.filter(match => goodMatches.includes(match))).slice(0, 6).map((match) => (
-                      <TrainerCard
-                        key={match.trainer.id}
-                        trainer={match.trainer}
-                        onViewProfile={handleViewProfile}
-                        matchScore={match.score}
-                        matchReasons={match.matchReasons}
-                        matchDetails={match.matchDetails}
-                      />
-                    ))}
+                     {filterTrainers(browseTrainers.filter(match => goodMatches.includes(match))).slice(0, 6).map((match) => (
+                       <TrainerCard
+                         key={match.trainer.id}
+                         trainer={match.trainer}
+                         onViewProfile={handleViewProfile}
+                         matchScore={match.score}
+                         matchReasons={match.matchReasons}
+                         matchDetails={match.matchDetails}
+                         cardState={
+                           isShortlisted(match.trainer.id) ? "shortlisted" :
+                           isTrainerSaved(match.trainer.id) ? "saved" : 
+                           "default"
+                         }
+                       />
+                     ))}
                   </div>
                 </div>
               )}
@@ -745,16 +750,21 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                 <Badge variant="outline">{filterTrainers(browseTrainers).length} trainers</Badge>
               </div>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filterTrainers(browseTrainers).map((match) => (
-                  <TrainerCard
-                    key={match.trainer.id}
-                    trainer={match.trainer}
-                    onViewProfile={handleViewProfile}
-                    matchScore={match.score}
-                    matchReasons={match.matchReasons}
-                    matchDetails={match.matchDetails}
-                  />
-                ))}
+                 {filterTrainers(browseTrainers).map((match) => (
+                   <TrainerCard
+                     key={match.trainer.id}
+                     trainer={match.trainer}
+                     onViewProfile={handleViewProfile}
+                     matchScore={match.score}
+                     matchReasons={match.matchReasons}
+                     matchDetails={match.matchDetails}
+                     cardState={
+                       isShortlisted(match.trainer.id) ? "shortlisted" :
+                       isTrainerSaved(match.trainer.id) ? "saved" : 
+                       "default"
+                     }
+                   />
+                 ))}
               </div>
             </div>
           )}
