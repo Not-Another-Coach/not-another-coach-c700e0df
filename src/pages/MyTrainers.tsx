@@ -81,18 +81,28 @@ export default function MyTrainers() {
   useEffect(() => {
     const fetchAvailabilityData = async () => {
       const shortlistedTrainers = getOnlyShortlistedTrainers();
+      console.log('🔧 Fetching availability for shortlisted trainers:', shortlistedTrainers.length);
+      
+      // Don't block UI if no shortlisted trainers
+      if (shortlistedTrainers.length === 0) {
+        console.log('📋 No shortlisted trainers to fetch availability for');
+        return;
+      }
       
       for (const engagement of shortlistedTrainers) {
         const trainerId = engagement.trainerId;
         
         try {
+          console.log(`🔧 Fetching availability for trainer: ${trainerId}`);
           const availability = await getCoachAvailability(trainerId);
+          console.log(`✅ Got availability for ${trainerId}:`, availability);
           setTrainerAvailability(prev => ({
             ...prev,
             [trainerId]: availability
           }));
         } catch (error) {
-          console.warn(`Failed to get availability for trainer ${trainerId}:`, error);
+          console.warn(`⚠️ Failed to get availability for trainer ${trainerId}:`, error);
+          // Set to null but don't block the UI
           setTrainerAvailability(prev => ({
             ...prev,
             [trainerId]: null
@@ -101,7 +111,15 @@ export default function MyTrainers() {
       }
     };
     
-    fetchAvailabilityData();
+    // Add timeout to prevent hanging
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Availability fetch timeout')), 10000)
+    );
+    
+    Promise.race([fetchAvailabilityData(), timeoutPromise])
+      .catch(error => {
+        console.warn('⚠️ Availability fetch timed out or failed:', error);
+      });
   }, [getOnlyShortlistedTrainers, getCoachAvailability]);
 
   // Simplified trainer aggregation based on client's engagement status
