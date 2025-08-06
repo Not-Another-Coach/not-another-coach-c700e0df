@@ -788,7 +788,33 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                         </Button>
                       )}
                       
-                      {/* Show shortlisted actions if already shortlisted */}
+                      {/* Always show Remove from Saved button */}
+                      <Button
+                        onClick={async () => {
+                          console.log('🟢 Remove from Saved clicked for trainer:', match.trainer.id);
+                          try {
+                            const result = await unsaveTrainer(match.trainer.id);
+                            if (result) {
+                              console.log('✅ Successfully removed from saved:', match.trainer.id);
+                              toast.success('Trainer removed from saved list!');
+                            } else {
+                              console.error('❌ Failed to remove from saved');
+                              toast.error('Failed to remove from saved');
+                            }
+                          } catch (error) {
+                            console.error('❌ Error removing from saved:', error);
+                            toast.error('Failed to remove from saved');
+                          }
+                        }}
+                        className="w-full"
+                        size="sm"
+                        variant="outline"
+                      >
+                        <X className="h-3 w-3 mr-1" />
+                        Remove from Saved
+                       </Button>
+                       
+                       {/* Show shortlisted actions if already shortlisted */}
                       {isShortlisted(match.trainer.id) && (
                         <div className="space-y-2">
                           <div className="flex items-center justify-center gap-2 py-2 bg-green-50 text-green-800 rounded-lg border border-green-200">
@@ -899,11 +925,38 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                 These are your top trainer choices. You can chat with them and book discovery calls.
               </div>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                 {shortlistedTrainers.map((match) => {
-                     // Find the corresponding shortlisted data
-                     const shortlisted = actualShortlistedTrainers.find(st => st.trainer_id === match.trainer.id);
-                     if (!shortlisted) return null;
+                 {actualShortlistedTrainers.map((shortlisted) => {
+                     // Find the trainer from matchedTrainers or create fallback
+                     let match = matchedTrainers.find(m => m.trainer.id === shortlisted.trainer_id);
+                     if (!match) {
+                       // Create a fallback trainer object for display
+                       const fallbackTrainer = {
+                         id: shortlisted.trainer_id,
+                         name: `Trainer ${shortlisted.trainer_id.slice(0, 8)}...`,
+                         specialties: ["Personal Training"],
+                         rating: 4.5,
+                         reviews: 0,
+                         experience: "Professional",
+                         location: "Available",
+                         hourlyRate: 75,
+                         image: "/placeholder.svg",
+                         certifications: ["Certified Personal Trainer"],
+                         description: "Professional personal trainer ready to help you achieve your fitness goals.",
+                         availability: "Flexible",
+                         trainingType: ["In-Person", "Online"],
+                         offers_discovery_call: true
+                       };
+                       match = {
+                         trainer: fallbackTrainer,
+                         score: 80,
+                         matchReasons: ["Previously shortlisted trainer"],
+                         matchDetails: [],
+                         compatibilityPercentage: 80
+                       };
+                     }
+                     console.log('Rendering shortlisted trainer:', shortlisted.trainer_id, match.trainer.name);
 
+                     
                      // Calculate match data for this trainer to ensure consistency
                      const matchData = getTrainerMatchData(match.trainer);
                      
