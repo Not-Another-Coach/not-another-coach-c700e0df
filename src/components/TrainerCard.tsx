@@ -61,6 +61,8 @@ interface TrainerCardProps {
   onStartConversation?: (trainerId: string) => void;
   onBookDiscoveryCall?: (trainerId: string) => void;
   onEditDiscoveryCall?: (trainerId: string) => void;
+  onProceedWithCoach?: (trainerId: string) => void;
+  onRejectCoach?: (trainerId: string) => void;
   isShortlisted?: boolean;
   hasDiscoveryCall?: boolean;
   discoveryCallData?: any;
@@ -86,6 +88,8 @@ export const TrainerCard = ({
   onStartConversation,
   onBookDiscoveryCall,
   onEditDiscoveryCall,
+  onProceedWithCoach,
+  onRejectCoach,
   isShortlisted = false,
   hasDiscoveryCall = false,
   discoveryCallData,
@@ -461,7 +465,7 @@ export const TrainerCard = ({
                           <Calendar className="h-3 w-3 mr-1" />
                           Reschedule
                         </Button>
-                      ) : discoveryCallData?.status === 'completed' || discoveryCallData?.status === 'cancelled' ? (
+                      ) : discoveryCallData?.status === 'cancelled' ? (
                         <Button 
                           size="sm" 
                           variant="default" 
@@ -469,8 +473,11 @@ export const TrainerCard = ({
                           onClick={() => onBookDiscoveryCall && onBookDiscoveryCall(trainer.id)}
                         >
                           <Calendar className="h-3 w-3 mr-1" />
-                          Book New Call
+                          Book Discovery Call
                         </Button>
+                      ) : discoveryCallData?.status === 'completed' ? (
+                        // Discovery call completed - show proceed/reject options
+                        null // These will be shown as separate CTAs below
                       ) : (
                         <Button 
                           size="sm" 
@@ -505,6 +512,37 @@ export const TrainerCard = ({
                     </Button>
                   )}
                 </div>
+                
+                {/* Post-Discovery Call Decision CTAs - shown after completed discovery call */}
+                {discoveryCallData?.status === 'completed' && (onProceedWithCoach || onRejectCoach) && (
+                  <div className="space-y-2 mt-3 pt-3 border-t border-border/50">
+                    <div className="text-xs text-center text-muted-foreground mb-2">
+                      Discovery call completed - What's your decision?
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {onProceedWithCoach && (
+                        <Button 
+                          size="sm" 
+                          variant="default" 
+                          className="text-xs bg-green-600 hover:bg-green-700"
+                          onClick={() => onProceedWithCoach(trainer.id)}
+                        >
+                          ✅ Proceed
+                        </Button>
+                      )}
+                      {onRejectCoach && (
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="text-xs hover:bg-red-50 hover:text-red-600 hover:border-red-200"
+                          onClick={() => onRejectCoach(trainer.id)}
+                        >
+                          ❌ Pass
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                )}
                 
                 {/* Waitlist CTA for shortlisted trainers */}
                 {isClient && coachAvailability?.availability_status === 'waitlist' && !clientWaitlistStatus && (
