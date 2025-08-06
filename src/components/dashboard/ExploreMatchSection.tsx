@@ -965,7 +965,9 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                       />
                       
                       {/* External CTAs for Shortlisted Trainers */}
-                      <div className="space-y-2">
+                      <div className="space-y-2 border-4 border-blue-500 bg-blue-100 p-4 rounded-lg">
+                        <div className="text-lg text-blue-900 font-bold">🔵 DEBUG: SHORTLIST CTAs HERE 🔵</div>
+                        <div className="text-sm text-blue-700">Trainer ID: {shortlisted.trainer_id}</div>
                         <div className="flex items-center justify-center gap-2 py-2 bg-green-50 text-green-800 rounded-lg border border-green-200">
                           <Star className="h-3 w-3 fill-current" />
                           <span className="text-xs font-medium">Shortlisted</span>
