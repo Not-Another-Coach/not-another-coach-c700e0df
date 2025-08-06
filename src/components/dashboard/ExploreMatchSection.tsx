@@ -167,6 +167,35 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
   // Combine real trainers with sample trainers for better matching experience
   const allTrainers = [...realTrainers, ...sampleTrainers];
 
+  // Clean up invalid trainer IDs from shortlisted trainers on mount
+  useEffect(() => {
+    const cleanupInvalidTrainers = async () => {
+      if (!actualShortlistedTrainers.length || trainersLoading) return;
+
+      const allValidTrainerIds = allTrainers.map(t => t.id);
+      const invalidShortlistedIds = actualShortlistedTrainers
+        .filter(st => !allValidTrainerIds.includes(st.trainer_id))
+        .map(st => st.trainer_id);
+
+      if (invalidShortlistedIds.length > 0) {
+        console.log('🧹 Cleaning up invalid shortlisted trainers:', invalidShortlistedIds);
+        
+        // Remove invalid trainers from shortlist silently
+        for (const trainerId of invalidShortlistedIds) {
+          try {
+            await removeFromShortlist(trainerId);
+          } catch (error) {
+            console.error('Error removing invalid trainer:', trainerId, error);
+          }
+        }
+      }
+    };
+
+    // Run cleanup after data loads
+    const timeoutId = setTimeout(cleanupInvalidTrainers, 1000);
+    return () => clearTimeout(timeoutId);
+  }, [actualShortlistedTrainers, allTrainers, trainersLoading, removeFromShortlist]);
+
   const { matchedTrainers, topMatches, goodMatches } = useEnhancedTrainerMatching(
     allTrainers, 
     profile.quiz_answers,
@@ -914,40 +943,29 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                 These are your top trainer choices. You can chat with them and book discovery calls.
               </div>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {actualShortlistedTrainers.map((shortlisted) => {
-                  // Find the trainer data from all trainers (sample + real)
-                  let trainer = allTrainers.find(t => t.id === shortlisted.trainer_id);
-                  
-                  // If not found in allTrainers, try to fetch from database or use enhanced fallback
-                  if (!trainer) {
-                    console.warn(`Trainer ${shortlisted.trainer_id} not found in allTrainers. This may indicate a data inconsistency.`);
+                {actualShortlistedTrainers
+                  .map((shortlisted) => {
+                    // Find the trainer data from all trainers (sample + real)
+                    let trainer = allTrainers.find(t => t.id === shortlisted.trainer_id);
                     
-                    // Create enhanced trainer object with better defaults
-                    trainer = {
-                      id: shortlisted.trainer_id,
-                      name: `Trainer ${shortlisted.trainer_id.slice(0, 8)}...`,
-                      specialties: ["General Fitness"],
-                      rating: 4.5,
-                      reviews: 0,
-                      experience: 'Not specified',
-                      location: 'Location not specified',
-                      hourlyRate: 0,
-                      image: '/placeholder.svg',
-                      certifications: [],
-                      description: 'Profile details not available.',
-                      availability: 'Contact for availability',
-                      trainingType: ["Contact for details"],
-                      offers_discovery_call: false // Default to false for unknown trainers
-                    } as any;
-                  }
+                    // If not found in allTrainers, return null to filter out
+                    if (!trainer) {
+                      console.warn(`Trainer ${shortlisted.trainer_id} not found in allTrainers. Removing from shortlist display.`);
+                      return null;
+                    }
 
-                  // Calculate match data for this trainer to ensure consistency
-                  const matchData = getTrainerMatchData(trainer);
-                  
-                   return (
-                    <div key={`shortlisted-${shortlisted.trainer_id}-${shortlisted.stage}`} className="space-y-3">
-                      <TrainerCard
-                        trainer={matchData.trainer}
+                    return { shortlisted, trainer };
+                  })
+                  .filter(Boolean) // Remove null entries
+                  .map(({ shortlisted, trainer }) => {
+
+                    // Calculate match data for this trainer to ensure consistency
+                    const matchData = getTrainerMatchData(trainer);
+                    
+                    return (
+                      <div key={`shortlisted-${shortlisted.trainer_id}-${shortlisted.stage}`} className="space-y-3">
+                        <TrainerCard
+                          trainer={matchData.trainer}
                         onViewProfile={handleViewProfile}
                         matchScore={matchData.score}
                         matchReasons={matchData.matchReasons}
