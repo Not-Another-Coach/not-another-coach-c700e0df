@@ -384,45 +384,43 @@ const TrainerDashboard = () => {
             </Card>
 
             {/* 2. Upcoming Sessions and This Week's Goal - Side by Side */}
-            <div className="grid lg:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-2 gap-6">
               
               {/* Upcoming Sessions */}
               <Card>
-                <CardHeader>
+                <CardHeader className="pb-3">
                   <CardTitle className="text-base">Upcoming Sessions</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="max-h-48 overflow-y-auto">
                   <UpcomingSessionsWidget />
                 </CardContent>
               </Card>
 
               {/* This Week's Goal */}
               <Card className="bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-semibold mb-2">🎯 This Week's Goal</h3>
-                      <p className="text-muted-foreground">Convert 3 new clients</p>
-                      <div className="flex items-center gap-2 mt-2">
-                        <Progress value={33} className="w-32 h-2" />
-                        <span className="text-sm text-muted-foreground">1/3</span>
-                      </div>
+                <CardContent className="p-6 flex items-center justify-between min-h-[12rem]">
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">🎯 This Week's Goal</h3>
+                    <p className="text-muted-foreground">Convert 3 new clients</p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Progress value={33} className="w-32 h-2" />
+                      <span className="text-sm text-muted-foreground">1/3</span>
                     </div>
-                    <Target className="w-8 h-8 text-primary" />
                   </div>
+                  <Target className="w-8 h-8 text-primary flex-shrink-0" />
                 </CardContent>
               </Card>
             </div>
 
             {/* 3. Live Activity and Coach Feedback - Side by Side */}
-            <div className="grid lg:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-2 gap-6">
               
               {/* Live Activity */}
               <Card>
-                <CardHeader>
+                <CardHeader className="pb-3">
                   <CardTitle className="text-base">Live Activity</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="max-h-48 overflow-y-auto">
                   <LiveActivityFeed />
                 </CardContent>
               </Card>
