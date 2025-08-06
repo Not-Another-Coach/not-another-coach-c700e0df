@@ -624,20 +624,15 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                   </div>
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {mutualMatches.map((match) => (
-                      <div key={match.trainer.id} className="relative">
-                        <TrainerCard
-                          trainer={match.trainer}
-                          onViewProfile={handleViewProfile}
-                          matchScore={match.score}
-                          matchReasons={match.matchReasons}
-                          matchDetails={match.matchDetails}
-                        />
-                        <Badge 
-                          className="absolute top-8 left-2 bg-green-500 text-white z-10"
-                        >
-                          Mutual Match!
-                        </Badge>
-                      </div>
+                      <TrainerCard
+                        key={match.trainer.id}
+                        trainer={match.trainer}
+                        onViewProfile={handleViewProfile}
+                        matchScore={match.score}
+                        matchReasons={match.matchReasons}
+                        matchDetails={match.matchDetails}
+                        cardState="matched"
+                      />
                     ))}
                   </div>
                 </div>
@@ -700,74 +695,19 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
           {savedTrainers.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {savedTrainers.map((match) => (
-                <div key={match.trainer.id} className="relative">
-                  {/* Comparison Checkbox - Line 1 */}
-                  <div className="absolute top-2 right-2 z-10">
-                    <Checkbox
-                      checked={savedComparison.includes(match.trainer.id)}
-                      onCheckedChange={() => handleSavedComparisonToggle(match.trainer.id)}
-                      disabled={!savedComparison.includes(match.trainer.id) && savedComparison.length >= 4}
-                      className="bg-white border-2 shadow-sm"
-                    />
-                  </div>
-
-                  <TrainerCard
-                    trainer={match.trainer}
-                    onViewProfile={handleViewProfile}
-                    matchScore={match.score}
-                    matchReasons={match.matchReasons}
-                    matchDetails={match.matchDetails}
-                  />
-                  
-                  {/* Shortlist Action Buttons */}
-                  <div className="mt-4 space-y-2">
-                    {isShortlisted(match.trainer.id) ? (
-                      <div className="space-y-2">
-                        <Badge variant="default" className="w-full justify-center bg-green-100 text-green-800 border-green-200">
-                          ✓ Shortlisted
-                        </Badge>
-                        <div className="grid grid-cols-2 gap-2">
-                          <Button size="sm" variant="outline" className="text-xs" onClick={() => handleMessage(match.trainer.id)}>
-                            <MessageCircle className="h-3 w-3 mr-1" />
-                            Chat
-                          </Button>
-                          {match.trainer.offers_discovery_call ? (
-                            <BookDiscoveryCallButton 
-                              trainer={{
-                                id: match.trainer.id,
-                                name: match.trainer.name,
-                                offers_discovery_call: match.trainer.offers_discovery_call
-                              }}
-                              size="sm"
-                              variant="outline"
-                              className="text-xs"
-                            />
-                          ) : (
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              disabled
-                              className="flex items-center gap-1 text-xs opacity-50 cursor-not-allowed"
-                            >
-                              No Discovery Call
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    ) : (
-                      <Button 
-                        size="sm" 
-                        variant="default" 
-                        className="w-full"
-                        onClick={() => handleShortlist(match.trainer.id)}
-                        disabled={!canShortlistMore}
-                      >
-                        <Star className="h-3 w-3 mr-1" />
-                        {canShortlistMore ? 'Add to Shortlist' : 'Shortlist Full'}
-                      </Button>
-                    )}
-                  </div>
-                </div>
+                <TrainerCard
+                  key={match.trainer.id}
+                  trainer={match.trainer}
+                  onViewProfile={handleViewProfile}
+                  matchScore={match.score}
+                  matchReasons={match.matchReasons}
+                  matchDetails={match.matchDetails}
+                  cardState={isShortlisted(match.trainer.id) ? "shortlisted" : "saved"}
+                  showComparisonCheckbox={true}
+                  comparisonChecked={savedComparison.includes(match.trainer.id)}
+                  onComparisonToggle={handleSavedComparisonToggle}
+                  comparisonDisabled={!savedComparison.includes(match.trainer.id) && savedComparison.length >= 4}
+                />
               ))}
             </div>
           ) : (
@@ -839,102 +779,21 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                   const matchData = getTrainerMatchData(trainer);
                   
                   return (
-                    <div key={shortlisted.trainer_id} className="relative">
-                      {/* Comparison Checkbox - Line 1 */}
-                      <div className="absolute top-2 right-2 z-20">
-                        <Checkbox
-                          checked={shortlistedComparison.includes(shortlisted.trainer_id)}
-                          onCheckedChange={() => handleShortlistedComparisonToggle(shortlisted.trainer_id)}
-                          disabled={!shortlistedComparison.includes(shortlisted.trainer_id) && shortlistedComparison.length >= 4}
-                          className="bg-white border-2 shadow-sm"
-                        />
-                      </div>
-
-                      <TrainerCard
-                        trainer={matchData.trainer}
-                        onViewProfile={handleViewProfile}
-                        matchScore={matchData.score}
-                        matchReasons={matchData.matchReasons}
-                        matchDetails={matchData.matchDetails}
-                      />
-                      <Badge 
-                        className="absolute top-8 left-2 bg-yellow-500 text-white z-10"
-                      >
-                        ⭐ Shortlisted
-                      </Badge>
-                      
-                      {/* Remove from Shortlist Button - Line 1 */}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="absolute top-2 left-2 bg-white/90 backdrop-blur hover:bg-red-50 hover:text-red-600 z-10"
-                        onClick={() => handleRemoveFromShortlist(shortlisted.trainer_id, matchData.trainer.name)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                      
-                      {/* Action Buttons for Shortlisted Trainers */}
-                      <div className="mt-4 grid grid-cols-3 gap-2">
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          className="flex items-center gap-1 text-xs"
-                          onClick={() => handleViewProfile(shortlisted.trainer_id)}
-                        >
-                          View Profile
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="default" 
-                          className="flex items-center gap-1 text-xs"
-                          onClick={() => handleMessage(shortlisted.trainer_id)}
-                        >
-                          <MessageCircle className="h-3 w-3" />
-                          Chat
-                        </Button>
-                        {shortlisted.discovery_call ? (
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            className="flex items-center gap-1 text-xs"
-                            onClick={() => {
-                              setSelectedDiscoveryCall({
-                                ...shortlisted.discovery_call,
-                                trainer: {
-                                  id: shortlisted.trainer_id,
-                                  name: trainer.name,
-                                  firstName: trainer.name.split(' ')[0] || 'Trainer',
-                                  lastName: trainer.name.split(' ')[1] || shortlisted.trainer_id
-                                }
-                              });
-                              setIsRescheduleModalOpen(true);
-                            }}
-                          >
-                            Reschedule
-                          </Button>
-                        ) : matchData.trainer.offers_discovery_call ? (
-                          <BookDiscoveryCallButton 
-                            trainer={{
-                              id: shortlisted.trainer_id,
-                              name: matchData.trainer.name,
-                              offers_discovery_call: matchData.trainer.offers_discovery_call
-                            }}
-                            size="sm"
-                            variant="outline"
-                            className="text-xs"
-                          />
-                        ) : (
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            disabled
-                            className="flex items-center gap-1 text-xs opacity-50 cursor-not-allowed"
-                          >
-                            No Discovery Call
-                          </Button>
-                        )}
-                      </div>
-                    </div>
+                    <TrainerCard
+                      key={shortlisted.trainer_id}
+                      trainer={matchData.trainer}
+                      onViewProfile={handleViewProfile}
+                      matchScore={matchData.score}
+                      matchReasons={matchData.matchReasons}
+                      matchDetails={matchData.matchDetails}
+                      cardState="shortlisted"
+                      showComparisonCheckbox={true}
+                      comparisonChecked={shortlistedComparison.includes(shortlisted.trainer_id)}
+                      onComparisonToggle={handleShortlistedComparisonToggle}
+                      comparisonDisabled={!shortlistedComparison.includes(shortlisted.trainer_id) && shortlistedComparison.length >= 4}
+                      showRemoveButton={true}
+                      onRemove={(trainerId) => handleRemoveFromShortlist(trainerId, matchData.trainer.name)}
+                    />
                   );
                 })}
               </div>
@@ -997,64 +856,15 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                     const matchData = getTrainerMatchData(trainer);
                     
                     return (
-                      <div key={shortlisted.trainer_id} className="relative">
-                        <TrainerCard
-                          trainer={matchData.trainer}
-                          onViewProfile={handleViewProfile}
-                          matchScore={matchData.score}
-                          matchReasons={matchData.matchReasons}
-                          matchDetails={matchData.matchDetails}
-                        />
-                        <Badge 
-                          className="absolute top-2 left-2 bg-blue-500 text-white z-10"
-                        >
-                          🔍 Discovery
-                        </Badge>
-                        
-                        {/* Action Buttons for Discovery */}
-                        <div className="mt-4 grid grid-cols-3 gap-2">
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            className="flex items-center gap-1 text-xs"
-                            onClick={() => handleViewProfile(shortlisted.trainer_id)}
-                          >
-                            View Profile
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="default" 
-                            className="flex items-center gap-1 text-xs"
-                            onClick={() => handleMessage(shortlisted.trainer_id)}
-                          >
-                            <MessageCircle className="h-3 w-3" />
-                            Chat
-                          </Button>
-                          {shortlisted.discovery_call ? (
-                            <EditDiscoveryCallButton
-                              discoveryCall={shortlisted.discovery_call}
-                              trainer={{
-                                id: shortlisted.trainer_id,
-                                name: trainer.name
-                              }}
-                              size="sm"
-                              variant="outline"
-                              className="text-xs"
-                            />
-                          ) : (
-                            <BookDiscoveryCallButton
-                              trainer={{
-                                id: shortlisted.trainer_id,
-                                name: matchData.trainer.name,
-                                offers_discovery_call: matchData.trainer.offers_discovery_call ?? true
-                              }}
-                              size="sm"
-                              variant="outline"
-                              className="text-xs"
-                            />
-                          )}
-                        </div>
-                      </div>
+                      <TrainerCard
+                        key={shortlisted.trainer_id}
+                        trainer={matchData.trainer}
+                        onViewProfile={handleViewProfile}
+                        matchScore={matchData.score}
+                        matchReasons={matchData.matchReasons}
+                        matchDetails={matchData.matchDetails}
+                        cardState="discovery"
+                      />
                     );
                   })}
                 </div>

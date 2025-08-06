@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Star, MapPin, Clock, Users, Award, Target, Dumbbell, Heart } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Star, MapPin, Clock, Users, Award, Target, Dumbbell, Heart, X } from "lucide-react";
 import { MatchBadge } from "@/components/MatchBadge";
 import { MatchProgressIndicator } from "@/components/MatchProgressIndicator";
 import { useSavedTrainers } from "@/hooks/useSavedTrainers";
@@ -45,9 +46,32 @@ interface TrainerCardProps {
   matchScore?: number;
   matchReasons?: string[];
   matchDetails?: MatchDetail[];
+  
+  // Unified state management
+  cardState?: 'saved' | 'shortlisted' | 'discovery' | 'matched' | 'default';
+  showComparisonCheckbox?: boolean;
+  comparisonChecked?: boolean;
+  onComparisonToggle?: (trainerId: string) => void;
+  comparisonDisabled?: boolean;
+  showRemoveButton?: boolean;
+  onRemove?: (trainerId: string) => void;
 }
 
-export const TrainerCard = ({ trainer, onViewProfile, onMessage, matchScore = 0, matchReasons = [], matchDetails = [] }: TrainerCardProps) => {
+export const TrainerCard = ({ 
+  trainer, 
+  onViewProfile, 
+  onMessage, 
+  matchScore = 0, 
+  matchReasons = [], 
+  matchDetails = [],
+  cardState = 'default',
+  showComparisonCheckbox = false,
+  comparisonChecked = false,
+  onComparisonToggle,
+  comparisonDisabled = false,
+  showRemoveButton = false,
+  onRemove
+}: TrainerCardProps) => {
   const { isTrainerSaved, saveTrainer, unsaveTrainer } = useSavedTrainers();
   const { stage } = useEngagementStage(trainer.id);
   const { getVisibility } = useContentVisibility({
@@ -88,35 +112,93 @@ export const TrainerCard = ({ trainer, onViewProfile, onMessage, matchScore = 0,
     const success = isSaved 
       ? await unsaveTrainer(trainer.id)
       : await saveTrainer(trainer.id);
-    
-    // The hook already shows toast notifications, so we don't need additional feedback here
+  };
+
+  const handleComparisonClick = () => {
+    if (onComparisonToggle) {
+      onComparisonToggle(trainer.id);
+    }
+  };
+
+  const handleRemoveClick = () => {
+    if (onRemove) {
+      onRemove(trainer.id);
+    }
+  };
+
+  // Get the appropriate badge based on card state
+  const getStateBadge = () => {
+    switch (cardState) {
+      case 'matched':
+        return (
+          <Badge className="absolute top-8 left-2 bg-green-500 text-white z-10">
+            Mutual Match!
+          </Badge>
+        );
+      case 'shortlisted':
+        return (
+          <Badge className="absolute top-8 left-2 bg-yellow-500 text-white z-10">
+            ⭐ Shortlisted
+          </Badge>
+        );
+      case 'discovery':
+        return (
+          <Badge className="absolute top-8 left-2 bg-blue-500 text-white z-10">
+            🔍 Discovery
+          </Badge>
+        );
+      default:
+        return null;
+    }
   };
 
   return (
     <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-card to-muted/30 border-0 relative overflow-hidden">
       <CardContent className="p-6 pt-16"> {/* Add top padding for two header lines */}
-        {/* Like/Save Button - Line 1 */}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="absolute top-2 left-2 z-20 bg-white/80 backdrop-blur hover:bg-white/90 transition-all"
-          onClick={handleToggleSave}
-        >
-          {isSaved ? (
-            <Heart className="h-4 w-4 text-red-500 fill-current" />
+        {/* Line 1: Interactive elements */}
+        <div className="absolute top-2 left-2 right-2 flex justify-between z-20">
+          {/* Left: Heart/Save or Remove button */}
+          {showRemoveButton ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="bg-white/90 backdrop-blur hover:bg-red-50 hover:text-red-600"
+              onClick={handleRemoveClick}
+            >
+              <X className="h-4 w-4" />
+            </Button>
           ) : (
-            <Heart className="h-4 w-4 text-gray-400 hover:text-red-500 transition-colors" />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="bg-white/80 backdrop-blur hover:bg-white/90 transition-all"
+              onClick={handleToggleSave}
+            >
+              {isSaved ? (
+                <Heart className="h-4 w-4 text-red-500 fill-current" />
+              ) : (
+                <Heart className="h-4 w-4 text-gray-400 hover:text-red-500 transition-colors" />
+              )}
+            </Button>
           )}
-        </Button>
 
-        {/* Match Badge - Line 1 */}
-        {matchScore > 0 && (
-          <div className="absolute top-2 right-2 z-10">
+          {/* Right: Comparison checkbox or Match badge */}
+          {showComparisonCheckbox ? (
+            <Checkbox
+              checked={comparisonChecked}
+              onCheckedChange={handleComparisonClick}
+              disabled={comparisonDisabled}
+              className="bg-white border-2 shadow-sm"
+            />
+          ) : matchScore > 0 ? (
             <MatchBadge score={matchScore} reasons={matchReasons} />
-          </div>
-        )}
+          ) : null}
+        </div>
+
+        {/* Line 2: State badge */}
+        {getStateBadge()}
         
-        {/* Trainer Image and Basic Info */}
+        {/* Main content */}
         <div className="flex items-start gap-4 mb-4">
           <div className="relative">
             <img 
