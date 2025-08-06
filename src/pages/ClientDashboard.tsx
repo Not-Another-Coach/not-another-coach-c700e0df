@@ -12,8 +12,8 @@ import { DashboardSummary } from "@/components/dashboard/DashboardSummary";
 import { EditPreferencesSection } from "@/components/dashboard/EditPreferencesSection";
 import { ExploreMatchSection } from "@/components/dashboard/ExploreMatchSection";
 import { MessagesSection } from "@/components/dashboard/MessagesSection";
-import { UnmatchedTrainers } from "@/components/dashboard/UnmatchedTrainers";
 import { ClientSurveyWidget } from "@/components/dashboard/ClientSurveyWidget";
+import MyTrainers from "./MyTrainers";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { FloatingMessageButton } from "@/components/FloatingMessageButton";
 import { ClientJourneyBreadcrumb } from "@/components/ClientJourneyBreadcrumb";
@@ -174,7 +174,7 @@ export default function ClientDashboard() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           {/* Tab Navigation */}
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            <TabsList className="grid w-full sm:w-auto grid-cols-4 lg:grid-cols-4">
+            <TabsList className="grid w-full sm:w-auto grid-cols-5">
               <TabsTrigger value="summary" className="flex items-center gap-2">
                 <Menu className="h-4 w-4" />
                 <span className="hidden sm:inline">Dashboard</span>
@@ -186,6 +186,10 @@ export default function ClientDashboard() {
                 <Settings className="h-4 w-4" />
                 <span className="hidden sm:inline">Preferences</span>
               </TabsTrigger>
+              <TabsTrigger value="trainers" className="flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                <span className="hidden sm:inline">My Trainers</span>
+              </TabsTrigger>
               <TabsTrigger value="explore" className="flex items-center gap-2">
                 <Search className="h-4 w-4" />
                 <span className="hidden sm:inline">Explore</span>
@@ -196,17 +200,8 @@ export default function ClientDashboard() {
               </TabsTrigger>
             </TabsList>
 
-            {/* Quick Actions */}
+            {/* Remove the old quick actions since My Trainers is now a tab */}
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigate('/my-trainers')}
-                className="flex items-center gap-2"
-              >
-                <Users className="h-4 w-4" />
-                My Trainers
-              </Button>
             </div>
           </div>
 
@@ -232,10 +227,11 @@ export default function ClientDashboard() {
             <ClientSurveyWidget profile={profile} />
           </TabsContent>
 
+          <TabsContent value="trainers" className="space-y-6">
+            <MyTrainers />
+          </TabsContent>
+
           <TabsContent value="explore" className="space-y-6">
-            <UnmatchedTrainers 
-              profile={profile}
-            />
             <ExploreMatchSection 
               profile={profile}
             />

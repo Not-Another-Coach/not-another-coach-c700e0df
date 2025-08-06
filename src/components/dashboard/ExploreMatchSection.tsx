@@ -1,27 +1,16 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useEnhancedTrainerMatching } from "@/hooks/useEnhancedTrainerMatching";
 import { useSavedTrainers } from "@/hooks/useSavedTrainers";
 import { useShortlistedTrainers } from "@/hooks/useShortlistedTrainers";
-import { useTrainerEngagement } from "@/hooks/useTrainerEngagement";
-import { useConversations } from "@/hooks/useConversations";
 import { useRealTrainers } from "@/hooks/useRealTrainers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SwipeResultsSection } from "@/components/dashboard/SwipeResultsSection";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { TrainerCard } from "@/components/TrainerCard";
-import { SwipeableCard } from "@/components/SwipeableCard";
 import { ComparisonView } from "@/components/ComparisonView";
-import { BookDiscoveryCallButton } from "@/components/discovery-call/BookDiscoveryCallButton";
-import { EditDiscoveryCallButton } from "@/components/discovery-call/EditDiscoveryCallButton";
-import { ClientRescheduleModal } from "./ClientRescheduleModal";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { 
   Search, 
@@ -45,18 +34,10 @@ interface ExploreMatchSectionProps {
   profile: any;
 }
 
-// Note: Sample trainers removed - using only real published trainers from database
-
 export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
   const navigate = useNavigate();
-  const { savedTrainerIds, unsaveTrainer } = useSavedTrainers();
-  const { shortlistTrainer, isShortlisted, shortlistCount, canShortlistMore, removeFromShortlist, bookDiscoveryCall, shortlistedTrainers: actualShortlistedTrainers } = useShortlistedTrainers();
-  
-  // Import engagement functions for updating trainer status
-  const { proceedWithCoach, rejectCoach } = useTrainerEngagement();
-  
-  // Import conversation functionality
-  const { createConversation, conversations } = useConversations();
+  const { saveTrainer, isTrainerSaved } = useSavedTrainers();
+  const { shortlistTrainer, isShortlisted, shortlistCount, canShortlistMore } = useShortlistedTrainers();
   
   // Use real trainers from database
   const { trainers: realTrainers, loading: trainersLoading } = useRealTrainers();
@@ -65,17 +46,11 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
   const [selectedGoal, setSelectedGoal] = useState("all");
   const [selectedLocation, setSelectedLocation] = useState("all");
   const [selectedAvailability, setSelectedAvailability] = useState("all");
-  const [activeTab, setActiveTab] = useState("browse");
-  const [browseView, setBrowseView] = useState("recommended"); // Sub-navigation for browse tab
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   
   // Comparison functionality
   const [selectedForComparison, setSelectedForComparison] = useState<string[]>([]);
   const [showComparison, setShowComparison] = useState(false);
-  const [comparisonContext, setComparisonContext] = useState<'saved' | 'shortlisted' | 'general'>('general');
-
-  // Reschedule modal state
-  const [selectedDiscoveryCall, setSelectedDiscoveryCall] = useState<any>(null);
-  const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
 
   // Get enhanced matched trainers using client survey data
   const clientSurveyData = {
@@ -98,135 +73,15 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
     flexible_scheduling: profile.flexible_scheduling,
   };
 
-  // Use only published trainers for all client views
-  const allTrainers = realTrainers;
-  
   const { matchedTrainers, topMatches, goodMatches } = useEnhancedTrainerMatching(
-    allTrainers, 
+    realTrainers, 
     profile.quiz_answers,
     clientSurveyData
   );
 
-  // Pre-calculate match data for ALL trainers to avoid hook violations
-  const allTrainerMatches = useMemo(() => {
-    // Create a map of all trainer matches for quick lookup
-    const matchMap = new Map();
-    matchedTrainers.forEach(match => {
-      matchMap.set(match.trainer.id, match);
-    });
-    return matchMap;
-  }, [matchedTrainers]);
-
-  // Filter matched trainers to exclude saved ones from Browse tab
-  const browseTrainers = matchedTrainers.filter(match => 
-    !savedTrainerIds.includes(match.trainer.id)
-  );
-
-  // Get saved trainers - simple approach using memoization
-  const savedTrainers = useMemo(() => {
-    // First try to get from matched trainers
-    const savedFromMatched = matchedTrainers.filter(match => 
-      savedTrainerIds.includes(match.trainer.id) && !isShortlisted(match.trainer.id)
-    );
-
-    // For any saved trainers not in matched results, create simple placeholders
-    const savedIdsFromMatched = savedFromMatched.map(s => s.trainer.id);
-    const missingSavedIds = savedTrainerIds.filter(id => 
-      !savedIdsFromMatched.includes(id) && !isShortlisted(id)
-    );
-
-    const missingTrainerPlaceholders = missingSavedIds.map(trainerId => ({
-      trainer: {
-        id: trainerId,
-        name: "Private Trainer",
-        specialties: ["Personal Training"],
-        rating: 4.5,
-        reviews: 8,
-        experience: "3+ years",
-        location: "Location TBD",
-        hourlyRate: 75,
-        image: "/placeholder.svg",
-        certifications: ["Certified Personal Trainer"],
-        description: "Professional personal trainer ready to help you achieve your fitness goals.",
-        availability: "Flexible",
-        trainingType: ["1-on-1", "Virtual"],
-        offers_discovery_call: true
-      },
-      score: 85,
-      matchReasons: ["Previously saved trainer"],
-      matchDetails: []
-    }));
-
-    const allSavedTrainers = [...savedFromMatched, ...missingTrainerPlaceholders];
-    
-    // Deduplicate by trainer ID to prevent duplicate keys and checkbox conflicts
-    const uniqueTrainers = allSavedTrainers.reduce((acc, current) => {
-      const existingIndex = acc.findIndex(item => item.trainer.id === current.trainer.id);
-      if (existingIndex === -1) {
-        acc.push(current);
-      } else {
-        console.warn(`Duplicate trainer found: ${current.trainer.id} - ${current.trainer.name}. Keeping the better match.`);
-        // Keep the one with higher score or more data
-        if (current.score > acc[existingIndex].score || current.matchDetails.length > 0) {
-          acc[existingIndex] = current;
-        }
-      }
-      return acc;
-    }, [] as typeof allSavedTrainers);
-
-    console.log('Deduplicated saved trainers:', uniqueTrainers.map(t => ({ id: t.trainer.id, name: t.trainer.name })));
-    
-    return uniqueTrainers;
-  }, [matchedTrainers, savedTrainerIds, isShortlisted]);
-
-  // Get shortlisted trainers
-  const shortlistedTrainers = matchedTrainers.filter(match => 
-    isShortlisted(match.trainer.id)
-  );
-
-  // Helper function to get match data for any trainer (no hooks!)
-  const getTrainerMatchData = (trainer: any) => {
-    // Check if trainer is already in our matches
-    const existingMatch = allTrainerMatches.get(trainer.id);
-    if (existingMatch) {
-      return existingMatch;
-    }
-
-    // For trainers not in the matches, return basic match data
-    return {
-      trainer,
-      score: 75, // Give a reasonable default score
-      matchReasons: ["Manually added trainer"],
-      matchDetails: [
-        {
-          category: "Goals",
-          score: 80,
-          icon: Target,
-          color: "text-green-500"
-        },
-        {
-          category: "Location",
-          score: 70,
-          icon: MapPin,
-          color: "text-blue-500"
-        },
-        {
-          category: "Experience",
-          score: 75,
-          icon: Users,
-          color: "text-purple-500"
-        }
-      ],
-      compatibilityPercentage: 75
-    };
-  };
-
-  // Mock matched trainers (those with mutual interest)
-  const mutualMatches = matchedTrainers.filter(match => match.score >= 80);
-
-  // Filter trainers based on search and filters
-  const filterTrainers = (trainers: any[]) => {
-    return trainers.filter(match => {
+  // Filter matched trainers based on search and filters
+  const filteredTrainers = useMemo(() => {
+    return matchedTrainers.filter(match => {
       const trainer = match.trainer;
       const matchesSearch = !searchTerm || 
         trainer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -240,12 +95,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
       
       return matchesSearch && matchesGoal && matchesLocation;
     });
-  };
-
-  const handleSwipe = (direction: 'left' | 'right', trainer: any) => {
-    console.log(`Swiped ${direction} on trainer ${trainer.id}`);
-    // Here you would implement the swipe logic
-  };
+  }, [matchedTrainers, searchTerm, selectedGoal, selectedLocation]);
 
   const handleViewProfile = (trainerId: string) => {
     navigate(`/trainer/${trainerId}`);
@@ -259,128 +109,43 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
     window.dispatchEvent(event);
   };
 
-  const handleCreateConversation = async (trainerId: string) => {
-    // Create conversation and navigate to messaging
-    const result = await createConversation(trainerId);
-    if (!result.error) {
-      navigate('/messaging');
+  const handleSaveTrainer = async (trainerId: string) => {
+    console.log('🔥 Save trainer clicked:', trainerId);
+    try {
+      const result = await saveTrainer(trainerId);
+      if (result) {
+        toast.success('Trainer saved!');
+      } else {
+        toast.error('Failed to save trainer');
+      }
+    } catch (error) {
+      console.error('Error saving trainer:', error);
+      toast.error('Failed to save trainer');
     }
   };
 
   const handleShortlist = async (trainerId: string) => {
+    console.log('🔥 Shortlist trainer clicked:', trainerId);
     if (!canShortlistMore) {
       toast.error('You can only shortlist up to 4 trainers');
       return;
     }
     
-    const result = await shortlistTrainer(trainerId);
-    if (result.error) {
+    try {
+      const result = await shortlistTrainer(trainerId);
+      if (result.error) {
+        toast.error('Failed to shortlist trainer');
+      } else {
+        toast.success('Trainer added to shortlist!');
+      }
+    } catch (error) {
+      console.error('Error shortlisting trainer:', error);
       toast.error('Failed to shortlist trainer');
-    } else {
-      toast.success('Trainer added to shortlist!');
-      // Force a small delay to ensure state updates
-      setTimeout(() => {
-        // The tabs should automatically update due to the reactive state
-        console.log('Shortlist action completed for trainer:', trainerId);
-      }, 500);
     }
   };
 
-  const handleRemoveFromShortlist = async (trainerId: string, trainerName: string) => {
-    // Show confirmation dialog asking if they want to keep the trainer saved
-    const keepSaved = await new Promise<boolean>((resolve) => {
-      const dialog = document.createElement('div');
-      dialog.innerHTML = `
-        <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div class="bg-white rounded-lg p-6 max-w-md mx-4">
-            <h3 class="text-lg font-semibold mb-2">Remove from Shortlist</h3>
-            <p class="text-gray-600 mb-4">
-              Do you want to keep ${trainerName} in your saved trainers for future reference?
-            </p>
-            <div class="flex gap-2 justify-end">
-              <button id="remove-all" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
-                Remove from Both
-              </button>
-              <button id="keep-saved" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-                Keep Saved
-              </button>
-            </div>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(dialog);
-
-      const handleKeepSaved = () => {
-        document.body.removeChild(dialog);
-        resolve(true);
-      };
-
-      const handleRemoveAll = () => {
-        document.body.removeChild(dialog);
-        resolve(false);
-      };
-
-      dialog.querySelector('#keep-saved')?.addEventListener('click', handleKeepSaved);
-      dialog.querySelector('#remove-all')?.addEventListener('click', handleRemoveAll);
-    });
-
-    // Remove from shortlist
-    console.log('Removing trainer from shortlist:', trainerId);
-    const result = await removeFromShortlist(trainerId);
-    if (result.error) {
-      console.error('Error removing from shortlist:', result.error);
-      toast.error('Failed to remove from shortlist');
-      return;
-    }
-
-    // If user chose to remove from saved as well
-    if (!keepSaved) {
-      await unsaveTrainer(trainerId);
-      toast.success(`${trainerName} removed from shortlist and saved trainers`);
-    } else {
-      toast.success(`${trainerName} removed from shortlist but kept in saved trainers`);
-    }
-    
-    // Force a refresh after a short delay to ensure the UI updates
-    setTimeout(() => {
-      console.log('Shortlist removal completed for trainer:', trainerId);
-    }, 500);
-  };
-
-  // Comparison functionality for saved trainers
-  const [savedComparison, setSavedComparison] = useState<string[]>([]);
-  const [shortlistedComparison, setShortlistedComparison] = useState<string[]>([]);
-
-  const handleSavedComparisonToggle = (trainerId: string) => {
-    console.log('handleSavedComparisonToggle called for trainer:', trainerId);
-    console.log('Current savedComparison state:', savedComparison);
-    
-    setSavedComparison(prev => {
-      const newState = prev.includes(trainerId) 
-        ? prev.filter(id => id !== trainerId)
-        : prev.length < 4 
-          ? [...prev, trainerId] 
-          : prev;
-      
-      console.log('New savedComparison state:', newState);
-      return newState;
-    });
-  };
-
-  // Clean up comparison state when savedTrainers changes to remove invalid trainer IDs
-  useEffect(() => {
-    const savedTrainerIds = savedTrainers.map(match => match.trainer.id);
-    setSavedComparison(prev => prev.filter(id => savedTrainerIds.includes(id)));
-  }, [savedTrainers]);
-
-  // Clean up shortlisted comparison state when shortlisted trainers change
-  useEffect(() => {
-    const shortlistedTrainerIds = actualShortlistedTrainers.map(shortlisted => shortlisted.trainer_id);
-    setShortlistedComparison(prev => prev.filter(id => shortlistedTrainerIds.includes(id)));
-  }, [actualShortlistedTrainers]);
-
-  const handleShortlistedComparisonToggle = (trainerId: string) => {
-    setShortlistedComparison(prev => 
+  const handleComparisonToggle = (trainerId: string) => {
+    setSelectedForComparison(prev => 
       prev.includes(trainerId) 
         ? prev.filter(id => id !== trainerId)
         : prev.length < 4 
@@ -389,797 +154,270 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
     );
   };
 
-  const getSavedSelectedTrainersData = () => {
-    // Filter from deduplicated saved trainers instead of allTrainers
-    const savedTrainerData = savedTrainers.map(match => match.trainer);
-    return savedTrainerData.filter(trainer => savedComparison.includes(trainer.id));
-  };
-
-  const getShortlistedSelectedTrainersData = () => {
-    // Build trainer data from shortlisted trainers directly, handling missing trainers in allTrainers
-    const shortlistedTrainerData = actualShortlistedTrainers
-      .filter(shortlisted => shortlistedComparison.includes(shortlisted.trainer_id))
-      .map(shortlisted => {
-        // Find the trainer data from all trainers (sample + real)
-        let trainer = allTrainers.find(t => t.id === shortlisted.trainer_id);
-        
-        // If not found in allTrainers, create a fallback trainer object
-        if (!trainer) {
-          console.warn(`Creating fallback trainer data for ${shortlisted.trainer_id}`);
-          trainer = {
-            id: shortlisted.trainer_id,
-            name: `Trainer ${shortlisted.trainer_id.slice(0, 8)}...`,
-            specialties: ["General Fitness"],
-            rating: 4.5,
-            reviews: 0,
-            experience: 'Not specified',
-            location: 'Location not specified',
-            hourlyRate: 75,
-            image: '/placeholder.svg',
-            certifications: ['Certified Personal Trainer'],
-            description: 'Experienced personal trainer focused on helping you achieve your fitness goals.',
-            availability: 'Flexible',
-            trainingType: ['In-Person', 'Online']
-          };
-        }
-        
-        return trainer;
-      });
-    
-    return shortlistedTrainerData;
-  };
-
-  const handleStartSavedComparison = () => {
-    const selectedTrainersData = getSavedSelectedTrainersData();
-    if (selectedTrainersData.length >= 2) {
-      setSelectedForComparison(savedComparison);
-      setComparisonContext('saved');
+  const handleStartComparison = () => {
+    if (selectedForComparison.length >= 2) {
       setShowComparison(true);
-    }
-  };
-
-  const handleStartShortlistedComparison = () => {
-    const selectedTrainersData = getShortlistedSelectedTrainersData();
-    console.log('Starting shortlisted comparison with trainers:', selectedTrainersData.map(t => ({ id: t.id, name: t.name })));
-    if (selectedTrainersData.length >= 2) {
-      setSelectedForComparison(shortlistedComparison);
-      setComparisonContext('shortlisted');
-      setShowComparison(true);
-    } else {
-      toast.error('Please select at least 2 trainers to compare');
     }
   };
 
   const getSelectedTrainersData = () => {
-    // Use the appropriate data source based on comparison context
-    switch (comparisonContext) {
-      case 'saved':
-        return getSavedSelectedTrainersData();
-      case 'shortlisted':
-        return getShortlistedSelectedTrainersData();
-      default:
-        return allTrainers.filter(trainer => selectedForComparison.includes(trainer.id));
-    }
+    return filteredTrainers
+      .filter(match => selectedForComparison.includes(match.trainer.id))
+      .map(match => match.trainer);
   };
 
-  const handleStartComparison = () => {
-    if (selectedForComparison.length < 2) {
-      toast.error('Please select at least 2 trainers to compare');
-      return;
-    }
-    setShowComparison(true);
+  const renderCTAs = (trainer: any) => {
+    const isSaved = isTrainerSaved(trainer.id);
+    const isShortlistedTrainer = isShortlisted(trainer.id);
+
+    return (
+      <div className="space-y-2 p-3 bg-background border rounded-lg">
+        <div className="grid grid-cols-2 gap-2">
+          {!isSaved && !isShortlistedTrainer && (
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => handleSaveTrainer(trainer.id)}
+            >
+              <Heart className="h-3 w-3 mr-1" />
+              Save
+            </Button>
+          )}
+          
+          {isSaved && !isShortlistedTrainer && (
+            <Button 
+              size="sm" 
+              variant="default"
+              onClick={() => handleShortlist(trainer.id)}
+              disabled={!canShortlistMore}
+            >
+              <Star className="h-3 w-3 mr-1" />
+              {canShortlistMore ? 'Shortlist' : 'Full'}
+            </Button>
+          )}
+          
+          {isShortlistedTrainer && (
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => navigate('/my-trainers')}
+            >
+              <Star className="h-3 w-3 mr-1 fill-current" />
+              Shortlisted
+            </Button>
+          )}
+          
+          <Button 
+            size="sm" 
+            variant="outline"
+            onClick={() => handleMessage(trainer.id)}
+          >
+            <MessageCircle className="h-3 w-3 mr-1" />
+            Message
+          </Button>
+        </div>
+      </div>
+    );
   };
 
-  const handleCloseComparison = () => {
-    setShowComparison(false);
-    setSelectedForComparison([]);
-    setComparisonContext('general');
-  };
-
-  // Show comparison view if active
   if (showComparison) {
     return (
-      <ComparisonView 
-        trainers={getSelectedTrainersData()} 
-        onClose={handleCloseComparison}
-      />
+      <div className="space-y-4">
+        <div className="flex items-center gap-4">
+          <Button 
+            variant="outline" 
+            onClick={() => setShowComparison(false)}
+            className="flex items-center gap-2"
+          >
+            <X className="h-4 w-4" />
+            Back to Explore
+          </Button>
+          <h2 className="text-xl font-semibold">Compare Trainers</h2>
+        </div>
+        <ComparisonView
+          trainers={getSelectedTrainersData()}
+          onClose={() => setShowComparison(false)}
+        />
+      </div>
+    );
+  }
+
+  if (trainersLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading trainers...</p>
+        </div>
+      </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Explore & Match</h1>
-          <p className="text-muted-foreground">
-            Discover trainers, manage your matches, and connect with coaches
-          </p>
-        </div>
-        <Button onClick={() => navigate('/discovery')}>
-          <Shuffle className="h-4 w-4 mr-2" />
-          Swipe Mode
-        </Button>
-      </div>
-
-      {/* Search and Filters */}
+      {/* Header with Search and Filters */}
       <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input
-                  placeholder="Search trainers by name or specialty..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+        <CardHeader>
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5" />
+              Explore Trainers
+            </CardTitle>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline">
+                {filteredTrainers.length} trainers
+              </Badge>
+              {selectedForComparison.length >= 2 && (
+                <Button 
+                  variant="default" 
+                  size="sm"
+                  onClick={handleStartComparison}
+                  className="flex items-center gap-2"
+                >
+                  <BarChart3 className="h-4 w-4" />
+                  Compare ({selectedForComparison.length})
+                </Button>
+              )}
             </div>
-            <div className="flex gap-2">
-              <Select value={selectedGoal} onValueChange={setSelectedGoal}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="Goal" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Goals</SelectItem>
-                  <SelectItem value="weight loss">Weight Loss</SelectItem>
-                  <SelectItem value="strength">Strength</SelectItem>
-                  <SelectItem value="yoga">Yoga</SelectItem>
-                  <SelectItem value="crossfit">CrossFit</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="Location" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Areas</SelectItem>
-                  <SelectItem value="downtown">Downtown</SelectItem>
-                  <SelectItem value="westside">Westside</SelectItem>
-                  <SelectItem value="eastside">Eastside</SelectItem>
-                  <SelectItem value="northside">Northside</SelectItem>
-                </SelectContent>
-              </Select>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input
+              placeholder="Search trainers by name or specialty..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+
+          {/* Filters */}
+          <div className="grid sm:grid-cols-3 gap-4">
+            <Select value={selectedGoal} onValueChange={setSelectedGoal}>
+              <SelectTrigger>
+                <SelectValue placeholder="Fitness Goal" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Goals</SelectItem>
+                <SelectItem value="weight loss">Weight Loss</SelectItem>
+                <SelectItem value="strength">Strength Training</SelectItem>
+                <SelectItem value="muscle">Muscle Building</SelectItem>
+                <SelectItem value="cardio">Cardio</SelectItem>
+                <SelectItem value="flexibility">Flexibility</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+              <SelectTrigger>
+                <SelectValue placeholder="Location" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Locations</SelectItem>
+                <SelectItem value="downtown">Downtown</SelectItem>
+                <SelectItem value="uptown">Uptown</SelectItem>
+                <SelectItem value="suburbs">Suburbs</SelectItem>
+                <SelectItem value="online">Online Only</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={selectedAvailability} onValueChange={setSelectedAvailability}>
+              <SelectTrigger>
+                <SelectValue placeholder="Availability" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Any Time</SelectItem>
+                <SelectItem value="morning">Morning</SelectItem>
+                <SelectItem value="afternoon">Afternoon</SelectItem>
+                <SelectItem value="evening">Evening</SelectItem>
+                <SelectItem value="weekend">Weekends</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* View Mode Toggle */}
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              Found {filteredTrainers.length} trainers matching your criteria
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant={viewMode === 'grid' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('grid')}
+              >
+                <Grid3X3 className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+              >
+                <List className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Tabs for different views */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="browse" className="flex items-center gap-2">
-            <Search className="h-4 w-4" />
-            <span className="hidden sm:inline">Browse</span>
-          </TabsTrigger>
-          <TabsTrigger value="saved" className="flex items-center gap-2">
-            <Heart className="h-4 w-4" />
-            <span className="hidden sm:inline">Saved</span>
-            <Badge variant="secondary" className="ml-1 text-xs">
-              {savedTrainers.length}
-            </Badge>
-          </TabsTrigger>
-          <TabsTrigger value="shortlisted" className="flex items-center gap-2">
-            <Star className="h-4 w-4" />
-            <span className="hidden sm:inline">Shortlisted</span>
-            <Badge variant="secondary" className="ml-1 text-xs">
-              {actualShortlistedTrainers.length}
-            </Badge>
-          </TabsTrigger>
-          <TabsTrigger value="discover" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            <span className="hidden sm:inline">Discover</span>
-            <Badge variant="secondary" className="ml-1 text-xs">
-              {actualShortlistedTrainers.filter(st => st.discovery_call).length}
-            </Badge>
-          </TabsTrigger>
-        </TabsList>
+      {/* Quick Actions */}
+      <div className="flex items-center justify-between">
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => navigate('/my-trainers')}>
+            <Users className="h-4 w-4 mr-2" />
+            My Trainers ({shortlistCount})
+          </Button>
+        </div>
+      </div>
 
-        {/* Browse Tab - Combines Recommended, Match, and List View */}
-        <TabsContent value="browse" className="space-y-6">
-          {/* Sub-navigation for Browse views */}
-          <div className="flex items-center justify-center">
-            <div className="flex items-center bg-muted rounded-lg p-1">
-              <Button
-                variant={browseView === "recommended" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setBrowseView("recommended")}
-                className="flex items-center gap-2"
-              >
-                <Target className="h-4 w-4" />
-                Recommended
-              </Button>
-              <Button
-                variant={browseView === "matches" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setBrowseView("matches")}
-                className="flex items-center gap-2"
-              >
-                <Users className="h-4 w-4" />
-                Matches
-              </Button>
-              <Button
-                variant={browseView === "all" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setBrowseView("all")}
-                className="flex items-center gap-2"
-              >
-                <List className="h-4 w-4" />
-                All Trainers
-              </Button>
+      {/* Trainers Grid/List */}
+      {filteredTrainers.length > 0 ? (
+        <div className={viewMode === 'grid' ? "grid md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}>
+          {filteredTrainers.map((match) => (
+            <div key={match.trainer.id} className="space-y-3">
+              <TrainerCard
+                trainer={match.trainer}
+                onViewProfile={handleViewProfile}
+                matchScore={match.score}
+                matchReasons={match.matchReasons}
+                matchDetails={match.matchDetails}
+                cardState={
+                  isShortlisted(match.trainer.id) ? "shortlisted" : 
+                  isTrainerSaved(match.trainer.id) ? "saved" : 
+                  "default"
+                }
+                showComparisonCheckbox={true}
+                comparisonChecked={selectedForComparison.includes(match.trainer.id)}
+                onComparisonToggle={handleComparisonToggle}
+                comparisonDisabled={!selectedForComparison.includes(match.trainer.id) && selectedForComparison.length >= 4}
+              />
+              
+              {/* CTAs */}
+              {renderCTAs(match.trainer)}
             </div>
-          </div>
-
-          {/* Recommended View */}
-          {browseView === "recommended" && (
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-xl font-semibold mb-4">Recommended For You</h2>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filterTrainers(browseTrainers.filter(match => topMatches.includes(match))).map((match) => (
-                    <div key={match.trainer.id} className="relative">
-                      <TrainerCard
-                        trainer={match.trainer}
-                        onViewProfile={handleViewProfile}
-                        matchScore={match.score}
-                        matchReasons={match.matchReasons}
-                        matchDetails={match.matchDetails}
-                      />
-                      <Badge 
-                        className="absolute top-2 right-1/2 transform translate-x-1/2 bg-primary text-primary-foreground z-10"
-                      >
-                        ⚡{match.score}% Match
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {goodMatches.length > 0 && (
-                <div>
-                  <h2 className="text-xl font-semibold mb-4">Good Matches</h2>
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filterTrainers(browseTrainers.filter(match => goodMatches.includes(match))).slice(0, 6).map((match) => (
-                      <TrainerCard
-                        key={match.trainer.id}
-                        trainer={match.trainer}
-                        onViewProfile={handleViewProfile}
-                        matchScore={match.score}
-                        matchReasons={match.matchReasons}
-                        matchDetails={match.matchDetails}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Matches View */}
-          {browseView === "matches" && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold">Mutual Matches</h2>
-                <Badge variant="outline">{mutualMatches.length} matches</Badge>
-              </div>
-              {mutualMatches.length > 0 ? (
-                <div className="space-y-4">
-                  <div className="text-sm text-muted-foreground">
-                    These trainers are interested in working with you! You can save them to your shortlist.
-                  </div>
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {mutualMatches.map((match) => (
-                      <TrainerCard
-                        key={`mutual-${match.trainer.id}`} // More unique key
-                        trainer={match.trainer}
-                        onViewProfile={handleViewProfile}
-                        matchScore={match.score}
-                        matchReasons={match.matchReasons}
-                        matchDetails={match.matchDetails}
-                        cardState="matched"
-                      />
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <Card>
-                  <CardContent className="p-8 text-center">
-                    <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">No mutual matches yet</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Keep exploring trainers! Mutual matches appear when trainers are also interested in working with you.
-                    </p>
-                    <Button onClick={() => setBrowseView('recommended')}>
-                      View Recommended Trainers
-                    </Button>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          )}
-
-          {/* All Trainers View */}
-          {browseView === "all" && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold">All Trainers</h2>
-                <Badge variant="outline">{filterTrainers(browseTrainers).length} trainers</Badge>
-              </div>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filterTrainers(browseTrainers).map((match) => (
-                  <TrainerCard
-                    key={match.trainer.id}
-                    trainer={match.trainer}
-                    onViewProfile={handleViewProfile}
-                    matchScore={match.score}
-                    matchReasons={match.matchReasons}
-                    matchDetails={match.matchDetails}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-        </TabsContent>
-
-        {/* Saved Trainers */}
-        <TabsContent value="saved" className="space-y-4">
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            <h2 className="text-xl font-semibold">Your Saved Trainers</h2>
-            {savedComparison.length >= 2 && (
-              <Button 
-                variant="default" 
-                size="sm"
-                onClick={handleStartSavedComparison}
-                className="flex items-center gap-2"
-              >
-                <BarChart3 className="h-4 w-4" />
-                Compare ({savedComparison.length})
-              </Button>
-            )}
-          </div>
-          {savedTrainers.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {savedTrainers.map((match, index) => {
-                console.log(`Rendering saved trainer ${index}:`, match.trainer.id, match.trainer.name);
-                return (
-                  <div key={`saved-${match.trainer.id}-${index}`} className="space-y-3">
-                    <TrainerCard
-                      trainer={match.trainer}
-                      onViewProfile={handleViewProfile}
-                      matchScore={match.score}
-                      matchReasons={match.matchReasons}
-                      matchDetails={match.matchDetails}
-                      cardState={isShortlisted(match.trainer.id) ? "shortlisted" : "saved"}
-                      showComparisonCheckbox={true}
-                      comparisonChecked={savedComparison.includes(match.trainer.id)}
-                      onComparisonToggle={handleSavedComparisonToggle}
-                      comparisonDisabled={!savedComparison.includes(match.trainer.id) && savedComparison.length >= 4}
-                    />
-                    
-                    {/* External CTAs for Saved Trainers */}
-                    <div className="space-y-2">
-                      {/* Show Add to Shortlist if not already shortlisted */}
-                      {!isShortlisted(match.trainer.id) && (
-                        <Button
-                          onClick={async (e) => {
-                            console.log('🔥 BUTTON CLICK DEBUG: Add to Shortlist clicked');
-                            console.log('🔥 Event object:', e);
-                            console.log('🔥 Trainer ID:', match.trainer.id);
-                            console.log('🔥 Can shortlist more:', canShortlistMore);
-                            console.log('🔥 Shortlist count:', shortlistCount);
-                            
-                            if (!canShortlistMore) {
-                              console.log('🔥 Cannot shortlist more - returning early');
-                              return;
-                            }
-                            
-                            console.log('🔥 About to call shortlistTrainer function');
-                            try {
-                              const result = await shortlistTrainer(match.trainer.id);
-                              console.log('🔥 Shortlist result:', result);
-                              if (result.error) {
-                                console.error('❌ Failed to shortlist trainer:', result.error);
-                                toast.error('Failed to add to shortlist');
-                              } else {
-                                console.log('✅ Successfully shortlisted trainer:', match.trainer.id);
-                                toast.success('Trainer added to shortlist!');
-                              }
-                            } catch (error) {
-                              console.error('❌ Error shortlisting trainer:', error);
-                              toast.error('Failed to add to shortlist');
-                            }
-                          }}
-                          className="w-full"
-                          size="sm"
-                          disabled={!canShortlistMore}
-                        >
-                          <Star className="h-3 w-3 mr-1" />
-                          {canShortlistMore ? 'Add to Shortlist' : `Shortlist Full (${shortlistCount}/4)`}
-                        </Button>
-                      )}
-                      
-                      {/* Always show Remove from Saved button */}
-                      <Button
-                        onClick={async (e) => {
-                          console.log('🔥 BUTTON CLICK DEBUG: Remove from Saved clicked');
-                          console.log('🔥 Event object:', e);
-                          console.log('🔥 Trainer ID:', match.trainer.id);
-                          console.log('🔥 About to call unsaveTrainer function');
-                          try {
-                            const result = await unsaveTrainer(match.trainer.id);
-                            console.log('🔥 Unsave result:', result);
-                            if (result) {
-                              console.log('✅ Successfully removed from saved:', match.trainer.id);
-                              toast.success('Trainer removed from saved list!');
-                            } else {
-                              console.error('❌ Failed to remove from saved');
-                              toast.error('Failed to remove from saved');
-                            }
-                          } catch (error) {
-                            console.error('❌ Error removing from saved:', error);
-                            toast.error('Failed to remove from saved');
-                          }
-                        }}
-                        className="w-full"
-                        size="sm"
-                        variant="outline"
-                      >
-                        <X className="h-3 w-3 mr-1" />
-                        Remove from Saved
-                       </Button>
-                       
-                       {/* Show shortlisted actions if already shortlisted */}
-                      {isShortlisted(match.trainer.id) && (
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-center gap-2 py-2 bg-green-50 text-green-800 rounded-lg border border-green-200">
-                            <Star className="h-3 w-3 fill-current" />
-                            <span className="text-xs font-medium">Shortlisted</span>
-                          </div>
-                          <div className="grid grid-cols-2 gap-2">
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              className="text-xs"
-                              onClick={async () => {
-                                console.log('🟢 Chat button clicked for trainer:', match.trainer.id);
-                                try {
-                                  const result = await createConversation(match.trainer.id);
-                                  if (!result.error) {
-                                    console.log('✅ Conversation created, navigating to messaging');
-                                    navigate('/messaging');
-                                  } else {
-                                    console.error('❌ Failed to create conversation:', result.error);
-                                    toast.error('Failed to start conversation');
-                                  }
-                                } catch (error) {
-                                  console.error('❌ Error creating conversation:', error);
-                                  toast.error('Failed to start conversation');
-                                }
-                              }}
-                            >
-                              <MessageCircle className="h-3 w-3 mr-1" />
-                              Chat
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="default" 
-                              className="text-xs"
-                              onClick={async () => {
-                                console.log('🟢 Discovery Call button clicked for trainer:', match.trainer.id);
-                                try {
-                                  const result = await bookDiscoveryCall(match.trainer.id);
-                                  if (result.error) {
-                                    console.error('❌ Failed to book discovery call:', result.error);
-                                    toast.error('Failed to book discovery call');
-                                  } else {
-                                    console.log('✅ Discovery call booked successfully');
-                                    toast.success('Discovery call booked!');
-                                    
-                                    // Also create conversation after booking
-                                    const conversationResult = await createConversation(match.trainer.id);
-                                    if (!conversationResult.error) {
-                                      console.log('✅ Conversation created after discovery call booking');
-                                    }
-                                  }
-                                } catch (error) {
-                                  console.error('❌ Error booking discovery call:', error);
-                                  toast.error('Failed to book discovery call');
-                                }
-                              }}
-                            >
-                              <Calendar className="h-3 w-3 mr-1" />
-                              Discovery Call
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <Card>
-              <CardContent className="p-8 text-center">
-                <Heart className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No saved trainers yet</h3>
-                <p className="text-muted-foreground mb-4">
-                  Like trainers by clicking the heart icon to save them for later and build your shortlist
-                </p>
-                <Button onClick={() => setActiveTab('browse')}>
-                  Explore Trainers
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-
-        {/* Shortlisted Trainers */}
-        <TabsContent value="shortlisted" className="space-y-4">
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            <h2 className="text-xl font-semibold">Your Shortlisted Trainers</h2>
-            <div className="flex items-center gap-2 flex-wrap">
-              <Badge variant="outline">{shortlistCount}/4 shortlisted</Badge>
-              {shortlistedComparison.length >= 2 && (
-                <Button 
-                  variant="default" 
-                  size="sm"
-                  onClick={handleStartShortlistedComparison}
-                  className="flex items-center gap-2"
-                >
-                  <BarChart3 className="h-4 w-4" />
-                  Compare ({shortlistedComparison.length})
-                </Button>
-              )}
-            </div>
-          </div>
-          {actualShortlistedTrainers.length > 0 ? (
-            <div className="space-y-4">
-              <div className="text-sm text-muted-foreground">
-                These are your top trainer choices. You can chat with them and book discovery calls.
-              </div>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                 {actualShortlistedTrainers.map((shortlisted) => {
-                     // Find the trainer from matchedTrainers or create fallback
-                     let match = matchedTrainers.find(m => m.trainer.id === shortlisted.trainer_id);
-                     if (!match) {
-                       // Create a fallback trainer object for display
-                       const fallbackTrainer = {
-                         id: shortlisted.trainer_id,
-                         name: `Trainer ${shortlisted.trainer_id.slice(0, 8)}...`,
-                         specialties: ["Personal Training"],
-                         rating: 4.5,
-                         reviews: 0,
-                         experience: "Professional",
-                         location: "Available",
-                         hourlyRate: 75,
-                         image: "/placeholder.svg",
-                         certifications: ["Certified Personal Trainer"],
-                         description: "Professional personal trainer ready to help you achieve your fitness goals.",
-                         availability: "Flexible",
-                         trainingType: ["In-Person", "Online"],
-                         offers_discovery_call: true
-                       };
-                       match = {
-                         trainer: fallbackTrainer,
-                         score: 80,
-                         matchReasons: ["Previously shortlisted trainer"],
-                         matchDetails: [],
-                         compatibilityPercentage: 80
-                       };
-                     }
-                     console.log('Rendering shortlisted trainer:', shortlisted.trainer_id, match.trainer.name);
-
-                     
-                     // Calculate match data for this trainer to ensure consistency
-                     const matchData = getTrainerMatchData(match.trainer);
-                     
-                     return (
-                      <div key={`shortlisted-${shortlisted.trainer_id}-${shortlisted.stage}`} className="space-y-3">
-                        <TrainerCard
-                          trainer={matchData.trainer}
-                        onViewProfile={handleViewProfile}
-                        matchScore={matchData.score}
-                        matchReasons={matchData.matchReasons}
-                        matchDetails={matchData.matchDetails}
-                        cardState="shortlisted"
-                        showComparisonCheckbox={true}
-                        comparisonChecked={shortlistedComparison.includes(shortlisted.trainer_id)}
-                        onComparisonToggle={handleShortlistedComparisonToggle}
-                        comparisonDisabled={!shortlistedComparison.includes(shortlisted.trainer_id) && shortlistedComparison.length >= 4}
-                        showRemoveButton={true}
-                        onRemove={(trainerId) => handleRemoveFromShortlist(trainerId, matchData.trainer.name)}
-                        hasDiscoveryCall={!!shortlisted.discovery_call}
-                        discoveryCallData={shortlisted.discovery_call}
-                        trainerOffersDiscoveryCalls={(match.trainer as any).offers_discovery_call || false}
-                      />
-                      
-                      {/* External CTAs for Shortlisted Trainers */}
-                      <div className="space-y-2 p-3 bg-background border rounded-lg">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Star className="h-3 w-3 fill-current text-primary" />
-                            <span className="text-xs font-medium text-primary">Shortlisted</span>
-                          </div>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
-                            onClick={() => handleRemoveFromShortlist(shortlisted.trainer_id, matchData.trainer.name)}
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-                        
-                        <div className="grid grid-cols-2 gap-2">
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            className="text-xs h-8"
-                            onClick={async () => {
-                              console.log('🟢 Chat button clicked for trainer:', shortlisted.trainer_id);
-                              try {
-                                const result = await createConversation(shortlisted.trainer_id);
-                                if (!result.error) {
-                                  console.log('✅ Conversation created, navigating to messaging');
-                                  navigate('/messaging');
-                                } else {
-                                  console.error('❌ Failed to create conversation:', result.error);
-                                  toast.error('Failed to start conversation');
-                                }
-                              } catch (error) {
-                                console.error('❌ Error in chat handler:', error);
-                                toast.error('Failed to start conversation');
-                              }
-                            }}
-                          >
-                            <MessageCircle className="h-3 w-3 mr-1" />
-                            Chat
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="default" 
-                            className="text-xs h-8"
-                            onClick={async () => {
-                              console.log('🟢 Discovery call button clicked for trainer:', shortlisted.trainer_id);
-                              try {
-                                const result = await bookDiscoveryCall(shortlisted.trainer_id);
-                                if (result.error) {
-                                  console.error('❌ Failed to book discovery call:', result.error);
-                                  toast.error('Failed to book discovery call');
-                                } else {
-                                  console.log('📅 Discovery call booking result:', result);
-                                  toast.success('Discovery call booked!');
-                                  
-                                  // If booking was successful, create conversation too
-                                  const conversationResult = await createConversation(shortlisted.trainer_id);
-                                  if (!conversationResult.error) {
-                                    console.log('✅ Conversation created after discovery call booking');
-                                  }
-                                }
-                              } catch (error) {
-                                console.error('❌ Error in discovery call handler:', error);
-                                toast.error('Failed to book discovery call');
-                              }
-                            }}
-                          >
-                            <Calendar className="h-3 w-3 mr-1" />
-                            {shortlisted.discovery_call ? 'View Call' : 'Book Call'}
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ) : (
-            <Card>
-              <CardContent className="p-8 text-center">
-                <Star className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No shortlisted trainers yet</h3>
-                <p className="text-muted-foreground mb-4">
-                  Add up to 4 trainers to your shortlist from your saved trainers to unlock chat and discovery call features.
-                </p>
-                <Button onClick={() => setActiveTab('saved')}>
-                  View Saved Trainers
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-
-        {/* Discover Tab - Discovery functionality using TrainerCard layout */}
-        <TabsContent value="discover" className="space-y-6">
-          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-              <h2 className="text-xl font-semibold">Discovery Opportunities</h2>
-              <Badge variant="outline">{actualShortlistedTrainers.filter(st => st.discovery_call).length} available</Badge>
-            </div>
-            
-            {actualShortlistedTrainers.filter(st => st.discovery_call).length > 0 ? (
-              <div className="space-y-4">
-                <div className="text-sm text-muted-foreground">
-                  Chat with your shortlisted trainers and book discovery calls to learn more about their approach.
-                </div>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {actualShortlistedTrainers.filter(st => st.discovery_call).map((shortlisted) => {
-                    // Find the trainer data from all trainers (sample + real)
-                    let trainer = allTrainers.find(t => t.id === shortlisted.trainer_id);
-                    
-                    // If not found in allTrainers, create basic trainer object
-                    if (!trainer) {
-                      trainer = {
-                        id: shortlisted.trainer_id,
-                        name: `Trainer ${shortlisted.trainer_id}`,
-                        specialties: [],
-                        rating: 0,
-                        reviews: 0,
-                        experience: '',
-                        location: '',
-                        hourlyRate: 0,
-                        image: '',
-                        certifications: [],
-                        description: '',
-                        availability: '',
-                        trainingType: [],
-                        offers_discovery_call: true
-                      } as any; // Type assertion to avoid TypeScript issues
-                    }
-
-                    // Calculate match data for this trainer to ensure consistency
-                    const matchData = getTrainerMatchData(trainer);
-                    
-                    return (
-                      <TrainerCard
-                        key={shortlisted.trainer_id}
-                        trainer={matchData.trainer}
-                        onViewProfile={handleViewProfile}
-                        matchScore={matchData.score}
-                        matchReasons={matchData.matchReasons}
-                        matchDetails={matchData.matchDetails}
-                        cardState="discovery"
-                      />
-                    );
-                  })}
-                </div>
-              </div>
-            ) : (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No discovery opportunities</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Add trainers to your shortlist to unlock discovery call features
-                  </p>
-                  <Button onClick={() => setActiveTab('shortlisted')}>
-                    View Shortlisted Trainers
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </TabsContent>
-
-      </Tabs>
-
-      {/* Client Reschedule Modal */}
-      {selectedDiscoveryCall && (
-        <ClientRescheduleModal
-          isOpen={isRescheduleModalOpen}
-          onClose={() => {
-            setIsRescheduleModalOpen(false);
-            setSelectedDiscoveryCall(null);
-          }}
-          discoveryCall={selectedDiscoveryCall}
-          trainer={selectedDiscoveryCall.trainer}
-          onCallUpdated={() => {
-            // Refresh the shortlisted trainers data
-            window.location.reload(); // Simple refresh for now
-          }}
-        />
+          ))}
+        </div>
+      ) : (
+        <Card>
+          <CardContent className="p-8 text-center">
+            <Search className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No trainers found</h3>
+            <p className="text-muted-foreground mb-4">
+              Try adjusting your search criteria or filters
+            </p>
+            <Button 
+              onClick={() => {
+                setSearchTerm("");
+                setSelectedGoal("all");
+                setSelectedLocation("all");
+                setSelectedAvailability("all");
+              }}
+            >
+              Clear Filters
+            </Button>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

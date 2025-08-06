@@ -225,9 +225,9 @@ export function DashboardSummary({ profile, onTabChange }: DashboardSummaryProps
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => navigate('/my-trainers')}
+                  onClick={() => onTabChange('trainers')}
                 >
-                  View All Trainers
+                  View My Trainers
                 </Button>
               </div>
             </CardHeader>
