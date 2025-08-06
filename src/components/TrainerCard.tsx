@@ -430,6 +430,7 @@ export const TrainerCard = ({
               </Button>
             )}
             
+            
             {(cardState === 'shortlisted' || (cardState === 'saved' && isShortlisted)) && (
               <div className="space-y-2">
                 <Badge variant="default" className="w-full justify-center bg-green-100 text-green-800 border-green-200">
@@ -481,6 +482,26 @@ export const TrainerCard = ({
                     </Button>
                   )}
                 </div>
+                
+                {/* Waitlist CTA for shortlisted trainers */}
+                {isClient && coachAvailability?.availability_status === 'waitlist' && !clientWaitlistStatus && (
+                  <div className="mt-2">
+                    <WaitlistJoinButton
+                      coachId={trainer.id}
+                      coachName={trainer.name}
+                      nextAvailableDate={coachAvailability?.next_available_date}
+                      waitlistMessage={coachAvailability?.waitlist_message}
+                      className="w-full"
+                    />
+                  </div>
+                )}
+                
+                {/* Show waitlist status if client is already on waitlist */}
+                {isClient && clientWaitlistStatus && (
+                  <div className="mt-2">
+                    <WaitlistStatusBadge coachId={trainer.id} />
+                  </div>
+                )}
               </div>
             )}
             
@@ -491,7 +512,9 @@ export const TrainerCard = ({
                 hasAddToShortlist={onAddToShortlist ? 'true' : 'false'},
                 hasStartConversation={onStartConversation ? 'true' : 'false'},
                 hasBookDiscoveryCall={onBookDiscoveryCall ? 'true' : 'false'},
-                trainerOffersDiscoveryCalls={trainerOffersDiscoveryCalls ? 'true' : 'false'}
+                trainerOffersDiscoveryCalls={trainerOffersDiscoveryCalls ? 'true' : 'false'},
+                coachAvailabilityStatus={coachAvailability?.availability_status || 'unknown'},
+                clientOnWaitlist={clientWaitlistStatus ? 'true' : 'false'}
               </div>
             )}
           </div>
