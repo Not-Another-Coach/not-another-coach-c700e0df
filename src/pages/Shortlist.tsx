@@ -10,11 +10,17 @@ import { BookDiscoveryCallButton } from '@/components/discovery-call/BookDiscove
 import { EditDiscoveryCallButton } from '@/components/discovery-call/EditDiscoveryCallButton';
 import { TrainerCard } from '@/components/TrainerCard';
 import { useRealTrainers } from '@/hooks/useRealTrainers';
+import { useConversations } from '@/hooks/useConversations';
+import { useTrainerEngagement } from '@/hooks/useTrainerEngagement';
 
 export default function Shortlist() {
   const navigate = useNavigate();
   const { shortlistedTrainers, loading, removeFromShortlist, refetchShortlisted } = useShortlistedTrainers();
   const { trainers } = useRealTrainers();
+  
+  // Add conversation and engagement functionality
+  const { createConversation } = useConversations();
+  const { bookDiscoveryCall, proceedWithCoach, rejectCoach } = useTrainerEngagement();
 
   if (loading) {
     return (
@@ -170,17 +176,31 @@ export default function Shortlist() {
                   discoveryCallData={shortlisted.discovery_call}
                   trainerOffersDiscoveryCalls={trainerData.offers_discovery_call || false}
                   // Don't pass onAddToShortlist since they're already shortlisted
-                  onStartConversation={(trainerId) => {
-                    // Handle start conversation logic
-                    console.log('Start conversation with:', trainerId);
+                  onStartConversation={async (trainerId) => {
+                    // Create conversation and navigate to messaging
+                    const result = await createConversation(trainerId);
+                    if (!result.error) {
+                      navigate('/messaging');
+                    }
                   }}
-                  onBookDiscoveryCall={(trainerId) => {
-                    // Handle book discovery call logic
-                    console.log('Book discovery call with:', trainerId);
+                  onBookDiscoveryCall={async (trainerId) => {
+                    // Book discovery call and update engagement stage
+                    await bookDiscoveryCall(trainerId);
+                    await refetchShortlisted();
                   }}
                   onEditDiscoveryCall={(trainerId) => {
                     // Handle edit discovery call logic
                     console.log('Edit discovery call with:', trainerId);
+                  }}
+                  onProceedWithCoach={async (trainerId) => {
+                    // Proceed with coach after discovery call
+                    await proceedWithCoach(trainerId);
+                    await refetchShortlisted();
+                  }}
+                  onRejectCoach={async (trainerId) => {
+                    // Reject coach after discovery call
+                    await rejectCoach(trainerId);
+                    await refetchShortlisted();
                   }}
                 />
               );
