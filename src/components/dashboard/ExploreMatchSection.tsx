@@ -731,16 +731,27 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                             <MessageCircle className="h-3 w-3 mr-1" />
                             Chat
                           </Button>
-                          <BookDiscoveryCallButton 
-                            trainer={{
-                              id: match.trainer.id,
-                              name: match.trainer.name,
-                              offers_discovery_call: match.trainer.offers_discovery_call
-                            }}
-                            size="sm"
-                            variant="outline"
-                            className="text-xs"
-                          />
+                          {match.trainer.offers_discovery_call ? (
+                            <BookDiscoveryCallButton 
+                              trainer={{
+                                id: match.trainer.id,
+                                name: match.trainer.name,
+                                offers_discovery_call: match.trainer.offers_discovery_call
+                              }}
+                              size="sm"
+                              variant="outline"
+                              className="text-xs"
+                            />
+                          ) : (
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              disabled
+                              className="flex items-center gap-1 text-xs opacity-50 cursor-not-allowed"
+                            >
+                              No Discovery Call
+                            </Button>
+                          )}
                         </div>
                       </div>
                     ) : (
