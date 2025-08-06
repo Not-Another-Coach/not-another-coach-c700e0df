@@ -195,6 +195,9 @@ export function useConversations() {
           : conv
       ));
 
+      // Note: Database trigger will automatically handle engagement stage transitions
+      // for trainers who don't offer discovery calls when both parties have exchanged messages
+
       return { data };
     } catch (error) {
       console.error('Error sending message:', error);
