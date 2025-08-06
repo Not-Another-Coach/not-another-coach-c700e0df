@@ -8,10 +8,13 @@ import { format } from 'date-fns';
 import { StartConversationButton } from '@/components/StartConversationButton';
 import { BookDiscoveryCallButton } from '@/components/discovery-call/BookDiscoveryCallButton';
 import { EditDiscoveryCallButton } from '@/components/discovery-call/EditDiscoveryCallButton';
+import { TrainerCard } from '@/components/TrainerCard';
+import { useRealTrainers } from '@/hooks/useRealTrainers';
 
 export default function Shortlist() {
   const navigate = useNavigate();
   const { shortlistedTrainers, loading, removeFromShortlist, refetchShortlisted } = useShortlistedTrainers();
+  const { trainers } = useRealTrainers();
 
   if (loading) {
     return (
@@ -62,90 +65,124 @@ export default function Shortlist() {
           </Card>
         ) : (
           <div className="grid md:grid-cols-2 gap-6">
-            {shortlistedTrainers.map((shortlisted) => (
-              <Card key={shortlisted.id} className="border-l-4 border-l-primary">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle>Trainer #{shortlisted.trainer_id}</CardTitle>
-                      <p className="text-sm text-muted-foreground">
-                        Shortlisted {new Date(shortlisted.shortlisted_at).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => removeFromShortlist(shortlisted.trainer_id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex gap-2">
-                      <Badge variant="default" className="bg-green-100 text-green-800">
-                        Chat Enabled
-                      </Badge>
-                      {shortlisted.discovery_call ? (
-                        <Badge variant="default" className="bg-blue-100 text-blue-800">
-                          Call Scheduled
-                        </Badge>
-                      ) : (
-                        <Badge variant="default" className="bg-blue-100 text-blue-800">
-                          Discovery Call Available
-                        </Badge>
-                      )}
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      <StartConversationButton 
-                        trainerId={shortlisted.trainer_id}
-                        trainerName={`Trainer ${shortlisted.trainer_id}`}
-                        size="sm"
-                        variant="outline"
-                      />
-                      {shortlisted.discovery_call ? (
-                        <EditDiscoveryCallButton 
-                          trainer={{
-                            id: shortlisted.trainer_id,
-                            name: `Trainer ${shortlisted.trainer_id}`,
-                            firstName: `Trainer`,
-                            lastName: shortlisted.trainer_id
-                          }}
-                          discoveryCall={shortlisted.discovery_call}
-                          variant="default"
-                          size="sm"
-                          onCallUpdated={refetchShortlisted}
-                        />
-                      ) : (
-                        <BookDiscoveryCallButton 
-                          trainer={{
-                            id: shortlisted.trainer_id,
-                            name: `Trainer ${shortlisted.trainer_id}`,
-                            firstName: `Trainer`,
-                            lastName: shortlisted.trainer_id
-                          }}
-                          variant="default"
-                          size="sm"
-                          onCallBooked={refetchShortlisted}
-                        />
-                      )}
-                    </div>
-
-                    {shortlisted.discovery_call ? (
-                      <div className="p-3 bg-blue-50 rounded-lg text-sm text-blue-800">
-                        Discovery call scheduled for {format(new Date(shortlisted.discovery_call.scheduled_for), 'MMM d, yyyy \'at\' h:mm a')}
+            {shortlistedTrainers.map((shortlisted) => {
+              // Find the trainer data from the real trainers list
+              const trainerData = trainers.find(t => t.id === shortlisted.trainer_id);
+              
+              if (!trainerData) {
+                // Fallback card if trainer data not found
+                return (
+                  <Card key={shortlisted.id} className="border-l-4 border-l-primary">
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <CardTitle>Trainer #{shortlisted.trainer_id}</CardTitle>
+                          <p className="text-sm text-muted-foreground">
+                            Shortlisted {new Date(shortlisted.shortlisted_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => removeFromShortlist(shortlisted.trainer_id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
-                    ) : shortlisted.discovery_call_booked_at ? (
-                      <div className="p-3 bg-green-50 rounded-lg text-sm text-green-800">
-                        Discovery call booked on {new Date(shortlisted.discovery_call_booked_at).toLocaleDateString()}
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex gap-2">
+                          <Badge variant="default" className="bg-green-100 text-green-800">
+                            Chat Enabled
+                          </Badge>
+                          {shortlisted.discovery_call ? (
+                            <Badge variant="default" className="bg-blue-100 text-blue-800">
+                              Call Scheduled
+                            </Badge>
+                          ) : (
+                            <Badge variant="default" className="bg-blue-100 text-blue-800">
+                              Discovery Call Available
+                            </Badge>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2">
+                          <StartConversationButton 
+                            trainerId={shortlisted.trainer_id}
+                            trainerName={`Trainer ${shortlisted.trainer_id}`}
+                            size="sm"
+                            variant="outline"
+                          />
+                          {shortlisted.discovery_call ? (
+                            <EditDiscoveryCallButton 
+                              trainer={{
+                                id: shortlisted.trainer_id,
+                                name: `Trainer ${shortlisted.trainer_id}`,
+                                firstName: `Trainer`,
+                                lastName: shortlisted.trainer_id
+                              }}
+                              discoveryCall={shortlisted.discovery_call}
+                              variant="default"
+                              size="sm"
+                              onCallUpdated={refetchShortlisted}
+                            />
+                          ) : (
+                            <BookDiscoveryCallButton 
+                              trainer={{
+                                id: shortlisted.trainer_id,
+                                name: `Trainer ${shortlisted.trainer_id}`,
+                                firstName: `Trainer`,
+                                lastName: shortlisted.trainer_id
+                              }}
+                              variant="default"
+                              size="sm"
+                              onCallBooked={refetchShortlisted}
+                            />
+                          )}
+                        </div>
+
+                        {shortlisted.discovery_call ? (
+                          <div className="p-3 bg-blue-50 rounded-lg text-sm text-blue-800">
+                            Discovery call scheduled for {format(new Date(shortlisted.discovery_call.scheduled_for), 'MMM d, yyyy \'at\' h:mm a')}
+                          </div>
+                        ) : shortlisted.discovery_call_booked_at ? (
+                          <div className="p-3 bg-green-50 rounded-lg text-sm text-green-800">
+                            Discovery call booked on {new Date(shortlisted.discovery_call_booked_at).toLocaleDateString()}
+                          </div>
+                        ) : null}
                       </div>
-                    ) : null}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                    </CardContent>
+                  </Card>
+                );
+              }
+
+              // Use TrainerCard component with shortlisted state
+              return (
+                <TrainerCard
+                  key={shortlisted.id}
+                  trainer={trainerData}
+                  cardState="shortlisted"
+                  showRemoveButton={true}
+                  onRemove={removeFromShortlist}
+                  isShortlisted={true}
+                  hasDiscoveryCall={!!shortlisted.discovery_call}
+                  discoveryCallData={shortlisted.discovery_call}
+                  onStartConversation={(trainerId) => {
+                    // Handle start conversation logic
+                    console.log('Start conversation with:', trainerId);
+                  }}
+                  onBookDiscoveryCall={(trainerId) => {
+                    // Handle book discovery call logic
+                    console.log('Book discovery call with:', trainerId);
+                  }}
+                  onEditDiscoveryCall={(trainerId) => {
+                    // Handle edit discovery call logic
+                    console.log('Edit discovery call with:', trainerId);
+                  }}
+                />
+              );
+            })}
           </div>
         )}
       </div>

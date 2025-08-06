@@ -415,13 +415,14 @@ export const TrainerCard = ({
 
         {/* CTA Section - Actions based on trainer status */}
         {(cardState === 'saved' || cardState === 'shortlisted') && (
-          <div className="border-t pt-4 space-y-2">
+          <div className="border-t pt-4 space-y-2 bg-muted/10 rounded-lg p-3">
             {cardState === 'saved' && !isShortlisted && onAddToShortlist && (
               <Button 
                 onClick={() => onAddToShortlist(trainer.id)} 
                 className="w-full"
                 size="sm"
               >
+                <Star className="h-3 w-3 mr-1" />
                 Add to Shortlist
               </Button>
             )}
@@ -465,6 +466,14 @@ export const TrainerCard = ({
                     </Button>
                   ) : null}
                 </div>
+              </div>
+            )}
+            
+            {/* Debug info - remove in production */}
+            {process.env.NODE_ENV === 'development' && (
+              <div className="text-xs text-red-500 mt-2">
+                Debug: cardState={cardState}, isShortlisted={isShortlisted ? 'true' : 'false'}, 
+                hasAddToShortlist={onAddToShortlist ? 'true' : 'false'}
               </div>
             )}
           </div>
