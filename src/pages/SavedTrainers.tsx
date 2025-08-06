@@ -312,7 +312,7 @@ export default function SavedTrainers() {
                   showRemoveButton={true}
                   onRemove={unsaveTrainer}
                   // CTA actions
-                  onAddToShortlist={canShortlistMore ? handleShortlist : undefined}
+                  onAddToShortlist={handleShortlist}
                   isShortlisted={isShortlisted(trainer.id)}
                   onStartConversation={(trainerId) => console.log('Start conversation:', trainerId)}
                   onBookDiscoveryCall={(trainerId) => console.log('Book discovery call:', trainerId)}

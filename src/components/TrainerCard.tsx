@@ -421,6 +421,7 @@ export const TrainerCard = ({
                 onClick={() => onAddToShortlist(trainer.id)} 
                 className="w-full"
                 size="sm"
+                disabled={false} // Let the parent handle disabling logic
               >
                 <Star className="h-3 w-3 mr-1" />
                 Add to Shortlist
@@ -471,9 +472,11 @@ export const TrainerCard = ({
             
             {/* Debug info - remove in production */}
             {process.env.NODE_ENV === 'development' && (
-              <div className="text-xs text-red-500 mt-2">
+              <div className="text-xs text-red-500 mt-2 bg-red-50 p-2 rounded">
                 Debug: cardState={cardState}, isShortlisted={isShortlisted ? 'true' : 'false'}, 
-                hasAddToShortlist={onAddToShortlist ? 'true' : 'false'}
+                hasAddToShortlist={onAddToShortlist ? 'true' : 'false'},
+                hasStartConversation={onStartConversation ? 'true' : 'false'},
+                hasBookDiscoveryCall={onBookDiscoveryCall ? 'true' : 'false'}
               </div>
             )}
           </div>
