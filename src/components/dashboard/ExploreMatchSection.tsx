@@ -128,6 +128,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
   // Comparison functionality
   const [selectedForComparison, setSelectedForComparison] = useState<string[]>([]);
   const [showComparison, setShowComparison] = useState(false);
+  const [comparisonContext, setComparisonContext] = useState<'saved' | 'shortlisted' | 'general'>('general');
 
   // Reschedule modal state
   const [selectedDiscoveryCall, setSelectedDiscoveryCall] = useState<any>(null);
@@ -403,6 +404,12 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
     });
   };
 
+  // Clean up comparison state when savedTrainers changes to remove invalid trainer IDs
+  useEffect(() => {
+    const savedTrainerIds = savedTrainers.map(match => match.trainer.id);
+    setSavedComparison(prev => prev.filter(id => savedTrainerIds.includes(id)));
+  }, [savedTrainers]);
+
   const handleShortlistedComparisonToggle = (trainerId: string) => {
     setShortlistedComparison(prev => 
       prev.includes(trainerId) 
@@ -414,17 +421,22 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
   };
 
   const getSavedSelectedTrainersData = () => {
-    return allTrainers.filter(trainer => savedComparison.includes(trainer.id));
+    // Filter from deduplicated saved trainers instead of allTrainers
+    const savedTrainerData = savedTrainers.map(match => match.trainer);
+    return savedTrainerData.filter(trainer => savedComparison.includes(trainer.id));
   };
 
   const getShortlistedSelectedTrainersData = () => {
-    return allTrainers.filter(trainer => shortlistedComparison.includes(trainer.id));
+    // Filter from shortlisted trainers instead of allTrainers  
+    const shortlistedTrainerData = shortlistedTrainers.map(match => match.trainer);
+    return shortlistedTrainerData.filter(trainer => shortlistedComparison.includes(trainer.id));
   };
 
   const handleStartSavedComparison = () => {
     const selectedTrainersData = getSavedSelectedTrainersData();
     if (selectedTrainersData.length >= 2) {
       setSelectedForComparison(savedComparison);
+      setComparisonContext('saved');
       setShowComparison(true);
     }
   };
@@ -433,12 +445,21 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
     const selectedTrainersData = getShortlistedSelectedTrainersData();
     if (selectedTrainersData.length >= 2) {
       setSelectedForComparison(shortlistedComparison);
+      setComparisonContext('shortlisted');
       setShowComparison(true);
     }
   };
 
   const getSelectedTrainersData = () => {
-    return allTrainers.filter(trainer => selectedForComparison.includes(trainer.id));
+    // Use the appropriate data source based on comparison context
+    switch (comparisonContext) {
+      case 'saved':
+        return getSavedSelectedTrainersData();
+      case 'shortlisted':
+        return getShortlistedSelectedTrainersData();
+      default:
+        return allTrainers.filter(trainer => selectedForComparison.includes(trainer.id));
+    }
   };
 
   const handleStartComparison = () => {
@@ -452,6 +473,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
   const handleCloseComparison = () => {
     setShowComparison(false);
     setSelectedForComparison([]);
+    setComparisonContext('general');
   };
 
   // Show comparison view if active
