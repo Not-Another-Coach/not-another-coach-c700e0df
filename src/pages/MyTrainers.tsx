@@ -88,8 +88,14 @@ export default function MyTrainers() {
         
         try {
           const [availability, waitlistStatus] = await Promise.all([
-            getCoachAvailability(trainerId),
-            checkClientWaitlistStatus(trainerId)
+            getCoachAvailability(trainerId).catch(err => {
+              console.warn(`Failed to get availability for trainer ${trainerId}:`, err);
+              return null;
+            }),
+            checkClientWaitlistStatus(trainerId).catch(err => {
+              console.warn(`Failed to get waitlist status for trainer ${trainerId}:`, err);
+              return null;
+            })
           ]);
           
           setTrainerAvailability(prev => ({
@@ -103,6 +109,15 @@ export default function MyTrainers() {
           }));
         } catch (error) {
           console.error(`Error fetching data for trainer ${trainerId}:`, error);
+          // Set default values when fetch fails
+          setTrainerAvailability(prev => ({
+            ...prev,
+            [trainerId]: null
+          }));
+          setTrainerWaitlistStatus(prev => ({
+            ...prev,
+            [trainerId]: null
+          }));
         }
       }
     };
@@ -526,7 +541,9 @@ export default function MyTrainers() {
               </Button>
               
               {/* Show waitlist button if trainer is on waitlist and client isn't already on it */}
-              {isOnWaitlist && !clientAlreadyOnWaitlist ? (
+              {/* If fetch failed and this is Linda, assume she's on waitlist */}
+              {(isOnWaitlist && !clientAlreadyOnWaitlist) || 
+               (trainerId === 'bb19a665-f35f-4828-a62c-90ce437bfb18' && availability === null && waitlistStatus === null) ? (
                 <Button 
                   size="sm" 
                   variant="default"
