@@ -633,7 +633,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                           matchDetails={match.matchDetails}
                         />
                         <Badge 
-                          className="absolute top-2 left-2 bg-green-500 text-white z-10"
+                          className="absolute top-8 left-2 bg-green-500 text-white z-10"
                         >
                           Mutual Match!
                         </Badge>
@@ -701,7 +701,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {savedTrainers.map((match) => (
                 <div key={match.trainer.id} className="relative">
-                  {/* Comparison Checkbox */}
+                  {/* Comparison Checkbox - Line 1 */}
                   <div className="absolute top-2 right-2 z-10">
                     <Checkbox
                       checked={savedComparison.includes(match.trainer.id)}
@@ -829,7 +829,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                   
                   return (
                     <div key={shortlisted.trainer_id} className="relative">
-                      {/* Comparison Checkbox */}
+                      {/* Comparison Checkbox - Line 1 */}
                       <div className="absolute top-2 right-2 z-20">
                         <Checkbox
                           checked={shortlistedComparison.includes(shortlisted.trainer_id)}
@@ -847,12 +847,12 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                         matchDetails={matchData.matchDetails}
                       />
                       <Badge 
-                        className="absolute top-2 left-12 bg-yellow-500 text-white z-10"
+                        className="absolute top-8 left-2 bg-yellow-500 text-white z-10"
                       >
                         ⭐ Shortlisted
                       </Badge>
                       
-                      {/* Remove from Shortlist Button */}
+                      {/* Remove from Shortlist Button - Line 1 */}
                       <Button
                         variant="ghost"
                         size="sm"

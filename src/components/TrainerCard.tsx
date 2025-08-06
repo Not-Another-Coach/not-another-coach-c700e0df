@@ -94,12 +94,12 @@ export const TrainerCard = ({ trainer, onViewProfile, onMessage, matchScore = 0,
 
   return (
     <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-card to-muted/30 border-0 relative overflow-hidden">
-      <CardContent className="p-6">
-        {/* Like/Save Button */}
+      <CardContent className="p-6 pt-16"> {/* Add top padding for two header lines */}
+        {/* Like/Save Button - Line 1 */}
         <Button
           variant="ghost"
           size="sm"
-          className="absolute top-3 left-3 z-20 bg-white/80 backdrop-blur hover:bg-white/90 transition-all"
+          className="absolute top-2 left-2 z-20 bg-white/80 backdrop-blur hover:bg-white/90 transition-all"
           onClick={handleToggleSave}
         >
           {isSaved ? (
@@ -109,14 +109,15 @@ export const TrainerCard = ({ trainer, onViewProfile, onMessage, matchScore = 0,
           )}
         </Button>
 
-        {/* Match Badge - Fixed positioning */}
+        {/* Match Badge - Line 1 */}
         {matchScore > 0 && (
-          <div className="absolute top-3 right-3 z-10">
+          <div className="absolute top-2 right-2 z-10">
             <MatchBadge score={matchScore} reasons={matchReasons} />
           </div>
         )}
+        
         {/* Trainer Image and Basic Info */}
-        <div className="flex items-start gap-4 mb-4" style={{ marginTop: matchScore > 0 ? '2rem' : '0' }}>
+        <div className="flex items-start gap-4 mb-4">
           <div className="relative">
             <img 
               src={trainer.image} 
