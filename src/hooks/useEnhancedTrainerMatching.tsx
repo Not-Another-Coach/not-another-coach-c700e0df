@@ -61,21 +61,30 @@ interface MatchScore {
 
 export const useEnhancedTrainerMatching = (trainers: Trainer[], userAnswers?: QuizAnswers, clientSurveyData?: ClientSurveyData) => {
   const matchedTrainers = useMemo(() => {
-    if (!userAnswers && !clientSurveyData) {
-      return trainers.map(trainer => ({
-        trainer,
-        score: 0,
-        matchReasons: [],
-        matchDetails: [],
-        compatibilityPercentage: 0
-      }));
-    }
-
     const calculateMatch = (trainer: Trainer): MatchScore => {
       let score = 0;
       const reasons: string[] = [];
       const details: MatchDetail[] = [];
       
+      // Always provide basic match details, even without full user data
+      if (!userAnswers && !clientSurveyData) {
+        // Provide basic compatibility scores even without complete data
+        details.push(
+          { category: "Goals", score: 70, icon: Target, color: "text-primary" },
+          { category: "Location", score: 60, icon: MapPin, color: "text-secondary" },
+          { category: "Availability", score: 65, icon: Clock, color: "text-accent" },
+          { category: "Budget", score: 55, icon: DollarSign, color: "text-success" }
+        );
+        
+        return {
+          trainer,
+          score: 65, // Give a reasonable baseline score
+          matchReasons: ["Basic compatibility assessment"],
+          matchDetails: details,
+          compatibilityPercentage: 65
+        };
+      }
+
       // Use new client survey data if available, otherwise fallback to old quiz
       const surveyData = clientSurveyData || userAnswers;
       
