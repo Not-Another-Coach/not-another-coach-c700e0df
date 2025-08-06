@@ -68,12 +68,6 @@ export default function MyTrainers() {
 
   // Get all trainer engagements and build unified trainer list
   const trainersWithStatus = useMemo(() => {
-    console.log('🔍 Building trainersWithStatus...');
-    console.log('📊 allTrainers count:', allTrainers.length);
-    console.log('💙 likedTrainers:', getLikedTrainers());
-    console.log('⭐ actualShortlistedTrainers:', actualShortlistedTrainers);
-    console.log('📞 discoveryStageTrainers:', getDiscoveryStageTrainers());
-    
     const allTrainerData = [];
 
     // Get saved trainers (liked stage)
@@ -149,13 +143,11 @@ export default function MyTrainers() {
       }
     });
 
-    console.log('📋 Final allTrainerData:', allTrainerData);
     return allTrainerData;
   }, [allTrainers, getLikedTrainers, actualShortlistedTrainers, getDiscoveryStageTrainers]);
 
   // Filter trainers based on active filter
   const filteredTrainers = useMemo(() => {
-    console.log('🔍 Filtering trainers. activeFilter:', activeFilter, 'trainersWithStatus:', trainersWithStatus);
     if (activeFilter === 'all') return trainersWithStatus;
     return trainersWithStatus.filter(t => t.status === activeFilter);
   }, [trainersWithStatus, activeFilter]);
@@ -361,10 +353,14 @@ export default function MyTrainers() {
   if (!user || !profile) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
+        <div className="text-lg">Loading user data...</div>
       </div>
     );
   }
+
+  console.log('🔍 Current user:', user?.id, user?.email);
+  console.log('📊 Counts:', counts);
+  console.log('📋 Filtered trainers:', filteredTrainers.length);
 
   return (
     <div className="min-h-screen bg-background">
