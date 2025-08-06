@@ -344,78 +344,7 @@ const TrainerDashboard = () => {
         {activeView === 'dashboard' && (
           <div className="space-y-8">
             
-            {/* 1. Performance Metrics - Full Width */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Performance Metrics</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                  <div className="text-center p-4 rounded-lg bg-blue-50 border border-blue-200">
-                    <div className="text-3xl font-bold text-blue-600 mb-2">
-                      {analyticsLoading ? '...' : analytics?.total_views || 256}
-                    </div>
-                    <p className="text-sm font-medium text-blue-800">Profile Views</p>
-                    <p className="text-xs text-blue-600 mt-1">+12 this week</p>
-                  </div>
-                  <div className="text-center p-4 rounded-lg bg-red-50 border border-red-200">
-                    <div className="text-3xl font-bold text-red-600 mb-2">
-                      {analyticsLoading ? '...' : analytics?.total_likes || 42}
-                    </div>
-                    <p className="text-sm font-medium text-red-800">Likes</p>
-                    <p className="text-xs text-red-600 mt-1">+5 this week</p>
-                  </div>
-                  <div className="text-center p-4 rounded-lg bg-yellow-50 border border-yellow-200">
-                    <div className="text-3xl font-bold text-yellow-600 mb-2">
-                      {analyticsLoading ? '...' : analytics?.total_shortlists || 18}
-                    </div>
-                    <p className="text-sm font-medium text-yellow-800">Shortlisted</p>
-                    <p className="text-xs text-yellow-600 mt-1">+3 this week</p>
-                  </div>
-                  <div className="text-center p-4 rounded-lg bg-green-50 border border-green-200">
-                    <div className="text-3xl font-bold text-green-600 mb-2">
-                      {analyticsLoading ? '...' : `${analytics?.conversion_rate?.toFixed(1) || 7.2}%`}
-                    </div>
-                    <p className="text-sm font-medium text-green-800">Conversion Rate</p>
-                    <p className="text-xs text-green-600 mt-1">+1.3% this week</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* 2. Upcoming Sessions and This Week's Goal - Side by Side */}
-            <div className="grid md:grid-cols-2 gap-6">
-              
-              {/* Upcoming Sessions */}
-              <UpcomingSessionsWidget />
-
-              {/* This Week's Goal */}
-              <Card className="bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20">
-                <CardContent className="p-6 flex items-center justify-between min-h-[12rem]">
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">🎯 This Week's Goal</h3>
-                    <p className="text-muted-foreground">Convert 3 new clients</p>
-                    <div className="flex items-center gap-2 mt-2">
-                      <Progress value={33} className="w-32 h-2" />
-                      <span className="text-sm text-muted-foreground">1/3</span>
-                    </div>
-                  </div>
-                  <Target className="w-8 h-8 text-primary flex-shrink-0" />
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* 3. Live Activity and Coach Feedback - Side by Side */}
-            <div className="grid md:grid-cols-2 gap-6">
-              
-              {/* Live Activity */}
-              <LiveActivityFeed />
-
-              {/* Coach Feedback Summary */}
-              <CoachFeedbackSummary />
-            </div>
-
-            {/* 4. Quick Actions */}
+            {/* 1. Quick Actions - Right after header */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -460,6 +389,77 @@ const TrainerDashboard = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* 2. Performance Metrics - Full Width */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Performance Metrics</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                  <div className="text-center p-4 rounded-lg bg-blue-50 border border-blue-200">
+                    <div className="text-3xl font-bold text-blue-600 mb-2">
+                      {analyticsLoading ? '...' : analytics?.total_views || 256}
+                    </div>
+                    <p className="text-sm font-medium text-blue-800">Profile Views</p>
+                    <p className="text-xs text-blue-600 mt-1">+12 this week</p>
+                  </div>
+                  <div className="text-center p-4 rounded-lg bg-red-50 border border-red-200">
+                    <div className="text-3xl font-bold text-red-600 mb-2">
+                      {analyticsLoading ? '...' : analytics?.total_likes || 42}
+                    </div>
+                    <p className="text-sm font-medium text-red-800">Likes</p>
+                    <p className="text-xs text-red-600 mt-1">+5 this week</p>
+                  </div>
+                  <div className="text-center p-4 rounded-lg bg-yellow-50 border border-yellow-200">
+                    <div className="text-3xl font-bold text-yellow-600 mb-2">
+                      {analyticsLoading ? '...' : analytics?.total_shortlists || 18}
+                    </div>
+                    <p className="text-sm font-medium text-yellow-800">Shortlisted</p>
+                    <p className="text-xs text-yellow-600 mt-1">+3 this week</p>
+                  </div>
+                  <div className="text-center p-4 rounded-lg bg-green-50 border border-green-200">
+                    <div className="text-3xl font-bold text-green-600 mb-2">
+                      {analyticsLoading ? '...' : `${analytics?.conversion_rate?.toFixed(1) || 7.2}%`}
+                    </div>
+                    <p className="text-sm font-medium text-green-800">Conversion Rate</p>
+                    <p className="text-xs text-green-600 mt-1">+1.3% this week</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 3. Upcoming Sessions and This Week's Goal - Side by Side */}
+            <div className="grid md:grid-cols-2 gap-6">
+              
+              {/* Upcoming Sessions */}
+              <UpcomingSessionsWidget />
+
+              {/* This Week's Goal */}
+              <Card className="bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20">
+                <CardContent className="p-6 flex items-center justify-between min-h-[12rem]">
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">🎯 This Week's Goal</h3>
+                    <p className="text-muted-foreground">Convert 3 new clients</p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Progress value={33} className="w-32 h-2" />
+                      <span className="text-sm text-muted-foreground">1/3</span>
+                    </div>
+                  </div>
+                  <Target className="w-8 h-8 text-primary flex-shrink-0" />
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* 4. Live Activity and Coach Feedback - Side by Side */}
+            <div className="grid md:grid-cols-2 gap-6">
+              
+              {/* Live Activity */}
+              <LiveActivityFeed />
+
+              {/* Coach Feedback Summary */}
+              <CoachFeedbackSummary />
+            </div>
 
             {/* 5. Match Quality Distribution */}
             {analytics?.match_tier_stats && (
