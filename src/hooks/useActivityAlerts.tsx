@@ -5,7 +5,7 @@ import { useProfile } from './useProfile';
 
 interface ActivityAlert {
   id: string;
-  type: 'discovery_call_booked' | 'discovery_call_cancelled' | 'discovery_call_rescheduled' | 'client_inquiry' | 'profile_view' | 'testimonial' | 'conversion';
+  type: 'discovery_call_booked' | 'discovery_call_cancelled' | 'discovery_call_rescheduled' | 'client_inquiry' | 'profile_view' | 'testimonial' | 'conversion' | 'waitlist_joined';
   title: string;
   description: string;
   metadata?: any;
@@ -164,6 +164,8 @@ export function useActivityAlerts() {
         return '🎉';
       case 'conversion':
         return '📈';
+      case 'waitlist_joined':
+        return '⏰';
       default:
         return '🔔';
     }
@@ -185,6 +187,8 @@ export function useActivityAlerts() {
         return 'bg-yellow-50 border-yellow-200';
       case 'conversion':
         return 'bg-orange-50 border-orange-200';
+      case 'waitlist_joined':
+        return 'bg-amber-50 border-amber-200';
       default:
         return 'bg-gray-50 border-gray-200';
     }
