@@ -85,6 +85,7 @@ export const TrainerCard = ({
   const [coachAvailability, setCoachAvailability] = useState<any>(null);
   const [clientWaitlistStatus, setClientWaitlistStatus] = useState<any>(null);
   
+  // Use trainer-specific saved state instead of global check
   const isSaved = isTrainerSaved(trainer.id);
   const profileImageVisibility = getVisibility('profile_image');
   const isClient = profile?.user_type === 'client';
@@ -113,13 +114,16 @@ export const TrainerCard = ({
     e.stopPropagation();
     
     // If trainer is saved and we're in the saved trainers context, shortlist them
-    // Otherwise just toggle save/unsave
     if (isSaved && cardState === 'saved' && onShortlist) {
+      console.log(`Shortlisting trainer ${trainer.id} from saved state`);
       await onShortlist(trainer.id);
     } else {
+      // Otherwise just toggle save/unsave
+      console.log(`Toggling save state for trainer ${trainer.id}, currently saved: ${isSaved}`);
       const success = isSaved 
         ? await unsaveTrainer(trainer.id)
         : await saveTrainer(trainer.id);
+      console.log(`Save toggle result for ${trainer.id}:`, success);
     }
   };
 
