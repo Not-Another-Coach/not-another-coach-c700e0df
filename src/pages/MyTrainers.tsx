@@ -667,11 +667,11 @@ export default function MyTrainers() {
               ) : (
                 <Button 
                   size="sm" 
-                  variant="default"
-                  onClick={() => navigate(`/trainer/${trainer.id}`)}
+                  variant="outline"
+                  onClick={() => handleStartConversation(trainer.id)}
                 >
-                  <Phone className="h-3 w-3 mr-1" />
-                  View Details
+                  <MessageCircle className="h-3 w-3 mr-1" />
+                  Start Chat
                 </Button>
               )}
             </div>
@@ -782,6 +782,9 @@ export default function MyTrainers() {
                 comparisonChecked={selectedForComparison.includes(trainerData.trainer.id)}
                 onComparisonToggle={handleComparisonToggle}
                 comparisonDisabled={!selectedForComparison.includes(trainerData.trainer.id) && selectedForComparison.length >= 4}
+                onStartConversation={handleStartConversation}
+                onBookDiscoveryCall={handleBookDiscoveryCall}
+                trainerOffersDiscoveryCalls={trainerData.trainer.offers_discovery_call}
               />
               
               {/* Status Badge */}
