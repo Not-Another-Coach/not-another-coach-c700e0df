@@ -108,6 +108,21 @@ export function useConversations() {
     }
 
     try {
+      // First check if conversation already exists
+      const { data: existingConversation, error: fetchError } = await supabase
+        .from('conversations')
+        .select('*')
+        .eq('client_id', user.id)
+        .eq('trainer_id', trainerId)
+        .single();
+
+      if (existingConversation) {
+        // Conversation already exists, return it
+        toast.success('Opening existing conversation');
+        return { data: existingConversation };
+      }
+
+      // If no existing conversation found, create a new one
       const { data, error } = await supabase
         .from('conversations')
         .insert({
@@ -120,8 +135,19 @@ export function useConversations() {
       if (error) {
         console.error('Error creating conversation:', error);
         if (error.code === '23505') {
-          toast.error('Conversation already exists with this trainer');
-          return { error: 'Conversation already exists' };
+          // Race condition - conversation was created between our check and insert
+          // Fetch the existing conversation
+          const { data: raceConversation } = await supabase
+            .from('conversations')
+            .select('*')
+            .eq('client_id', user.id)
+            .eq('trainer_id', trainerId)
+            .single();
+          
+          if (raceConversation) {
+            toast.success('Opening existing conversation');
+            return { data: raceConversation };
+          }
         }
         toast.error('Failed to create conversation');
         return { error };
