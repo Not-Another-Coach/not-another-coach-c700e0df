@@ -342,31 +342,9 @@ const TrainerDashboard = () => {
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Content based on active view */}
         {activeView === 'dashboard' && (
-          <>
-            {/* Two Column Layout */}
-            <div className="grid lg:grid-cols-3 gap-8">
-          
-          {/* Left Column: Key Stats + Performance */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="space-y-8">
             
-            {/* This Week's Goal Card */}
-            <Card className="bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">🎯 This Week's Goal</h3>
-                    <p className="text-muted-foreground">Convert 3 new clients</p>
-                    <div className="flex items-center gap-2 mt-2">
-                      <Progress value={33} className="w-32 h-2" />
-                      <span className="text-sm text-muted-foreground">1/3</span>
-                    </div>
-                  </div>
-                  <Target className="w-8 h-8 text-primary" />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Performance Metrics */}
+            {/* 1. Performance Metrics - Full Width */}
             <Card>
               <CardHeader>
                 <CardTitle>Performance Metrics</CardTitle>
@@ -405,7 +383,55 @@ const TrainerDashboard = () => {
               </CardContent>
             </Card>
 
-            {/* Primary Quick Actions */}
+            {/* 2. Upcoming Sessions and This Week's Goal - Side by Side */}
+            <div className="grid lg:grid-cols-2 gap-6">
+              
+              {/* Upcoming Sessions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Upcoming Sessions</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <UpcomingSessionsWidget />
+                </CardContent>
+              </Card>
+
+              {/* This Week's Goal */}
+              <Card className="bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold mb-2">🎯 This Week's Goal</h3>
+                      <p className="text-muted-foreground">Convert 3 new clients</p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <Progress value={33} className="w-32 h-2" />
+                        <span className="text-sm text-muted-foreground">1/3</span>
+                      </div>
+                    </div>
+                    <Target className="w-8 h-8 text-primary" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* 3. Live Activity and Coach Feedback - Side by Side */}
+            <div className="grid lg:grid-cols-2 gap-6">
+              
+              {/* Live Activity */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Live Activity</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <LiveActivityFeed />
+                </CardContent>
+              </Card>
+
+              {/* Coach Feedback Summary */}
+              <CoachFeedbackSummary />
+            </div>
+
+            {/* 4. Quick Actions */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -443,7 +469,48 @@ const TrainerDashboard = () => {
               </CardContent>
             </Card>
 
-            {/* Availability Status Management */}
+            {/* 5. Match Quality Distribution */}
+            {analytics?.match_tier_stats && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Match Quality Distribution</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div className="text-center p-4 rounded-lg bg-green-50 border border-green-200">
+                      <div className="text-3xl font-bold text-green-600 mb-2">
+                        {analytics.match_tier_stats.perfect_matches || 0}
+                      </div>
+                      <p className="text-sm font-medium text-green-800">Perfect Matches</p>
+                      <p className="text-xs text-green-600 mt-1">90%+ compatibility</p>
+                    </div>
+                    <div className="text-center p-4 rounded-lg bg-blue-50 border border-blue-200">
+                      <div className="text-3xl font-bold text-blue-600 mb-2">
+                        {analytics.match_tier_stats.great_matches || 0}
+                      </div>
+                      <p className="text-sm font-medium text-blue-800">Great Matches</p>
+                      <p className="text-xs text-blue-600 mt-1">75-89% compatibility</p>
+                    </div>
+                    <div className="text-center p-4 rounded-lg bg-yellow-50 border border-yellow-200">
+                      <div className="text-3xl font-bold text-yellow-600 mb-2">
+                        {analytics.match_tier_stats.good_matches || 0}
+                      </div>
+                      <p className="text-sm font-medium text-yellow-800">Good Matches</p>
+                      <p className="text-xs text-yellow-600 mt-1">60-74% compatibility</p>
+                    </div>
+                    <div className="text-center p-4 rounded-lg bg-orange-50 border border-orange-200">
+                      <div className="text-3xl font-bold text-orange-600 mb-2">
+                        {analytics.match_tier_stats.potential_matches || 0}
+                      </div>
+                      <p className="text-sm font-medium text-orange-800">Potential Matches</p>
+                      <p className="text-xs text-orange-600 mt-1">45-59% compatibility</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Availability Management Section */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -566,14 +633,7 @@ const TrainerDashboard = () => {
               </CardContent>
             </Card>
 
-            {/* Coach Feedback Summary */}
-            <CoachFeedbackSummary />
-          </div>
-
-          {/* Right Column: Compact Activity Widgets */}
-          <div className="space-y-4">
-            
-            {/* Engagement Streak */}
+            {/* Engagement Streak - At Bottom */}
             <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
@@ -586,95 +646,7 @@ const TrainerDashboard = () => {
               </CardContent>
             </Card>
 
-            {/* Live Activity Feed - Compact */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">Live Activity</CardTitle>
-              </CardHeader>
-              <CardContent className="max-h-48 overflow-y-auto">
-                <LiveActivityFeed />
-              </CardContent>
-            </Card>
-
-            {/* Upcoming Sessions - Compact */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">Upcoming Sessions</CardTitle>
-              </CardHeader>
-              <CardContent className="max-h-48 overflow-y-auto">
-                <UpcomingSessionsWidget />
-              </CardContent>
-            </Card>
           </div>
-        </div>
-
-        {/* Match Quality Stats - Full Width */}
-        {analytics?.match_tier_stats && (
-          <Card className="mt-8">
-            <CardHeader>
-              <CardTitle>Match Quality Distribution</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <div className="text-center p-4 rounded-lg bg-green-50 border border-green-200">
-                  <div className="text-3xl font-bold text-green-600 mb-2">
-                    {analytics.match_tier_stats.perfect_matches || 0}
-                  </div>
-                  <p className="text-sm font-medium text-green-800">Perfect Matches</p>
-                  <p className="text-xs text-green-600 mt-1">90%+ compatibility</p>
-                </div>
-                <div className="text-center p-4 rounded-lg bg-blue-50 border border-blue-200">
-                  <div className="text-3xl font-bold text-blue-600 mb-2">
-                    {analytics.match_tier_stats.great_matches || 0}
-                  </div>
-                  <p className="text-sm font-medium text-blue-800">Great Matches</p>
-                  <p className="text-xs text-blue-600 mt-1">75-89% compatibility</p>
-                </div>
-                <div className="text-center p-4 rounded-lg bg-yellow-50 border border-yellow-200">
-                  <div className="text-3xl font-bold text-yellow-600 mb-2">
-                    {analytics.match_tier_stats.good_matches || 0}
-                  </div>
-                  <p className="text-sm font-medium text-yellow-800">Good Matches</p>
-                  <p className="text-xs text-yellow-600 mt-1">60-74% compatibility</p>
-                </div>
-                <div className="text-center p-4 rounded-lg bg-orange-50 border border-orange-200">
-                  <div className="text-3xl font-bold text-orange-600 mb-2">
-                    {analytics.match_tier_stats.potential_matches || 0}
-                  </div>
-                  <p className="text-sm font-medium text-orange-800">Potential Matches</p>
-                  <p className="text-xs text-orange-600 mt-1">45-59% compatibility</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Shortlisted Clients */}
-        {shortlistedClients && shortlistedClients.length > 0 && (
-          <Card className="mt-8">
-            <CardHeader>
-              <CardTitle>Recent Shortlisted Clients</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {shortlistedClients.slice(0, 5).map((client, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border">
-                    <div>
-                      <p className="font-medium">Client #{client.id.slice(0, 8)}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {client.primary_goals?.length ? `Goals: ${client.primary_goals.join(', ')}` : 'No goals specified'}
-                      </p>
-                    </div>
-                    <Badge variant={((client as any).discovery_call_booked ? 'default' : 'secondary')}>
-                      {(client as any).discovery_call_booked ? 'Call Booked' : 'Available'}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-          </>
         )}
         
         {activeView === 'prospects' && (
@@ -707,6 +679,32 @@ const TrainerDashboard = () => {
                 <p className="text-sm text-muted-foreground">
                   Set and track your coaching goals and targets.
                 </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Shortlisted Clients - Show only on dashboard view */}
+        {activeView === 'dashboard' && shortlistedClients && shortlistedClients.length > 0 && (
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle>Recent Shortlisted Clients</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {shortlistedClients.slice(0, 5).map((client, index) => (
+                  <div key={index} className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border">
+                    <div>
+                      <p className="font-medium">Client #{client.id.slice(0, 8)}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {client.primary_goals?.length ? `Goals: ${client.primary_goals.join(', ')}` : 'No goals specified'}
+                      </p>
+                    </div>
+                    <Badge variant={((client as any).discovery_call_booked ? 'default' : 'secondary')}>
+                      {(client as any).discovery_call_booked ? 'Call Booked' : 'Available'}
+                    </Badge>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
