@@ -236,10 +236,22 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
       matchReasons: ["Manually added trainer"],
       matchDetails: [
         {
-          category: "Compatibility",
-          score: 75,
+          category: "Goals",
+          score: 80,
           icon: Target,
+          color: "text-green-500"
+        },
+        {
+          category: "Location",
+          score: 70,
+          icon: MapPin,
           color: "text-blue-500"
+        },
+        {
+          category: "Experience",
+          score: 75,
+          icon: Users,
+          color: "text-purple-500"
         }
       ],
       compatibilityPercentage: 75
@@ -469,7 +481,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
             <Star className="h-4 w-4" />
             <span className="hidden sm:inline">Shortlisted</span>
             <Badge variant="secondary" className="ml-1 text-xs">
-              {shortlistedTrainers.length}
+              {actualShortlistedTrainers.length}
             </Badge>
           </TabsTrigger>
           <TabsTrigger value="discover" className="flex items-center gap-2">
