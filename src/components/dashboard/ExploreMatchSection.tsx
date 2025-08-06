@@ -36,6 +36,7 @@ import {
   MapPin,
   Phone,
   MessageCircle,
+  Calendar,
   X,
   BarChart3
 } from "lucide-react";
@@ -322,6 +323,14 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
       detail: { trainerId }
     });
     window.dispatchEvent(event);
+  };
+
+  const handleCreateConversation = async (trainerId: string) => {
+    // Create conversation and navigate to messaging
+    const result = await createConversation(trainerId);
+    if (!result.error) {
+      navigate('/messaging');
+    }
   };
 
   const handleShortlist = async (trainerId: string) => {
@@ -789,19 +798,66 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
               {savedTrainers.map((match, index) => {
                 console.log(`Rendering saved trainer ${index}:`, match.trainer.id, match.trainer.name);
                 return (
-                  <TrainerCard
-                    key={`saved-${match.trainer.id}-${index}`} // Even more unique key
-                    trainer={match.trainer}
-                    onViewProfile={handleViewProfile}
-                    matchScore={match.score}
-                    matchReasons={match.matchReasons}
-                    matchDetails={match.matchDetails}
-                    cardState={isShortlisted(match.trainer.id) ? "shortlisted" : "saved"}
-                    showComparisonCheckbox={true}
-                    comparisonChecked={savedComparison.includes(match.trainer.id)}
-                    onComparisonToggle={handleSavedComparisonToggle}
-                    comparisonDisabled={!savedComparison.includes(match.trainer.id) && savedComparison.length >= 4}
-                  />
+                  <div key={`saved-${match.trainer.id}-${index}`} className="space-y-3">
+                    <TrainerCard
+                      trainer={match.trainer}
+                      onViewProfile={handleViewProfile}
+                      matchScore={match.score}
+                      matchReasons={match.matchReasons}
+                      matchDetails={match.matchDetails}
+                      cardState={isShortlisted(match.trainer.id) ? "shortlisted" : "saved"}
+                      showComparisonCheckbox={true}
+                      comparisonChecked={savedComparison.includes(match.trainer.id)}
+                      onComparisonToggle={handleSavedComparisonToggle}
+                      comparisonDisabled={!savedComparison.includes(match.trainer.id) && savedComparison.length >= 4}
+                    />
+                    
+                    {/* External CTAs for Saved Trainers */}
+                    <div className="space-y-2">
+                      {/* Show Add to Shortlist if not already shortlisted */}
+                      {!isShortlisted(match.trainer.id) && (
+                        <Button
+                          onClick={() => shortlistTrainer(match.trainer.id)}
+                          className="w-full"
+                          size="sm"
+                          disabled={!canShortlistMore}
+                        >
+                          <Star className="h-3 w-3 mr-1" />
+                          {canShortlistMore ? 'Add to Shortlist' : `Shortlist Full (${shortlistCount}/4)`}
+                        </Button>
+                      )}
+                      
+                      {/* Show shortlisted actions if already shortlisted */}
+                      {isShortlisted(match.trainer.id) && (
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-center gap-2 py-2 bg-green-50 text-green-800 rounded-lg border border-green-200">
+                            <Star className="h-3 w-3 fill-current" />
+                            <span className="text-xs font-medium">Shortlisted</span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="text-xs"
+                              onClick={() => handleCreateConversation(match.trainer.id)}
+                            >
+                              <MessageCircle className="h-3 w-3 mr-1" />
+                              Chat
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="default" 
+                              className="text-xs"
+                              onClick={() => handleCreateConversation(match.trainer.id)}
+                            >
+                              <Calendar className="h-3 w-3 mr-1" />
+                              Discovery Call
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 );
               })}
             </div>
