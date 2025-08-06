@@ -312,6 +312,8 @@ export default function SavedTrainers() {
                 <TrainerCard
                   trainer={trainer}
                   onViewProfile={(id) => console.log('View profile:', id)}
+                  cardState="saved"
+                  onShortlist={handleShortlist}
                 />
 
                 {/* Action Buttons */}
