@@ -387,14 +387,7 @@ const TrainerDashboard = () => {
             <div className="grid md:grid-cols-2 gap-6">
               
               {/* Upcoming Sessions */}
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base">Upcoming Sessions</CardTitle>
-                </CardHeader>
-                <CardContent className="max-h-48 overflow-y-auto">
-                  <UpcomingSessionsWidget />
-                </CardContent>
-              </Card>
+              <UpcomingSessionsWidget />
 
               {/* This Week's Goal */}
               <Card className="bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20">
@@ -416,14 +409,7 @@ const TrainerDashboard = () => {
             <div className="grid md:grid-cols-2 gap-6">
               
               {/* Live Activity */}
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base">Live Activity</CardTitle>
-                </CardHeader>
-                <CardContent className="max-h-48 overflow-y-auto">
-                  <LiveActivityFeed />
-                </CardContent>
-              </Card>
+              <LiveActivityFeed />
 
               {/* Coach Feedback Summary */}
               <CoachFeedbackSummary />
