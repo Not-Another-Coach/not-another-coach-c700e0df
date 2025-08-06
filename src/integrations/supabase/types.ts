@@ -1463,6 +1463,10 @@ export type Database = {
         Args: { p_user_id: string; p_reason: string }
         Returns: undefined
       }
+      revert_waitlist_client_conversion: {
+        Args: { p_client_id: string; p_trainer_id: string }
+        Returns: boolean
+      }
       suspend_user: {
         Args: { p_user_id: string; p_reason: string; p_duration_days?: number }
         Returns: undefined
