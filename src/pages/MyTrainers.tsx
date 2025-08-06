@@ -596,7 +596,7 @@ export default function MyTrainers() {
                   title="Reschedule your discovery call"
                 >
                   <Edit className="h-3 w-3 mr-1" />
-                  Call Booked
+                  Reschedule Call
                 </Button>
               ) : offersDiscoveryCall ? (
                 <Button 
@@ -675,7 +675,7 @@ export default function MyTrainers() {
                   onClick={() => handleRescheduleCall(trainer.id)}
                 >
                   <Edit className="h-3 w-3 mr-1" />
-                  Call Booked
+                  Reschedule Call
                 </Button>
               ) : isDiscoveryInProgress ? (
                 <Button 
