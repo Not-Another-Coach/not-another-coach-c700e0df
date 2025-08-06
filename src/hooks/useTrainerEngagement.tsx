@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
-export type EngagementStage = 'browsing' | 'liked' | 'shortlisted' | 'discovery_call_booked' | 'matched' | 'discovery_completed' | 'active_client' | 'unmatched' | 'declined';
+export type EngagementStage = 'browsing' | 'liked' | 'shortlisted' | 'discovery_call_booked' | 'discovery_in_progress' | 'matched' | 'discovery_completed' | 'active_client' | 'unmatched' | 'declined';
 
 interface TrainerEngagement {
   trainerId: string;
@@ -92,11 +92,12 @@ export function useTrainerEngagement() {
 
   const getShortlistedTrainers = () => {
     // Return ALL trainers that are beyond the browsing/liked stage
-    // This includes shortlisted, discovery_call_booked, and discovery_completed
+    // This includes shortlisted, discovery_call_booked, discovery_in_progress, and discovery_completed
     // The consuming component will filter these based on their specific needs
     return engagements.filter(e => 
       e.stage === 'shortlisted' || 
       e.stage === 'discovery_call_booked' || 
+      e.stage === 'discovery_in_progress' ||
       e.stage === 'discovery_completed'
     );
   };
@@ -107,9 +108,10 @@ export function useTrainerEngagement() {
   };
 
   const getDiscoveryStageTrainers = () => {
-    // Return only trainers with discovery call stages
+    // Return trainers with discovery call stages and discovery in progress
     return engagements.filter(e => 
       e.stage === 'discovery_call_booked' || 
+      e.stage === 'discovery_in_progress' ||
       e.stage === 'discovery_completed'
     );
   };
@@ -128,7 +130,7 @@ export function useTrainerEngagement() {
 
   const isTrainerShortlisted = (trainerId: string) => {
     const stage = getEngagementStage(trainerId);
-    return stage === 'shortlisted' || stage === 'discovery_call_booked';
+    return stage === 'shortlisted' || stage === 'discovery_call_booked' || stage === 'discovery_in_progress';
   };
 
   const likeTrainer = async (trainerId: string) => {

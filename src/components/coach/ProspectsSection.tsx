@@ -77,7 +77,7 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
           notes
         `)
         .eq('trainer_id', profile.id)
-        .in('stage', ['shortlisted', 'discovery_call_booked', 'matched', 'discovery_completed', 'declined', 'unmatched'])
+        .in('stage', ['shortlisted', 'discovery_call_booked', 'discovery_in_progress', 'matched', 'discovery_completed', 'declined', 'unmatched'])
         .order('created_at', { ascending: false });
 
       console.log('Engagement data:', engagementData);
@@ -146,7 +146,7 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
       })) as Prospect[];
 
       // Separate active and lost prospects
-      const activeStages = ['shortlisted', 'discovery_call_booked', 'matched', 'discovery_completed'];
+      const activeStages = ['shortlisted', 'discovery_call_booked', 'discovery_in_progress', 'matched', 'discovery_completed'];
       const lostStages = ['declined', 'unmatched'];
       
       const active = mergedData.filter(prospect => activeStages.includes(prospect.stage));

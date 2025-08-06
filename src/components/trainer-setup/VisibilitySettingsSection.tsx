@@ -23,6 +23,7 @@ const engagementStageLabels: Record<EngagementStage, string> = {
   liked: 'Liked',
   shortlisted: 'Shortlisted',
   discovery_call_booked: 'Call Booked',
+  discovery_in_progress: 'Discovery Active',
   matched: 'Matched',
   discovery_completed: 'Discovery Done',
   active_client: 'Active Client',
@@ -57,6 +58,7 @@ export const VisibilitySettingsSection = () => {
     'liked', 
     'shortlisted',
     'discovery_call_booked',
+    'discovery_in_progress',
     'matched', 
     'discovery_completed', 
     'active_client'

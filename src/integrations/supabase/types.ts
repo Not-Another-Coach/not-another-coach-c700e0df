@@ -1516,6 +1516,7 @@ export type Database = {
         | "active_client"
         | "shortlisted"
         | "discovery_call_booked"
+        | "discovery_in_progress"
         | "unmatched"
         | "declined"
       user_type: "client" | "trainer" | "admin"
@@ -1683,6 +1684,7 @@ export const Constants = {
         "active_client",
         "shortlisted",
         "discovery_call_booked",
+        "discovery_in_progress",
         "unmatched",
         "declined",
       ],

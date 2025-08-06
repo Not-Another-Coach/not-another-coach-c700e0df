@@ -53,7 +53,7 @@ export default function MyTrainers() {
     shortlistedTrainers: actualShortlistedTrainers 
   } = useShortlistedTrainers();
   const { createConversation } = useConversations();
-  const { getEngagementStage, getLikedTrainers, getOnlyShortlistedTrainers } = useTrainerEngagement();
+  const { getEngagementStage, getLikedTrainers, getOnlyShortlistedTrainers, getDiscoveryStageTrainers } = useTrainerEngagement();
   const { hasActiveDiscoveryCall, getDiscoveryCallForTrainer } = useDiscoveryCallData();
   const { getCoachAvailability, checkClientWaitlistStatus, joinWaitlist } = useWaitlist();
 
@@ -183,7 +183,8 @@ export default function MyTrainers() {
     }
 
     // Get trainers with active discovery calls (scheduled/rescheduled, not cancelled)
-    // Check all possible trainers who might have discovery calls, not just those in allTrainers
+    // AND trainers with discovery_in_progress stage
+    // Check all possible trainers who might have discovery calls or be in discovery_in_progress, not just those in allTrainers
     const trainersWithDiscoveryCalls = new Set<string>();
     
     // First, collect all trainer IDs that have active discovery calls
@@ -197,6 +198,14 @@ export default function MyTrainers() {
     allTrainerData.forEach(trainerData => {
       if (hasActiveDiscoveryCall(trainerData.trainer.id)) {
         trainersWithDiscoveryCalls.add(trainerData.trainer.id);
+      }
+    });
+    
+    // Also include trainers with discovery_in_progress stage
+    const discoveryStageTrainers = getDiscoveryStageTrainers();
+    discoveryStageTrainers.forEach((engagement: any) => {
+      if (engagement.stage === 'discovery_in_progress' || engagement.stage === 'discovery_call_booked' || engagement.stage === 'discovery_completed') {
+        trainersWithDiscoveryCalls.add(engagement.trainerId);
       }
     });
     
@@ -232,7 +241,7 @@ export default function MyTrainers() {
           trainer,
           status: 'discovery',
           engagement: allTrainerData[existingIndex].engagement,
-          statusLabel: 'Discovery Call',
+          statusLabel: 'Discovery Active',
           statusColor: 'bg-purple-100 text-purple-800'
         };
       } else {
@@ -241,14 +250,14 @@ export default function MyTrainers() {
           trainer,
           status: 'discovery',
           engagement: null,
-          statusLabel: 'Discovery Call',
+          statusLabel: 'Discovery Active',
           statusColor: 'bg-purple-100 text-purple-800'
         });
       }
     });
 
     return allTrainerData;
-  }, [allTrainers, getLikedTrainers, getOnlyShortlistedTrainers, hasActiveDiscoveryCall]);
+  }, [allTrainers, getLikedTrainers, getOnlyShortlistedTrainers, getDiscoveryStageTrainers, hasActiveDiscoveryCall]);
 
   // Filter trainers based on active filter
   const filteredTrainers = useMemo(() => {
@@ -492,6 +501,8 @@ export default function MyTrainers() {
         const discoveryCall = getDiscoveryCallForTrainer(trainer.id);
         const callDate = discoveryCall ? new Date(discoveryCall.scheduled_for) : null;
         const isCallInPast = callDate ? callDate < new Date() : false;
+        const engagementStage = getEngagementStage(trainer.id);
+        const isDiscoveryInProgress = engagementStage === 'discovery_in_progress';
         
         return (
           <div className="space-y-2">
@@ -505,8 +516,17 @@ export default function MyTrainers() {
                 Chat
               </Button>
               
-              {/* Show reschedule button for scheduled calls, or choose coach for past calls */}
-              {discoveryCall && !isCallInPast ? (
+              {/* Different actions based on whether it's a discovery call or discovery in progress */}
+              {isDiscoveryInProgress ? (
+                <Button 
+                  size="sm" 
+                  variant="default"
+                  onClick={() => handleChooseCoach(trainer.id)}
+                >
+                  <UserCheck className="h-3 w-3 mr-1" />
+                  Choose Coach
+                </Button>
+              ) : discoveryCall && !isCallInPast ? (
                 <Button 
                   size="sm" 
                   variant="outline"
@@ -536,8 +556,18 @@ export default function MyTrainers() {
               )}
             </div>
             
-            {/* Bottom button changes based on call timing */}
-            {isCallInPast ? (
+            {/* Bottom button changes based on discovery type */}
+            {isDiscoveryInProgress ? (
+              <Button
+                onClick={() => navigate(`/trainer/${trainer.id}`)}
+                className="w-full"
+                size="sm"
+                variant="outline"
+              >
+                <Phone className="h-3 w-3 mr-1" />
+                View Full Profile
+              </Button>
+            ) : isCallInPast ? (
               <Button
                 onClick={() => navigate(`/trainer/${trainer.id}`)}
                 className="w-full"
