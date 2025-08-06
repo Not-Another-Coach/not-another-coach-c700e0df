@@ -6,7 +6,6 @@ import { useShortlistedTrainers } from "@/hooks/useShortlistedTrainers";
 import { useTrainerEngagement } from "@/hooks/useTrainerEngagement";
 import { useConversations } from "@/hooks/useConversations";
 import { useRealTrainers } from "@/hooks/useRealTrainers";
-import { useShortlistedTrainerProfiles } from "@/hooks/useShortlistedTrainerProfiles";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
@@ -99,12 +98,8 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
     flexible_scheduling: profile.flexible_scheduling,
   };
 
-  // Use only real trainers (published) for main matching, but fetch shortlisted separately
+  // Use only published trainers for all client views
   const allTrainers = realTrainers;
-  
-  // Get shortlisted trainer IDs and fetch their profiles separately (including unpublished)
-  const shortlistedTrainerIds = actualShortlistedTrainers.map(st => st.trainer_id);
-  const { shortlistedProfiles } = useShortlistedTrainerProfiles(shortlistedTrainerIds);
   
   const { matchedTrainers, topMatches, goodMatches } = useEnhancedTrainerMatching(
     allTrainers, 
@@ -904,13 +899,13 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                 These are your top trainer choices. You can chat with them and book discovery calls.
               </div>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                 {shortlistedProfiles.map((trainer) => {
+                 {shortlistedTrainers.map((match) => {
                      // Find the corresponding shortlisted data
-                     const shortlisted = actualShortlistedTrainers.find(st => st.trainer_id === trainer.id);
+                     const shortlisted = actualShortlistedTrainers.find(st => st.trainer_id === match.trainer.id);
                      if (!shortlisted) return null;
 
                      // Calculate match data for this trainer to ensure consistency
-                     const matchData = getTrainerMatchData(trainer);
+                     const matchData = getTrainerMatchData(match.trainer);
                      
                      return (
                       <div key={`shortlisted-${shortlisted.trainer_id}-${shortlisted.stage}`} className="space-y-3">
@@ -929,7 +924,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                         onRemove={(trainerId) => handleRemoveFromShortlist(trainerId, matchData.trainer.name)}
                         hasDiscoveryCall={!!shortlisted.discovery_call}
                         discoveryCallData={shortlisted.discovery_call}
-                        trainerOffersDiscoveryCalls={(trainer as any).offers_discovery_call || false}
+                        trainerOffersDiscoveryCalls={(match.trainer as any).offers_discovery_call || false}
                       />
                       
                       {/* External CTAs for Shortlisted Trainers */}
