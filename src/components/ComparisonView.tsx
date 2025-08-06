@@ -157,10 +157,6 @@ export const ComparisonView = ({ trainers, onClose }: ComparisonViewProps) => {
                   </div>
                 </div>
                 
-                <Button className="w-full mt-4" variant="outline">
-                  <MessageCircle className="h-4 w-4 mr-2" />
-                  Message {trainer.name.split(' ')[0]}
-                </Button>
               </CardContent>
             </Card>
           ))}
