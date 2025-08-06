@@ -211,6 +211,31 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
     isShortlisted(match.trainer.id)
   );
 
+  // Helper function to calculate match data for any trainer
+  const calculateTrainerMatch = (trainer: any) => {
+    // Check if trainer is already in matchedTrainers
+    const existingMatch = matchedTrainers.find(match => match.trainer.id === trainer.id);
+    if (existingMatch) {
+      return existingMatch;
+    }
+
+    // If not found, calculate match data using the same logic as useEnhancedTrainerMatching
+    // This ensures consistent match scoring for all trainers
+    const { matchedTrainers: singleTrainerMatch } = useEnhancedTrainerMatching(
+      [trainer], 
+      profile.quiz_answers,
+      clientSurveyData
+    );
+
+    return singleTrainerMatch[0] || {
+      trainer,
+      score: 0,
+      matchReasons: [],
+      matchDetails: [],
+      compatibilityPercentage: 0
+    };
+  };
+
   // Mock matched trainers (those with mutual interest)
   const mutualMatches = matchedTrainers.filter(match => match.score >= 80);
 
@@ -717,23 +742,31 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
               </div>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {actualShortlistedTrainers.map((shortlisted) => {
-                  // Find the trainer data from our matched trainers
-                  const trainerMatch = matchedTrainers.find(match => match.trainer.id === shortlisted.trainer_id);
-                  const trainer = trainerMatch?.trainer || {
-                    id: shortlisted.trainer_id,
-                    name: `Trainer ${shortlisted.trainer_id}`,
-                    specialties: [],
-                    rating: 0,
-                    reviews: 0,
-                    experience: '',
-                    location: '',
-                    hourlyRate: 0,
-                    image: '',
-                    certifications: [],
-                    description: '',
-                    availability: '',
-                    trainingType: []
-                  };
+                  // Find the trainer data from all trainers (sample + real)
+                  let trainer = allTrainers.find(t => t.id === shortlisted.trainer_id);
+                  
+                  // If not found in allTrainers, create basic trainer object
+                  if (!trainer) {
+                    trainer = {
+                      id: shortlisted.trainer_id,
+                      name: `Trainer ${shortlisted.trainer_id}`,
+                      specialties: [],
+                      rating: 0,
+                      reviews: 0,
+                      experience: '',
+                      location: '',
+                      hourlyRate: 0,
+                      image: '',
+                      certifications: [],
+                      description: '',
+                      availability: '',
+                      trainingType: [],
+                      offers_discovery_call: true
+                    } as any; // Type assertion to avoid TypeScript issues
+                  }
+
+                  // Calculate match data for this trainer to ensure consistency
+                  const matchData = calculateTrainerMatch(trainer);
                   
                   return (
                     <div key={shortlisted.trainer_id} className="relative">
@@ -748,11 +781,11 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                       </div>
 
                       <TrainerCard
-                        trainer={trainer}
+                        trainer={matchData.trainer}
                         onViewProfile={handleViewProfile}
-                        matchScore={trainerMatch?.score || 0}
-                        matchReasons={trainerMatch?.matchReasons || []}
-                        matchDetails={trainerMatch?.matchDetails || []}
+                        matchScore={matchData.score}
+                        matchReasons={matchData.matchReasons}
+                        matchDetails={matchData.matchDetails}
                       />
                       <Badge 
                         className="absolute top-2 right-14 bg-yellow-500 text-white z-10"
@@ -765,7 +798,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                         variant="ghost"
                         size="sm"
                         className="absolute top-2 left-2 bg-white/90 backdrop-blur hover:bg-red-50 hover:text-red-600 z-10"
-                        onClick={() => handleRemoveFromShortlist(shortlisted.trainer_id, trainer.name)}
+                        onClick={() => handleRemoveFromShortlist(shortlisted.trainer_id, matchData.trainer.name)}
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -813,8 +846,8 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                           <BookDiscoveryCallButton 
                             trainer={{
                               id: shortlisted.trainer_id,
-                              name: trainer.name,
-                              offers_discovery_call: trainer.offers_discovery_call
+                              name: matchData.trainer.name,
+                              offers_discovery_call: matchData.trainer.offers_discovery_call ?? true
                             }}
                             size="sm"
                             variant="outline"
@@ -858,32 +891,40 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                 </div>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {actualShortlistedTrainers.filter(st => st.discovery_call).map((shortlisted) => {
-                    // Find the trainer data from our matched trainers
-                    const trainerMatch = matchedTrainers.find(match => match.trainer.id === shortlisted.trainer_id);
-                    const trainer = trainerMatch?.trainer || {
-                      id: shortlisted.trainer_id,
-                      name: `Trainer ${shortlisted.trainer_id}`,
-                      specialties: [],
-                      rating: 0,
-                      reviews: 0,
-                      experience: '',
-                      location: '',
-                      hourlyRate: 0,
-                      image: '',
-                      certifications: [],
-                      description: '',
-                      availability: '',
-                      trainingType: []
-                    };
+                    // Find the trainer data from all trainers (sample + real)
+                    let trainer = allTrainers.find(t => t.id === shortlisted.trainer_id);
+                    
+                    // If not found in allTrainers, create basic trainer object
+                    if (!trainer) {
+                      trainer = {
+                        id: shortlisted.trainer_id,
+                        name: `Trainer ${shortlisted.trainer_id}`,
+                        specialties: [],
+                        rating: 0,
+                        reviews: 0,
+                        experience: '',
+                        location: '',
+                        hourlyRate: 0,
+                        image: '',
+                        certifications: [],
+                        description: '',
+                        availability: '',
+                        trainingType: [],
+                        offers_discovery_call: true
+                      } as any; // Type assertion to avoid TypeScript issues
+                    }
+
+                    // Calculate match data for this trainer to ensure consistency
+                    const matchData = calculateTrainerMatch(trainer);
                     
                     return (
                       <div key={shortlisted.trainer_id} className="relative">
                         <TrainerCard
-                          trainer={trainer}
+                          trainer={matchData.trainer}
                           onViewProfile={handleViewProfile}
-                          matchScore={trainerMatch?.score || 0}
-                          matchReasons={trainerMatch?.matchReasons || []}
-                          matchDetails={trainerMatch?.matchDetails || []}
+                          matchScore={matchData.score}
+                          matchReasons={matchData.matchReasons}
+                          matchDetails={matchData.matchDetails}
                         />
                         <Badge 
                           className="absolute top-2 right-2 bg-blue-500 text-white z-10"
@@ -925,8 +966,8 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                             <BookDiscoveryCallButton
                               trainer={{
                                 id: shortlisted.trainer_id,
-                                name: trainer.name,
-                                offers_discovery_call: trainer.offers_discovery_call
+                                name: matchData.trainer.name,
+                                offers_discovery_call: matchData.trainer.offers_discovery_call ?? true
                               }}
                               size="sm"
                               variant="outline"
