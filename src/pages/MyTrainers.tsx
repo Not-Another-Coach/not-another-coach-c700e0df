@@ -54,7 +54,7 @@ export default function MyTrainers() {
     shortlistedTrainers: actualShortlistedTrainers 
   } = useShortlistedTrainers();
   const { createConversation } = useConversations();
-  const { getEngagementStage, getLikedTrainers, getOnlyShortlistedTrainers, getDiscoveryStageTrainers } = useTrainerEngagement();
+  const { getEngagementStage, getLikedTrainers, getOnlyShortlistedTrainers, getDiscoveryStageTrainers, getMatchedTrainers } = useTrainerEngagement();
   const { hasActiveDiscoveryCall, getDiscoveryCallForTrainer } = useDiscoveryCallData();
   const { getCoachAvailability, checkClientWaitlistStatus, joinWaitlist } = useWaitlist();
 
@@ -254,14 +254,16 @@ export default function MyTrainers() {
       const existingIndex = allTrainerData.findIndex(t => t.trainer.id === trainerId);
       
       if (existingIndex >= 0) {
-        // Upgrade existing trainer to discovery status
-        allTrainerData[existingIndex] = {
-          trainer,
-          status: 'discovery',
-          engagement: allTrainerData[existingIndex].engagement,
-          statusLabel: 'Discovery Active',
-          statusColor: 'bg-purple-100 text-purple-800'
-        };
+        // Don't upgrade if trainer is already matched - keep them in correct status
+        if (allTrainerData[existingIndex].status !== 'discovery') {
+          allTrainerData[existingIndex] = {
+            trainer,
+            status: 'discovery',
+            engagement: allTrainerData[existingIndex].engagement,
+            statusLabel: 'Discovery Active',
+            statusColor: 'bg-purple-100 text-purple-800'
+          };
+        }
       } else {
         // Add as new discovery trainer
         allTrainerData.push({
@@ -274,10 +276,53 @@ export default function MyTrainers() {
       }
     });
 
-    return allTrainerData;
-  }, [allTrainers, getLikedTrainers, getOnlyShortlistedTrainers, getDiscoveryStageTrainers, hasActiveDiscoveryCall, conversations, user]);
+    // Add matched trainers
+    const matchedTrainers = getMatchedTrainers();
+    matchedTrainers.forEach(engagement => {
+      let trainer = allTrainers.find(t => t.id === engagement.trainerId);
+      
+      if (!trainer) {
+        trainer = {
+          id: engagement.trainerId,
+          name: 'Loading trainer...',
+          specialties: [],
+          rating: 0,
+          reviews: 0,
+          experience: '',
+          location: 'Loading...',
+          hourlyRate: 0,
+          image: '',
+          certifications: [],
+          description: 'Loading trainer information...',
+          availability: 'Unknown',
+          trainingType: ['Loading...']
+        };
+      }
+      
+      // Check if already exists and upgrade to matched status
+      const existingIndex = allTrainerData.findIndex(t => t.trainer.id === engagement.trainerId);
+      
+      if (existingIndex >= 0) {
+        allTrainerData[existingIndex] = {
+          trainer,
+          status: 'discovery', // Keep matched trainers in discovery section
+          engagement,
+          statusLabel: 'Matched',
+          statusColor: 'bg-green-100 text-green-800'
+        };
+      } else {
+        allTrainerData.push({
+          trainer,
+          status: 'discovery', // Keep matched trainers in discovery section
+          engagement,
+          statusLabel: 'Matched', 
+          statusColor: 'bg-green-100 text-green-800'
+        });
+      }
+    });
 
-  // Filter trainers based on active filter
+    return allTrainerData;
+  }, [allTrainers, getLikedTrainers, getOnlyShortlistedTrainers, getDiscoveryStageTrainers, getMatchedTrainers, hasActiveDiscoveryCall, conversations, user]);
   const filteredTrainers = useMemo(() => {
     if (activeFilter === 'all') return trainersWithStatus;
     return trainersWithStatus.filter(t => t.status === activeFilter);
