@@ -210,32 +210,13 @@ export function SwipeResultsSection({ profile }: SwipeResultsSectionProps) {
     setFeedbackModalOpen(true);
   };
 
-  const handleStartConversation = async (trainerId: string) => {
-    if (!user) {
-      toast.error('Please log in to start a conversation');
-      return;
-    }
-
-    // Check if conversation already exists
-    const existingConversation = conversations.find(conv => 
-      (conv.client_id === user?.id && conv.trainer_id === trainerId) ||
-      (conv.trainer_id === user?.id && conv.client_id === trainerId)
-    );
-
-    if (existingConversation) {
-      toast.info('Conversation already exists with this trainer');
-      navigate('/messaging');
-      return;
-    }
-
-    // Create the conversation
-    const result = await createConversation(trainerId);
-    if (!result.error) {
-      toast.success('Conversation started!');
-      navigate('/messaging');
-    } else {
-      toast.error('Failed to start conversation');
-    }
+  const handleStartConversation = (trainerId: string) => {
+    // Use the same approach as DashboardSummary - trigger the floating message button
+    // which opens the MessagingPopup with better UX
+    const event = new CustomEvent('openMessagePopup', {
+      detail: { trainerId }
+    });
+    window.dispatchEvent(event);
   };
 
   const handleBookDiscoveryCall = async (trainerId: string) => {
