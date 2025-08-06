@@ -493,12 +493,12 @@ export default function MyTrainers() {
         );
 
       case 'shortlisted':
-        // Note: offers_discovery_call is not available on trainer object, this is checked elsewhere
         const trainerId = trainer.id;
         const availability = trainerAvailability[trainerId];
         const waitlistStatus = trainerWaitlistStatus[trainerId];
         const isOnWaitlist = availability?.availability_status === 'waitlist';
         const clientAlreadyOnWaitlist = waitlistStatus !== null;
+        const offersDiscoveryCall = trainer.offers_discovery_call;
         
         return (
           <div className="space-y-2">
@@ -534,16 +534,26 @@ export default function MyTrainers() {
                   <Clock className="h-3 w-3 mr-1" />
                   On Waitlist
                 </Button>
-              ) : (
+              ) : offersDiscoveryCall ? (
                 <Button 
                   size="sm" 
                   variant="default"
                   onClick={() => handleBookDiscoveryCall(trainer.id)}
-                  className=""
                   title="Book a discovery call with this trainer"
                 >
                   <Calendar className="h-3 w-3 mr-1" />
                   Book Call
+                </Button>
+              ) : (
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  disabled
+                  className="opacity-50 cursor-not-allowed"
+                  title="This trainer does not offer discovery calls"
+                >
+                  <Calendar className="h-3 w-3 mr-1" />
+                  No Calls
                 </Button>
               )}
             </div>
