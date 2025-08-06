@@ -8,11 +8,14 @@ import { Heart, X, Shuffle, Users, Phone, MessageCircle, Star, CheckCircle } fro
 import { useNavigate } from "react-router-dom";
 import { useShortlistedTrainers } from "@/hooks/useShortlistedTrainers";
 import { useDiscoveryCallFeedback } from "@/hooks/useDiscoveryCallFeedback";
+import { useConversations } from "@/hooks/useConversations";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useTrainerEngagement } from "@/hooks/useTrainerEngagement";
 import { DiscoveryCallFeedbackModal } from "@/components/discovery-call/DiscoveryCallFeedbackModal";
+import { BookDiscoveryCallButton } from "@/components/discovery-call/BookDiscoveryCallButton";
+import { toast } from "sonner";
 
 // Mock data - in real app this would come from swipe history API
 import trainerSarah from "@/assets/trainer-sarah.jpg";
@@ -77,10 +80,11 @@ interface SwipeResultsSectionProps {
 export function SwipeResultsSection({ profile }: SwipeResultsSectionProps) {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { toast } = useToast();
-  const { shortlistedTrainers, loading, removeFromShortlist, refetchShortlisted } = useShortlistedTrainers();
+  const { toast: useToastHook } = useToast();
+  const { shortlistedTrainers, loading, removeFromShortlist, refetchShortlisted, bookDiscoveryCall } = useShortlistedTrainers();
   const { getOnlyShortlistedTrainers, getDiscoveryStageTrainers } = useTrainerEngagement();
   const { submitFeedback, getFeedback } = useDiscoveryCallFeedback();
+  const { createConversation, conversations } = useConversations();
   
   const [activeTab, setActiveTab] = useState("shortlisted");
   const [completedDiscoveryCalls, setCompletedDiscoveryCalls] = useState([]);
@@ -179,18 +183,12 @@ export function SwipeResultsSection({ profile }: SwipeResultsSectionProps) {
 
   const handleChooseCoach = async (trainerId: string) => {
     // TODO: Implement coach selection logic
-    toast({
-      title: "Feature Coming Soon",
-      description: "Coach selection and onboarding process will be available soon.",
-    });
+    toast.info("Coach selection and onboarding process will be available soon.");
   };
 
   const handleMoveBackToShortlist = async (trainerId: string) => {
     // This would reset the discovery call status for the trainer
-    toast({
-      title: "Feature Coming Soon", 
-      description: "Moving trainers back to shortlist will be available soon.",
-    });
+    toast.info("Moving trainers back to shortlist will be available soon.");
   };
 
   const handleViewProfile = (trainerId: string) => {
@@ -210,6 +208,73 @@ export function SwipeResultsSection({ profile }: SwipeResultsSectionProps) {
       scheduled_for: call.scheduled_for,
     });
     setFeedbackModalOpen(true);
+  };
+
+  const handleStartConversation = async (trainerId: string) => {
+    if (!user) {
+      toast.error('Please log in to start a conversation');
+      return;
+    }
+
+    // Check if conversation already exists
+    const existingConversation = conversations.find(conv => 
+      (conv.client_id === user?.id && conv.trainer_id === trainerId) ||
+      (conv.trainer_id === user?.id && conv.client_id === trainerId)
+    );
+
+    if (existingConversation) {
+      toast.info('Conversation already exists with this trainer');
+      navigate('/messaging');
+      return;
+    }
+
+    // Create the conversation
+    const result = await createConversation(trainerId);
+    if (!result.error) {
+      toast.success('Conversation started!');
+      navigate('/messaging');
+    } else {
+      toast.error('Failed to start conversation');
+    }
+  };
+
+  const handleBookDiscoveryCall = async (trainerId: string) => {
+    if (!user) {
+      toast.error('Please log in to book a discovery call');
+      return;
+    }
+
+    try {
+      const result = await bookDiscoveryCall(trainerId);
+      if (!result.error) {
+        toast.success('Discovery call booking initiated!');
+        // Refresh the data
+        const loadDiscoveryCalls = async () => {
+          const { data, error } = await supabase
+            .from('discovery_calls')
+            .select(`
+              id,
+              trainer_id,
+              scheduled_for,
+              status,
+              profiles!discovery_calls_trainer_id_fkey(first_name, last_name)
+            `)
+            .eq('client_id', user.id)
+            .in('status', ['scheduled', 'completed'])
+            .order('scheduled_for', { ascending: false });
+
+          if (data && !error) {
+            setCompletedDiscoveryCalls(data);
+          }
+        };
+        loadDiscoveryCalls();
+      } else {
+        toast.error('Failed to book discovery call');
+      }
+    } catch (error) {
+      console.error('Discovery call booking error:', error);
+      toast.error('Failed to book discovery call');
+    }
   };
 
   const handleFeedbackSubmitted = () => {
@@ -334,11 +399,19 @@ export function SwipeResultsSection({ profile }: SwipeResultsSectionProps) {
                       </div>
 
                       <div className="grid grid-cols-2 gap-2">
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleStartConversation(trainer.trainer_id)}
+                        >
                           <MessageCircle className="h-4 w-4 mr-2" />
                           Chat
                         </Button>
-                        <Button variant="default" size="sm">
+                        <Button 
+                          variant="default" 
+                          size="sm"
+                          onClick={() => handleBookDiscoveryCall(trainer.trainer_id)}
+                        >
                           <Phone className="h-4 w-4 mr-2" />
                           Book Call
                         </Button>
