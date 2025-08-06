@@ -9,12 +9,18 @@ import trainerEmma from "@/assets/trainer-emma.jpg";
 // Fallback images for trainers
 const trainerImages = [trainerAlex, trainerSarah, trainerMike, trainerEmma];
 
-export function useRealTrainers() {
-  const [trainers, setTrainers] = useState<Trainer[]>([]);
-  const [loading, setLoading] = useState(true);
+export function useShortlistedTrainerProfiles(shortlistedTrainerIds: string[]) {
+  const [shortlistedProfiles, setShortlistedProfiles] = useState<Trainer[]>([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchTrainers = async () => {
+    const fetchShortlistedProfiles = async () => {
+      if (!shortlistedTrainerIds.length) {
+        setShortlistedProfiles([]);
+        return;
+      }
+
+      setLoading(true);
       try {
         const { data, error } = await supabase
           .from('profiles')
@@ -33,21 +39,17 @@ export function useRealTrainers() {
             profile_photo_url,
             is_verified,
             verification_status,
-            trainer_availability_settings!inner(
-              offers_discovery_call
-            )
+            profile_published
           `)
-          .eq('user_type', 'trainer')
-          .eq('profile_published', true)
-          .order('created_at');
+          .in('id', shortlistedTrainerIds)
+          .eq('user_type', 'trainer');
 
         if (error) {
-          console.error('Error fetching trainers:', error);
+          console.error('Error fetching shortlisted trainer profiles:', error);
           return;
         }
 
-        const realTrainers: Trainer[] = data?.map((trainer, index) => {
-          // Use profile photo if available, otherwise use fallback image
+        const profiles: Trainer[] = data?.map((trainer, index) => {
           const imageUrl = trainer.profile_photo_url || trainerImages[index % trainerImages.length];
           
           return {
@@ -64,20 +66,21 @@ export function useRealTrainers() {
             description: trainer.bio || "Professional fitness trainer dedicated to helping you achieve your goals.",
             availability: "Available",
             trainingType: trainer.training_types || ["In-Person", "Online"],
-            offers_discovery_call: trainer.trainer_availability_settings?.[0]?.offers_discovery_call || false
+            offers_discovery_call: true,
+            isPublished: trainer.profile_published // Add this to track publication status
           };
         }) || [];
 
-        setTrainers(realTrainers);
+        setShortlistedProfiles(profiles);
       } catch (error) {
-        console.error('Error fetching trainers:', error);
+        console.error('Error fetching shortlisted trainer profiles:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchTrainers();
-  }, []);
+    fetchShortlistedProfiles();
+  }, [shortlistedTrainerIds]);
 
-  return { trainers, loading };
+  return { shortlistedProfiles, loading };
 }

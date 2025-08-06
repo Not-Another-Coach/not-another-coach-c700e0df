@@ -30,6 +30,7 @@ export interface Trainer {
   availability: string;
   trainingType: string[];
   offers_discovery_call?: boolean;
+  isPublished?: boolean; // Track publication status for shortlisted trainers
 }
 
 interface MatchDetail {
@@ -178,6 +179,12 @@ export const TrainerCard = ({
           className: "bg-green-500 text-white"
         };
       case 'shortlisted':
+        if (trainer.isPublished === false) {
+          return {
+            text: "⭐ Shortlisted (Profile Pending)",
+            className: "bg-yellow-500/80 text-white"
+          };
+        }
         return {
           text: "⭐ Shortlisted",
           className: "bg-yellow-500 text-white"

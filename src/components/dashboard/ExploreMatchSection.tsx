@@ -6,6 +6,7 @@ import { useShortlistedTrainers } from "@/hooks/useShortlistedTrainers";
 import { useTrainerEngagement } from "@/hooks/useTrainerEngagement";
 import { useConversations } from "@/hooks/useConversations";
 import { useRealTrainers } from "@/hooks/useRealTrainers";
+import { useShortlistedTrainerProfiles } from "@/hooks/useShortlistedTrainerProfiles";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
@@ -40,78 +41,12 @@ import {
   X,
   BarChart3
 } from "lucide-react";
-import trainerSarah from "@/assets/trainer-sarah.jpg";
-import trainerMike from "@/assets/trainer-mike.jpg";
-import trainerEmma from "@/assets/trainer-emma.jpg";
-import trainerAlex from "@/assets/trainer-alex.jpg";
 
 interface ExploreMatchSectionProps {
   profile: any;
 }
 
-// Sample trainer data
-const sampleTrainers = [
-  {
-    id: "550e8400-e29b-41d4-a716-446655440001",
-    name: "Sarah Johnson",
-    specialties: ["Weight Loss", "Strength Training", "Nutrition"],
-    rating: 4.9,
-    reviews: 127,
-    experience: "8 years",
-    location: "Downtown",
-    hourlyRate: 85,
-    image: trainerSarah,
-    certifications: ["NASM-CPT", "Precision Nutrition"],
-    description: "Passionate about helping clients achieve sustainable weight loss and building strength.",
-    availability: "Mon-Fri",
-    trainingType: ["In-Person", "Online"]
-  },
-  {
-    id: "550e8400-e29b-41d4-a716-446655440002",
-    name: "Mike Rodriguez",
-    specialties: ["Muscle Building", "Powerlifting", "Sports Performance"],
-    rating: 4.8,
-    reviews: 94,
-    experience: "12 years",
-    location: "Westside",
-    hourlyRate: 95,
-    image: trainerMike,
-    certifications: ["CSCS", "USAPL Coach"],
-    description: "Former competitive powerlifter dedicated to helping clients build serious muscle and strength.",
-    availability: "All Week",
-    trainingType: ["In-Person", "Hybrid"]
-  },
-  {
-    id: "550e8400-e29b-41d4-a716-446655440003",
-    name: "Emma Chen",
-    specialties: ["Yoga", "Flexibility", "Mindfulness", "Rehabilitation"],
-    rating: 4.9,
-    reviews: 156,
-    experience: "6 years", 
-    location: "Eastside",
-    hourlyRate: 70,
-    image: trainerEmma,
-    certifications: ["RYT-500", "Corrective Exercise"],
-    description: "Certified yoga instructor focusing on mind-body connection, flexibility, and injury prevention.",
-    availability: "Flexible",
-    trainingType: ["Online", "In-Person"]
-  },
-  {
-    id: "4f90441a-20de-4f62-99aa-2440b12228dd",
-    name: "Alex Thompson", 
-    specialties: ["CrossFit", "HIIT", "Endurance", "Functional Training"],
-    rating: 4.7,
-    reviews: 89,
-    experience: "5 years",
-    location: "Northside",
-    hourlyRate: 80,
-    image: trainerAlex,
-    certifications: ["CrossFit L2", "ACSM-CPT"],
-    description: "High-energy trainer specializing in functional movements and metabolic conditioning.",
-    availability: "Evenings",
-    trainingType: ["In-Person", "Group"]
-  }
-];
+// Note: Sample trainers removed - using only real published trainers from database
 
 export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
   const navigate = useNavigate();
@@ -164,8 +99,12 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
     flexible_scheduling: profile.flexible_scheduling,
   };
 
-  // Combine real trainers with sample trainers for better matching experience
-  const allTrainers = [...realTrainers, ...sampleTrainers];
+  // Use only real trainers (published) for main matching, but fetch shortlisted separately
+  const allTrainers = realTrainers;
+  
+  // Get shortlisted trainer IDs and fetch their profiles separately (including unpublished)
+  const shortlistedTrainerIds = actualShortlistedTrainers.map(st => st.trainer_id);
+  const { shortlistedProfiles } = useShortlistedTrainerProfiles(shortlistedTrainerIds);
   
   const { matchedTrainers, topMatches, goodMatches } = useEnhancedTrainerMatching(
     allTrainers, 
@@ -965,26 +904,15 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                 These are your top trainer choices. You can chat with them and book discovery calls.
               </div>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {actualShortlistedTrainers
-                  .map((shortlisted) => {
-                    // Find the trainer data from all trainers (sample + real)
-                    let trainer = allTrainers.find(t => t.id === shortlisted.trainer_id);
-                    
-                    // If not found in allTrainers, return null to filter out
-                    if (!trainer) {
-                      console.warn(`Trainer ${shortlisted.trainer_id} not found in allTrainers. Removing from shortlist display.`);
-                      return null;
-                    }
+                 {shortlistedProfiles.map((trainer) => {
+                     // Find the corresponding shortlisted data
+                     const shortlisted = actualShortlistedTrainers.find(st => st.trainer_id === trainer.id);
+                     if (!shortlisted) return null;
 
-                    return { shortlisted, trainer };
-                  })
-                  .filter(Boolean) // Remove null entries
-                  .map(({ shortlisted, trainer }) => {
-
-                    // Calculate match data for this trainer to ensure consistency
-                    const matchData = getTrainerMatchData(trainer);
-                    
-                    return (
+                     // Calculate match data for this trainer to ensure consistency
+                     const matchData = getTrainerMatchData(trainer);
+                     
+                     return (
                       <div key={`shortlisted-${shortlisted.trainer_id}-${shortlisted.stage}`} className="space-y-3">
                         <TrainerCard
                           trainer={matchData.trainer}
