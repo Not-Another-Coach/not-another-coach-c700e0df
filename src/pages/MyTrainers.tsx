@@ -782,7 +782,6 @@ export default function MyTrainers() {
                 comparisonChecked={selectedForComparison.includes(trainerData.trainer.id)}
                 onComparisonToggle={handleComparisonToggle}
                 comparisonDisabled={!selectedForComparison.includes(trainerData.trainer.id) && selectedForComparison.length >= 4}
-                onStartConversation={handleStartConversation}
                 onBookDiscoveryCall={handleBookDiscoveryCall}
                 trainerOffersDiscoveryCalls={trainerData.trainer.offers_discovery_call}
               />

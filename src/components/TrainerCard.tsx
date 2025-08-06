@@ -15,6 +15,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { WaitlistJoinButton } from "@/components/waitlist/WaitlistJoinButton";
 import { WaitlistStatusBadge } from "@/components/waitlist/WaitlistStatusBadge";
 import { useNavigate } from "react-router-dom";
+import { StartConversationButton } from "@/components/StartConversationButton";
 
 export interface Trainer {
   id: string;
@@ -435,30 +436,26 @@ export const TrainerCard = ({
         {/* Action Buttons based on card state */}
         {cardState !== 'default' && (
           <div className="mb-4 space-y-2">
-            {/* Chat button for discovery trainers */}
+            {/* Message button for discovery trainers */}
             {cardState === 'discovery' && (
-              <Button
-                onClick={() => onStartConversation?.(trainer.id)}
-                className="w-full"
+              <StartConversationButton
+                trainerId={trainer.id}
+                trainerName={displayName}
                 size="sm"
+                className="w-full"
                 variant="outline"
-              >
-                <MessageCircle className="h-4 w-4 mr-2" />
-                Start Chat
-              </Button>
+              />
             )}
             
             {/* Shortlist actions */}
             {cardState === 'shortlisted' && (
               <div className="grid grid-cols-2 gap-2">
-                <Button
-                  onClick={() => onStartConversation?.(trainer.id)}
+                <StartConversationButton
+                  trainerId={trainer.id}
+                  trainerName={displayName}
                   size="sm"
                   variant="outline"
-                >
-                  <MessageCircle className="h-3 w-3 mr-1" />
-                  Chat
-                </Button>
+                />
                 {onBookDiscoveryCall && trainer.offers_discovery_call && (
                   <Button
                     onClick={() => onBookDiscoveryCall(trainer.id)}
@@ -474,7 +471,7 @@ export const TrainerCard = ({
           </div>
         )}
 
-        {/* Waitlist Join Button - Show if coach is on waitlist and client not already on it */}
+        {/* Waitlist Join Button - Show for any client not on waitlist regardless of card state */}
         {isClient && coachAvailability?.availability_status === 'waitlist' && !clientWaitlistStatus && (
           <div className="mb-4">
             <WaitlistJoinButton
