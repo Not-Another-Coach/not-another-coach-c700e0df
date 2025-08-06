@@ -18,7 +18,8 @@ import { FloatingMessageButton } from "@/components/FloatingMessageButton";
 import { ClientJourneyBreadcrumb } from "@/components/ClientJourneyBreadcrumb";
 import { DiscoveryCallFeedbackPrompt } from "@/components/dashboard/DiscoveryCallFeedbackPrompt";
 import { useClientJourneyProgress } from "@/hooks/useClientJourneyProgress";
-import { Heart, Settings, Search, MessageCircle, Menu, Users, Shuffle, Shield, ChevronRight } from "lucide-react";
+import { ClientHeader } from "@/components/ClientHeader";
+import { Heart, Settings, Search, MessageCircle, Menu, Users, Shuffle, Shield, ChevronRight, Home, User, UserSearch } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function ClientDashboard() {
@@ -117,121 +118,58 @@ export default function ClientDashboard() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="sticky top-0 z-50 bg-background border-b">
-        <div className="flex justify-between items-center p-4">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3">
-              <h1 className="text-xl font-bold">
-                Your Fitness Journey, {profile?.first_name || 'Client'}
-              </h1>
-              {journeyProgress && !journeyLoading && (
-                <>
-                  <Badge variant="secondary" className="text-xs">
-                    {journeyProgress.percentage}% Complete
-                  </Badge>
-                  <Badge variant="outline" className="text-xs">
-                    {journeyProgress.stage.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                  </Badge>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => navigate('/client/journey')}
-                    className="text-xs h-6 px-2 flex items-center gap-1"
-                  >
-                    View Details
-                    <ChevronRight className="w-3 h-3" />
-                  </Button>
-                </>
-              )}
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            {isAdmin && (
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => navigate('/admin/dashboard')}
-                className="flex items-center gap-2"
-              >
-                <Shield className="w-4 h-4" />
-                Admin
-              </Button>
-            )}
-            
-            
-            <ProfileDropdown 
-              profile={profile} 
-              onSignOut={handleSignOut}
-            />
-          </div>
-        </div>
-      </div>
+      <ClientHeader 
+        profile={profile}
+        onSignOut={handleSignOut}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+      />
 
 
       {/* Main Dashboard Content */}
       <div className="max-w-7xl mx-auto p-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          {/* Tab Navigation */}
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            <TabsList className="grid w-full sm:w-auto grid-cols-4">
-              <TabsTrigger value="summary" className="flex items-center gap-2">
-                <Menu className="h-4 w-4" />
-                <span className="hidden sm:inline">Dashboard</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="preferences" 
-                className="flex items-center gap-2"
-              >
-                <Settings className="h-4 w-4" />
-                <span className="hidden sm:inline">Preferences</span>
-              </TabsTrigger>
-              <TabsTrigger value="trainers" className="flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                <span className="hidden sm:inline">My Trainers</span>
-              </TabsTrigger>
-              <TabsTrigger value="explore" className="flex items-center gap-2">
-                <Search className="h-4 w-4" />
-                <span className="hidden sm:inline">Explore</span>
-              </TabsTrigger>
-            </TabsList>
-
-            {/* Remove the old quick actions since My Trainers is now a tab */}
-            <div className="flex gap-2">
-            </div>
-          </div>
+        <div className="space-y-6">
 
           {/* Tab Content */}
-          <TabsContent value="summary" className="space-y-6">
-            {/* Discovery Call Feedback Prompts */}
-            {completedDiscoveryCalls.length > 0 && (
-              <DiscoveryCallFeedbackPrompt 
-                completedCalls={completedDiscoveryCalls.filter(call => 
-                  !dismissedFeedbackPrompts.includes(call.id)
-                )}
-                onDismiss={handleDismissFeedback}
+          {activeTab === "summary" && (
+            <div className="space-y-6">
+              {/* Discovery Call Feedback Prompts */}
+              {completedDiscoveryCalls.length > 0 && (
+                <DiscoveryCallFeedbackPrompt 
+                  completedCalls={completedDiscoveryCalls.filter(call => 
+                    !dismissedFeedbackPrompts.includes(call.id)
+                  )}
+                  onDismiss={handleDismissFeedback}
+                />
+              )}
+              
+              <DashboardSummary 
+                profile={profile}
+                onTabChange={setActiveTab}
               />
-            )}
-            
-            <DashboardSummary 
-              profile={profile}
-              onTabChange={setActiveTab}
-            />
-          </TabsContent>
+            </div>
+          )}
 
-          <TabsContent value="preferences" className="space-y-6">
-            <ClientSurveyWidget profile={profile} />
-          </TabsContent>
+          {activeTab === "preferences" && (
+            <div className="space-y-6">
+              <ClientSurveyWidget profile={profile} />
+            </div>
+          )}
 
-          <TabsContent value="trainers" className="space-y-6">
-            <MyTrainers />
-          </TabsContent>
+          {activeTab === "my-trainers" && (
+            <div className="space-y-6">
+              <MyTrainers />
+            </div>
+          )}
 
-          <TabsContent value="explore" className="space-y-6">
-            <ExploreMatchSection 
-              profile={profile}
-            />
-          </TabsContent>
-        </Tabs>
+          {activeTab === "explore" && (
+            <div className="space-y-6">
+              <ExploreMatchSection 
+                profile={profile}
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Floating Message Button */}

@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TrainerCard } from "@/components/TrainerCard";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { useProfile } from "@/hooks/useProfile";
+import { ClientHeader } from "@/components/ClientHeader";
 import { 
   ArrowLeft, 
   Heart, 
@@ -365,28 +366,12 @@ export default function MyTrainers() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="sticky top-0 z-50 bg-background border-b">
-        <div className="flex justify-between items-center p-4">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/client/dashboard')}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Dashboard
-            </Button>
-            <h1 className="text-xl font-bold">My Trainers</h1>
-          </div>
-          <ProfileDropdown 
-            profile={profile} 
-            onSignOut={() => {
-              navigate('/auth');
-            }}
-          />
-        </div>
-      </div>
+      <ClientHeader 
+        profile={profile}
+        onSignOut={() => navigate('/auth')}
+        activeTab="my-trainers"
+        showNavigation={true}
+      />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto p-6">
