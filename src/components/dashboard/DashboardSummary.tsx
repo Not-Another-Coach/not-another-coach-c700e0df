@@ -102,7 +102,7 @@ export function DashboardSummary({ profile, onTabChange }: DashboardSummaryProps
 
   // Handler to navigate to My Trainers with specific filter
   const navigateToMyTrainers = (filter: 'all' | 'saved' | 'shortlisted' | 'discovery') => {
-    onTabChange('trainers');
+    onTabChange('my-trainers');
     // Use a small delay to ensure tab change happens first
     setTimeout(() => {
       const event = new CustomEvent('setMyTrainersFilter', { 
@@ -220,13 +220,7 @@ export function DashboardSummary({ profile, onTabChange }: DashboardSummaryProps
         {/* Active Conversations */}
         <Card 
           className="cursor-pointer hover:shadow-lg transition-all duration-200 border-green-200 bg-gradient-to-br from-green-50 to-green-100"
-          onClick={() => {
-            // Open messaging popup
-            const messagingButton = document.querySelector('[data-messaging-button]') as HTMLButtonElement;
-            if (messagingButton) {
-              messagingButton.click();
-            }
-          }}
+          onClick={() => navigateToMyTrainers('discovery')}
         >
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
