@@ -194,7 +194,7 @@ export const TrainerCard = ({
 
   return (
     <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-card to-muted/30 border-0 relative overflow-hidden">
-      <CardContent className="p-6 pt-16"> {/* Reduced top padding since badges are now inline */}
+      <CardContent className="p-6 pt-20"> {/* Increased top padding to create space between labels and content */}
         {/* Line 1: Interactive elements */}
         <div className="absolute top-2 left-2 right-2 flex justify-between z-20">
           {/* Left: Heart/Save or Remove button */}
