@@ -49,6 +49,7 @@ export const useSavedTrainers = () => {
     }
 
     try {
+      console.log('Saving trainer:', trainerId);
       await engagementLikeTrainer(trainerId);
       
       // Track progress - first save advances to shortlisting stage
@@ -63,6 +64,7 @@ export const useSavedTrainers = () => {
         title: "Trainer saved!",
         description: "Added to your saved trainers list",
       });
+      console.log('Trainer saved successfully:', trainerId);
       return true;
     } catch (error) {
       console.error('Error saving trainer:', error);
@@ -80,6 +82,7 @@ export const useSavedTrainers = () => {
     if (!user) return false;
 
     try {
+      console.log('Unsaving trainer:', trainerId);
       // Move back to browsing stage when unsaving
       await updateEngagementStage(trainerId, 'browsing');
       
@@ -90,6 +93,7 @@ export const useSavedTrainers = () => {
         title: "Trainer removed",
         description: "Removed from your saved trainers list and any waitlists",
       });
+      console.log('Trainer unsaved successfully:', trainerId);
       return true;
     } catch (error) {
       console.error('Error removing saved trainer:', error);

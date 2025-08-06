@@ -110,9 +110,11 @@ export const TrainerCard = ({
 
   const handleToggleSave = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    console.log(`Heart clicked for trainer ${trainer.id}, currently saved: ${isSaved}, cardState: ${cardState}`);
     const success = isSaved 
       ? await unsaveTrainer(trainer.id)
       : await saveTrainer(trainer.id);
+    console.log(`Save/unsave result for ${trainer.id}:`, success);
   };
 
   const handleComparisonClick = (checked: boolean) => {
@@ -215,7 +217,7 @@ export const TrainerCard = ({
               className="bg-white/80 backdrop-blur hover:bg-white/90 transition-all"
               onClick={handleToggleSave}
             >
-              {isSaved ? (
+              {isSaved || cardState === 'saved' ? (
                 <Heart className="h-4 w-4 text-red-500 fill-current" />
               ) : (
                 <Heart className="h-4 w-4 text-gray-400 hover:text-red-500 transition-colors" />

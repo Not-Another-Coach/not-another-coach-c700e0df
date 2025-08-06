@@ -315,6 +315,14 @@ export default function SavedTrainers() {
                   trainer={trainer}
                   onViewProfile={(id) => console.log('View profile:', id)}
                   cardState="saved"
+                  showComparisonCheckbox={allTrainers.length >= 2}
+                  comparisonChecked={selectedForComparison.includes(trainer.id)}
+                  onComparisonToggle={(trainerId) => 
+                    handleToggleComparison(trainerId, !selectedForComparison.includes(trainerId))
+                  }
+                  comparisonDisabled={!selectedForComparison.includes(trainer.id) && selectedForComparison.length >= 4}
+                  showRemoveButton={true}
+                  onRemove={unsaveTrainer}
                 />
 
                 {/* Action Buttons */}
