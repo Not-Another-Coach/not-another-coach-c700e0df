@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Star, MapPin, Clock, Users, Award, Target, Dumbbell, Heart, X } from "lucide-react";
+import { Star, MapPin, Clock, Users, Award, Target, Dumbbell, Heart, X, MessageCircle, Calendar } from "lucide-react";
 import { MatchBadge } from "@/components/MatchBadge";
 import { MatchProgressIndicator } from "@/components/MatchProgressIndicator";
 import { useSavedTrainers } from "@/hooks/useSavedTrainers";
@@ -55,6 +55,15 @@ interface TrainerCardProps {
   comparisonDisabled?: boolean;
   showRemoveButton?: boolean;
   onRemove?: (trainerId: string) => void;
+  
+  // CTA actions
+  onAddToShortlist?: (trainerId: string) => void;
+  onStartConversation?: (trainerId: string) => void;
+  onBookDiscoveryCall?: (trainerId: string) => void;
+  onEditDiscoveryCall?: (trainerId: string) => void;
+  isShortlisted?: boolean;
+  hasDiscoveryCall?: boolean;
+  discoveryCallData?: any;
 }
 
 export const TrainerCard = ({ 
@@ -70,7 +79,15 @@ export const TrainerCard = ({
   onComparisonToggle,
   comparisonDisabled = false,
   showRemoveButton = false,
-  onRemove
+  onRemove,
+  // CTA props
+  onAddToShortlist,
+  onStartConversation,
+  onBookDiscoveryCall,
+  onEditDiscoveryCall,
+  isShortlisted = false,
+  hasDiscoveryCall = false,
+  discoveryCallData
 }: TrainerCardProps) => {
   const { isTrainerSaved, saveTrainer, unsaveTrainer } = useSavedTrainers();
   const { stage } = useEngagementStage(trainer.id);
@@ -392,9 +409,66 @@ export const TrainerCard = ({
         )}
 
         {/* Certifications */}
-        <div className="text-xs text-muted-foreground">
+        <div className="text-xs text-muted-foreground mb-4">
           <strong>Certified:</strong> {trainer.certifications.join(", ")}
         </div>
+
+        {/* CTA Section - Actions based on trainer status */}
+        {(cardState === 'saved' || cardState === 'shortlisted') && (
+          <div className="border-t pt-4 space-y-2">
+            {cardState === 'saved' && !isShortlisted && onAddToShortlist && (
+              <Button 
+                onClick={() => onAddToShortlist(trainer.id)} 
+                className="w-full"
+                size="sm"
+              >
+                Add to Shortlist
+              </Button>
+            )}
+            
+            {(cardState === 'shortlisted' || isShortlisted) && (
+              <div className="space-y-2">
+                <Badge variant="default" className="w-full justify-center bg-green-100 text-green-800 border-green-200">
+                  ✓ Shortlisted
+                </Badge>
+                <div className="grid grid-cols-2 gap-2">
+                  {onStartConversation && (
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="text-xs"
+                      onClick={() => onStartConversation(trainer.id)}
+                    >
+                      <MessageCircle className="h-3 w-3 mr-1" />
+                      Chat
+                    </Button>
+                  )}
+                  {hasDiscoveryCall && onEditDiscoveryCall ? (
+                    <Button 
+                      size="sm" 
+                      variant="default" 
+                      className="text-xs"
+                      onClick={() => onEditDiscoveryCall(trainer.id)}
+                    >
+                      <Calendar className="h-3 w-3 mr-1" />
+                      Edit Call
+                    </Button>
+                  ) : onBookDiscoveryCall ? (
+                    <Button 
+                      size="sm" 
+                      variant="default" 
+                      className="text-xs"
+                      onClick={() => onBookDiscoveryCall(trainer.id)}
+                    >
+                      <Calendar className="h-3 w-3 mr-1" />
+                      Discovery Call
+                    </Button>
+                  ) : null}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

@@ -299,18 +299,6 @@ export default function SavedTrainers() {
                   </div>
                 )}
 
-                {/* Remove Button */}
-                <div className="absolute top-4 right-4 z-10">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="bg-white/90 backdrop-blur hover:bg-red-50 hover:text-red-600 hover:border-red-200"
-                    onClick={() => unsaveTrainer(trainer.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-
                 <TrainerCard
                   trainer={trainer}
                   onViewProfile={(id) => console.log('View profile:', id)}
@@ -323,47 +311,12 @@ export default function SavedTrainers() {
                   comparisonDisabled={!selectedForComparison.includes(trainer.id) && selectedForComparison.length >= 4}
                   showRemoveButton={true}
                   onRemove={unsaveTrainer}
+                  // CTA actions
+                  onAddToShortlist={canShortlistMore ? handleShortlist : undefined}
+                  isShortlisted={isShortlisted(trainer.id)}
+                  onStartConversation={(trainerId) => console.log('Start conversation:', trainerId)}
+                  onBookDiscoveryCall={(trainerId) => console.log('Book discovery call:', trainerId)}
                 />
-
-                {/* Action Buttons */}
-                <div className="mt-4 space-y-2">
-                  {isShortlisted(trainer.id) ? (
-                    <div className="space-y-2">
-                      <Badge variant="default" className="w-full justify-center bg-green-100 text-green-800 border-green-200">
-                        ✓ Shortlisted
-                      </Badge>
-                      <div className="grid grid-cols-2 gap-2">
-                        <Button size="sm" variant="outline" className="text-xs">
-                          <MessageCircle className="h-3 w-3 mr-1" />
-                          Chat
-                        </Button>
-                        <BookDiscoveryCallButton
-                          trainer={{
-                            id: trainer.id,
-                            name: trainer.name,
-                            firstName: trainer.name.split(' ')[0],
-                            lastName: trainer.name.split(' ')[1],
-                            profilePhotoUrl: trainer.image
-                          }}
-                          variant="outline"
-                          size="sm"
-                          className="text-xs"
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    <Button 
-                      size="sm" 
-                      variant="default" 
-                      className="w-full"
-                      onClick={() => handleShortlist(trainer.id)}
-                      disabled={!canShortlistMore}
-                    >
-                      <Star className="h-3 w-3 mr-1" />
-                      {canShortlistMore ? 'Add to Shortlist' : 'Shortlist Full'}
-                    </Button>
-                  )}
-                </div>
 
                 {/* Saved Date */}
                 <div className="mt-2 text-xs text-muted-foreground text-center">
