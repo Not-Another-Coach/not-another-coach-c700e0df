@@ -7,6 +7,7 @@ import { useConversations } from "@/hooks/useConversations";
 import { useRealTrainers } from "@/hooks/useRealTrainers";
 import { useAuth } from "@/hooks/useAuth";
 import { useDiscoveryCallData } from "@/hooks/useDiscoveryCallData";
+import { useWaitlist } from "@/hooks/useWaitlist";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +26,8 @@ import {
   Filter,
   Users,
   X,
-  BarChart3
+  BarChart3,
+  Clock
 } from "lucide-react";
 import { DiscoveryCallBookingModal } from "@/components/discovery-call/DiscoveryCallBookingModal";
 import { toast } from "sonner";
@@ -50,10 +52,13 @@ export default function MyTrainers() {
   const { createConversation } = useConversations();
   const { getEngagementStage, getLikedTrainers, getOnlyShortlistedTrainers } = useTrainerEngagement();
   const { hasActiveDiscoveryCall } = useDiscoveryCallData();
+  const { getCoachAvailability, checkClientWaitlistStatus, joinWaitlist } = useWaitlist();
 
   // State for filtering and UI
   const [activeFilter, setActiveFilter] = useState<'all' | 'saved' | 'shortlisted' | 'discovery'>('all');
   const [selectedForComparison, setSelectedForComparison] = useState<string[]>([]);
+  const [trainerWaitlistStatus, setTrainerWaitlistStatus] = useState<{[key: string]: any}>({});
+  const [trainerAvailability, setTrainerAvailability] = useState<{[key: string]: any}>({});
 
   // Listen for filter events from dashboard
   useEffect(() => {
@@ -68,6 +73,38 @@ export default function MyTrainers() {
       window.removeEventListener('setMyTrainersFilter', handleFilterEvent as EventListener);
     };
   }, []);
+
+  // Fetch waitlist status and availability for shortlisted trainers
+  useEffect(() => {
+    const fetchWaitlistData = async () => {
+      const shortlistedTrainers = getOnlyShortlistedTrainers();
+      
+      for (const engagement of shortlistedTrainers) {
+        const trainerId = engagement.trainerId;
+        
+        try {
+          const [availability, waitlistStatus] = await Promise.all([
+            getCoachAvailability(trainerId),
+            checkClientWaitlistStatus(trainerId)
+          ]);
+          
+          setTrainerAvailability(prev => ({
+            ...prev,
+            [trainerId]: availability
+          }));
+          
+          setTrainerWaitlistStatus(prev => ({
+            ...prev,
+            [trainerId]: waitlistStatus
+          }));
+        } catch (error) {
+          console.error(`Error fetching data for trainer ${trainerId}:`, error);
+        }
+      }
+    };
+    
+    fetchWaitlistData();
+  }, [getOnlyShortlistedTrainers, getCoachAvailability, checkClientWaitlistStatus]);
 
   // Simplified trainer aggregation based on client's engagement status
   const trainersWithStatus = useMemo(() => {
@@ -279,6 +316,26 @@ export default function MyTrainers() {
     toast.info('Comparison feature coming soon!');
   };
 
+  const handleJoinWaitlist = async (trainerId: string) => {
+    console.log('🔥 Join waitlist clicked:', trainerId);
+    try {
+      const result = await joinWaitlist(trainerId);
+      if (result.error) {
+        toast.error('Failed to join waitlist');
+      } else {
+        toast.success('Joined waitlist! The trainer will contact you when available.');
+        // Refresh waitlist status
+        setTrainerWaitlistStatus(prev => ({
+          ...prev,
+          [trainerId]: { status: 'active' }
+        }));
+      }
+    } catch (error) {
+      console.error('Error joining waitlist:', error);
+      toast.error('Failed to join waitlist');
+    }
+  };
+
   // Render CTAs based on trainer status
   const renderCTAs = (trainerData: typeof trainersWithStatus[0]) => {
     const { trainer, status } = trainerData;
@@ -310,6 +367,11 @@ export default function MyTrainers() {
 
       case 'shortlisted':
         const offersDiscoveryCall = trainerData.trainer.offers_discovery_call;
+        const trainerId = trainer.id;
+        const availability = trainerAvailability[trainerId];
+        const waitlistStatus = trainerWaitlistStatus[trainerId];
+        const isOnWaitlist = availability?.availability_status === 'waitlist';
+        const clientAlreadyOnWaitlist = waitlistStatus !== null;
         
         return (
           <div className="space-y-2">
@@ -322,17 +384,42 @@ export default function MyTrainers() {
                 <MessageCircle className="h-3 w-3 mr-1" />
                 Chat
               </Button>
-              <Button 
-                size="sm" 
-                variant={offersDiscoveryCall ? "default" : "outline"}
-                onClick={() => offersDiscoveryCall ? handleBookDiscoveryCall(trainer.id) : null}
-                disabled={!offersDiscoveryCall}
-                className={!offersDiscoveryCall ? "opacity-50 cursor-not-allowed" : ""}
-                title={!offersDiscoveryCall ? "This trainer doesn't offer discovery calls" : "Book a discovery call"}
-              >
-                <Calendar className="h-3 w-3 mr-1" />
-                Book Call
-              </Button>
+              
+              {/* Show waitlist button if trainer is on waitlist and client isn't already on it */}
+              {isOnWaitlist && !clientAlreadyOnWaitlist ? (
+                <Button 
+                  size="sm" 
+                  variant="default"
+                  onClick={() => handleJoinWaitlist(trainer.id)}
+                  className="bg-orange-500 hover:bg-orange-600"
+                >
+                  <Clock className="h-3 w-3 mr-1" />
+                  Join Waitlist
+                </Button>
+              ) : isOnWaitlist && clientAlreadyOnWaitlist ? (
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  disabled
+                  className="opacity-50 cursor-not-allowed"
+                  title="You're already on this trainer's waitlist"
+                >
+                  <Clock className="h-3 w-3 mr-1" />
+                  On Waitlist
+                </Button>
+              ) : (
+                <Button 
+                  size="sm" 
+                  variant={offersDiscoveryCall ? "default" : "outline"}
+                  onClick={() => offersDiscoveryCall ? handleBookDiscoveryCall(trainer.id) : null}
+                  disabled={!offersDiscoveryCall}
+                  className={!offersDiscoveryCall ? "opacity-50 cursor-not-allowed" : ""}
+                  title={!offersDiscoveryCall ? "This trainer doesn't offer discovery calls" : "Book a discovery call"}
+                >
+                  <Calendar className="h-3 w-3 mr-1" />
+                  Book Call
+                </Button>
+              )}
             </div>
             <Button
               onClick={() => handleRemoveFromShortlist(trainer.id)}
