@@ -364,104 +364,93 @@ export default function MyTrainers() {
   console.log('📋 Filtered trainers:', filteredTrainers.length);
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <ClientHeader 
-        profile={profile}
-        onSignOut={() => navigate('/auth')}
-        activeTab="my-trainers"
-        showNavigation={true}
-      />
+    <div className="space-y-6">
+      {/* Filter Tabs */}
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-6">
+        <Tabs value={activeFilter} onValueChange={(value: any) => setActiveFilter(value)} className="w-full sm:w-auto">
+          <TabsList className="grid w-full sm:w-auto grid-cols-4">
+            <TabsTrigger value="all" className="flex items-center gap-2">
+              <Filter className="h-4 w-4" />
+              All ({counts.all})
+            </TabsTrigger>
+            <TabsTrigger value="saved" className="flex items-center gap-2">
+              <Heart className="h-4 w-4" />
+              Saved ({counts.saved})
+            </TabsTrigger>
+            <TabsTrigger value="shortlisted" className="flex items-center gap-2">
+              <Star className="h-4 w-4" />
+              Shortlisted ({counts.shortlisted})
+            </TabsTrigger>
+            <TabsTrigger value="discovery" className="flex items-center gap-2">
+              <Phone className="h-4 w-4" />
+              Discovery ({counts.discovery})
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto p-6">
-        {/* Filter Tabs */}
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-6">
-          <Tabs value={activeFilter} onValueChange={(value: any) => setActiveFilter(value)} className="w-full sm:w-auto">
-            <TabsList className="grid w-full sm:w-auto grid-cols-4">
-              <TabsTrigger value="all" className="flex items-center gap-2">
-                <Filter className="h-4 w-4" />
-                All ({counts.all})
-              </TabsTrigger>
-              <TabsTrigger value="saved" className="flex items-center gap-2">
-                <Heart className="h-4 w-4" />
-                Saved ({counts.saved})
-              </TabsTrigger>
-              <TabsTrigger value="shortlisted" className="flex items-center gap-2">
-                <Star className="h-4 w-4" />
-                Shortlisted ({counts.shortlisted})
-              </TabsTrigger>
-              <TabsTrigger value="discovery" className="flex items-center gap-2">
-                <Phone className="h-4 w-4" />
-                Discovery ({counts.discovery})
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-
-          {/* Comparison Button */}
-          {selectedForComparison.length >= 2 && (
-            <Button 
-              variant="default" 
-              size="sm"
-              onClick={handleStartComparison}
-              className="flex items-center gap-2"
-            >
-              <BarChart3 className="h-4 w-4" />
-              Compare ({selectedForComparison.length})
-            </Button>
-          )}
-        </div>
-
-        {/* Trainers Grid */}
-        {filteredTrainers.length > 0 ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredTrainers.map((trainerData) => (
-              <div key={`${trainerData.trainer.id}-${trainerData.status}`} className="space-y-3">
-                <TrainerCard
-                  trainer={trainerData.trainer}
-                  onViewProfile={handleViewProfile}
-                  cardState={trainerData.status}
-                  showComparisonCheckbox={true}
-                  comparisonChecked={selectedForComparison.includes(trainerData.trainer.id)}
-                  onComparisonToggle={handleComparisonToggle}
-                  comparisonDisabled={!selectedForComparison.includes(trainerData.trainer.id) && selectedForComparison.length >= 4}
-                />
-                
-                {/* Status Badge */}
-                <div className="flex items-center justify-between">
-                  <Badge className={trainerData.statusColor}>
-                    {trainerData.statusLabel}
-                  </Badge>
-                </div>
-
-                {/* CTAs based on status */}
-                {renderCTAs(trainerData)}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <Card>
-            <CardContent className="p-8 text-center">
-              <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">
-                {activeFilter === 'all' 
-                  ? 'No trainers yet' 
-                  : `No ${activeFilter} trainers`
-                }
-              </h3>
-              <p className="text-muted-foreground mb-4">
-                {activeFilter === 'all'
-                  ? 'Start exploring trainers to build your fitness team'
-                  : `You haven't ${activeFilter === 'saved' ? 'saved' : activeFilter === 'shortlisted' ? 'shortlisted' : 'booked discovery calls with'} any trainers yet`
-                }
-              </p>
-              <Button onClick={() => navigate('/client/dashboard')}>
-                Explore Trainers
-              </Button>
-            </CardContent>
-          </Card>
+        {/* Comparison Button */}
+        {selectedForComparison.length >= 2 && (
+          <Button 
+            variant="default" 
+            size="sm"
+            onClick={handleStartComparison}
+            className="flex items-center gap-2"
+          >
+            <BarChart3 className="h-4 w-4" />
+            Compare ({selectedForComparison.length})
+          </Button>
         )}
       </div>
+
+      {/* Trainers Grid */}
+      {filteredTrainers.length > 0 ? (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredTrainers.map((trainerData) => (
+            <div key={`${trainerData.trainer.id}-${trainerData.status}`} className="space-y-3">
+              <TrainerCard
+                trainer={trainerData.trainer}
+                onViewProfile={handleViewProfile}
+                cardState={trainerData.status}
+                showComparisonCheckbox={true}
+                comparisonChecked={selectedForComparison.includes(trainerData.trainer.id)}
+                onComparisonToggle={handleComparisonToggle}
+                comparisonDisabled={!selectedForComparison.includes(trainerData.trainer.id) && selectedForComparison.length >= 4}
+              />
+              
+              {/* Status Badge */}
+              <div className="flex items-center justify-between">
+                <Badge className={trainerData.statusColor}>
+                  {trainerData.statusLabel}
+                </Badge>
+              </div>
+
+              {/* CTAs based on status */}
+              {renderCTAs(trainerData)}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <Card>
+          <CardContent className="p-8 text-center">
+            <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold mb-2">
+              {activeFilter === 'all' 
+                ? 'No trainers yet' 
+                : `No ${activeFilter} trainers`
+              }
+            </h3>
+            <p className="text-muted-foreground mb-4">
+              {activeFilter === 'all'
+                ? 'Start exploring trainers to build your fitness team'
+                : `You haven't ${activeFilter === 'saved' ? 'saved' : activeFilter === 'shortlisted' ? 'shortlisted' : 'booked discovery calls with'} any trainers yet`
+              }
+            </p>
+            <Button onClick={() => navigate('/client/dashboard')}>
+              Explore Trainers
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Discovery Call Booking Modal */}
       {selectedTrainerForCall && (
