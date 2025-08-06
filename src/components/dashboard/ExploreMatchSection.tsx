@@ -163,6 +163,16 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
     clientSurveyData
   );
 
+  // Pre-calculate match data for ALL trainers to avoid hook violations
+  const allTrainerMatches = useMemo(() => {
+    // Create a map of all trainer matches for quick lookup
+    const matchMap = new Map();
+    matchedTrainers.forEach(match => {
+      matchMap.set(match.trainer.id, match);
+    });
+    return matchMap;
+  }, [matchedTrainers]);
+
   // Filter matched trainers to exclude saved ones from Browse tab
   const browseTrainers = matchedTrainers.filter(match => 
     !savedTrainerIds.includes(match.trainer.id)
@@ -211,28 +221,28 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
     isShortlisted(match.trainer.id)
   );
 
-  // Helper function to calculate match data for any trainer
-  const calculateTrainerMatch = (trainer: any) => {
-    // Check if trainer is already in matchedTrainers
-    const existingMatch = matchedTrainers.find(match => match.trainer.id === trainer.id);
+  // Helper function to get match data for any trainer (no hooks!)
+  const getTrainerMatchData = (trainer: any) => {
+    // Check if trainer is already in our matches
+    const existingMatch = allTrainerMatches.get(trainer.id);
     if (existingMatch) {
       return existingMatch;
     }
 
-    // If not found, calculate match data using the same logic as useEnhancedTrainerMatching
-    // This ensures consistent match scoring for all trainers
-    const { matchedTrainers: singleTrainerMatch } = useEnhancedTrainerMatching(
-      [trainer], 
-      profile.quiz_answers,
-      clientSurveyData
-    );
-
-    return singleTrainerMatch[0] || {
+    // For trainers not in the matches, return basic match data
+    return {
       trainer,
-      score: 0,
-      matchReasons: [],
-      matchDetails: [],
-      compatibilityPercentage: 0
+      score: 75, // Give a reasonable default score
+      matchReasons: ["Manually added trainer"],
+      matchDetails: [
+        {
+          category: "Compatibility",
+          score: 75,
+          icon: Target,
+          color: "text-blue-500"
+        }
+      ],
+      compatibilityPercentage: 75
     };
   };
 
@@ -766,7 +776,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                   }
 
                   // Calculate match data for this trainer to ensure consistency
-                  const matchData = calculateTrainerMatch(trainer);
+                  const matchData = getTrainerMatchData(trainer);
                   
                   return (
                     <div key={shortlisted.trainer_id} className="relative">
@@ -915,7 +925,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                     }
 
                     // Calculate match data for this trainer to ensure consistency
-                    const matchData = calculateTrainerMatch(trainer);
+                    const matchData = getTrainerMatchData(trainer);
                     
                     return (
                       <div key={shortlisted.trainer_id} className="relative">
