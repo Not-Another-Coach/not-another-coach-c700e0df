@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useSavedTrainers } from '@/hooks/useSavedTrainers';
 import { useTrainerList } from '@/hooks/useTrainerList';
+import { useConversations } from '@/hooks/useConversations';
 import { useProfile } from '@/hooks/useProfile';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -47,6 +48,7 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
   const { profile } = useProfile();
   const { savedTrainers, savedTrainerIds } = useSavedTrainers();
   const { trainers } = useTrainerList();
+  const { conversations } = useConversations();
 
   const isTrainer = profile?.user_type === 'trainer';
   
@@ -167,12 +169,19 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
 
   const contacts = isTrainer 
     ? trainerContacts
-    : trainers.filter(trainer => savedTrainerIds.includes(trainer.id)).map(trainer => ({
-        ...trainer,
-        profilePhotoUrl: trainer.profilePhotoUrl,
-        firstName: trainer.firstName,
-        lastName: trainer.lastName
-      })); // Clients see shortlisted trainers
+    : conversations
+        .filter(conv => conv.client_id === profile?.id) // Only conversations where this user is the client
+        .map(conv => ({
+          id: conv.trainer_id,
+          name: conv.otherUser?.first_name && conv.otherUser?.last_name 
+            ? `${conv.otherUser.first_name} ${conv.otherUser.last_name}`
+            : `Trainer ${conv.trainer_id.slice(0, 8)}`,
+          firstName: conv.otherUser?.first_name,
+          lastName: conv.otherUser?.last_name,
+          location: 'Available for chat',
+          profilePhotoUrl: conv.otherUser?.profile_photo_url,
+          lastMessageAt: conv.last_message_at
+        })); // Clients only see trainers they've actually messaged
 
   // Filter contacts based on search
   const filteredContacts = contacts.filter(contact => 
@@ -467,7 +476,7 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
                   ) : (
                     <>
                       <Heart className="w-4 h-4" />
-                      <span>Your Shortlisted Trainers</span>
+                      <span>Active Conversations</span>
                     </>
                   )}
                   <Badge variant="secondary" className="ml-auto">
@@ -528,14 +537,14 @@ export const MessagingPopup = ({ isOpen, onClose, selectedClient }: MessagingPop
                   <div className="flex flex-col items-center justify-center h-full p-4 text-center">
                     <Users className="w-12 h-12 text-muted-foreground/50 mb-2" />
                     <p className="text-sm font-medium text-muted-foreground">
-                      {searchFilter ? 'No contacts found' : (isTrainer ? 'No client conversations' : 'No shortlisted trainers')}
+                      {searchFilter ? 'No contacts found' : (isTrainer ? 'No client conversations' : 'No conversations started')}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
                       {searchFilter 
                         ? 'Try adjusting your search terms'
                         : (isTrainer 
                             ? 'When clients message you, they\'ll appear here'
-                            : 'Like trainers to add them to your shortlist and start messaging'
+                            : 'Start a conversation with a shortlisted trainer from the Chat button'
                           )
                       }
                     </p>
