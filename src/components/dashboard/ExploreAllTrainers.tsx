@@ -465,16 +465,6 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
         </CardContent>
       </Card>
 
-      {/* Quick Actions */}
-      <div className="flex items-center justify-between">
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => navigate('/my-trainers')}>
-            <Users className="h-4 w-4 mr-2" />
-            My Trainers ({shortlistCount})
-          </Button>
-        </div>
-      </div>
-
       {/* Trainers Grid/List */}
       {paginatedTrainers.length > 0 ? (
         <>
