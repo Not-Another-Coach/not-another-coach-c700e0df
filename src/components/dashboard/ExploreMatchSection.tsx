@@ -391,8 +391,10 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
     });
 
     // Remove from shortlist
+    console.log('Removing trainer from shortlist:', trainerId);
     const result = await removeFromShortlist(trainerId);
     if (result.error) {
+      console.error('Error removing from shortlist:', result.error);
       toast.error('Failed to remove from shortlist');
       return;
     }
@@ -404,6 +406,11 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
     } else {
       toast.success(`${trainerName} removed from shortlist but kept in saved trainers`);
     }
+    
+    // Force a refresh after a short delay to ensure the UI updates
+    setTimeout(() => {
+      console.log('Shortlist removal completed for trainer:', trainerId);
+    }, 500);
   };
 
   // Comparison functionality for saved trainers
@@ -977,7 +984,12 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                             size="sm" 
                             variant="default" 
                             className="text-xs"
-                            onClick={() => handleCreateConversation(shortlisted.trainer_id)}
+                            onClick={async () => {
+                              console.log('Discovery call clicked for trainer:', shortlisted.trainer_id);
+                              await bookDiscoveryCall(shortlisted.trainer_id);
+                              // Also create conversation for messaging
+                              await handleCreateConversation(shortlisted.trainer_id);
+                            }}
                           >
                             <Calendar className="h-3 w-3 mr-1" />
                             Discovery Call
