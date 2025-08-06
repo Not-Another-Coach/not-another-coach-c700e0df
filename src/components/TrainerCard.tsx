@@ -490,7 +490,8 @@ export const TrainerCard = ({
                 Debug: cardState={cardState}, isShortlisted={isShortlisted ? 'true' : 'false'}, 
                 hasAddToShortlist={onAddToShortlist ? 'true' : 'false'},
                 hasStartConversation={onStartConversation ? 'true' : 'false'},
-                hasBookDiscoveryCall={onBookDiscoveryCall ? 'true' : 'false'}
+                hasBookDiscoveryCall={onBookDiscoveryCall ? 'true' : 'false'},
+                trainerOffersDiscoveryCalls={trainerOffersDiscoveryCalls ? 'true' : 'false'}
               </div>
             )}
           </div>
