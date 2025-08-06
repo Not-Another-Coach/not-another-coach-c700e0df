@@ -163,22 +163,16 @@ export default function SavedTrainers() {
   };
 
   const handleShortlist = async (trainerId: string) => {
-    console.log(`handleShortlist called for trainer ${trainerId}`);
-    console.log(`Current shortlist count: ${shortlistCount}, can shortlist more: ${canShortlistMore}`);
-    
     if (!canShortlistMore) {
       toast.error('You can only shortlist up to 4 trainers');
       return;
     }
     
     const result = await shortlistTrainer(trainerId);
-    console.log(`Shortlist result for ${trainerId}:`, result);
-    
     if (result.error) {
       toast.error('Failed to shortlist trainer');
     } else {
-      // Force refresh of both saved and shortlisted data
-      window.location.reload(); // Temporary fix to ensure state updates
+      toast.success('Trainer moved to shortlist!');
     }
   };
 
@@ -321,7 +315,6 @@ export default function SavedTrainers() {
                   trainer={trainer}
                   onViewProfile={(id) => console.log('View profile:', id)}
                   cardState="saved"
-                  onShortlist={handleShortlist}
                 />
 
                 {/* Action Buttons */}

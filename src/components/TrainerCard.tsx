@@ -55,7 +55,6 @@ interface TrainerCardProps {
   comparisonDisabled?: boolean;
   showRemoveButton?: boolean;
   onRemove?: (trainerId: string) => void;
-  onShortlist?: (trainerId: string) => void;
 }
 
 export const TrainerCard = ({ 
@@ -71,8 +70,7 @@ export const TrainerCard = ({
   onComparisonToggle,
   comparisonDisabled = false,
   showRemoveButton = false,
-  onRemove,
-  onShortlist
+  onRemove
 }: TrainerCardProps) => {
   const { isTrainerSaved, saveTrainer, unsaveTrainer } = useSavedTrainers();
   const { stage } = useEngagementStage(trainer.id);
@@ -112,19 +110,9 @@ export const TrainerCard = ({
 
   const handleToggleSave = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    
-    // If trainer is saved and we're in the saved trainers context, shortlist them
-    if (isSaved && cardState === 'saved' && onShortlist) {
-      console.log(`Shortlisting trainer ${trainer.id} from saved state`);
-      await onShortlist(trainer.id);
-    } else {
-      // Otherwise just toggle save/unsave
-      console.log(`Toggling save state for trainer ${trainer.id}, currently saved: ${isSaved}`);
-      const success = isSaved 
-        ? await unsaveTrainer(trainer.id)
-        : await saveTrainer(trainer.id);
-      console.log(`Save toggle result for ${trainer.id}:`, success);
-    }
+    const success = isSaved 
+      ? await unsaveTrainer(trainer.id)
+      : await saveTrainer(trainer.id);
   };
 
   const handleComparisonClick = (checked: boolean) => {
