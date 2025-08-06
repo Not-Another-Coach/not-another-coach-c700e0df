@@ -657,6 +657,16 @@ export default function MyTrainers() {
                   <Clock className="h-3 w-3 mr-1" />
                   Join Waitlist
                 </Button>
+              ) : discoveryCall && !isCallInPast ? (
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  disabled
+                  className="opacity-75 cursor-not-allowed"
+                >
+                  <Calendar className="h-3 w-3 mr-1" />
+                  Call Booked
+                </Button>
               ) : isDiscoveryInProgress ? (
                 <Button 
                   size="sm" 
@@ -666,16 +676,7 @@ export default function MyTrainers() {
                   <UserCheck className="h-3 w-3 mr-1" />
                   Choose Coach
                 </Button>
-              ) : discoveryCall && !isCallInPast ? (
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={() => handleRescheduleCall(trainer.id)}
-                >
-                  <Edit className="h-3 w-3 mr-1" />
-                  Reschedule
-                </Button>
-              ) : isCallInPast ? (
+              ) : discoveryCall && isCallInPast ? (
                 <Button 
                   size="sm" 
                   variant="default"
@@ -684,14 +685,25 @@ export default function MyTrainers() {
                   <UserCheck className="h-3 w-3 mr-1" />
                   Choose Coach
                 </Button>
+              ) : trainerData.trainer.offers_discovery_call ? (
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  disabled
+                  className="opacity-75 cursor-not-allowed"
+                >
+                  <Calendar className="h-3 w-3 mr-1" />
+                  No Call Available
+                </Button>
               ) : (
                 <Button 
                   size="sm" 
                   variant="outline"
-                  onClick={() => handleStartConversation(trainer.id)}
+                  disabled
+                  className="opacity-75 cursor-not-allowed"
                 >
-                  <MessageCircle className="h-3 w-3 mr-1" />
-                  Start Chat
+                  <X className="h-3 w-3 mr-1" />
+                  No Call Available
                 </Button>
               )}
             </div>
