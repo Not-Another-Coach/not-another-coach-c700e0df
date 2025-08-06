@@ -38,7 +38,6 @@ export function useRealTrainers() {
             )
           `)
           .eq('user_type', 'trainer')
-          .eq('profile_published', true)
           .order('created_at');
 
         if (error) {

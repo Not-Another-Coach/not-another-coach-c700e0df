@@ -164,81 +164,9 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
     flexible_scheduling: profile.flexible_scheduling,
   };
 
-  // State for missing trainer profiles
-  const [missingTrainerProfiles, setMissingTrainerProfiles] = useState<any[]>([]);
-
-  // Combine real trainers with sample trainers and missing profiles for better matching experience
-  const allTrainers = [...realTrainers, ...sampleTrainers, ...missingTrainerProfiles];
+  // Combine real trainers with sample trainers for better matching experience
+  const allTrainers = [...realTrainers, ...sampleTrainers];
   
-  // Fetch missing trainer profiles for shortlisted trainers not in basic trainer lists
-  useEffect(() => {
-    const fetchMissingProfiles = async () => {
-      if (!actualShortlistedTrainers.length || trainersLoading) return;
-
-      const basicTrainerIds = [...realTrainers, ...sampleTrainers].map(t => t.id);
-      const missingTrainerIds = actualShortlistedTrainers
-        .filter(st => !basicTrainerIds.includes(st.trainer_id))
-        .map(st => st.trainer_id);
-
-      if (missingTrainerIds.length > 0) {
-        console.log('🔍 Fetching missing trainer profiles for shortlisted trainers:', missingTrainerIds);
-        
-        try {
-          const { data: missingProfiles, error } = await supabase
-            .from('profiles')
-            .select(`
-              id,
-              first_name,
-              last_name,
-              bio,
-              location,
-              specializations,
-              qualifications,
-              hourly_rate,
-              rating,
-              total_ratings,
-              training_types,
-              profile_photo_url,
-              is_verified,
-              verification_status
-            `)
-            .in('id', missingTrainerIds)
-            .eq('user_type', 'trainer');
-
-          if (error) {
-            console.error('Error fetching missing trainer profiles:', error);
-            return;
-          }
-
-          const formattedProfiles = missingProfiles?.map((trainer, index) => ({
-            id: trainer.id,
-            name: `${trainer.first_name || ''} ${trainer.last_name || ''}`.trim() || 'Professional Trainer',
-            specialties: trainer.specializations || [],
-            rating: trainer.rating || 4.5,
-            reviews: trainer.total_ratings || 0,
-            experience: trainer.is_verified ? "Verified Professional" : "Professional",
-            location: trainer.location || "Location TBD",
-            hourlyRate: trainer.hourly_rate || 75,
-            image: trainer.profile_photo_url || "/placeholder.svg",
-            certifications: trainer.qualifications || [],
-            description: trainer.bio || "Professional fitness trainer dedicated to helping you achieve your goals.",
-            availability: "Available",
-            trainingType: trainer.training_types || ["In-Person", "Online"],
-            offers_discovery_call: true
-          })) || [];
-
-          setMissingTrainerProfiles(formattedProfiles);
-        } catch (error) {
-          console.error('Error fetching missing trainer profiles:', error);
-        }
-      } else {
-        setMissingTrainerProfiles([]);
-      }
-    };
-
-    fetchMissingProfiles();
-  }, [actualShortlistedTrainers, realTrainers, trainersLoading]);
-
   const { matchedTrainers, topMatches, goodMatches } = useEnhancedTrainerMatching(
     allTrainers, 
     profile.quiz_answers,
