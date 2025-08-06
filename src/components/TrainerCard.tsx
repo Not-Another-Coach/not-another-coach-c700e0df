@@ -410,6 +410,7 @@ export const TrainerCard = ({
         {/* CTA Section - Actions based on trainer status */}
         {(cardState === 'saved' || cardState === 'shortlisted') && (
           <div className="border-t pt-4 space-y-2 bg-muted/10 rounded-lg p-3">
+            {/* Show Add to Shortlist button for saved trainers that aren't shortlisted yet */}
             {cardState === 'saved' && !isShortlisted && onAddToShortlist && (
               <Button 
                 onClick={() => onAddToShortlist(trainer.id)} 
