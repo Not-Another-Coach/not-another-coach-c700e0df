@@ -1,13 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import { useEnhancedTrainerMatching } from "@/hooks/useEnhancedTrainerMatching";
 import { useSavedTrainers } from "@/hooks/useSavedTrainers";
+import { useShortlistedTrainers } from "@/hooks/useShortlistedTrainers";
+import { useConversations } from "@/hooks/useConversations";
 import { useRealTrainers } from "@/hooks/useRealTrainers";
-import { useActiveDiscoveryCallsCount } from "@/hooks/useActiveDiscoveryCallsCount";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { TrainerCard } from "@/components/TrainerCard";
 import { NewsAlertsSection } from "@/components/dashboard/NewsAlertsSection";
 import { DiscoveryCallNotificationsWidget } from "@/components/dashboard/DiscoveryCallNotificationsWidget";
 import { 
@@ -20,75 +20,35 @@ import {
   CheckCircle,
   Clock,
   Users,
-  Target
+  Target,
+  Phone,
+  Calendar,
+  ArrowRight,
+  ChevronRight
 } from "lucide-react";
-import trainerSarah from "@/assets/trainer-sarah.jpg";
-import trainerMike from "@/assets/trainer-mike.jpg";
-import trainerEmma from "@/assets/trainer-emma.jpg";
-import trainerAlex from "@/assets/trainer-alex.jpg";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
 
 interface DashboardSummaryProps {
   profile: any;
   onTabChange: (tab: string) => void;
 }
 
-// Sample trainer data
-const sampleTrainers = [
-  {
-    id: "1",
-    name: "Sarah Johnson",
-    specialties: ["Weight Loss", "Strength Training", "Nutrition"],
-    rating: 4.9,
-    reviews: 127,
-    experience: "8 years",
-    location: "Downtown",
-    hourlyRate: 85,
-    image: trainerSarah,
-    certifications: ["NASM-CPT", "Precision Nutrition"],
-    description: "Passionate about helping clients achieve sustainable weight loss and building strength.",
-    availability: "Mon-Fri",
-    trainingType: ["In-Person", "Online"]
-  },
-  {
-    id: "2", 
-    name: "Mike Rodriguez",
-    specialties: ["Muscle Building", "Powerlifting", "Sports Performance"],
-    rating: 4.8,
-    reviews: 94,
-    experience: "12 years",
-    location: "Westside",
-    hourlyRate: 95,
-    image: trainerMike,
-    certifications: ["CSCS", "USAPL Coach"],
-    description: "Former competitive powerlifter dedicated to helping clients build serious muscle and strength.",
-    availability: "All Week",
-    trainingType: ["In-Person", "Hybrid"]
-  },
-  {
-    id: "3",
-    name: "Emma Chen",
-    specialties: ["Yoga", "Flexibility", "Mindfulness", "Rehabilitation"],
-    rating: 4.9,
-    reviews: 156,
-    experience: "6 years", 
-    location: "Eastside",
-    hourlyRate: 70,
-    image: trainerEmma,
-    certifications: ["RYT-500", "Corrective Exercise"],
-    description: "Certified yoga instructor focusing on mind-body connection, flexibility, and injury prevention.",
-    availability: "Flexible",
-    trainingType: ["Online", "In-Person"]
-  }
-];
-
 export function DashboardSummary({ profile, onTabChange }: DashboardSummaryProps) {
   const navigate = useNavigate();
-  const { savedTrainerIds } = useSavedTrainers();
-  const { count: activeDiscoveryCallsCount } = useActiveDiscoveryCallsCount();
-  
-  // Use real trainers from database
+  const { user } = useAuth();
   const { trainers: realTrainers, loading: trainersLoading } = useRealTrainers();
+  const { savedTrainers, savedTrainerIds } = useSavedTrainers();
+  const { shortlistedTrainers, shortlistCount } = useShortlistedTrainers();
+  const { conversations } = useConversations();
   
+  const [discoveryCallsData, setDiscoveryCallsData] = useState({
+    scheduled: 0,
+    completed: 0,
+    total: 0
+  });
+
   // Get enhanced matched trainers using client survey data
   const clientSurveyData = {
     primary_goals: profile.primary_goals,
@@ -110,208 +70,285 @@ export function DashboardSummary({ profile, onTabChange }: DashboardSummaryProps
     flexible_scheduling: profile.flexible_scheduling,
   };
 
-  // Combine real trainers with sample trainers for better matching experience
-  const allTrainers = [...realTrainers, ...sampleTrainers];
-
   const { matchedTrainers, topMatches } = useEnhancedTrainerMatching(
-    allTrainers, 
+    realTrainers, 
     profile.quiz_answers,
     clientSurveyData
   );
 
-  // Calculate profile completion percentage
-  const getProfileCompletion = () => {
-    const fields = [
-      profile.primary_goals?.length > 0,
-      profile.training_location_preference,
-      profile.preferred_training_frequency,
-      profile.preferred_time_slots?.length > 0,
-      profile.preferred_coaching_style?.length > 0,
-      profile.client_personality_type?.length > 0,
-      profile.preferred_package_type,
-      profile.budget_range_min || profile.budget_range_max
-    ];
-    const completed = fields.filter(Boolean).length;
-    return Math.round((completed / fields.length) * 100);
+  // Load discovery calls data
+  useEffect(() => {
+    const loadDiscoveryCallsData = async () => {
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('discovery_calls')
+        .select('id, status')
+        .eq('client_id', user.id);
+
+      if (data && !error) {
+        const scheduled = data.filter(call => call.status === 'scheduled').length;
+        const completed = data.filter(call => call.status === 'completed').length;
+        setDiscoveryCallsData({
+          scheduled,
+          completed,
+          total: data.length
+        });
+      }
+    };
+
+    loadDiscoveryCallsData();
+  }, [user]);
+
+  // Handler to navigate to My Trainers with specific filter
+  const navigateToMyTrainers = (filter: 'all' | 'saved' | 'shortlisted' | 'discovery') => {
+    onTabChange('trainers');
+    // Use a small delay to ensure tab change happens first
+    setTimeout(() => {
+      const event = new CustomEvent('setMyTrainersFilter', { 
+        detail: { filter } 
+      });
+      window.dispatchEvent(event);
+    }, 100);
   };
 
-  const profileCompletion = getProfileCompletion();
+  // Calculate profile completion for clients
+  const calculateProfileCompletion = () => {
+    const requiredFields = [
+      'primary_goals',
+      'training_location_preference', 
+      'preferred_training_frequency',
+      'preferred_time_slots',
+      'preferred_coaching_style',
+      'client_personality_type',
+      'preferred_package_type'
+    ];
+    
+    const completedFields = requiredFields.filter(field => profile[field] && 
+      (Array.isArray(profile[field]) ? profile[field].length > 0 : true)
+    ).length;
+    
+    return Math.round((completedFields / requiredFields.length) * 100);
+  };
+
+  const profileCompletion = calculateProfileCompletion();
 
   return (
     <div className="space-y-6">
-      {/* Welcome Header */}
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold">
-          Welcome back, {profile.first_name || 'there'}! 👋
-        </h1>
-        <p className="text-muted-foreground">
-          Your fitness journey continues. Here's what's happening with your matches and progress.
-        </p>
-      </div>
-
-      {/* Key Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-primary">{topMatches.length}</div>
-            <p className="text-sm text-muted-foreground">Top Matches</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-primary">{savedTrainerIds.length}</div>
-            <p className="text-sm text-muted-foreground">Saved Trainers</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-primary">0</div>
-            <p className="text-sm text-muted-foreground">Active Chats</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-primary">{activeDiscoveryCallsCount}</div>
-            <p className="text-sm text-muted-foreground">Discovery Calls</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Profile Completion Section - Only show if not 100% complete */}
+      {/* Profile Completion Card */}
       {profileCompletion < 100 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Settings className="h-5 w-5" />
-              Complete Your Survey
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
+        <Card className="border-amber-200 bg-amber-50">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
               <div>
-                <p className="font-medium">Survey Completion</p>
-                <p className="text-sm text-muted-foreground">
-                  {profileCompletion}% complete - Complete the full survey for better matches
+                <h3 className="font-semibold text-amber-800">Complete Your Profile</h3>
+                <p className="text-sm text-amber-700">
+                  Get better trainer matches by completing your preferences
                 </p>
               </div>
-              <div className="text-right">
-                <div className="text-2xl font-bold text-primary">{profileCompletion}%</div>
+              <div className="text-2xl font-bold text-amber-800">{profileCompletion}%</div>
+            </div>
+            <Progress value={profileCompletion} className="w-full mb-4" />
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => onTabChange('preferences')}
+              className="border-amber-300 text-amber-800 hover:bg-amber-100"
+            >
+              Complete Profile
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Summary Cards Grid */}
+      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Top Matches */}
+        <Card 
+          className="cursor-pointer hover:shadow-lg transition-all duration-200 border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100"
+          onClick={() => onTabChange('explore')}
+        >
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 rounded-full bg-blue-500 text-white">
+                <Target className="h-6 w-6" />
+              </div>
+              <ChevronRight className="h-5 w-5 text-blue-600" />
+            </div>
+            <h3 className="font-semibold text-blue-900 mb-1">Top Matches</h3>
+            <div className="text-3xl font-bold text-blue-700 mb-2">{topMatches.length}</div>
+            <p className="text-sm text-blue-600">Discover your perfect trainers</p>
+          </CardContent>
+        </Card>
+
+        {/* Saved Trainers */}
+        <Card 
+          className="cursor-pointer hover:shadow-lg transition-all duration-200 border-pink-200 bg-gradient-to-br from-pink-50 to-pink-100"
+          onClick={() => navigateToMyTrainers('saved')}
+        >
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 rounded-full bg-pink-500 text-white">
+                <Heart className="h-6 w-6" />
+              </div>
+              <ChevronRight className="h-5 w-5 text-pink-600" />
+            </div>
+            <h3 className="font-semibold text-pink-900 mb-1">Saved Trainers</h3>
+            <div className="text-3xl font-bold text-pink-700 mb-2">{savedTrainers.length}</div>
+            <p className="text-sm text-pink-600">Your liked trainers</p>
+          </CardContent>
+        </Card>
+
+        {/* Shortlisted Trainers */}
+        <Card 
+          className="cursor-pointer hover:shadow-lg transition-all duration-200 border-yellow-200 bg-gradient-to-br from-yellow-50 to-yellow-100"
+          onClick={() => navigateToMyTrainers('shortlisted')}
+        >
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 rounded-full bg-yellow-500 text-white">
+                <Star className="h-6 w-6" />
+              </div>
+              <ChevronRight className="h-5 w-5 text-yellow-600" />
+            </div>
+            <h3 className="font-semibold text-yellow-900 mb-1">Shortlisted</h3>
+            <div className="text-3xl font-bold text-yellow-700 mb-2">{shortlistCount}/4</div>
+            <p className="text-sm text-yellow-600">Ready to connect</p>
+          </CardContent>
+        </Card>
+
+        {/* Active Conversations */}
+        <Card 
+          className="cursor-pointer hover:shadow-lg transition-all duration-200 border-green-200 bg-gradient-to-br from-green-50 to-green-100"
+          onClick={() => {
+            // Open messaging popup
+            const messagingButton = document.querySelector('[data-messaging-button]') as HTMLButtonElement;
+            if (messagingButton) {
+              messagingButton.click();
+            }
+          }}
+        >
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 rounded-full bg-green-500 text-white">
+                <MessageCircle className="h-6 w-6" />
+              </div>
+              <ChevronRight className="h-5 w-5 text-green-600" />
+            </div>
+            <h3 className="font-semibold text-green-900 mb-1">Active Chats</h3>
+            <div className="text-3xl font-bold text-green-700 mb-2">{conversations.length}</div>
+            <p className="text-sm text-green-600">Ongoing conversations</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Discovery Calls Section */}
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Discovery Calls Summary */}
+        <Card 
+          className="cursor-pointer hover:shadow-lg transition-all duration-200 border-purple-200 bg-gradient-to-br from-purple-50 to-purple-100"
+          onClick={() => navigateToMyTrainers('discovery')}
+        >
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 rounded-full bg-purple-500 text-white">
+                <Phone className="h-6 w-6" />
+              </div>
+              <ChevronRight className="h-5 w-5 text-purple-600" />
+            </div>
+            <h3 className="font-semibold text-purple-900 mb-4">Discovery Calls</h3>
+            
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div>
+                <div className="text-2xl font-bold text-purple-700">{discoveryCallsData.scheduled}</div>
+                <p className="text-xs text-purple-600">Scheduled</p>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-purple-700">{discoveryCallsData.completed}</div>
+                <p className="text-xs text-purple-600">Completed</p>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-purple-700">{discoveryCallsData.total}</div>
+                <p className="text-xs text-purple-600">Total</p>
               </div>
             </div>
-            <Progress value={profileCompletion} className="w-full" />
-            <div className="flex gap-2">
+          </CardContent>
+        </Card>
+
+        {/* Discovery Call Notifications Widget */}
+        <DiscoveryCallNotificationsWidget />
+      </div>
+
+      {/* Top Matches Preview */}
+      {topMatches.length > 0 && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Star className="h-5 w-5" />
+                Your Top Matches Preview
+              </CardTitle>
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => navigate('/client-survey')}
+                onClick={() => onTabChange('explore')}
               >
-                Complete Survey
+                Explore All →
               </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4">
+              {topMatches.slice(0, 2).map((match) => (
+                <div key={match.trainer.id} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
+                  <div className="flex items-start gap-4">
+                    <img 
+                      src={match.trainer.image || '/placeholder.svg'} 
+                      alt={match.trainer.name}
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-semibold">{match.trainer.name}</h3>
+                        <Badge variant="secondary">
+                          {match.score}% Match
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        {match.trainer.specialties?.slice(0, 2).join(' • ') || 'Personal Training'}
+                      </p>
+                      <div className="flex gap-2">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => navigate(`/trainer/${match.trainer.id}`)}
+                        >
+                          View Profile
+                        </Button>
+                        <Button 
+                          size="sm"
+                          onClick={() => {
+                            // Open messaging popup
+                            const event = new CustomEvent('openMessagePopup', {
+                              detail: { trainerId: match.trainer.id }
+                            });
+                            window.dispatchEvent(event);
+                          }}
+                        >
+                          Send Message
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
       )}
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Your Top Matches */}
-        <div className="lg:col-span-2 space-y-4">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <Star className="h-5 w-5" />
-                  Your Top Matches
-                </CardTitle>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => onTabChange('trainers')}
-                >
-                  View My Trainers
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {topMatches.length > 0 ? (
-                <div className="space-y-4">
-                  {topMatches.slice(0, 2).map((match) => (
-                    <div key={match.trainer.id} className="border rounded-lg p-4">
-                      <div className="flex items-start gap-4">
-                        <img 
-                          src={match.trainer.image} 
-                          alt={match.trainer.name}
-                          className="w-16 h-16 rounded-full object-cover"
-                        />
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold">{match.trainer.name}</h3>
-                            <Badge variant="secondary">
-                              {match.score}% Match
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-muted-foreground mb-2">
-                            {match.trainer.specialties.slice(0, 2).join(' • ')}
-                          </p>
-                          <div className="flex gap-2">
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => navigate(`/trainer/${match.trainer.id}`)}
-                            >
-                              View Profile
-                            </Button>
-                            <Button 
-                              size="sm"
-                              onClick={(e) => {
-                                console.log('🔥 DASHBOARD SEND MESSAGE BUTTON CLICK DEBUG');
-                                console.log('🔥 Event object:', e);
-                                console.log('🔥 About to trigger messaging popup');
-                                
-                                // Open messaging popup instead of navigating
-                                const messagingButton = document.querySelector('[data-messaging-button]') as HTMLButtonElement;
-                                if (messagingButton) {
-                                  console.log('🔥 Found messaging button, clicking it');
-                                  messagingButton.click();
-                                } else {
-                                  console.error('🔥 Could not find messaging button');
-                                }
-                              }}
-                            >
-                              Send Message
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">
-                    Complete your preferences to see personalized matches
-                  </p>
-                  <Button 
-                    className="mt-4"
-                    onClick={() => onTabChange('preferences')}
-                  >
-                    Update Preferences
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Right Sidebar */}
-        <div className="space-y-4">
-          {/* Discovery Call Notifications */}
-          <DiscoveryCallNotificationsWidget />
-          
-          {/* News & Alerts Section */}
-          <NewsAlertsSection />
-        </div>
-      </div>
+      {/* News & Alerts Section */}
+      <NewsAlertsSection />
     </div>
   );
 }

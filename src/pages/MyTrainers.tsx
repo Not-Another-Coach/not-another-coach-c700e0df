@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSavedTrainers } from "@/hooks/useSavedTrainers";
 import { useShortlistedTrainers } from "@/hooks/useShortlistedTrainers";
@@ -50,6 +50,20 @@ export default function MyTrainers() {
   // State for filtering and UI
   const [activeFilter, setActiveFilter] = useState<'all' | 'saved' | 'shortlisted' | 'discovery'>('all');
   const [selectedForComparison, setSelectedForComparison] = useState<string[]>([]);
+
+  // Listen for filter events from dashboard
+  useEffect(() => {
+    const handleFilterEvent = (event: CustomEvent) => {
+      const { filter } = event.detail;
+      setActiveFilter(filter);
+    };
+
+    window.addEventListener('setMyTrainersFilter', handleFilterEvent as EventListener);
+    
+    return () => {
+      window.removeEventListener('setMyTrainersFilter', handleFilterEvent as EventListener);
+    };
+  }, []);
 
   // Get all trainer engagements and build unified trainer list
   const trainersWithStatus = useMemo(() => {

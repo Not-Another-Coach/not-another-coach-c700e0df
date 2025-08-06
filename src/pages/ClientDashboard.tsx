@@ -11,7 +11,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardSummary } from "@/components/dashboard/DashboardSummary";
 import { EditPreferencesSection } from "@/components/dashboard/EditPreferencesSection";
 import { ExploreMatchSection } from "@/components/dashboard/ExploreMatchSection";
-import { MessagesSection } from "@/components/dashboard/MessagesSection";
 import { ClientSurveyWidget } from "@/components/dashboard/ClientSurveyWidget";
 import MyTrainers from "./MyTrainers";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
@@ -174,7 +173,7 @@ export default function ClientDashboard() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           {/* Tab Navigation */}
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            <TabsList className="grid w-full sm:w-auto grid-cols-5">
+            <TabsList className="grid w-full sm:w-auto grid-cols-4">
               <TabsTrigger value="summary" className="flex items-center gap-2">
                 <Menu className="h-4 w-4" />
                 <span className="hidden sm:inline">Dashboard</span>
@@ -193,10 +192,6 @@ export default function ClientDashboard() {
               <TabsTrigger value="explore" className="flex items-center gap-2">
                 <Search className="h-4 w-4" />
                 <span className="hidden sm:inline">Explore</span>
-              </TabsTrigger>
-              <TabsTrigger value="messages" className="flex items-center gap-2">
-                <MessageCircle className="h-4 w-4" />
-                <span className="hidden sm:inline">Messages</span>
               </TabsTrigger>
             </TabsList>
 
@@ -233,13 +228,6 @@ export default function ClientDashboard() {
 
           <TabsContent value="explore" className="space-y-6">
             <ExploreMatchSection 
-              profile={profile}
-            />
-          </TabsContent>
-
-
-          <TabsContent value="messages" className="space-y-6">
-            <MessagesSection 
               profile={profile}
             />
           </TabsContent>
