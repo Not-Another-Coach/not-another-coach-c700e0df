@@ -37,7 +37,7 @@ export function useShortlistedTrainers() {
   const [loading, setLoading] = useState(true);
 
   // Convert engagement data to shortlisted trainers format
-  const engagementShortlisted = useMemo(() => getEngagementShortlisted(), [getEngagementShortlisted]);
+  const engagementShortlisted = getEngagementShortlisted();
   const shortlistedTrainers: ShortlistedTrainer[] = useMemo(() => 
     engagementShortlisted.map(engagement => {
       const discoveryCall = discoveryCallsData.find(call => call.trainer_id === engagement.trainerId);
@@ -59,18 +59,16 @@ export function useShortlistedTrainers() {
     }), [engagementShortlisted, discoveryCallsData, user?.id]);
 
   const fetchDiscoveryCalls = useCallback(async () => {
-    if (!user || engagementShortlisted.length === 0) {
+    if (!user) {
       setDiscoveryCallsData([]);
       return;
     }
 
     try {
-      const trainerIds = engagementShortlisted.map(e => e.trainerId);
       const { data: callsData, error: callsError } = await supabase
         .from('discovery_calls')
         .select('*')
         .eq('client_id', user.id)
-        .in('trainer_id', trainerIds)
         .in('status', ['scheduled', 'rescheduled']);
       
       if (callsError) {
@@ -81,7 +79,7 @@ export function useShortlistedTrainers() {
     } catch (error) {
       console.error('Error fetching discovery calls:', error);
     }
-  }, [user?.id, engagementShortlisted]);
+  }, [user?.id]);
 
   useEffect(() => {
     fetchDiscoveryCalls();
@@ -192,9 +190,9 @@ export function useShortlistedTrainers() {
     if (!user) return { error: 'No user logged in' };
 
     try {
-      // Move to matched stage when booking discovery call
-      await updateEngagementStage(trainerId, 'matched');
-
+      // The engagement stage will be updated by the trigger when discovery call is actually booked
+      // in the DiscoveryCallBookingModal component
+      
       // Update client journey to discovery call booked stage
       try {
         await supabase
@@ -215,15 +213,14 @@ export function useShortlistedTrainers() {
         console.error('Error updating journey for discovery call:', journeyError);
       }
 
-      toast.success('Discovery call booking confirmed!');
-      await fetchDiscoveryCalls(); // Refresh discovery calls
+      // Just trigger the modal - actual booking happens in the modal
       return { data: { trainer_id: trainerId } };
     } catch (error) {
-      console.error('Error booking discovery call:', error);
-      toast.error('Failed to book discovery call');
+      console.error('Error preparing discovery call booking:', error);
+      toast.error('Failed to prepare discovery call booking');
       return { error };
     }
-  }, [user, updateEngagementStage, fetchDiscoveryCalls]);
+  }, [user]);
 
   return {
     shortlistedTrainers,

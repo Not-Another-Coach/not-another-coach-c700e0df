@@ -25,6 +25,7 @@ import {
   X,
   BarChart3
 } from "lucide-react";
+import { DiscoveryCallBookingModal } from "@/components/discovery-call/DiscoveryCallBookingModal";
 import { toast } from "sonner";
 
 export default function MyTrainers() {
@@ -224,19 +225,11 @@ export default function MyTrainers() {
     window.dispatchEvent(event);
   };
 
+  const [selectedTrainerForCall, setSelectedTrainerForCall] = useState<string | null>(null);
+
   const handleBookDiscoveryCall = async (trainerId: string) => {
     console.log('🔥 Book discovery call clicked:', trainerId);
-    try {
-      const result = await bookDiscoveryCall(trainerId);
-      if (result.error) {
-        toast.error('Failed to book discovery call');
-      } else {
-        toast.success('Discovery call booked!');
-      }
-    } catch (error) {
-      console.error('Error booking discovery call:', error);
-      toast.error('Failed to book discovery call');
-    }
+    setSelectedTrainerForCall(trainerId);
   };
 
   const handleViewProfile = (trainerId: string) => {
@@ -480,6 +473,25 @@ export default function MyTrainers() {
           </Card>
         )}
       </div>
+
+      {/* Discovery Call Booking Modal */}
+      {selectedTrainerForCall && (
+        <DiscoveryCallBookingModal
+          isOpen={!!selectedTrainerForCall}
+          onClose={() => setSelectedTrainerForCall(null)}
+          trainer={{
+            id: selectedTrainerForCall,
+            name: allTrainers.find(t => t.id === selectedTrainerForCall)?.name || 'Unknown',
+            firstName: allTrainers.find(t => t.id === selectedTrainerForCall)?.name?.split(' ')[0],
+            lastName: allTrainers.find(t => t.id === selectedTrainerForCall)?.name?.split(' ')[1],
+            profilePhotoUrl: allTrainers.find(t => t.id === selectedTrainerForCall)?.image
+          }}
+          onCallBooked={() => {
+            // Refresh engagement data
+            window.location.reload();
+          }}
+        />
+      )}
     </div>
   );
 }
