@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSavedTrainers } from '@/hooks/useSavedTrainers';
 import { useShortlistedTrainers } from '@/hooks/useShortlistedTrainers';
+import { useConversations } from '@/hooks/useConversations';
+import { useTrainerEngagement } from '@/hooks/useTrainerEngagement';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -86,6 +88,8 @@ export default function SavedTrainers() {
   const navigate = useNavigate();
   const { savedTrainers, loading, unsaveTrainer } = useSavedTrainers();
   const { shortlistTrainer, isShortlisted, shortlistCount, canShortlistMore } = useShortlistedTrainers();
+  const { createConversation } = useConversations();
+  const { bookDiscoveryCall } = useTrainerEngagement();
   const [selectedForComparison, setSelectedForComparison] = useState<string[]>([]);
   const [showComparison, setShowComparison] = useState(false);
   const [allTrainers, setAllTrainers] = useState<(Trainer & { savedInfo: any })[]>([]);
@@ -174,6 +178,18 @@ export default function SavedTrainers() {
     } else {
       toast.success('Trainer moved to shortlist!');
     }
+  };
+
+  const handleStartConversation = async (trainerId: string) => {
+    const result = await createConversation(trainerId);
+    if (!result.error) {
+      navigate('/messaging');
+    }
+  };
+
+  const handleBookDiscoveryCall = async (trainerId: string) => {
+    await bookDiscoveryCall(trainerId);
+    toast.success('Discovery call booking initiated!');
   };
 
   const handleStartComparison = () => {
@@ -309,8 +325,8 @@ export default function SavedTrainers() {
                   // CTA actions
                   onAddToShortlist={handleShortlist}
                   isShortlisted={isShortlisted(trainer.id)}
-                  onStartConversation={(trainerId) => console.log('Start conversation:', trainerId)}
-                  onBookDiscoveryCall={(trainerId) => console.log('Book discovery call:', trainerId)}
+                  onStartConversation={handleStartConversation}
+                  onBookDiscoveryCall={handleBookDiscoveryCall}
                 />
 
                 {/* Saved Date */}

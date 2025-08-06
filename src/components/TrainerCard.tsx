@@ -508,7 +508,7 @@ export const TrainerCard = ({
                       disabled={true}
                     >
                       <Calendar className="h-3 w-3 mr-1" />
-                      Discovery Calls Not Available
+                      Discovery Call Unavailable
                     </Button>
                   )}
                 </div>
