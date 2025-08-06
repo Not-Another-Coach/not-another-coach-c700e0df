@@ -428,7 +428,7 @@ export const TrainerCard = ({
               </Button>
             )}
             
-            {(cardState === 'shortlisted' || isShortlisted) && (
+            {(cardState === 'shortlisted' || (cardState === 'saved' && isShortlisted)) && (
               <div className="space-y-2">
                 <Badge variant="default" className="w-full justify-center bg-green-100 text-green-800 border-green-200">
                   ✓ Shortlisted
