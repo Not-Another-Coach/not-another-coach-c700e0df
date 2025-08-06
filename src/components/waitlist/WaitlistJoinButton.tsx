@@ -104,9 +104,6 @@ export function WaitlistJoinButton({
         });
         setIsOnWaitlist(false);
         setIsOpen(false);
-        // Force a refresh of the waitlist status
-        const status = await checkClientWaitlistStatus(coachId);
-        setIsOnWaitlist(!!status);
         onWaitlistChange?.(); // Trigger refresh of other components
       }
     } catch (error) {
