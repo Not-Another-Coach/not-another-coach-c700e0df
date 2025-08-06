@@ -366,13 +366,17 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
 
   // Comparison functionality
   const handleComparisonToggle = (trainerId: string) => {
-    setSelectedForComparison(prev => 
-      prev.includes(trainerId) 
+    console.log('Toggling comparison for trainer:', trainerId);
+    console.log('Current selection:', selectedForComparison);
+    setSelectedForComparison(prev => {
+      const newSelection = prev.includes(trainerId) 
         ? prev.filter(id => id !== trainerId)
         : prev.length < 4 
           ? [...prev, trainerId] 
-          : prev
-    );
+          : prev;
+      console.log('New selection:', newSelection);
+      return newSelection;
+    });
   };
 
   const getSelectedTrainersData = () => {
@@ -596,7 +600,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                           matchDetails={match.matchDetails}
                         />
                         <Badge 
-                          className="absolute top-2 right-2 bg-green-500 text-white"
+                          className="absolute top-2 right-1/2 transform translate-x-1/2 bg-green-500 text-white z-10"
                         >
                           Mutual Match!
                         </Badge>
@@ -810,7 +814,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                         matchDetails={matchData.matchDetails}
                       />
                       <Badge 
-                        className="absolute top-2 right-14 bg-yellow-500 text-white z-10"
+                        className="absolute top-2 right-1/2 transform translate-x-1/2 bg-yellow-500 text-white z-10"
                       >
                         ⭐ Shortlisted
                       </Badge>
@@ -949,7 +953,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                           matchDetails={matchData.matchDetails}
                         />
                         <Badge 
-                          className="absolute top-2 right-2 bg-blue-500 text-white z-10"
+                          className="absolute top-2 right-1/2 transform translate-x-1/2 bg-blue-500 text-white z-10"
                         >
                           🔍 Discovery
                         </Badge>
