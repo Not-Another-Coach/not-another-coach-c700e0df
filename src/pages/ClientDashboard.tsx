@@ -18,7 +18,7 @@ import { FloatingMessageButton } from "@/components/FloatingMessageButton";
 import { ClientJourneyBreadcrumb } from "@/components/ClientJourneyBreadcrumb";
 import { DiscoveryCallFeedbackPrompt } from "@/components/dashboard/DiscoveryCallFeedbackPrompt";
 import { useClientJourneyProgress } from "@/hooks/useClientJourneyProgress";
-import { Heart, Settings, Search, MessageCircle, Menu, Users, Shuffle, Shield } from "lucide-react";
+import { Heart, Settings, Search, MessageCircle, Menu, Users, Shuffle, Shield, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function ClientDashboard() {
@@ -120,7 +120,30 @@ export default function ClientDashboard() {
       <div className="sticky top-0 z-50 bg-background border-b">
         <div className="flex justify-between items-center p-4">
           <div className="flex items-center gap-4">
-            <h1 className="text-xl font-bold">Your Fitness Journey</h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-xl font-bold">
+                Your Fitness Journey, {profile?.first_name || 'Client'}
+              </h1>
+              {journeyProgress && !journeyLoading && (
+                <>
+                  <Badge variant="secondary" className="text-xs">
+                    {journeyProgress.percentage}% Complete
+                  </Badge>
+                  <Badge variant="outline" className="text-xs">
+                    {journeyProgress.stage.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                  </Badge>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => navigate('/client/journey')}
+                    className="text-xs h-6 px-2 flex items-center gap-1"
+                  >
+                    View Details
+                    <ChevronRight className="w-3 h-3" />
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
           <div className="flex items-center gap-3">
             {isAdmin && (
@@ -144,29 +167,6 @@ export default function ClientDashboard() {
         </div>
       </div>
 
-      {/* Client Journey Progress Tracker - Shows when survey is 100% complete */}
-      {journeyProgress && !journeyLoading && (
-        <div className="max-w-7xl mx-auto px-6 pt-6">
-          <Card 
-            className="mb-4 cursor-pointer transition-all hover:shadow-md bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20"
-            onClick={() => navigate('/client/journey')}
-          >
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-semibold text-primary">Your Fitness Journey</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {journeyProgress.stage.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())} • {journeyProgress.percentage}% Complete
-                  </p>
-                </div>
-                <Button variant="ghost" size="sm">
-                  View Details →
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
 
       {/* Main Dashboard Content */}
       <div className="max-w-7xl mx-auto p-6">
