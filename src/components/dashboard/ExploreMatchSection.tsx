@@ -344,6 +344,11 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
       toast.error('Failed to shortlist trainer');
     } else {
       toast.success('Trainer added to shortlist!');
+      // Force a small delay to ensure state updates
+      setTimeout(() => {
+        // The tabs should automatically update due to the reactive state
+        console.log('Shortlist action completed for trainer:', trainerId);
+      }, 500);
     }
   };
 
@@ -932,51 +937,54 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                   // Calculate match data for this trainer to ensure consistency
                   const matchData = getTrainerMatchData(trainer);
                   
-                  
-                  return (
-                    <TrainerCard
-                      key={`shortlisted-${shortlisted.trainer_id}-${shortlisted.stage}`} // More unique key
-                      trainer={matchData.trainer}
-                      onViewProfile={handleViewProfile}
-                      matchScore={matchData.score}
-                      matchReasons={matchData.matchReasons}
-                      matchDetails={matchData.matchDetails}
-                      cardState="shortlisted"
-                      showComparisonCheckbox={true}
-                      comparisonChecked={shortlistedComparison.includes(shortlisted.trainer_id)}
-                      onComparisonToggle={handleShortlistedComparisonToggle}
-                      comparisonDisabled={!shortlistedComparison.includes(shortlisted.trainer_id) && shortlistedComparison.length >= 4}
-                      showRemoveButton={true}
-                      onRemove={(trainerId) => handleRemoveFromShortlist(trainerId, matchData.trainer.name)}
-                      isShortlisted={true}
-                      hasDiscoveryCall={!!shortlisted.discovery_call}
-                      discoveryCallData={shortlisted.discovery_call}
-                      trainerOffersDiscoveryCalls={matchData.trainer.offers_discovery_call || false}
-                      onStartConversation={async (trainerId) => {
-                        // Create conversation and navigate to messaging
-                        const result = await createConversation(trainerId);
-                        if (!result.error) {
-                          // Navigate to messaging page or open popup
-                          navigate('/messaging');
-                        }
-                      }}
-                      onBookDiscoveryCall={async (trainerId) => {
-                        console.log('Book discovery call with:', trainerId);
-                        // Move profile to discovery tab when booking call
-                        await bookDiscoveryCall(trainerId);
-                      }}
-                      onEditDiscoveryCall={(trainerId) => {
-                        console.log('Edit discovery call with:', trainerId);
-                      }}
-                      onProceedWithCoach={async (trainerId) => {
-                        console.log('Proceed with coach:', trainerId);
-                        await proceedWithCoach(trainerId);
-                      }}
-                      onRejectCoach={async (trainerId) => {
-                        console.log('Reject coach:', trainerId);
-                        await rejectCoach(trainerId);
-                      }}
-                    />
+                   return (
+                    <div key={`shortlisted-${shortlisted.trainer_id}-${shortlisted.stage}`} className="space-y-3">
+                      <TrainerCard
+                        trainer={matchData.trainer}
+                        onViewProfile={handleViewProfile}
+                        matchScore={matchData.score}
+                        matchReasons={matchData.matchReasons}
+                        matchDetails={matchData.matchDetails}
+                        cardState="shortlisted"
+                        showComparisonCheckbox={true}
+                        comparisonChecked={shortlistedComparison.includes(shortlisted.trainer_id)}
+                        onComparisonToggle={handleShortlistedComparisonToggle}
+                        comparisonDisabled={!shortlistedComparison.includes(shortlisted.trainer_id) && shortlistedComparison.length >= 4}
+                        showRemoveButton={true}
+                        onRemove={(trainerId) => handleRemoveFromShortlist(trainerId, matchData.trainer.name)}
+                        hasDiscoveryCall={!!shortlisted.discovery_call}
+                        discoveryCallData={shortlisted.discovery_call}
+                        trainerOffersDiscoveryCalls={(trainer as any).offers_discovery_call || false}
+                      />
+                      
+                      {/* External CTAs for Shortlisted Trainers */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-center gap-2 py-2 bg-green-50 text-green-800 rounded-lg border border-green-200">
+                          <Star className="h-3 w-3 fill-current" />
+                          <span className="text-xs font-medium">Shortlisted</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="text-xs"
+                            onClick={() => handleCreateConversation(shortlisted.trainer_id)}
+                          >
+                            <MessageCircle className="h-3 w-3 mr-1" />
+                            Chat
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="default" 
+                            className="text-xs"
+                            onClick={() => handleCreateConversation(shortlisted.trainer_id)}
+                          >
+                            <Calendar className="h-3 w-3 mr-1" />
+                            Discovery Call
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
                   );
                 })}
               </div>
