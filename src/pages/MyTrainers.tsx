@@ -183,31 +183,67 @@ export default function MyTrainers() {
     }
 
     // Get trainers with active discovery calls (scheduled/rescheduled, not cancelled)
-    // This includes trainers from engagement stage OR with active discovery calls
+    // Check all possible trainers who might have discovery calls, not just those in allTrainers
+    const trainersWithDiscoveryCalls = new Set<string>();
+    
+    // First, collect all trainer IDs that have active discovery calls
     allTrainers.forEach(trainer => {
       if (hasActiveDiscoveryCall(trainer.id)) {
-        // Check if already exists in the list
-        const existingIndex = allTrainerData.findIndex(t => t.trainer.id === trainer.id);
-        
-        if (existingIndex >= 0) {
-          // Upgrade existing trainer to discovery status
-          allTrainerData[existingIndex] = {
-            trainer,
-            status: 'discovery',
-            engagement: allTrainerData[existingIndex].engagement,
-            statusLabel: 'Discovery Call',
-            statusColor: 'bg-purple-100 text-purple-800'
-          };
-        } else {
-          // Add as new discovery trainer
-          allTrainerData.push({
-            trainer,
-            status: 'discovery',
-            engagement: null,
-            statusLabel: 'Discovery Call',
-            statusColor: 'bg-purple-100 text-purple-800'
-          });
-        }
+        trainersWithDiscoveryCalls.add(trainer.id);
+      }
+    });
+    
+    // Also check trainers from engagement data that might have discovery calls
+    trainersWithStatus.forEach(trainerData => {
+      if (hasActiveDiscoveryCall(trainerData.trainer.id)) {
+        trainersWithDiscoveryCalls.add(trainerData.trainer.id);
+      }
+    });
+    
+    // Now add/upgrade all trainers with discovery calls
+    trainersWithDiscoveryCalls.forEach(trainerId => {
+      let trainer = allTrainers.find(t => t.id === trainerId);
+      
+      // If trainer not found in allTrainers, create a placeholder with basic info
+      if (!trainer) {
+        trainer = {
+          id: trainerId,
+          name: 'Loading trainer...',
+          specialties: [],
+          rating: 0,
+          reviews: 0,
+          experience: '',
+          location: 'Loading...',
+          hourlyRate: 0,
+          image: '',
+          certifications: [],
+          description: 'Loading trainer information...',
+          availability: 'Unknown',
+          trainingType: ['Loading...']
+        };
+      }
+      
+      // Check if already exists in the list
+      const existingIndex = allTrainerData.findIndex(t => t.trainer.id === trainerId);
+      
+      if (existingIndex >= 0) {
+        // Upgrade existing trainer to discovery status
+        allTrainerData[existingIndex] = {
+          trainer,
+          status: 'discovery',
+          engagement: allTrainerData[existingIndex].engagement,
+          statusLabel: 'Discovery Call',
+          statusColor: 'bg-purple-100 text-purple-800'
+        };
+      } else {
+        // Add as new discovery trainer
+        allTrainerData.push({
+          trainer,
+          status: 'discovery',
+          engagement: null,
+          statusLabel: 'Discovery Call',
+          statusColor: 'bg-purple-100 text-purple-800'
+        });
       }
     });
 
