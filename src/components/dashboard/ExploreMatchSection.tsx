@@ -364,19 +364,52 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
     }
   };
 
-  // Comparison functionality
-  const handleComparisonToggle = (trainerId: string) => {
-    console.log('Toggling comparison for trainer:', trainerId);
-    console.log('Current selection:', selectedForComparison);
-    setSelectedForComparison(prev => {
-      const newSelection = prev.includes(trainerId) 
+  // Comparison functionality for saved trainers
+  const [savedComparison, setSavedComparison] = useState<string[]>([]);
+  const [shortlistedComparison, setShortlistedComparison] = useState<string[]>([]);
+
+  const handleSavedComparisonToggle = (trainerId: string) => {
+    setSavedComparison(prev => 
+      prev.includes(trainerId) 
         ? prev.filter(id => id !== trainerId)
         : prev.length < 4 
           ? [...prev, trainerId] 
-          : prev;
-      console.log('New selection:', newSelection);
-      return newSelection;
-    });
+          : prev
+    );
+  };
+
+  const handleShortlistedComparisonToggle = (trainerId: string) => {
+    setShortlistedComparison(prev => 
+      prev.includes(trainerId) 
+        ? prev.filter(id => id !== trainerId)
+        : prev.length < 4 
+          ? [...prev, trainerId] 
+          : prev
+    );
+  };
+
+  const getSavedSelectedTrainersData = () => {
+    return allTrainers.filter(trainer => savedComparison.includes(trainer.id));
+  };
+
+  const getShortlistedSelectedTrainersData = () => {
+    return allTrainers.filter(trainer => shortlistedComparison.includes(trainer.id));
+  };
+
+  const handleStartSavedComparison = () => {
+    const selectedTrainersData = getSavedSelectedTrainersData();
+    if (selectedTrainersData.length >= 2) {
+      setSelectedForComparison(savedComparison);
+      setShowComparison(true);
+    }
+  };
+
+  const handleStartShortlistedComparison = () => {
+    const selectedTrainersData = getShortlistedSelectedTrainersData();
+    if (selectedTrainersData.length >= 2) {
+      setSelectedForComparison(shortlistedComparison);
+      setShowComparison(true);
+    }
   };
 
   const getSelectedTrainersData = () => {
@@ -600,7 +633,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                           matchDetails={match.matchDetails}
                         />
                         <Badge 
-                          className="absolute top-2 right-1/2 transform translate-x-1/2 bg-green-500 text-white z-10"
+                          className="absolute top-2 left-2 bg-green-500 text-white z-10"
                         >
                           Mutual Match!
                         </Badge>
@@ -652,15 +685,15 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
         <TabsContent value="saved" className="space-y-4">
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
             <h2 className="text-xl font-semibold">Your Saved Trainers</h2>
-            {selectedForComparison.length >= 2 && (
+            {savedComparison.length >= 2 && (
               <Button 
                 variant="default" 
                 size="sm"
-                onClick={handleStartComparison}
+                onClick={handleStartSavedComparison}
                 className="flex items-center gap-2"
               >
                 <BarChart3 className="h-4 w-4" />
-                Compare ({selectedForComparison.length})
+                Compare ({savedComparison.length})
               </Button>
             )}
           </div>
@@ -671,9 +704,9 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                   {/* Comparison Checkbox */}
                   <div className="absolute top-2 right-2 z-10">
                     <Checkbox
-                      checked={selectedForComparison.includes(match.trainer.id)}
-                      onCheckedChange={() => handleComparisonToggle(match.trainer.id)}
-                      disabled={!selectedForComparison.includes(match.trainer.id) && selectedForComparison.length >= 4}
+                      checked={savedComparison.includes(match.trainer.id)}
+                      onCheckedChange={() => handleSavedComparisonToggle(match.trainer.id)}
+                      disabled={!savedComparison.includes(match.trainer.id) && savedComparison.length >= 4}
                       className="bg-white border-2 shadow-sm"
                     />
                   </div>
@@ -748,15 +781,15 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
             <h2 className="text-xl font-semibold">Your Shortlisted Trainers</h2>
             <div className="flex items-center gap-2 flex-wrap">
               <Badge variant="outline">{shortlistCount}/4 shortlisted</Badge>
-              {selectedForComparison.length >= 2 && (
+              {shortlistedComparison.length >= 2 && (
                 <Button 
                   variant="default" 
                   size="sm"
-                  onClick={handleStartComparison}
+                  onClick={handleStartShortlistedComparison}
                   className="flex items-center gap-2"
                 >
                   <BarChart3 className="h-4 w-4" />
-                  Compare ({selectedForComparison.length})
+                  Compare ({shortlistedComparison.length})
                 </Button>
               )}
             </div>
@@ -799,9 +832,9 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                       {/* Comparison Checkbox */}
                       <div className="absolute top-2 right-2 z-20">
                         <Checkbox
-                          checked={selectedForComparison.includes(shortlisted.trainer_id)}
-                          onCheckedChange={() => handleComparisonToggle(shortlisted.trainer_id)}
-                          disabled={!selectedForComparison.includes(shortlisted.trainer_id) && selectedForComparison.length >= 4}
+                          checked={shortlistedComparison.includes(shortlisted.trainer_id)}
+                          onCheckedChange={() => handleShortlistedComparisonToggle(shortlisted.trainer_id)}
+                          disabled={!shortlistedComparison.includes(shortlisted.trainer_id) && shortlistedComparison.length >= 4}
                           className="bg-white border-2 shadow-sm"
                         />
                       </div>
@@ -814,7 +847,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                         matchDetails={matchData.matchDetails}
                       />
                       <Badge 
-                        className="absolute top-2 right-1/2 transform translate-x-1/2 bg-yellow-500 text-white z-10"
+                        className="absolute top-2 left-12 bg-yellow-500 text-white z-10"
                       >
                         ⭐ Shortlisted
                       </Badge>
@@ -953,7 +986,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                           matchDetails={matchData.matchDetails}
                         />
                         <Badge 
-                          className="absolute top-2 right-1/2 transform translate-x-1/2 bg-blue-500 text-white z-10"
+                          className="absolute top-2 left-2 bg-blue-500 text-white z-10"
                         >
                           🔍 Discovery
                         </Badge>
