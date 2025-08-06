@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Star, MapPin, Clock, Users, Award, Target, Dumbbell, Heart, X, MessageCircle, Calendar } from "lucide-react";
+import { Star, MapPin, Clock, Users, Award, Target, Dumbbell, Heart, X, MessageCircle, Calendar, ExternalLink } from "lucide-react";
 import { MatchBadge } from "@/components/MatchBadge";
 import { MatchProgressIndicator } from "@/components/MatchProgressIndicator";
 import { useSavedTrainers } from "@/hooks/useSavedTrainers";
@@ -14,6 +14,7 @@ import { useWaitlist } from "@/hooks/useWaitlist";
 import { useProfile } from "@/hooks/useProfile";
 import { WaitlistJoinButton } from "@/components/waitlist/WaitlistJoinButton";
 import { WaitlistStatusBadge } from "@/components/waitlist/WaitlistStatusBadge";
+import { useNavigate } from "react-router-dom";
 
 export interface Trainer {
   id: string;
@@ -95,6 +96,7 @@ export const TrainerCard = ({
   discoveryCallData,
   trainerOffersDiscoveryCalls = false
 }: TrainerCardProps) => {
+  const navigate = useNavigate();
   const { isTrainerSaved, saveTrainer, unsaveTrainer } = useSavedTrainers();
   const { stage } = useEngagementStage(trainer.id);
   const { getVisibility } = useContentVisibility({
@@ -295,9 +297,16 @@ export const TrainerCard = ({
           </div>
           
           <div className="flex-1">
-            <h3 className="font-semibold text-lg text-foreground group-hover:text-primary transition-colors">
-              {displayName}
-            </h3>
+            <div 
+              className="flex items-center gap-2 cursor-pointer group/name"
+              onClick={() => navigate(`/trainer/${trainer.id}`)}
+              title="View trainer profile"
+            >
+              <h3 className="font-semibold text-lg text-foreground group-hover/name:text-primary transition-colors">
+                {displayName}
+              </h3>
+              <ExternalLink className="h-4 w-4 text-muted-foreground group-hover/name:text-primary transition-colors opacity-0 group-hover/name:opacity-100" />
+            </div>
             <div className="flex items-center gap-2 mb-2">
               <div className="flex items-center gap-1">
                 <Star className="h-4 w-4 fill-accent text-accent" />
@@ -420,6 +429,19 @@ export const TrainerCard = ({
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Waitlist Join Button - Show if coach is on waitlist and client not already on it */}
+        {isClient && coachAvailability?.availability_status === 'waitlist' && !clientWaitlistStatus && (
+          <div className="mb-4">
+            <WaitlistJoinButton
+              coachId={trainer.id}
+              coachName={displayName}
+              nextAvailableDate={coachAvailability?.next_available_date}
+              waitlistMessage={coachAvailability?.waitlist_message}
+              className="w-full"
+            />
           </div>
         )}
 

@@ -218,19 +218,7 @@ export const TieredTrainerProfile = ({
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
-          {/* Show waitlist join button if coach is on waitlist status and client not already on waitlist */}
-          {isClient && coachAvailability?.availability_status === 'waitlist' && !clientWaitlistStatus && (
-            <WaitlistJoinButton
-              coachId={trainer.id}
-              coachName={trainer.name || `${trainer.firstName} ${trainer.lastName}`.trim()}
-              nextAvailableDate={coachAvailability?.next_available_date}
-              waitlistMessage={coachAvailability?.waitlist_message}
-              className="flex-1"
-            />
-          )}
-
-          {/* Regular action buttons - only show if coach is not on waitlist or client is already waitlisted */}
-          {(!coachAvailability || coachAvailability?.availability_status !== 'waitlist' || clientWaitlistStatus) && (
+          {/* Regular action buttons */}
             <>
               {stage === 'browsing' && isClient && (
                 <Button 
@@ -272,7 +260,6 @@ export const TieredTrainerProfile = ({
                 </Button>
               )}
             </>
-          )}
 
           {onViewProfile && (
             <Button variant="outline" onClick={onViewProfile}>

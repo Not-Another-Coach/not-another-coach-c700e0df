@@ -24,7 +24,8 @@ import {
   Phone,
   Calendar,
   ArrowRight,
-  ChevronRight
+  ChevronRight,
+  ExternalLink
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -303,7 +304,14 @@ export function DashboardSummary({ profile, onTabChange }: DashboardSummaryProps
                     />
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold">{match.trainer.name}</h3>
+                        <div 
+                          className="flex items-center gap-2 cursor-pointer group/name"
+                          onClick={() => navigate(`/trainer/${match.trainer.id}`)}
+                          title="View trainer profile"
+                        >
+                          <h3 className="font-semibold group-hover/name:text-primary transition-colors">{match.trainer.name}</h3>
+                          <ExternalLink className="h-4 w-4 text-muted-foreground group-hover/name:text-primary transition-colors opacity-0 group-hover/name:opacity-100" />
+                        </div>
                         <Badge variant="secondary">
                           {match.score}% Match
                         </Badge>
@@ -312,13 +320,6 @@ export function DashboardSummary({ profile, onTabChange }: DashboardSummaryProps
                         {match.trainer.specialties?.slice(0, 2).join(' • ') || 'Personal Training'}
                       </p>
                       <div className="flex gap-2">
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => navigate(`/trainer/${match.trainer.id}`)}
-                        >
-                          View Profile
-                        </Button>
                         <Button 
                           size="sm"
                           onClick={() => {

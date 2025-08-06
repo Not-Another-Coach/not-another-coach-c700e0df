@@ -597,11 +597,11 @@ export default function MyTrainers() {
                 <Button 
                   size="sm" 
                   variant="outline"
-                  onClick={() => navigate(`/trainer/${trainer.id}`)}
-                  title="View trainer profile"
+                  onClick={() => handleBookDiscoveryCall(trainer.id)}
+                  title="Book a discovery call"
                 >
-                  <Phone className="h-3 w-3 mr-1" />
-                  View Profile
+                  <Calendar className="h-3 w-3 mr-1" />
+                  Book Call
                 </Button>
               )}
             </div>
