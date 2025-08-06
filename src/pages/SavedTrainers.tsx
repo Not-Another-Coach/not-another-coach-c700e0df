@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Heart, Scale, Trash2, Star, MessageCircle, Phone } from 'lucide-react';
+import { ArrowLeft, Heart, Scale, Trash2, Star, MessageCircle, Phone, Calendar } from 'lucide-react';
 import { TrainerCard, Trainer } from '@/components/TrainerCard';
 import { ComparisonView } from '@/components/ComparisonView';
 import { toast } from 'sonner';
@@ -325,13 +325,59 @@ export default function SavedTrainers() {
                   showComparisonCheckbox={false} // Handled separately above
                   showRemoveButton={true}
                   onRemove={unsaveTrainer}
-                  // CTA actions
+                  // CTA actions - pass but also implement externally below
                   onAddToShortlist={handleShortlist}
                   isShortlisted={isShortlisted(trainer.id)}
                   onStartConversation={handleStartConversation}
                   onBookDiscoveryCall={handleBookDiscoveryCall}
                   trainerOffersDiscoveryCalls={trainer.offers_discovery_call || false}
                 />
+
+                {/* External CTAs - Add these below the card as they were before */}
+                <div className="mt-3 space-y-2">
+                  {/* Show Add to Shortlist if not already shortlisted */}
+                  {!isShortlisted(trainer.id) && (
+                    <Button
+                      onClick={() => handleShortlist(trainer.id)}
+                      className="w-full"
+                      size="sm"
+                      disabled={!canShortlistMore}
+                    >
+                      <Star className="h-3 w-3 mr-1" />
+                      {canShortlistMore ? 'Add to Shortlist' : `Shortlist Full (${shortlistCount}/4)`}
+                    </Button>
+                  )}
+                  
+                  {/* Show shortlisted actions if already shortlisted */}
+                  {isShortlisted(trainer.id) && (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-center gap-2 py-2 bg-green-50 text-green-800 rounded-lg border border-green-200">
+                        <Star className="h-3 w-3 fill-current" />
+                        <span className="text-xs font-medium">Shortlisted</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="text-xs"
+                          onClick={() => handleStartConversation(trainer.id)}
+                        >
+                          <MessageCircle className="h-3 w-3 mr-1" />
+                          Chat
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="default" 
+                          className="text-xs"
+                          onClick={() => handleBookDiscoveryCall(trainer.id)}
+                        >
+                          <Calendar className="h-3 w-3 mr-1" />
+                          Discovery Call
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 {/* Saved Date */}
                 <div className="mt-2 text-xs text-muted-foreground text-center">

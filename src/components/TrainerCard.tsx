@@ -389,16 +389,29 @@ export const TrainerCard = ({
           </div>
         )}
 
-        {/* Waitlist Join Button - Show if coach is on waitlist and client not already on waitlist */}
-        {isClient && coachAvailability?.availability_status === 'waitlist' && !clientWaitlistStatus && (
-          <div className="mb-4">
-            <WaitlistJoinButton
-              coachId={trainer.id}
-              coachName={trainer.name}
-              nextAvailableDate={coachAvailability?.next_available_date}
-              waitlistMessage={coachAvailability?.waitlist_message}
-              className="w-full"
-            />
+        {/* Match Score and Breakdown - Add back the match display */}
+        {matchScore > 0 && (
+          <div className="mb-4 space-y-3">
+            {/* Match Percentage */}
+            <div className="text-center">
+              <div className="text-2xl font-bold text-primary">{matchScore}%</div>
+              <div className="text-sm text-muted-foreground">Match</div>
+            </div>
+            
+            {/* Match Breakdown/Reasons */}
+            {matchReasons && matchReasons.length > 0 && (
+              <div className="bg-muted/20 rounded-lg p-3">
+                <div className="text-xs font-medium text-muted-foreground mb-2">Why this match:</div>
+                <div className="space-y-1">
+                  {matchReasons.slice(0, 3).map((reason, index) => (
+                    <div key={index} className="text-xs text-foreground flex items-start">
+                      <span className="text-primary mr-1">•</span>
+                      {reason}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
