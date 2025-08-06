@@ -98,6 +98,19 @@ export function useWaitlist() {
     if (!user) return { error: 'No user' };
 
     try {
+      // First check if client is already on waitlist
+      const { data: existingEntry } = await supabase
+        .from('coach_waitlists')
+        .select('id')
+        .eq('client_id', user.id)
+        .eq('coach_id', coachId)
+        .maybeSingle();
+
+      if (existingEntry) {
+        console.log('🔥 Client already on waitlist');
+        return { error: 'You are already on this trainer\'s waitlist' };
+      }
+
       // Get coach's availability settings to determine estimated start date
       const { data: coachSettings } = await supabase
         .from('coach_availability_settings')
@@ -105,6 +118,7 @@ export function useWaitlist() {
         .eq('coach_id', coachId)
         .maybeSingle();
 
+      console.log('🔥 Attempting to join waitlist for coach:', coachId);
       const { data, error } = await supabase
         .from('coach_waitlists')
         .insert({
@@ -116,11 +130,16 @@ export function useWaitlist() {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('🔥 Database error joining waitlist:', error);
+        throw error;
+      }
+      
+      console.log('🔥 Successfully joined waitlist:', data);
       return { success: true, data };
     } catch (error) {
-      console.error('Error joining waitlist:', error);
-      return { error };
+      console.error('🔥 Error joining waitlist:', error);
+      return { error: error.message || 'Failed to join waitlist' };
     }
   }, [user]);
 

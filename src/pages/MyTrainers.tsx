@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TrainerCard } from "@/components/TrainerCard";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
+import { FloatingMessageButton } from "@/components/FloatingMessageButton";
 import { useProfile } from "@/hooks/useProfile";
 import { ClientHeader } from "@/components/ClientHeader";
 import { 
@@ -428,11 +429,13 @@ export default function MyTrainers() {
 
   const handleStartConversation = (trainerId: string) => {
     console.log('🔥 Start conversation clicked:', trainerId);
+    console.log('🔥 Dispatching openMessagePopup event...');
     // Trigger messaging popup
     const event = new CustomEvent('openMessagePopup', {
       detail: { trainerId }
     });
     window.dispatchEvent(event);
+    console.log('🔥 Event dispatched successfully');
   };
 
   const [selectedTrainerForCall, setSelectedTrainerForCall] = useState<string | null>(null);
@@ -465,16 +468,19 @@ export default function MyTrainers() {
 
   const handleJoinWaitlist = async (trainerId: string) => {
     console.log('🔥 Join waitlist clicked:', trainerId);
+    console.log('🔥 Current trainerAvailability for trainer:', trainerAvailability[trainerId]);
     try {
       const result = await joinWaitlist(trainerId);
+      console.log('🔥 Waitlist join result:', result);
       if (result.error) {
+        console.error('🔥 Waitlist join error:', result.error);
         toast.error('Failed to join waitlist');
       } else {
         toast.success('Joined waitlist! The trainer will contact you when available.');
         // Note: No need to update local state since we're using client-side logic
       }
     } catch (error) {
-      console.error('Error joining waitlist:', error);
+      console.error('🔥 Error joining waitlist:', error);
       toast.error('Failed to join waitlist');
     }
   };
@@ -876,6 +882,9 @@ export default function MyTrainers() {
           }}
         />
       )}
+
+      {/* Floating Message Button */}
+      <FloatingMessageButton />
     </div>
   );
 }
