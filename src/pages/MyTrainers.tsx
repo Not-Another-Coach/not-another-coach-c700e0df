@@ -16,6 +16,7 @@ import { TrainerCard } from "@/components/TrainerCard";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { FloatingMessageButton } from "@/components/FloatingMessageButton";
 import { useProfile } from "@/hooks/useProfile";
+import { WaitlistJoinButton } from "@/components/waitlist/WaitlistJoinButton";
 import { ClientHeader } from "@/components/ClientHeader";
 import { 
   ArrowLeft, 
@@ -667,18 +668,12 @@ export default function MyTrainers() {
               
               {/* Show waitlist button if trainer has waitlist and client not on it */}
               {hasWaitlistEnabled ? (
-                <Button 
-                  size="sm" 
-                  variant="default"
-                  onClick={() => {
-                    console.log(`🔥 Discovery section waitlist button clicked for ${trainer.id}`);
-                    handleJoinWaitlist(trainer.id);
-                  }}
-                  className="bg-orange-500 hover:bg-orange-600"
-                >
-                  <Clock className="h-3 w-3 mr-1" />
-                  Join Waitlist
-                </Button>
+                <WaitlistJoinButton
+                  coachId={trainer.id}
+                  coachName={trainer.name}
+                  nextAvailableDate={trainerAvailabilityForCTA?.next_available_date}
+                  waitlistMessage={trainerAvailabilityForCTA?.waitlist_message}
+                />
               ) : discoveryCall && !isCallInPast ? (
                 <Button 
                   size="sm" 
