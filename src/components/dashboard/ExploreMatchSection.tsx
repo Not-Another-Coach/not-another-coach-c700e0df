@@ -441,7 +441,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
             <Users className="h-4 w-4" />
             <span className="hidden sm:inline">Discover</span>
             <Badge variant="secondary" className="ml-1 text-xs">
-              {actualShortlistedTrainers.length}
+              {actualShortlistedTrainers.filter(st => st.discovery_call).length}
             </Badge>
           </TabsTrigger>
         </TabsList>
@@ -848,16 +848,16 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
           <div className="space-y-4">
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
               <h2 className="text-xl font-semibold">Discovery Opportunities</h2>
-              <Badge variant="outline">{actualShortlistedTrainers.length} available</Badge>
+              <Badge variant="outline">{actualShortlistedTrainers.filter(st => st.discovery_call).length} available</Badge>
             </div>
             
-            {actualShortlistedTrainers.length > 0 ? (
+            {actualShortlistedTrainers.filter(st => st.discovery_call).length > 0 ? (
               <div className="space-y-4">
                 <div className="text-sm text-muted-foreground">
                   Chat with your shortlisted trainers and book discovery calls to learn more about their approach.
                 </div>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {actualShortlistedTrainers.map((shortlisted) => {
+                  {actualShortlistedTrainers.filter(st => st.discovery_call).map((shortlisted) => {
                     // Find the trainer data from our matched trainers
                     const trainerMatch = matchedTrainers.find(match => match.trainer.id === shortlisted.trainer_id);
                     const trainer = trainerMatch?.trainer || {
