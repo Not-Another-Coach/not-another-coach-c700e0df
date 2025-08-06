@@ -3,7 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useJourneyProgress } from '@/hooks/useJourneyProgress';
 import { useTrainerEngagement } from '@/hooks/useTrainerEngagement';
 import { useWaitlist } from '@/hooks/useWaitlist';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 export interface SavedTrainer {
   id: string;
@@ -40,11 +40,7 @@ export const useSavedTrainers = () => {
   // Save a trainer using the engagement system
   const saveTrainer = async (trainerId: string, notes?: string) => {
     if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "Please log in to save trainers",
-        variant: "destructive",
-      });
+      toast.error("Please log in to save trainers");
       return false;
     }
 
@@ -60,19 +56,12 @@ export const useSavedTrainers = () => {
         await updateProgress('shortlisting', 'save_trainer', { trainerId });
       }
       
-      toast({
-        title: "Trainer saved!",
-        description: "Added to your saved trainers list",
-      });
+      toast.success("Trainer saved! Added to your saved trainers list");
       console.log('Trainer saved successfully:', trainerId);
       return true;
     } catch (error) {
       console.error('Error saving trainer:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save trainer",
-        variant: "destructive",
-      });
+      toast.error("Failed to save trainer");
       return false;
     }
   };
@@ -89,19 +78,12 @@ export const useSavedTrainers = () => {
       // Also remove from waitlist if they're on one (per spec requirement)
       await removeFromWaitlist(trainerId);
       
-      toast({
-        title: "Trainer removed",
-        description: "Removed from your saved trainers list and any waitlists",
-      });
+      toast.success("Trainer removed from your saved trainers list and any waitlists");
       console.log('Trainer unsaved successfully:', trainerId);
       return true;
     } catch (error) {
       console.error('Error removing saved trainer:', error);
-      toast({
-        title: "Error",
-        description: "Failed to remove trainer",
-        variant: "destructive",
-      });
+      toast.error("Failed to remove trainer");
       return false;
     }
   };
