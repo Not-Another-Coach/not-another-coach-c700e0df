@@ -625,7 +625,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {mutualMatches.map((match) => (
                       <TrainerCard
-                        key={match.trainer.id}
+                        key={`mutual-${match.trainer.id}`} // More unique key
                         trainer={match.trainer}
                         onViewProfile={handleViewProfile}
                         matchScore={match.score}
@@ -696,7 +696,7 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {savedTrainers.map((match) => (
                 <TrainerCard
-                  key={match.trainer.id}
+                  key={`saved-${match.trainer.id}`} // More unique key
                   trainer={match.trainer}
                   onViewProfile={handleViewProfile}
                   matchScore={match.score}
@@ -755,32 +755,36 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
                   // Find the trainer data from all trainers (sample + real)
                   let trainer = allTrainers.find(t => t.id === shortlisted.trainer_id);
                   
-                  // If not found in allTrainers, create basic trainer object
+                  // If not found in allTrainers, try to fetch from database or use enhanced fallback
                   if (!trainer) {
+                    console.warn(`Trainer ${shortlisted.trainer_id} not found in allTrainers. This may indicate a data inconsistency.`);
+                    
+                    // Create enhanced trainer object with better defaults
                     trainer = {
                       id: shortlisted.trainer_id,
-                      name: `Trainer ${shortlisted.trainer_id}`,
-                      specialties: [],
-                      rating: 0,
+                      name: `Trainer ${shortlisted.trainer_id.slice(0, 8)}...`,
+                      specialties: ["General Fitness"],
+                      rating: 4.5,
                       reviews: 0,
-                      experience: '',
-                      location: '',
+                      experience: 'Not specified',
+                      location: 'Location not specified',
                       hourlyRate: 0,
-                      image: '',
+                      image: '/placeholder.svg',
                       certifications: [],
-                      description: '',
-                      availability: '',
-                      trainingType: [],
-                      offers_discovery_call: true
-                    } as any; // Type assertion to avoid TypeScript issues
+                      description: 'Profile details not available.',
+                      availability: 'Contact for availability',
+                      trainingType: ["Contact for details"],
+                      offers_discovery_call: false // Default to false for unknown trainers
+                    } as any;
                   }
 
                   // Calculate match data for this trainer to ensure consistency
                   const matchData = getTrainerMatchData(trainer);
                   
+                  
                   return (
                     <TrainerCard
-                      key={shortlisted.trainer_id}
+                      key={`shortlisted-${shortlisted.trainer_id}-${shortlisted.stage}`} // More unique key
                       trainer={matchData.trainer}
                       onViewProfile={handleViewProfile}
                       matchScore={matchData.score}
