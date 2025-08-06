@@ -578,7 +578,7 @@ export default function MyTrainers() {
                   <Clock className="h-3 w-3 mr-1" />
                   Join Waitlist
                 </Button>
-              ) : shouldShowDiscoveryCall ? (
+               ) : shouldShowDiscoveryCall ? (
                 <Button 
                   size="sm" 
                   variant="default"
@@ -592,22 +592,33 @@ export default function MyTrainers() {
                 <Button 
                   size="sm" 
                   variant="outline"
+                  onClick={() => handleRescheduleCall(trainer.id)}
+                  title="Reschedule your discovery call"
+                >
+                  <Edit className="h-3 w-3 mr-1" />
+                  Call Booked
+                </Button>
+              ) : offersDiscoveryCall ? (
+                <Button 
+                  size="sm" 
+                  variant="outline"
                   disabled
-                  className="opacity-50 cursor-not-allowed"
-                  title="Discovery call already scheduled"
+                  className="opacity-75 cursor-not-allowed"
+                  title="No discovery call slots available"
                 >
                   <Calendar className="h-3 w-3 mr-1" />
-                  Call Booked
+                  No Call Available
                 </Button>
               ) : (
                 <Button 
                   size="sm" 
                   variant="outline"
-                  onClick={() => handleBookDiscoveryCall(trainer.id)}
-                  title="Book a discovery call"
+                  disabled
+                  className="opacity-75 cursor-not-allowed"
+                  title="This trainer doesn't offer discovery calls"
                 >
-                  <Calendar className="h-3 w-3 mr-1" />
-                  Book Call
+                  <X className="h-3 w-3 mr-1" />
+                  No Call Available
                 </Button>
               )}
             </div>
@@ -661,10 +672,9 @@ export default function MyTrainers() {
                 <Button 
                   size="sm" 
                   variant="outline"
-                  disabled
-                  className="opacity-75 cursor-not-allowed"
+                  onClick={() => handleRescheduleCall(trainer.id)}
                 >
-                  <Calendar className="h-3 w-3 mr-1" />
+                  <Edit className="h-3 w-3 mr-1" />
                   Call Booked
                 </Button>
               ) : isDiscoveryInProgress ? (
