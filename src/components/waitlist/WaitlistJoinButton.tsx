@@ -23,7 +23,7 @@ export function WaitlistJoinButton({
   className 
 }: WaitlistJoinButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [clientGoals, setClientGoals] = useState('');
+  const [coachNote, setCoachNote] = useState('');
   const [isJoining, setIsJoining] = useState(false);
   const { joinWaitlist } = useWaitlist();
   const { toast } = useToast();
@@ -32,7 +32,7 @@ export function WaitlistJoinButton({
     setIsJoining(true);
     
     try {
-      const result = await joinWaitlist(coachId, clientGoals);
+      const result = await joinWaitlist(coachId, coachNote);
       
       if (result.error) {
         toast({
@@ -46,7 +46,7 @@ export function WaitlistJoinButton({
           description: `You've been added to ${coachName}'s waitlist. They'll reach out closer to your potential start date.`,
         });
         setIsOpen(false);
-        setClientGoals('');
+        setCoachNote('');
       }
     } catch (error) {
       console.error('Error joining waitlist:', error);
@@ -95,12 +95,12 @@ export function WaitlistJoinButton({
           )}
           
           <div className="space-y-2">
-            <Label htmlFor="goals">What are your fitness goals? (Optional)</Label>
+            <Label htmlFor="note">Note for coach (Optional)</Label>
             <Textarea
-              id="goals"
-              placeholder="Tell the coach about your specific goals and what you're looking to achieve..."
-              value={clientGoals}
-              onChange={(e) => setClientGoals(e.target.value)}
+              id="note"
+              placeholder="Any specific events you're training for, when you'd like to start, or other relevant details..."
+              value={coachNote}
+              onChange={(e) => setCoachNote(e.target.value)}
               rows={3}
             />
           </div>
