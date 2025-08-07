@@ -1355,14 +1355,28 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
 
       {/* Clone Confirmation Dialog */}
       <AlertDialog open={showCloneConfirmation} onOpenChange={setShowCloneConfirmation}>
-        <AlertDialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+        <AlertDialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <AlertDialogHeader className="space-y-3">
             <AlertDialogTitle className="text-lg">Clone Package with Ways of Working?</AlertDialogTitle>
             <AlertDialogDescription className="space-y-4">
+              {packageToClone && (
+                <div className="bg-muted/50 p-3 rounded-md border">
+                  <h4 className="font-medium text-sm mb-1">Cloning: {packageToClone.name}</h4>
+                  <p className="text-xs text-muted-foreground">{packageToClone.description}</p>
+                  <div className="flex gap-2 mt-2">
+                    {packageToClone.sessions && (
+                      <Badge variant="outline" className="text-xs">{packageToClone.sessions} sessions</Badge>
+                    )}
+                    <Badge variant="secondary" className="text-xs">
+                      {packageToClone.currency === 'GBP' ? '£' : packageToClone.currency === 'USD' ? '$' : '€'}{packageToClone.price}
+                    </Badge>
+                  </div>
+                </div>
+              )}
               <p className="text-sm">Do you want to copy the "Ways of Working" from this package to the new one?</p>
-              <div className="bg-muted p-3 rounded-md text-xs space-y-2">
-                <p>• <span className="font-medium">Choose "Yes"</span> - Ways of working will be copied automatically</p>
-                <p>• <span className="font-medium">Choose "No"</span> - You can set up ways of working later in the Ways of Working tab</p>
+              <div className="bg-muted p-4 rounded-md text-sm space-y-3">
+                <p>• <span className="font-medium">Choose "Yes - Clone with WoW"</span> - Ways of working will be copied automatically to the new package</p>
+                <p>• <span className="font-medium">Choose "No - Clone Package Only"</span> - You can set up ways of working later in the Ways of Working tab</p>
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
