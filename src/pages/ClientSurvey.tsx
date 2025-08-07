@@ -473,7 +473,10 @@ const ClientSurvey = () => {
                   <div
                     key={stepNumber}
                     className={`flex flex-col items-center text-xs cursor-pointer transition-all hover:scale-105 ${statusColor} p-1`}
-                    onClick={() => setCurrentStep(stepNumber)}
+                    onClick={() => {
+                      setCurrentStep(stepNumber);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
                     title={`Go to step ${stepNumber}: ${title}`}
                   >
                     <div
@@ -540,7 +543,10 @@ const ClientSurvey = () => {
                     className={`flex flex-col items-center text-xs cursor-pointer transition-all hover:scale-105 ${
                       isCurrent ? 'text-primary' : 'text-green-600'
                     } p-1`}
-                    onClick={() => setCurrentStep(stepNumber)}
+                    onClick={() => {
+                      setCurrentStep(stepNumber);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
                     title={`Go to step ${stepNumber}: ${title}`}
                   >
                     <div
