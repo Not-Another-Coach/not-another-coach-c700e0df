@@ -96,39 +96,83 @@ const Documentation = () => {
           </TabsList>
 
           <TabsContent value="pages" className="mt-6">
-            <PagesDocumentation searchTerm={searchTerm} onElementClick={handleElementClick} />
+            <div className="space-y-8">
+              <PagesDocumentation searchTerm={searchTerm} onElementClick={handleElementClick} />
+              <MessageComposer
+                message={message}
+                setMessage={setMessage}
+                clickedElements={clickedElements}
+                onClearElements={handleClearElements}
+                onRemoveElement={handleRemoveElement}
+              />
+            </div>
           </TabsContent>
 
           <TabsContent value="apis" className="mt-6">
-            <APIDocumentation searchTerm={searchTerm} onElementClick={handleElementClick} />
+            <div className="space-y-8">
+              <APIDocumentation searchTerm={searchTerm} onElementClick={handleElementClick} />
+              <MessageComposer
+                message={message}
+                setMessage={setMessage}
+                clickedElements={clickedElements}
+                onClearElements={handleClearElements}
+                onRemoveElement={handleRemoveElement}
+              />
+            </div>
           </TabsContent>
 
           <TabsContent value="hooks" className="mt-6">
-            <HooksDocumentation searchTerm={searchTerm} onElementClick={handleElementClick} />
+            <div className="space-y-8">
+              <HooksDocumentation searchTerm={searchTerm} onElementClick={handleElementClick} />
+              <MessageComposer
+                message={message}
+                setMessage={setMessage}
+                clickedElements={clickedElements}
+                onClearElements={handleClearElements}
+                onRemoveElement={handleRemoveElement}
+              />
+            </div>
           </TabsContent>
 
           <TabsContent value="database" className="mt-6">
-            <DatabaseDocumentation searchTerm={searchTerm} onElementClick={handleElementClick} />
+            <div className="space-y-8">
+              <DatabaseDocumentation searchTerm={searchTerm} onElementClick={handleElementClick} />
+              <MessageComposer
+                message={message}
+                setMessage={setMessage}
+                clickedElements={clickedElements}
+                onClearElements={handleClearElements}
+                onRemoveElement={handleRemoveElement}
+              />
+            </div>
           </TabsContent>
 
           <TabsContent value="features" className="mt-6">
-            <FeaturesDocumentation searchTerm={searchTerm} onElementClick={handleElementClick} />
+            <div className="space-y-8">
+              <FeaturesDocumentation searchTerm={searchTerm} onElementClick={handleElementClick} />
+              <MessageComposer
+                message={message}
+                setMessage={setMessage}
+                clickedElements={clickedElements}
+                onClearElements={handleClearElements}
+                onRemoveElement={handleRemoveElement}
+              />
+            </div>
           </TabsContent>
 
           <TabsContent value="knowledge-base" className="mt-6">
-            <KBDocumentationTab searchTerm={searchTerm} onElementClick={handleElementClick} />
+            <div className="space-y-8">
+              <KBDocumentationTab searchTerm={searchTerm} onElementClick={handleElementClick} />
+              <MessageComposer
+                message={message}
+                setMessage={setMessage}
+                clickedElements={clickedElements}
+                onClearElements={handleClearElements}
+                onRemoveElement={handleRemoveElement}
+              />
+            </div>
           </TabsContent>
         </Tabs>
-
-        <div className="mt-8">
-          <MessageComposer
-            message={message}
-            setMessage={setMessage}
-            clickedElements={clickedElements}
-            onClearElements={handleClearElements}
-            onRemoveElement={handleRemoveElement}
-          />
-        </div>
       </div>
     </div>
   );
