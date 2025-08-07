@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Heart, MessageCircle, DollarSign, Clock, CheckCircle } from 'lucide-react';
 import { useCoachSelection } from '@/hooks/useCoachSelection';
 import { useProfile } from '@/hooks/useProfile';
+import { toast } from 'sonner';
 
 interface Package {
   id: string;
@@ -62,15 +63,19 @@ export const ChooseCoachModal = ({
 
   const handleSubmit = async () => {
     console.log('🚨🚨🚨 SUBMIT BUTTON CLICKED - CACHE BUST v4');
+    toast.info('Submit button clicked - starting debug...');
+    
     console.log('Selected package:', selectedPackage);
     console.log('createSelectionRequest function exists:', !!createSelectionRequest);
     console.log('createSelectionRequest type:', typeof createSelectionRequest);
     
     if (!selectedPackage) {
       console.log('No package selected, returning');
+      toast.error('No package selected');
       return;
     }
 
+    toast.info('About to call createSelectionRequest...');
     console.log('About to call createSelectionRequest...');
     console.log('Parameters:', {
       trainerId: trainer.id,
@@ -92,15 +97,20 @@ export const ChooseCoachModal = ({
       );
 
       console.log('Result:', result);
+      toast.info('Function call completed, result: ' + JSON.stringify(result));
+      
       if (result.success) {
         console.log('Success - closing modal');
+        toast.success('Selection request sent successfully!');
         onOpenChange(false);
         onSuccess?.();
       } else {
         console.log('Failed - result:', result);
+        toast.error('Request failed: ' + JSON.stringify(result));
       }
     } catch (error) {
       console.error('Exception in handleSubmit:', error);
+      toast.error('Exception: ' + error.message);
     }
   };
 
