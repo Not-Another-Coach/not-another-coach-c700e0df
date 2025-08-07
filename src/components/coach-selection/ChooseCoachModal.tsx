@@ -61,9 +61,10 @@ export const ChooseCoachModal = ({
   };
 
   const handleSubmit = async () => {
-    alert('🚨🚨🚨 SUBMIT BUTTON CLICKED - CACHE BUST v3');
-    console.log('🚨🚨🚨 SUBMIT BUTTON CLICKED - CACHE BUST v3');
+    console.log('🚨🚨🚨 SUBMIT BUTTON CLICKED - CACHE BUST v4');
     console.log('Selected package:', selectedPackage);
+    console.log('createSelectionRequest function exists:', !!createSelectionRequest);
+    console.log('createSelectionRequest type:', typeof createSelectionRequest);
     
     if (!selectedPackage) {
       console.log('No package selected, returning');
@@ -71,8 +72,14 @@ export const ChooseCoachModal = ({
     }
 
     console.log('About to call createSelectionRequest...');
-    console.log('createSelectionRequest function:', createSelectionRequest);
-    console.log('Type of createSelectionRequest:', typeof createSelectionRequest);
+    console.log('Parameters:', {
+      trainerId: trainer.id,
+      packageId: selectedPackage.id,
+      packageName: selectedPackage.name,
+      packagePrice: selectedPackage.price,
+      packageDuration: selectedPackage.duration,
+      clientMessage: clientMessage.trim() || undefined
+    });
     
     try {
       const result = await createSelectionRequest(
@@ -94,7 +101,6 @@ export const ChooseCoachModal = ({
       }
     } catch (error) {
       console.error('Exception in handleSubmit:', error);
-      alert('Exception caught: ' + error.message);
     }
   };
 
