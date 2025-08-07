@@ -163,9 +163,8 @@ export const TestUserSelector: React.FC<TestUserSelectorProps> = ({ onUserSelect
             
             <div className="mt-4 p-3 bg-muted/50 rounded-lg">
               <p className="text-xs text-muted-foreground">
-                <strong>Development Mode:</strong> Real users shown with suggested test passwords. 
-                If the suggested password doesn't work, the user may have set a different password during signup.
-                Common dev passwords: password123, test123, demo123, admin123
+                <strong>Development Mode:</strong> All users use the standard password: Password123!
+                Click any user to automatically log in with their credentials.
               </p>
             </div>
           </CardContent>

@@ -154,23 +154,10 @@ export const useTestUsers = () => {
     }
   ];
 
-  // For development: provide common test passwords based on user patterns
+  // For development: all users now use the standard Password123! password
   const getTestPassword = (email: string): string => {
-    // Check for common development email patterns
-    if (email.includes('demo')) return 'demo123';
-    if (email.includes('test')) return 'test123';
-    if (email.includes('admin')) return 'admin123';
-    if (email.includes('trainer')) return 'trainer123';
-    if (email.includes('client')) return 'client123';
-    
-    // For real user emails, we can't access their actual passwords
-    // But many development setups use these common patterns:
-    if (email.endsWith('@gmail.com') || email.endsWith('@example.com')) {
-      return 'password123';
-    }
-    
-    // Default development password
-    return 'password123';
+    // All users in development now use the same password for simplicity
+    return 'Password123!';
   };
 
   useEffect(() => {

@@ -1716,6 +1716,14 @@ export type Database = {
         Args: { p_user_id: string; p_notes: string }
         Returns: undefined
       }
+      update_all_user_passwords_dev: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      update_all_user_passwords_dev_simple: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       update_engagement_stage: {
         Args: {
           client_uuid: string
