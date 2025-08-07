@@ -369,7 +369,12 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
                         >
                           <Plus className="h-4 w-4" />
                         </Button>
-                         <Dialog open={editingPackage?.id === pkg.id} onOpenChange={(open) => !open && setEditingPackage(null)}>
+                         <Dialog open={editingPackage?.id === pkg.id || (isCloning && editingPackage !== null)} onOpenChange={(open) => {
+                           if (!open) {
+                             setEditingPackage(null);
+                             setIsCloning(false);
+                           }
+                         }}>
                            <DialogTrigger asChild>
                              <Button
                                variant="ghost"
