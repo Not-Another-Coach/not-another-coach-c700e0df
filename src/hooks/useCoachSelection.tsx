@@ -57,15 +57,18 @@ export function useCoachSelection() {
         userId: user?.id
       });
 
-      console.log('📡 Calling Supabase RPC function...');
-      const { data, error } = await supabase.rpc('create_coach_selection_request', {
+      console.log('📡 Calling Supabase RPC function with exact params...');
+      const rpcParams = {
         p_trainer_id: trainerId,
         p_package_id: packageId,
         p_package_name: packageName,
-        p_package_price: packagePrice,
+        p_package_price: Number(packagePrice),
         p_package_duration: packageDuration,
         p_client_message: clientMessage || null
-      });
+      };
+      console.log('🔍 RPC Parameters:', rpcParams);
+      
+      const { data, error } = await supabase.rpc('create_coach_selection_request', rpcParams);
 
       console.log('📥 Raw Supabase response:', { data, error });
 
