@@ -16,13 +16,10 @@ export const TestUserSelector: React.FC<TestUserSelectorProps> = ({ onUserSelect
   const [isOpen, setIsOpen] = useState(false);
 
   const handleUserClick = (user: TestUser) => {
-    if (user.password) {
+    if (user.email && user.password) {
       onUserSelect(user.email, user.password);
-    } else if (user.email.includes('@hidden.com')) {
-      // For users without visible emails, try common test passwords
-      const testPasswords = ['password123', 'demo123', 'test123'];
-      // You could show a dialog to enter password, or try common passwords
-      alert('This user\'s login credentials are not available for security. Try logging in directly with known test accounts.');
+    } else {
+      alert(`Login credentials not available for this user. Try with known test accounts or contact admin.`);
     }
   };
 
@@ -106,11 +103,7 @@ export const TestUserSelector: React.FC<TestUserSelectorProps> = ({ onUserSelect
                           </p>
                           <div className="flex items-center gap-1 text-xs text-muted-foreground">
                             <Mail className="h-3 w-3" />
-                            {user.email.includes('@hidden.com') ? (
-                              <span className="italic">Email hidden for privacy</span>
-                            ) : (
-                              user.email
-                            )}
+                            {user.displayEmail || user.email}
                           </div>
                         </div>
                       </div>

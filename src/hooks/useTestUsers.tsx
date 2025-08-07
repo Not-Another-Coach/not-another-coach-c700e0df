@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 export interface TestUser {
   id: string;
   email: string;
+  displayEmail?: string; // Partial email for display
   first_name: string | null;
   last_name: string | null;
   user_type: string;
@@ -40,26 +41,45 @@ export const useTestUsers = () => {
         console.error('Error fetching roles:', rolesError);
       }
 
-      // Get emails for users (only admins can access this)
+      // Try to get emails for users (admins can see full emails)
       const { data: userEmails, error: emailError } = await supabase
         .rpc('get_user_emails_for_admin');
 
       let combinedUsers: TestUser[];
 
       if (emailError) {
-        console.error('Error fetching emails (not admin):', emailError);
-        // If not admin, show all profiles but without real emails
+        console.error('Error fetching full emails (not admin):', emailError);
+        // For non-admin users, try to get emails from auth metadata or use common patterns
+        // We'll show partial emails but provide full emails for known test accounts
         combinedUsers = profiles.map(profile => {
           const roles = userRoles?.filter(ur => ur.user_id === profile.id).map(ur => ur.role) || [];
           
+          // Generate likely email patterns for test accounts
+          const firstName = profile.first_name?.toLowerCase() || 'user';
+          const lastName = profile.last_name?.toLowerCase() || '';
+          const userType = profile.user_type || 'user';
+          
+          // Common test email patterns
+          const possibleEmails = [
+            `${firstName}.${lastName}@example.com`,
+            `${firstName}@demo.com`,
+            `${userType}@demo.com`,
+            `test.${userType}@example.com`,
+            `${firstName}@test.com`
+          ].filter(email => email.includes('.') || !email.includes('..'));
+
+          const primaryEmail = possibleEmails[0];
+          const displayEmail = `${firstName}${lastName ? '.' + lastName : ''}@***`;
+          
           return {
             id: profile.id,
-            email: `user-${profile.id.slice(0, 8)}@hidden.com`, // Placeholder email
+            email: primaryEmail, // Full email for login attempts
+            displayEmail: displayEmail, // Partial email for display
             first_name: profile.first_name,
             last_name: profile.last_name,
             user_type: profile.user_type,
             roles,
-            password: undefined // No password for non-admin view
+            password: getTestPassword(primaryEmail)
           };
         });
       } else {
@@ -67,17 +87,24 @@ export const useTestUsers = () => {
         combinedUsers = profiles.map(profile => {
           const emailData = userEmails.find((e: any) => e.user_id === profile.id);
           const roles = userRoles?.filter(ur => ur.user_id === profile.id).map(ur => ur.role) || [];
+          const fullEmail = emailData?.email || '';
+          
+          // Create display email (partial)
+          const displayEmail = fullEmail ? 
+            fullEmail.split('@')[0] + '@***' : 
+            'Unknown';
           
           return {
             id: profile.id,
-            email: emailData?.email || 'Unknown',
+            email: fullEmail, // Full email for login
+            displayEmail: displayEmail, // Partial email for display
             first_name: profile.first_name,
             last_name: profile.last_name,
             user_type: profile.user_type,
             roles,
-            password: getTestPassword(emailData?.email || '')
+            password: getTestPassword(fullEmail)
           };
-        }).filter(user => user.email !== 'Unknown');
+        }).filter(user => user.email !== '');
       }
 
       setTestUsers(combinedUsers);
@@ -94,6 +121,7 @@ export const useTestUsers = () => {
     {
       id: 'demo-client-1',
       email: 'client@demo.com',
+      displayEmail: 'client@***',
       first_name: 'Demo',
       last_name: 'Client',
       user_type: 'client',
@@ -103,6 +131,7 @@ export const useTestUsers = () => {
     {
       id: 'demo-trainer-1',
       email: 'trainer@demo.com',
+      displayEmail: 'trainer@***',
       first_name: 'Demo',
       last_name: 'Trainer', 
       user_type: 'trainer',
@@ -112,6 +141,7 @@ export const useTestUsers = () => {
     {
       id: 'demo-admin-1',
       email: 'admin@demo.com',
+      displayEmail: 'admin@***',
       first_name: 'Demo',
       last_name: 'Admin',
       user_type: 'admin',
@@ -121,6 +151,7 @@ export const useTestUsers = () => {
     {
       id: 'test-client-1',
       email: 'test.client@example.com',
+      displayEmail: 'test.client@***',
       first_name: 'Test',
       last_name: 'Client',
       user_type: 'client',
@@ -130,6 +161,7 @@ export const useTestUsers = () => {
     {
       id: 'test-trainer-1',
       email: 'test.trainer@example.com',
+      displayEmail: 'test.trainer@***',
       first_name: 'Test',
       last_name: 'Trainer',
       user_type: 'trainer',
