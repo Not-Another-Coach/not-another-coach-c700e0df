@@ -95,6 +95,11 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
   const [isCloning, setIsCloning] = useState(false);
   const [showCloneConfirmation, setShowCloneConfirmation] = useState(false);
   const [packageToClone, setPackageToClone] = useState<TrainingPackage | null>(null);
+  const [cloneWaysOfWorkingData, setCloneWaysOfWorkingData] = useState<{
+    sourcePackageId: string;
+    targetPackageId: string;
+    targetPackageName: string;
+  } | null>(null);
   const [editPackageData, setEditPackageData] = useState({
     name: "",
     sessions: "",
@@ -184,13 +189,17 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
       promotionEndDate: clonedPackage.promotionEndDate,
     });
 
-    // If user wants to copy ways of working, we'll handle it after package creation
+    // Store the cloning info for later use when package is saved
     if (copyWaysOfWorking) {
-      await copyPackageWaysOfWorking(pkg.id, clonedPackage.id);
+      setCloneWaysOfWorkingData({
+        sourcePackageId: pkg.id,
+        targetPackageId: clonedPackage.id,
+        targetPackageName: clonedPackage.name
+      });
     }
   };
 
-  const copyPackageWaysOfWorking = async (sourcePackageId: string, targetPackageId: string) => {
+  const copyPackageWaysOfWorking = async (sourcePackageId: string, targetPackageId: string, targetPackageName: string) => {
     try {
       // Check if the source package has ways of working configured
       const sourceWorkflow = getPackageWorkflow(sourcePackageId);
@@ -204,14 +213,8 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
         return;
       }
 
-      // Find the target package to get its name
-      const targetPackage = packages.find(pkg => pkg.id === targetPackageId);
-      if (!targetPackage) {
-        throw new Error('Target package not found');
-      }
-
       // Clone the ways of working by saving the source workflow data with the new package details
-      await savePackageWorkflow(targetPackageId, targetPackage.name, {
+      await savePackageWorkflow(targetPackageId, targetPackageName, {
         onboarding_items: sourceWorkflow.onboarding_items,
         first_week_items: sourceWorkflow.first_week_items,
         ongoing_structure_items: sourceWorkflow.ongoing_structure_items,
@@ -276,6 +279,16 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
           title: "Package cloned",
           description: "Package has been duplicated successfully",
         });
+        
+        // Handle ways of working copying if needed
+        if (cloneWaysOfWorkingData && cloneWaysOfWorkingData.targetPackageId === updatedPackage.id) {
+          copyPackageWaysOfWorking(
+            cloneWaysOfWorkingData.sourcePackageId,
+            cloneWaysOfWorkingData.targetPackageId,
+            updatedPackage.name
+          );
+          setCloneWaysOfWorkingData(null);
+        }
       } else {
         // Update existing package
         updatedPackages = packages.map(pkg => 
@@ -1342,18 +1355,18 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
 
       {/* Clone Confirmation Dialog */}
       <AlertDialog open={showCloneConfirmation} onOpenChange={setShowCloneConfirmation}>
-        <AlertDialogContent className="max-w-lg">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Clone Package with Ways of Working?</AlertDialogTitle>
-            <AlertDialogDescription className="space-y-3">
-              <p>Do you want to copy the "Ways of Working" from this package to the new one?</p>
-              <div className="bg-muted p-4 rounded-md text-sm space-y-2">
-                <p className="font-medium">• Choose "Yes" - Ways of working will be copied automatically</p>
-                <p className="font-medium">• Choose "No" - You can set up ways of working later in the Ways of Working tab</p>
+        <AlertDialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+          <AlertDialogHeader className="space-y-3">
+            <AlertDialogTitle className="text-lg">Clone Package with Ways of Working?</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-4">
+              <p className="text-sm">Do you want to copy the "Ways of Working" from this package to the new one?</p>
+              <div className="bg-muted p-3 rounded-md text-xs space-y-2">
+                <p>• <span className="font-medium">Choose "Yes"</span> - Ways of working will be copied automatically</p>
+                <p>• <span className="font-medium">Choose "No"</span> - You can set up ways of working later in the Ways of Working tab</p>
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+          <AlertDialogFooter className="flex flex-col gap-2 sm:flex-row-reverse">
             <AlertDialogCancel onClick={() => {
               setShowCloneConfirmation(false);
               setPackageToClone(null);
