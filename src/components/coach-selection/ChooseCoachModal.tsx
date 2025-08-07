@@ -61,7 +61,8 @@ export const ChooseCoachModal = ({
   };
 
   const handleSubmit = async () => {
-    console.log('🚨🚨🚨 SUBMIT BUTTON CLICKED - CACHE BUST v2');
+    alert('🚨🚨🚨 SUBMIT BUTTON CLICKED - CACHE BUST v3');
+    console.log('🚨🚨🚨 SUBMIT BUTTON CLICKED - CACHE BUST v3');
     console.log('Selected package:', selectedPackage);
     
     if (!selectedPackage) {
