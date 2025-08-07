@@ -1,7 +1,8 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Database, Users, MessageCircle, Calendar, BarChart, Shield, Settings, FileText } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Database, Users, MessageCircle, Calendar, BarChart, Shield, Settings, FileText, ExternalLink } from 'lucide-react';
 
 interface DatabaseDocumentationProps {
   searchTerm: string;
@@ -231,6 +232,12 @@ export const DatabaseDocumentation: React.FC<DatabaseDocumentationProps> = ({ se
     )
   })).filter(category => category.items.length > 0);
 
+  const supabaseProjectId = 'ogpiovfxjxcclptfybrk';
+  
+  const getSupabaseTableUrl = (tableName: string) => {
+    return `https://supabase.com/dashboard/project/${supabaseProjectId}/editor/${tableName}`;
+  };
+
   return (
     <div className="space-y-8">
       {filteredTables.map((category) => (
@@ -246,12 +253,23 @@ export const DatabaseDocumentation: React.FC<DatabaseDocumentationProps> = ({ se
               <Card key={table.name} className="hover:shadow-md transition-shadow">
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle 
-                      className="text-xl font-mono cursor-pointer hover:text-primary transition-colors"
-                      onClick={() => onElementClick(table.name)}
-                    >
-                      {table.name}
-                    </CardTitle>
+                    <div className="flex items-center gap-3">
+                      <CardTitle 
+                        className="text-xl font-mono cursor-pointer hover:text-primary transition-colors"
+                        onClick={() => onElementClick(table.name)}
+                      >
+                        {table.name}
+                      </CardTitle>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 text-xs"
+                        onClick={() => window.open(getSupabaseTableUrl(table.name), '_blank')}
+                      >
+                        <ExternalLink className="h-3 w-3 mr-1" />
+                        View in Supabase
+                      </Button>
+                    </div>
                     <Badge variant="outline" className="flex items-center gap-1">
                       <Database className="h-3 w-3" />
                       Table
