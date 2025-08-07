@@ -13,6 +13,7 @@ import { Trash2, Plus, ExternalLink, DollarSign, PoundSterling, Euro, Calendar a
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useDiscoveryCallSettings } from "@/hooks/useDiscoveryCallSettings";
+import { usePackageWaysOfWorking } from "@/hooks/usePackageWaysOfWorking";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -117,6 +118,7 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
 
   // Use the discovery call settings hook
   const { settings: discoverySettings, loading: discoveryLoading, updateSettings } = useDiscoveryCallSettings();
+  const { getPackageWorkflow, savePackageWorkflow } = usePackageWaysOfWorking();
   const { toast } = useToast();
 
   const addPackage = () => {
@@ -190,8 +192,34 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
 
   const copyPackageWaysOfWorking = async (sourcePackageId: string, targetPackageId: string) => {
     try {
-      // This will be handled by the database/API to copy ways of working data
-      console.log('Copying ways of working from package', sourcePackageId, 'to', targetPackageId);
+      // Check if the source package has ways of working configured
+      const sourceWorkflow = getPackageWorkflow(sourcePackageId);
+      
+      if (!sourceWorkflow) {
+        toast({
+          title: "No ways of working to copy",
+          description: "The source package doesn't have any ways of working configured.",
+          variant: "default",
+        });
+        return;
+      }
+
+      // Find the target package to get its name
+      const targetPackage = packages.find(pkg => pkg.id === targetPackageId);
+      if (!targetPackage) {
+        throw new Error('Target package not found');
+      }
+
+      // Clone the ways of working by saving the source workflow data with the new package details
+      await savePackageWorkflow(targetPackageId, targetPackage.name, {
+        onboarding_items: sourceWorkflow.onboarding_items,
+        first_week_items: sourceWorkflow.first_week_items,
+        ongoing_structure_items: sourceWorkflow.ongoing_structure_items,
+        tracking_tools_items: sourceWorkflow.tracking_tools_items,
+        client_expectations_items: sourceWorkflow.client_expectations_items,
+        what_i_bring_items: sourceWorkflow.what_i_bring_items,
+        visibility: sourceWorkflow.visibility,
+      });
       
       toast({
         title: "Ways of working copied",
