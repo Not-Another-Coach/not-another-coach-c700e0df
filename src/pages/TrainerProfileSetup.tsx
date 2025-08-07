@@ -523,7 +523,7 @@ const TrainerProfileSetup = () => {
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => handleSave()}>
             <Save className="h-4 w-4 mr-2" />
-            Save Draft
+            {profile?.profile_setup_completed ? 'Update' : 'Save Draft'}
           </Button>
           <Button variant="outline" size="sm" onClick={handlePreview}>
             <Eye className="h-4 w-4 mr-2" />

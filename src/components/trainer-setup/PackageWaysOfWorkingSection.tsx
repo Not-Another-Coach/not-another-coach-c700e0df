@@ -247,6 +247,24 @@ export function PackageWaysOfWorkingSection({ formData }: PackageWaysOfWorkingSe
     }
   };
 
+  const clonePackageWorkflow = async (sourcePackageId: string, targetPackageId: string, targetPackageName: string) => {
+    const sourceWorkflow = getPackageWorkflow(sourcePackageId);
+    if (!sourceWorkflow) return;
+
+    const clonedWorkflow = {
+      ...sourceWorkflow,
+      package_id: targetPackageId,
+      package_name: targetPackageName
+    };
+    
+    await savePackageWorkflow(targetPackageId, targetPackageName, clonedWorkflow);
+    
+    toast({
+      title: "Ways of working cloned",
+      description: `Copied settings from ${sourceWorkflow.package_name}`,
+    });
+  };
+
   const renderSection = (section: string) => {
     if (!currentWorkflow) return null;
     
@@ -381,13 +399,43 @@ export function PackageWaysOfWorkingSection({ formData }: PackageWaysOfWorkingSe
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{pkg.name}</span>
                       <Badge variant="outline" className="text-xs">
-                        £{pkg.price}
+                        {pkg.currency === 'GBP' ? '£' : pkg.currency === 'USD' ? '$' : '€'}{pkg.price}
                       </Badge>
                     </div>
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            
+            {activePackageId && packages.length > 1 && (
+              <div className="mt-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const sourcePackages = packages.filter((pkg: any) => pkg.id !== activePackageId && getPackageWorkflow(pkg.id));
+                    if (sourcePackages.length > 0) {
+                      // For simplicity, clone from the first available package with workflow
+                      const sourcePackage = sourcePackages[0];
+                      const currentPackage = packages.find((pkg: any) => pkg.id === activePackageId);
+                      if (currentPackage) {
+                        clonePackageWorkflow(sourcePackage.id, activePackageId, currentPackage.name);
+                      }
+                    }
+                  }}
+                  disabled={packages.filter((pkg: any) => pkg.id !== activePackageId && getPackageWorkflow(pkg.id)).length === 0}
+                  className="flex items-center gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Clone from another package
+                </Button>
+                {packages.filter((pkg: any) => pkg.id !== activePackageId && getPackageWorkflow(pkg.id)).length === 0 && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Configure ways of working for other packages first to enable cloning
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

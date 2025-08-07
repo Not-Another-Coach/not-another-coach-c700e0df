@@ -1045,6 +1045,33 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_update_streaks: {
+        Row: {
+          created_at: string
+          id: string
+          trainer_id: string
+          updated_at: string
+          week_end_date: string
+          week_start_date: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          trainer_id: string
+          updated_at?: string
+          week_end_date: string
+          week_start_date: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          trainer_id?: string
+          updated_at?: string
+          week_end_date?: string
+          week_start_date?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           account_status: string | null
@@ -1643,6 +1670,10 @@ export type Database = {
       get_engagement_stage: {
         Args: { client_uuid: string; trainer_uuid: string }
         Returns: Database["public"]["Enums"]["engagement_stage"]
+      }
+      get_trainer_streak_count: {
+        Args: { trainer_uuid: string }
+        Returns: number
       }
       get_user_emails_for_admin: {
         Args: Record<PropertyKey, never>
