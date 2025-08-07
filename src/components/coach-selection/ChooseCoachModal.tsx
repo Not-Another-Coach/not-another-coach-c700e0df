@@ -61,8 +61,15 @@ export const ChooseCoachModal = ({
   };
 
   const handleSubmit = async () => {
-    if (!selectedPackage) return;
+    console.log('🚨🚨🚨 SUBMIT BUTTON CLICKED - CACHE BUST v2');
+    console.log('Selected package:', selectedPackage);
+    
+    if (!selectedPackage) {
+      console.log('No package selected, returning');
+      return;
+    }
 
+    console.log('About to call createSelectionRequest...');
     const result = await createSelectionRequest(
       trainer.id,
       selectedPackage.id,
@@ -72,6 +79,7 @@ export const ChooseCoachModal = ({
       clientMessage.trim() || undefined
     );
 
+    console.log('Result:', result);
     if (result.success) {
       onOpenChange(false);
       onSuccess?.();
