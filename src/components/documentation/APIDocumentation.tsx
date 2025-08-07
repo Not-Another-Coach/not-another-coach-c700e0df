@@ -6,6 +6,7 @@ import { ExternalLink, Code, Server, Mail, Users, Trash, Calendar, FileText } fr
 
 interface APIDocumentationProps {
   searchTerm: string;
+  onElementClick: (elementText: string) => void;
 }
 
 const apis = [
@@ -161,7 +162,7 @@ const categories = [
   }
 ];
 
-export const APIDocumentation: React.FC<APIDocumentationProps> = ({ searchTerm }) => {
+export const APIDocumentation: React.FC<APIDocumentationProps> = ({ searchTerm, onElementClick }) => {
   const filteredAPIs = apis.filter(api => 
     api.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     api.purpose.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -226,7 +227,12 @@ export const APIDocumentation: React.FC<APIDocumentationProps> = ({ searchTerm }
                       {api.icon}
                     </div>
                     <div>
-                      <CardTitle className="text-xl font-mono">{api.name}</CardTitle>
+                      <CardTitle 
+                        className="text-xl font-mono cursor-pointer hover:text-primary transition-colors"
+                        onClick={() => onElementClick(api.name)}
+                      >
+                        {api.name}
+                      </CardTitle>
                       <CardDescription className="mt-1">{api.purpose}</CardDescription>
                     </div>
                   </div>
@@ -287,7 +293,12 @@ export const APIDocumentation: React.FC<APIDocumentationProps> = ({ searchTerm }
                   <h4 className="font-medium text-sm text-foreground mb-2">Key Features</h4>
                   <div className="flex flex-wrap gap-2">
                     {api.features.map((feature) => (
-                      <Badge key={feature} variant="outline" className="text-xs">
+                      <Badge 
+                        key={feature} 
+                        variant="outline" 
+                        className="text-xs cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                        onClick={() => onElementClick(feature)}
+                      >
                         {feature}
                       </Badge>
                     ))}

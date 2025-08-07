@@ -5,6 +5,7 @@ import { ExternalLink, Lock, User, Users, Settings } from 'lucide-react';
 
 interface PageDocumentationProps {
   searchTerm: string;
+  onElementClick: (elementText: string) => void;
 }
 
 const pages = [
@@ -150,7 +151,7 @@ const pages = [
   }
 ];
 
-export const PagesDocumentation: React.FC<PageDocumentationProps> = ({ searchTerm }) => {
+export const PagesDocumentation: React.FC<PageDocumentationProps> = ({ searchTerm, onElementClick }) => {
   const filteredPages = pages.map(category => ({
     ...category,
     items: category.items.filter(page => 
@@ -189,13 +190,22 @@ export const PagesDocumentation: React.FC<PageDocumentationProps> = ({ searchTer
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <CardTitle className="text-xl">{page.name}</CardTitle>
+                      <CardTitle 
+                        className="text-xl cursor-pointer hover:text-primary transition-colors"
+                        onClick={() => onElementClick(page.name)}
+                      >
+                        {page.name}
+                      </CardTitle>
                       <Badge variant={getAccessColor(page.access)} className="flex items-center gap-1">
                         {getAccessIcon(page.access)}
                         {page.access}
                       </Badge>
                     </div>
-                    <Badge variant="outline" className="font-mono text-xs">
+                    <Badge 
+                      variant="outline" 
+                      className="font-mono text-xs cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                      onClick={() => onElementClick(page.route)}
+                    >
                       {page.route}
                     </Badge>
                   </div>
@@ -207,7 +217,12 @@ export const PagesDocumentation: React.FC<PageDocumentationProps> = ({ searchTer
                       <h4 className="font-medium text-sm text-foreground mb-2">Key Features</h4>
                       <div className="flex flex-wrap gap-2">
                         {page.features.map((feature) => (
-                          <Badge key={feature} variant="secondary" className="text-xs">
+                          <Badge 
+                            key={feature} 
+                            variant="secondary" 
+                            className="text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
+                            onClick={() => onElementClick(feature)}
+                          >
                             {feature}
                           </Badge>
                         ))}
@@ -217,7 +232,12 @@ export const PagesDocumentation: React.FC<PageDocumentationProps> = ({ searchTer
                       <h4 className="font-medium text-sm text-foreground mb-2">Main Components</h4>
                       <div className="flex flex-wrap gap-2">
                         {page.components.map((component) => (
-                          <Badge key={component} variant="outline" className="text-xs font-mono">
+                          <Badge 
+                            key={component} 
+                            variant="outline" 
+                            className="text-xs font-mono cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                            onClick={() => onElementClick(component)}
+                          >
                             {component}
                           </Badge>
                         ))}

@@ -9,6 +9,7 @@ import {
 
 interface FeaturesDocumentationProps {
   searchTerm: string;
+  onElementClick: (elementText: string) => void;
 }
 
 const features = [
@@ -292,7 +293,7 @@ const features = [
   }
 ];
 
-export const FeaturesDocumentation: React.FC<FeaturesDocumentationProps> = ({ searchTerm }) => {
+export const FeaturesDocumentation: React.FC<FeaturesDocumentationProps> = ({ searchTerm, onElementClick }) => {
   const filteredFeatures = features.map(category => ({
     ...category,
     items: category.items.filter(feature => 
@@ -316,7 +317,12 @@ export const FeaturesDocumentation: React.FC<FeaturesDocumentationProps> = ({ se
             {category.items.map((feature) => (
               <Card key={feature.name} className="hover:shadow-md transition-shadow">
                 <CardHeader>
-                  <CardTitle className="text-xl">{feature.name}</CardTitle>
+                  <CardTitle 
+                    className="text-xl cursor-pointer hover:text-primary transition-colors"
+                    onClick={() => onElementClick(feature.name)}
+                  >
+                    {feature.name}
+                  </CardTitle>
                   <CardDescription>{feature.description}</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -325,7 +331,12 @@ export const FeaturesDocumentation: React.FC<FeaturesDocumentationProps> = ({ se
                       <h4 className="font-medium text-sm text-foreground mb-2">Key Components</h4>
                       <div className="flex flex-wrap gap-2">
                         {feature.components.map((component) => (
-                          <Badge key={component} variant="outline" className="text-xs font-mono">
+                          <Badge 
+                            key={component} 
+                            variant="outline" 
+                            className="text-xs font-mono cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                            onClick={() => onElementClick(component)}
+                          >
                             {component}
                           </Badge>
                         ))}
@@ -350,7 +361,12 @@ export const FeaturesDocumentation: React.FC<FeaturesDocumentationProps> = ({ se
                       <h4 className="font-medium text-sm text-foreground mb-2">Key Features</h4>
                       <div className="flex flex-wrap gap-2">
                         {feature.features.map((f) => (
-                          <Badge key={f} variant="secondary" className="text-xs">
+                          <Badge 
+                            key={f} 
+                            variant="secondary" 
+                            className="text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
+                            onClick={() => onElementClick(f)}
+                          >
                             {f}
                           </Badge>
                         ))}

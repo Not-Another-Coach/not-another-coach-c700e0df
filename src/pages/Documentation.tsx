@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -9,9 +9,38 @@ import { HooksDocumentation } from '@/components/documentation/HooksDocumentatio
 import { DatabaseDocumentation } from '@/components/documentation/DatabaseDocumentation';
 import { FeaturesDocumentation } from '@/components/documentation/FeaturesDocumentation';
 import { APIDocumentation } from '@/components/documentation/APIDocumentation';
+import { MessageComposer } from '@/components/documentation/MessageComposer';
 
 const Documentation = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [message, setMessage] = useState('');
+  const [clickedElements, setClickedElements] = useState<string[]>([]);
+
+  const handleElementClick = useCallback((elementText: string) => {
+    setClickedElements(prev => [...prev, elementText]);
+    
+    // Add the element to the message
+    setMessage(prev => {
+      const separator = prev ? (prev.endsWith(' ') ? '' : ' ') : '';
+      return prev + separator + elementText;
+    });
+  }, []);
+
+  const handleClearElements = useCallback(() => {
+    setClickedElements([]);
+    setMessage('');
+  }, []);
+
+  const handleRemoveElement = useCallback((index: number) => {
+    const elementToRemove = clickedElements[index];
+    setClickedElements(prev => prev.filter((_, i) => i !== index));
+    
+    // Remove the element from the message
+    setMessage(prev => {
+      const regex = new RegExp(`\\b${elementToRemove.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'g');
+      return prev.replace(regex, '').replace(/\s+/g, ' ').trim();
+    });
+  }, [clickedElements]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -62,25 +91,35 @@ const Documentation = () => {
           </TabsList>
 
           <TabsContent value="pages" className="mt-6">
-            <PagesDocumentation searchTerm={searchTerm} />
+            <PagesDocumentation searchTerm={searchTerm} onElementClick={handleElementClick} />
           </TabsContent>
 
           <TabsContent value="apis" className="mt-6">
-            <APIDocumentation searchTerm={searchTerm} />
+            <APIDocumentation searchTerm={searchTerm} onElementClick={handleElementClick} />
           </TabsContent>
 
           <TabsContent value="hooks" className="mt-6">
-            <HooksDocumentation searchTerm={searchTerm} />
+            <HooksDocumentation searchTerm={searchTerm} onElementClick={handleElementClick} />
           </TabsContent>
 
           <TabsContent value="database" className="mt-6">
-            <DatabaseDocumentation searchTerm={searchTerm} />
+            <DatabaseDocumentation searchTerm={searchTerm} onElementClick={handleElementClick} />
           </TabsContent>
 
           <TabsContent value="features" className="mt-6">
-            <FeaturesDocumentation searchTerm={searchTerm} />
+            <FeaturesDocumentation searchTerm={searchTerm} onElementClick={handleElementClick} />
           </TabsContent>
         </Tabs>
+
+        <div className="mt-8">
+          <MessageComposer
+            message={message}
+            setMessage={setMessage}
+            clickedElements={clickedElements}
+            onClearElements={handleClearElements}
+            onRemoveElement={handleRemoveElement}
+          />
+        </div>
       </div>
     </div>
   );

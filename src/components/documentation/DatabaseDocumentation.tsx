@@ -5,6 +5,7 @@ import { Database, Users, MessageCircle, Calendar, BarChart, Shield, Settings, F
 
 interface DatabaseDocumentationProps {
   searchTerm: string;
+  onElementClick: (elementText: string) => void;
 }
 
 const tables = [
@@ -220,7 +221,7 @@ const tables = [
   }
 ];
 
-export const DatabaseDocumentation: React.FC<DatabaseDocumentationProps> = ({ searchTerm }) => {
+export const DatabaseDocumentation: React.FC<DatabaseDocumentationProps> = ({ searchTerm, onElementClick }) => {
   const filteredTables = tables.map(category => ({
     ...category,
     items: category.items.filter(table => 
@@ -245,7 +246,12 @@ export const DatabaseDocumentation: React.FC<DatabaseDocumentationProps> = ({ se
               <Card key={table.name} className="hover:shadow-md transition-shadow">
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-xl font-mono">{table.name}</CardTitle>
+                    <CardTitle 
+                      className="text-xl font-mono cursor-pointer hover:text-primary transition-colors"
+                      onClick={() => onElementClick(table.name)}
+                    >
+                      {table.name}
+                    </CardTitle>
                     <Badge variant="outline" className="flex items-center gap-1">
                       <Database className="h-3 w-3" />
                       Table
@@ -259,7 +265,12 @@ export const DatabaseDocumentation: React.FC<DatabaseDocumentationProps> = ({ se
                       <h4 className="font-medium text-sm text-foreground mb-2">Key Columns</h4>
                       <div className="flex flex-wrap gap-2">
                         {table.keyColumns.map((column) => (
-                          <Badge key={column} variant="secondary" className="text-xs font-mono">
+                          <Badge 
+                            key={column} 
+                            variant="secondary" 
+                            className="text-xs font-mono cursor-pointer hover:bg-secondary/80 transition-colors"
+                            onClick={() => onElementClick(column)}
+                          >
                             {column}
                           </Badge>
                         ))}

@@ -5,6 +5,7 @@ import { Code, Database, User, Settings, MessageCircle, Calendar } from 'lucide-
 
 interface HooksDocumentationProps {
   searchTerm: string;
+  onElementClick: (elementText: string) => void;
 }
 
 const hooks = [
@@ -234,7 +235,7 @@ const hooks = [
   }
 ];
 
-export const HooksDocumentation: React.FC<HooksDocumentationProps> = ({ searchTerm }) => {
+export const HooksDocumentation: React.FC<HooksDocumentationProps> = ({ searchTerm, onElementClick }) => {
   const filteredHooks = hooks.map(category => ({
     ...category,
     items: category.items.filter(hook => 
@@ -259,8 +260,17 @@ export const HooksDocumentation: React.FC<HooksDocumentationProps> = ({ searchTe
               <Card key={hook.name} className="hover:shadow-md transition-shadow">
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-xl font-mono">{hook.name}</CardTitle>
-                    <Badge variant="outline" className="font-mono text-xs">
+                    <CardTitle 
+                      className="text-xl font-mono cursor-pointer hover:text-primary transition-colors"
+                      onClick={() => onElementClick(hook.name)}
+                    >
+                      {hook.name}
+                    </CardTitle>
+                    <Badge 
+                      variant="outline" 
+                      className="font-mono text-xs cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                      onClick={() => onElementClick(hook.file)}
+                    >
                       {hook.file}
                     </Badge>
                   </div>
@@ -272,7 +282,12 @@ export const HooksDocumentation: React.FC<HooksDocumentationProps> = ({ searchTe
                       <h4 className="font-medium text-sm text-foreground mb-2">Returns</h4>
                       <div className="flex flex-wrap gap-2">
                         {hook.returns.map((returnValue) => (
-                          <Badge key={returnValue} variant="secondary" className="text-xs font-mono">
+                          <Badge 
+                            key={returnValue} 
+                            variant="secondary" 
+                            className="text-xs font-mono cursor-pointer hover:bg-secondary/80 transition-colors"
+                            onClick={() => onElementClick(returnValue)}
+                          >
                             {returnValue}
                           </Badge>
                         ))}
