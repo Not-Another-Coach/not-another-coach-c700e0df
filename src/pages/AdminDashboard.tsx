@@ -8,7 +8,7 @@ import { FeedbackQuestionBuilder } from '@/components/admin/FeedbackQuestionBuil
 import { BulkUserUpload } from '@/components/admin/BulkUserUpload';
 import { TestUserCleanup } from '@/components/admin/TestUserCleanup';
 import { VisibilitySettingsSection } from '@/components/trainer-setup/VisibilitySettingsSection';
-import { Settings, Users, Shield, BarChart3, ArrowLeft, Home, Eye, Upload } from 'lucide-react';
+import { Settings, Users, Shield, BarChart3, ArrowLeft, Home, Eye, Upload, FileText, ExternalLink } from 'lucide-react';
 import { useUserRoles } from '@/hooks/useUserRoles';
 
 export const AdminDashboard = () => {
@@ -68,7 +68,15 @@ export const AdminDashboard = () => {
           </p>
         </div>
         
-        <div className="w-32"></div> {/* Spacer for centering */}
+        <Button 
+          onClick={() => navigate('/documentation')}
+          variant="outline"
+          className="flex items-center gap-2"
+        >
+          <FileText className="h-4 w-4" />
+          Documentation
+          <ExternalLink className="h-3 w-3" />
+        </Button>
       </div>
 
       <Tabs defaultValue="users" className="space-y-6">
