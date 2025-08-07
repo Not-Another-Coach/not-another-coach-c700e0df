@@ -47,10 +47,10 @@ export const TestUserSelector: React.FC<TestUserSelectorProps> = ({ onUserSelect
               <div>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <User className="h-5 w-5" />
-                  Test Users
+                  All Users
                 </CardTitle>
                 <CardDescription>
-                  Click to select a test user and auto-fill login credentials
+                  Click to select any user and auto-fill login credentials
                 </CardDescription>
               </div>
               <div className="flex items-center gap-2">
@@ -65,7 +65,7 @@ export const TestUserSelector: React.FC<TestUserSelectorProps> = ({ onUserSelect
           <CardContent className="pt-0">
             <div className="flex justify-between items-center mb-4">
               <p className="text-sm text-muted-foreground">
-                Select a user to auto-populate the login form
+                Select any user to auto-populate the login form
               </p>
               <Button
                 variant="outline"
@@ -130,15 +130,15 @@ export const TestUserSelector: React.FC<TestUserSelectorProps> = ({ onUserSelect
                 {testUsers.length === 0 && !loading && (
                   <div className="text-center py-8 text-muted-foreground">
                     <User className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <p>No test users available</p>
-                    <p className="text-xs">Create some test accounts to see them here</p>
+                    <p>No users available</p>
+                    <p className="text-xs">Users will appear here once they sign up</p>
                   </div>
                 )}
                 
                 {loading && (
                   <div className="text-center py-8 text-muted-foreground">
                     <RefreshCw className="h-8 w-8 mx-auto mb-2 animate-spin" />
-                    <p>Loading test users...</p>
+                    <p>Loading users...</p>
                   </div>
                 )}
               </div>
@@ -146,8 +146,8 @@ export const TestUserSelector: React.FC<TestUserSelectorProps> = ({ onUserSelect
             
             <div className="mt-4 p-3 bg-muted/50 rounded-lg">
               <p className="text-xs text-muted-foreground">
-                <strong>Note:</strong> This feature is for development and testing purposes. 
-                Test users typically use standard passwords like "password123" or "demo123".
+                <strong>Note:</strong> This shows all registered users for development and testing purposes. 
+                Known test passwords are shown for demo accounts.
               </p>
             </div>
           </CardContent>
