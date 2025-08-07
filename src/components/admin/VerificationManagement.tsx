@@ -6,8 +6,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { CheckCircle2, XCircle, Clock, Eye, FileText, AlertCircle } from 'lucide-react';
+import { CheckCircle2, XCircle, Clock, Eye, FileText, AlertCircle, User } from 'lucide-react';
 import { useTrainerVerification } from '@/hooks/useTrainerVerification';
+import { TieredTrainerProfile } from '@/components/tiered-profile/TieredTrainerProfile';
 import { toast } from 'sonner';
 
 const statusIcons = {
@@ -30,9 +31,17 @@ export const VerificationManagement = () => {
   const { verificationRequests, trainerProfiles, updateVerificationStatus, loading } = useTrainerVerification();
   const [selectedTrainer, setSelectedTrainer] = useState<any>(null);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [profileToView, setProfileToView] = useState<any>(null);
   const [adminNotes, setAdminNotes] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
   const [reviewAction, setReviewAction] = useState<'approve' | 'reject' | null>(null);
+
+  // Filter profiles to only show pending/resubmitted ones
+  const filteredProfiles = trainerProfiles.filter(profile => 
+    profile.verification_status === 'pending' || 
+    profile.verification_status === 'rejected'
+  );
 
   const handleReviewSubmit = async () => {
     if (!selectedTrainer || !reviewAction) return;
@@ -61,6 +70,11 @@ export const VerificationManagement = () => {
     setAdminNotes(trainer.admin_notes || '');
     setRejectionReason('');
     setIsReviewModalOpen(true);
+  };
+
+  const openProfileModal = (trainer: any) => {
+    setProfileToView(trainer);
+    setIsProfileModalOpen(true);
   };
 
   if (loading) {
@@ -169,11 +183,20 @@ export const VerificationManagement = () => {
         <TabsContent value="profiles" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>All Trainer Profiles</CardTitle>
+              <CardTitle>Trainer Profiles Awaiting Verification</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Only trainers with pending or rejected verification status are shown
+              </p>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {trainerProfiles.map((profile) => (
+              {filteredProfiles.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <AlertCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>No profiles awaiting verification</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {filteredProfiles.map((profile) => (
                   <div key={profile.id} className="border rounded-lg p-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <div>
@@ -197,13 +220,20 @@ export const VerificationManagement = () => {
 
                     <div className="flex gap-2">
                       <Button
+                        onClick={() => openProfileModal(profile)}
+                        variant="outline"
+                        size="sm"
+                      >
+                        <User className="w-4 h-4 mr-1" />
+                        View Profile
+                      </Button>
+                      <Button
                         onClick={() => openReviewModal(profile, 'approve')}
                         size="sm"
-                        variant={profile.verification_status === 'verified' ? 'outline' : 'default'}
-                        className={profile.verification_status !== 'verified' ? 'bg-green-600 hover:bg-green-700' : ''}
+                        className="bg-green-600 hover:bg-green-700"
                       >
                         <CheckCircle2 className="w-4 h-4 mr-1" />
-                        {profile.verification_status === 'verified' ? 'Re-verify' : 'Verify'}
+                        Verify
                       </Button>
                       <Button
                         onClick={() => openReviewModal(profile, 'reject')}
@@ -221,9 +251,10 @@ export const VerificationManagement = () => {
                         <p className="text-sm text-muted-foreground">{profile.admin_review_notes}</p>
                       </div>
                     )}
-                  </div>
-                ))}
-              </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -282,6 +313,44 @@ export const VerificationManagement = () => {
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Trainer Profile View Modal */}
+      <Dialog open={isProfileModalOpen} onOpenChange={setIsProfileModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              Trainer Profile - {profileToView?.first_name} {profileToView?.last_name}
+            </DialogTitle>
+            <p className="text-sm text-muted-foreground">
+              Read-only view for verification review
+            </p>
+          </DialogHeader>
+          
+          {profileToView && (
+            <TieredTrainerProfile
+              trainer={{
+                id: profileToView.id,
+                name: `${profileToView.first_name} ${profileToView.last_name}`,
+                firstName: profileToView.first_name,
+                lastName: profileToView.last_name,
+                profilePhotoUrl: profileToView.profile_photo_url,
+                location: profileToView.location,
+                tagline: profileToView.tagline,
+                bio: profileToView.bio,
+                specializations: profileToView.specializations || [],
+                trainingTypes: profileToView.training_types || [],
+                coachingStyles: profileToView.coaching_styles || [],
+                hourlyRate: profileToView.hourly_rate,
+                packageOptions: profileToView.package_options || [],
+                testimonials: profileToView.testimonials || [],
+                qualifications: profileToView.qualifications || [],
+                offers_discovery_call: profileToView.free_discovery_call
+              }}
+              previewStage="active_client" // Show all content for admin review
+            />
+          )}
         </DialogContent>
       </Dialog>
     </div>
