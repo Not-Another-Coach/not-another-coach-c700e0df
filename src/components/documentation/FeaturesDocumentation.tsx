@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Target, Users, MessageCircle, Calendar, BarChart, 
   Shield, Search, Layers, Settings, Bell, Clock, 
-  UserCheck, Filter, Eye, Workflow
+  UserCheck, Filter, Eye, Workflow, UserCircle
 } from 'lucide-react';
 
 interface FeaturesDocumentationProps {
@@ -96,6 +96,77 @@ const features = [
           'Premium content for active clients'
         ],
         features: ['Progressive disclosure', 'Engagement-based access', 'Content gating', 'Unlock messaging']
+      }
+    ]
+  },
+  {
+    category: 'Trainer Profile Management',
+    icon: <UserCircle className="h-4 w-4" />,
+    items: [
+      {
+        name: 'Profile Setup Workflow',
+        description: 'Multi-step trainer profile creation and completion system',
+        components: ['TrainerProfileSetup', 'BasicInfoSection', 'ExpertiseSection', 'RatesSection', 'QualificationsSection'],
+        workflow: [
+          'Step 1: Basic Information (name, bio, location)',
+          'Step 2: Expertise & Specializations',
+          'Step 3: Rates & Package Options',
+          'Step 4: Qualifications & Certifications',
+          'Step 5: Profile Review & Publishing'
+        ],
+        features: ['Multi-step wizard', 'Progress tracking', 'Auto-save', 'Validation system', 'Profile preview']
+      },
+      {
+        name: 'Profile Verification System',
+        description: 'Administrative verification and approval process for trainer profiles',
+        components: ['VerificationSection', 'VerificationManagement', 'useTrainerVerification', 'VerificationNotifications'],
+        workflow: [
+          'Trainer submits verification request with documents',
+          'Admin reviews request and documentation',
+          'Admin approves, rejects, or requests more info',
+          'Trainer receives notification of status change',
+          'Verified status affects profile visibility and trust'
+        ],
+        features: ['Document upload', 'Admin review workflow', 'Status notifications', 'Rejection reasons', 'Re-submission process']
+      },
+      {
+        name: 'Profile Status Management',
+        description: 'Dynamic profile state management and visibility control',
+        components: ['ProfileManagementSection', 'VisibilitySettingsSection', 'useProfile'],
+        workflow: [
+          'Profile creation starts in draft state',
+          'Profile setup completion enables publishing',
+          'Verification affects public visibility',
+          'Admin can suspend or manage profile status',
+          'Status changes trigger notifications'
+        ],
+        features: ['Draft/Published states', 'Visibility controls', 'Status tracking', 'Admin overrides', 'Automated notifications']
+      },
+      {
+        name: 'Tiered Profile Blocks',
+        description: 'Modular profile content system with engagement-based visibility',
+        components: ['TieredTrainerProfile', 'HeroBlock', 'MiniBioBlock', 'SpecialismsBlock', 'GalleryPackagesBlock'],
+        workflow: [
+          'Profile divided into content blocks',
+          'Each block has visibility requirements',
+          'Basic info visible to all users',
+          'Advanced content unlocked with engagement',
+          'Premium pricing visible after shortlisting'
+        ],
+        features: ['Modular content', 'Progressive disclosure', 'Engagement gating', 'Content blocks', 'Visibility tiers']
+      },
+      {
+        name: 'Ways of Working Documentation',
+        description: 'Detailed trainer methodology and process documentation',
+        components: ['WaysOfWorkingSection', 'PackageWaysOfWorkingSection', 'WaysOfWorkingBlock', 'usePackageWaysOfWorking'],
+        workflow: [
+          'Trainer documents their coaching methodology',
+          'Defines onboarding process and expectations',
+          'Outlines first week and ongoing structure',
+          'Specifies tracking tools and client expectations',
+          'Content helps clients understand working style'
+        ],
+        features: ['Process documentation', 'Client expectations', 'Methodology visibility', 'Package-specific workflows', 'Working style clarity']
       }
     ]
   },
