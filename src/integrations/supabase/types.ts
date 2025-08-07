@@ -1120,6 +1120,7 @@ export type Database = {
         Row: {
           account_status: string | null
           admin_notes: string | null
+          admin_review_notes: string | null
           admin_verification_notes: string | null
           availability_schedule: Json | null
           availability_slots: Json | null
@@ -1218,6 +1219,8 @@ export type Database = {
           updated_at: string
           uploaded_certificates: Json | null
           user_type: Database["public"]["Enums"]["user_type"]
+          verification_documents: Json | null
+          verification_requested_at: string | null
           verification_status:
             | Database["public"]["Enums"]["verification_status_enum"]
             | null
@@ -1238,6 +1241,7 @@ export type Database = {
         Insert: {
           account_status?: string | null
           admin_notes?: string | null
+          admin_review_notes?: string | null
           admin_verification_notes?: string | null
           availability_schedule?: Json | null
           availability_slots?: Json | null
@@ -1336,6 +1340,8 @@ export type Database = {
           updated_at?: string
           uploaded_certificates?: Json | null
           user_type: Database["public"]["Enums"]["user_type"]
+          verification_documents?: Json | null
+          verification_requested_at?: string | null
           verification_status?:
             | Database["public"]["Enums"]["verification_status_enum"]
             | null
@@ -1356,6 +1362,7 @@ export type Database = {
         Update: {
           account_status?: string | null
           admin_notes?: string | null
+          admin_review_notes?: string | null
           admin_verification_notes?: string | null
           availability_schedule?: Json | null
           availability_slots?: Json | null
@@ -1454,6 +1461,8 @@ export type Database = {
           updated_at?: string
           uploaded_certificates?: Json | null
           user_type?: Database["public"]["Enums"]["user_type"]
+          verification_documents?: Json | null
+          verification_requested_at?: string | null
           verification_status?:
             | Database["public"]["Enums"]["verification_status_enum"]
             | null
@@ -1472,6 +1481,63 @@ export type Database = {
           year_certified?: number | null
         }
         Relationships: []
+      }
+      trainer_verification_requests: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          documents_provided: Json
+          id: string
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["verification_request_status"]
+          submitted_at: string
+          trainer_id: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          documents_provided?: Json
+          id?: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["verification_request_status"]
+          submitted_at?: string
+          trainer_id: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          documents_provided?: Json
+          id?: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["verification_request_status"]
+          submitted_at?: string
+          trainer_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainer_verification_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_verification_requests_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trainer_visibility_settings: {
         Row: {
@@ -1731,6 +1797,10 @@ export type Database = {
         Args: { trainer_id: string }
         Returns: boolean
       }
+      request_trainer_verification: {
+        Args: { p_documents?: Json }
+        Returns: string
+      }
       restrict_communication: {
         Args: { p_user_id: string; p_reason: string }
         Returns: undefined
@@ -1760,6 +1830,15 @@ export type Database = {
           client_uuid: string
           trainer_uuid: string
           new_stage: Database["public"]["Enums"]["engagement_stage"]
+        }
+        Returns: undefined
+      }
+      update_trainer_verification_status: {
+        Args: {
+          p_trainer_id: string
+          p_status: Database["public"]["Enums"]["verification_status_enum"]
+          p_admin_notes?: string
+          p_rejection_reason?: string
         }
         Returns: undefined
       }
@@ -1813,6 +1892,12 @@ export type Database = {
         | "business_rule"
         | "integration"
       user_type: "client" | "trainer" | "admin"
+      verification_request_status:
+        | "pending"
+        | "under_review"
+        | "approved"
+        | "rejected"
+        | "resubmitted"
       verification_status_enum: "pending" | "verified" | "rejected"
       visibility_state: "hidden" | "blurred" | "visible"
       waitlist_status: "active" | "contacted" | "converted" | "archived"
@@ -1992,6 +2077,13 @@ export const Constants = {
         "integration",
       ],
       user_type: ["client", "trainer", "admin"],
+      verification_request_status: [
+        "pending",
+        "under_review",
+        "approved",
+        "rejected",
+        "resubmitted",
+      ],
       verification_status_enum: ["pending", "verified", "rejected"],
       visibility_state: ["hidden", "blurred", "visible"],
       waitlist_status: ["active", "contacted", "converted", "archived"],

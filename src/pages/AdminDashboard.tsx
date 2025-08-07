@@ -10,7 +10,8 @@ import { TestUserCleanup } from '@/components/admin/TestUserCleanup';
 import { KnowledgeBaseAdmin } from '@/components/knowledge-base/KnowledgeBaseAdmin';
 import { VisibilitySettingsSection } from '@/components/trainer-setup/VisibilitySettingsSection';
 import { UserValidityChecker } from '@/components/admin/UserValidityChecker';
-import { Settings, Users, Shield, BarChart3, ArrowLeft, Home, Eye, Upload, FileText, ExternalLink } from 'lucide-react';
+import { VerificationManagement } from '@/components/admin/VerificationManagement';
+import { Settings, Users, Shield, BarChart3, ArrowLeft, Home, Eye, Upload, FileText, ExternalLink, CheckCircle } from 'lucide-react';
 import { useUserRoles } from '@/hooks/useUserRoles';
 
 export const AdminDashboard = () => {
@@ -82,10 +83,14 @@ export const AdminDashboard = () => {
       </div>
 
       <Tabs defaultValue="users" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="users" className="flex items-center gap-2">
             <Users className="w-4 h-4" />
             Users & Roles
+          </TabsTrigger>
+          <TabsTrigger value="verification" className="flex items-center gap-2">
+            <CheckCircle className="w-4 h-4" />
+            Verification
           </TabsTrigger>
           <TabsTrigger value="bulk-upload" className="flex items-center gap-2">
             <Upload className="w-4 h-4" />
@@ -115,6 +120,10 @@ export const AdminDashboard = () => {
 
           <TabsContent value="users">
             <UserManagement />
+          </TabsContent>
+
+          <TabsContent value="verification">
+            <VerificationManagement />
           </TabsContent>
 
           <TabsContent value="bulk-upload">

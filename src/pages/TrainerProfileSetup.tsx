@@ -18,6 +18,7 @@ import { RatesSection } from "@/components/trainer-setup/RatesSection";
 import { TestimonialsSection } from "@/components/trainer-setup/TestimonialsSection";
 import { PackageWaysOfWorkingSection } from "@/components/trainer-setup/PackageWaysOfWorkingSection";
 import { ProfileManagementSection } from "@/components/trainer-setup/ProfileManagementSection";
+import { VerificationSection } from "@/components/trainer-setup/VerificationSection";
 
 const TrainerProfileSetup = () => {
   const { user, loading } = useAuth();
@@ -88,7 +89,7 @@ const TrainerProfileSetup = () => {
     terms_agreed: false,
   });
 
-  const totalSteps = 8;
+  const totalSteps = 9;
 
   const stepTitles = [
     "Basic Info",
@@ -98,7 +99,8 @@ const TrainerProfileSetup = () => {
     "Rates & Discovery Calls",
     "Testimonials & Case Studies",
     "Ways of Working",
-    "Profile Management"
+    "Profile Management",
+    "Verification"
   ];
 
   // Redirect if not trainer - using simple check
@@ -175,7 +177,8 @@ const TrainerProfileSetup = () => {
         'rates': 5,
         'testimonials': 6,
         'ways-of-working': 7,
-        'management': 8
+        'management': 8,
+        'verification': 9
       };
       
       const stepNumber = tabMap[tab];
@@ -311,6 +314,9 @@ const TrainerProfileSetup = () => {
         return allPackagesConfigured ? 'completed' : (anyPackageConfigured ? 'partial' : 'not_started');
       case 8:
         return formData.terms_agreed ? 'completed' : 'not_started';
+      case 9:
+        // Verification step - always accessible but completion depends on verification status
+        return 'completed'; // This is a read-only informational step
       default:
         return 'not_started';
     }
@@ -410,11 +416,19 @@ const TrainerProfileSetup = () => {
       if (currentStep < totalSteps) {
         setCurrentStep(currentStep + 1);
       } else {
-        await updateProfile({ ...formData, profile_setup_completed: true });
-        toast({
-          title: "Profile completed!",
-          description: "Your trainer profile is now live and visible to clients.",
-        });
+        // Step 9 is verification - don't complete profile, just show final message
+        if (currentStep === 9) {
+          toast({
+            title: "Profile Setup Complete!",
+            description: "Your profile is ready. Submit for verification to go live.",
+          });
+        } else {
+          await updateProfile({ ...formData, profile_setup_completed: true });
+          toast({
+            title: "Profile completed!",
+            description: "Your trainer profile is now live and visible to clients.",
+          });
+        }
         navigate('/trainer/dashboard');
       }
     } catch (error) {
@@ -486,6 +500,8 @@ const TrainerProfileSetup = () => {
         return <PackageWaysOfWorkingSection {...commonProps} />;
       case 8:
         return <ProfileManagementSection {...commonProps} />;
+      case 9:
+        return <VerificationSection />;
       default:
         return null;
     }
