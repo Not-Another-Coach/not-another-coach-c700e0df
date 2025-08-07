@@ -10,6 +10,7 @@ import { DatabaseDocumentation } from '@/components/documentation/DatabaseDocume
 import { FeaturesDocumentation } from '@/components/documentation/FeaturesDocumentation';
 import { APIDocumentation } from '@/components/documentation/APIDocumentation';
 import { MessageComposer } from '@/components/documentation/MessageComposer';
+import { KBDocumentationTab } from '@/components/knowledge-base/KBDocumentationTab';
 
 const Documentation = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -67,7 +68,7 @@ const Documentation = () => {
         </div>
 
         <Tabs defaultValue="pages" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="pages" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
               Pages
@@ -87,6 +88,10 @@ const Documentation = () => {
             <TabsTrigger value="features" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
               Features
+            </TabsTrigger>
+            <TabsTrigger value="knowledge-base" className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Knowledge Base
             </TabsTrigger>
           </TabsList>
 
@@ -108,6 +113,10 @@ const Documentation = () => {
 
           <TabsContent value="features" className="mt-6">
             <FeaturesDocumentation searchTerm={searchTerm} onElementClick={handleElementClick} />
+          </TabsContent>
+
+          <TabsContent value="knowledge-base" className="mt-6">
+            <KBDocumentationTab searchTerm={searchTerm} onElementClick={handleElementClick} />
           </TabsContent>
         </Tabs>
 

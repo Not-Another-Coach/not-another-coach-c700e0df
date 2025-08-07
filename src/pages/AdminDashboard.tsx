@@ -7,6 +7,7 @@ import { UserManagement } from '@/components/admin/UserManagement';
 import { FeedbackQuestionBuilder } from '@/components/admin/FeedbackQuestionBuilder';
 import { BulkUserUpload } from '@/components/admin/BulkUserUpload';
 import { TestUserCleanup } from '@/components/admin/TestUserCleanup';
+import { KnowledgeBaseAdmin } from '@/components/knowledge-base/KnowledgeBaseAdmin';
 import { VisibilitySettingsSection } from '@/components/trainer-setup/VisibilitySettingsSection';
 import { Settings, Users, Shield, BarChart3, ArrowLeft, Home, Eye, Upload, FileText, ExternalLink } from 'lucide-react';
 import { useUserRoles } from '@/hooks/useUserRoles';
@@ -80,7 +81,7 @@ export const AdminDashboard = () => {
       </div>
 
       <Tabs defaultValue="users" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="users" className="flex items-center gap-2">
             <Users className="w-4 h-4" />
             Users & Roles
@@ -92,6 +93,10 @@ export const AdminDashboard = () => {
           <TabsTrigger value="feedback" className="flex items-center gap-2">
             <Settings className="w-4 h-4" />
             Feedback Builder
+          </TabsTrigger>
+          <TabsTrigger value="knowledge-base" className="flex items-center gap-2">
+            <FileText className="w-4 h-4" />
+            Knowledge Base
           </TabsTrigger>
           <TabsTrigger value="visibility" className="flex items-center gap-2">
             <Eye className="w-4 h-4" />
@@ -120,6 +125,10 @@ export const AdminDashboard = () => {
 
           <TabsContent value="feedback">
             <FeedbackQuestionBuilder />
+          </TabsContent>
+
+          <TabsContent value="knowledge-base">
+            <KnowledgeBaseAdmin />
           </TabsContent>
 
         <TabsContent value="visibility">
