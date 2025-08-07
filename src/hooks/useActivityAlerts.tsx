@@ -5,7 +5,7 @@ import { useProfile } from './useProfile';
 
 interface ActivityAlert {
   id: string;
-  type: 'discovery_call_booked' | 'discovery_call_cancelled' | 'discovery_call_rescheduled' | 'client_inquiry' | 'profile_view' | 'testimonial' | 'conversion' | 'waitlist_joined';
+  type: 'discovery_call_booked' | 'discovery_call_cancelled' | 'discovery_call_rescheduled' | 'client_inquiry' | 'profile_view' | 'testimonial' | 'conversion' | 'waitlist_joined' | 'coach_selection_request' | 'coach_selection_sent';
   title: string;
   description: string;
   metadata?: any;
@@ -86,8 +86,16 @@ export function useActivityAlerts() {
       // Transform alerts data and filter based on user type and targeting
       const transformedAlerts: ActivityAlert[] = (alertsData || [])
         .filter(alert => {
-          // Filter out discovery call alerts for clients
+          // For clients, show their own selection confirmations
           if (profile?.user_type === 'client') {
+            // Check if this is a coach selection sent alert specifically for this client
+            if (alert.alert_type === 'coach_selection_sent') {
+              const targetAudience = alert.target_audience as any;
+              if (targetAudience?.clients && Array.isArray(targetAudience.clients)) {
+                return targetAudience.clients.includes(user.id);
+              }
+            }
+            // Filter out discovery call alerts for clients
             const discoveryCallTypes = ['discovery_call_booked', 'discovery_call_cancelled', 'discovery_call_rescheduled'];
             return !discoveryCallTypes.includes(alert.alert_type);
           }
@@ -180,6 +188,10 @@ export function useActivityAlerts() {
         return '📈';
       case 'waitlist_joined':
         return '⏰';
+      case 'coach_selection_request':
+        return '🎯';
+      case 'coach_selection_sent':
+        return '✅';
       default:
         return '🔔';
     }
@@ -203,6 +215,10 @@ export function useActivityAlerts() {
         return 'bg-orange-50 border-orange-200';
       case 'waitlist_joined':
         return 'bg-amber-50 border-amber-200';
+      case 'coach_selection_request':
+        return 'bg-blue-50 border-blue-200';
+      case 'coach_selection_sent':
+        return 'bg-green-50 border-green-200';
       default:
         return 'bg-gray-50 border-gray-200';
     }
