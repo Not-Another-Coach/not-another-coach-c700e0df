@@ -7,11 +7,12 @@ import { UserManagement } from '@/components/admin/UserManagement';
 import { FeedbackQuestionBuilder } from '@/components/admin/FeedbackQuestionBuilder';
 import { BulkUserUpload } from '@/components/admin/BulkUserUpload';
 import { TestUserCleanup } from '@/components/admin/TestUserCleanup';
+import { ClientTrainerCleanup } from '@/components/admin/ClientTrainerCleanup';
 import { KnowledgeBaseAdmin } from '@/components/knowledge-base/KnowledgeBaseAdmin';
 import { VisibilitySettingsSection } from '@/components/trainer-setup/VisibilitySettingsSection';
 import { UserValidityChecker } from '@/components/admin/UserValidityChecker';
 import { VerificationManagement } from '@/components/admin/VerificationManagement';
-import { Settings, Users, Shield, BarChart3, ArrowLeft, Home, Eye, Upload, FileText, ExternalLink, CheckCircle } from 'lucide-react';
+import { Settings, Users, Shield, BarChart3, ArrowLeft, Home, Eye, Upload, FileText, ExternalLink, CheckCircle, Trash2 } from 'lucide-react';
 import { useUserRoles } from '@/hooks/useUserRoles';
 
 export const AdminDashboard = () => {
@@ -83,7 +84,7 @@ export const AdminDashboard = () => {
       </div>
 
       <Tabs defaultValue="users" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-8">
+        <TabsList className="grid w-full grid-cols-9">
           <TabsTrigger value="users" className="flex items-center gap-2">
             <Users className="w-4 h-4" />
             Users & Roles
@@ -108,6 +109,10 @@ export const AdminDashboard = () => {
             <Eye className="w-4 h-4" />
             Content Visibility
           </TabsTrigger>
+          <TabsTrigger value="cleanup" className="flex items-center gap-2">
+            <Trash2 className="w-4 h-4" />
+            Data Cleanup
+          </TabsTrigger>
           <TabsTrigger value="analytics" className="flex items-center gap-2">
             <BarChart3 className="w-4 h-4" />
             Analytics
@@ -131,6 +136,10 @@ export const AdminDashboard = () => {
               <BulkUserUpload />
               <TestUserCleanup />
             </div>
+          </TabsContent>
+
+          <TabsContent value="cleanup">
+            <ClientTrainerCleanup />
           </TabsContent>
 
           <TabsContent value="feedback">

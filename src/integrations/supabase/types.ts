@@ -1706,6 +1706,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_cleanup_client_trainer_interactions: {
+        Args: { p_client_id: string; p_trainer_id: string }
+        Returns: Json
+      }
       client_has_sent_first_message: {
         Args: { conversation_uuid: string; client_uuid: string }
         Returns: boolean
