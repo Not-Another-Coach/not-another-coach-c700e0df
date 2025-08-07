@@ -34,70 +34,34 @@ export function useCoachSelection() {
     packageDuration: string,
     clientMessage?: string
   ) => {
-    console.log('🔥 COACH SELECTION REQUEST START');
-    console.log('🔥 User object:', user);
-    console.log('🔥 User ID:', user?.id);
-    console.log('🔥 User email:', user?.email);
-
     if (!user) {
-      console.error('❌ No user found - not authenticated');
       toast.error('You must be logged in to select a coach');
       return { error: 'Not authenticated' };
     }
 
     setLoading(true);
     try {
-      console.log('🚀 Creating coach selection request with params:', {
-        trainerId,
-        packageId,
-        packageName,
-        packagePrice,
-        packageDuration,
-        clientMessage,
-        userId: user?.id
-      });
-
-      console.log('📡 Calling Supabase RPC function with exact params...');
-      const rpcParams = {
+      const { data, error } = await supabase.rpc('create_coach_selection_request', {
         p_trainer_id: trainerId,
         p_package_id: packageId,
         p_package_name: packageName,
         p_package_price: Number(packagePrice),
         p_package_duration: packageDuration,
         p_client_message: clientMessage || null
-      };
-      console.log('🔍 RPC Parameters:', rpcParams);
-      
-      const { data, error } = await supabase.rpc('create_coach_selection_request', rpcParams);
-
-      console.log('📥 Raw Supabase response:', { data, error });
+      });
 
       if (error) {
-        console.error('❌ Supabase RPC error:', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code,
-          fullError: error
-        });
         toast.error(`Failed to send selection request: ${error.message}`);
         return { error };
       }
 
-      console.log('🎉 Selection request created successfully with ID:', data);
       toast.success('Selection request sent to coach!');
       return { data, success: true };
     } catch (error: any) {
-      console.error('💥 Exception caught during request:', {
-        message: error?.message,
-        stack: error?.stack,
-        fullError: error
-      });
       toast.error(`Failed to send selection request: ${error?.message || 'Unknown error'}`);
       return { error };
     } finally {
       setLoading(false);
-      console.log('🔚 COACH SELECTION REQUEST END');
     }
   }, [user]);
 
