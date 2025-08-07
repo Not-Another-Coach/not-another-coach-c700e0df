@@ -859,215 +859,7 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
       </div>
 
       {/* Discovery Call Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Add Training Package</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Create tiered pricing packages to offer better value
-            </p>
-          </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="package_name">Package Name</Label>
-            <Input
-              id="package_name"
-              value={newPackage.name}
-              onChange={(e) => setNewPackage({ ...newPackage, name: e.target.value })}
-              placeholder="e.g., 10 PT Sessions Bundle"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="package_sessions">Number of Sessions (Optional)</Label>
-            <Input
-              id="package_sessions"
-              type="number"
-              value={newPackage.sessions}
-              onChange={(e) => setNewPackage({ ...newPackage, sessions: e.target.value })}
-              placeholder="e.g., 10"
-              min="1"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="package_price">Price</Label>
-            <div className="relative">
-              <div className="absolute left-3 top-3 text-muted-foreground">
-                {currency === 'GBP' ? '£' : currency === 'USD' ? '$' : '€'}
-              </div>
-              <Input
-                id="package_price"
-                type="number"
-                value={newPackage.price}
-                onChange={(e) => setNewPackage({ ...newPackage, price: e.target.value })}
-                placeholder="400"
-                className="pl-8"
-                min="0"
-                step="0.01"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="package_description">Description</Label>
-            <Textarea
-              id="package_description"
-              value={newPackage.description}
-              onChange={(e) => setNewPackage({ ...newPackage, description: e.target.value })}
-              placeholder="e.g., 10 x 1-hour PT sessions with personalized nutrition plan"
-              rows={3}
-              className="resize-none"
-            />
-          </div>
-          
-          {/* Promotional Options */}
-          <div className="space-y-3 border-t pt-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label className="text-sm font-medium">Promotional Offer</Label>
-                <p className="text-xs text-muted-foreground">Mark this package as a limited-time promotion</p>
-              </div>
-              <Switch
-                checked={newPackage.isPromotion}
-                onCheckedChange={(checked) => setNewPackage({ ...newPackage, isPromotion: checked })}
-              />
-            </div>
-            
-            {newPackage.isPromotion && (
-              <div className="space-y-3 ml-4 border-l-2 border-orange-200 pl-4">
-                <div className="space-y-2">
-                  <Label htmlFor="promotion_start_date">Promotion Start Date</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !newPackage.promotionStartDate && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {newPackage.promotionStartDate ? (
-                          format(newPackage.promotionStartDate, "PPP")
-                        ) : (
-                          <span>Pick start date</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={newPackage.promotionStartDate}
-                        onSelect={(date) => setNewPackage({ ...newPackage, promotionStartDate: date })}
-                        disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
-                        initialFocus
-                        className={cn("p-3 pointer-events-auto")}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="promotion_end_date">Promotion End Date</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !newPackage.promotionEndDate && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {newPackage.promotionEndDate ? (
-                          format(newPackage.promotionEndDate, "PPP")
-                        ) : (
-                          <span>Pick end date</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={newPackage.promotionEndDate}
-                        onSelect={(date) => setNewPackage({ ...newPackage, promotionEndDate: date })}
-                        disabled={(date) => {
-                          const today = new Date(new Date().setHours(0, 0, 0, 0));
-                          const startDate = newPackage.promotionStartDate || today;
-                          return date < startDate;
-                        }}
-                        initialFocus
-                        className={cn("p-3 pointer-events-auto")}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                
-                {newPackage.promotionStartDate && newPackage.promotionEndDate && (
-                  <div className="bg-orange-50 border border-orange-200 rounded p-2">
-                    <p className="text-xs text-orange-700">
-                      🎯 This promotion will be visible to clients from {format(newPackage.promotionStartDate, 'MMM dd, yyyy')} until {format(newPackage.promotionEndDate, 'MMM dd, yyyy')}
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          <Button 
-            onClick={addPackage}
-            className="w-full"
-            disabled={!newPackage.name || !newPackage.price || !newPackage.description || (newPackage.isPromotion && (!newPackage.promotionStartDate || !newPackage.promotionEndDate))}
-          >
-            Add Package
-          </Button>
-        </CardContent>
-      </Card>
-
-      {/* Clone Confirmation Dialog */}
-      <AlertDialog open={showCloneConfirmation} onOpenChange={setShowCloneConfirmation}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Clone Package with Ways of Working?</AlertDialogTitle>
-            <AlertDialogDescription className="space-y-2">
-              <p>Do you want to copy the "Ways of Working" from this package to the new one?</p>
-              <div className="bg-muted p-3 rounded-md text-sm">
-                <p className="font-medium">• Choose "Yes" - Ways of working will be copied automatically</p>
-                <p className="font-medium">• Choose "No" - You can set up ways of working later in the Ways of Working tab</p>
-              </div>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => {
-              setShowCloneConfirmation(false);
-              setPackageToClone(null);
-            }}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction 
-              variant="outline"
-              onClick={() => {
-                if (packageToClone) {
-                  clonePackage(packageToClone, false);
-                  setShowCloneConfirmation(false);
-                  setPackageToClone(null);
-                }
-              }}
-            >
-              No - Clone Package Only
-            </AlertDialogAction>
-            <AlertDialogAction onClick={() => {
-              if (packageToClone) {
-                clonePackage(packageToClone, true);
-                setShowCloneConfirmation(false);
-                setPackageToClone(null);
-              }
-            }}>
-              Yes - Clone with Ways of Working
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="w-5 h-5" />
@@ -1351,12 +1143,12 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
                                               updateSettings({ availability_schedule: newSchedule });
                                             }}
                                           >
-                                            <Trash2 className="w-4 h-4 text-red-500" />
-                                           </Button>
-                                         </div>
-                                         );
-                                       })
-                                     )}
+                                             <Trash2 className="w-4 h-4 text-red-500" />
+                                            </Button>
+                                          </div>
+                                        );
+                                      })
+                                    )}
                                    </div>
                                  )}
                                </div>
@@ -1541,7 +1333,6 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction 
-              variant="outline"
               onClick={() => {
                 if (packageToClone) {
                   clonePackage(packageToClone, false);
