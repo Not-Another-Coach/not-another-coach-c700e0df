@@ -275,7 +275,13 @@ export default function Auth() {
         {/* Main Auth Card */}
         <Card className="w-full max-w-md mx-auto">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold">Not Another Coach</CardTitle>
+            <div className="flex justify-center mb-4">
+              <img 
+                src="/lovable-uploads/368e4fe2-dde9-4c8b-8657-e97a19f8afff.png" 
+                alt="Not Another Coach" 
+                className="h-24 w-auto"
+              />
+            </div>
             <CardDescription>Not another app. Not another coach. This is personal.</CardDescription>
           </CardHeader>
           <CardContent>
