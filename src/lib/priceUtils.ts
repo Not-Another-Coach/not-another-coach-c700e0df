@@ -9,6 +9,9 @@ interface PackageOption {
   price: number;
   currency: string;
   description: string;
+  isPromotion?: boolean;
+  promotionStartDate?: Date;
+  promotionEndDate?: Date;
 }
 
 /**
@@ -67,4 +70,42 @@ export function formatPriceRange(priceRange: { min: number; max: number; currenc
 export function getTrainerDisplayPrice(trainer: any): string {
   const priceRange = calculatePriceRange(trainer.package_options);
   return formatPriceRange(priceRange);
+}
+
+/**
+ * Checks if a promotional package is currently active
+ * @param pkg - Package with promotional dates
+ * @returns Boolean indicating if promotion is active
+ */
+export function isPromotionActive(pkg: PackageOption): boolean {
+  if (!pkg.isPromotion || !pkg.promotionStartDate || !pkg.promotionEndDate) {
+    return false;
+  }
+  
+  const now = new Date();
+  const startDate = new Date(pkg.promotionStartDate);
+  const endDate = new Date(pkg.promotionEndDate);
+  
+  // Set time to start/end of day for proper comparison
+  startDate.setHours(0, 0, 0, 0);
+  endDate.setHours(23, 59, 59, 999);
+  
+  return now >= startDate && now <= endDate;
+}
+
+/**
+ * Filters packages to only show active promotions and regular packages
+ * @param packages - Array of packages
+ * @returns Filtered packages that are either not promotions or active promotions
+ */
+export function getVisiblePackages(packages: PackageOption[] | null | undefined): PackageOption[] {
+  if (!packages) return [];
+  
+  return packages.filter(pkg => {
+    // Show non-promotional packages
+    if (!pkg.isPromotion) return true;
+    
+    // Show promotional packages only if they're active
+    return isPromotionActive(pkg);
+  });
 }

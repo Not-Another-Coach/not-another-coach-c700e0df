@@ -6,11 +6,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Plus, ExternalLink, DollarSign, PoundSterling, Euro, Calendar, Sparkles, Edit, Clock, Info } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Trash2, Plus, ExternalLink, DollarSign, PoundSterling, Euro, Calendar as CalendarIcon, Sparkles, Edit, Clock, Info } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useDiscoveryCallSettings } from "@/hooks/useDiscoveryCallSettings";
 import { useToast } from "@/hooks/use-toast";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface RatesSectionProps {
   formData: any;
@@ -25,6 +29,9 @@ interface TrainingPackage {
   price: number;
   currency: string;
   description: string;
+  isPromotion?: boolean;
+  promotionStartDate?: Date;
+  promotionEndDate?: Date;
 }
 
 // Helper function to check if two time slots overlap
@@ -89,6 +96,9 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
     sessions: "",
     price: "",
     description: "",
+    isPromotion: false,
+    promotionStartDate: undefined as Date | undefined,
+    promotionEndDate: undefined as Date | undefined,
   });
   const [newPackage, setNewPackage] = useState({
     name: "",
@@ -96,7 +106,10 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
     price: "",
     description: "",
     terms: "",
-    inclusions: [] as string[]
+    inclusions: [] as string[],
+    isPromotion: false,
+    promotionStartDate: undefined as Date | undefined,
+    promotionEndDate: undefined as Date | undefined,
   });
 
   // Use the discovery call settings hook
@@ -111,7 +124,10 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
         sessions: newPackage.sessions ? parseInt(newPackage.sessions) : undefined,
         price: parseFloat(newPackage.price),
         currency,
-        description: newPackage.description
+        description: newPackage.description,
+        isPromotion: newPackage.isPromotion,
+        promotionStartDate: newPackage.promotionStartDate,
+        promotionEndDate: newPackage.promotionEndDate,
       };
       
       const updatedPackages = [...packages, trainingPackage];
@@ -124,7 +140,10 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
         price: "",
         description: "",
         terms: "",
-        inclusions: []
+        inclusions: [],
+        isPromotion: false,
+        promotionStartDate: undefined,
+        promotionEndDate: undefined,
       });
     }
   };
@@ -136,7 +155,10 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
       sessions: pkg.sessions,
       price: pkg.price,
       currency: pkg.currency,
-      description: pkg.description
+      description: pkg.description,
+      isPromotion: pkg.isPromotion,
+      promotionStartDate: pkg.promotionStartDate,
+      promotionEndDate: pkg.promotionEndDate,
     };
     
     // Set up for immediate editing
@@ -147,6 +169,9 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
       sessions: clonedPackage.sessions?.toString() || "",
       price: clonedPackage.price.toString(),
       description: clonedPackage.description,
+      isPromotion: clonedPackage.isPromotion || false,
+      promotionStartDate: clonedPackage.promotionStartDate,
+      promotionEndDate: clonedPackage.promotionEndDate,
     });
   };
 
@@ -164,6 +189,9 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
       sessions: pkg.sessions?.toString() || "",
       price: pkg.price.toString(),
       description: pkg.description,
+      isPromotion: pkg.isPromotion || false,
+      promotionStartDate: pkg.promotionStartDate,
+      promotionEndDate: pkg.promotionEndDate,
     });
   };
 
@@ -174,7 +202,10 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
         name: editPackageData.name,
         sessions: editPackageData.sessions ? parseInt(editPackageData.sessions) : undefined,
         price: parseFloat(editPackageData.price),
-        description: editPackageData.description
+        description: editPackageData.description,
+        isPromotion: editPackageData.isPromotion,
+        promotionStartDate: editPackageData.promotionStartDate,
+        promotionEndDate: editPackageData.promotionEndDate,
       };
       
       let updatedPackages;
@@ -207,6 +238,9 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
         sessions: "",
         price: "",
         description: "",
+        isPromotion: false,
+        promotionStartDate: undefined,
+        promotionEndDate: undefined,
       });
     }
   };
@@ -305,6 +339,12 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
                      <div className="flex-1">
                        <div className="flex items-center gap-2 mb-2">
                          <h4 className="font-medium">{pkg.name}</h4>
+                         {pkg.isPromotion && (
+                           <Badge variant="default" className="bg-orange-500 text-white">
+                             <Sparkles className="h-3 w-3 mr-1" />
+                             Promotion
+                           </Badge>
+                         )}
                          {pkg.sessions && (
                            <Badge variant="outline">{pkg.sessions} sessions</Badge>
                          )}
@@ -313,6 +353,11 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
                          </Badge>
                        </div>
                        <p className="text-sm text-muted-foreground">{pkg.description}</p>
+                       {pkg.isPromotion && pkg.promotionStartDate && pkg.promotionEndDate && (
+                         <p className="text-xs text-orange-600 mt-1">
+                           🎯 Valid from {format(pkg.promotionStartDate, 'MMM dd, yyyy')} to {format(pkg.promotionEndDate, 'MMM dd, yyyy')}
+                         </p>
+                       )}
                      </div>
                       <div className="flex items-center gap-2">
                         <Button
@@ -417,12 +462,106 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
                                   rows={3}
                                   className="resize-none"
                                 />
-                              </div>
+                               </div>
+                               
+                               {/* Promotional Options */}
+                               <div className="space-y-3 border-t pt-4">
+                                 <div className="flex items-center justify-between">
+                                   <div>
+                                     <Label className="text-sm font-medium">Promotional Offer</Label>
+                                     <p className="text-xs text-muted-foreground">Mark this package as a limited-time promotion</p>
+                                   </div>
+                                   <Switch
+                                     checked={editPackageData.isPromotion}
+                                     onCheckedChange={(checked) => setEditPackageData({ ...editPackageData, isPromotion: checked })}
+                                   />
+                                 </div>
+                                 
+                                 {editPackageData.isPromotion && (
+                                   <div className="space-y-3 ml-4 border-l-2 border-orange-200 pl-4">
+                                     <div className="space-y-2">
+                                       <Label className="text-sm">Promotion Start Date</Label>
+                                       <Popover>
+                                         <PopoverTrigger asChild>
+                                           <Button
+                                             variant="outline"
+                                             className={cn(
+                                               "w-full justify-start text-left font-normal",
+                                               !editPackageData.promotionStartDate && "text-muted-foreground"
+                                             )}
+                                           >
+                                             <CalendarIcon className="mr-2 h-4 w-4" />
+                                             {editPackageData.promotionStartDate ? (
+                                               format(editPackageData.promotionStartDate, "PPP")
+                                             ) : (
+                                               <span>Pick start date</span>
+                                             )}
+                                           </Button>
+                                         </PopoverTrigger>
+                                         <PopoverContent className="w-auto p-0" align="start">
+                                           <Calendar
+                                             mode="single"
+                                             selected={editPackageData.promotionStartDate}
+                                             onSelect={(date) => setEditPackageData({ ...editPackageData, promotionStartDate: date })}
+                                             disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                                             initialFocus
+                                             className={cn("p-3 pointer-events-auto")}
+                                           />
+                                         </PopoverContent>
+                                       </Popover>
+                                     </div>
+                                     
+                                     <div className="space-y-2">
+                                       <Label className="text-sm">Promotion End Date</Label>
+                                       <Popover>
+                                         <PopoverTrigger asChild>
+                                           <Button
+                                             variant="outline"
+                                             className={cn(
+                                               "w-full justify-start text-left font-normal",
+                                               !editPackageData.promotionEndDate && "text-muted-foreground"
+                                             )}
+                                           >
+                                             <CalendarIcon className="mr-2 h-4 w-4" />
+                                             {editPackageData.promotionEndDate ? (
+                                               format(editPackageData.promotionEndDate, "PPP")
+                                             ) : (
+                                               <span>Pick end date</span>
+                                             )}
+                                           </Button>
+                                         </PopoverTrigger>
+                                         <PopoverContent className="w-auto p-0" align="start">
+                                           <Calendar
+                                             mode="single"
+                                             selected={editPackageData.promotionEndDate}
+                                             onSelect={(date) => setEditPackageData({ ...editPackageData, promotionEndDate: date })}
+                                             disabled={(date) => {
+                                               const today = new Date(new Date().setHours(0, 0, 0, 0));
+                                               const startDate = editPackageData.promotionStartDate || today;
+                                               return date < startDate;
+                                             }}
+                                             initialFocus
+                                             className={cn("p-3 pointer-events-auto")}
+                                           />
+                                         </PopoverContent>
+                                       </Popover>
+                                     </div>
+                                     
+                                     {editPackageData.promotionStartDate && editPackageData.promotionEndDate && (
+                                       <div className="bg-orange-50 border border-orange-200 rounded p-2">
+                                         <p className="text-xs text-orange-700">
+                                           🎯 This promotion will be visible to clients from {format(editPackageData.promotionStartDate, 'MMM dd, yyyy')} until {format(editPackageData.promotionEndDate, 'MMM dd, yyyy')}
+                                         </p>
+                                       </div>
+                                     )}
+                                   </div>
+                                 )}
+                               </div>
                               
                                <div className="flex gap-2">
                                  <Button 
                                    onClick={saveEditedPackage}
-                                   disabled={!editPackageData.name || !editPackageData.description || (isCloning && !editPackageData.price)}
+                                   disabled={!editPackageData.name || !editPackageData.description || (isCloning && (!editPackageData.price || (editPackageData.isPromotion && (!editPackageData.promotionStartDate || !editPackageData.promotionEndDate))))}
                                    className="flex-1"
                                  >
                                   {isCloning ? 'Create Package' : 'Save Changes'}
@@ -576,9 +715,103 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
             />
           </div>
           
+          {/* Promotional Options */}
+          <div className="space-y-3 border-t pt-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-sm font-medium">Promotional Offer</Label>
+                <p className="text-xs text-muted-foreground">Mark this package as a limited-time promotion</p>
+              </div>
+              <Switch
+                checked={newPackage.isPromotion}
+                onCheckedChange={(checked) => setNewPackage({ ...newPackage, isPromotion: checked })}
+              />
+            </div>
+            
+            {newPackage.isPromotion && (
+              <div className="space-y-3 ml-4 border-l-2 border-orange-200 pl-4">
+                <div className="space-y-2">
+                  <Label htmlFor="promotion_start_date">Promotion Start Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !newPackage.promotionStartDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {newPackage.promotionStartDate ? (
+                          format(newPackage.promotionStartDate, "PPP")
+                        ) : (
+                          <span>Pick start date</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={newPackage.promotionStartDate}
+                        onSelect={(date) => setNewPackage({ ...newPackage, promotionStartDate: date })}
+                        disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="promotion_end_date">Promotion End Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !newPackage.promotionEndDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {newPackage.promotionEndDate ? (
+                          format(newPackage.promotionEndDate, "PPP")
+                        ) : (
+                          <span>Pick end date</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={newPackage.promotionEndDate}
+                        onSelect={(date) => setNewPackage({ ...newPackage, promotionEndDate: date })}
+                        disabled={(date) => {
+                          const today = new Date(new Date().setHours(0, 0, 0, 0));
+                          const startDate = newPackage.promotionStartDate || today;
+                          return date < startDate;
+                        }}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                
+                {newPackage.promotionStartDate && newPackage.promotionEndDate && (
+                  <div className="bg-orange-50 border border-orange-200 rounded p-2">
+                    <p className="text-xs text-orange-700">
+                      🎯 This promotion will be visible to clients from {format(newPackage.promotionStartDate, 'MMM dd, yyyy')} until {format(newPackage.promotionEndDate, 'MMM dd, yyyy')}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          
           <Button 
             onClick={addPackage}
-            disabled={!newPackage.name || !newPackage.price || !newPackage.description}
+            disabled={!newPackage.name || !newPackage.price || !newPackage.description || (newPackage.isPromotion && (!newPackage.promotionStartDate || !newPackage.promotionEndDate))}
             className="w-full"
           >
             <Plus className="h-4 w-4 mr-2" />
