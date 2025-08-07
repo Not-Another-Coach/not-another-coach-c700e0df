@@ -46,7 +46,7 @@ export function useCoachSelection() {
         p_package_id: packageId,
         p_package_name: packageName,
         p_package_price: Number(packagePrice),
-        p_package_duration: packageDuration,
+        p_package_duration: packageDuration || '',
         p_client_message: clientMessage || null
       });
 
