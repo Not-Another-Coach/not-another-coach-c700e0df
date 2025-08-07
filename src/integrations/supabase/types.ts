@@ -1619,11 +1619,11 @@ export type Database = {
       }
       create_coach_selection_request: {
         Args: {
-          p_package_duration: string
+          p_trainer_id: string
           p_package_id: string
           p_package_name: string
           p_package_price: number
-          p_trainer_id: string
+          p_package_duration: string
           p_client_message?: string
         }
         Returns: string

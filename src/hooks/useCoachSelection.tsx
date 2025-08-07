@@ -59,11 +59,11 @@ export function useCoachSelection() {
 
       console.log('📡 Calling Supabase RPC function...');
       const { data, error } = await supabase.rpc('create_coach_selection_request', {
-        p_package_duration: packageDuration,
+        p_trainer_id: trainerId,
         p_package_id: packageId,
         p_package_name: packageName,
         p_package_price: packagePrice,
-        p_trainer_id: trainerId,
+        p_package_duration: packageDuration,
         p_client_message: clientMessage
       });
 
