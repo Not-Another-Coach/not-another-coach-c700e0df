@@ -151,11 +151,11 @@ const tables = [
         purpose: 'Coach capacity and availability management'
       },
       {
-        name: 'trainer_availability_settings',
-        description: 'Detailed trainer scheduling and discovery call availability',
-        keyColumns: ['trainer_id', 'availability_schedule', 'offers_discovery_call', 'prep_notes'],
+        name: 'discovery_call_settings',
+        description: 'Discovery call availability and scheduling settings for trainers',
+        keyColumns: ['trainer_id', 'offers_discovery_call', 'discovery_call_duration', 'discovery_call_availability_schedule', 'prep_notes'],
         relationships: ['References profiles.id'],
-        purpose: 'Granular availability and booking configuration'
+        purpose: 'Manage trainer discovery call availability and booking preferences'
       },
       {
         name: 'waitlist_interactions',

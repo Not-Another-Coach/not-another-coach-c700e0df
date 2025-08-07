@@ -34,9 +34,10 @@ export function useRealTrainers() {
             is_verified,
             verification_status,
             package_options,
-            trainer_availability_settings!inner(
+            discovery_call_settings(
               offers_discovery_call
-            )
+            ),
+            availability_slots
           `)
           .eq('user_type', 'trainer')
           .eq('profile_published', true)
@@ -66,9 +67,9 @@ export function useRealTrainers() {
             profilePhotoUrl: trainer.profile_photo_url,
             certifications: trainer.qualifications || [],
             description: trainer.bio || "Professional fitness trainer dedicated to helping you achieve your goals.",
-            availability: "Available",
+            availability: trainer.availability_slots && Array.isArray(trainer.availability_slots) && trainer.availability_slots.length > 0 ? "Available" : "Limited Availability",
             trainingType: trainer.training_types || ["In-Person", "Online"],
-            offers_discovery_call: trainer.trainer_availability_settings?.[0]?.offers_discovery_call || false,
+            offers_discovery_call: trainer.discovery_call_settings?.[0]?.offers_discovery_call || false,
             package_options: (trainer.package_options as any[]) || []
           };
         }) || [];

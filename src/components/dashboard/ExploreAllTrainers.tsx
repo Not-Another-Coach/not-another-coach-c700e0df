@@ -86,7 +86,8 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
             is_verified,
             profile_photo_url,
             training_types,
-            trainer_availability_settings!inner(offers_discovery_call)
+            discovery_call_settings(offers_discovery_call),
+            availability_slots
           `)
           .eq('user_type', 'trainer')
           .eq('profile_published', true)
@@ -113,9 +114,9 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
             image: imageUrl,
             certifications: trainer.qualifications || [],
             description: trainer.bio || "Professional fitness trainer dedicated to helping you achieve your goals.",
-            availability: "Available",
+            availability: trainer.availability_slots && Array.isArray(trainer.availability_slots) && trainer.availability_slots.length > 0 ? "Available" : "Limited Availability",
             trainingType: trainer.training_types || ["In-Person", "Online"],
-            offers_discovery_call: trainer.trainer_availability_settings?.[0]?.offers_discovery_call || false
+            offers_discovery_call: trainer.discovery_call_settings?.[0]?.offers_discovery_call || false
           };
         }) || [];
 

@@ -38,7 +38,7 @@ export function useDiscoveryCallSettings() {
     
     try {
       const { data, error } = await supabase
-        .from('trainer_availability_settings')
+        .from('discovery_call_settings')
         .select('*')
         .eq('trainer_id', user.id)
         .maybeSingle();
@@ -87,7 +87,7 @@ export function useDiscoveryCallSettings() {
       const updatedSettings = { ...settings, ...updates };
       
       const { data, error } = await supabase
-        .from('trainer_availability_settings')
+        .from('discovery_call_settings')
         .upsert({
           trainer_id: user.id,
           offers_discovery_call: updatedSettings.offers_discovery_call,

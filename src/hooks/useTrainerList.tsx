@@ -28,7 +28,7 @@ export function useTrainerList() {
             location, 
             specializations, 
             profile_photo_url,
-            trainer_availability_settings(
+            discovery_call_settings(
               offers_discovery_call
             )
           `)
@@ -48,7 +48,7 @@ export function useTrainerList() {
           location: trainer.location,
           specializations: trainer.specializations,
           profilePhotoUrl: trainer.profile_photo_url,
-          offers_discovery_call: trainer.trainer_availability_settings?.[0]?.offers_discovery_call || false
+          offers_discovery_call: trainer.discovery_call_settings?.[0]?.offers_discovery_call || false
         })) || [];
 
         setTrainers(trainerOptions);

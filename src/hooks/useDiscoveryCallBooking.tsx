@@ -68,7 +68,7 @@ export function useDiscoveryCallBooking() {
   const getTrainerSettings = async (trainerId: string) => {
     try {
       const { data, error } = await supabase
-        .from('trainer_availability_settings')
+        .from('discovery_call_settings')
         .select('*')
         .eq('trainer_id', trainerId)
         .eq('offers_discovery_call', true)

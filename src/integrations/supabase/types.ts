@@ -618,6 +618,50 @@ export type Database = {
           },
         ]
       }
+      discovery_call_settings: {
+        Row: {
+          availability_schedule: Json
+          created_at: string
+          discovery_call_availability_schedule: Json | null
+          discovery_call_duration: number
+          id: string
+          offers_discovery_call: boolean
+          prep_notes: string | null
+          trainer_id: string
+          updated_at: string
+        }
+        Insert: {
+          availability_schedule?: Json
+          created_at?: string
+          discovery_call_availability_schedule?: Json | null
+          discovery_call_duration?: number
+          id?: string
+          offers_discovery_call?: boolean
+          prep_notes?: string | null
+          trainer_id: string
+          updated_at?: string
+        }
+        Update: {
+          availability_schedule?: Json
+          created_at?: string
+          discovery_call_availability_schedule?: Json | null
+          discovery_call_duration?: number
+          id?: string
+          offers_discovery_call?: boolean
+          prep_notes?: string | null
+          trainer_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainer_availability_settings_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       discovery_calls: {
         Row: {
           booking_notes: string | null
@@ -1428,50 +1472,6 @@ export type Database = {
           year_certified?: number | null
         }
         Relationships: []
-      }
-      trainer_availability_settings: {
-        Row: {
-          availability_schedule: Json
-          created_at: string
-          discovery_call_availability_schedule: Json | null
-          discovery_call_duration: number
-          id: string
-          offers_discovery_call: boolean
-          prep_notes: string | null
-          trainer_id: string
-          updated_at: string
-        }
-        Insert: {
-          availability_schedule?: Json
-          created_at?: string
-          discovery_call_availability_schedule?: Json | null
-          discovery_call_duration?: number
-          id?: string
-          offers_discovery_call?: boolean
-          prep_notes?: string | null
-          trainer_id: string
-          updated_at?: string
-        }
-        Update: {
-          availability_schedule?: Json
-          created_at?: string
-          discovery_call_availability_schedule?: Json | null
-          discovery_call_duration?: number
-          id?: string
-          offers_discovery_call?: boolean
-          prep_notes?: string | null
-          trainer_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "trainer_availability_settings_trainer_id_fkey"
-            columns: ["trainer_id"]
-            isOneToOne: true
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       trainer_visibility_settings: {
         Row: {
