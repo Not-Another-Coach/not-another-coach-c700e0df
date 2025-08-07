@@ -1342,18 +1342,18 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
 
       {/* Clone Confirmation Dialog */}
       <AlertDialog open={showCloneConfirmation} onOpenChange={setShowCloneConfirmation}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-lg">
           <AlertDialogHeader>
             <AlertDialogTitle>Clone Package with Ways of Working?</AlertDialogTitle>
-            <AlertDialogDescription className="space-y-2">
+            <AlertDialogDescription className="space-y-3">
               <p>Do you want to copy the "Ways of Working" from this package to the new one?</p>
-              <div className="bg-muted p-3 rounded-md text-sm">
+              <div className="bg-muted p-4 rounded-md text-sm space-y-2">
                 <p className="font-medium">• Choose "Yes" - Ways of working will be copied automatically</p>
                 <p className="font-medium">• Choose "No" - You can set up ways of working later in the Ways of Working tab</p>
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
             <AlertDialogCancel onClick={() => {
               setShowCloneConfirmation(false);
               setPackageToClone(null);
@@ -1361,6 +1361,7 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction 
+              className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
               onClick={() => {
                 if (packageToClone) {
                   clonePackage(packageToClone, false);
