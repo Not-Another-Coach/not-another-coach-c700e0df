@@ -144,7 +144,7 @@ export const KnowledgeBaseAdmin: React.FC = () => {
                 </SelectContent>
               </Select>
 
-              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+              <Select value={selectedStatus} onValueChange={(value) => setSelectedStatus(value as KBArticleStatus | '')}>
                 <SelectTrigger>
                   <SelectValue placeholder="All statuses" />
                 </SelectTrigger>
@@ -156,7 +156,7 @@ export const KnowledgeBaseAdmin: React.FC = () => {
                 </SelectContent>
               </Select>
 
-              <Select value={selectedContentType} onValueChange={setSelectedContentType}>
+              <Select value={selectedContentType} onValueChange={(value) => setSelectedContentType(value as KBContentType | '')}>
                 <SelectTrigger>
                   <SelectValue placeholder="All types" />
                 </SelectTrigger>
