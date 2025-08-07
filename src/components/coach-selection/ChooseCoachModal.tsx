@@ -61,8 +61,16 @@ export const ChooseCoachModal = ({
   };
 
   const handleSubmit = async () => {
-    if (!selectedPackage) return;
+    console.log('🚨 MODAL SUBMIT CLICKED - handleSubmit called');
+    console.log('🚨 Selected package:', selectedPackage);
+    console.log('🚨 Client message:', clientMessage);
+    
+    if (!selectedPackage) {
+      console.log('❌ No package selected, returning early');
+      return;
+    }
 
+    console.log('📞 About to call createSelectionRequest...');
     const result = await createSelectionRequest(
       trainer.id,
       selectedPackage.id,
@@ -72,9 +80,13 @@ export const ChooseCoachModal = ({
       clientMessage.trim() || undefined
     );
 
+    console.log('📋 createSelectionRequest result:', result);
     if (result.success) {
+      console.log('✅ Success - closing modal');
       onOpenChange(false);
       onSuccess?.();
+    } else {
+      console.log('❌ Failed - keeping modal open');
     }
   };
 
