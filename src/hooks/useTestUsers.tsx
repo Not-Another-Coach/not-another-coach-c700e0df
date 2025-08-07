@@ -77,11 +77,38 @@ export const useTestUsers = () => {
     }
   };
 
-  // Default test users for non-admin access
+  // Default test users for non-admin access or when no real users exist
   const getDefaultTestUsers = (): TestUser[] => [
     {
+      id: 'demo-client-1',
+      email: 'client@demo.com',
+      first_name: 'Demo',
+      last_name: 'Client',
+      user_type: 'client',
+      roles: [],
+      password: 'demo123'
+    },
+    {
+      id: 'demo-trainer-1',
+      email: 'trainer@demo.com',
+      first_name: 'Demo',
+      last_name: 'Trainer', 
+      user_type: 'trainer',
+      roles: [],
+      password: 'demo123'
+    },
+    {
+      id: 'demo-admin-1',
+      email: 'admin@demo.com',
+      first_name: 'Demo',
+      last_name: 'Admin',
+      user_type: 'admin',
+      roles: ['admin'],
+      password: 'admin123'
+    },
+    {
       id: 'test-client-1',
-      email: 'client@test.com',
+      email: 'test.client@example.com',
       first_name: 'Test',
       last_name: 'Client',
       user_type: 'client',
@@ -90,29 +117,22 @@ export const useTestUsers = () => {
     },
     {
       id: 'test-trainer-1',
-      email: 'trainer@test.com',
+      email: 'test.trainer@example.com',
       first_name: 'Test',
       last_name: 'Trainer',
       user_type: 'trainer',
       roles: [],
-      password: 'password123'
-    },
-    {
-      id: 'test-admin-1',
-      email: 'admin@test.com',
-      first_name: 'Test',
-      last_name: 'Admin',
-      user_type: 'admin',
-      roles: ['admin'],
       password: 'password123'
     }
   ];
 
   // Assign test passwords based on email patterns
   const getTestPassword = (email: string): string => {
-    if (email.includes('test')) return 'password123';
     if (email.includes('demo')) return 'demo123';
+    if (email.includes('test')) return 'password123';
     if (email.includes('admin')) return 'admin123';
+    if (email.includes('trainer')) return 'trainer123';
+    if (email.includes('client')) return 'client123';
     return 'password123'; // Default test password
   };
 
