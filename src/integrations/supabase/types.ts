@@ -684,6 +684,240 @@ export type Database = {
           },
         ]
       }
+      kb_article_revisions: {
+        Row: {
+          article_id: string
+          change_summary: string | null
+          content: string
+          created_at: string
+          created_by: string | null
+          excerpt: string | null
+          id: string
+          metadata: Json | null
+          revision_number: number
+          title: string
+        }
+        Insert: {
+          article_id: string
+          change_summary?: string | null
+          content: string
+          created_at?: string
+          created_by?: string | null
+          excerpt?: string | null
+          id?: string
+          metadata?: Json | null
+          revision_number: number
+          title: string
+        }
+        Update: {
+          article_id?: string
+          change_summary?: string | null
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          excerpt?: string | null
+          id?: string
+          metadata?: Json | null
+          revision_number?: number
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kb_article_revisions_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "kb_articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kb_article_tags: {
+        Row: {
+          article_id: string
+          created_at: string
+          id: string
+          tag_id: string
+        }
+        Insert: {
+          article_id: string
+          created_at?: string
+          id?: string
+          tag_id: string
+        }
+        Update: {
+          article_id?: string
+          created_at?: string
+          id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kb_article_tags_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "kb_articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kb_article_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "kb_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kb_articles: {
+        Row: {
+          category_id: string | null
+          content: string
+          content_type: Database["public"]["Enums"]["kb_content_type"]
+          created_at: string
+          created_by: string | null
+          excerpt: string | null
+          featured: boolean
+          id: string
+          metadata: Json | null
+          published_at: string | null
+          search_vector: unknown | null
+          slug: string
+          status: Database["public"]["Enums"]["kb_article_status"]
+          title: string
+          updated_at: string
+          updated_by: string | null
+          view_count: number
+        }
+        Insert: {
+          category_id?: string | null
+          content: string
+          content_type: Database["public"]["Enums"]["kb_content_type"]
+          created_at?: string
+          created_by?: string | null
+          excerpt?: string | null
+          featured?: boolean
+          id?: string
+          metadata?: Json | null
+          published_at?: string | null
+          search_vector?: unknown | null
+          slug: string
+          status?: Database["public"]["Enums"]["kb_article_status"]
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+          view_count?: number
+        }
+        Update: {
+          category_id?: string | null
+          content?: string
+          content_type?: Database["public"]["Enums"]["kb_content_type"]
+          created_at?: string
+          created_by?: string | null
+          excerpt?: string | null
+          featured?: boolean
+          id?: string
+          metadata?: Json | null
+          published_at?: string | null
+          search_vector?: unknown | null
+          slug?: string
+          status?: Database["public"]["Enums"]["kb_article_status"]
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          view_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kb_articles_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "kb_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kb_categories: {
+        Row: {
+          color: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          display_order: number
+          icon: string | null
+          id: string
+          is_active: boolean
+          name: string
+          parent_id: string | null
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          display_order?: number
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          parent_id?: string | null
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          display_order?: number
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          parent_id?: string | null
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kb_categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "kb_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kb_tags: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          slug: string
+          usage_count: number
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          slug: string
+          usage_count?: number
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          slug?: string
+          usage_count?: number
+        }
+        Relationships: []
+      }
       login_history: {
         Row: {
           failure_reason: string | null
@@ -1523,6 +1757,15 @@ export type Database = {
         | "discovery_in_progress"
         | "unmatched"
         | "declined"
+      kb_article_status: "draft" | "published" | "archived"
+      kb_content_type:
+        | "feature"
+        | "api"
+        | "component"
+        | "hook"
+        | "database"
+        | "business_rule"
+        | "integration"
       user_type: "client" | "trainer" | "admin"
       verification_status_enum: "pending" | "verified" | "rejected"
       visibility_state: "hidden" | "blurred" | "visible"
@@ -1691,6 +1934,16 @@ export const Constants = {
         "discovery_in_progress",
         "unmatched",
         "declined",
+      ],
+      kb_article_status: ["draft", "published", "archived"],
+      kb_content_type: [
+        "feature",
+        "api",
+        "component",
+        "hook",
+        "database",
+        "business_rule",
+        "integration",
       ],
       user_type: ["client", "trainer", "admin"],
       verification_status_enum: ["pending", "verified", "rejected"],
