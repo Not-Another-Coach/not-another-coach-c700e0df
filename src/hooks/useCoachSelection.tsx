@@ -41,6 +41,16 @@ export function useCoachSelection() {
 
     setLoading(true);
     try {
+      console.log('🚀 Creating coach selection request:', {
+        trainerId,
+        packageId,
+        packageName,
+        packagePrice,
+        packageDuration,
+        clientMessage,
+        user: user?.id
+      });
+
       const { data, error } = await supabase.rpc('create_coach_selection_request', {
         p_trainer_id: trainerId,
         p_package_id: packageId,
@@ -50,17 +60,20 @@ export function useCoachSelection() {
         p_client_message: clientMessage
       });
 
+      console.log('✅ Coach selection response:', { data, error });
+
       if (error) {
-        console.error('Error creating selection request:', error);
-        toast.error('Failed to send selection request');
+        console.error('❌ Error creating selection request:', error);
+        toast.error(`Failed to send selection request: ${error.message}`);
         return { error };
       }
 
+      console.log('🎉 Selection request created successfully:', data);
       toast.success('Selection request sent to coach!');
       return { data, success: true };
     } catch (error) {
-      console.error('Error creating selection request:', error);
-      toast.error('Failed to send selection request');
+      console.error('💥 Exception creating selection request:', error);
+      toast.error(`Failed to send selection request: ${error.message}`);
       return { error };
     } finally {
       setLoading(false);
