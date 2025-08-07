@@ -24,14 +24,14 @@ interface ShortlistedTrainer {
   };
 }
 
-export function useShortlistedTrainers() {
+export function useShortlistedTrainers(refreshTrigger?: number) {
   const { user } = useAuth();
   const { 
     getShortlistedTrainers: getEngagementShortlisted, 
     shortlistTrainer: engagementShortlistTrainer,
     updateEngagementStage,
     loading: engagementLoading 
-  } = useTrainerEngagement();
+  } = useTrainerEngagement(refreshTrigger);
   
   const [discoveryCallsData, setDiscoveryCallsData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

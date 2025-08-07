@@ -9,12 +9,14 @@ import trainerEmma from "@/assets/trainer-emma.jpg";
 // Fallback images for trainers
 const trainerImages = [trainerAlex, trainerSarah, trainerMike, trainerEmma];
 
-export function useRealTrainers() {
+export function useRealTrainers(refreshTrigger?: number) {
   const [trainers, setTrainers] = useState<Trainer[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchTrainers = async () => {
+      console.log('🔄 Fetching trainers data...');
+      setLoading(true);
       try {
         const { data, error } = await supabase
           .from('profiles')
@@ -75,6 +77,7 @@ export function useRealTrainers() {
         }) || [];
 
         setTrainers(realTrainers);
+        console.log('✅ Trainers data loaded:', realTrainers.length, 'trainers');
       } catch (error) {
         console.error('Error fetching trainers:', error);
       } finally {
@@ -83,7 +86,7 @@ export function useRealTrainers() {
     };
 
     fetchTrainers();
-  }, []);
+  }, [refreshTrigger]);
 
   return { trainers, loading };
 }

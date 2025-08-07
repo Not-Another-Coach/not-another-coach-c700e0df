@@ -9,6 +9,7 @@ import { useRealTrainers } from "@/hooks/useRealTrainers";
 import { useAuth } from "@/hooks/useAuth";
 import { useDiscoveryCallData } from "@/hooks/useDiscoveryCallData";
 import { useWaitlist } from "@/hooks/useWaitlist";
+import { useDataSynchronization } from "@/hooks/useDataSynchronization";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +20,8 @@ import { FloatingMessageButton } from "@/components/FloatingMessageButton";
 import { useProfile } from "@/hooks/useProfile";
 import { WaitlistJoinButton } from "@/components/waitlist/WaitlistJoinButton";
 import { ClientHeader } from "@/components/ClientHeader";
+import { DataSyncIndicator } from "@/components/ui/data-sync-indicator";
+import { SkeletonTrainerCard } from "@/components/ui/skeleton-trainer-card";
 import { 
   ArrowLeft, 
   Heart, 
@@ -31,7 +34,8 @@ import {
   X,
   BarChart3,
   Clock,
-  Edit
+  Edit,
+  RefreshCw
 } from "lucide-react";
 import { DiscoveryCallBookingModal } from "@/components/discovery-call/DiscoveryCallBookingModal";
 import { ClientRescheduleModal } from "@/components/dashboard/ClientRescheduleModal";
@@ -43,7 +47,20 @@ export default function MyTrainers() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { profile } = useProfile();
-  const { trainers: allTrainers } = useRealTrainers();
+  
+  // Data synchronization hook
+  const { 
+    loadingState, 
+    markTrainersLoaded, 
+    markEngagementLoaded, 
+    refreshData, 
+    refreshTrigger,
+    isDataReady,
+    isLoading,
+    isRefreshing
+  } = useDataSynchronization();
+  
+  const { trainers: allTrainers, loading: trainersLoading } = useRealTrainers(refreshTrigger);
   const { conversations } = useConversations();
   
   // Hooks for trainer management
@@ -56,7 +73,7 @@ export default function MyTrainers() {
     removeFromShortlist, 
     bookDiscoveryCall,
     shortlistedTrainers: actualShortlistedTrainers 
-  } = useShortlistedTrainers();
+  } = useShortlistedTrainers(refreshTrigger);
   const { createConversation } = useConversations();
   const { 
     getEngagementStage, 
@@ -65,8 +82,9 @@ export default function MyTrainers() {
     getDiscoveryStageTrainers, 
     getMatchedTrainers,
     updateEngagementStage,
-    likeTrainer 
-  } = useTrainerEngagement();
+    likeTrainer,
+    loading: engagementLoading
+  } = useTrainerEngagement(refreshTrigger);
   const { hasActiveDiscoveryCall, getDiscoveryCallForTrainer } = useDiscoveryCallData();
   const { getCoachAvailability, checkClientWaitlistStatus, joinWaitlist, removeFromWaitlist } = useWaitlist();
 
@@ -76,6 +94,19 @@ export default function MyTrainers() {
   const [selectedForComparison, setSelectedForComparison] = useState<string[]>([]);
   const [showComparison, setShowComparison] = useState(false);
   const [trainerAvailability, setTrainerAvailability] = useState<{[key: string]: any}>({});
+
+  // Notify sync hook when data is loaded
+  useEffect(() => {
+    if (!trainersLoading && allTrainers.length >= 0) {
+      markTrainersLoaded();
+    }
+  }, [trainersLoading, allTrainers, markTrainersLoaded]);
+
+  useEffect(() => {
+    if (!engagementLoading) {
+      markEngagementLoaded();
+    }
+  }, [engagementLoading, markEngagementLoaded]);
 
   // Listen for filter events from dashboard
   useEffect(() => {
@@ -381,7 +412,17 @@ export default function MyTrainers() {
     saved: trainersWithStatus.filter(t => t.status === 'saved').length,
     shortlisted: trainersWithStatus.filter(t => t.status === 'shortlisted').length,
     discovery: trainersWithStatus.filter(t => t.status === 'discovery').length
-  }), [trainersWithStatus]);
+    }), [trainersWithStatus]);
+
+  // Enhanced debug logging
+  useEffect(() => {
+    console.log('🔍 Current user:', user?.id, user?.email);
+    console.log('📊 Counts:', counts);
+    console.log('📋 Filtered trainers:', filteredTrainers.length);
+    console.log('🗨️ Conversations:', conversations.length);
+    console.log('🎯 Data ready state:', isDataReady);
+    console.log('⏳ Loading state:', { trainersLoading, engagementLoading, isLoading });
+  }, [counts, filteredTrainers.length, conversations.length, user, isDataReady, trainersLoading, engagementLoading, isLoading]);
 
   // Handler functions
   const handleSaveTrainer = async (trainerId: string) => {
@@ -816,6 +857,28 @@ export default function MyTrainers() {
 
   return (
     <div className="space-y-6">
+      {/* Header with sync status */}
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-2">
+        <div className="flex items-center gap-4">
+          <h1 className="text-2xl font-bold">My Trainers</h1>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={refreshData}
+            disabled={isRefreshing}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+        </div>
+        <DataSyncIndicator 
+          isLoading={isLoading}
+          isRefreshing={isRefreshing}
+          isConnected={true}
+        />
+      </div>
+
       {/* Filter Tabs */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-6">
         <Tabs value={activeFilter} onValueChange={(value: any) => setActiveFilter(value)} className="w-full sm:w-auto">
@@ -854,7 +917,13 @@ export default function MyTrainers() {
       </div>
 
       {/* Trainers Grid */}
-      {filteredTrainers.length > 0 ? (
+      {!isDataReady ? (
+        <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <SkeletonTrainerCard key={index} />
+          ))}
+        </div>
+      ) : filteredTrainers.length > 0 ? (
         <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           {filteredTrainers.map((trainerData) => (
             <div key={`${trainerData.trainer.id}-${trainerData.status}`} className="space-y-3">

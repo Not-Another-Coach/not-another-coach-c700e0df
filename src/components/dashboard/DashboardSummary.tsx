@@ -110,6 +110,9 @@ export function DashboardSummary({ profile, onTabChange }: DashboardSummaryProps
         detail: { filter } 
       });
       window.dispatchEvent(event);
+      
+      // Also trigger a data refresh to ensure latest data is shown
+      window.dispatchEvent(new CustomEvent('refreshMyTrainersData'));
     }, 100);
   };
 

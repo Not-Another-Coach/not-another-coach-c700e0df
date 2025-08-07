@@ -16,13 +16,18 @@ interface TrainerEngagement {
   becameClientAt?: string;
 }
 
-export function useTrainerEngagement() {
+export function useTrainerEngagement(refreshTrigger?: number) {
   const { user } = useAuth();
   const [engagements, setEngagements] = useState<TrainerEngagement[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchEngagements = async () => {
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+    
+    console.log('🔄 Fetching engagement data for user:', user.id);
 
     try {
       const { data, error } = await supabase
@@ -48,6 +53,7 @@ export function useTrainerEngagement() {
       })) || [];
 
       setEngagements(engagementData);
+      console.log('✅ Engagement data loaded:', engagementData.length, 'engagements');
     } catch (error) {
       console.error('Error fetching engagements:', error);
     } finally {
@@ -57,7 +63,7 @@ export function useTrainerEngagement() {
 
   useEffect(() => {
     fetchEngagements();
-  }, [user]);
+  }, [user, refreshTrigger]);
 
   const updateEngagementStage = async (trainerId: string, newStage: EngagementStage) => {
     if (!user) return;
