@@ -790,22 +790,7 @@ export default function MyTrainers() {
                   No Call Available
                 </Button>
               )}
-             </div>
-              
-               {/* Bottom button - Choose as Coach for discovery in progress or past calls */}
-               {!hasWaitlistEnabled && (isDiscoveryInProgress || isCallInPast ? (
-                 <ChooseCoachButton
-                   trainer={trainer}
-                   stage={getEngagementStage(trainer.id)}
-                   className="w-full"
-                 />
-               ) : (
-                 <ChooseCoachButton
-                   trainer={trainer}
-                   stage={getEngagementStage(trainer.id)}
-                   className="w-full"
-                 />
-               ))}
+              </div>
             </div>
           );
 
