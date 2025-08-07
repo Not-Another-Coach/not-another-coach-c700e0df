@@ -58,7 +58,7 @@ export const KBArticleEditor: React.FC<KBArticleEditorProps> = ({
         excerpt: article.excerpt || '',
         content_type: article.content_type,
         status: article.status,
-        category_id: article.category_id || '',
+        category_id: article.category_id || 'no-category',
         featured: article.featured,
         metadata: article.metadata || {},
       });
@@ -107,6 +107,7 @@ export const KBArticleEditor: React.FC<KBArticleEditorProps> = ({
     try {
       const articleData = {
         ...formData,
+        category_id: formData.category_id === 'no-category' ? null : formData.category_id,
         published_at: formData.status === 'published' ? new Date().toISOString() : null,
       };
 
@@ -279,7 +280,7 @@ export const KBArticleEditor: React.FC<KBArticleEditorProps> = ({
                       <SelectValue placeholder="Select a category" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">No category</SelectItem>
+                      <SelectItem value="no-category">No category</SelectItem>
                       {categories.map((category) => (
                         <SelectItem key={category.id} value={category.id}>
                           {category.name}

@@ -21,18 +21,18 @@ import { format } from 'date-fns';
 export const KnowledgeBaseAdmin: React.FC = () => {
   const [activeTab, setActiveTab] = useState('articles');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [selectedStatus, setSelectedStatus] = useState<KBArticleStatus | ''>('');
-  const [selectedContentType, setSelectedContentType] = useState<KBContentType | ''>('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all-categories');
+  const [selectedStatus, setSelectedStatus] = useState<KBArticleStatus | '' | 'all-statuses'>('all-statuses');
+  const [selectedContentType, setSelectedContentType] = useState<KBContentType | '' | 'all-types'>('all-types');
   const [editingArticle, setEditingArticle] = useState<KBArticle | null>(null);
   const [isCreating, setIsCreating] = useState(false);
 
   const { data: categories = [] } = useKBCategories();
   const { data: articles = [], isLoading } = useKBArticles({
     search: searchTerm || undefined,
-    category: selectedCategory || undefined,
-    status: selectedStatus || undefined,
-    content_type: selectedContentType || undefined,
+    category: selectedCategory === 'all-categories' ? undefined : selectedCategory || undefined,
+    status: selectedStatus === 'all-statuses' ? undefined : selectedStatus || undefined,
+    content_type: selectedContentType === 'all-types' ? undefined : selectedContentType || undefined,
   });
   const deleteArticle = useDeleteKBArticle();
 
@@ -135,7 +135,7 @@ export const KnowledgeBaseAdmin: React.FC = () => {
                   <SelectValue placeholder="All categories" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All categories</SelectItem>
+                  <SelectItem value="all-categories">All categories</SelectItem>
                   {categories.map((category) => (
                     <SelectItem key={category.id} value={category.id}>
                       {category.name}
@@ -144,24 +144,24 @@ export const KnowledgeBaseAdmin: React.FC = () => {
                 </SelectContent>
               </Select>
 
-              <Select value={selectedStatus} onValueChange={(value) => setSelectedStatus(value as KBArticleStatus | '')}>
+              <Select value={selectedStatus} onValueChange={(value) => setSelectedStatus(value as KBArticleStatus | 'all-statuses')}>
                 <SelectTrigger>
                   <SelectValue placeholder="All statuses" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All statuses</SelectItem>
+                  <SelectItem value="all-statuses">All statuses</SelectItem>
                   <SelectItem value="published">Published</SelectItem>
                   <SelectItem value="draft">Draft</SelectItem>
                   <SelectItem value="archived">Archived</SelectItem>
                 </SelectContent>
               </Select>
 
-              <Select value={selectedContentType} onValueChange={(value) => setSelectedContentType(value as KBContentType | '')}>
+              <Select value={selectedContentType} onValueChange={(value) => setSelectedContentType(value as KBContentType | 'all-types')}>
                 <SelectTrigger>
                   <SelectValue placeholder="All types" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All types</SelectItem>
+                  <SelectItem value="all-types">All types</SelectItem>
                   <SelectItem value="feature">Feature</SelectItem>
                   <SelectItem value="api">API</SelectItem>
                   <SelectItem value="component">Component</SelectItem>
