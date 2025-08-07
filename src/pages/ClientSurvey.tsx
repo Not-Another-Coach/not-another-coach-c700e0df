@@ -36,13 +36,13 @@ const ClientSurvey = () => {
     secondary_goals: [] as string[],
     
     // Training location and format
-    training_location_preference: "hybrid" as "in-person" | "online" | "hybrid",
-    open_to_virtual_coaching: true,
+    training_location_preference: null as "in-person" | "online" | "hybrid" | null,
+    open_to_virtual_coaching: false,
     
     // Training frequency and scheduling
     preferred_training_frequency: null as number | null,
     preferred_time_slots: [] as string[],
-    start_timeline: "flexible" as "urgent" | "next_month" | "flexible",
+    start_timeline: null as "urgent" | "next_month" | "flexible" | null,
     
     // Coaching style preferences
     preferred_coaching_style: [] as string[],
@@ -53,14 +53,14 @@ const ClientSurvey = () => {
     experience_level: "beginner" as "beginner" | "intermediate" | "advanced",
     
     // Package and budget preferences
-    preferred_package_type: "ongoing" as "ongoing" | "short_term" | "single_session",
+    preferred_package_type: null as "ongoing" | "short_term" | "single_session" | null,
     budget_range_min: null as number | null,
     budget_range_max: null as number | null,
     budget_flexibility: "flexible" as "strict" | "flexible" | "negotiable",
     
     // Waitlist and availability preferences
-    waitlist_preference: "quality_over_speed" as "asap" | "quality_over_speed",
-    flexible_scheduling: true,
+    waitlist_preference: null as "asap" | "quality_over_speed" | null,
+    flexible_scheduling: false,
     
     // Survey completion tracking
     client_survey_completed: false,
@@ -113,21 +113,21 @@ const ClientSurvey = () => {
         ...prev,
         primary_goals: profileData.primary_goals || [],
         secondary_goals: profileData.secondary_goals || [],
-        training_location_preference: profileData.training_location_preference || "hybrid",
-        open_to_virtual_coaching: profileData.open_to_virtual_coaching ?? true,
+        training_location_preference: profileData.training_location_preference || null,
+        open_to_virtual_coaching: profileData.open_to_virtual_coaching ?? false,
         preferred_training_frequency: profileData.preferred_training_frequency,
         preferred_time_slots: profileData.preferred_time_slots || [],
-        start_timeline: profileData.start_timeline || "flexible",
+        start_timeline: profileData.start_timeline || null,
         preferred_coaching_style: profileData.preferred_coaching_style || [],
         motivation_factors: profileData.motivation_factors || [],
         client_personality_type: profileData.client_personality_type || [],
         experience_level: profileData.experience_level || "beginner",
-        preferred_package_type: profileData.preferred_package_type || "ongoing",
+        preferred_package_type: profileData.preferred_package_type || null,
         budget_range_min: profileData.budget_range_min,
         budget_range_max: profileData.budget_range_max,
         budget_flexibility: profileData.budget_flexibility || "flexible",
-        waitlist_preference: profileData.waitlist_preference || "quality_over_speed",
-        flexible_scheduling: profileData.flexible_scheduling ?? true,
+        waitlist_preference: profileData.waitlist_preference || null,
+        flexible_scheduling: profileData.flexible_scheduling ?? false,
         client_survey_step: profileData.client_survey_step || 1,
       }));
       
@@ -197,8 +197,8 @@ const ClientSurvey = () => {
         }
         break;
       case 8: // Availability
-        if (!formData.start_timeline) {
-          newErrors.start_timeline = "Please select when you'd like to start";
+        if (!formData.waitlist_preference) {
+          newErrors.start_timeline = "Please select how you'd prefer to handle trainer availability";
         }
         break;
     }
@@ -227,7 +227,7 @@ const ClientSurvey = () => {
         // Budget is mandatory - either min or max must be set
         return (formData.budget_range_min || formData.budget_range_max) ? 'completed' : 'not_started';
       case 8:
-        return formData.start_timeline ? 'completed' : 'not_started';
+        return formData.waitlist_preference ? 'completed' : 'not_started';
       default:
         return 'not_started';
     }
@@ -286,6 +286,8 @@ const ClientSurvey = () => {
       
       if (currentStep < totalSteps) {
         setCurrentStep(currentStep + 1);
+        // Scroll to top when moving to next step
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         // Complete the survey - update both completion flags
         await updateProfile({ 
@@ -316,6 +318,8 @@ const ClientSurvey = () => {
   const handlePrevious = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
+      // Scroll to top when moving to previous step
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 

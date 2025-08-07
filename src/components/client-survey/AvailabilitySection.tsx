@@ -100,7 +100,7 @@ export function AvailabilitySection({ formData, updateFormData, errors, clearFie
           <div className="flex items-center space-x-3">
             <Checkbox
               id="flexible-scheduling"
-              checked={formData.flexible_scheduling ?? true}
+              checked={formData.flexible_scheduling ?? false}
               onCheckedChange={handleFlexibleSchedulingToggle}
             />
             <div className="flex-1">
