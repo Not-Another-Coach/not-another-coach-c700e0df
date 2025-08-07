@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
@@ -24,6 +25,7 @@ interface ClientSurveyWidgetProps {
 export function ClientSurveyWidget({ profile }: ClientSurveyWidgetProps) {
   const { updateProfile } = useProfile();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -276,6 +278,9 @@ export function ClientSurveyWidget({ profile }: ClientSurveyWidgetProps) {
           title: "Survey completed!",
           description: "Your preferences have been updated.",
         });
+        
+        // Navigate to dashboard after completing survey
+        navigate('/client/dashboard');
       }
     } catch (error) {
       console.error('Error in handleNext:', error);
@@ -360,7 +365,9 @@ export function ClientSurveyWidget({ profile }: ClientSurveyWidgetProps) {
         </div>
         <Button variant="outline" size="sm" onClick={() => handleSave()}>
           <Save className="h-4 w-4 sm:mr-2" />
-          <span className="hidden sm:inline">Save Progress</span>
+          <span className="hidden sm:inline">
+            {profile?.client_survey_completed ? "Update/Save" : "Save Progress"}
+          </span>
         </Button>
       </div>
 
