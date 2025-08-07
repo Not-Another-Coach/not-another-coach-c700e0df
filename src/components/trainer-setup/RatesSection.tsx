@@ -126,6 +126,26 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
     }
   };
 
+  const clonePackage = (pkg: TrainingPackage) => {
+    const clonedPackage: TrainingPackage = {
+      id: Date.now().toString(),
+      name: `${pkg.name} (Copy)`,
+      sessions: pkg.sessions,
+      price: pkg.price,
+      currency: pkg.currency,
+      description: pkg.description
+    };
+    
+    const updatedPackages = [...packages, clonedPackage];
+    setPackages(updatedPackages);
+    updateFormData({ package_options: updatedPackages });
+    
+    toast({
+      title: "Package cloned",
+      description: "Package has been duplicated and can now be edited",
+    });
+  };
+
   const removePackage = (id: string) => {
     const updatedPackages = packages.filter(pkg => pkg.id !== id);
     setPackages(updatedPackages);
@@ -244,54 +264,30 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
         <div>
           <Label>Session Rates</Label>
           <p className="text-sm text-muted-foreground">
-            Set your rates for different types of training sessions
+            Set your rate for personal training sessions
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="hourly_rate">1-on-1 Personal Training *</Label>
-            <div className="relative">
-              <div className="absolute left-3 top-3 text-muted-foreground">
-                {currency === 'GBP' ? '£' : currency === 'USD' ? '$' : '€'}
-              </div>
-              <Input
-                id="hourly_rate"
-                type="number"
-                value={formData.hourly_rate || ""}
-                onChange={(e) => updateFormData({ hourly_rate: e.target.value ? parseFloat(e.target.value) : null })}
-                placeholder="50"
-                className="pl-8"
-                min="0"
-                step="0.01"
-              />
+        <div className="space-y-2">
+          <Label htmlFor="hourly_rate">Personal Training Rate *</Label>
+          <div className="relative">
+            <div className="absolute left-3 top-3 text-muted-foreground">
+              {currency === 'GBP' ? '£' : currency === 'USD' ? '$' : '€'}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Your rate per hour for 1-on-1 sessions
-            </p>
+            <Input
+              id="hourly_rate"
+              type="number"
+              value={formData.hourly_rate || ""}
+              onChange={(e) => updateFormData({ hourly_rate: e.target.value ? parseFloat(e.target.value) : null })}
+              placeholder="50"
+              className="pl-8"
+              min="0"
+              step="0.01"
+            />
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="class_rate">Group/Class Rate</Label>
-            <div className="relative">
-              <div className="absolute left-3 top-3 text-muted-foreground">
-                {currency === 'GBP' ? '£' : currency === 'USD' ? '$' : '€'}
-              </div>
-              <Input
-                id="class_rate"
-                type="number"
-                value={formData.class_rate || ""}
-                onChange={(e) => updateFormData({ class_rate: e.target.value ? parseFloat(e.target.value) : null })}
-                placeholder="25"
-                className="pl-8"
-                min="0"
-                step="0.01"
-              />
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Your rate per person for group sessions
-            </p>
-          </div>
+          <p className="text-xs text-muted-foreground">
+            Your rate per hour for personal training sessions
+          </p>
         </div>
       </div>
 
@@ -326,18 +322,27 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
                        </div>
                        <p className="text-sm text-muted-foreground">{pkg.description}</p>
                      </div>
-                     <div className="flex items-center gap-2">
-                        <Dialog open={editingPackage?.id === pkg.id} onOpenChange={(open) => !open && setEditingPackage(null)}>
-                          <DialogTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => startEditPackage(pkg)}
-                              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                          </DialogTrigger>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => clonePackage(pkg)}
+                          className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                          title="Clone package"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                         <Dialog open={editingPackage?.id === pkg.id} onOpenChange={(open) => !open && setEditingPackage(null)}>
+                           <DialogTrigger asChild>
+                             <Button
+                               variant="ghost"
+                               size="sm"
+                               onClick={() => startEditPackage(pkg)}
+                               className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                             >
+                               <Edit className="h-4 w-4" />
+                             </Button>
+                           </DialogTrigger>
                           <DialogContent className="max-w-md">
                             <DialogHeader>
                               <DialogTitle>Edit Package</DialogTitle>
