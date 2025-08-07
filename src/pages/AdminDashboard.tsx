@@ -9,6 +9,7 @@ import { BulkUserUpload } from '@/components/admin/BulkUserUpload';
 import { TestUserCleanup } from '@/components/admin/TestUserCleanup';
 import { KnowledgeBaseAdmin } from '@/components/knowledge-base/KnowledgeBaseAdmin';
 import { VisibilitySettingsSection } from '@/components/trainer-setup/VisibilitySettingsSection';
+import { UserValidityChecker } from '@/components/admin/UserValidityChecker';
 import { Settings, Users, Shield, BarChart3, ArrowLeft, Home, Eye, Upload, FileText, ExternalLink } from 'lucide-react';
 import { useUserRoles } from '@/hooks/useUserRoles';
 
@@ -159,16 +160,20 @@ export const AdminDashboard = () => {
         </TabsContent>
 
         <TabsContent value="settings">
-          <Card>
-            <CardHeader>
-              <CardTitle>System Settings</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                System settings panel coming soon...
-              </p>
-            </CardContent>
-          </Card>
+          <div className="space-y-6">
+            <UserValidityChecker />
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>System Settings</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Additional system settings coming soon...
+                </p>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
