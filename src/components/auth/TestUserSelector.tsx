@@ -133,7 +133,7 @@ export const TestUserSelector: React.FC<TestUserSelectorProps> = ({ onUserSelect
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Key className="h-3 w-3" />
                         <span className="font-mono">●●●●●●●●●●</span>
-                        <span className="ml-1">({user.password})</span>
+                        <span className="ml-1">Try: {user.password}</span>
                       </div>
                     ) : (
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -163,8 +163,9 @@ export const TestUserSelector: React.FC<TestUserSelectorProps> = ({ onUserSelect
             
             <div className="mt-4 p-3 bg-muted/50 rounded-lg">
               <p className="text-xs text-muted-foreground">
-                <strong>Development Mode:</strong> All registered users are shown with real email addresses. 
-                Clicking any user will automatically log you in with their credentials.
+                <strong>Development Mode:</strong> Real users shown with suggested test passwords. 
+                If the suggested password doesn't work, the user may have set a different password during signup.
+                Common dev passwords: password123, test123, demo123, admin123
               </p>
             </div>
           </CardContent>
