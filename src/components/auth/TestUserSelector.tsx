@@ -18,6 +18,11 @@ export const TestUserSelector: React.FC<TestUserSelectorProps> = ({ onUserSelect
   const handleUserClick = (user: TestUser) => {
     if (user.password) {
       onUserSelect(user.email, user.password);
+    } else if (user.email.includes('@hidden.com')) {
+      // For users without visible emails, try common test passwords
+      const testPasswords = ['password123', 'demo123', 'test123'];
+      // You could show a dialog to enter password, or try common passwords
+      alert('This user\'s login credentials are not available for security. Try logging in directly with known test accounts.');
     }
   };
 
@@ -101,7 +106,11 @@ export const TestUserSelector: React.FC<TestUserSelectorProps> = ({ onUserSelect
                           </p>
                           <div className="flex items-center gap-1 text-xs text-muted-foreground">
                             <Mail className="h-3 w-3" />
-                            {user.email}
+                            {user.email.includes('@hidden.com') ? (
+                              <span className="italic">Email hidden for privacy</span>
+                            ) : (
+                              user.email
+                            )}
                           </div>
                         </div>
                       </div>
@@ -117,11 +126,16 @@ export const TestUserSelector: React.FC<TestUserSelectorProps> = ({ onUserSelect
                       </div>
                     </div>
                     
-                    {user.password && (
+                    {user.password ? (
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Key className="h-3 w-3" />
                         <span className="font-mono">●●●●●●●●●●</span>
                         <span className="ml-1">({user.password})</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Key className="h-3 w-3" />
+                        <span className="italic">Password not available</span>
                       </div>
                     )}
                   </div>

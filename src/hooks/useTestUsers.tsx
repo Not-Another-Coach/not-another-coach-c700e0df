@@ -44,29 +44,41 @@ export const useTestUsers = () => {
       const { data: userEmails, error: emailError } = await supabase
         .rpc('get_user_emails_for_admin');
 
-      if (emailError) {
-        console.error('Error fetching emails:', emailError);
-        // If not admin, create a limited test user list with known test accounts
-        setTestUsers(getDefaultTestUsers());
-        setLoading(false);
-        return;
-      }
+      let combinedUsers: TestUser[];
 
-      // Combine profile data with emails and roles
-      const combinedUsers: TestUser[] = profiles.map(profile => {
-        const emailData = userEmails.find((e: any) => e.user_id === profile.id);
-        const roles = userRoles?.filter(ur => ur.user_id === profile.id).map(ur => ur.role) || [];
-        
-        return {
-          id: profile.id,
-          email: emailData?.email || 'Unknown',
-          first_name: profile.first_name,
-          last_name: profile.last_name,
-          user_type: profile.user_type,
-          roles,
-          password: getTestPassword(emailData?.email || '')
-        };
-      }).filter(user => user.email !== 'Unknown');
+      if (emailError) {
+        console.error('Error fetching emails (not admin):', emailError);
+        // If not admin, show all profiles but without real emails
+        combinedUsers = profiles.map(profile => {
+          const roles = userRoles?.filter(ur => ur.user_id === profile.id).map(ur => ur.role) || [];
+          
+          return {
+            id: profile.id,
+            email: `user-${profile.id.slice(0, 8)}@hidden.com`, // Placeholder email
+            first_name: profile.first_name,
+            last_name: profile.last_name,
+            user_type: profile.user_type,
+            roles,
+            password: undefined // No password for non-admin view
+          };
+        });
+      } else {
+        // Admin view - combine profile data with real emails and roles
+        combinedUsers = profiles.map(profile => {
+          const emailData = userEmails.find((e: any) => e.user_id === profile.id);
+          const roles = userRoles?.filter(ur => ur.user_id === profile.id).map(ur => ur.role) || [];
+          
+          return {
+            id: profile.id,
+            email: emailData?.email || 'Unknown',
+            first_name: profile.first_name,
+            last_name: profile.last_name,
+            user_type: profile.user_type,
+            roles,
+            password: getTestPassword(emailData?.email || '')
+          };
+        }).filter(user => user.email !== 'Unknown');
+      }
 
       setTestUsers(combinedUsers);
     } catch (error) {
