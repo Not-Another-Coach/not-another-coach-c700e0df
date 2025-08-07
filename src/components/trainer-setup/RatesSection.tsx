@@ -1392,7 +1392,7 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
                 setPackageToClone(null);
               }
             }}>
-              Yes - Clone with Ways of Working
+              Yes - Clone with WoW
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
