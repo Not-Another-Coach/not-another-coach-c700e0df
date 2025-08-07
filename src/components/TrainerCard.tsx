@@ -20,6 +20,8 @@ import { useNavigate } from "react-router-dom";
 export interface Trainer {
   id: string;
   name: string;
+  firstName?: string;
+  lastName?: string;
   specialties: string[];
   rating: number;
   reviews: number;
@@ -27,11 +29,13 @@ export interface Trainer {
   location: string;
   hourlyRate: number;
   image: string;
+  profilePhotoUrl?: string;
   certifications: string[];
   description: string;
   availability: string;
   trainingType: string[];
   offers_discovery_call?: boolean;
+  package_options?: any[];
 }
 
 interface MatchDetail {

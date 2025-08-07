@@ -33,6 +33,7 @@ export function useRealTrainers() {
             profile_photo_url,
             is_verified,
             verification_status,
+            package_options,
             trainer_availability_settings!inner(
               offers_discovery_call
             )
@@ -53,6 +54,8 @@ export function useRealTrainers() {
           return {
             id: trainer.id,
             name: `${trainer.first_name || ''} ${trainer.last_name || ''}`.trim() || 'Professional Trainer',
+            firstName: trainer.first_name,
+            lastName: trainer.last_name,
             specialties: trainer.specializations || [],
             rating: trainer.rating || 4.5,
             reviews: trainer.total_ratings || 0,
@@ -60,11 +63,13 @@ export function useRealTrainers() {
             location: trainer.location || "Location TBD",
             hourlyRate: trainer.hourly_rate || 75,
             image: imageUrl,
+            profilePhotoUrl: trainer.profile_photo_url,
             certifications: trainer.qualifications || [],
             description: trainer.bio || "Professional fitness trainer dedicated to helping you achieve your goals.",
             availability: "Available",
             trainingType: trainer.training_types || ["In-Person", "Online"],
-            offers_discovery_call: trainer.trainer_availability_settings?.[0]?.offers_discovery_call || false
+            offers_discovery_call: trainer.trainer_availability_settings?.[0]?.offers_discovery_call || false,
+            package_options: (trainer.package_options as any[]) || []
           };
         }) || [];
 
