@@ -8,6 +8,7 @@ import { PagesDocumentation } from '@/components/documentation/PagesDocumentatio
 import { HooksDocumentation } from '@/components/documentation/HooksDocumentation';
 import { DatabaseDocumentation } from '@/components/documentation/DatabaseDocumentation';
 import { FeaturesDocumentation } from '@/components/documentation/FeaturesDocumentation';
+import { APIDocumentation } from '@/components/documentation/APIDocumentation';
 
 const Documentation = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -37,10 +38,14 @@ const Documentation = () => {
         </div>
 
         <Tabs defaultValue="pages" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="pages" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
               Pages
+            </TabsTrigger>
+            <TabsTrigger value="apis" className="flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              APIs
             </TabsTrigger>
             <TabsTrigger value="hooks" className="flex items-center gap-2">
               <Code className="h-4 w-4" />
@@ -58,6 +63,10 @@ const Documentation = () => {
 
           <TabsContent value="pages" className="mt-6">
             <PagesDocumentation searchTerm={searchTerm} />
+          </TabsContent>
+
+          <TabsContent value="apis" className="mt-6">
+            <APIDocumentation searchTerm={searchTerm} />
           </TabsContent>
 
           <TabsContent value="hooks" className="mt-6">
