@@ -83,8 +83,11 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
   const [packages, setPackages] = useState<TrainingPackage[]>(formData.package_options || []);
   const [communicationAIHelperOpen, setCommunicationAIHelperOpen] = useState(false);
   const [editingPackage, setEditingPackage] = useState<TrainingPackage | null>(null);
+  const [isCloning, setIsCloning] = useState(false);
   const [editPackageData, setEditPackageData] = useState({
     name: "",
+    sessions: "",
+    price: "",
     description: "",
   });
   const [newPackage, setNewPackage] = useState({
@@ -136,13 +139,14 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
       description: pkg.description
     };
     
-    const updatedPackages = [...packages, clonedPackage];
-    setPackages(updatedPackages);
-    updateFormData({ package_options: updatedPackages });
-    
-    toast({
-      title: "Package cloned",
-      description: "Package has been duplicated and can now be edited",
+    // Set up for immediate editing
+    setEditingPackage(clonedPackage);
+    setIsCloning(true);
+    setEditPackageData({
+      name: clonedPackage.name,
+      sessions: clonedPackage.sessions?.toString() || "",
+      price: clonedPackage.price.toString(),
+      description: clonedPackage.description,
     });
   };
 
@@ -154,36 +158,56 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
 
   const startEditPackage = (pkg: TrainingPackage) => {
     setEditingPackage(pkg);
+    setIsCloning(false);
     setEditPackageData({
       name: pkg.name,
+      sessions: pkg.sessions?.toString() || "",
+      price: pkg.price.toString(),
       description: pkg.description,
     });
   };
 
   const saveEditedPackage = () => {
-    if (editingPackage && editPackageData.name && editPackageData.description) {
+    if (editingPackage && editPackageData.name && editPackageData.description && editPackageData.price) {
       const updatedPackage: TrainingPackage = {
         ...editingPackage,
         name: editPackageData.name,
+        sessions: editPackageData.sessions ? parseInt(editPackageData.sessions) : undefined,
+        price: parseFloat(editPackageData.price),
         description: editPackageData.description
       };
       
-      const updatedPackages = packages.map(pkg => 
-        pkg.id === editingPackage.id ? updatedPackage : pkg
-      );
+      let updatedPackages;
+      if (isCloning) {
+        // Add the new cloned package
+        updatedPackages = [...packages, updatedPackage];
+        toast({
+          title: "Package cloned",
+          description: "Package has been duplicated successfully",
+        });
+      } else {
+        // Update existing package
+        updatedPackages = packages.map(pkg => 
+          pkg.id === editingPackage.id ? updatedPackage : pkg
+        );
+        toast({
+          title: "Package updated",
+          description: "Package has been updated successfully",
+        });
+      }
+      
       setPackages(updatedPackages);
       updateFormData({ package_options: updatedPackages });
       
       // Close the modal and reset the editing state
       setEditingPackage(null);
+      setIsCloning(false);
       setEditPackageData({
         name: "",
+        sessions: "",
+        price: "",
         description: "",
       });
-      
-      // Close the dialog by triggering the close event
-      const event = new Event('click', { bubbles: true });
-      document.querySelector('[data-dialog-close]')?.dispatchEvent(event);
     }
   };
 
@@ -311,13 +335,16 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
                                <Edit className="h-4 w-4" />
                              </Button>
                            </DialogTrigger>
-                          <DialogContent className="max-w-md">
-                            <DialogHeader>
-                              <DialogTitle>Edit Package</DialogTitle>
-                              <p className="text-sm text-muted-foreground">
-                                Only package name and description can be edited to protect existing purchases.
-                              </p>
-                            </DialogHeader>
+                           <DialogContent className="max-w-md">
+                             <DialogHeader>
+                               <DialogTitle>{isCloning ? 'Clone Package' : 'Edit Package'}</DialogTitle>
+                               <p className="text-sm text-muted-foreground">
+                                 {isCloning 
+                                   ? 'Customize your cloned package details.'
+                                   : 'Only package name and description can be edited to protect existing purchases.'
+                                 }
+                               </p>
+                             </DialogHeader>
                             <div className="space-y-4">
                               <div className="space-y-2">
                                 <Label htmlFor="edit_package_name">Package Name</Label>
@@ -329,29 +356,56 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
                                 />
                               </div>
 
-                              <div className="space-y-2">
-                                <Label>Number of Sessions</Label>
-                                <div className="p-3 bg-muted rounded-md">
-                                  <span className="text-sm text-muted-foreground">
-                                    {pkg.sessions ? `${pkg.sessions} sessions` : 'No specific session count'}
-                                  </span>
-                                  <p className="text-xs text-muted-foreground mt-1">
-                                    This cannot be changed to protect existing purchases
-                                  </p>
-                                </div>
-                              </div>
-                              
-                              <div className="space-y-2">
-                                <Label>Price</Label>
-                                <div className="p-3 bg-muted rounded-md">
-                                  <span className="text-sm text-muted-foreground">
-                                    {pkg.currency === 'GBP' ? '£' : pkg.currency === 'USD' ? '$' : '€'}{pkg.price}
-                                  </span>
-                                  <p className="text-xs text-muted-foreground mt-1">
-                                    This cannot be changed to protect existing purchases
-                                  </p>
-                                </div>
-                              </div>
+                               <div className="space-y-2">
+                                 <Label>Number of Sessions</Label>
+                                 {isCloning ? (
+                                   <Input
+                                     value={editPackageData.sessions}
+                                     onChange={(e) => setEditPackageData({ ...editPackageData, sessions: e.target.value })}
+                                     placeholder="e.g., 10"
+                                     type="number"
+                                     min="1"
+                                   />
+                                 ) : (
+                                   <div className="p-3 bg-muted rounded-md">
+                                     <span className="text-sm text-muted-foreground">
+                                       {editingPackage?.sessions ? `${editingPackage.sessions} sessions` : 'No specific session count'}
+                                     </span>
+                                     <p className="text-xs text-muted-foreground mt-1">
+                                       This cannot be changed to protect existing purchases
+                                     </p>
+                                   </div>
+                                 )}
+                               </div>
+                               
+                               <div className="space-y-2">
+                                 <Label>Price</Label>
+                                 {isCloning ? (
+                                   <div className="relative">
+                                     <div className="absolute left-3 top-3 text-muted-foreground">
+                                       {currency === 'GBP' ? '£' : currency === 'USD' ? '$' : '€'}
+                                     </div>
+                                     <Input
+                                       value={editPackageData.price}
+                                       onChange={(e) => setEditPackageData({ ...editPackageData, price: e.target.value })}
+                                       placeholder="e.g., 400"
+                                       type="number"
+                                       min="0"
+                                       step="0.01"
+                                       className="pl-8"
+                                     />
+                                   </div>
+                                 ) : (
+                                   <div className="p-3 bg-muted rounded-md">
+                                     <span className="text-sm text-muted-foreground">
+                                       {editingPackage?.currency === 'GBP' ? '£' : editingPackage?.currency === 'USD' ? '$' : '€'}{editingPackage?.price}
+                                     </span>
+                                     <p className="text-xs text-muted-foreground mt-1">
+                                       This cannot be changed to protect existing purchases
+                                     </p>
+                                   </div>
+                                 )}
+                               </div>
                               
                               <div className="space-y-2">
                                 <Label htmlFor="edit_package_description">Description</Label>
@@ -365,19 +419,22 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
                                 />
                               </div>
                               
-                              <div className="flex gap-2">
-                                <Button 
-                                  onClick={saveEditedPackage}
-                                  disabled={!editPackageData.name || !editPackageData.description}
-                                  className="flex-1"
-                                >
-                                  Save Changes
+                               <div className="flex gap-2">
+                                 <Button 
+                                   onClick={saveEditedPackage}
+                                   disabled={!editPackageData.name || !editPackageData.description || (isCloning && !editPackageData.price)}
+                                   className="flex-1"
+                                 >
+                                  {isCloning ? 'Create Package' : 'Save Changes'}
                                 </Button>
-                                <Button 
-                                  variant="outline" 
-                                  onClick={() => setEditingPackage(null)}
-                                  className="flex-1"
-                                >
+                                 <Button 
+                                   variant="outline" 
+                                   onClick={() => {
+                                     setEditingPackage(null);
+                                     setIsCloning(false);
+                                   }}
+                                   className="flex-1"
+                                 >
                                   Cancel
                                 </Button>
                               </div>
