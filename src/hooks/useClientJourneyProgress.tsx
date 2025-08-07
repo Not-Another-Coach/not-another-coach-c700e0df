@@ -90,7 +90,7 @@ export const useClientJourneyProgress = () => {
       // Get user profile with survey completion
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('quiz_completed, client_journey_stage')
+        .select('client_survey_completed, client_journey_stage')
         .eq('id', user.id)
         .single();
 
@@ -116,16 +116,23 @@ export const useClientJourneyProgress = () => {
       let currentStage: ClientJourneyStage = 'preferences_identified';
       
       // Check if survey is completed (100%)
-      if (!profile?.quiz_completed) {
+      if (!profile?.client_survey_completed) {
         // If survey not complete, don't show journey tracker yet
         setProgress(null);
         setLoading(false);
         return;
       }
 
-      // Stage 2: Has liked at least one coach or has engagement records
+      
+      // Stage 1: Survey completed - automatically advance to exploring coaches
+      if (profile?.client_survey_completed) {
+        currentStage = 'exploring_coaches';
+      }
+
+      // Stage 2: Has actually liked coaches or has engagement records
       const hasLikedCoaches = engagements?.some(e => e.liked_at) || (engagements?.length || 0) > 0;
       if (hasLikedCoaches) {
+        // Keep at exploring_coaches stage but with data
         currentStage = 'exploring_coaches';
       }
 
@@ -171,7 +178,7 @@ export const useClientJourneyProgress = () => {
         // Determine if stage has data/progress
         let hasData = false;
         if (stageKey === 'preferences_identified') {
-          hasData = profile?.quiz_completed || false;
+          hasData = profile?.client_survey_completed || false;
         } else if (stageKey === 'exploring_coaches') {
           hasData = hasLikedCoaches;
         } else if (stageKey === 'discovery_call_booked') {
