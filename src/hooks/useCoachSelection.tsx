@@ -64,7 +64,7 @@ export function useCoachSelection() {
         p_package_name: packageName,
         p_package_price: packagePrice,
         p_package_duration: packageDuration,
-        p_client_message: clientMessage
+        p_client_message: clientMessage || null
       });
 
       console.log('📥 Raw Supabase response:', { data, error });
