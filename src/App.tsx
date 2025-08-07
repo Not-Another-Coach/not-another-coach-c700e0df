@@ -42,6 +42,7 @@ const App = () => (
             <Route path="/saved" element={<SavedTrainers />} />
             <Route path="/trainer/dashboard" element={<TrainerDashboard />} />
             <Route path="/trainer/profile-setup" element={<TrainerProfileSetup />} />
+            <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/trainer/:trainerId" element={<TrainerProfile />} />
             <Route path="/messages/:trainerId?" element={<Messaging />} />
