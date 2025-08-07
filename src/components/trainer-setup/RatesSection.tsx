@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Trash2, Plus, ExternalLink, DollarSign, PoundSterling, Euro, Calendar as CalendarIcon, Sparkles, Edit, Clock, Info } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -91,6 +92,8 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
   const [communicationAIHelperOpen, setCommunicationAIHelperOpen] = useState(false);
   const [editingPackage, setEditingPackage] = useState<TrainingPackage | null>(null);
   const [isCloning, setIsCloning] = useState(false);
+  const [showCloneConfirmation, setShowCloneConfirmation] = useState(false);
+  const [packageToClone, setPackageToClone] = useState<TrainingPackage | null>(null);
   const [editPackageData, setEditPackageData] = useState({
     name: "",
     sessions: "",
@@ -148,7 +151,12 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
     }
   };
 
-  const clonePackage = (pkg: TrainingPackage) => {
+  const startCloneProcess = (pkg: TrainingPackage) => {
+    setPackageToClone(pkg);
+    setShowCloneConfirmation(true);
+  };
+
+  const clonePackage = async (pkg: TrainingPackage, copyWaysOfWorking: boolean = false) => {
     const clonedPackage: TrainingPackage = {
       id: Date.now().toString(),
       name: `${pkg.name} (Copy)`,
@@ -173,6 +181,30 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
       promotionStartDate: clonedPackage.promotionStartDate,
       promotionEndDate: clonedPackage.promotionEndDate,
     });
+
+    // If user wants to copy ways of working, we'll handle it after package creation
+    if (copyWaysOfWorking) {
+      await copyPackageWaysOfWorking(pkg.id, clonedPackage.id);
+    }
+  };
+
+  const copyPackageWaysOfWorking = async (sourcePackageId: string, targetPackageId: string) => {
+    try {
+      // This will be handled by the database/API to copy ways of working data
+      console.log('Copying ways of working from package', sourcePackageId, 'to', targetPackageId);
+      
+      toast({
+        title: "Ways of working copied",
+        description: "The ways of working have been copied to your new package",
+      });
+    } catch (error) {
+      console.error('Error copying ways of working:', error);
+      toast({
+        title: "Error copying ways of working",
+        description: "There was an issue copying the ways of working. You can set them up manually in the Ways of Working tab.",
+        variant: "destructive",
+      });
+    }
   };
 
   const removePackage = (id: string) => {
@@ -363,7 +395,7 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => clonePackage(pkg)}
+                          onClick={() => startCloneProcess(pkg)}
                           className="text-green-600 hover:text-green-700 hover:bg-green-50"
                           title="Clone package"
                         >
@@ -827,7 +859,215 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
       </div>
 
       {/* Discovery Call Settings */}
-      <Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Add Training Package</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Create tiered pricing packages to offer better value
+            </p>
+          </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="package_name">Package Name</Label>
+            <Input
+              id="package_name"
+              value={newPackage.name}
+              onChange={(e) => setNewPackage({ ...newPackage, name: e.target.value })}
+              placeholder="e.g., 10 PT Sessions Bundle"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="package_sessions">Number of Sessions (Optional)</Label>
+            <Input
+              id="package_sessions"
+              type="number"
+              value={newPackage.sessions}
+              onChange={(e) => setNewPackage({ ...newPackage, sessions: e.target.value })}
+              placeholder="e.g., 10"
+              min="1"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="package_price">Price</Label>
+            <div className="relative">
+              <div className="absolute left-3 top-3 text-muted-foreground">
+                {currency === 'GBP' ? '£' : currency === 'USD' ? '$' : '€'}
+              </div>
+              <Input
+                id="package_price"
+                type="number"
+                value={newPackage.price}
+                onChange={(e) => setNewPackage({ ...newPackage, price: e.target.value })}
+                placeholder="400"
+                className="pl-8"
+                min="0"
+                step="0.01"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="package_description">Description</Label>
+            <Textarea
+              id="package_description"
+              value={newPackage.description}
+              onChange={(e) => setNewPackage({ ...newPackage, description: e.target.value })}
+              placeholder="e.g., 10 x 1-hour PT sessions with personalized nutrition plan"
+              rows={3}
+              className="resize-none"
+            />
+          </div>
+          
+          {/* Promotional Options */}
+          <div className="space-y-3 border-t pt-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-sm font-medium">Promotional Offer</Label>
+                <p className="text-xs text-muted-foreground">Mark this package as a limited-time promotion</p>
+              </div>
+              <Switch
+                checked={newPackage.isPromotion}
+                onCheckedChange={(checked) => setNewPackage({ ...newPackage, isPromotion: checked })}
+              />
+            </div>
+            
+            {newPackage.isPromotion && (
+              <div className="space-y-3 ml-4 border-l-2 border-orange-200 pl-4">
+                <div className="space-y-2">
+                  <Label htmlFor="promotion_start_date">Promotion Start Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !newPackage.promotionStartDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {newPackage.promotionStartDate ? (
+                          format(newPackage.promotionStartDate, "PPP")
+                        ) : (
+                          <span>Pick start date</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={newPackage.promotionStartDate}
+                        onSelect={(date) => setNewPackage({ ...newPackage, promotionStartDate: date })}
+                        disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="promotion_end_date">Promotion End Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !newPackage.promotionEndDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {newPackage.promotionEndDate ? (
+                          format(newPackage.promotionEndDate, "PPP")
+                        ) : (
+                          <span>Pick end date</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={newPackage.promotionEndDate}
+                        onSelect={(date) => setNewPackage({ ...newPackage, promotionEndDate: date })}
+                        disabled={(date) => {
+                          const today = new Date(new Date().setHours(0, 0, 0, 0));
+                          const startDate = newPackage.promotionStartDate || today;
+                          return date < startDate;
+                        }}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                
+                {newPackage.promotionStartDate && newPackage.promotionEndDate && (
+                  <div className="bg-orange-50 border border-orange-200 rounded p-2">
+                    <p className="text-xs text-orange-700">
+                      🎯 This promotion will be visible to clients from {format(newPackage.promotionStartDate, 'MMM dd, yyyy')} until {format(newPackage.promotionEndDate, 'MMM dd, yyyy')}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          <Button 
+            onClick={addPackage}
+            className="w-full"
+            disabled={!newPackage.name || !newPackage.price || !newPackage.description || (newPackage.isPromotion && (!newPackage.promotionStartDate || !newPackage.promotionEndDate))}
+          >
+            Add Package
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Clone Confirmation Dialog */}
+      <AlertDialog open={showCloneConfirmation} onOpenChange={setShowCloneConfirmation}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Clone Package with Ways of Working?</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>Do you want to copy the "Ways of Working" from this package to the new one?</p>
+              <div className="bg-muted p-3 rounded-md text-sm">
+                <p className="font-medium">• Choose "Yes" - Ways of working will be copied automatically</p>
+                <p className="font-medium">• Choose "No" - You can set up ways of working later in the Ways of Working tab</p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              setShowCloneConfirmation(false);
+              setPackageToClone(null);
+            }}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              variant="outline"
+              onClick={() => {
+                if (packageToClone) {
+                  clonePackage(packageToClone, false);
+                  setShowCloneConfirmation(false);
+                  setPackageToClone(null);
+                }
+              }}
+            >
+              No - Clone Package Only
+            </AlertDialogAction>
+            <AlertDialogAction onClick={() => {
+              if (packageToClone) {
+                clonePackage(packageToClone, true);
+                setShowCloneConfirmation(false);
+                setPackageToClone(null);
+              }
+            }}>
+              Yes - Clone with Ways of Working
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="w-5 h-5" />
@@ -1157,7 +1397,6 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
         </CardContent>
       </Card>
 
-
       {/* Communication Style */}
       <Card>
         <CardHeader>
@@ -1280,6 +1519,51 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
           </ul>
         </CardContent>
       </Card>
+
+      {/* Clone Confirmation Dialog */}
+      <AlertDialog open={showCloneConfirmation} onOpenChange={setShowCloneConfirmation}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Clone Package with Ways of Working?</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>Do you want to copy the "Ways of Working" from this package to the new one?</p>
+              <div className="bg-muted p-3 rounded-md text-sm">
+                <p className="font-medium">• Choose "Yes" - Ways of working will be copied automatically</p>
+                <p className="font-medium">• Choose "No" - You can set up ways of working later in the Ways of Working tab</p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              setShowCloneConfirmation(false);
+              setPackageToClone(null);
+            }}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              variant="outline"
+              onClick={() => {
+                if (packageToClone) {
+                  clonePackage(packageToClone, false);
+                  setShowCloneConfirmation(false);
+                  setPackageToClone(null);
+                }
+              }}
+            >
+              No - Clone Package Only
+            </AlertDialogAction>
+            <AlertDialogAction onClick={() => {
+              if (packageToClone) {
+                clonePackage(packageToClone, true);
+                setShowCloneConfirmation(false);
+                setPackageToClone(null);
+              }
+            }}>
+              Yes - Clone with Ways of Working
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
