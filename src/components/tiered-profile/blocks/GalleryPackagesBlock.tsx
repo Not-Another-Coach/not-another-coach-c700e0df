@@ -74,7 +74,7 @@ export const GalleryPackagesBlock = ({ trainer, canViewPricing, stage }: Gallery
                   <h4 className="font-medium">{pkg.name || `Package ${index + 1}`}</h4>
                   {canViewPricing ? (
                     <Badge variant="secondary" className="text-green-600">
-                      ${pkg.price || trainer.hourly_rate || '75'}/session
+                      ${pkg.price}/session
                     </Badge>
                   ) : (
                     <Badge variant="outline" className="text-muted-foreground">
@@ -109,7 +109,7 @@ export const GalleryPackagesBlock = ({ trainer, canViewPricing, stage }: Gallery
                 <h4 className="font-medium">1:1 Personal Training</h4>
                 {canViewPricing ? (
                   <Badge variant="secondary" className="text-green-600">
-                    ${trainer.hourly_rate || '75'}/session
+                    Contact for pricing
                   </Badge>
                 ) : (
                   <Badge variant="outline" className="text-muted-foreground">

@@ -62,10 +62,10 @@ const validationRules: ValidationRules = {
   },
   
   // Step 5: Rates & Discovery Calls
-  hourly_rate: { 
+  package_options: { 
     required: true, 
-    custom: (value) => value > 0,
-    message: 'Hourly rate is required and must be greater than 0' 
+    custom: (value) => Array.isArray(value) && value.length > 0,
+    message: 'At least one package is required' 
   },
   
   // Step 7: Profile Management
@@ -81,7 +81,7 @@ const stepFieldMapping: Record<number, string[]> = {
   2: ['qualifications'],
   3: ['specializations', 'training_types', 'location'],
   4: ['ideal_client_types', 'coaching_styles'],
-  5: ['hourly_rate'],
+  5: ['package_options'],
   6: [], // Testimonials are optional
   7: ['terms_agreed']
 };

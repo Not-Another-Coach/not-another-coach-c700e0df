@@ -15,6 +15,7 @@ import { useWaitlist } from "@/hooks/useWaitlist";
 import { useProfile } from "@/hooks/useProfile";
 import { WaitlistJoinButton } from "@/components/waitlist/WaitlistJoinButton";
 import { WaitlistStatusBadge } from "@/components/waitlist/WaitlistStatusBadge";
+import { getTrainerDisplayPrice } from "@/lib/priceUtils";
 import { useNavigate } from "react-router-dom";
 
 export interface Trainer {
@@ -376,8 +377,8 @@ export const TrainerCard = ({
           </div>
           
           <div className="text-right">
-            <div className="text-2xl font-bold text-primary">${trainer.hourlyRate}</div>
-            <div className="text-sm text-muted-foreground">per hour</div>
+            <div className="text-2xl font-bold text-primary">{getTrainerDisplayPrice(trainer)}</div>
+            <div className="text-sm text-muted-foreground">package pricing</div>
           </div>
         </div>
 

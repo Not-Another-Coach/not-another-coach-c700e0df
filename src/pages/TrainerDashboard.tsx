@@ -129,7 +129,7 @@ const TrainerDashboard = () => {
       (profile as any).ideal_client_types?.length,
       (profile as any).coaching_styles?.length,
       profile.terms_agreed,
-      profile.hourly_rate
+      (profile as any).package_options && (profile as any).package_options.length > 0
     ];
     
     const completedFields = requiredFields.filter(field => {

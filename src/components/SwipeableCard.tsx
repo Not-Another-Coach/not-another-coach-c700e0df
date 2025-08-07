@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Trainer } from '@/components/TrainerCard';
 import { MatchBadge } from '@/components/MatchBadge';
 import { useSavedTrainers } from '@/hooks/useSavedTrainers';
+import { getTrainerDisplayPrice } from '@/lib/priceUtils';
 
 interface SwipeableCardProps {
   trainer: Trainer;
@@ -176,7 +177,7 @@ export const SwipeableCard = ({ trainer, onSwipe, matchScore = 0, matchReasons =
           <div className="flex justify-between items-start">
             <div>
               <p className="text-muted-foreground text-sm">{trainer.experience} experience</p>
-              <div className="text-2xl font-bold text-primary">${trainer.hourlyRate}/hr</div>
+              <div className="text-2xl font-bold text-primary">{getTrainerDisplayPrice(trainer)}</div>
             </div>
             <div className="text-right">
               <p className="text-sm text-muted-foreground">Availability</p>

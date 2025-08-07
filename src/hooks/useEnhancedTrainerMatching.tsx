@@ -242,7 +242,9 @@ export const useEnhancedTrainerMatching = (trainers: Trainer[], userAnswers?: Qu
       const budgetFlex = clientSurveyData?.budget_flexibility;
       
       if (budgetMin || budgetMax || userAnswers?.budget_range) {
-        let trainerRate = trainer.hourlyRate;
+        // Get trainer rate from packages or fallback to hourly rate
+        const packagePrices = trainer.package_options?.map((pkg: any) => pkg.price) || [];
+        let trainerRate = packagePrices.length > 0 ? Math.min(...packagePrices) : trainer.hourlyRate;
         let withinBudget = false;
         
         if (clientSurveyData && (budgetMin || budgetMax)) {

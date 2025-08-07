@@ -163,7 +163,11 @@ export const useTrainerMatching = (trainers: Trainer[], userAnswers?: QuizAnswer
         };
         
         const [min, max] = budgetRanges[userAnswers.budget_range] || [0, 999];
-        const budgetMatch = trainer.hourlyRate >= min && trainer.hourlyRate <= max;
+        // Budget match - check against package price range
+        const packagePrices = trainer.package_options?.map((pkg: any) => pkg.price) || [trainer.hourlyRate];
+        const minPrice = Math.min(...packagePrices);
+        const maxPrice = Math.max(...packagePrices);
+        const budgetMatch = maxPrice >= min && minPrice <= max;
         
         budgetScore = budgetMatch ? 100 : 0;
         score += budgetScore * 0.15;

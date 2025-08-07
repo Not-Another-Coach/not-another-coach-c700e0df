@@ -259,38 +259,6 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
         </div>
       </div>
 
-      {/* Session Rates */}
-      <div className="space-y-4">
-        <div>
-          <Label>Session Rates</Label>
-          <p className="text-sm text-muted-foreground">
-            Set your rate for personal training sessions
-          </p>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="hourly_rate">Personal Training Rate *</Label>
-          <div className="relative">
-            <div className="absolute left-3 top-3 text-muted-foreground">
-              {currency === 'GBP' ? '£' : currency === 'USD' ? '$' : '€'}
-            </div>
-            <Input
-              id="hourly_rate"
-              type="number"
-              value={formData.hourly_rate || ""}
-              onChange={(e) => updateFormData({ hourly_rate: e.target.value ? parseFloat(e.target.value) : null })}
-              placeholder="50"
-              className="pl-8"
-              min="0"
-              step="0.01"
-            />
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Your rate per hour for personal training sessions
-          </p>
-        </div>
-      </div>
-
       {/* Tiered Package Pricing */}
       <div className="space-y-4">
         <div>
