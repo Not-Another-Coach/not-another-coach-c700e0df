@@ -792,34 +792,20 @@ export default function MyTrainers() {
               )}
              </div>
               
-              {/* Bottom button - only show Choose as Coach if no waitlist */}
-              {!hasWaitlistEnabled && (isDiscoveryInProgress ? (
-               <Button
-                 onClick={() => navigate(`/trainer/${trainer.id}`)}
-                 className="w-full"
-                 size="sm"
-                 variant="outline"
-               >
-                 <Phone className="h-3 w-3 mr-1" />
-                 View Full Profile
-               </Button>
-             ) : isCallInPast ? (
-               <Button
-                 onClick={() => navigate(`/trainer/${trainer.id}`)}
-                 className="w-full"
-                 size="sm"
-                 variant="outline"
-               >
-                 <Phone className="h-3 w-3 mr-1" />
-                 View Details
-               </Button>
-              ) : (
-                <ChooseCoachButton
-                  trainer={trainer}
-                  stage={getEngagementStage(trainer.id)}
-                  className="w-full"
-                />
-              ))}
+               {/* Bottom button - Choose as Coach for discovery in progress or past calls */}
+               {!hasWaitlistEnabled && (isDiscoveryInProgress || isCallInPast ? (
+                 <ChooseCoachButton
+                   trainer={trainer}
+                   stage={getEngagementStage(trainer.id)}
+                   className="w-full"
+                 />
+               ) : (
+                 <ChooseCoachButton
+                   trainer={trainer}
+                   stage={getEngagementStage(trainer.id)}
+                   className="w-full"
+                 />
+               ))}
             </div>
           );
 
