@@ -5,7 +5,7 @@ import { useProfile } from "@/hooks/useProfile";
 
 export default function Home() {
   const { user, loading } = useAuth();
-  const { profile, loading: profileLoading, isClient, isTrainer } = useProfile();
+  const { profile, loading: profileLoading, isClient, isTrainer, isAdmin } = useProfile();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,10 +29,13 @@ export default function Home() {
           } else {
             navigate('/client/dashboard');
           }
+        } else {
+          // Handle admin or other user types
+          navigate('/admin');
         }
       }
     }
-  }, [user, profile, loading, profileLoading, isClient, isTrainer, navigate]);
+  }, [user, profile, loading, profileLoading, isClient, isTrainer, isAdmin, navigate]);
 
   // Show loading while redirecting
   return (
