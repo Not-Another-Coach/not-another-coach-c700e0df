@@ -28,7 +28,7 @@ interface CoachAnalyticsDashboardProps {
 export const CoachAnalyticsDashboard = ({ trainerId }: CoachAnalyticsDashboardProps) => {
   const { profile, isTrainer } = useProfile();
   const currentTrainerId = trainerId || profile?.id?.toString();
-  const { analytics, shortlistedClients, loading } = useCoachAnalytics(currentTrainerId);
+  const { analytics, shortlistedClients, shortlistedStats, loading } = useCoachAnalytics(currentTrainerId);
 
   // Mock data for demonstration - in real app this would come from analytics
   const mockStats = {
@@ -144,8 +144,9 @@ export const CoachAnalyticsDashboard = ({ trainerId }: CoachAnalyticsDashboardPr
                 <div className="flex items-center space-x-2">
                   <Users className="h-4 w-4 text-muted-foreground" />
                   <div className="space-y-1">
-                    <p className="text-sm font-medium">Shortlisted</p>
-                    <p className="text-2xl font-bold">{stats.total_shortlists}</p>
+                    <p className="text-sm font-medium">Shortlisted & Discovery</p>
+                    <p className="text-2xl font-bold">{shortlistedStats.total}</p>
+                    <p className="text-xs text-muted-foreground">+{shortlistedStats.last7Days} this week</p>
                   </div>
                 </div>
               </CardContent>
@@ -238,16 +239,16 @@ export const CoachAnalyticsDashboard = ({ trainerId }: CoachAnalyticsDashboardPr
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5" />
-                Shortlisted Clients ({shortlistedClients.length})
+                Shortlisted & Discovery Clients ({shortlistedClients.length})
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                Limited visibility until discovery call is booked
+                Includes clients who are shortlisted or in discovery stages
               </p>
             </CardHeader>
             <CardContent>
               {shortlistedClients.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
-                  No clients have shortlisted you yet
+                  No clients have shortlisted you or are in discovery stages yet
                 </div>
               ) : (
                 <div className="grid gap-4">
@@ -258,6 +259,9 @@ export const CoachAnalyticsDashboard = ({ trainerId }: CoachAnalyticsDashboardPr
                           <div className="space-y-3 flex-1">
                             <div className="flex items-center gap-2">
                               <Badge variant="secondary">Client #{index + 1}</Badge>
+                              <Badge variant="outline" className="text-xs">
+                                {(client as any).engagement_stage?.replace('_', ' ')}
+                              </Badge>
                               {(client as any).discovery_call_booked && (
                                 <Badge variant="default" className="bg-green-100 text-green-800">
                                   Discovery Call Booked

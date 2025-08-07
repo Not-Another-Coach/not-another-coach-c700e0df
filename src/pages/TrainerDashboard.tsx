@@ -63,7 +63,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 const TrainerDashboard = () => {
   const { user, signOut, loading } = useAuth();
   const { profile, loading: profileLoading, isTrainer, updateProfile } = useProfile();
-  const { analytics, shortlistedClients, loading: analyticsLoading } = useCoachAnalytics(profile?.id);
+  const { analytics, shortlistedClients, shortlistedStats, loading: analyticsLoading } = useCoachAnalytics(profile?.id);
   const { isAdmin } = useUserRoles();
   const { waitlistEntries } = useWaitlist();
   const navigate = useNavigate();
@@ -413,10 +413,10 @@ const TrainerDashboard = () => {
                   </div>
                   <div className="text-center p-4 rounded-lg bg-yellow-50 border border-yellow-200">
                     <div className="text-3xl font-bold text-yellow-600 mb-2">
-                      {analyticsLoading ? '...' : analytics?.total_shortlists || 18}
+                      {analyticsLoading ? '...' : shortlistedStats.total}
                     </div>
-                    <p className="text-sm font-medium text-yellow-800">Shortlisted</p>
-                    <p className="text-xs text-yellow-600 mt-1">+3 this week</p>
+                    <p className="text-sm font-medium text-yellow-800">Shortlisted & Discovery</p>
+                    <p className="text-xs text-yellow-600 mt-1">+{shortlistedStats.last7Days} this week</p>
                   </div>
                   <div className="text-center p-4 rounded-lg bg-green-50 border border-green-200">
                     <div className="text-3xl font-bold text-green-600 mb-2">
@@ -566,31 +566,6 @@ const TrainerDashboard = () => {
           </Card>
         )}
 
-        {/* Shortlisted Clients - Show only on dashboard view */}
-        {activeView === 'dashboard' && shortlistedClients && shortlistedClients.length > 0 && (
-          <Card className="mt-8">
-            <CardHeader>
-              <CardTitle>Recent Shortlisted Clients</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {shortlistedClients.slice(0, 5).map((client, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border">
-                    <div>
-                      <p className="font-medium">Client #{client.id.slice(0, 8)}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {client.primary_goals?.length ? `Goals: ${client.primary_goals.join(', ')}` : 'No goals specified'}
-                      </p>
-                    </div>
-                    <Badge variant={((client as any).discovery_call_booked ? 'default' : 'secondary')}>
-                      {(client as any).discovery_call_booked ? 'Call Booked' : 'Available'}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
       </div>
 
       {/* Floating Message Button */}

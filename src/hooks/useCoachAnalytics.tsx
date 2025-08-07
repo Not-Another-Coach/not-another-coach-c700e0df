@@ -9,6 +9,7 @@ interface CoachAnalytics {
   total_likes: number;
   total_saves: number;
   total_shortlists: number;
+  total_shortlists_last_7_days?: number;
   match_tier_stats: any;
   conversion_rate: number;
   last_activity_at?: string;
@@ -37,6 +38,7 @@ export function useCoachAnalytics(trainerId?: string) {
   const { user } = useAuth();
   const [analytics, setAnalytics] = useState<CoachAnalytics | null>(null);
   const [shortlistedClients, setShortlistedClients] = useState<ClientVisibility[]>([]);
+  const [shortlistedStats, setShortlistedStats] = useState({ total: 0, last7Days: 0 });
   const [loading, setLoading] = useState(true);
 
   const fetchAnalytics = useCallback(async () => {
@@ -65,12 +67,14 @@ export function useCoachAnalytics(trainerId?: string) {
     if (!user || !trainerId) return;
 
     try {
-      // Get clients who have shortlisted this trainer from the engagement table
+      // Get clients who have shortlisted this trainer or are in discovery states
+      // Include: shortlisted, discovery_in_progress, discovery_call_booked, discovery_completed
+      // Exclude: matched, active_client, unmatched, declined
       const { data: engagementData, error: engagementError } = await supabase
         .from('client_trainer_engagement')
-        .select('client_id, created_at')
+        .select('client_id, created_at, stage')
         .eq('trainer_id', trainerId)
-        .eq('stage', 'shortlisted');
+        .in('stage', ['shortlisted', 'discovery_in_progress', 'discovery_call_booked', 'discovery_completed']);
 
       if (engagementError) {
         console.error('Error fetching shortlisted clients:', engagementError);
@@ -113,12 +117,14 @@ export function useCoachAnalytics(trainerId?: string) {
         .eq('trainer_id', trainerId)
         .in('client_id', clientIds);
 
-      // Combine with discovery call info
+      // Combine with discovery call info and stage
       const enrichedClients = clientData?.map(client => {
+        const engagement = engagementData.find(e => e.client_id === client.id);
         const hasDiscoveryCall = discoveryCallData?.some(dc => dc.client_id === client.id);
         return {
           ...client,
-          discovery_call_booked: hasDiscoveryCall
+          discovery_call_booked: hasDiscoveryCall,
+          engagement_stage: engagement?.stage
         };
       }) || [];
 
@@ -128,16 +134,60 @@ export function useCoachAnalytics(trainerId?: string) {
     }
   }, [user, trainerId]);
 
+  const fetchShortlistedStats = useCallback(async () => {
+    if (!user || !trainerId) return { total: 0, last7Days: 0 };
+
+    try {
+      // Get total count of shortlisted/discovery state clients
+      const { data: totalData, error: totalError } = await supabase
+        .from('client_trainer_engagement')
+        .select('id', { count: 'exact' })
+        .eq('trainer_id', trainerId)
+        .in('stage', ['shortlisted', 'discovery_in_progress', 'discovery_call_booked', 'discovery_completed']);
+
+      if (totalError) {
+        console.error('Error fetching total shortlisted count:', totalError);
+        return { total: 0, last7Days: 0 };
+      }
+
+      // Get count from last 7 days
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      
+      const { data: recentData, error: recentError } = await supabase
+        .from('client_trainer_engagement')
+        .select('id', { count: 'exact' })
+        .eq('trainer_id', trainerId)
+        .in('stage', ['shortlisted', 'discovery_in_progress', 'discovery_call_booked', 'discovery_completed'])
+        .gte('created_at', sevenDaysAgo.toISOString());
+
+      if (recentError) {
+        console.error('Error fetching recent shortlisted count:', recentError);
+        return { total: totalData?.length || 0, last7Days: 0 };
+      }
+
+      return { 
+        total: totalData?.length || 0, 
+        last7Days: recentData?.length || 0 
+      };
+    } catch (error) {
+      console.error('Error fetching shortlisted stats:', error);
+      return { total: 0, last7Days: 0 };
+    }
+  }, [user, trainerId]);
+
   useEffect(() => {
     if (user && trainerId) {
       fetchAnalytics();
       fetchShortlistedClients();
+      fetchShortlistedStats().then(setShortlistedStats);
     } else {
       setAnalytics(null);
       setShortlistedClients([]);
+      setShortlistedStats({ total: 0, last7Days: 0 });
       setLoading(false);
     }
-  }, [user, trainerId, fetchAnalytics, fetchShortlistedClients]);
+  }, [user, trainerId, fetchAnalytics, fetchShortlistedClients, fetchShortlistedStats]);
 
   const updateAnalytics = useCallback(async (updates: Partial<CoachAnalytics>) => {
     if (!user || !trainerId) return { error: 'No user or trainer ID' };
@@ -201,6 +251,7 @@ export function useCoachAnalytics(trainerId?: string) {
   return {
     analytics,
     shortlistedClients,
+    shortlistedStats,
     loading,
     incrementView,
     incrementLike,
