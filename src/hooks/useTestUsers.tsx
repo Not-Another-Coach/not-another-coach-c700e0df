@@ -41,70 +41,54 @@ export const useTestUsers = () => {
         console.error('Error fetching roles:', rolesError);
       }
 
-      // Try to get emails for users (admins can see full emails)
-      const { data: userEmails, error: emailError } = await supabase
-        .rpc('get_user_emails_for_admin');
+      // Try to get emails for users (development function allows all authenticated users)
+      let userEmails: any[] = [];
+      let emailError: any = null;
+      
+      // First try the development function
+      const { data: devEmails, error: devEmailError } = await supabase
+        .rpc('get_user_emails_for_development');
+        
+      if (devEmailError) {
+        console.error('Development email fetch failed, trying admin function:', devEmailError);
+        // Fallback to admin function
+        const { data: adminEmails, error: adminEmailError } = await supabase
+          .rpc('get_user_emails_for_admin');
+        if (adminEmailError) {
+          emailError = adminEmailError;
+        } else {
+          userEmails = adminEmails || [];
+        }
+      } else {
+        userEmails = devEmails || [];
+      }
 
       let combinedUsers: TestUser[];
 
-      if (emailError) {
-        console.error('Error fetching full emails (not admin):', emailError);
-        // For non-admin users, try to get emails from auth metadata or use common patterns
-        // We'll show partial emails but provide full emails for known test accounts
-        combinedUsers = profiles.map(profile => {
-          const roles = userRoles?.filter(ur => ur.user_id === profile.id).map(ur => ur.role) || [];
-          
-          // Generate likely email patterns for test accounts
-          const firstName = profile.first_name?.toLowerCase() || 'user';
-          const lastName = profile.last_name?.toLowerCase() || '';
-          const userType = profile.user_type || 'user';
-          
-          // Common test email patterns
-          const possibleEmails = [
-            `${firstName}.${lastName}@example.com`,
-            `${firstName}@demo.com`,
-            `${userType}@demo.com`,
-            `test.${userType}@example.com`,
-            `${firstName}@test.com`
-          ].filter(email => email.includes('.') || !email.includes('..'));
-
-          const primaryEmail = possibleEmails[0];
-          const displayEmail = `${firstName}${lastName ? '.' + lastName : ''}@***`;
-          
-          return {
-            id: profile.id,
-            email: primaryEmail, // Full email for login attempts
-            displayEmail: displayEmail, // Partial email for display
-            first_name: profile.first_name,
-            last_name: profile.last_name,
-            user_type: profile.user_type,
-            roles,
-            password: getTestPassword(primaryEmail)
-          };
-        });
+      if (emailError && userEmails.length === 0) {
+        console.error('Could not fetch emails:', emailError);
+        // Fallback to default test users
+        combinedUsers = getDefaultTestUsers();
       } else {
-        // Admin view - combine profile data with real emails and roles
+        // Combine profile data with real emails and roles
         combinedUsers = profiles.map(profile => {
           const emailData = userEmails.find((e: any) => e.user_id === profile.id);
           const roles = userRoles?.filter(ur => ur.user_id === profile.id).map(ur => ur.role) || [];
           const fullEmail = emailData?.email || '';
           
-          // Create display email (partial)
-          const displayEmail = fullEmail ? 
-            fullEmail.split('@')[0] + '@***' : 
-            'Unknown';
+          if (!fullEmail) return null; // Skip users without emails
           
           return {
             id: profile.id,
-            email: fullEmail, // Full email for login
-            displayEmail: displayEmail, // Partial email for display
+            email: fullEmail, // Real email for login
+            displayEmail: fullEmail, // Show full email for development
             first_name: profile.first_name,
             last_name: profile.last_name,
             user_type: profile.user_type,
             roles,
             password: getTestPassword(fullEmail)
           };
-        }).filter(user => user.email !== '');
+        }).filter(user => user !== null) as TestUser[];
       }
 
       setTestUsers(combinedUsers);

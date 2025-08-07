@@ -9,17 +9,27 @@ import { useTestUsers, TestUser } from '@/hooks/useTestUsers';
 
 interface TestUserSelectorProps {
   onUserSelect: (email: string, password: string) => void;
+  onAutoLogin?: (email: string, password: string) => void; // Optional auto-login function
 }
 
-export const TestUserSelector: React.FC<TestUserSelectorProps> = ({ onUserSelect }) => {
+export const TestUserSelector: React.FC<TestUserSelectorProps> = ({ onUserSelect, onAutoLogin }) => {
   const { testUsers, loading, refreshTestUsers } = useTestUsers();
   const [isOpen, setIsOpen] = useState(false);
 
   const handleUserClick = (user: TestUser) => {
     if (user.email && user.password) {
+      // First update the form fields
       onUserSelect(user.email, user.password);
+      
+      // Then trigger auto-login if available
+      if (onAutoLogin) {
+        // Small delay to ensure form is populated first
+        setTimeout(() => {
+          onAutoLogin(user.email, user.password);
+        }, 100);
+      }
     } else {
-      alert(`Login credentials not available for this user. Try with known test accounts or contact admin.`);
+      alert(`Login credentials not available for this user.`);
     }
   };
 
@@ -52,7 +62,7 @@ export const TestUserSelector: React.FC<TestUserSelectorProps> = ({ onUserSelect
                   All Users
                 </CardTitle>
                 <CardDescription>
-                  Click to select any user and auto-fill login credentials
+                  Click any user to auto-login (Development Mode)
                 </CardDescription>
               </div>
               <div className="flex items-center gap-2">
@@ -67,7 +77,7 @@ export const TestUserSelector: React.FC<TestUserSelectorProps> = ({ onUserSelect
           <CardContent className="pt-0">
             <div className="flex justify-between items-center mb-4">
               <p className="text-sm text-muted-foreground">
-                Select any user to auto-populate the login form
+                Click any user to automatically log in with their credentials
               </p>
               <Button
                 variant="outline"
@@ -86,7 +96,7 @@ export const TestUserSelector: React.FC<TestUserSelectorProps> = ({ onUserSelect
                 {testUsers.map((user) => (
                   <div
                     key={user.id}
-                    className="p-3 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
+                    className="p-3 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors hover:border-primary/50"
                     onClick={() => handleUserClick(user)}
                   >
                     <div className="flex items-center justify-between mb-2">
@@ -153,8 +163,8 @@ export const TestUserSelector: React.FC<TestUserSelectorProps> = ({ onUserSelect
             
             <div className="mt-4 p-3 bg-muted/50 rounded-lg">
               <p className="text-xs text-muted-foreground">
-                <strong>Note:</strong> This shows all registered users for development and testing purposes. 
-                Known test passwords are shown for demo accounts.
+                <strong>Development Mode:</strong> All registered users are shown with real email addresses. 
+                Clicking any user will automatically log you in with their credentials.
               </p>
             </div>
           </CardContent>

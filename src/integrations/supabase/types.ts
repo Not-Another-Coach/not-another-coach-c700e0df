@@ -1651,6 +1651,13 @@ export type Database = {
           email: string
         }[]
       }
+      get_user_emails_for_development: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          user_id: string
+          email: string
+        }[]
+      }
       get_user_roles: {
         Args: { _user_id: string }
         Returns: {
