@@ -71,19 +71,30 @@ export const ChooseCoachModal = ({
     }
 
     console.log('About to call createSelectionRequest...');
-    const result = await createSelectionRequest(
-      trainer.id,
-      selectedPackage.id,
-      selectedPackage.name,
-      selectedPackage.price,
-      selectedPackage.duration,
-      clientMessage.trim() || undefined
-    );
+    console.log('createSelectionRequest function:', createSelectionRequest);
+    console.log('Type of createSelectionRequest:', typeof createSelectionRequest);
+    
+    try {
+      const result = await createSelectionRequest(
+        trainer.id,
+        selectedPackage.id,
+        selectedPackage.name,
+        selectedPackage.price,
+        selectedPackage.duration,
+        clientMessage.trim() || undefined
+      );
 
-    console.log('Result:', result);
-    if (result.success) {
-      onOpenChange(false);
-      onSuccess?.();
+      console.log('Result:', result);
+      if (result.success) {
+        console.log('Success - closing modal');
+        onOpenChange(false);
+        onSuccess?.();
+      } else {
+        console.log('Failed - result:', result);
+      }
+    } catch (error) {
+      console.error('Exception in handleSubmit:', error);
+      alert('Exception caught: ' + error.message);
     }
   };
 
