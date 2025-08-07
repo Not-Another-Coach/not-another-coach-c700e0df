@@ -61,38 +61,20 @@ export const ChooseCoachModal = ({
   };
 
   const handleSubmit = async () => {
-    console.log('MODAL SUBMIT CLICKED');
-    alert('Modal submit clicked - check console');
-    
-    if (!selectedPackage) {
-      console.log('No package selected');
-      alert('No package selected');
-      return;
-    }
+    if (!selectedPackage) return;
 
-    console.log('About to call createSelectionRequest');
-    alert('About to call createSelectionRequest');
-    
-    try {
-      const result = await createSelectionRequest(
-        trainer.id,
-        selectedPackage.id,
-        selectedPackage.name,
-        selectedPackage.price,
-        selectedPackage.duration,
-        clientMessage.trim() || undefined
-      );
+    const result = await createSelectionRequest(
+      trainer.id,
+      selectedPackage.id,
+      selectedPackage.name,
+      selectedPackage.price,
+      selectedPackage.duration,
+      clientMessage.trim() || undefined
+    );
 
-      console.log('Got result:', result);
-      alert('Got result: ' + JSON.stringify(result));
-      
-      if (result.success) {
-        onOpenChange(false);
-        onSuccess?.();
-      }
-    } catch (error) {
-      console.error('Error in handleSubmit:', error);
-      alert('Error in handleSubmit: ' + error);
+    if (result.success) {
+      onOpenChange(false);
+      onSuccess?.();
     }
   };
 
