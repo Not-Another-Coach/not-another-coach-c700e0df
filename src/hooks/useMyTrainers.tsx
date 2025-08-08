@@ -4,6 +4,7 @@ import { useAuth } from './useAuth';
 import { useTrainerEngagement } from './useTrainerEngagement';
 import { useConversations } from './useConversations';
 import { useDiscoveryCallData } from './useDiscoveryCallData';
+import { useWaitlist } from './useWaitlist';
 
 export interface TrainerWithStatus {
   id: string;
@@ -25,7 +26,7 @@ export interface TrainerWithStatus {
   offers_discovery_call: boolean;
   package_options?: any[];
   // Status fields
-  status: 'saved' | 'shortlisted' | 'discovery' | 'declined';
+  status: 'saved' | 'shortlisted' | 'discovery' | 'declined' | 'waitlist';
   engagement?: any;
   statusLabel: string;
   statusColor: string;
@@ -35,6 +36,7 @@ export function useMyTrainers(refreshTrigger?: number) {
   const { user } = useAuth();
   const { conversations } = useConversations();
   const { hasActiveDiscoveryCall } = useDiscoveryCallData();
+  const { checkClientWaitlistStatus } = useWaitlist();
   
   const { 
     engagements,
@@ -49,11 +51,40 @@ export function useMyTrainers(refreshTrigger?: number) {
   const [trainers, setTrainers] = useState<TrainerWithStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [availability, setAvailability] = useState<{[key: string]: any}>({});
+  const [waitlistTrainers, setWaitlistTrainers] = useState<string[]>([]);
 
-  // Get all unique trainer IDs from engagements
+  // Get all unique trainer IDs from engagements and waitlist
   const trainerIds = useMemo(() => {
-    return [...new Set(engagements.map(e => e.trainerId))];
-  }, [engagements]);
+    const engagementIds = engagements.map(e => e.trainerId);
+    return [...new Set([...engagementIds, ...waitlistTrainers])];
+  }, [engagements, waitlistTrainers]);
+
+  // Fetch waitlist trainers
+  useEffect(() => {
+    const fetchWaitlistTrainers = async () => {
+      if (!user) return;
+
+      try {
+        const { data: waitlistData, error } = await supabase
+          .from('coach_waitlists')
+          .select('coach_id')
+          .eq('client_id', user.id)
+          .eq('status', 'active');
+
+        if (error) {
+          console.error('Error fetching waitlist trainers:', error);
+          return;
+        }
+
+        const waitlistIds = waitlistData?.map(w => w.coach_id) || [];
+        setWaitlistTrainers(waitlistIds);
+      } catch (error) {
+        console.error('Error in fetchWaitlistTrainers:', error);
+      }
+    };
+
+    fetchWaitlistTrainers();
+  }, [user, refreshTrigger]);
 
   // Fetch trainer profiles for engaged trainers only
   useEffect(() => {
@@ -262,6 +293,29 @@ export function useMyTrainers(refreshTrigger?: number) {
           }
         });
 
+        // Process waitlisted trainers (separate status)
+        const waitlistPromises = waitlistTrainers.map(async (trainerId) => {
+          const trainerProfile = trainerData?.find(t => t.id === trainerId);
+          if (trainerProfile && !trainersWithStatus.find(t => t.id === trainerId)) {
+            // Only add if not already in list with another status
+            return {
+              ...createTrainerObject(trainerProfile),
+              status: 'waitlist' as const,
+              engagement: null,
+              statusLabel: 'On Waitlist',
+              statusColor: 'bg-orange-100 text-orange-800'
+            };
+          }
+          return null;
+        });
+
+        const waitlistResults = await Promise.all(waitlistPromises);
+        waitlistResults.forEach(result => {
+          if (result) {
+            trainersWithStatus.push(result);
+          }
+        });
+
         // Process declined trainers (only show if not dismissed)
         const declinedTrainers = allEngagements.filter(engagement => engagement.stage === 'declined');
         declinedTrainers.forEach(engagement => {
@@ -336,7 +390,7 @@ export function useMyTrainers(refreshTrigger?: number) {
 
   // Filter trainers by status
   const filteredTrainers = useMemo(() => {
-    return (filter: 'all' | 'saved' | 'shortlisted' | 'discovery' | 'declined') => {
+    return (filter: 'all' | 'saved' | 'shortlisted' | 'discovery' | 'declined' | 'waitlist') => {
       if (filter === 'all') return trainers;
       return trainers.filter(t => t.status === filter);
     };
@@ -348,7 +402,8 @@ export function useMyTrainers(refreshTrigger?: number) {
     saved: trainers.filter(t => t.status === 'saved').length,
     shortlisted: trainers.filter(t => t.status === 'shortlisted').length,
     discovery: trainers.filter(t => t.status === 'discovery').length,
-    declined: trainers.filter(t => t.status === 'declined').length
+    declined: trainers.filter(t => t.status === 'declined').length,
+    waitlist: trainers.filter(t => t.status === 'waitlist').length
   }), [trainers]);
 
   return {

@@ -92,7 +92,7 @@ export default function MyTrainers() {
   const { getCoachAvailability, checkClientWaitlistStatus, joinWaitlist, removeFromWaitlist } = useWaitlist();
 
   // State for filtering and UI
-  const [activeFilter, setActiveFilter] = useState<'all' | 'saved' | 'shortlisted' | 'discovery' | 'declined'>('all');
+  const [activeFilter, setActiveFilter] = useState<'all' | 'saved' | 'shortlisted' | 'discovery' | 'declined' | 'waitlist'>('all');
   const [waitlistRefreshKey, setWaitlistRefreshKey] = useState(0);
   const [selectedForComparison, setSelectedForComparison] = useState<string[]>([]);
   const [showComparison, setShowComparison] = useState(false);
@@ -284,6 +284,33 @@ export default function MyTrainers() {
     } catch (error) {
       console.error('Error moving trainer to saved:', error);
       toast.error('Failed to move trainer to saved');
+    }
+  };
+
+  const handleLeaveWaitlist = async (trainerId: string) => {
+    console.log('🔥 Leave waitlist clicked:', trainerId);
+    try {
+      const result = await removeFromWaitlist(trainerId);
+      if (result.error) {
+        toast.error('Failed to leave waitlist');
+      } else {
+        // Move trainer back to shortlisted if they were shortlisted before
+        const currentStage = getEngagementStage(trainerId);
+        if (currentStage === 'shortlisted' || currentStage === 'liked') {
+          // Keep their current engagement stage
+          toast.success('Left waitlist! Trainer moved back to your list.');
+        } else {
+          // Reset to browsing if no prior engagement
+          await updateEngagementStage(trainerId, 'browsing');
+          toast.success('Left waitlist!');
+        }
+        
+        // Refresh data
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error('Error leaving waitlist:', error);
+      toast.error('Failed to leave waitlist');
     }
   };
 
@@ -559,12 +586,26 @@ export default function MyTrainers() {
               </Button>
             </div>
           </div>
-        );
+         );
 
-      default:
-        return null;
-    }
-  };
+       case 'waitlist':
+         return (
+           <div className="space-y-2">
+             <WaitlistJoinButton 
+               coachId={trainer.id}
+               coachName={trainer.name}
+               nextAvailableDate={null}
+               waitlistMessage={null}
+               className="w-full"
+               onWaitlistChange={() => setWaitlistRefreshKey(prev => prev + 1)}
+             />
+           </div>
+         );
+
+       default:
+         return null;
+     }
+   };
 
   if (!user || !profile) {
     return (
@@ -619,7 +660,7 @@ export default function MyTrainers() {
       {/* Filter Tabs */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-6">
         <Tabs value={activeFilter} onValueChange={(value: any) => setActiveFilter(value)} className="w-full sm:w-auto">
-          <TabsList className="grid w-full sm:w-auto grid-cols-5">
+          <TabsList className="grid w-full sm:w-auto grid-cols-6">
             <TabsTrigger value="all" className="flex items-center gap-2">
               <Filter className="h-4 w-4" />
               All ({counts.all})
@@ -631,6 +672,10 @@ export default function MyTrainers() {
             <TabsTrigger value="shortlisted" className="flex items-center gap-2">
               <Star className="h-4 w-4" />
               Shortlisted ({counts.shortlisted})
+            </TabsTrigger>
+            <TabsTrigger value="waitlist" className="flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              Waitlist ({counts.waitlist})
             </TabsTrigger>
             <TabsTrigger value="discovery" className="flex items-center gap-2">
               <Phone className="h-4 w-4" />
@@ -709,7 +754,7 @@ export default function MyTrainers() {
             <p className="text-muted-foreground mb-4">
               {activeFilter === 'all'
                 ? 'Start exploring trainers to build your fitness team'
-                : `You haven't ${activeFilter === 'saved' ? 'saved' : activeFilter === 'shortlisted' ? 'shortlisted' : activeFilter === 'declined' ? 'declined' : 'booked discovery calls with'} any trainers yet`
+                : `You haven't ${activeFilter === 'saved' ? 'saved' : activeFilter === 'shortlisted' ? 'shortlisted' : activeFilter === 'waitlist' ? 'joined any waitlists for' : activeFilter === 'declined' ? 'declined' : 'booked discovery calls with'} any trainers yet`
               }
             </p>
             <Button onClick={() => navigate('/client/dashboard')}>

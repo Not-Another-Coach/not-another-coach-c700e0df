@@ -55,7 +55,7 @@ interface TrainerCardProps {
   matchDetails?: MatchDetail[];
   
   // Unified state management
-  cardState?: 'saved' | 'shortlisted' | 'discovery' | 'matched' | 'declined' | 'default';
+  cardState?: 'saved' | 'shortlisted' | 'discovery' | 'matched' | 'declined' | 'waitlist' | 'default';
   showComparisonCheckbox?: boolean;
   comparisonChecked?: boolean;
   onComparisonToggle?: (trainerId: string) => void;
@@ -219,6 +219,11 @@ export const TrainerCard = ({
         return {
           text: "❌ Declined",
           className: "bg-red-500 text-white"
+        };
+      case 'waitlist':
+        return {
+          text: "⏰ On Waitlist",
+          className: "bg-orange-500 text-white"
         };
       default:
         return null;
