@@ -305,8 +305,11 @@ export function useMyTrainers(refreshTrigger?: number) {
       }
     };
 
-    fetchAvailabilityData();
-  }, [trainers]);
+    // Only fetch if we have trainers and they're not loading
+    if (trainers.length > 0 && !loading) {
+      fetchAvailabilityData();
+    }
+  }, [trainers.length, loading]); // Use trainers.length instead of trainers to prevent loop
 
   // Filter trainers by status
   const filteredTrainers = useMemo(() => {
