@@ -490,7 +490,7 @@ export default function MyTrainers() {
                  <WaitlistJoinButton
                    coachId={trainer.id}
                    coachName={trainer.name}
-                   nextAvailableDate={trainerAvailabilityForCTA?.next_available_date}
+                   nextAvailableDate={null}
                    waitlistMessage={trainerAvailabilityForCTA?.waitlist_message}
                    onWaitlistChange={() => setWaitlistRefreshKey(prev => prev + 1)}
                  />

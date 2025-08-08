@@ -1123,7 +1123,6 @@ export type Database = {
           admin_review_notes: string | null
           admin_verification_notes: string | null
           availability_schedule: Json | null
-          availability_slots: Json | null
           before_after_photos: Json | null
           billing_address: Json | null
           bio: string | null
@@ -1176,7 +1175,6 @@ export type Database = {
           max_clients: number | null
           messaging_support: boolean | null
           motivation_factors: string[] | null
-          next_available_date: string | null
           onboarding_step: number | null
           open_to_virtual_coaching: boolean | null
           package_inclusions: Json | null
@@ -1244,7 +1242,6 @@ export type Database = {
           admin_review_notes?: string | null
           admin_verification_notes?: string | null
           availability_schedule?: Json | null
-          availability_slots?: Json | null
           before_after_photos?: Json | null
           billing_address?: Json | null
           bio?: string | null
@@ -1297,7 +1294,6 @@ export type Database = {
           max_clients?: number | null
           messaging_support?: boolean | null
           motivation_factors?: string[] | null
-          next_available_date?: string | null
           onboarding_step?: number | null
           open_to_virtual_coaching?: boolean | null
           package_inclusions?: Json | null
@@ -1365,7 +1361,6 @@ export type Database = {
           admin_review_notes?: string | null
           admin_verification_notes?: string | null
           availability_schedule?: Json | null
-          availability_slots?: Json | null
           before_after_photos?: Json | null
           billing_address?: Json | null
           bio?: string | null
@@ -1418,7 +1413,6 @@ export type Database = {
           max_clients?: number | null
           messaging_support?: boolean | null
           motivation_factors?: string[] | null
-          next_available_date?: string | null
           onboarding_step?: number | null
           open_to_virtual_coaching?: boolean | null
           package_inclusions?: Json | null

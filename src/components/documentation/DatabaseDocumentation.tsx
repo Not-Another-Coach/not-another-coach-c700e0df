@@ -166,7 +166,7 @@ const tables = [
       {
         name: 'coach_availability_settings',
         description: 'Coach availability status and preferences',
-        keyColumns: ['coach_id', 'availability_status', 'next_available_date', 'waitlist_message'],
+        keyColumns: ['coach_id', 'availability_status', 'waitlist_message'],
         relationships: ['References profiles.id'],
         purpose: 'Coach capacity and availability management'
       },

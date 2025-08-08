@@ -223,37 +223,6 @@ export const TrainerProfilePreview = ({ formData }: TrainerProfilePreviewProps) 
 
       {/* Package-Specific Ways of Working */}
       <PackageWaysOfWorkingPreview packages={formData.package_options || []} />
-
-      {/* Availability */}
-      {formData.availability_slots?.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Availability</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Group slots by day */}
-              {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => {
-                const daySlots = formData.availability_slots.filter((slot: any) => slot.day === day);
-                if (daySlots.length === 0) return null;
-                
-                return (
-                  <div key={day} className="space-y-2">
-                    <h5 className="font-medium">{day}</h5>
-                    <div className="space-y-1">
-                      {daySlots.map((slot: any) => (
-                        <Badge key={slot.id} variant="outline" className="block w-fit">
-                          {slot.startTime} - {slot.endTime}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 };

@@ -465,7 +465,7 @@ export const TrainerCard = ({
                 <WaitlistJoinButton 
                   coachId={trainer.id} 
                   coachName={trainer.name}
-                  nextAvailableDate={coachAvailability?.next_available_date}
+                  nextAvailableDate={null}
                   waitlistMessage={coachAvailability?.waitlist_message}
                 />
               </div>

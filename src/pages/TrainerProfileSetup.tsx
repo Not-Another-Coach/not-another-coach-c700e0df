@@ -64,7 +64,7 @@ const TrainerProfileSetup = () => {
     package_options: [],
     free_discovery_call: false,
     calendar_link: "",
-    next_available_date: "",
+    
     
     // Communication Style
     communication_style: "",
@@ -154,7 +154,7 @@ const TrainerProfileSetup = () => {
         package_options: (profile as any).package_options || [],
         free_discovery_call: (profile as any).free_discovery_call || false,
         calendar_link: (profile as any).calendar_link || "",
-        next_available_date: (profile as any).next_available_date || "",
+        
         communication_style: (profile as any).communication_style || "",
         video_checkins: (profile as any).video_checkins || false,
         messaging_support: (profile as any).messaging_support || false,
@@ -336,7 +336,7 @@ const TrainerProfileSetup = () => {
         'verification_status', 'profile_published', 'before_after_photos',
         'availability_schedule', 'max_clients', 'package_options', 
         'free_discovery_call', 'testimonials', 'profile_setup_step',
-        'total_profile_setup_steps', 'package_inclusions', 'availability_slots',
+        'total_profile_setup_steps', 'package_inclusions',
         'is_uk_based', 'works_bank_holidays', 'uploaded_certificates',
         'special_credentials', 'internal_tags', 'admin_verification_notes',
         'ideal_client_types', 'coaching_styles', 'languages', 'journey_progress',
@@ -344,7 +344,7 @@ const TrainerProfileSetup = () => {
         'delivery_format', 'journey_stage', 'certifying_body', 'proof_upload_urls',
         'ideal_client_age_range', 'ideal_client_fitness_level', 
         'ideal_client_personality', 'training_vibe', 'calendar_link',
-         'next_available_date', 'communication_style', 'video_checkins',
+         'communication_style', 'video_checkins',
         'messaging_support', 'weekly_programming_only', 'ways_of_working_onboarding',
         'ways_of_working_first_week', 'ways_of_working_ongoing_structure',
         'ways_of_working_tracking_tools', 'ways_of_working_client_expectations',
@@ -362,10 +362,6 @@ const TrainerProfileSetup = () => {
             value !== "" // Filter out empty strings that could cause date parsing errors
           )
           .map(([key, value]) => {
-            // Convert empty date strings to null
-            if (key === 'next_available_date' && value === '') {
-              return [key, null];
-            }
             return [key, value];
           })
       );

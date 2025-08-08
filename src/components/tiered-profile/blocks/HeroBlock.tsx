@@ -105,11 +105,6 @@ export const HeroBlock = ({
       )}>
         <div className="w-2 h-2 bg-white rounded-full" />
         {availability.text}
-        {trainer.next_available_date && (
-          <span className="text-white/80">
-            • Starting {new Date(trainer.next_available_date).toLocaleDateString()}
-          </span>
-        )}
       </div>
 
       {/* Goal Tags - Primary specializations visible at browsing stage */}

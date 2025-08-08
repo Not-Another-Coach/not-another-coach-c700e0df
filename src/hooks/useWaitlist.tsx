@@ -114,7 +114,7 @@ export function useWaitlist() {
       // Get coach's availability settings to determine estimated start date
       const { data: coachSettings } = await supabase
         .from('coach_availability_settings')
-        .select('next_available_date')
+        .select('*')
         .eq('coach_id', coachId)
         .maybeSingle();
 
@@ -125,7 +125,7 @@ export function useWaitlist() {
           client_id: user.id,
           coach_id: coachId,
           client_goals: clientGoals,
-          estimated_start_date: coachSettings?.next_available_date
+          estimated_start_date: coachSettings?.next_available_date || null
         })
         .select()
         .single();
@@ -237,7 +237,7 @@ export function useWaitlist() {
           availability_status: 'accepting' as CoachAvailabilityStatus,
           allow_discovery_calls_on_waitlist: true,
           auto_follow_up_days: 14,
-          next_available_date: null,
+          
           waitlist_message: null
         };
       }

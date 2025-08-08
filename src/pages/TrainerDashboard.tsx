@@ -6,7 +6,7 @@ import { useCoachAnalytics } from "@/hooks/useCoachAnalytics";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { useWaitlist } from "@/hooks/useWaitlist";
-import { AvailabilitySettings } from "@/components/coach/AvailabilitySettings";
+
 import { WaitlistManagement } from "@/components/coach/WaitlistManagement";
 import { CoachFeedbackSummary } from "@/components/coach/CoachFeedbackSummary";
 import { ActiveClientsSection } from "@/components/coach/ActiveClientsSection";
@@ -68,8 +68,6 @@ const TrainerDashboard = () => {
   const { waitlistEntries } = useWaitlist();
   const navigate = useNavigate();
   const [availabilityStatus, setAvailabilityStatus] = useState<'accepting' | 'waitlist' | 'unavailable'>('accepting');
-  const [nextAvailableDate, setNextAvailableDate] = useState<Date | undefined>();
-  const [showDatePicker, setShowDatePicker] = useState(false);
   const [prospectsCount, setProspectsCount] = useState(0);
   const [activeClientsCount, setActiveClientsCount] = useState(0);
   const [activeView, setActiveView] = useState('dashboard');
@@ -87,11 +85,6 @@ const TrainerDashboard = () => {
       const newStatus = statusMap[profile.client_status] || 'accepting';
       console.log('Setting availability status to:', newStatus);
       setAvailabilityStatus(newStatus);
-      
-      // Initialize next available date from profile
-      if ((profile as any).next_available_date) {
-        setNextAvailableDate(new Date((profile as any).next_available_date));
-      }
     }
   }, [profile?.client_status]);
 
@@ -140,34 +133,6 @@ const TrainerDashboard = () => {
     return Math.round((completedFields / requiredFields.length) * 100);
   };
 
-  const handleStatusChange = async (status: 'accepting' | 'waitlist' | 'unavailable') => {
-    console.log('Changing status from', availabilityStatus, 'to', status);
-    const previousStatus = availabilityStatus;
-    setAvailabilityStatus(status);
-    
-    // Show date picker when moving to waitlist for the first time
-    if (status === 'waitlist' && previousStatus !== 'waitlist' && !nextAvailableDate) {
-      setShowDatePicker(true);
-    }
-    
-    // Map status to client_status enum
-    const clientStatusMap = {
-      'accepting': 'onboarding' as const,
-      'waitlist': 'browsing' as const,
-      'unavailable': 'decision_pending' as const
-    };
-    
-    const result = await updateProfile({ client_status: clientStatusMap[status] });
-    console.log('Status update result:', result);
-  };
-
-  const handleNextAvailableDateChange = async (date: Date | undefined) => {
-    setNextAvailableDate(date);
-    setShowDatePicker(false);
-    
-    const dateString = date ? format(date, 'yyyy-MM-dd') : null;
-    await updateProfile({ next_available_date: dateString } as any);
-  };
 
   if (loading || profileLoading) {
     return (
@@ -226,19 +191,6 @@ const TrainerDashboard = () => {
                   </>
                 )}
               </div>
-              
-              {nextAvailableDate && availabilityStatus === 'waitlist' && (
-                <>
-                  <Separator orientation="vertical" className="h-4" />
-                  
-                  <div className="flex items-center gap-2">
-                    <CalendarIcon className="w-3 h-3 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">
-                      Available: {format(nextAvailableDate, 'MMM d, yyyy')}
-                    </span>
-                  </div>
-                </>
-              )}
                
               <Separator orientation="vertical" className="h-4" />
               

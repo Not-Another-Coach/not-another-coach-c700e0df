@@ -89,7 +89,7 @@ const stepFieldMapping: Record<number, string[]> = {
 // Additional fields to ensure they're saved (not validated but tracked for completeness)
 const additionalFormFields = [
   'profile_photo_url',
-  'availability_slots', 
+   
   'max_clients',
   'ideal_client_personality',
   'is_uk_based',
