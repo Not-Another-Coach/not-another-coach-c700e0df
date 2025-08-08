@@ -21,6 +21,7 @@ import { useClientJourneyProgress } from "@/hooks/useClientJourneyProgress";
 import { ClientHeader } from "@/components/ClientHeader";
 import { WaitlistExclusiveAccessWidget } from "@/components/dashboard/WaitlistExclusiveAccessWidget";
 import { OnboardingSection } from "@/components/dashboard/OnboardingSection";
+import { ClientOnboardingSection } from "@/components/dashboard/ClientOnboardingSection";
 import { useTrainerEngagement } from "@/hooks/useTrainerEngagement";
 import { Heart, Settings, Search, MessageCircle, Menu, Users, Shuffle, Shield, ChevronRight, Home, User, UserSearch } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -166,7 +167,7 @@ export default function ClientDashboard() {
           )}
 
           {activeTab === "onboarding" && isActiveClient && (
-            <OnboardingSection profile={profile} />
+            <ClientOnboardingSection />
           )}
 
           {!isActiveClient && activeTab === "preferences" && (

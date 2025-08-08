@@ -17,6 +17,7 @@ import { FloatingMessageButton } from "@/components/FloatingMessageButton";
 import { LiveActivityFeed } from "@/components/dashboard/LiveActivityFeed";
 import { UpcomingSessionsWidget } from "@/components/dashboard/UpcomingSessionsWidget";
 import { CoachExclusivityEndedAlert } from "@/components/dashboard/CoachExclusivityEndedAlert";
+import { ClientOnboardingManagement } from "@/components/coach/ClientOnboardingManagement";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -275,6 +276,16 @@ const TrainerDashboard = () => {
             </Button>
             
             <Button
+              variant={activeView === 'onboarding' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setActiveView('onboarding')}
+              className="flex items-center gap-2"
+            >
+              <CheckCircle className="w-4 h-4" />
+              Client Onboarding
+            </Button>
+            
+            <Button
               variant={activeView === 'goals' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setActiveView('goals')}
@@ -495,6 +506,10 @@ const TrainerDashboard = () => {
         
         {activeView === 'clients' && (
           <ActiveClientsSection onCountChange={setActiveClientsCount} />
+        )}
+        
+        {activeView === 'onboarding' && (
+          <ClientOnboardingManagement />
         )}
         
         {activeView === 'goals' && (
