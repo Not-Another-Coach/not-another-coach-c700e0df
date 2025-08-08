@@ -104,6 +104,80 @@ export type Database = {
         }
         Relationships: []
       }
+      client_onboarding_progress: {
+        Row: {
+          client_id: string
+          completed_at: string | null
+          completed_by: string | null
+          completion_method: string
+          completion_notes: string | null
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          instructions: string | null
+          requires_file_upload: boolean
+          status: string
+          step_name: string
+          step_type: string
+          template_step_id: string | null
+          trainer_id: string
+          trainer_notes: string | null
+          updated_at: string
+          uploaded_file_url: string | null
+        }
+        Insert: {
+          client_id: string
+          completed_at?: string | null
+          completed_by?: string | null
+          completion_method?: string
+          completion_notes?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          instructions?: string | null
+          requires_file_upload?: boolean
+          status?: string
+          step_name: string
+          step_type?: string
+          template_step_id?: string | null
+          trainer_id: string
+          trainer_notes?: string | null
+          updated_at?: string
+          uploaded_file_url?: string | null
+        }
+        Update: {
+          client_id?: string
+          completed_at?: string | null
+          completed_by?: string | null
+          completion_method?: string
+          completion_notes?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          instructions?: string | null
+          requires_file_upload?: boolean
+          status?: string
+          step_name?: string
+          step_type?: string
+          template_step_id?: string | null
+          trainer_id?: string
+          trainer_notes?: string | null
+          updated_at?: string
+          uploaded_file_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_onboarding_progress_template_step_id_fkey"
+            columns: ["template_step_id"]
+            isOneToOne: false
+            referencedRelation: "trainer_onboarding_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_trainer_engagement: {
         Row: {
           became_client_at: string | null
@@ -1482,6 +1556,51 @@ export type Database = {
         }
         Relationships: []
       }
+      trainer_onboarding_templates: {
+        Row: {
+          completion_method: string
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          instructions: string | null
+          is_active: boolean
+          requires_file_upload: boolean
+          step_name: string
+          step_type: string
+          trainer_id: string
+          updated_at: string
+        }
+        Insert: {
+          completion_method?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          instructions?: string | null
+          is_active?: boolean
+          requires_file_upload?: boolean
+          step_name: string
+          step_type?: string
+          trainer_id: string
+          updated_at?: string
+        }
+        Update: {
+          completion_method?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          instructions?: string | null
+          is_active?: boolean
+          requires_file_upload?: boolean
+          step_name?: string
+          step_type?: string
+          trainer_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       trainer_verification_requests: {
         Row: {
           admin_notes: string | null
@@ -1817,6 +1936,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
         }
         Returns: boolean
+      }
+      initialize_client_onboarding: {
+        Args: { p_client_id: string; p_trainer_id: string }
+        Returns: undefined
       }
       initialize_trainer_visibility_defaults: {
         Args: { p_trainer_id: string }
