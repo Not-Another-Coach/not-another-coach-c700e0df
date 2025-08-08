@@ -149,26 +149,42 @@ export function useCoachSelection() {
     if (!user) return { error: 'Not authenticated' };
 
     try {
-      const { data, error } = await supabase
+      // First get the selection requests
+      const { data: requestsData, error: requestsError } = await supabase
         .from('coach_selection_requests')
-        .select(`
-          *,
-          client:profiles!coach_selection_requests_client_id_fkey(
-            first_name,
-            last_name,
-            profile_photo_url
-          )
-        `)
+        .select('*')
         .eq('trainer_id', user.id)
         .eq('status', 'pending')
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching pending requests:', error);
-        return { error };
+      if (requestsError) {
+        console.error('Error fetching selection requests:', requestsError);
+        return { error: requestsError };
       }
 
-      return { data };
+      if (!requestsData || requestsData.length === 0) {
+        return { data: [] };
+      }
+
+      // Get client IDs and fetch their profiles separately
+      const clientIds = requestsData.map(req => req.client_id);
+      const { data: clientProfiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, profile_photo_url')
+        .in('id', clientIds);
+
+      if (profilesError) {
+        console.error('Error fetching client profiles:', profilesError);
+        return { error: profilesError };
+      }
+
+      // Manually join the data
+      const enrichedRequests = requestsData.map(request => ({
+        ...request,
+        client: clientProfiles?.find(profile => profile.id === request.client_id) || null
+      }));
+
+      return { data: enrichedRequests };
     } catch (error) {
       console.error('Error fetching pending requests:', error);
       return { error };
