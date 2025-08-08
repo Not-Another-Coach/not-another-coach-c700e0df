@@ -1,7 +1,6 @@
 import { useWaitlist } from "@/hooks/useWaitlist";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
@@ -149,29 +148,61 @@ export function AvailabilitySection({ formData, updateFormData }: AvailabilitySe
         <CardContent className="space-y-6">
           <div className="space-y-4">
             <Label>Select your current availability status</Label>
-            <RadioGroup value={availabilityStatus} onValueChange={setAvailabilityStatus}>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="accepting" id="accepting" />
-                <Label htmlFor="accepting" className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                  Accepting Clients - Visible to all potential clients
-                </Label>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Accepting Clients */}
+              <div
+                className={`border-2 rounded-lg p-4 cursor-pointer transition-all hover:shadow-md ${
+                  availabilityStatus === 'accepting'
+                    ? 'border-green-500 bg-green-50'
+                    : 'border-gray-200 hover:border-green-300'
+                }`}
+                onClick={() => setAvailabilityStatus('accepting')}
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                  <span className="font-medium">Accepting Clients</span>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Your profile is visible and you're actively taking new clients
+                </p>
               </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="waitlist" id="waitlist" />
-                <Label htmlFor="waitlist" className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-amber-600" />
-                  Waitlist Only - Clients can join your waitlist
-                </Label>
+
+              {/* Waitlist Only */}
+              <div
+                className={`border-2 rounded-lg p-4 cursor-pointer transition-all hover:shadow-md ${
+                  availabilityStatus === 'waitlist'
+                    ? 'border-amber-500 bg-amber-50'
+                    : 'border-gray-200 hover:border-amber-300'
+                }`}
+                onClick={() => setAvailabilityStatus('waitlist')}
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <Clock className="h-5 w-5 text-amber-600" />
+                  <span className="font-medium">Waitlist Only</span>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Your profile is visible but clients can only join a waitlist
+                </p>
               </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="unavailable" id="unavailable" />
-                <Label htmlFor="unavailable" className="flex items-center gap-2">
-                  <Pause className="h-4 w-4 text-red-600" />
-                  Not Available - Hidden from searches
-                </Label>
+
+              {/* Not Available */}
+              <div
+                className={`border-2 rounded-lg p-4 cursor-pointer transition-all hover:shadow-md ${
+                  availabilityStatus === 'unavailable'
+                    ? 'border-red-500 bg-red-50'
+                    : 'border-gray-200 hover:border-red-300'
+                }`}
+                onClick={() => setAvailabilityStatus('unavailable')}
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <Pause className="h-5 w-5 text-red-600" />
+                  <span className="font-medium">Not Available</span>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Your profile is hidden from client searches
+                </p>
               </div>
-            </RadioGroup>
+            </div>
           </div>
 
           {availabilityStatus === 'waitlist' && (
