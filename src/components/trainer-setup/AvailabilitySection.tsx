@@ -64,7 +64,36 @@ export function AvailabilitySection({ formData, updateFormData, onAvailabilityCh
       // Update the local availability status to reflect the selection
       setLocalAvailabilityStatus(newStatus);
       
-      // Notify parent component about the change so it can be included in profile save
+      // Save directly to database
+      setIsSaving(true);
+      try {
+        await updateAvailabilitySettings({
+          availability_status: newStatus as any,
+          next_available_date: nextAvailableDate || null,
+          allow_discovery_calls_on_waitlist: allowDiscoveryCalls,
+          auto_follow_up_days: autoFollowUpDays,
+          waitlist_message: waitlistMessage || null,
+        });
+        
+        // Refresh data to ensure UI is in sync
+        await refetch();
+        
+        toast({
+          title: "Status Updated",
+          description: "Your availability status has been updated successfully.",
+        });
+      } catch (error) {
+        console.error('Failed to update status:', error);
+        toast({
+          title: "Error",
+          description: "Failed to update status. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsSaving(false);
+      }
+      
+      // Also notify parent component if callback exists (for profile setup integration)
       if (onAvailabilityChange) {
         onAvailabilityChange(newStatus, {
           next_available_date: nextAvailableDate || null,
@@ -84,7 +113,51 @@ export function AvailabilitySection({ formData, updateFormData, onAvailabilityCh
     // Update the local status when waitlist prompt is responded to
     setLocalAvailabilityStatus(pendingAvailabilityChange);
     
-    // Notify parent component about the change
+    // Save directly to database
+    setIsSaving(true);
+    try {
+      if (offerToWaitlist) {
+        // Start exclusive period and update status
+        const result = await startExclusivePeriod(user.id);
+        if (result.success) {
+          await updateAvailabilitySettings({
+            availability_status: pendingAvailabilityChange as any,
+            next_available_date: nextAvailableDate || null,
+            allow_discovery_calls_on_waitlist: allowDiscoveryCalls,
+            auto_follow_up_days: autoFollowUpDays,
+            waitlist_message: waitlistMessage || null,
+          });
+        }
+      } else {
+        // Just update the status normally
+        await updateAvailabilitySettings({
+          availability_status: pendingAvailabilityChange as any,
+          next_available_date: nextAvailableDate || null,
+          allow_discovery_calls_on_waitlist: allowDiscoveryCalls,
+          auto_follow_up_days: autoFollowUpDays,
+          waitlist_message: waitlistMessage || null,
+        });
+      }
+      
+      // Refresh data to ensure UI is in sync
+      await refetch();
+      
+      toast({
+        title: "Status Updated",
+        description: "Your availability status has been updated successfully.",
+      });
+    } catch (error) {
+      console.error('Failed to update status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update status. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+    
+    // Also notify parent component if callback exists
     if (onAvailabilityChange) {
       onAvailabilityChange(pendingAvailabilityChange, {
         next_available_date: nextAvailableDate || null,
