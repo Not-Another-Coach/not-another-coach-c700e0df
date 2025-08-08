@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { Upload, Plus, Trash2, Image, Quote, Star } from "lucide-react";
 import { ImageUploadSection } from "./ImageUploadSection";
+import { SectionHeader } from './SectionHeader';
 
 interface TestimonialsSectionProps {
   formData: any;
@@ -103,6 +104,12 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
 
   return (
     <div className="space-y-6">
+      <SectionHeader 
+        icons={[Quote, Star]}
+        title="Testimonials & Case Studies"
+        description="Showcase your client success stories and transformations"
+      />
+      
       {/* Existing Testimonials */}
       {testimonials.length > 0 && (
         <div className="space-y-4">

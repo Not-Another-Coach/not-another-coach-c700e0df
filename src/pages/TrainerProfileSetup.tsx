@@ -698,7 +698,7 @@ const TrainerProfileSetup = () => {
           </div>
           <div>
             <p className="text-sm text-muted-foreground">
-              {isFullyComplete() ? 'Manage your trainer profile settings' : `Step ${currentStep} of ${totalSteps}: ${stepTitles[currentStep - 1]}`}
+              {isFullyComplete() ? `Step ${currentStep} of ${totalSteps}: ${stepTitles[currentStep - 1]}` : `Step ${currentStep} of ${totalSteps}: ${stepTitles[currentStep - 1]}`}
             </p>
           </div>
         </div>
@@ -826,15 +826,19 @@ const TrainerProfileSetup = () => {
         </div>
       )}
 
+      {/* Manage profile settings description when fully complete */}
+      {isFullyComplete() && (
+        <div className="text-center py-4">
+          <p className="text-muted-foreground">
+            Manage your trainer profile settings
+          </p>
+        </div>
+      )}
+
       {/* Main Content */}
       <div className="max-w-4xl mx-auto p-6">
         <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">
-              {stepTitles[currentStep - 1]}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-6 pt-6">
             {renderCurrentSection()}
           </CardContent>
         </Card>

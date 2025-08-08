@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Upload, Camera, Sparkles, User } from "lucide-react";
+import { SectionHeader } from './SectionHeader';
 
 interface BasicInfoSectionProps {
   formData: any;
@@ -65,6 +66,12 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
 
   return (
     <div className="space-y-6">
+      <SectionHeader 
+        icons={[User, Camera]}
+        title="Basic Info"
+        description="Set up your essential profile information and photo"
+      />
+      
       {/* Full Name */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">

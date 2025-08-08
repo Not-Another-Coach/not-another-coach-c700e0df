@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Upload, Search, Plus, CheckCircle, Clock, FileText } from "lucide-react";
+import { SectionHeader } from './SectionHeader';
 
 interface QualificationsSectionProps {
   formData: any;
@@ -120,6 +121,12 @@ export function QualificationsSection({ formData, updateFormData }: Qualificatio
 
   return (
     <div className="space-y-6">
+      <SectionHeader 
+        icons={[CheckCircle, FileText]}
+        title="Qualifications"
+        description="Add your certifications and professional credentials"
+      />
+      
       {/* Selected Qualifications */}
       {formData.qualifications && formData.qualifications.length > 0 && (
         <div className="space-y-2">

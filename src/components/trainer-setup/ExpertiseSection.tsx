@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { MapPin, Monitor, Users, Globe } from "lucide-react";
+import { MapPin, Monitor, Users, Globe, Target, Dumbbell } from "lucide-react";
+import { SectionHeader } from './SectionHeader';
 
 interface ExpertiseSectionProps {
   formData: any;
@@ -129,6 +130,12 @@ export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionP
 
   return (
     <div className="space-y-6">
+      <SectionHeader 
+        icons={[Target, Dumbbell]}
+        title="Expertise & Services"
+        description="Define your specialties, training types, and service areas"
+      />
+      
       {/* Selected Specialties */}
       {formData.specializations && formData.specializations.length > 0 && (
         <div className="space-y-2">

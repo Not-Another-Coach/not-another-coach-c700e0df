@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Clock, Users } from 'lucide-react';
 import { WorkingHoursSection } from './WorkingHoursSection';
 import { AvailabilitySection } from './AvailabilitySection';
+import { SectionHeader } from './SectionHeader';
 
 interface WorkingHoursAndAvailabilitySectionProps {
   formData: any;
@@ -13,16 +14,11 @@ interface WorkingHoursAndAvailabilitySectionProps {
 export function WorkingHoursAndAvailabilitySection({ formData, updateFormData, onAvailabilityChange }: WorkingHoursAndAvailabilitySectionProps) {
   return (
     <div className="space-y-6">
-      <div className="text-center space-y-2">
-        <div className="flex items-center justify-center gap-2 text-primary">
-          <Clock className="w-6 h-6" />
-          <Users className="w-6 h-6" />
-        </div>
-        <h2 className="text-2xl font-bold">Working Hours & New Client Availability</h2>
-        <p className="text-muted-foreground">
-          Set your weekly schedule and manage when you're accepting new clients
-        </p>
-      </div>
+      <SectionHeader 
+        icons={[Clock, Users]}
+        title="Working Hours & New Client Availability"
+        description="Set your weekly schedule and manage when you're accepting new clients"
+      />
 
       {/* Working Hours */}
       <WorkingHoursSection formData={formData} updateFormData={updateFormData} />

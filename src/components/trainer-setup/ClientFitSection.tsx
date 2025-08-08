@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Users, Heart, Target, Zap, Sparkles } from "lucide-react";
 import { AIDescriptionHelper } from "./AIDescriptionHelper";
+import { SectionHeader } from './SectionHeader';
 
 interface ClientFitSectionProps {
   formData: any;
@@ -106,6 +107,12 @@ export function ClientFitSection({ formData, updateFormData }: ClientFitSectionP
 
   return (
     <div className="space-y-6">
+      <SectionHeader 
+        icons={[Users, Heart]}
+        title="Client Fit Preferences"
+        description="Define your ideal clients and coaching style to attract the perfect matches"
+      />
+      
       {/* Selected Client Types */}
       {formData.ideal_client_types && formData.ideal_client_types.length > 0 && (
         <div className="space-y-2">

@@ -10,6 +10,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Trash2, Plus, ExternalLink, DollarSign, PoundSterling, Euro, Calendar as CalendarIcon, Sparkles, Edit, Clock, Info } from "lucide-react";
+import { SectionHeader } from './SectionHeader';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useDiscoveryCallSettings } from "@/hooks/useDiscoveryCallSettings";
@@ -356,6 +357,12 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
 
   return (
     <div className="space-y-6">
+      <SectionHeader 
+        icons={[DollarSign, CalendarIcon]}
+        title="Rates & Discovery Calls"
+        description="Set your pricing and configure discovery call availability"
+      />
+      
       {/* Currency Toggle */}
       <div className="space-y-2">
         <Label>Currency</Label>
