@@ -1,32 +1,38 @@
+import React from 'react';
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
-import { Bell, Eye, CheckCircle, AlertTriangle } from "lucide-react";
+import { Bell, Eye, CheckCircle, FileText } from "lucide-react";
 import { TrainerProfilePreview } from "@/components/TrainerProfilePreview";
-import { AvailabilitySection } from "./AvailabilitySection";
-import { WorkingHoursSection } from "./WorkingHoursSection";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
-interface ProfileManagementSectionProps {
+interface TermsAndNotificationsSectionProps {
   formData: any;
   updateFormData: (updates: any) => void;
 }
 
-export function ProfileManagementSection({ formData, updateFormData }: ProfileManagementSectionProps) {
+export function TermsAndNotificationsSection({ formData, updateFormData }: TermsAndNotificationsSectionProps) {
   return (
     <div className="space-y-6">
-      {/* Working Hours */}
-      <WorkingHoursSection formData={formData} updateFormData={updateFormData} />
-      
-      {/* Availability Status Management */}
-      <AvailabilitySection formData={formData} updateFormData={updateFormData} />
+      <div className="text-center space-y-2">
+        <div className="flex items-center justify-center gap-2 text-primary">
+          <Bell className="w-6 h-6" />
+          <FileText className="w-6 h-6" />
+        </div>
+        <h2 className="text-2xl font-bold">T&Cs and Notifications</h2>
+        <p className="text-muted-foreground">
+          Configure your preferences and complete your profile setup
+        </p>
+      </div>
 
       {/* Notification Preferences */}
       <div className="space-y-4">
-        <Label>Notification Preferences</Label>
+        <div className="flex items-center gap-2">
+          <Bell className="w-5 h-5 text-primary" />
+          <Label className="text-lg font-semibold">Notification Preferences</Label>
+        </div>
         <Card>
           <CardContent className="p-4 space-y-4">
             <div className="flex items-center justify-between">
@@ -73,7 +79,10 @@ export function ProfileManagementSection({ formData, updateFormData }: ProfileMa
 
       {/* Profile Preview */}
       <div className="space-y-2">
-        <Label>Profile Preview</Label>
+        <div className="flex items-center gap-2">
+          <Eye className="w-5 h-5 text-primary" />
+          <Label className="text-lg font-semibold">View Profile</Label>
+        </div>
         <Card className="border-blue-200 bg-blue-50">
           <CardContent className="p-4">
             <div className="flex items-center gap-3 mb-3">
@@ -101,9 +110,12 @@ export function ProfileManagementSection({ formData, updateFormData }: ProfileMa
         </Card>
       </div>
 
-      {/* Terms Agreement */}
+      {/* Final Agreement */}
       <div className="space-y-4">
-        <Label>Final Agreement</Label>
+        <div className="flex items-center gap-2">
+          <FileText className="w-5 h-5 text-primary" />
+          <Label className="text-lg font-semibold">Final Agreement</Label>
+        </div>
         <Card>
           <CardContent className="p-4 space-y-4">
             <div className="flex items-start space-x-2">
@@ -150,7 +162,7 @@ export function ProfileManagementSection({ formData, updateFormData }: ProfileMa
         </Card>
       </div>
 
-      {/* Completion Summary */}
+      {/* Ready to Go Live */}
       <Card className="border-green-200 bg-green-50">
         <CardContent className="p-4">
           <div className="flex items-start gap-3">

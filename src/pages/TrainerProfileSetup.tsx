@@ -17,7 +17,9 @@ import { ClientFitSection } from "@/components/trainer-setup/ClientFitSection";
 import { RatesSection } from "@/components/trainer-setup/RatesSection";
 import { TestimonialsSection } from "@/components/trainer-setup/TestimonialsSection";
 import { PackageWaysOfWorkingSection } from "@/components/trainer-setup/PackageWaysOfWorkingSection";
-import { ProfileManagementSection } from "@/components/trainer-setup/ProfileManagementSection";
+
+import { WorkingHoursAndAvailabilitySection } from "@/components/trainer-setup/WorkingHoursAndAvailabilitySection";
+import { TermsAndNotificationsSection } from "@/components/trainer-setup/TermsAndNotificationsSection";
 import { VerificationSection } from "@/components/trainer-setup/VerificationSection";
 
 const TrainerProfileSetup = () => {
@@ -89,7 +91,7 @@ const TrainerProfileSetup = () => {
     terms_agreed: false,
   });
 
-  const totalSteps = 9;
+  const totalSteps = 10;
 
   const stepTitles = [
     "Basic Info",
@@ -99,7 +101,8 @@ const TrainerProfileSetup = () => {
     "Rates & Discovery Calls",
     "Testimonials & Case Studies",
     "Ways of Working",
-    "Profile Management",
+    "Working Hours & New Client Availability",
+    "T&Cs and Notifications",
     "Verification"
   ];
 
@@ -177,8 +180,9 @@ const TrainerProfileSetup = () => {
         'rates': 5,
         'testimonials': 6,
         'ways-of-working': 7,
-        'management': 8,
-        'verification': 9
+        'working-hours': 8,
+        'terms-notifications': 9,
+        'verification': 10
       };
       
       const stepNumber = tabMap[tab];
@@ -244,7 +248,7 @@ const TrainerProfileSetup = () => {
           newErrors.package_options = "At least one tiered pricing package is required";
         }
         break;
-      case 8:
+      case 9:
         if (!formData.terms_agreed) {
           newErrors.terms_agreed = "You must agree to the terms";
         }
@@ -313,8 +317,10 @@ const TrainerProfileSetup = () => {
         
         return allPackagesConfigured ? 'completed' : (anyPackageConfigured ? 'partial' : 'not_started');
       case 8:
-        return formData.terms_agreed ? 'completed' : 'not_started';
+        return 'completed'; // Working hours step - always accessible
       case 9:
+        return formData.terms_agreed ? 'completed' : 'not_started';
+      case 10:
         // Verification step - always accessible but completion depends on verification status
         return 'completed'; // This is a read-only informational step
       default:
@@ -412,8 +418,8 @@ const TrainerProfileSetup = () => {
       if (currentStep < totalSteps) {
         setCurrentStep(currentStep + 1);
       } else {
-        // Step 9 is verification - don't complete profile, just show final message
-        if (currentStep === 9) {
+        // Step 10 is verification - don't complete profile, just show final message
+        if (currentStep === 10) {
           toast({
             title: "Profile Setup Complete!",
             description: "Your profile is ready. Submit for verification to go live.",
@@ -495,8 +501,10 @@ const TrainerProfileSetup = () => {
       case 7:
         return <PackageWaysOfWorkingSection {...commonProps} />;
       case 8:
-        return <ProfileManagementSection {...commonProps} />;
+        return <WorkingHoursAndAvailabilitySection {...commonProps} />;
       case 9:
+        return <TermsAndNotificationsSection {...commonProps} />;
+      case 10:
         return <VerificationSection />;
       default:
         return null;
