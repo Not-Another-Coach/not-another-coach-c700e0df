@@ -70,10 +70,7 @@ export function useTrainerOnboarding() {
       // Get active clients
       const { data: engagements, error: engagementError } = await supabase
         .from('client_trainer_engagement')
-        .select(`
-          client_id,
-          profiles!client_trainer_engagement_client_id_fkey(first_name, last_name)
-        `)
+        .select('client_id')
         .eq('trainer_id', user.id)
         .eq('stage', 'active_client');
 
@@ -83,6 +80,15 @@ export function useTrainerOnboarding() {
         setClientsOnboarding([]);
         return;
       }
+
+      // Get client profiles separately
+      const clientIds = engagements.map(e => e.client_id);
+      const { data: clientProfiles, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name')
+        .in('id', clientIds);
+
+      if (profileError) throw profileError;
 
       // Get onboarding progress for each client
       const clientsData: ClientOnboardingData[] = [];
@@ -101,7 +107,7 @@ export function useTrainerOnboarding() {
         const totalCount = steps?.length || 0;
         const percentageComplete = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
-        const clientProfile = engagement.profiles as any;
+        const clientProfile = clientProfiles?.find(p => p.id === engagement.client_id);
         clientsData.push({
           clientId: engagement.client_id,
           clientName: `${clientProfile?.first_name || ''} ${clientProfile?.last_name || ''}`.trim() || 'Unknown Client',
