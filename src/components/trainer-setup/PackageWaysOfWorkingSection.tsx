@@ -10,6 +10,7 @@ import { Plus, X, Eye, EyeOff, Info, Package, AlertCircle, Settings, Workflow } 
 import { usePackageWaysOfWorking, PackageWaysOfWorking } from "@/hooks/usePackageWaysOfWorking";
 import { useToast } from "@/hooks/use-toast";
 import { SectionHeader } from "./SectionHeader";
+import { useTrainerActivities } from "@/hooks/useTrainerActivities";
 
 interface PackageWaysOfWorkingSectionProps {
   formData: any;
@@ -69,57 +70,7 @@ export function PackageWaysOfWorkingSection({ formData }: PackageWaysOfWorkingSe
     createWorkflowIfNeeded();
   }, [activePackageId, packages, getPackageWorkflow, savePackageWorkflow]);
 
-  // Common suggestions for each section
-  const suggestions = {
-    onboarding: [
-      "Free 15-min discovery call",
-      "Comprehensive health questionnaire",
-      "Goals & lifestyle assessment",
-      "Starting photos & measurements",
-      "Movement assessment session",
-      "Nutrition preferences discussion"
-    ],
-    first_week: [
-      "Welcome package sent via app",
-      "Personalized training plan delivered by Day 2",
-      "First live session scheduled",
-      "Nutrition guidelines provided",
-      "Check-in call within 48 hours",
-      "App setup & walkthrough"
-    ],
-    ongoing_structure: [
-      "Weekly video check-ins",
-      "Bi-weekly live sessions",
-      "Monthly goal reviews",
-      "Daily messaging support Mon-Fri",
-      "Flexible session rescheduling",
-      "Quarterly progress assessments"
-    ],
-    tracking_tools: [
-      "Before/after photos",
-      "Body measurements tracking",
-      "Food journal reviews",
-      "Workout completion logs",
-      "Progress photos monthly",
-      "Performance metrics tracking"
-    ],
-    client_expectations: [
-      "Weekly honest feedback",
-      "Consistent communication",
-      "Openness to try new routines",
-      "Photo/measurement updates",
-      "Active participation in sessions",
-      "Regular check-in responses"
-    ],
-    what_i_bring: [
-      "Personalized training programs",
-      "Ongoing motivation & support",
-      "Flexible scheduling options",
-      "Evidence-based approaches",
-      "Adaptation to your lifestyle",
-      "Realistic goal setting"
-    ]
-  };
+  const { getSuggestionsBySection } = useTrainerActivities();
 
   const sectionTitles = {
     onboarding: "Onboarding Process",
@@ -270,7 +221,7 @@ export function PackageWaysOfWorkingSection({ formData }: PackageWaysOfWorkingSe
     if (!currentWorkflow) return null;
     
     const items = currentWorkflow[`${section}_items` as keyof PackageWaysOfWorking] as WaysOfWorkingItem[] || [];
-    const sectionSuggestions = suggestions[section as keyof typeof suggestions];
+    const sectionSuggestions = getSuggestionsBySection(section);
 
     return (
       <Card key={section} className="space-y-4">

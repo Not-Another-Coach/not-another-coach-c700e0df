@@ -1613,8 +1613,9 @@ export type Database = {
           id: string
           instructions: string | null
           is_active: boolean
+          is_system: boolean
           requires_file_upload: boolean
-          trainer_id: string
+          trainer_id: string | null
           updated_at: string
         }
         Insert: {
@@ -1627,8 +1628,9 @@ export type Database = {
           id?: string
           instructions?: string | null
           is_active?: boolean
+          is_system?: boolean
           requires_file_upload?: boolean
-          trainer_id: string
+          trainer_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -1641,8 +1643,9 @@ export type Database = {
           id?: string
           instructions?: string | null
           is_active?: boolean
+          is_system?: boolean
           requires_file_upload?: boolean
-          trainer_id?: string
+          trainer_id?: string | null
           updated_at?: string
         }
         Relationships: [
