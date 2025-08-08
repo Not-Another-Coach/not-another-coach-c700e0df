@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useWaitlist } from '@/hooks/useWaitlist';
+import { useProfile } from '@/hooks/useProfile';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Clock, Users, X } from 'lucide-react';
@@ -32,6 +33,7 @@ export function WaitlistJoinButton({
   const [isLoading, setIsLoading] = useState(true);
   const [availabilitySettings, setAvailabilitySettings] = useState<any>(null);
   const { joinWaitlist, removeFromWaitlist, checkClientWaitlistStatus } = useWaitlist();
+  const { profile } = useProfile();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -138,11 +140,15 @@ export function WaitlistJoinButton({
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'TBD';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric'
-    });
+    
+    // Use UK date format if client is UK based, otherwise use US format
+    const isUKBased = (profile as any)?.is_uk_based;
+    const locale = isUKBased ? 'en-GB' : 'en-US';
+    const dateFormat = isUKBased 
+      ? { day: 'numeric', month: 'long', year: 'numeric' } as const
+      : { month: 'long', day: 'numeric', year: 'numeric' } as const;
+    
+    return new Date(dateString).toLocaleDateString(locale, dateFormat);
   };
 
   if (isLoading) {
