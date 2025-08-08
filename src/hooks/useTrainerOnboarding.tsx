@@ -67,6 +67,8 @@ export function useTrainerOnboarding() {
     if (!user) return;
 
     try {
+      console.log('Fetching clients onboarding for trainer:', user.id);
+      
       // Get active clients
       const { data: engagements, error: engagementError } = await supabase
         .from('client_trainer_engagement')
@@ -76,24 +78,32 @@ export function useTrainerOnboarding() {
 
       if (engagementError) throw engagementError;
 
+      console.log('Found engagements:', engagements);
+
       if (!engagements || engagements.length === 0) {
+        console.log('No active clients found');
         setClientsOnboarding([]);
         return;
       }
 
       // Get client profiles separately
       const clientIds = engagements.map(e => e.client_id);
+      console.log('Client IDs:', clientIds);
+      
       const { data: clientProfiles, error: profileError } = await supabase
         .from('profiles')
         .select('id, first_name, last_name')
         .in('id', clientIds);
 
       if (profileError) throw profileError;
+      console.log('Client profiles:', clientProfiles);
 
       // Get onboarding progress for each client
       const clientsData: ClientOnboardingData[] = [];
 
       for (const engagement of engagements) {
+        console.log('Processing engagement for client:', engagement.client_id);
+        
         const { data: steps, error: stepsError } = await supabase
           .from('client_onboarding_progress')
           .select('*')
@@ -102,6 +112,7 @@ export function useTrainerOnboarding() {
           .order('display_order');
 
         if (stepsError) throw stepsError;
+        console.log('Steps for client', engagement.client_id, ':', steps);
 
         const completedCount = steps?.filter(step => step.status === 'completed').length || 0;
         const totalCount = steps?.length || 0;
@@ -128,6 +139,7 @@ export function useTrainerOnboarding() {
         });
       }
 
+      console.log('Final clients data:', clientsData);
       setClientsOnboarding(clientsData);
     } catch (err) {
       console.error('Error fetching clients onboarding:', err);
