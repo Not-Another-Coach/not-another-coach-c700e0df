@@ -64,6 +64,7 @@ export function useMyTrainers(refreshTrigger?: number) {
       }
 
       try {
+        // Single query with proper join syntax
         const { data: trainerData, error } = await supabase
           .from('profiles')
           .select(`
@@ -79,7 +80,10 @@ export function useMyTrainers(refreshTrigger?: number) {
             coaching_styles,
             ideal_client_types,
             qualifications,
-            package_options
+            package_options,
+            discovery_call_settings!inner(
+              offers_discovery_call
+            )
           `)
           .eq('user_type', 'trainer')
           .in('id', trainerIds);
@@ -90,33 +94,15 @@ export function useMyTrainers(refreshTrigger?: number) {
           return;
         }
 
-        // Separately fetch discovery call settings for all trainers
-        const { data: discoverySettings, error: discoveryError } = await supabase
-          .from('discovery_call_settings')
-          .select('trainer_id, offers_discovery_call')
-          .in('trainer_id', trainerIds);
-
-        if (discoveryError) {
-          console.error('Error fetching discovery call settings:', discoveryError);
-        }
-
-        console.log('🔍 Raw trainer data from database:', trainerData);
-        console.log('🔍 Discovery call settings:', discoverySettings);
-        
-        // Create a map for easy lookup
-        const discoverySettingsMap = new Map();
-        discoverySettings?.forEach(setting => {
-          discoverySettingsMap.set(setting.trainer_id, setting.offers_discovery_call);
-        });
+        console.log('🔍 Raw trainer data with discovery settings:', trainerData);
         
         // Debug log specifically for Lou
         const louTrainer = trainerData?.find(t => t.first_name === 'TrainerLou');
         if (louTrainer) {
-          const louDiscoverySettings = discoverySettingsMap.get(louTrainer.id);
-          console.log('🐛 Lou raw data from DB:', {
+          console.log('🐛 Lou data with fixed join:', {
             id: louTrainer.id,
-            discovery_call_setting_from_map: louDiscoverySettings,
-            offers_discovery_call: louDiscoverySettings || false
+            discovery_call_settings: louTrainer.discovery_call_settings,
+            offers_discovery_call: louTrainer.discovery_call_settings?.offers_discovery_call
           });
         }
 
@@ -125,15 +111,14 @@ export function useMyTrainers(refreshTrigger?: number) {
         
         // Helper function to create trainer object
         const createTrainerObject = (trainerProfile: any): Omit<TrainerWithStatus, 'status' | 'engagement' | 'statusLabel' | 'statusColor'> => {
-          const discoveryCallValue = discoverySettingsMap.get(trainerProfile.id) || false;
+          const discoveryCallValue = trainerProfile.discovery_call_settings?.offers_discovery_call || false;
           
           // Debug log for Lou specifically
           if (trainerProfile.first_name === 'TrainerLou') {
             console.log('🐛 Creating trainer object for Lou:', {
               id: trainerProfile.id,
-              discovery_setting_from_map: discoverySettingsMap.get(trainerProfile.id),
-              extracted_value: discoveryCallValue,
-              map_size: discoverySettingsMap.size
+              discovery_call_settings: trainerProfile.discovery_call_settings,
+              extracted_value: discoveryCallValue
             });
           }
           
