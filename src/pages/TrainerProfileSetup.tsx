@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, Save, Eye, CheckCircle, AlertCircle } from "lucide-react";
+import { ArrowLeft, ArrowRight, Save, Eye, CheckCircle, AlertCircle, Shield, Check } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -587,8 +587,47 @@ const TrainerProfileSetup = () => {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Dashboard
           </Button>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-bold">
+              {isFullyComplete() ? 'Profile Management' : 'Profile Setup'}
+            </h1>
+            {/* Verification Badge */}
+            {(() => {
+              const verificationStatus = (profile as any)?.verification_status || 'pending';
+              if (verificationStatus === 'verified') {
+                return (
+                  <div className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
+                    <Shield className="h-3 w-3" />
+                    <Check className="h-3 w-3" />
+                    Verified
+                  </div>
+                );
+              } else if (verificationStatus === 'under_review') {
+                return (
+                  <div className="flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                    <Shield className="h-3 w-3" />
+                    Under Review
+                  </div>
+                );
+              } else if (verificationStatus === 'pending') {
+                return (
+                  <div className="flex items-center gap-1 px-2 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-medium">
+                    <Shield className="h-3 w-3" />
+                    Pending
+                  </div>
+                );
+              } else if (verificationStatus === 'rejected') {
+                return (
+                  <div className="flex items-center gap-1 px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">
+                    <Shield className="h-3 w-3" />
+                    Rejected
+                  </div>
+                );
+              }
+              return null;
+            })()}
+          </div>
           <div>
-            <h1 className="text-xl font-bold">{isFullyComplete() ? 'Profile Management' : 'Profile Setup'}</h1>
             <p className="text-sm text-muted-foreground">
               {isFullyComplete() ? 'Manage your trainer profile settings' : `Step ${currentStep} of ${totalSteps}: ${stepTitles[currentStep - 1]}`}
             </p>
@@ -683,14 +722,6 @@ const TrainerProfileSetup = () => {
       {isFullyComplete() && (
         <div className="bg-card border-b p-4">
           <div className="max-w-4xl mx-auto">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <span className="text-sm font-medium text-green-600">✓ Profile Complete</span>
-              <span className="text-sm text-muted-foreground">•</span>
-              <span className="text-sm text-muted-foreground">
-                Currently editing: {stepTitles[currentStep - 1]}
-              </span>
-            </div>
-            
             {/* Clickable step indicators */}
             <div className="flex justify-between">
               {stepTitles.map((title, index) => {
