@@ -621,6 +621,20 @@ export default function MyTrainers() {
         const allowDiscoveryOnWaitlist = availability?.allow_discovery_calls_on_waitlist === true;
         const offersDiscoveryCall = trainer.offers_discovery_call;
         
+        // Debug logging for Lou specifically
+        if (trainer.name.includes('Lou')) {
+          console.log(`🐛 DEBUG Lou Discovery Call Logic:`, {
+            trainerId: shortlistedTrainerId,
+            trainerName: trainer.name,
+            availability,
+            offersDiscoveryCall,
+            isOnWaitlist,
+            allowDiscoveryOnWaitlist,
+            shortlistedEngagementStage,
+            hasActiveCall
+          });
+        }
+        
         // Show waitlist button if:
         // - Trainer is on waitlist AND
         // - Client is shortlisted (current stage) AND  
@@ -632,9 +646,10 @@ export default function MyTrainers() {
         // Show discovery call button if:
         // - Trainer offers discovery calls AND
         // - Either not on waitlist OR allows discovery calls on waitlist AND
-        // - No discovery call booked yet
+        // - No discovery call booked yet AND
+        // - If no availability data exists, default to allowing discovery calls
         const shouldShowDiscoveryCall = offersDiscoveryCall && 
-                                        (!isOnWaitlist || allowDiscoveryOnWaitlist) && 
+                                        (!availability || !isOnWaitlist || allowDiscoveryOnWaitlist) && 
                                         shortlistedEngagementStage === 'shortlisted' && 
                                         !hasActiveCall;
         
