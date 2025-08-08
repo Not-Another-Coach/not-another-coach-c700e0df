@@ -84,6 +84,12 @@ export const ChooseCoachButton = ({
         description: 'Client now awaiting payment',
         color: 'bg-green-500'
       },
+      awaiting_payment: {
+        icon: Clock,
+        label: 'Awaiting Payment',
+        description: 'Complete payment to secure your coach',
+        color: 'bg-orange-500'
+      },
       declined: {
         icon: Heart,
         label: 'Request Declined',
