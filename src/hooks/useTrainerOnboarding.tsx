@@ -67,31 +67,52 @@ export function useTrainerOnboarding() {
     if (!user) return;
 
     try {
-      // Get active templates for this trainer
-      const { data: activeTemplates, error: templatesError } = await supabase
-        .from('trainer_onboarding_templates')
+      // Get the coach selection request to find the package purchased
+      const { data: selectionRequest, error: selectionError } = await supabase
+        .from('coach_selection_requests')
+        .select('package_id, package_name')
+        .eq('client_id', clientId)
+        .eq('trainer_id', user.id)
+        .eq('status', 'completed')
+        .single();
+
+      if (selectionError || !selectionRequest) {
+        console.error('Could not find coach selection request:', selectionError);
+        return;
+      }
+
+      // Get the package ways of working for this specific package
+      const { data: packageWorkflow, error: workflowError } = await supabase
+        .from('package_ways_of_working')
         .select('*')
         .eq('trainer_id', user.id)
-        .eq('is_active', true)
-        .order('display_order');
+        .eq('package_id', selectionRequest.package_id)
+        .single();
 
-      if (templatesError) throw templatesError;
+      if (workflowError || !packageWorkflow) {
+        console.error('Could not find package workflow:', workflowError);
+        return;
+      }
 
-      if (!activeTemplates || activeTemplates.length === 0) return;
+      // Create onboarding steps from the package's onboarding items
+      const onboardingItems = packageWorkflow.onboarding_items as Array<{ id: string; text: string }> || [];
+      
+      if (onboardingItems.length === 0) {
+        console.log('No onboarding items found for package:', selectionRequest.package_id);
+        return;
+      }
 
-      // Create client onboarding steps from templates
-      const onboardingSteps = activeTemplates.map(template => ({
+      const onboardingSteps = onboardingItems.map((item, index) => ({
         client_id: clientId,
         trainer_id: user.id,
-        template_step_id: template.id,
-        step_name: template.step_name,
-        step_type: template.step_type,
-        description: template.description,
-        instructions: template.instructions,
-        requires_file_upload: template.requires_file_upload,
-        completion_method: template.completion_method,
-        display_order: template.display_order,
-        status: 'pending'
+        step_name: item.text,
+        step_type: 'mandatory' as const,
+        description: `Onboarding step for ${selectionRequest.package_name}`,
+        instructions: item.text,
+        requires_file_upload: false,
+        completion_method: 'client' as const,
+        display_order: index,
+        status: 'pending' as const
       }));
 
       const { error: insertError } = await supabase
@@ -99,8 +120,10 @@ export function useTrainerOnboarding() {
         .insert(onboardingSteps);
 
       if (insertError) throw insertError;
+      
+      console.log(`Created ${onboardingSteps.length} onboarding steps for client ${clientId} from package ${selectionRequest.package_name}`);
     } catch (err) {
-      console.error('Error creating onboarding steps from templates:', err);
+      console.error('Error creating onboarding steps from package workflow:', err);
     }
   }, [user]);
 
