@@ -5,11 +5,12 @@ import { useSavedTrainers } from "@/hooks/useSavedTrainers";
 import { useShortlistedTrainers } from "@/hooks/useShortlistedTrainers";
 import { useTrainerEngagement } from "@/hooks/useTrainerEngagement";
 import { useConversations } from "@/hooks/useConversations";
-import { useRealTrainers } from "@/hooks/useRealTrainers";
+import { useMyTrainers } from "@/hooks/useMyTrainers";
 import { useAuth } from "@/hooks/useAuth";
 import { useDiscoveryCallData } from "@/hooks/useDiscoveryCallData";
 import { useWaitlist } from "@/hooks/useWaitlist";
 import { useDataSynchronization } from "@/hooks/useDataSynchronization";
+import { useProfile } from "@/hooks/useProfile";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,7 +18,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TrainerCard } from "@/components/TrainerCard";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { FloatingMessageButton } from "@/components/FloatingMessageButton";
-import { useProfile } from "@/hooks/useProfile";
 import { WaitlistJoinButton } from "@/components/waitlist/WaitlistJoinButton";
 import { ClientHeader } from "@/components/ClientHeader";
 import { DataSyncIndicator } from "@/components/ui/data-sync-indicator";
@@ -40,7 +40,7 @@ import {
 import { DiscoveryCallBookingModal } from "@/components/discovery-call/DiscoveryCallBookingModal";
 import { ClientRescheduleModal } from "@/components/dashboard/ClientRescheduleModal";
 import { ChooseCoachButton } from "@/components/coach-selection/ChooseCoachButton";
-import { supabase } from "@/integrations/supabase/client";
+
 import { toast } from "sonner";
 
 export default function MyTrainers() {
@@ -60,10 +60,18 @@ export default function MyTrainers() {
     isRefreshing
   } = useDataSynchronization();
   
-  const { trainers: allTrainers, loading: trainersLoading } = useRealTrainers(refreshTrigger);
+  // Simplified data fetching with new hook
+  const { 
+    trainers: allTrainers,
+    loading: trainersLoading,
+    availability: trainerAvailability,
+    filteredTrainers: getFilteredTrainers,
+    counts
+  } = useMyTrainers(refreshTrigger);
+  
   const { conversations } = useConversations();
   
-  // Hooks for trainer management
+  // Hooks for trainer management actions
   const { savedTrainerIds, unsaveTrainer } = useSavedTrainers();
   const { 
     shortlistTrainer, 
@@ -71,16 +79,11 @@ export default function MyTrainers() {
     shortlistCount, 
     canShortlistMore, 
     removeFromShortlist, 
-    bookDiscoveryCall,
-    shortlistedTrainers: actualShortlistedTrainers 
+    bookDiscoveryCall
   } = useShortlistedTrainers(refreshTrigger);
   const { createConversation } = useConversations();
   const { 
-    getEngagementStage, 
-    getLikedTrainers, 
-    getOnlyShortlistedTrainers, 
-    getDiscoveryStageTrainers, 
-    getMatchedTrainers,
+    getEngagementStage,
     updateEngagementStage,
     likeTrainer,
     loading: engagementLoading
@@ -90,10 +93,9 @@ export default function MyTrainers() {
 
   // State for filtering and UI
   const [activeFilter, setActiveFilter] = useState<'all' | 'saved' | 'shortlisted' | 'discovery'>('all');
-  const [waitlistRefreshKey, setWaitlistRefreshKey] = useState(0); // Add refresh key for waitlist components
+  const [waitlistRefreshKey, setWaitlistRefreshKey] = useState(0);
   const [selectedForComparison, setSelectedForComparison] = useState<string[]>([]);
   const [showComparison, setShowComparison] = useState(false);
-  const [trainerAvailability, setTrainerAvailability] = useState<{[key: string]: any}>({});
 
   // Notify sync hook when data is loaded
   useEffect(() => {
@@ -122,304 +124,10 @@ export default function MyTrainers() {
     };
   }, []);
 
-  // Batch fetch availability data for all shortlisted trainers (much more efficient)
-  useEffect(() => {
-    const fetchAllAvailabilityData = async () => {
-      const shortlistedTrainers = getOnlyShortlistedTrainers();
-      const trainerIds = shortlistedTrainers.map(engagement => engagement.trainerId);
-      
-      console.log('🔧 Batch fetching availability for trainers:', trainerIds.length);
-      
-      // Don't block UI if no shortlisted trainers
-      if (trainerIds.length === 0) {
-        console.log('📋 No shortlisted trainers to fetch availability for');
-        return;
-      }
-      
-      try {
-        // Batch fetch all availability settings in one query
-        console.log('🔧 Making single batch query for all trainers');
-        const { data: availabilityData, error } = await supabase
-          .from('coach_availability_settings')
-          .select('*')
-          .in('coach_id', trainerIds);
-        
-        if (error) {
-          console.warn('⚠️ Failed to batch fetch availability:', error);
-          return;
-        }
-        
-        console.log('✅ Successfully fetched availability data:', availabilityData);
-        
-        // Convert array to object for easy lookup
-        const availabilityMap: {[key: string]: any} = {};
-        availabilityData?.forEach(item => {
-          availabilityMap[item.coach_id] = item;
-        });
-        
-        // Set availability for all trainers (null for ones not found)
-        const newAvailability: {[key: string]: any} = {};
-        trainerIds.forEach(trainerId => {
-          newAvailability[trainerId] = availabilityMap[trainerId] || null;
-        });
-        
-        setTrainerAvailability(newAvailability);
-        console.log('🎯 Set availability for trainers:', Object.keys(newAvailability));
-        
-      } catch (error) {
-        console.warn('⚠️ Batch availability fetch failed:', error);
-        // Set all to null but don't block the UI
-        const fallbackAvailability: {[key: string]: any} = {};
-        trainerIds.forEach(trainerId => {
-          fallbackAvailability[trainerId] = null;
-        });
-        setTrainerAvailability(fallbackAvailability);
-      }
-    };
-    
-    // Add timeout to prevent hanging
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Batch availability fetch timeout')), 5000)
-    );
-    
-    Promise.race([fetchAllAvailabilityData(), timeoutPromise])
-      .catch(error => {
-        console.warn('⚠️ Availability fetch timed out or failed:', error);
-      });
-  }, [getOnlyShortlistedTrainers]);
-
-  // Simplified trainer aggregation based on client's engagement status
-  const trainersWithStatus = useMemo(() => {
-    const allTrainerData: Array<{
-      trainer: any;
-      status: 'saved' | 'shortlisted' | 'discovery';
-      engagement?: any;
-      statusLabel: string;
-      statusColor: string;
-    }> = [];
-
-    // Get liked/saved trainers (stage: 'liked')
-    const likedTrainers = getLikedTrainers();
-    likedTrainers.forEach(engagement => {
-      const trainer = allTrainers.find(t => t.id === engagement.trainerId);
-      if (trainer) {
-        allTrainerData.push({
-          trainer,
-          status: 'saved',
-          engagement,
-          statusLabel: 'Saved',
-          statusColor: 'bg-blue-100 text-blue-800'
-        });
-      }
-    });
-
-    // Get only shortlisted trainers (stage: 'shortlisted') - not including discovery stage
-    const onlyShortlistedTrainers = getOnlyShortlistedTrainers();
-    for (const engagement of onlyShortlistedTrainers) {
-      let trainer = allTrainers.find(t => t.id === engagement.trainerId);
-      
-      // If trainer not found in allTrainers, create a placeholder with basic info
-      if (!trainer) {
-        trainer = {
-          id: engagement.trainerId,
-          name: 'Loading trainer...',
-          specialties: [],
-          rating: 0,
-          reviews: 0,
-          experience: '',
-          location: 'Loading...',
-          hourlyRate: 0,
-          image: '',
-          certifications: [],
-          description: 'Loading trainer information...',
-          availability: 'Unknown',
-          trainingType: ['Loading...'],
-          offers_discovery_call: false
-        };
-      } else {
-        // Ensure discovery call setting is preserved for found trainers
-        trainer = {
-          ...trainer,
-          offers_discovery_call: trainer.offers_discovery_call ?? false
-        };
-      }
-      
-      // Check if already exists in the list (upgrade from saved to shortlisted)
-      const existingIndex = allTrainerData.findIndex(t => t.trainer.id === engagement.trainerId);
-      
-      if (existingIndex >= 0) {
-        // Upgrade existing trainer to shortlisted status
-        allTrainerData[existingIndex] = {
-          trainer,
-          status: 'shortlisted',
-          engagement,
-          statusLabel: 'Shortlisted',
-          statusColor: 'bg-yellow-100 text-yellow-800'
-        };
-      } else {
-        // Add as new shortlisted trainer
-        allTrainerData.push({
-          trainer,
-          status: 'shortlisted',
-          engagement,
-          statusLabel: 'Shortlisted',
-          statusColor: 'bg-yellow-100 text-yellow-800'
-        });
-      }
-    }
-
-    // Get trainers for discovery section - includes:
-    // 1. Trainers with active discovery calls (scheduled/rescheduled, not cancelled)  
-    // 2. Trainers with discovery-related engagement stages
-    // 3. Shortlisted trainers who have exchanged messages (indicating discovery conversations)
-    const trainersWithDiscoveryCalls = new Set<string>();
-    
-    // First, collect all trainer IDs that have active discovery calls
-    allTrainers.forEach(trainer => {
-      if (hasActiveDiscoveryCall(trainer.id)) {
-        trainersWithDiscoveryCalls.add(trainer.id);
-      }
-    });
-    
-    // Also check trainers from already processed engagement data that might have discovery calls
-    allTrainerData.forEach(trainerData => {
-      if (hasActiveDiscoveryCall(trainerData.trainer.id)) {
-        trainersWithDiscoveryCalls.add(trainerData.trainer.id);
-      }
-    });
-    
-    // Include trainers with discovery-related engagement stages
-    const discoveryStageTrainers = getDiscoveryStageTrainers();
-    discoveryStageTrainers.forEach((engagement: any) => {
-      if (engagement.stage === 'discovery_in_progress' || 
-          engagement.stage === 'discovery_call_booked' || 
-          engagement.stage === 'discovery_completed') {
-        trainersWithDiscoveryCalls.add(engagement.trainerId);
-      }
-    });
-    
-    // ALSO include shortlisted trainers who have active conversations (indicating discovery in progress)
-    allTrainerData.forEach(trainerData => {
-      if (trainerData.status === 'shortlisted') {
-        // Check if this trainer has any messages with the client
-        const hasConversation = conversations.some(conv => 
-          (conv.client_id === user?.id && conv.trainer_id === trainerData.trainer.id) ||
-          (conv.trainer_id === user?.id && conv.client_id === trainerData.trainer.id)
-        );
-        if (hasConversation) {
-          trainersWithDiscoveryCalls.add(trainerData.trainer.id);
-        }
-      }
-    });
-    
-    // Now add/upgrade all trainers with discovery calls
-    trainersWithDiscoveryCalls.forEach(trainerId => {
-      let trainer = allTrainers.find(t => t.id === trainerId);
-      
-      // If trainer not found in allTrainers, create a placeholder with basic info
-      if (!trainer) {
-        trainer = {
-          id: trainerId,
-          name: 'Loading trainer...',
-          specialties: [],
-          rating: 0,
-          reviews: 0,
-          experience: '',
-          location: 'Loading...',
-          hourlyRate: 0,
-          image: '',
-          certifications: [],
-          description: 'Loading trainer information...',
-          availability: 'Unknown',
-          trainingType: ['Loading...']
-        };
-      }
-      
-      // Check if already exists in the list
-      const existingIndex = allTrainerData.findIndex(t => t.trainer.id === trainerId);
-      
-      if (existingIndex >= 0) {
-        // Don't upgrade if trainer is already matched - keep them in correct status
-        if (allTrainerData[existingIndex].status !== 'discovery') {
-          allTrainerData[existingIndex] = {
-            trainer,
-            status: 'discovery',
-            engagement: allTrainerData[existingIndex].engagement,
-            statusLabel: 'Discovery Active',
-            statusColor: 'bg-purple-100 text-purple-800'
-          };
-        }
-      } else {
-        // Add as new discovery trainer
-        allTrainerData.push({
-          trainer,
-          status: 'discovery',
-          engagement: null,
-          statusLabel: 'Discovery Active',
-          statusColor: 'bg-purple-100 text-purple-800'
-        });
-      }
-    });
-
-    // Add matched trainers
-    const matchedTrainers = getMatchedTrainers();
-    matchedTrainers.forEach(engagement => {
-      let trainer = allTrainers.find(t => t.id === engagement.trainerId);
-      
-      if (!trainer) {
-        trainer = {
-          id: engagement.trainerId,
-          name: 'Loading trainer...',
-          specialties: [],
-          rating: 0,
-          reviews: 0,
-          experience: '',
-          location: 'Loading...',
-          hourlyRate: 0,
-          image: '',
-          certifications: [],
-          description: 'Loading trainer information...',
-          availability: 'Unknown',
-          trainingType: ['Loading...']
-        };
-      }
-      
-      // Check if already exists and upgrade to matched status
-      const existingIndex = allTrainerData.findIndex(t => t.trainer.id === engagement.trainerId);
-      
-      if (existingIndex >= 0) {
-        allTrainerData[existingIndex] = {
-          trainer,
-          status: 'discovery', // Keep matched trainers in discovery section
-          engagement,
-          statusLabel: 'Matched',
-          statusColor: 'bg-green-100 text-green-800'
-        };
-      } else {
-        allTrainerData.push({
-          trainer,
-          status: 'discovery', // Keep matched trainers in discovery section
-          engagement,
-          statusLabel: 'Matched', 
-          statusColor: 'bg-green-100 text-green-800'
-        });
-      }
-    });
-
-    return allTrainerData;
-  }, [allTrainers, getLikedTrainers, getOnlyShortlistedTrainers, getDiscoveryStageTrainers, getMatchedTrainers, hasActiveDiscoveryCall, conversations, user]);
+  // Get filtered trainers based on active filter
   const filteredTrainers = useMemo(() => {
-    if (activeFilter === 'all') return trainersWithStatus;
-    return trainersWithStatus.filter(t => t.status === activeFilter);
-  }, [trainersWithStatus, activeFilter]);
-
-  // Get counts for filter tabs
-  const counts = useMemo(() => ({
-    all: trainersWithStatus.length,
-    saved: trainersWithStatus.filter(t => t.status === 'saved').length,
-    shortlisted: trainersWithStatus.filter(t => t.status === 'shortlisted').length,
-    discovery: trainersWithStatus.filter(t => t.status === 'discovery').length
-    }), [trainersWithStatus]);
+    return getFilteredTrainers(activeFilter);
+  }, [getFilteredTrainers, activeFilter]);
 
   // Enhanced debug logging
   useEffect(() => {
@@ -589,8 +297,8 @@ export default function MyTrainers() {
   };
 
   // Render CTAs based on trainer status
-  const renderCTAs = (trainerData: typeof trainersWithStatus[0]) => {
-    const { trainer, status } = trainerData;
+  const renderCTAs = (trainer: any) => {
+    const { status } = trainer;
 
     switch (status) {
       case 'saved':
@@ -792,7 +500,7 @@ export default function MyTrainers() {
                   stage={getEngagementStage(trainer.id)}
                   className="w-full"
                 />
-              ) : trainerData.trainer.offers_discovery_call ? (
+              ) : trainer.offers_discovery_call ? (
                 <Button 
                   size="sm" 
                   variant="outline"
@@ -920,15 +628,15 @@ export default function MyTrainers() {
       ) : filteredTrainers.length > 0 ? (
         <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           {filteredTrainers.map((trainerData) => (
-            <div key={`${trainerData.trainer.id}-${trainerData.status}`} className="space-y-3">
+            <div key={`${trainerData.id}-${trainerData.status}`} className="space-y-3">
               <TrainerCard
-                trainer={trainerData.trainer}
+                trainer={trainerData}
                 onViewProfile={handleViewProfile}
                 cardState={trainerData.status}
                 showComparisonCheckbox={true}
-                comparisonChecked={selectedForComparison.includes(trainerData.trainer.id)}
+                comparisonChecked={selectedForComparison.includes(trainerData.id)}
                 onComparisonToggle={handleComparisonToggle}
-                comparisonDisabled={!selectedForComparison.includes(trainerData.trainer.id) && selectedForComparison.length >= 4}
+                comparisonDisabled={!selectedForComparison.includes(trainerData.id) && selectedForComparison.length >= 4}
                 onStartConversation={handleStartConversation}
                 onBookDiscoveryCall={handleBookDiscoveryCall}
                 waitlistRefreshKey={waitlistRefreshKey}

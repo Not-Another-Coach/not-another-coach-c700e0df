@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useSavedTrainers } from '@/hooks/useSavedTrainers';
-import { useTrainerList } from '@/hooks/useTrainerList';
+import { useRealTrainers } from '@/hooks/useRealTrainers';
 import { useConversations } from '@/hooks/useConversations';
 import { useProfile } from '@/hooks/useProfile';
 import { cn } from '@/lib/utils';
@@ -48,7 +48,7 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
   
   const { profile } = useProfile();
   const { savedTrainers, savedTrainerIds } = useSavedTrainers();
-  const { trainers } = useTrainerList();
+  const { trainers } = useRealTrainers();
   const { conversations } = useConversations();
 
   const isTrainer = profile?.user_type === 'trainer';

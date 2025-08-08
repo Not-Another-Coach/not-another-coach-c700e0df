@@ -6,12 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TieredTrainerProfile } from '@/components/tiered-profile/TieredTrainerProfile';
 import { MessagingPopup } from '@/components/MessagingPopup';
-import { useTrainerList } from '@/hooks/useTrainerList';
+import { useRealTrainers } from '@/hooks/useRealTrainers';
 
 export const TrainerProfile = () => {
   const { trainerId } = useParams<{ trainerId: string }>();
   const navigate = useNavigate();
-  const { trainers, loading } = useTrainerList();
+  const { trainers, loading } = useRealTrainers();
   const [isMessagingOpen, setIsMessagingOpen] = useState(false);
 
   const trainer = trainers.find(t => t.id === trainerId);

@@ -5,14 +5,14 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Users, Dumbbell, ArrowLeftRight, ChevronDown } from 'lucide-react';
 import { useProfile } from '@/hooks/useProfile';
-import { useTrainerList } from '@/hooks/useTrainerList';
+import { useRealTrainers } from '@/hooks/useRealTrainers';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 
 export function RoleSwitcher() {
   const { profile, refetchProfile, isAdmin } = useProfile();
-  const { trainers, loading: trainersLoading } = useTrainerList();
+  const { trainers, loading: trainersLoading } = useRealTrainers();
   const navigate = useNavigate();
   const [selectedTrainerId, setSelectedTrainerId] = useState<string>('');
   const [showTrainerSelection, setShowTrainerSelection] = useState(false);

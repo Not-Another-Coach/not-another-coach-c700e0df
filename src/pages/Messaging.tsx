@@ -7,14 +7,14 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
-import { useTrainerList } from '@/hooks/useTrainerList';
+import { useRealTrainers } from '@/hooks/useRealTrainers';
 
 export const Messaging = () => {
   const navigate = useNavigate();
   const { trainerId } = useParams<{ trainerId?: string }>();
   const { user } = useAuth();
   const { profile } = useProfile();
-  const { trainers } = useTrainerList();
+  const { trainers } = useRealTrainers();
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<any[]>([]);
 
