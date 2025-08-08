@@ -86,11 +86,7 @@ export const CoachSelectionRequests = () => {
       ) : (
         <div className="grid gap-4">
           {requests.map((request: any) => (
-            <Card 
-              key={request.id} 
-              className="cursor-pointer hover:shadow-md transition-shadow"
-              onClick={() => handleRequestClick(request)}
-            >
+            <Card key={request.id} className="hover:shadow-md transition-shadow">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -109,9 +105,20 @@ export const CoachSelectionRequests = () => {
                       </p>
                     </div>
                   </div>
-                  <Badge variant="outline" className="bg-blue-50 text-blue-700">
-                    New Request
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                      New Request
+                    </Badge>
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRequestClick(request);
+                      }}
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
+                    >
+                      Respond
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
@@ -138,6 +145,12 @@ export const CoachSelectionRequests = () => {
                       <p className="text-sm text-blue-800">{request.client_message}</p>
                     </div>
                   )}
+                  
+                  <div className="pt-2 border-t">
+                    <p className="text-sm text-muted-foreground text-center">
+                      Click "Respond" to accept, decline, or suggest alternatives
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
