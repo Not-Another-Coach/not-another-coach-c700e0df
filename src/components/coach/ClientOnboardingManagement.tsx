@@ -245,9 +245,88 @@ export function ClientOnboardingManagement() {
       <CardContent>
         <Tabs defaultValue="templates" className="space-y-4">
           <TabsList>
+            <TabsTrigger value="activities">Activities</TabsTrigger>
             <TabsTrigger value="templates">Templates</TabsTrigger>
             <TabsTrigger value="workflows">Ways of Working Overview</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="activities" className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-medium">Reusable Activities</h3>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Create Activity
+              </Button>
+            </div>
+            
+            <div className="grid gap-4">
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-medium">Free 15-min Discovery Call</h4>
+                        <Badge variant="secondary">Initial Contact</Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Brief consultation to understand client goals and determine fit
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button variant="outline" size="sm">Assign</Button>
+                      <Button variant="ghost" size="sm">
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-medium">Complete Health & Fitness Assessment</h4>
+                        <Badge variant="default">Mandatory</Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Comprehensive health screening and fitness level evaluation
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button variant="outline" size="sm">Assign</Button>
+                      <Button variant="ghost" size="sm">
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-medium">Goal Setting Session</h4>
+                        <Badge variant="default">Mandatory</Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Define SMART goals and create personalized training plan
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button variant="outline" size="sm">Assign</Button>
+                      <Button variant="ghost" size="sm">
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
 
           <TabsContent value="templates" className="space-y-4">
             <div className="flex items-center justify-between">
