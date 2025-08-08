@@ -451,10 +451,25 @@ export const TrainerCard = ({
         )}
 
 
-        {/* Waitlist Status Badge - Show if client is on waitlist */}
-        {isClient && clientWaitlistStatus && (
+        {/* Waitlist Status Badge - Show if client is on waitlist OR coach has waitlist enabled */}
+        {isClient && (clientWaitlistStatus || (coachAvailability?.availability_status === 'waitlist')) && (
           <div className="mb-4">
-            <WaitlistStatusBadge coachId={trainer.id} refreshKey={waitlistRefreshKey} />
+            {clientWaitlistStatus ? (
+              <WaitlistStatusBadge coachId={trainer.id} refreshKey={waitlistRefreshKey} />
+            ) : (
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="text-xs">
+                  <Clock className="w-3 h-3 mr-1" />
+                  Waitlist Available
+                </Badge>
+                <WaitlistJoinButton 
+                  coachId={trainer.id} 
+                  coachName={trainer.name}
+                  nextAvailableDate={coachAvailability?.next_available_date}
+                  waitlistMessage={coachAvailability?.waitlist_message}
+                />
+              </div>
+            )}
           </div>
         )}
 
