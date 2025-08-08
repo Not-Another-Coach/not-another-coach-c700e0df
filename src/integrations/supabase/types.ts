@@ -1941,6 +1941,14 @@ export type Database = {
         Args: { p_client_id: string; p_trainer_id: string }
         Returns: undefined
       }
+      initialize_client_onboarding_from_ways_of_working: {
+        Args: {
+          p_client_id: string
+          p_trainer_id: string
+          p_package_id?: string
+        }
+        Returns: undefined
+      }
       initialize_trainer_visibility_defaults: {
         Args: { p_trainer_id: string }
         Returns: undefined
