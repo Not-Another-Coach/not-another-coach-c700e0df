@@ -8,6 +8,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, ArrowRight, Save, Eye, CheckCircle, AlertCircle } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 // Import form sections
 import { BasicInfoSection } from "@/components/trainer-setup/BasicInfoSection";
@@ -33,7 +43,10 @@ const TrainerProfileSetup = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showExitDialog, setShowExitDialog] = useState(false);
   const hasInitialized = useRef(false);
+  const initialFormData = useRef<typeof formData | null>(null);
 
   const [formData, setFormData] = useState({
     // Basic Info
@@ -124,8 +137,7 @@ const TrainerProfileSetup = () => {
   useEffect(() => {
     if (profile && profile.id && !hasInitialized.current) {
       hasInitialized.current = true;
-      setFormData(prev => ({
-        ...prev,
+      const initialData = {
         first_name: profile.first_name || "",
         last_name: profile.last_name || "",
         tagline: profile.tagline || "",
@@ -164,9 +176,21 @@ const TrainerProfileSetup = () => {
         weekly_programming_only: (profile as any).weekly_programming_only || false,
         testimonials: (profile as any).testimonials || [],
         delivery_format: (profile as any).delivery_format || "hybrid",
-      }));
+      };
+      
+      setFormData(prev => ({ ...prev, ...initialData }));
+      initialFormData.current = { ...formData, ...initialData };
+      setHasUnsavedChanges(false);
     }
   }, [profile?.id]);
+
+  // Track changes to form data
+  useEffect(() => {
+    if (initialFormData.current && hasInitialized.current) {
+      const hasChanges = JSON.stringify(formData) !== JSON.stringify(initialFormData.current);
+      setHasUnsavedChanges(hasChanges);
+    }
+  }, [formData]);
 
   // Handle tab navigation from URL parameters
   useEffect(() => {
@@ -386,6 +410,11 @@ const TrainerProfileSetup = () => {
           description: "Your changes have been saved successfully.",
         });
       }
+      
+      // Update initial form data and reset unsaved changes flag after successful save
+      initialFormData.current = { ...formData };
+      setHasUnsavedChanges(false);
+      
       return result;
     } catch (error) {
       console.error('Error in handleSave:', error);
@@ -451,11 +480,37 @@ const TrainerProfileSetup = () => {
     }
   };
 
-  const handlePreview = () => {
-    toast({
-      title: "Preview coming soon",
-      description: "Profile preview feature will be available soon.",
-    });
+  const handlePreview = async () => {
+    try {
+      await handleSave(false);
+      toast({
+        title: "Preview coming soon",
+        description: "Profile preview feature will be available soon.",
+      });
+    } catch (error) {
+      // Error already handled in handleSave
+    }
+  };
+
+  const handleBackToDashboard = () => {
+    if (hasUnsavedChanges) {
+      setShowExitDialog(true);
+    } else {
+      navigate('/trainer/dashboard');
+    }
+  };
+
+  const handleSaveAndExit = async () => {
+    try {
+      await handleSave(false);
+      navigate('/trainer/dashboard');
+    } catch (error) {
+      // Error already handled in handleSave
+    }
+  };
+
+  const handleDiscardAndExit = () => {
+    navigate('/trainer/dashboard');
   };
 
   const calculateProgress = () => {
@@ -527,7 +582,7 @@ const TrainerProfileSetup = () => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate('/trainer/dashboard')}
+            onClick={handleBackToDashboard}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Dashboard
@@ -718,6 +773,29 @@ const TrainerProfileSetup = () => {
           </Button>
         </div>
       </div>
+
+      {/* Exit Confirmation Dialog */}
+      <AlertDialog open={showExitDialog} onOpenChange={setShowExitDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved changes. What would you like to do?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowExitDialog(false)}>
+              Cancel
+            </AlertDialogCancel>
+            <Button variant="outline" onClick={handleDiscardAndExit}>
+              Discard Changes
+            </Button>
+            <AlertDialogAction onClick={handleSaveAndExit}>
+              Save Changes
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
