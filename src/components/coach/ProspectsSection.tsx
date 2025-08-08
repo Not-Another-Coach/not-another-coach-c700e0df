@@ -316,7 +316,7 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
                     </Button>
                   )}
                   
-                  {prospect.stage === 'shortlisted' && !prospect.discovery_call && (
+                  {prospect.stage === 'shortlisted' && !prospect.discovery_call && profile?.free_discovery_call && (
                     <Button
                       size="sm"
                       variant="outline"
