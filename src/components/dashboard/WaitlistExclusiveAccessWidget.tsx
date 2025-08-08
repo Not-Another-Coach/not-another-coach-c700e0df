@@ -33,7 +33,7 @@ export function WaitlistExclusiveAccessWidget() {
         // First, get active exclusive periods
         const { data: exclusivePeriods, error: periodsError } = await supabase
           .from('waitlist_exclusive_periods')
-          .select('coach_id, expires_at')
+          .select('coach_id, expires_at, created_at')
           .eq('is_active', true)
           .gt('expires_at', new Date().toISOString());
 
@@ -51,7 +51,7 @@ export function WaitlistExclusiveAccessWidget() {
         const coachIds = exclusivePeriods.map(p => p.coach_id);
         const { data: waitlistEntries, error: waitlistError } = await supabase
           .from('coach_waitlists')
-          .select('coach_id')
+          .select('coach_id, joined_at')
           .eq('client_id', user.id)
           .eq('status', 'active')
           .in('coach_id', coachIds);
@@ -66,10 +66,16 @@ export function WaitlistExclusiveAccessWidget() {
           return;
         }
 
-        // Filter exclusive periods to only those where user is on waitlist
-        const relevantPeriods = exclusivePeriods.filter(period => 
-          waitlistEntries.some(entry => entry.coach_id === period.coach_id)
-        );
+        // Filter exclusive periods to only those where user joined waitlist BEFORE the exclusive period started
+        const relevantPeriods = exclusivePeriods.filter(period => {
+          const waitlistEntry = waitlistEntries.find(entry => entry.coach_id === period.coach_id);
+          if (!waitlistEntry) return false;
+          
+          // Only show access if client joined waitlist before exclusive period started
+          const joinedAt = new Date(waitlistEntry.joined_at);
+          const periodStarted = new Date(period.created_at);
+          return joinedAt < periodStarted;
+        });
 
         console.log('🔥 WaitlistExclusiveAccessWidget: Relevant periods for user:', relevantPeriods);
 
