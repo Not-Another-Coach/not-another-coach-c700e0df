@@ -172,6 +172,27 @@ export function useWaitlist() {
     console.log('🔥 removeFromWaitlist called:', { coachId, userId: user.id });
 
     try {
+      // First check if user is actually on waitlist
+      const { data: existingEntry, error: checkError } = await supabase
+        .from('coach_waitlists')
+        .select('*')
+        .eq('client_id', user.id)
+        .eq('coach_id', coachId)
+        .maybeSingle();
+
+      console.log('🔥 removeFromWaitlist - existing entry check:', { existingEntry, checkError });
+
+      if (checkError) {
+        console.error('🔥 removeFromWaitlist - check error:', checkError);
+        return { error: `Error checking waitlist status: ${checkError.message}` };
+      }
+
+      if (!existingEntry) {
+        console.log('🔥 removeFromWaitlist - no entry found');
+        return { error: 'You are not on this coach\'s waitlist' };
+      }
+
+      // Now attempt to delete
       const { data, error } = await supabase
         .from('coach_waitlists')
         .delete()
@@ -179,18 +200,23 @@ export function useWaitlist() {
         .eq('coach_id', coachId)
         .select(); // Add select to see what was deleted
 
-      console.log('🔥 removeFromWaitlist result:', { data, error });
+      console.log('🔥 removeFromWaitlist result:', { data, error, deletedCount: data?.length || 0 });
 
       if (error) {
         console.error('🔥 removeFromWaitlist database error:', error);
-        throw error;
+        return { error: `Database error: ${error.message}` };
       }
       
-      console.log('🔥 removeFromWaitlist successful, deleted rows:', data?.length || 0);
+      if (!data || data.length === 0) {
+        console.log('🔥 removeFromWaitlist - no rows deleted');
+        return { error: 'No waitlist entry was removed. Please try again.' };
+      }
+      
+      console.log('🔥 removeFromWaitlist successful, deleted rows:', data.length);
       return { success: true, deletedRows: data };
-    } catch (error) {
+    } catch (error: any) {
       console.error('🔥 removeFromWaitlist catch error:', error);
-      return { error };
+      return { error: `Unexpected error: ${error.message || 'Something went wrong'}` };
     }
   }, [user]);
 

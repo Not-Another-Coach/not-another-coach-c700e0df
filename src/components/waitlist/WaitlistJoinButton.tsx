@@ -113,7 +113,7 @@ export function WaitlistJoinButton({
         console.error('🔥 Remove from waitlist error:', result.error);
         toast({
           title: "Error",
-          description: "Failed to remove from waitlist. Please try again.",
+          description: result.error || "Failed to remove from waitlist. Please try again.",
           variant: "destructive"
         });
       } else {
