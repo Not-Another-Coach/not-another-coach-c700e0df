@@ -9,7 +9,12 @@ interface WaitlistStatus {
   loading: boolean;
 }
 
-export function useWaitlistStatus(trainerId?: string) {
+interface UseWaitlistStatusProps {
+  trainerId?: string;
+  onEngagementChange?: () => void;
+}
+
+export function useWaitlistStatus(trainerId?: string, onEngagementChange?: () => void) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [status, setStatus] = useState<WaitlistStatus>({
@@ -87,8 +92,9 @@ export function useWaitlistStatus(trainerId?: string) {
         description: "You've been added to the trainer's waitlist successfully!"
       });
 
-      // Refresh status
+      // Refresh status and trigger engagement change
       await checkWaitlistStatus();
+      onEngagementChange?.();
       return true;
     } catch (error) {
       console.error('Error in joinWaitlist:', error);
@@ -127,8 +133,9 @@ export function useWaitlistStatus(trainerId?: string) {
         description: "You've been removed from the waitlist successfully."
       });
 
-      // Refresh status
+      // Refresh status and trigger engagement change
       await checkWaitlistStatus();
+      onEngagementChange?.();
       return true;
     } catch (error) {
       console.error('Error in leaveWaitlist:', error);
