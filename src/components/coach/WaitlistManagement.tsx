@@ -9,6 +9,7 @@ import { useWaitlist } from '@/hooks/useWaitlist';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { Users, MessageCircle, Calendar, UserPlus, Archive, Clock, Settings, ExternalLink, Bell } from 'lucide-react';
+import { MessagingPopup } from '@/components/MessagingPopup';
 
 export function WaitlistManagement() {
   const { waitlistEntries, updateWaitlistEntry, loading } = useWaitlist();
@@ -17,6 +18,8 @@ export function WaitlistManagement() {
   const [selectedEntry, setSelectedEntry] = useState<any>(null);
   const [notes, setNotes] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
+  const [messagingPopupOpen, setMessagingPopupOpen] = useState(false);
+  const [selectedClientForMessaging, setSelectedClientForMessaging] = useState<any>(null);
 
   const getStatusInfo = (status: string) => {
     switch (status) {
@@ -225,7 +228,14 @@ export function WaitlistManagement() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleUpdateStatus(entry.id, 'contacted')}
+                          onClick={() => {
+                            setSelectedClientForMessaging({
+                              id: entry.client_id,
+                              user_id: entry.client_id,
+                              client_profile: null // Waitlist entries may not have full profile data
+                            });
+                            setMessagingPopupOpen(true);
+                          }}
                           disabled={isUpdating}
                         >
                           <MessageCircle className="w-3 h-3 mr-1" />
@@ -323,6 +333,15 @@ export function WaitlistManagement() {
         )}
       </CardContent>
     </Card>
+    
+    <MessagingPopup
+      isOpen={messagingPopupOpen}
+      onClose={() => {
+        setMessagingPopupOpen(false);
+        setSelectedClientForMessaging(null);
+      }}
+      selectedClient={selectedClientForMessaging}
+    />
     </div>
   );
 }

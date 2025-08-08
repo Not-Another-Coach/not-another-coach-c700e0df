@@ -7,6 +7,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { format } from 'date-fns';
 import { Users, MessageCircle, Calendar, UserCheck } from 'lucide-react';
 import { DiscoveryCallNotesTaker } from '@/components/DiscoveryCallNotesTaker';
+import { MessagingPopup } from '@/components/MessagingPopup';
 
 interface ActiveClient {
   id: string;
@@ -31,6 +32,8 @@ export function ActiveClientsSection({ onCountChange }: ActiveClientsSectionProp
   const { profile } = useProfile();
   const [activeClients, setActiveClients] = useState<ActiveClient[]>([]);
   const [loading, setLoading] = useState(true);
+  const [messagingPopupOpen, setMessagingPopupOpen] = useState(false);
+  const [selectedClientForMessaging, setSelectedClientForMessaging] = useState<any>(null);
 
   useEffect(() => {
     if (profile?.id) {
@@ -174,8 +177,12 @@ export function ActiveClientsSection({ onCountChange }: ActiveClientsSectionProp
                     size="sm"
                     variant="outline"
                     onClick={() => {
-                      // TODO: Implement messaging functionality
-                      console.log('Message client:', client.client_id);
+                      setSelectedClientForMessaging({
+                        id: client.client_id,
+                        user_id: client.client_id,
+                        client_profile: client.client_profile
+                      });
+                      setMessagingPopupOpen(true);
                     }}
                   >
                     <MessageCircle className="w-3 h-3 mr-1" />
@@ -209,6 +216,15 @@ export function ActiveClientsSection({ onCountChange }: ActiveClientsSectionProp
           </div>
         )}
       </CardContent>
+      
+      <MessagingPopup
+        isOpen={messagingPopupOpen}
+        onClose={() => {
+          setMessagingPopupOpen(false);
+          setSelectedClientForMessaging(null);
+        }}
+        selectedClient={selectedClientForMessaging}
+      />
     </Card>
   );
 }
