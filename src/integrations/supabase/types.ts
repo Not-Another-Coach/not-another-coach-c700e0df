@@ -1887,7 +1887,7 @@ export type Database = {
         | "unmatched"
         | "declined"
         | "declined_dismissed"
-      kb_article_status: "draft" | "published" | "archived"
+      kb_article_status: "draft" | "published" | "archived" | "staging"
       kb_content_type:
         | "feature"
         | "api"
@@ -2072,7 +2072,7 @@ export const Constants = {
         "declined",
         "declined_dismissed",
       ],
-      kb_article_status: ["draft", "published", "archived"],
+      kb_article_status: ["draft", "published", "archived", "staging"],
       kb_content_type: [
         "feature",
         "api",

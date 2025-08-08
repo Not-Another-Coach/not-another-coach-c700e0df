@@ -17,6 +17,7 @@ import {
 import { KBArticleEditor } from './KBArticleEditor';
 import { KBCategoryManager } from './KBCategoryManager';
 import { AddCoachDeclineArticle } from './AddCoachDeclineArticle';
+import { ArticleStagingManager } from './ArticleStagingManager';
 import { format } from 'date-fns';
 
 export const KnowledgeBaseAdmin: React.FC = () => {
@@ -107,6 +108,7 @@ export const KnowledgeBaseAdmin: React.FC = () => {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="articles">Articles</TabsTrigger>
+          <TabsTrigger value="staging">Staging Review</TabsTrigger>
           <TabsTrigger value="categories">Categories</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
@@ -252,6 +254,10 @@ export const KnowledgeBaseAdmin: React.FC = () => {
               ))
             )}
           </div>
+        </TabsContent>
+
+        <TabsContent value="staging">
+          <ArticleStagingManager />
         </TabsContent>
 
         <TabsContent value="categories">

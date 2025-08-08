@@ -19,7 +19,7 @@ export interface KBCategory {
 }
 
 export type KBContentType = 'feature' | 'api' | 'component' | 'hook' | 'database' | 'business_rule' | 'integration';
-export type KBArticleStatus = 'draft' | 'published' | 'archived';
+export type KBArticleStatus = 'draft' | 'published' | 'archived' | 'staging';
 
 export interface KBArticle {
   id: string;
