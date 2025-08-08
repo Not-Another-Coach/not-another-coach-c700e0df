@@ -1822,6 +1822,10 @@ export type Database = {
         Args: { p_trainer_id: string }
         Returns: undefined
       }
+      is_client_on_waitlist: {
+        Args: { p_client_id: string; p_trainer_id: string }
+        Returns: boolean
+      }
       log_admin_action: {
         Args: {
           p_target_user_id: string
@@ -1933,6 +1937,7 @@ export type Database = {
         | "unmatched"
         | "declined"
         | "declined_dismissed"
+        | "waitlist"
       kb_article_status: "draft" | "published" | "archived" | "staging"
       kb_content_type:
         | "feature"
@@ -2117,6 +2122,7 @@ export const Constants = {
         "unmatched",
         "declined",
         "declined_dismissed",
+        "waitlist",
       ],
       kb_article_status: ["draft", "published", "archived", "staging"],
       kb_content_type: [
