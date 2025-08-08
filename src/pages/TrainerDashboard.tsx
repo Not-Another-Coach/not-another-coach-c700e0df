@@ -18,6 +18,7 @@ import { LiveActivityFeed } from "@/components/dashboard/LiveActivityFeed";
 import { UpcomingSessionsWidget } from "@/components/dashboard/UpcomingSessionsWidget";
 import { CoachExclusivityEndedAlert } from "@/components/dashboard/CoachExclusivityEndedAlert";
 import { ClientOnboardingManagement } from "@/components/coach/ClientOnboardingManagement";
+import { ClientOnboardingTracker } from "@/components/coach/ClientOnboardingTracker";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -275,15 +276,29 @@ const TrainerDashboard = () => {
               Active Clients ({activeClientsCount})
             </Button>
             
-            <Button
-              variant={activeView === 'onboarding' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setActiveView('onboarding')}
-              className="flex items-center gap-2"
-            >
-              <CheckCircle className="w-4 h-4" />
-              Client Onboarding
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant={activeView === 'onboarding' || activeView === 'onboarding-tracker' ? 'default' : 'ghost'}
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  Client Onboarding
+                  <ChevronDown className="w-3 h-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuItem onClick={() => setActiveView('onboarding-tracker')}>
+                  <TrendingUp className="w-4 h-4 mr-2" />
+                  Onboarding Tracker
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setActiveView('onboarding')}>
+                  <Settings className="w-4 h-4 mr-2" />
+                  Onboarding Management
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             
             <Button
               variant={activeView === 'goals' ? 'default' : 'ghost'}
@@ -510,6 +525,10 @@ const TrainerDashboard = () => {
         
         {activeView === 'onboarding' && (
           <ClientOnboardingManagement />
+        )}
+        
+        {activeView === 'onboarding-tracker' && (
+          <ClientOnboardingTracker />
         )}
         
         {activeView === 'goals' && (
