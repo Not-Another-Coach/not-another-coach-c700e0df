@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, X, Eye, EyeOff, Info } from "lucide-react";
+import { Plus, X, Eye, EyeOff, Info, MapPin, Users } from "lucide-react";
+import { SectionHeader } from "./SectionHeader";
 
 interface WaysOfWorkingSectionProps {
   formData: any;
@@ -224,6 +225,12 @@ export function WaysOfWorkingSection({ formData, updateFormData, errors = {}, cl
 
   return (
     <div className="space-y-6">
+      <SectionHeader 
+        icons={[MapPin, Users]}
+        title="Ways of Working"
+        description="Define your client journey and working process to set clear expectations"
+      />
+      
       {/* Section Introduction */}
       <Card className="border-primary/20 bg-primary/5">
         <CardContent className="p-4">

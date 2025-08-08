@@ -17,6 +17,7 @@ import {
 import { useTrainerVerification } from '@/hooks/useTrainerVerification';
 import { useProfile } from '@/hooks/useProfile';
 import { VerificationNotifications } from './VerificationNotifications';
+import { SectionHeader } from './SectionHeader';
 import { toast } from 'sonner';
 
 const statusConfig = {
@@ -110,6 +111,12 @@ export const VerificationSection = () => {
 
   return (
     <div className="space-y-6">
+      <SectionHeader 
+        icons={[Shield, CheckCircle2]}
+        title="Profile Verification"
+        description="Get your profile verified to start accepting clients and build trust"
+      />
+      
       <VerificationNotifications />
       
       <Card>
