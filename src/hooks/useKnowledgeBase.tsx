@@ -121,7 +121,24 @@ export const useKBArticles = (filters?: {
       }
 
       if (filters?.search) {
-        query = query.textSearch('search_vector', filters.search);
+        try {
+          // Format search query for PostgreSQL full-text search
+          const formattedQuery = filters.search
+            .trim()
+            .split(/\s+/)
+            .map(word => word.replace(/[^a-zA-Z0-9]/g, '')) // Remove special characters
+            .filter(word => word.length > 0)
+            .join(' & '); // Join with AND operator
+          
+          if (formattedQuery) {
+            query = query.textSearch('search_vector', formattedQuery);
+          }
+        } catch (error) {
+          // Fallback to simple text search if full-text search fails
+          console.warn('Full-text search failed, falling back to simple search:', error);
+          const searchTerm = `%${filters.search}%`;
+          query = query.or(`title.ilike.${searchTerm},content.ilike.${searchTerm},excerpt.ilike.${searchTerm}`);
+        }
       }
 
       query = query.order('featured', { ascending: false })
