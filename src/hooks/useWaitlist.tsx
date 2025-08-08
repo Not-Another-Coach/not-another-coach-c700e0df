@@ -46,6 +46,7 @@ export function useWaitlist() {
         .from('coach_waitlists')
         .select('*')
         .eq('coach_id', user.id)
+        .neq('status', 'converted') // Exclude converted clients from waitlist view
         .order('joined_at', { ascending: false });
 
       if (error) throw error;
