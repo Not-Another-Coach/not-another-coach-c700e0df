@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Users, Heart, Target, Zap, Sparkles } from "lucide-react";
 import { AIDescriptionHelper } from "./AIDescriptionHelper";
-import { WorkingHoursSection } from "./WorkingHoursSection";
 
 interface ClientFitSectionProps {
   formData: any;
@@ -270,20 +269,6 @@ export function ClientFitSection({ formData, updateFormData }: ClientFitSectionP
         </p>
       </div>
 
-      {/* Availability */}
-      <div className="space-y-4">
-        <div>
-          <Label>Availability</Label>
-          <p className="text-sm text-muted-foreground mt-1">
-            When are you typically available for training sessions?
-          </p>
-        </div>
-
-        <WorkingHoursSection 
-          formData={formData}
-          updateFormData={updateFormData}
-        />
-      </div>
     </div>
   );
 }

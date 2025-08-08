@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Bell, Eye, CheckCircle, AlertTriangle } from "lucide-react";
 import { TrainerProfilePreview } from "@/components/TrainerProfilePreview";
 import { AvailabilitySection } from "./AvailabilitySection";
+import { WorkingHoursSection } from "./WorkingHoursSection";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface ProfileManagementSectionProps {
@@ -17,6 +18,9 @@ interface ProfileManagementSectionProps {
 export function ProfileManagementSection({ formData, updateFormData }: ProfileManagementSectionProps) {
   return (
     <div className="space-y-6">
+      {/* Working Hours */}
+      <WorkingHoursSection formData={formData} updateFormData={updateFormData} />
+      
       {/* Availability Status Management */}
       <AvailabilitySection formData={formData} updateFormData={updateFormData} />
 
