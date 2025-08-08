@@ -63,12 +63,51 @@ export function useTrainerOnboarding() {
     }
   }, [user]);
 
+  const createOnboardingStepsFromTemplates = useCallback(async (clientId: string) => {
+    if (!user) return;
+
+    try {
+      // Get active templates for this trainer
+      const { data: activeTemplates, error: templatesError } = await supabase
+        .from('trainer_onboarding_templates')
+        .select('*')
+        .eq('trainer_id', user.id)
+        .eq('is_active', true)
+        .order('display_order');
+
+      if (templatesError) throw templatesError;
+
+      if (!activeTemplates || activeTemplates.length === 0) return;
+
+      // Create client onboarding steps from templates
+      const onboardingSteps = activeTemplates.map(template => ({
+        client_id: clientId,
+        trainer_id: user.id,
+        template_step_id: template.id,
+        step_name: template.step_name,
+        step_type: template.step_type,
+        description: template.description,
+        instructions: template.instructions,
+        requires_file_upload: template.requires_file_upload,
+        completion_method: template.completion_method,
+        display_order: template.display_order,
+        status: 'pending'
+      }));
+
+      const { error: insertError } = await supabase
+        .from('client_onboarding_progress')
+        .insert(onboardingSteps);
+
+      if (insertError) throw insertError;
+    } catch (err) {
+      console.error('Error creating onboarding steps from templates:', err);
+    }
+  }, [user]);
+
   const fetchClientsOnboarding = useCallback(async () => {
     if (!user) return;
 
     try {
-      console.log('Fetching clients onboarding for trainer:', user.id);
-      
       // Get active clients
       const { data: engagements, error: engagementError } = await supabase
         .from('client_trainer_engagement')
@@ -78,33 +117,25 @@ export function useTrainerOnboarding() {
 
       if (engagementError) throw engagementError;
 
-      console.log('Found engagements:', engagements);
-
       if (!engagements || engagements.length === 0) {
-        console.log('No active clients found');
         setClientsOnboarding([]);
         return;
       }
 
       // Get client profiles separately
       const clientIds = engagements.map(e => e.client_id);
-      console.log('Client IDs:', clientIds);
-      
       const { data: clientProfiles, error: profileError } = await supabase
         .from('profiles')
         .select('id, first_name, last_name')
         .in('id', clientIds);
 
       if (profileError) throw profileError;
-      console.log('Client profiles:', clientProfiles);
 
       // Get onboarding progress for each client
       const clientsData: ClientOnboardingData[] = [];
 
       for (const engagement of engagements) {
-        console.log('Processing engagement for client:', engagement.client_id);
-        
-        const { data: steps, error: stepsError } = await supabase
+        let { data: steps, error: stepsError } = await supabase
           .from('client_onboarding_progress')
           .select('*')
           .eq('client_id', engagement.client_id)
@@ -112,7 +143,19 @@ export function useTrainerOnboarding() {
           .order('display_order');
 
         if (stepsError) throw stepsError;
-        console.log('Steps for client', engagement.client_id, ':', steps);
+
+        // If no steps exist for this client, create them from templates
+        if (!steps || steps.length === 0) {
+          await createOnboardingStepsFromTemplates(engagement.client_id);
+          // Fetch the newly created steps
+          const { data: newSteps } = await supabase
+            .from('client_onboarding_progress')
+            .select('*')
+            .eq('client_id', engagement.client_id)
+            .eq('trainer_id', user.id)
+            .order('display_order');
+          steps = newSteps || [];
+        }
 
         const completedCount = steps?.filter(step => step.status === 'completed').length || 0;
         const totalCount = steps?.length || 0;
@@ -139,13 +182,12 @@ export function useTrainerOnboarding() {
         });
       }
 
-      console.log('Final clients data:', clientsData);
       setClientsOnboarding(clientsData);
     } catch (err) {
       console.error('Error fetching clients onboarding:', err);
       setError(err instanceof Error ? err.message : 'Failed to load clients onboarding data');
     }
-  }, [user]);
+  }, [user, createOnboardingStepsFromTemplates]);
 
   const createTemplate = useCallback(async (template: Omit<OnboardingTemplate, 'id'>) => {
     if (!user) return { error: 'No user' };
