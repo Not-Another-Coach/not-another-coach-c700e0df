@@ -28,7 +28,8 @@ const engagementStageLabels: Record<EngagementStage, string> = {
   discovery_completed: 'Discovery Done',
   active_client: 'Active Client',
   unmatched: 'Unmatched',
-  declined: 'Declined'
+  declined: 'Declined',
+  declined_dismissed: 'Previously Declined'
 };
 
 const visibilityStateLabels: Record<VisibilityState, { label: string; icon: any; color: string }> = {

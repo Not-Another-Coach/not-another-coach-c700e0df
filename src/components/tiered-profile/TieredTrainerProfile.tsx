@@ -122,6 +122,8 @@ export const TieredTrainerProfile = ({
         return { label: 'Discovery Complete', color: 'bg-green-500' };
       case 'active_client':
         return { label: 'Active Client', color: 'bg-orange-500' };
+      case 'declined_dismissed':
+        return { label: 'Previously Declined', color: 'bg-red-300' };
       default:
         return { label: 'Browsing', color: 'bg-gray-500' };
     }

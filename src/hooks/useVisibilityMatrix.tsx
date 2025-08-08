@@ -22,7 +22,8 @@ export type EngagementStage =
   | 'discovery_completed' 
   | 'active_client'
   | 'unmatched'
-  | 'declined';
+  | 'declined'
+  | 'declined_dismissed';
 
 interface VisibilityMatrixHook {
   getContentVisibility: (

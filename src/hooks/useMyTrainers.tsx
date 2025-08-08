@@ -262,7 +262,7 @@ export function useMyTrainers(refreshTrigger?: number) {
           }
         });
 
-        // Process declined trainers
+        // Process declined trainers (only show if not dismissed)
         const declinedTrainers = allEngagements.filter(engagement => engagement.stage === 'declined');
         declinedTrainers.forEach(engagement => {
           const trainerProfile = trainerData?.find(t => t.id === engagement.trainerId);

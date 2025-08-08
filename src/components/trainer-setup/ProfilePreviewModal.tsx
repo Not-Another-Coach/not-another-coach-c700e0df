@@ -61,6 +61,11 @@ const stageLabels: Record<EngagementStage, { label: string; description: string;
     label: 'Declined Stage', 
     description: 'How your profile appears after being declined',
     color: 'bg-red-100 text-red-800'
+  },
+  declined_dismissed: { 
+    label: 'Previously Declined', 
+    description: 'How your profile appears in explore view after being declined and dismissed',
+    color: 'bg-gray-100 text-gray-600'
   }
 };
 

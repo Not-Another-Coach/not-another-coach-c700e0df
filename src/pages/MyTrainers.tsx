@@ -290,10 +290,21 @@ export default function MyTrainers() {
   const handleRemoveCompletely = async (trainerId: string) => {
     console.log('🔥 Remove completely clicked:', trainerId);
     try {
-      await updateEngagementStage(trainerId, 'browsing');
+      // Check current engagement stage
+      const currentStage = getEngagementStage(trainerId);
+      
+      if (currentStage === 'declined') {
+        // For declined trainers, move to declined_dismissed to preserve history
+        await updateEngagementStage(trainerId, 'declined_dismissed');
+        toast.success('Trainer removed! They will appear as "Previously Declined" in Explore Coaches.');
+      } else {
+        // For other stages, reset to browsing
+        await updateEngagementStage(trainerId, 'browsing');
+        toast.success('Trainer removed completely!');
+      }
+      
       // Also remove from waitlist if they're on one
       await removeFromWaitlist(trainerId);
-      toast.success('Trainer removed completely!');
     } catch (error) {
       console.error('Error removing trainer completely:', error);
       toast.error('Failed to remove trainer');
