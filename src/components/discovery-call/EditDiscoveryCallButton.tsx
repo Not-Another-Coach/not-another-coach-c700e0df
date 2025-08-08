@@ -115,22 +115,27 @@ export const EditDiscoveryCallButton = ({
         console.error('Error creating cancellation alert:', alertError);
       }
 
-      // Send cancellation email to trainer
-      try {
-        await supabase.functions.invoke('send-discovery-call-email', {
-          body: {
-            type: 'trainer_notification',
-            discoveryCallId: discoveryCall.id,
-            notificationType: 'cancellation'
-          }
-        });
-      } catch (emailError) {
-        console.error('Error sending cancellation email:', emailError);
-      }
+      // Send cancellation email to trainer (non-blocking - don't fail if this fails)
+      console.log('📧 Attempting to send cancellation email...');
+      supabase.functions.invoke('send-discovery-call-email', {
+        body: {
+          type: 'trainer_notification',
+          discoveryCallId: discoveryCall.id,
+          notificationType: 'cancellation'
+        }
+      }).then((result) => {
+        if (result.error) {
+          console.error('📧 Email sending failed (non-critical):', result.error);
+        } else {
+          console.log('📧 Cancellation email sent successfully');
+        }
+      }).catch((emailError) => {
+        console.error('📧 Email sending failed (non-critical):', emailError);
+      });
 
       toast({
         title: "Discovery call cancelled",
-        description: "The trainer has been notified and the slot is now available for others to book.",
+        description: "The discovery call has been cancelled successfully.",
       });
 
       setIsModalOpen(false);

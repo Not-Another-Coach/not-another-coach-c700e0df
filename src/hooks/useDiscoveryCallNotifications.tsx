@@ -214,7 +214,7 @@ export function useDiscoveryCallNotifications() {
         return false;
       }
 
-      // Send cancellation notification
+      // Send cancellation notification in the background (don't wait for it)
       try {
         await supabase.functions.invoke('send-discovery-call-email', {
           body: {
@@ -223,8 +223,10 @@ export function useDiscoveryCallNotifications() {
             notificationType: 'cancellation'
           }
         });
+        console.log('📧 Cancellation email sent successfully via hook');
       } catch (emailError) {
-        console.error('Error sending cancellation email:', emailError);
+        console.error('📧 Error sending cancellation email via hook (non-blocking):', emailError);
+        // Don't fail the cancellation if emails fail
       }
 
       // Refresh the upcoming calls
