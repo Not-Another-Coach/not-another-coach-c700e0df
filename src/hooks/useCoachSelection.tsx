@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import type { ClientJourneyStage } from '@/hooks/useClientJourneyProgress';
 
 export interface CoachSelectionRequest {
   id: string;
@@ -25,6 +26,54 @@ export interface CoachSelectionRequest {
 export function useCoachSelection() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
+
+  // Helper function to check if client has any active engagements
+  const checkForActiveEngagements = async (clientId: string): Promise<boolean> => {
+    try {
+      // Check for active discovery calls
+      const { data: discoveryCalls } = await supabase
+        .from('discovery_calls')
+        .select('id')
+        .eq('client_id', clientId)
+        .eq('status', 'scheduled')
+        .limit(1);
+
+      // Check for active engagements (beyond browsing and liked)
+      const { data: engagements } = await supabase
+        .from('client_trainer_engagement')
+        .select('stage')
+        .eq('client_id', clientId)
+        .in('stage', ['shortlisted', 'discovery_call_booked', 'discovery_in_progress', 'matched', 'discovery_completed', 'active_client'])
+        .limit(1);
+
+      // Check for other pending coach selection requests
+      const { data: pendingRequests } = await supabase
+        .from('coach_selection_requests')
+        .select('id')
+        .eq('client_id', clientId)
+        .eq('status', 'pending')
+        .limit(1);
+
+      return (discoveryCalls?.length || 0) > 0 || 
+             (engagements?.length || 0) > 0 || 
+             (pendingRequests?.length || 0) > 0;
+    } catch (error) {
+      console.error('Error checking active engagements:', error);
+      return true; // Assume active to be safe
+    }
+  };
+
+  // Helper function to update client journey stage
+  const updateClientJourneyStage = async (clientId: string, stage: ClientJourneyStage) => {
+    try {
+      await supabase
+        .from('profiles')
+        .update({ client_journey_stage: stage })
+        .eq('id', clientId);
+    } catch (error) {
+      console.error('Error updating client journey stage:', error);
+    }
+  };
 
   const createSelectionRequest = useCallback(async (
     trainerId: string,
@@ -117,6 +166,19 @@ export function useCoachSelection() {
         updateData.suggested_alternative_package_price = alternativePackage.price;
       }
 
+      // First get the request to know the client_id
+      const { data: requestData, error: fetchError } = await supabase
+        .from('coach_selection_requests')
+        .select('client_id')
+        .eq('id', requestId)
+        .single();
+
+      if (fetchError) {
+        console.error('Error fetching request data:', fetchError);
+        toast.error('Failed to respond to request');
+        return { error: fetchError };
+      }
+
       const { error } = await supabase
         .from('coach_selection_requests')
         .update(updateData)
@@ -126,6 +188,16 @@ export function useCoachSelection() {
         console.error('Error responding to request:', error);
         toast.error('Failed to respond to request');
         return { error };
+      }
+
+      // If request is declined, check if client should be moved back to exploring coaches
+      if (status === 'declined' && requestData?.client_id) {
+        const hasActiveEngagements = await checkForActiveEngagements(requestData.client_id);
+        
+        if (!hasActiveEngagements) {
+          console.log('No active engagements found, moving client back to exploring_coaches stage');
+          await updateClientJourneyStage(requestData.client_id, 'exploring_coaches');
+        }
       }
 
       const statusMessages = {
