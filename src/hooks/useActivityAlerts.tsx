@@ -151,7 +151,7 @@ export function useActivityAlerts() {
           title,
           content: description,
           created_by: user.id,
-          target_audience: { trainers: true },
+          target_audience: ["trainers"],
           metadata: metadata || {},
           is_active: true
         });

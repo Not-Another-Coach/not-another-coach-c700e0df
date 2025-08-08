@@ -92,10 +92,11 @@ export const EditDiscoveryCallButton = ({
             title: 'Discovery Call Cancelled',
             content: `A client has cancelled their discovery call scheduled for ${format(scheduledDate, 'MMM d, yyyy \'at\' h:mm a')}. Reason: ${cancellationReason.trim()}`,
             created_by: trainer.id,
-            target_audience: { trainers: true },
+            target_audience: ["trainers"],
             metadata: {
               discovery_call_id: discoveryCall.id,
-              cancellation_reason: cancellationReason.trim()
+              cancellation_reason: cancellationReason.trim(),
+              trainer_id: trainer.id
             },
             is_active: true
           });
@@ -157,9 +158,10 @@ export const EditDiscoveryCallButton = ({
           title: 'Discovery Call Rescheduled',
           content: `A client has rescheduled their discovery call. The previous booking has been cancelled and a new one has been made.`,
           created_by: trainer.id,
-          target_audience: { trainers: true },
+          target_audience: ["trainers"],
           metadata: {
-            old_discovery_call_id: discoveryCall.id
+            old_discovery_call_id: discoveryCall.id,
+            trainer_id: trainer.id
           },
           is_active: true
         });
