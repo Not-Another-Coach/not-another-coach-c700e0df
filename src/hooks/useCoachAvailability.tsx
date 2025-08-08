@@ -1,0 +1,147 @@
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from './useAuth';
+import { useToast } from './use-toast';
+
+interface WeeklySchedule {
+  [key: string]: {
+    enabled: boolean;
+    slots: Array<{
+      start: string;
+      end: string;
+    }>;
+  };
+}
+
+interface CoachAvailabilitySettings {
+  id?: string;
+  coach_id: string;
+  availability_status: 'accepting' | 'waitlist' | 'unavailable';
+  next_available_date?: string;
+  allow_discovery_calls_on_waitlist: boolean;
+  auto_follow_up_days: number;
+  waitlist_message?: string;
+  availability_schedule: WeeklySchedule;
+}
+
+export function useCoachAvailability() {
+  const [settings, setSettings] = useState<CoachAvailabilitySettings | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const { user } = useAuth();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (user) {
+      fetchSettings();
+    }
+  }, [user]);
+
+  const fetchSettings = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('coach_availability_settings')
+        .select('*')
+        .eq('coach_id', user.id)
+        .maybeSingle();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching coach availability settings:', error);
+        return;
+      }
+
+      if (data) {
+        setSettings({
+          ...data,
+          availability_schedule: data.availability_schedule as WeeklySchedule
+        });
+      } else {
+        // Create default settings if none exist
+        const defaultSettings: CoachAvailabilitySettings = {
+          coach_id: user.id,
+          availability_status: 'accepting',
+          allow_discovery_calls_on_waitlist: true,
+          auto_follow_up_days: 14,
+          availability_schedule: {
+            monday: { enabled: false, slots: [] },
+            tuesday: { enabled: false, slots: [] },
+            wednesday: { enabled: false, slots: [] },
+            thursday: { enabled: false, slots: [] },
+            friday: { enabled: false, slots: [] },
+            saturday: { enabled: false, slots: [] },
+            sunday: { enabled: false, slots: [] }
+          }
+        };
+        setSettings(defaultSettings);
+      }
+    } catch (error) {
+      console.error('Error fetching coach availability settings:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateSettings = async (updates: Partial<CoachAvailabilitySettings>) => {
+    if (!user || !settings) return;
+
+    setSaving(true);
+    try {
+      const updatedSettings = { ...settings, ...updates };
+      
+      const { data, error } = await supabase
+        .from('coach_availability_settings')
+        .upsert({
+          coach_id: user.id,
+          availability_status: updatedSettings.availability_status,
+          next_available_date: updatedSettings.next_available_date || null,
+          allow_discovery_calls_on_waitlist: updatedSettings.allow_discovery_calls_on_waitlist,
+          auto_follow_up_days: updatedSettings.auto_follow_up_days,
+          waitlist_message: updatedSettings.waitlist_message || null,
+          availability_schedule: updatedSettings.availability_schedule
+        }, {
+          onConflict: 'coach_id'
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating coach availability settings:', error);
+        toast({
+          title: "Error",
+          description: "Failed to update availability settings",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setSettings({
+        ...data,
+        availability_schedule: data.availability_schedule as WeeklySchedule
+      });
+      
+      toast({
+        title: "Settings updated",
+        description: "Your availability settings have been saved",
+      });
+    } catch (error) {
+      console.error('Error updating coach availability settings:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update availability settings",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return {
+    settings,
+    loading,
+    saving,
+    updateSettings,
+    refetch: fetchSettings
+  };
+}

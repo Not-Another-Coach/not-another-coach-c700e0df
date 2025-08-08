@@ -56,7 +56,7 @@ const TrainerProfileSetup = () => {
     ideal_client_personality: "",
     training_vibe: "",
     max_clients: null as number | null,
-    availability_schedule: {},
+    
     
     // Rates & Discovery Calls
     hourly_rate: null as number | null,
@@ -149,7 +149,7 @@ const TrainerProfileSetup = () => {
         ideal_client_personality: (profile as any).ideal_client_personality || "",
         training_vibe: (profile as any).training_vibe || "",
         max_clients: (profile as any).max_clients,
-        availability_schedule: (profile as any).availability_schedule || {},
+        
         class_rate: (profile as any).class_rate,
         package_options: (profile as any).package_options || [],
         free_discovery_call: (profile as any).free_discovery_call || false,
@@ -334,7 +334,7 @@ const TrainerProfileSetup = () => {
         'user_type', 'is_verified', 'rating', 'total_ratings',
         'fitness_goals', 'quiz_completed', 'quiz_answers', 'quiz_completed_at',
         'verification_status', 'profile_published', 'before_after_photos',
-        'availability_schedule', 'max_clients', 'package_options', 
+        'max_clients', 'package_options',
         'free_discovery_call', 'testimonials', 'profile_setup_step',
         'total_profile_setup_steps', 'package_inclusions',
         'is_uk_based', 'works_bank_holidays', 'uploaded_certificates',

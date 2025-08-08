@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Clock, Plus, Trash2, Calendar } from 'lucide-react';
+import { useCoachAvailability } from '@/hooks/useCoachAvailability';
 import { useToast } from '@/hooks/use-toast';
 
 interface TimeSlot {
@@ -31,49 +32,46 @@ const timeOptions = Array.from({ length: 48 }, (_, i) => {
 });
 
 export function WorkingHoursSection({ formData, updateFormData }: WorkingHoursSectionProps) {
+  const { settings, loading, saving, updateSettings } = useCoachAvailability();
   const { toast } = useToast();
-  const [timeSlots, setTimeSlots] = useState<TimeSlot[]>(formData.availability_slots || []);
-  const [newSlot, setNewSlot] = useState({
-    day: "",
-    startTime: "07:00",
-    endTime: "08:00"
-  });
   const [isUKBased, setIsUKBased] = useState(formData.is_uk_based ?? true);
   
-  // Initialize availability state
+  // Initialize availability state from coach availability settings
   const [availability, setAvailability] = useState<Record<string, TimeSlot[]>>({});
 
-  // Initialize availability from existing data
+  // Initialize availability from coach availability settings
   useEffect(() => {
-    if (formData.availability_slots) {
-      const grouped = formData.availability_slots.reduce((acc: Record<string, TimeSlot[]>, slot: any) => {
-        if (!acc[slot.day]) {
-          acc[slot.day] = [];
-        }
-        acc[slot.day].push({
-          id: slot.id || `${slot.day}-${slot.startTime}-${slot.endTime}`,
-          day: slot.day,
-          startTime: slot.startTime,
-          endTime: slot.endTime
-        });
-        return acc;
-      }, {});
+    if (settings?.availability_schedule) {
+      const grouped: Record<string, TimeSlot[]> = {};
+      Object.entries(settings.availability_schedule).forEach(([day, daySchedule]) => {
+        grouped[day] = daySchedule.slots.map((slot, index) => ({
+          id: `${day}-${index}`,
+          day,
+          startTime: slot.start,
+          endTime: slot.end
+        }));
+      });
       setAvailability(grouped);
     }
-  }, [formData.availability_slots]);
+  }, [settings?.availability_schedule]);
 
-  const updateDayAvailability = (day: string, slots: TimeSlot[]) => {
+  const updateDayAvailability = async (day: string, slots: TimeSlot[]) => {
     const newAvailability = { ...availability, [day]: slots };
     setAvailability(newAvailability);
     
-    // Flatten for form data
-    const flatSlots = Object.entries(newAvailability).flatMap(([dayKey, daySlots]) => 
-      daySlots.map(slot => ({
-        ...slot
-      }))
-    );
-    
-    updateFormData({ availability_slots: flatSlots });
+    // Update coach availability settings
+    if (settings) {
+      const newSchedule = { ...settings.availability_schedule };
+      newSchedule[day] = {
+        enabled: slots.length > 0,
+        slots: slots.map(slot => ({
+          start: slot.startTime,
+          end: slot.endTime
+        }))
+      };
+      
+      await updateSettings({ availability_schedule: newSchedule });
+    }
   };
 
   const addTimeSlot = (day: string) => {
@@ -108,53 +106,49 @@ export function WorkingHoursSection({ formData, updateFormData }: WorkingHoursSe
     updateFormData({ is_uk_based: ukBased });
   };
 
-  const setQuickSchedule = (type: 'weekdays' | 'weekends' | 'clear') => {
-    const newAvailability: Record<string, TimeSlot[]> = {};
+  const setQuickSchedule = async (type: 'weekdays' | 'weekends' | 'clear') => {
+    if (!settings) return;
+
+    const newSchedule = { ...settings.availability_schedule };
 
     if (type === 'clear') {
       daysOfWeek.forEach(day => {
-        newAvailability[day] = [];
+        newSchedule[day] = { enabled: false, slots: [] };
       });
     } else if (type === 'weekdays') {
       const weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
       weekdays.forEach(day => {
-        newAvailability[day] = [{
-          id: `${day}-default`,
-          day,
-          startTime: '09:00',
-          endTime: '17:00'
-        }];
-      });
-      // Keep weekends empty
-      ['saturday', 'sunday'].forEach(day => {
-        newAvailability[day] = availability[day] || [];
+        newSchedule[day] = {
+          enabled: true,
+          slots: [{ start: '09:00', end: '17:00' }]
+        };
       });
     } else if (type === 'weekends') {
       const weekends = ['saturday', 'sunday'];
       weekends.forEach(day => {
-        newAvailability[day] = [{
-          id: `${day}-default`,
-          day,
-          startTime: '10:00',
-          endTime: '16:00'
-        }];
-      });
-      // Keep weekdays as they are
-      ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'].forEach(day => {
-        newAvailability[day] = availability[day] || [];
+        newSchedule[day] = {
+          enabled: true,
+          slots: [{ start: '10:00', end: '16:00' }]
+        };
       });
     }
 
-    setAvailability(newAvailability);
-    
-    // Flatten for form data
-    const flatSlots = Object.entries(newAvailability).flatMap(([dayKey, daySlots]) => 
-      daySlots.map(slot => ({
-        ...slot
-      }))
-    );
-    updateFormData({ availability_slots: flatSlots });
+    await updateSettings({ availability_schedule: newSchedule });
   };
+
+  if (loading) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="space-y-4">
+            <div className="h-4 bg-muted rounded animate-pulse" />
+            <div className="h-8 bg-muted rounded animate-pulse" />
+            <div className="h-4 bg-muted rounded animate-pulse" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -200,6 +194,7 @@ export function WorkingHoursSection({ formData, updateFormData }: WorkingHoursSe
               variant="outline"
               size="sm"
               onClick={() => setQuickSchedule('weekdays')}
+              disabled={saving}
             >
               Weekdays (9AM-5PM)
             </Button>
@@ -208,6 +203,7 @@ export function WorkingHoursSection({ formData, updateFormData }: WorkingHoursSe
               variant="outline"
               size="sm"
               onClick={() => setQuickSchedule('weekends')}
+              disabled={saving}
             >
               Weekends (10AM-4PM)
             </Button>
@@ -216,6 +212,7 @@ export function WorkingHoursSection({ formData, updateFormData }: WorkingHoursSe
               variant="outline"
               size="sm"
               onClick={() => setQuickSchedule('clear')}
+              disabled={saving}
             >
               Clear All
             </Button>
@@ -246,6 +243,7 @@ export function WorkingHoursSection({ formData, updateFormData }: WorkingHoursSe
                       size="sm"
                       variant="outline"
                       onClick={() => addTimeSlot(day)}
+                      disabled={saving}
                     >
                       <Plus className="w-4 h-4 mr-1" />
                       Add Slot
@@ -263,6 +261,7 @@ export function WorkingHoursSection({ formData, updateFormData }: WorkingHoursSe
                           <Select
                             value={slot.startTime}
                             onValueChange={(value) => updateTimeSlot(day, index, 'startTime', value)}
+                            disabled={saving}
                           >
                             <SelectTrigger className="w-24">
                               <SelectValue />
@@ -277,6 +276,7 @@ export function WorkingHoursSection({ formData, updateFormData }: WorkingHoursSe
                           <Select
                             value={slot.endTime}
                             onValueChange={(value) => updateTimeSlot(day, index, 'endTime', value)}
+                            disabled={saving}
                           >
                             <SelectTrigger className="w-24">
                               <SelectValue />
@@ -292,6 +292,7 @@ export function WorkingHoursSection({ formData, updateFormData }: WorkingHoursSe
                             size="sm"
                             variant="ghost"
                             onClick={() => removeTimeSlot(day, index)}
+                            disabled={saving}
                           >
                             <Trash2 className="w-4 h-4 text-destructive" />
                           </Button>
@@ -318,6 +319,7 @@ export function WorkingHoursSection({ formData, updateFormData }: WorkingHoursSe
               <Switch
                 checked={formData.works_bank_holidays || false}
                 onCheckedChange={(checked) => updateFormData({ works_bank_holidays: checked })}
+                disabled={saving}
               />
             </div>
           </div>

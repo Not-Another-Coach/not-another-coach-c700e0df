@@ -192,6 +192,7 @@ export type Database = {
         Row: {
           allow_discovery_calls_on_waitlist: boolean
           auto_follow_up_days: number
+          availability_schedule: Json | null
           availability_status: Database["public"]["Enums"]["coach_availability_status"]
           coach_id: string
           created_at: string
@@ -203,6 +204,7 @@ export type Database = {
         Insert: {
           allow_discovery_calls_on_waitlist?: boolean
           auto_follow_up_days?: number
+          availability_schedule?: Json | null
           availability_status?: Database["public"]["Enums"]["coach_availability_status"]
           coach_id: string
           created_at?: string
@@ -214,6 +216,7 @@ export type Database = {
         Update: {
           allow_discovery_calls_on_waitlist?: boolean
           auto_follow_up_days?: number
+          availability_schedule?: Json | null
           availability_status?: Database["public"]["Enums"]["coach_availability_status"]
           coach_id?: string
           created_at?: string
@@ -620,7 +623,6 @@ export type Database = {
       }
       discovery_call_settings: {
         Row: {
-          availability_schedule: Json
           created_at: string
           discovery_call_availability_schedule: Json | null
           discovery_call_duration: number
@@ -631,7 +633,6 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          availability_schedule?: Json
           created_at?: string
           discovery_call_availability_schedule?: Json | null
           discovery_call_duration?: number
@@ -642,7 +643,6 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          availability_schedule?: Json
           created_at?: string
           discovery_call_availability_schedule?: Json | null
           discovery_call_duration?: number
