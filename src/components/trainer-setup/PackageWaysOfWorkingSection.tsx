@@ -356,27 +356,41 @@ export function PackageWaysOfWorkingSection({ formData }: PackageWaysOfWorkingSe
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-8">
-        <div className="text-sm text-muted-foreground">Loading package workflows...</div>
+      <div className="space-y-6">
+        <SectionHeader 
+          icons={[Package, Workflow]}
+          title="Package Ways of Working"
+          description="Define how you work with clients for each of your packages"
+        />
+        <div className="flex items-center justify-center p-8">
+          <div className="text-sm text-muted-foreground">Loading package workflows...</div>
+        </div>
       </div>
     );
   }
 
   if (packages.length === 0) {
     return (
-      <Card className="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950">
-        <CardContent className="p-6">
-          <div className="flex items-center gap-3">
-            <AlertCircle className="h-5 w-5 text-amber-600" />
-            <div>
-              <h3 className="font-medium text-amber-800 dark:text-amber-200">No packages configured</h3>
-              <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
-                You need to set up your packages in the "Rates & Discovery Calls" section before configuring ways of working.
-              </p>
+      <div className="space-y-6">
+        <SectionHeader 
+          icons={[Package, Workflow]}
+          title="Package Ways of Working"
+          description="Define how you work with clients for each of your packages"
+        />
+        <Card className="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="h-5 w-5 text-amber-600" />
+              <div>
+                <h3 className="font-medium text-amber-800 dark:text-amber-200">No packages configured</h3>
+                <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+                  You need to set up your packages in the "Rates & Discovery Calls" section before configuring ways of working.
+                </p>
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
