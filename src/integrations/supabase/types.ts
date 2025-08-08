@@ -2036,6 +2036,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      import_activities_from_ways_of_working: {
+        Args: { p_trainer_id?: string }
+        Returns: number
+      }
       initialize_client_onboarding: {
         Args: { p_client_id: string; p_trainer_id: string }
         Returns: undefined
