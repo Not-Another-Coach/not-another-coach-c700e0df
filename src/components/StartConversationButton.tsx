@@ -56,9 +56,12 @@ export function StartConversationButton({
 
     // Create the conversation
     const result = await createConversation(trainerId);
-    if (!result.error) {
-      toast.success(`Conversation started with ${trainerName || 'trainer'}!`);
+    if (result.error) {
+      toast.error('Failed to start conversation');
+      return;
     }
+    
+    toast.success(`Conversation started with ${trainerName || 'trainer'}!`);
   };
 
   // Don't show button if conversation already exists
