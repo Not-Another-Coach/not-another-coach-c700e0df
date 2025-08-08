@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useWaitlist } from '@/hooks/useWaitlist';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { Clock, Users, X } from 'lucide-react';
 
 interface WaitlistJoinButtonProps {
@@ -29,18 +30,35 @@ export function WaitlistJoinButton({
   const [isJoining, setIsJoining] = useState(false);
   const [isOnWaitlist, setIsOnWaitlist] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [availabilitySettings, setAvailabilitySettings] = useState<any>(null);
   const { joinWaitlist, removeFromWaitlist, checkClientWaitlistStatus } = useWaitlist();
   const { toast } = useToast();
 
   useEffect(() => {
-    const checkWaitlistStatus = async () => {
+    const fetchData = async () => {
       setIsLoading(true);
+      
+      // Fetch waitlist status
       const status = await checkClientWaitlistStatus(coachId);
       setIsOnWaitlist(!!status);
+      
+      // Fetch coach availability settings
+      try {
+        const { data: availabilityData } = await supabase
+          .from('coach_availability_settings')
+          .select('*')
+          .eq('coach_id', coachId)
+          .maybeSingle();
+        
+        setAvailabilitySettings(availabilityData);
+      } catch (error) {
+        console.error('Error fetching coach availability:', error);
+      }
+      
       setIsLoading(false);
     };
 
-    checkWaitlistStatus();
+    fetchData();
   }, [coachId, checkClientWaitlistStatus]);
 
   const handleJoinWaitlist = async () => {
@@ -198,12 +216,12 @@ export function WaitlistJoinButton({
             <>
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Clock className="w-4 h-4" />
-                <span>Next slots available: {formatDate(nextAvailableDate)}</span>
+                <span>Next slots available: {formatDate(availabilitySettings?.next_available_date || nextAvailableDate)}</span>
               </div>
               
-              {waitlistMessage && (
+              {(availabilitySettings?.waitlist_message || waitlistMessage) && (
                 <div className="p-3 bg-muted rounded-lg">
-                  <p className="text-sm">{waitlistMessage}</p>
+                  <p className="text-sm">{availabilitySettings?.waitlist_message || waitlistMessage}</p>
                 </div>
               )}
               
