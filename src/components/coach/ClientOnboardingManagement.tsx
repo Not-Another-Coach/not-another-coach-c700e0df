@@ -14,6 +14,7 @@ import { Switch } from '@/components/ui/switch';
 import { useTrainerOnboarding, OnboardingTemplate, ClientOnboardingData } from '@/hooks/useTrainerOnboarding';
 import { usePackageWaysOfWorking } from '@/hooks/usePackageWaysOfWorking';
 import { toast } from 'sonner';
+import { useTrainerActivities } from '@/hooks/useTrainerActivities';
 
 export function ClientOnboardingManagement() {
   const { 
@@ -24,6 +25,7 @@ export function ClientOnboardingManagement() {
   } = useTrainerOnboarding();
   
   const { packageWorkflows, loading: workflowsLoading } = usePackageWaysOfWorking();
+  const { activities, loading: activitiesLoading, error: activitiesError, refresh: refreshActivities } = useTrainerActivities();
   
   const [newTemplate, setNewTemplate] = useState<Partial<OnboardingTemplate>>({
     step_name: '',
@@ -259,73 +261,39 @@ export function ClientOnboardingManagement() {
               </Button>
             </div>
             
-            <div className="grid gap-4">
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-medium">Free 15-min Discovery Call</h4>
-                        <Badge variant="secondary">Initial Contact</Badge>
+            {activitiesLoading ? (
+              <div className="text-sm text-muted-foreground py-8">Loading activities...</div>
+            ) : activitiesError ? (
+              <div className="text-sm text-destructive py-8">{activitiesError}</div>
+            ) : activities.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">No activities yet.</div>
+            ) : (
+              <div className="grid gap-4">
+                {activities.map((a, idx) => (
+                  <Card key={idx}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-medium">{a.activity_name}</h4>
+                            <Badge variant="outline">{a.category}</Badge>
+                            {a.is_system && (
+                              <Badge variant="secondary">System</Badge>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button variant="outline" size="sm">Assign</Button>
+                          <Button variant="ghost" size="sm" disabled={a.is_system}>
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Brief consultation to understand client goals and determine fit
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm">Assign</Button>
-                      <Button variant="ghost" size="sm">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-medium">Complete Health & Fitness Assessment</h4>
-                        <Badge variant="default">Mandatory</Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Comprehensive health screening and fitness level evaluation
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm">Assign</Button>
-                      <Button variant="ghost" size="sm">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-medium">Goal Setting Session</h4>
-                        <Badge variant="default">Mandatory</Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Define SMART goals and create personalized training plan
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm">Assign</Button>
-                      <Button variant="ghost" size="sm">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="templates" className="space-y-4">

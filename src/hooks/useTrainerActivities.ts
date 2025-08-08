@@ -60,5 +60,6 @@ export function useTrainerActivities() {
     error,
     refresh: fetchAll,
     getSuggestionsBySection,
+    activities,
   };
 }
