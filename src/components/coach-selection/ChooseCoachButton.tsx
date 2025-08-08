@@ -163,10 +163,8 @@ export const ChooseCoachButton = ({
           packagePrice={selectionRequest?.package_price || 0}
           packageDuration={selectionRequest?.package_duration || ''}
           trainerName={trainer.name || `${trainer.firstName || ''} ${trainer.lastName || ''}`.trim()}
-          onPaymentSuccess={async () => {
-            await updateEngagementStage('active_client');
-            handleSuccess();
-          }}
+          trainerId={trainer.id}
+          onPaymentSuccess={handleSuccess}
         />
       </div>
     );
@@ -198,10 +196,8 @@ export const ChooseCoachButton = ({
         packagePrice={selectionRequest?.package_price || 0}
         packageDuration={selectionRequest?.package_duration || ''}
         trainerName={trainer.name || `${trainer.firstName || ''} ${trainer.lastName || ''}`.trim()}
-        onPaymentSuccess={async () => {
-          await updateEngagementStage('active_client');
-          handleSuccess();
-        }}
+        trainerId={trainer.id}
+        onPaymentSuccess={handleSuccess}
       />
     </div>
   );

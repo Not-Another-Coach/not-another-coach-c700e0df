@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { CreditCard, Lock, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useManualPaymentCompletion } from '@/hooks/useManualPaymentCompletion';
 
 interface PaymentFormProps {
   open: boolean;
@@ -15,6 +16,8 @@ interface PaymentFormProps {
   packagePrice: number;
   packageDuration: string;
   trainerName: string;
+  trainerId?: string;
+  clientId?: string;
   onPaymentSuccess?: () => void;
 }
 
@@ -25,9 +28,12 @@ export const PaymentForm = ({
   packagePrice,
   packageDuration,
   trainerName,
+  trainerId,
+  clientId,
   onPaymentSuccess
 }: PaymentFormProps) => {
   const { toast } = useToast();
+  const { completePayment } = useManualPaymentCompletion();
   const [processing, setProcessing] = useState(false);
   const [cardNumber, setCardNumber] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
@@ -41,6 +47,14 @@ export const PaymentForm = ({
       // Simulate payment processing
       await new Promise(resolve => setTimeout(resolve, 2000));
       
+      // Complete the payment manually (update database status)
+      if (trainerId) {
+        const result = await completePayment(trainerId, clientId);
+        if (result.error) {
+          throw new Error(result.error);
+        }
+      }
+      
       toast({
         title: "Payment Successful!",
         description: `Your onboarding with ${trainerName} is about to begin.`,
@@ -48,10 +62,10 @@ export const PaymentForm = ({
       
       onPaymentSuccess?.();
       onOpenChange(false);
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Payment Failed",
-        description: "There was an issue processing your payment. Please try again.",
+        description: error.message || "There was an issue processing your payment. Please try again.",
         variant: "destructive"
       });
     } finally {
