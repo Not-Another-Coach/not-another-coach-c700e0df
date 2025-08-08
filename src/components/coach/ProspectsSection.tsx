@@ -272,8 +272,22 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
                       </Badge>
                     )}
                     {prospect.selection_request && (
-                      <Badge variant="outline" className="bg-green-50 text-green-700">
-                        Coach Chosen - {prospect.selection_request.package_name}
+                      <Badge 
+                        variant="outline" 
+                        className={
+                          prospect.selection_request.status === 'awaiting_payment'
+                            ? "bg-orange-50 text-orange-700 border-orange-300"
+                            : prospect.selection_request.status === 'accepted'
+                            ? "bg-green-50 text-green-700 border-green-300"
+                            : "bg-blue-50 text-blue-700 border-blue-300"
+                        }
+                      >
+                        {prospect.selection_request.status === 'awaiting_payment' 
+                          ? `Awaiting Payment - ${prospect.selection_request.package_name}`
+                          : prospect.selection_request.status === 'accepted'
+                          ? `Coach Chosen - ${prospect.selection_request.package_name}`
+                          : `Package Requested - ${prospect.selection_request.package_name}`
+                        }
                       </Badge>
                     )}
                   </div>
