@@ -297,11 +297,11 @@ export function useMyTrainers(refreshTrigger?: number) {
     fetchTrainerData();
   }, [user, trainerIds, getLikedTrainers, getOnlyShortlistedTrainers, getDiscoveryStageTrainers, getMatchedTrainers, hasActiveDiscoveryCall, conversations]);
 
-  // Fetch availability data for shortlisted trainers
+  // Fetch availability data for shortlisted and discovery trainers
   useEffect(() => {
     const fetchAvailabilityData = async () => {
-      const shortlistedTrainers = trainers.filter(t => t.status === 'shortlisted');
-      const trainerIds = shortlistedTrainers.map(t => t.id);
+      const relevantTrainers = trainers.filter(t => t.status === 'shortlisted' || t.status === 'discovery');
+      const trainerIds = relevantTrainers.map(t => t.id);
       
       if (trainerIds.length === 0) return;
 
