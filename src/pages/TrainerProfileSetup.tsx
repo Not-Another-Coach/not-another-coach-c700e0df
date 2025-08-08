@@ -697,9 +697,7 @@ const TrainerProfileSetup = () => {
             })()}
           </div>
           <div>
-            <p className="text-sm text-muted-foreground">
-              {isFullyComplete() ? `Step ${currentStep} of ${totalSteps}: ${stepTitles[currentStep - 1]}` : `Step ${currentStep} of ${totalSteps}: ${stepTitles[currentStep - 1]}`}
-            </p>
+            {/* Remove step indicator since each tab now has its own header */}
           </div>
         </div>
         <div className="flex items-center gap-2">

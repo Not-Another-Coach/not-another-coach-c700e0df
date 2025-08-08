@@ -6,9 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, X, Eye, EyeOff, Info, Package, AlertCircle } from "lucide-react";
+import { Plus, X, Eye, EyeOff, Info, Package, AlertCircle, Settings, Workflow } from "lucide-react";
 import { usePackageWaysOfWorking, PackageWaysOfWorking } from "@/hooks/usePackageWaysOfWorking";
 import { useToast } from "@/hooks/use-toast";
+import { SectionHeader } from "./SectionHeader";
 
 interface PackageWaysOfWorkingSectionProps {
   formData: any;
@@ -380,7 +381,13 @@ export function PackageWaysOfWorkingSection({ formData }: PackageWaysOfWorkingSe
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      <SectionHeader 
+        icons={[Package, Workflow]}
+        title="Package Ways of Working"
+        description="Define how you work with clients for each of your packages"
+      />
+      
       {/* Package Selection */}
       <Card>
         <CardContent className="p-4">

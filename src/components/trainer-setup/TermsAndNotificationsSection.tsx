@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Bell, Eye, CheckCircle, FileText } from "lucide-react";
 import { TrainerProfilePreview } from "@/components/TrainerProfilePreview";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { SectionHeader } from "./SectionHeader";
 
 interface TermsAndNotificationsSectionProps {
   formData: any;
@@ -16,172 +17,165 @@ interface TermsAndNotificationsSectionProps {
 export function TermsAndNotificationsSection({ formData, updateFormData }: TermsAndNotificationsSectionProps) {
   return (
     <div className="space-y-6">
-      <div className="text-center space-y-2">
-        <div className="flex items-center justify-center gap-2 text-primary">
-          <Bell className="w-6 h-6" />
-          <FileText className="w-6 h-6" />
-        </div>
-        <h2 className="text-2xl font-bold">T&Cs and Notifications</h2>
-        <p className="text-muted-foreground">
-          Configure your preferences and complete your profile setup
-        </p>
-      </div>
+      <SectionHeader 
+        icons={[Bell, FileText]}
+        title="T&Cs and Notifications"
+        description="Configure your preferences and complete your profile setup"
+      />
 
       {/* Notification Preferences */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Bell className="w-5 h-5 text-primary" />
-          <Label className="text-lg font-semibold">Notification Preferences</Label>
-        </div>
-        <Card>
-          <CardContent className="p-4 space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Profile Views</p>
-                <p className="text-sm text-muted-foreground">
-                  Get notified when potential clients view your profile
-                </p>
-              </div>
-              <Switch
-                checked={formData.notify_profile_views || false}
-                onCheckedChange={(checked) => updateFormData({ notify_profile_views: checked })}
-              />
+      <Card className="border-muted bg-muted/20">
+        <CardContent className="p-6 space-y-4">
+          <div className="flex items-center gap-2 mb-4">
+            <Bell className="w-5 h-5 text-primary" />
+            <Label className="text-lg font-semibold">Notification Preferences</Label>
+          </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium">Profile Views</p>
+              <p className="text-sm text-muted-foreground">
+                Get notified when potential clients view your profile
+              </p>
             </div>
+            <Switch
+              checked={formData.notify_profile_views || false}
+              onCheckedChange={(checked) => updateFormData({ notify_profile_views: checked })}
+            />
+          </div>
 
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">New Messages</p>
-                <p className="text-sm text-muted-foreground">
-                  Instant notifications for new client inquiries
-                </p>
-              </div>
-              <Switch
-                checked={formData.notify_messages || true}
-                onCheckedChange={(checked) => updateFormData({ notify_messages: checked })}
-              />
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium">New Messages</p>
+              <p className="text-sm text-muted-foreground">
+                Instant notifications for new client inquiries
+              </p>
             </div>
+            <Switch
+              checked={formData.notify_messages || true}
+              onCheckedChange={(checked) => updateFormData({ notify_messages: checked })}
+            />
+          </div>
 
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Match Insights</p>
-                <p className="text-sm text-muted-foreground">
-                  Weekly summary of profile performance and matches
-                </p>
-              </div>
-              <Switch
-                checked={formData.notify_insights || true}
-                onCheckedChange={(checked) => updateFormData({ notify_insights: checked })}
-              />
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium">Match Insights</p>
+              <p className="text-sm text-muted-foreground">
+                Weekly summary of profile performance and matches
+              </p>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+            <Switch
+              checked={formData.notify_insights || true}
+              onCheckedChange={(checked) => updateFormData({ notify_insights: checked })}
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Profile Preview */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <Eye className="w-5 h-5 text-primary" />
-          <Label className="text-lg font-semibold">View Profile</Label>
-        </div>
-        <Card className="border-blue-200 bg-blue-50">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3 mb-3">
-              <Eye className="h-5 w-5 text-blue-600" />
-              <p className="font-medium text-blue-900">Preview Your Profile</p>
-            </div>
-            <p className="text-sm text-blue-700 mb-3">
-              See how your profile appears to potential clients before going live.
-            </p>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="border-blue-300 text-blue-700 hover:bg-blue-100">
-                  <Eye className="h-4 w-4 mr-2" />
-                  Preview Profile
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>Profile Preview</DialogTitle>
-                </DialogHeader>
-                <TrainerProfilePreview formData={formData} />
-              </DialogContent>
-            </Dialog>
-          </CardContent>
-        </Card>
-      </div>
+      <Card className="border-muted bg-muted/20">
+        <CardContent className="p-6 space-y-4">
+          <div className="flex items-center gap-2 mb-4">
+            <Eye className="w-5 h-5 text-primary" />
+            <Label className="text-lg font-semibold">View Profile</Label>
+          </div>
+          <Card className="border-blue-200 bg-blue-50">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <Eye className="h-5 w-5 text-blue-600" />
+                <p className="font-medium text-blue-900">Preview Your Profile</p>
+              </div>
+              <p className="text-sm text-blue-700 mb-3">
+                See how your profile appears to potential clients before going live.
+              </p>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="border-blue-300 text-blue-700 hover:bg-blue-100">
+                    <Eye className="h-4 w-4 mr-2" />
+                    Preview Profile
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Profile Preview</DialogTitle>
+                  </DialogHeader>
+                  <TrainerProfilePreview formData={formData} />
+                </DialogContent>
+              </Dialog>
+            </CardContent>
+          </Card>
+        </CardContent>
+      </Card>
 
       {/* Final Agreement */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <FileText className="w-5 h-5 text-primary" />
-          <Label className="text-lg font-semibold">Final Agreement</Label>
-        </div>
-        <Card>
-          <CardContent className="p-4 space-y-4">
-            <div className="flex items-start space-x-2">
-              <Checkbox
-                id="terms"
-                checked={formData.terms_agreed || false}
-                onCheckedChange={(checked) => updateFormData({ terms_agreed: checked })}
-              />
-              <div className="space-y-1 leading-none">
-                <Label
-                  htmlFor="terms"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  I agree to the Terms of Service and Community Guidelines *
-                </Label>
-                <p className="text-xs text-muted-foreground">
-                  By completing your profile, you agree to provide accurate information and maintain professional standards.
-                  <Button variant="link" className="h-auto p-0 text-xs ml-1">
-                    Read full terms
-                  </Button>
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start space-x-2">
-              <Checkbox
-                id="accuracy"
-                checked={formData.accuracy_confirmed || false}
-                onCheckedChange={(checked) => updateFormData({ accuracy_confirmed: checked })}
-              />
-              <div className="space-y-1 leading-none">
-                <Label
-                  htmlFor="accuracy"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Information Accuracy Confirmation *
-                </Label>
-                <p className="text-xs text-muted-foreground">
-                  I confirm that all information provided is accurate and up-to-date.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Ready to Go Live */}
-      <Card className="border-green-200 bg-green-50">
-        <CardContent className="p-4">
-          <div className="flex items-start gap-3">
-            <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
-            <div>
-              <p className="font-medium text-green-900 mb-2">
-                🎉 Ready to Go Live!
-              </p>
-              <div className="space-y-1 text-sm text-green-700">
-                <p>✅ Profile information complete</p>
-                <p>✅ Qualifications verified (pending admin review)</p>
-                <p>✅ Rates and availability set</p>
-                <p>✅ Terms agreed</p>
-              </div>
-              <p className="text-xs text-green-600 mt-2">
-                Once you complete this step, your profile will be live and visible to potential clients!
+      <Card className="border-muted bg-muted/20">
+        <CardContent className="p-6 space-y-4">
+          <div className="flex items-center gap-2 mb-4">
+            <FileText className="w-5 h-5 text-primary" />
+            <Label className="text-lg font-semibold">Final Agreement</Label>
+          </div>
+          <div className="flex items-start space-x-2">
+            <Checkbox
+              id="terms"
+              checked={formData.terms_agreed || false}
+              onCheckedChange={(checked) => updateFormData({ terms_agreed: checked })}
+            />
+            <div className="space-y-1 leading-none">
+              <Label
+                htmlFor="terms"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                I agree to the Terms of Service and Community Guidelines *
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                By completing your profile, you agree to provide accurate information and maintain professional standards.
+                <Button variant="link" className="h-auto p-0 text-xs ml-1">
+                  Read full terms
+                </Button>
               </p>
             </div>
           </div>
+
+          <div className="flex items-start space-x-2">
+            <Checkbox
+              id="accuracy"
+              checked={formData.accuracy_confirmed || false}
+              onCheckedChange={(checked) => updateFormData({ accuracy_confirmed: checked })}
+            />
+            <div className="space-y-1 leading-none">
+              <Label
+                htmlFor="accuracy"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Information Accuracy Confirmation *
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                I confirm that all information provided is accurate and up-to-date.
+              </p>
+            </div>
+          </div>
+
+          {/* Ready to Go Live */}
+          <Card className="border-green-200 bg-green-50">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                <div>
+                  <p className="font-medium text-green-900 mb-2">
+                    🎉 Ready to Go Live!
+                  </p>
+                  <div className="space-y-1 text-sm text-green-700">
+                    <p>✅ Profile information complete</p>
+                    <p>✅ Qualifications verified (pending admin review)</p>
+                    <p>✅ Rates and availability set</p>
+                    <p>✅ Terms agreed</p>
+                  </div>
+                  <p className="text-xs text-green-600 mt-2">
+                    Once you complete this step, your profile will be live and visible to potential clients!
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </CardContent>
       </Card>
     </div>
