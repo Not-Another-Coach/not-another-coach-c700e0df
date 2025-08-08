@@ -212,7 +212,11 @@ export default function MyTrainers() {
 
   const handleBookDiscoveryCall = async (trainerId: string) => {
     console.log('🔥 Book discovery call clicked:', trainerId);
-    setSelectedTrainerForCall(trainerId);
+    // Use the same booking logic as shortlisted trainers to ensure engagement stage is updated
+    const result = await bookDiscoveryCall(trainerId);
+    if (!result.error) {
+      setSelectedTrainerForCall(trainerId);
+    }
   };
 
   const handleViewProfile = (trainerId: string) => {
