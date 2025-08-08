@@ -202,19 +202,20 @@ export function WaitlistJoinButton({
               
               <div className="flex gap-2">
                 <Button
+                  variant="outline"
+                  onClick={() => setIsOpen(false)}
+                  disabled={isJoining}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
                   onClick={handleRemoveFromWaitlist}
                   disabled={isJoining}
                   variant="destructive"
                   className="flex-1"
                 >
                   {isJoining ? 'Removing...' : 'Remove from Waitlist'}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setIsOpen(false)}
-                  disabled={isJoining}
-                >
-                  Cancel
                 </Button>
               </div>
             </div>
