@@ -16,6 +16,7 @@ import { ProspectsSection } from "@/components/coach/ProspectsSection";
 import { FloatingMessageButton } from "@/components/FloatingMessageButton";
 import { LiveActivityFeed } from "@/components/dashboard/LiveActivityFeed";
 import { UpcomingSessionsWidget } from "@/components/dashboard/UpcomingSessionsWidget";
+import { CoachExclusivityEndedAlert } from "@/components/dashboard/CoachExclusivityEndedAlert";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -290,6 +291,9 @@ const TrainerDashboard = () => {
         {/* Content based on active view */}
         {activeView === 'dashboard' && (
           <div className="space-y-8">
+            
+            {/* Exclusive Period Alerts */}
+            <CoachExclusivityEndedAlert />
             
             {/* 1. Quick Actions - Right after header */}
             <Card>

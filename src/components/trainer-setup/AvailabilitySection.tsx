@@ -1,4 +1,6 @@
 import { useWaitlist } from "@/hooks/useWaitlist";
+import { useWaitlistExclusive } from '@/hooks/useWaitlistExclusive';
+import { WaitlistExclusivePrompt } from '@/components/coach/WaitlistExclusivePrompt';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -8,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle, Clock, Pause, Calendar, Users } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from '@/hooks/useAuth';
 
 interface AvailabilitySectionProps {
   formData: any;
@@ -15,7 +18,9 @@ interface AvailabilitySectionProps {
 }
 
 export function AvailabilitySection({ formData, updateFormData }: AvailabilitySectionProps) {
-  const { availabilitySettings, updateAvailabilitySettings, loading } = useWaitlist();
+  const { user } = useAuth();
+  const { availabilitySettings, updateAvailabilitySettings, loading, waitlistEntries } = useWaitlist();
+  const { startExclusivePeriod } = useWaitlistExclusive();
   const { toast } = useToast();
   const [availabilityStatus, setAvailabilityStatus] = useState('accepting');
   const [nextAvailableDate, setNextAvailableDate] = useState('');
@@ -23,6 +28,8 @@ export function AvailabilitySection({ formData, updateFormData }: AvailabilitySe
   const [autoFollowUpDays, setAutoFollowUpDays] = useState(14);
   const [waitlistMessage, setWaitlistMessage] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [showWaitlistPrompt, setShowWaitlistPrompt] = useState(false);
+  const [pendingAvailabilityChange, setPendingAvailabilityChange] = useState<string | null>(null);
 
   // Initialize state from availability settings
   useEffect(() => {
@@ -34,6 +41,40 @@ export function AvailabilitySection({ formData, updateFormData }: AvailabilitySe
       setWaitlistMessage(availabilitySettings.waitlist_message || '');
     }
   }, [availabilitySettings]);
+
+  const getWaitlistCount = () => {
+    return waitlistEntries.filter(entry => entry.status === 'active').length;
+  };
+
+  const handleAvailabilityStatusChange = (newStatus: string) => {
+    const currentStatus = availabilityStatus;
+    const waitlistCount = getWaitlistCount();
+
+    // Check if changing from waitlist to accepting and there are waitlist clients
+    if (currentStatus === 'waitlist' && newStatus === 'accepting' && waitlistCount > 0) {
+      setPendingAvailabilityChange(newStatus);
+      setShowWaitlistPrompt(true);
+    } else {
+      setAvailabilityStatus(newStatus);
+    }
+  };
+
+  const handleWaitlistPromptResponse = async (offerToWaitlist: boolean) => {
+    if (!pendingAvailabilityChange || !user?.id) return;
+
+    if (offerToWaitlist) {
+      // Start exclusive period and update status
+      const result = await startExclusivePeriod(user.id);
+      if (result.success) {
+        setAvailabilityStatus(pendingAvailabilityChange);
+      }
+    } else {
+      // Just update the status normally
+      setAvailabilityStatus(pendingAvailabilityChange);
+    }
+
+    setPendingAvailabilityChange(null);
+  };
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -156,7 +197,7 @@ export function AvailabilitySection({ formData, updateFormData }: AvailabilitySe
                     ? 'border-green-500 bg-green-50'
                     : 'border-gray-200 hover:border-green-300'
                 }`}
-                onClick={() => setAvailabilityStatus('accepting')}
+                onClick={() => handleAvailabilityStatusChange('accepting')}
               >
                 <div className="flex items-center gap-3 mb-2">
                   <CheckCircle className="h-5 w-5 text-green-600" />
@@ -174,7 +215,7 @@ export function AvailabilitySection({ formData, updateFormData }: AvailabilitySe
                     ? 'border-amber-500 bg-amber-50'
                     : 'border-gray-200 hover:border-amber-300'
                 }`}
-                onClick={() => setAvailabilityStatus('waitlist')}
+                onClick={() => handleAvailabilityStatusChange('waitlist')}
               >
                 <div className="flex items-center gap-3 mb-2">
                   <Clock className="h-5 w-5 text-amber-600" />
@@ -192,7 +233,7 @@ export function AvailabilitySection({ formData, updateFormData }: AvailabilitySe
                     ? 'border-red-500 bg-red-50'
                     : 'border-gray-200 hover:border-red-300'
                 }`}
-                onClick={() => setAvailabilityStatus('unavailable')}
+                onClick={() => handleAvailabilityStatusChange('unavailable')}
               >
                 <div className="flex items-center gap-3 mb-2">
                   <Pause className="h-5 w-5 text-red-600" />
@@ -279,6 +320,17 @@ export function AvailabilitySection({ formData, updateFormData }: AvailabilitySe
           </Button>
         </CardContent>
       </Card>
+
+      <WaitlistExclusivePrompt
+        isOpen={showWaitlistPrompt}
+        onClose={() => {
+          setShowWaitlistPrompt(false);
+          setPendingAvailabilityChange(null);
+        }}
+        onConfirm={handleWaitlistPromptResponse}
+        waitlistCount={getWaitlistCount()}
+        trainerName={user?.id || 'Coach'}
+      />
     </div>
   );
 }

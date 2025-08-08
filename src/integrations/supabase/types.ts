@@ -199,6 +199,8 @@ export type Database = {
           id: string
           next_available_date: string | null
           updated_at: string
+          waitlist_exclusive_active: boolean | null
+          waitlist_exclusive_until: string | null
           waitlist_message: string | null
         }
         Insert: {
@@ -211,6 +213,8 @@ export type Database = {
           id?: string
           next_available_date?: string | null
           updated_at?: string
+          waitlist_exclusive_active?: boolean | null
+          waitlist_exclusive_until?: string | null
           waitlist_message?: string | null
         }
         Update: {
@@ -223,6 +227,8 @@ export type Database = {
           id?: string
           next_available_date?: string | null
           updated_at?: string
+          waitlist_exclusive_active?: boolean | null
+          waitlist_exclusive_until?: string | null
           waitlist_message?: string | null
         }
         Relationships: []
@@ -1654,6 +1660,36 @@ export type Database = {
         }
         Relationships: []
       }
+      waitlist_exclusive_periods: {
+        Row: {
+          coach_id: string
+          created_at: string
+          expires_at: string
+          id: string
+          is_active: boolean
+          started_at: string
+          updated_at: string
+        }
+        Insert: {
+          coach_id: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          is_active?: boolean
+          started_at?: string
+          updated_at?: string
+        }
+        Update: {
+          coach_id?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          is_active?: boolean
+          started_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       waitlist_interactions: {
         Row: {
           completed_at: string | null
@@ -1704,8 +1740,16 @@ export type Database = {
         Args: { p_client_id: string; p_trainer_id: string }
         Returns: Json
       }
+      auto_end_expired_exclusive_periods: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       client_has_sent_first_message: {
         Args: { conversation_uuid: string; client_uuid: string }
+        Returns: boolean
+      }
+      client_has_waitlist_exclusive_access: {
+        Args: { p_client_id: string; p_coach_id: string }
         Returns: boolean
       }
       create_coach_selection_request: {
@@ -1718,6 +1762,10 @@ export type Database = {
           p_client_message?: string
         }
         Returns: string
+      }
+      end_waitlist_exclusive_period: {
+        Args: { p_coach_id: string }
+        Returns: undefined
       }
       get_content_visibility: {
         Args: {
@@ -1806,6 +1854,10 @@ export type Database = {
       revert_waitlist_client_conversion: {
         Args: { p_client_id: string; p_trainer_id: string }
         Returns: boolean
+      }
+      start_waitlist_exclusive_period: {
+        Args: { p_coach_id: string; p_duration_hours?: number }
+        Returns: string
       }
       suspend_user: {
         Args: { p_user_id: string; p_reason: string; p_duration_days?: number }

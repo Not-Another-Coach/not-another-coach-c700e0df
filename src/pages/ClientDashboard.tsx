@@ -19,6 +19,7 @@ import { ClientJourneyBreadcrumb } from "@/components/ClientJourneyBreadcrumb";
 import { DiscoveryCallFeedbackPrompt } from "@/components/dashboard/DiscoveryCallFeedbackPrompt";
 import { useClientJourneyProgress } from "@/hooks/useClientJourneyProgress";
 import { ClientHeader } from "@/components/ClientHeader";
+import { WaitlistExclusiveAccessWidget } from "@/components/dashboard/WaitlistExclusiveAccessWidget";
 import { Heart, Settings, Search, MessageCircle, Menu, Users, Shuffle, Shield, ChevronRight, Home, User, UserSearch } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -133,6 +134,9 @@ export default function ClientDashboard() {
           {/* Tab Content */}
           {activeTab === "summary" && (
             <div className="space-y-6">
+              {/* Waitlist Exclusive Access */}
+              <WaitlistExclusiveAccessWidget />
+              
               {/* Discovery Call Feedback Prompts */}
               {completedDiscoveryCalls.length > 0 && (
                 <DiscoveryCallFeedbackPrompt 

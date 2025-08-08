@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useToast } from './use-toast';
+import { useWaitlist } from '@/hooks/useWaitlist';
 
 interface WeeklySchedule {
   [key: string]: {
@@ -22,6 +23,8 @@ interface CoachAvailabilitySettings {
   auto_follow_up_days: number;
   waitlist_message?: string;
   availability_schedule: WeeklySchedule;
+  waitlist_exclusive_until?: string;
+  waitlist_exclusive_active?: boolean;
 }
 
 export function useCoachAvailability() {
@@ -30,6 +33,7 @@ export function useCoachAvailability() {
   const [saving, setSaving] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { waitlistEntries } = useWaitlist();
 
   useEffect(() => {
     if (user) {
@@ -137,11 +141,16 @@ export function useCoachAvailability() {
     }
   };
 
+  const getWaitlistCount = useCallback(() => {
+    return waitlistEntries.filter(entry => entry.status === 'active').length;
+  }, [waitlistEntries]);
+
   return {
     settings,
     loading,
     saving,
     updateSettings,
-    refetch: fetchSettings
+    refetch: fetchSettings,
+    getWaitlistCount
   };
 }
