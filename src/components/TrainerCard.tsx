@@ -277,7 +277,7 @@ export const TrainerCard = ({
               </Button>
             )}
             
-            {/* Management dropdown - only show for shortlisted/discovery trainers */}
+            {/* Management dropdown - only show for shortlisted/discovery trainers, never for declined */}
             {(cardState === 'shortlisted' || cardState === 'discovery') && (onMoveToSaved || onRemoveCompletely) && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

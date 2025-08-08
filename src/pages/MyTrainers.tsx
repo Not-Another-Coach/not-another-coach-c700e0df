@@ -686,7 +686,7 @@ export default function MyTrainers() {
                 onBookDiscoveryCall={handleBookDiscoveryCall}
                 waitlistRefreshKey={waitlistRefreshKey}
                 onMoveToSaved={handleMoveToSaved}
-                onRemoveCompletely={handleRemoveCompletely}
+                onRemoveCompletely={trainerData.status !== 'declined' ? handleRemoveCompletely : undefined}
               />
               
               
