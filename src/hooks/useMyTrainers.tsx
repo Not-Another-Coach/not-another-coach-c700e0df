@@ -64,7 +64,7 @@ export function useMyTrainers(refreshTrigger?: number) {
       }
 
       try {
-        // Single query with proper join syntax
+        // Single query with proper join syntax for complete discovery call data
         const { data: trainerData, error } = await supabase
           .from('profiles')
           .select(`
@@ -82,7 +82,10 @@ export function useMyTrainers(refreshTrigger?: number) {
             qualifications,
             package_options,
             discovery_call_settings!inner(
-              offers_discovery_call
+              offers_discovery_call,
+              discovery_call_availability_schedule,
+              discovery_call_duration,
+              prep_notes
             )
           `)
           .eq('user_type', 'trainer')

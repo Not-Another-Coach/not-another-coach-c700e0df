@@ -66,6 +66,7 @@ export function useDiscoveryCallBooking() {
   };
 
   const getTrainerSettings = async (trainerId: string) => {
+    console.log('🔍 Fetching trainer settings for booking modal, trainerId:', trainerId);
     try {
       const { data, error } = await supabase
         .from('discovery_call_settings')
@@ -75,13 +76,14 @@ export function useDiscoveryCallBooking() {
         .maybeSingle();
 
       if (error) {
-        console.error('Error fetching trainer settings:', error);
+        console.error('❌ Error fetching trainer settings:', error);
         return null;
       }
 
+      console.log('✅ Trainer settings fetched for booking:', data);
       return data;
     } catch (error) {
-      console.error('Error fetching trainer settings:', error);
+      console.error('❌ Error fetching trainer settings:', error);
       return null;
     }
   };
