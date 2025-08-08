@@ -25,7 +25,7 @@ export interface TrainerWithStatus {
   offers_discovery_call: boolean;
   package_options?: any[];
   // Status fields
-  status: 'saved' | 'shortlisted' | 'discovery';
+  status: 'saved' | 'shortlisted' | 'discovery' | 'declined';
   engagement?: any;
   statusLabel: string;
   statusColor: string;
@@ -42,7 +42,8 @@ export function useMyTrainers(refreshTrigger?: number) {
     getLikedTrainers,
     getOnlyShortlistedTrainers,
     getDiscoveryStageTrainers,
-    getMatchedTrainers
+    getMatchedTrainers,
+    engagements: allEngagements
   } = useTrainerEngagement(refreshTrigger);
   
   const [trainers, setTrainers] = useState<TrainerWithStatus[]>([]);
@@ -261,6 +262,28 @@ export function useMyTrainers(refreshTrigger?: number) {
           }
         });
 
+        // Process declined trainers
+        const declinedTrainers = allEngagements.filter(engagement => engagement.stage === 'declined');
+        declinedTrainers.forEach(engagement => {
+          const trainerProfile = trainerData?.find(t => t.id === engagement.trainerId);
+          if (trainerProfile) {
+            const existingIndex = trainersWithStatus.findIndex(t => t.id === engagement.trainerId);
+            const trainerObj = {
+              ...createTrainerObject(trainerProfile),
+              status: 'declined' as const,
+              engagement,
+              statusLabel: 'Declined',
+              statusColor: 'bg-red-100 text-red-800'
+            };
+            
+            if (existingIndex >= 0) {
+              trainersWithStatus[existingIndex] = trainerObj;
+            } else {
+              trainersWithStatus.push(trainerObj);
+            }
+          }
+        });
+
         setTrainers(trainersWithStatus);
         console.log('✅ MyTrainers: Loaded', trainersWithStatus.length, 'trainers with status');
         
@@ -313,7 +336,7 @@ export function useMyTrainers(refreshTrigger?: number) {
 
   // Filter trainers by status
   const filteredTrainers = useMemo(() => {
-    return (filter: 'all' | 'saved' | 'shortlisted' | 'discovery') => {
+    return (filter: 'all' | 'saved' | 'shortlisted' | 'discovery' | 'declined') => {
       if (filter === 'all') return trainers;
       return trainers.filter(t => t.status === filter);
     };
@@ -324,7 +347,8 @@ export function useMyTrainers(refreshTrigger?: number) {
     all: trainers.length,
     saved: trainers.filter(t => t.status === 'saved').length,
     shortlisted: trainers.filter(t => t.status === 'shortlisted').length,
-    discovery: trainers.filter(t => t.status === 'discovery').length
+    discovery: trainers.filter(t => t.status === 'discovery').length,
+    declined: trainers.filter(t => t.status === 'declined').length
   }), [trainers]);
 
   return {

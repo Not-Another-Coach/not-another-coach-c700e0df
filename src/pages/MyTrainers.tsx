@@ -92,7 +92,7 @@ export default function MyTrainers() {
   const { getCoachAvailability, checkClientWaitlistStatus, joinWaitlist, removeFromWaitlist } = useWaitlist();
 
   // State for filtering and UI
-  const [activeFilter, setActiveFilter] = useState<'all' | 'saved' | 'shortlisted' | 'discovery'>('all');
+  const [activeFilter, setActiveFilter] = useState<'all' | 'saved' | 'shortlisted' | 'discovery' | 'declined'>('all');
   const [waitlistRefreshKey, setWaitlistRefreshKey] = useState(0);
   const [selectedForComparison, setSelectedForComparison] = useState<string[]>([]);
   const [showComparison, setShowComparison] = useState(false);
@@ -529,6 +529,33 @@ export default function MyTrainers() {
             </div>
           );
 
+      case 'declined':
+        return (
+          <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-2">
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={() => handleMoveToSaved(trainer.id)}
+                title="Move trainer back to saved list"
+              >
+                <Heart className="h-3 w-3 mr-1" />
+                Re-save
+              </Button>
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={() => handleRemoveCompletely(trainer.id)}
+                className="text-red-600 hover:text-red-700"
+                title="Remove trainer completely"
+              >
+                <X className="h-3 w-3 mr-1" />
+                Remove
+              </Button>
+            </div>
+          </div>
+        );
+
       default:
         return null;
     }
@@ -587,7 +614,7 @@ export default function MyTrainers() {
       {/* Filter Tabs */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-6">
         <Tabs value={activeFilter} onValueChange={(value: any) => setActiveFilter(value)} className="w-full sm:w-auto">
-          <TabsList className="grid w-full sm:w-auto grid-cols-4">
+          <TabsList className="grid w-full sm:w-auto grid-cols-5">
             <TabsTrigger value="all" className="flex items-center gap-2">
               <Filter className="h-4 w-4" />
               All ({counts.all})
@@ -603,6 +630,10 @@ export default function MyTrainers() {
             <TabsTrigger value="discovery" className="flex items-center gap-2">
               <Phone className="h-4 w-4" />
               Discovery ({counts.discovery})
+            </TabsTrigger>
+            <TabsTrigger value="declined" className="flex items-center gap-2">
+              <X className="h-4 w-4" />
+              Declined ({counts.declined})
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -673,7 +704,7 @@ export default function MyTrainers() {
             <p className="text-muted-foreground mb-4">
               {activeFilter === 'all'
                 ? 'Start exploring trainers to build your fitness team'
-                : `You haven't ${activeFilter === 'saved' ? 'saved' : activeFilter === 'shortlisted' ? 'shortlisted' : 'booked discovery calls with'} any trainers yet`
+                : `You haven't ${activeFilter === 'saved' ? 'saved' : activeFilter === 'shortlisted' ? 'shortlisted' : activeFilter === 'declined' ? 'declined' : 'booked discovery calls with'} any trainers yet`
               }
             </p>
             <Button onClick={() => navigate('/client/dashboard')}>

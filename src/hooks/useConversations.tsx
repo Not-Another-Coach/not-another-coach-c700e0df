@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useProfile } from '@/hooks/useProfile';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -34,6 +35,7 @@ interface Message {
 
 export function useConversations() {
   const { user } = useAuth();
+  const { profile } = useProfile();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -92,14 +94,32 @@ export function useConversations() {
         };
       }) || [];
 
-      setConversations(conversationsWithProfiles);
+      // Filter out conversations with declined trainers (for clients only)
+      let filteredConversations = conversationsWithProfiles;
+      if (profile?.user_type === 'client') {
+        // Get engagement data to filter out declined trainers
+        const { data: engagements } = await supabase
+          .from('client_trainer_engagement')
+          .select('trainer_id, stage')
+          .eq('client_id', user.id)
+          .eq('stage', 'declined');
+
+        const declinedTrainerIds = new Set(engagements?.map(e => e.trainer_id) || []);
+        
+        filteredConversations = conversationsWithProfiles.filter(conv => {
+          const trainerId = conv.client_id === user.id ? conv.trainer_id : conv.client_id;
+          return !declinedTrainerIds.has(trainerId);
+        });
+      }
+
+      setConversations(filteredConversations);
     } catch (error) {
       console.error('Error fetching conversations:', error);
       toast.error('Failed to load conversations');
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, profile]);
 
   const createConversation = useCallback(async (trainerId: string) => {
     if (!user) {
