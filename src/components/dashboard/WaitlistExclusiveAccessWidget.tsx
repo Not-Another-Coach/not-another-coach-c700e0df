@@ -27,25 +27,56 @@ export function WaitlistExclusiveAccessWidget() {
     const fetchExclusiveAccess = async () => {
       if (!user?.id) return;
 
+      console.log('🔥 WaitlistExclusiveAccessWidget: Fetching exclusive access for user:', user.id);
+
       try {
-        // Get active exclusive periods for trainers where user is on waitlist
+        // First, get active exclusive periods
         const { data: exclusivePeriods, error: periodsError } = await supabase
           .from('waitlist_exclusive_periods')
-          .select(`
-            coach_id,
-            expires_at,
-            coach_waitlists!inner(client_id)
-          `)
+          .select('coach_id, expires_at')
           .eq('is_active', true)
-          .gt('expires_at', new Date().toISOString())
-          .eq('coach_waitlists.client_id', user.id)
-          .eq('coach_waitlists.status', 'active');
+          .gt('expires_at', new Date().toISOString());
+
+        console.log('🔥 WaitlistExclusiveAccessWidget: All exclusive periods:', { exclusivePeriods, periodsError });
 
         if (periodsError) throw periodsError;
 
-        if (exclusivePeriods && exclusivePeriods.length > 0) {
+        if (!exclusivePeriods || exclusivePeriods.length === 0) {
+          console.log('🔥 WaitlistExclusiveAccessWidget: No active exclusive periods found');
+          setLoading(false);
+          return;
+        }
+
+        // Then check which ones the user has waitlist access to
+        const coachIds = exclusivePeriods.map(p => p.coach_id);
+        const { data: waitlistEntries, error: waitlistError } = await supabase
+          .from('coach_waitlists')
+          .select('coach_id')
+          .eq('client_id', user.id)
+          .eq('status', 'active')
+          .in('coach_id', coachIds);
+
+        console.log('🔥 WaitlistExclusiveAccessWidget: User waitlist entries:', { waitlistEntries, waitlistError });
+
+        if (waitlistError) throw waitlistError;
+
+        if (!waitlistEntries || waitlistEntries.length === 0) {
+          console.log('🔥 WaitlistExclusiveAccessWidget: User not on any relevant waitlists');
+          setLoading(false);
+          return;
+        }
+
+        // Filter exclusive periods to only those where user is on waitlist
+        const relevantPeriods = exclusivePeriods.filter(period => 
+          waitlistEntries.some(entry => entry.coach_id === period.coach_id)
+        );
+
+        console.log('🔥 WaitlistExclusiveAccessWidget: Relevant periods for user:', relevantPeriods);
+
+        if (relevantPeriods.length > 0) {
+          console.log('🔥 WaitlistExclusiveAccessWidget: Found exclusive periods, fetching trainer profiles');
           // Get trainer profiles for exclusive periods
-          const coachIds = exclusivePeriods.map(p => p.coach_id);
+          const relevantCoachIds = relevantPeriods.map(p => p.coach_id);
           
           const { data: trainers, error: trainersError } = await supabase
             .from('profiles')
@@ -60,14 +91,16 @@ export function WaitlistExclusiveAccessWidget() {
               rating,
               package_options
             `)
-            .in('id', coachIds)
+            .in('id', relevantCoachIds)
             .eq('user_type', 'trainer');
+
+          console.log('🔥 WaitlistExclusiveAccessWidget: Trainer profiles query result:', { trainers, trainersError });
 
           if (trainersError) throw trainersError;
 
           // Combine trainer data with exclusive period info
           const exclusiveData = trainers?.map(trainer => {
-            const period = exclusivePeriods.find(p => p.coach_id === trainer.id);
+            const period = relevantPeriods.find(p => p.coach_id === trainer.id);
             return {
               ...trainer,
               package_options: Array.isArray(trainer.package_options) ? trainer.package_options : [],
@@ -75,10 +108,13 @@ export function WaitlistExclusiveAccessWidget() {
             };
           }).filter(t => t.exclusive_until) || [];
 
+          console.log('🔥 WaitlistExclusiveAccessWidget: Final exclusive trainers data:', exclusiveData);
           setExclusiveTrainers(exclusiveData);
+        } else {
+          console.log('🔥 WaitlistExclusiveAccessWidget: No relevant exclusive periods for this user');
         }
       } catch (error) {
-        console.error('Error fetching exclusive access:', error);
+        console.error('🔥 WaitlistExclusiveAccessWidget: Error fetching exclusive access:', error);
       } finally {
         setLoading(false);
       }

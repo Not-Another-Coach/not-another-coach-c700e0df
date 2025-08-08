@@ -29,6 +29,8 @@ export function useAlerts() {
     try {
       setLoading(true);
       
+      console.log('🔥 useAlerts: Fetching alerts for user:', user.id);
+      
       // Get active alerts
       const { data: alertsData, error: alertsError } = await supabase
         .from('alerts')
@@ -36,6 +38,8 @@ export function useAlerts() {
         .order('priority', { ascending: false })
         .order('created_at', { ascending: false })
         .limit(5);
+
+      console.log('🔥 useAlerts: Raw alerts data:', { alertsData, alertsError });
 
       if (alertsError) {
         console.error('Error fetching alerts:', alertsError);
