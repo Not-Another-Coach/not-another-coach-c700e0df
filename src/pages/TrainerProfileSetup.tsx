@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, ArrowRight, Save, Eye, CheckCircle, AlertCircle, Shield, Check } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -45,6 +46,7 @@ const TrainerProfileSetup = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showExitDialog, setShowExitDialog] = useState(false);
+  const [pendingAvailabilityChanges, setPendingAvailabilityChanges] = useState<any>(null);
   const hasInitialized = useRef(false);
   const initialFormData = useRef<typeof formData | null>(null);
 
@@ -429,6 +431,41 @@ const TrainerProfileSetup = () => {
     }
   };
 
+  // Save availability settings to coach_availability_settings table
+  const saveAvailabilitySettings = async (status: string, settings: any) => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('coach_availability_settings')
+        .upsert({
+          coach_id: user.id,
+          availability_status: status as 'accepting' | 'waitlist' | 'unavailable',
+          next_available_date: settings.next_available_date,
+          allow_discovery_calls_on_waitlist: settings.allow_discovery_calls_on_waitlist,
+          auto_follow_up_days: settings.auto_follow_up_days,
+          waitlist_message: settings.waitlist_message,
+        }, {
+          onConflict: 'coach_id'
+        });
+
+      if (error) {
+        console.error('Error updating availability settings:', error);
+        return { error };
+      }
+
+      return { data };
+    } catch (error) {
+      console.error('Error saving availability settings:', error);
+      return { error };
+    }
+  };
+
+  const handleAvailabilityChange = (status: string, settings: any) => {
+    setPendingAvailabilityChanges({ status, settings });
+    setHasUnsavedChanges(true);
+  };
+
   const handleNext = async () => {
     if (!validateCurrentStep()) {
       toast({
@@ -443,6 +480,15 @@ const TrainerProfileSetup = () => {
       setIsLoading(true);
       
       await handleSave(false);
+
+      // Also save availability settings if there are pending changes
+      if (pendingAvailabilityChanges) {
+        await saveAvailabilitySettings(
+          pendingAvailabilityChanges.status,
+          pendingAvailabilityChanges.settings
+        );
+        setPendingAvailabilityChanges(null);
+      }
       
       if (currentStep < totalSteps) {
         setCurrentStep(currentStep + 1);
@@ -483,6 +529,16 @@ const TrainerProfileSetup = () => {
   const handlePreview = async () => {
     try {
       await handleSave(false);
+      
+      // Also save availability settings if there are pending changes
+      if (pendingAvailabilityChanges) {
+        await saveAvailabilitySettings(
+          pendingAvailabilityChanges.status,
+          pendingAvailabilityChanges.settings
+        );
+        setPendingAvailabilityChanges(null);
+      }
+      
       toast({
         title: "Preview coming soon",
         description: "Profile preview feature will be available soon.",
@@ -503,6 +559,16 @@ const TrainerProfileSetup = () => {
   const handleSaveAndExit = async () => {
     try {
       await handleSave(false);
+      
+      // Also save availability settings if there are pending changes
+      if (pendingAvailabilityChanges) {
+        await saveAvailabilitySettings(
+          pendingAvailabilityChanges.status,
+          pendingAvailabilityChanges.settings
+        );
+        setPendingAvailabilityChanges(null);
+      }
+      
       navigate('/trainer/dashboard');
     } catch (error) {
       // Error already handled in handleSave
@@ -556,7 +622,10 @@ const TrainerProfileSetup = () => {
       case 7:
         return <PackageWaysOfWorkingSection {...commonProps} />;
       case 8:
-        return <WorkingHoursAndAvailabilitySection {...commonProps} />;
+        return <WorkingHoursAndAvailabilitySection 
+          {...commonProps} 
+          onAvailabilityChange={handleAvailabilityChange}
+        />;
       case 9:
         return <TermsAndNotificationsSection {...commonProps} />;
       case 10:

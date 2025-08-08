@@ -7,9 +7,10 @@ import { AvailabilitySection } from './AvailabilitySection';
 interface WorkingHoursAndAvailabilitySectionProps {
   formData: any;
   updateFormData: (updates: any) => void;
+  onAvailabilityChange?: (status: string, settings: any) => void;
 }
 
-export function WorkingHoursAndAvailabilitySection({ formData, updateFormData }: WorkingHoursAndAvailabilitySectionProps) {
+export function WorkingHoursAndAvailabilitySection({ formData, updateFormData, onAvailabilityChange }: WorkingHoursAndAvailabilitySectionProps) {
   return (
     <div className="space-y-6">
       <div className="text-center space-y-2">
@@ -27,7 +28,11 @@ export function WorkingHoursAndAvailabilitySection({ formData, updateFormData }:
       <WorkingHoursSection formData={formData} updateFormData={updateFormData} />
       
       {/* New Client Availability Status */}
-      <AvailabilitySection formData={formData} updateFormData={updateFormData} />
+      <AvailabilitySection 
+        formData={formData} 
+        updateFormData={updateFormData} 
+        onAvailabilityChange={onAvailabilityChange}
+      />
     </div>
   );
 }

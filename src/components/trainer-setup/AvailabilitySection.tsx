@@ -15,9 +15,10 @@ import { useAuth } from '@/hooks/useAuth';
 interface AvailabilitySectionProps {
   formData: any;
   updateFormData: (updates: any) => void;
+  onAvailabilityChange?: (status: string, settings: any) => void;
 }
 
-export function AvailabilitySection({ formData, updateFormData }: AvailabilitySectionProps) {
+export function AvailabilitySection({ formData, updateFormData, onAvailabilityChange }: AvailabilitySectionProps) {
   const { user } = useAuth();
   const { availabilitySettings, updateAvailabilitySettings, loading, waitlistEntries, refetch } = useWaitlist();
   const { startExclusivePeriod } = useWaitlistExclusive();
@@ -62,6 +63,17 @@ export function AvailabilitySection({ formData, updateFormData }: AvailabilitySe
     } else {
       // Update the local availability status to reflect the selection
       setLocalAvailabilityStatus(newStatus);
+      
+      // Notify parent component about the change so it can be included in profile save
+      if (onAvailabilityChange) {
+        onAvailabilityChange(newStatus, {
+          next_available_date: nextAvailableDate || null,
+          allow_discovery_calls_on_waitlist: allowDiscoveryCalls,
+          auto_follow_up_days: autoFollowUpDays,
+          waitlist_message: waitlistMessage || null,
+        });
+      }
+      
       console.log('Availability status changed to:', newStatus);
     }
   };
@@ -71,6 +83,17 @@ export function AvailabilitySection({ formData, updateFormData }: AvailabilitySe
 
     // Update the local status when waitlist prompt is responded to
     setLocalAvailabilityStatus(pendingAvailabilityChange);
+    
+    // Notify parent component about the change
+    if (onAvailabilityChange) {
+      onAvailabilityChange(pendingAvailabilityChange, {
+        next_available_date: nextAvailableDate || null,
+        allow_discovery_calls_on_waitlist: allowDiscoveryCalls,
+        auto_follow_up_days: autoFollowUpDays,
+        waitlist_message: waitlistMessage || null,
+      });
+    }
+    
     console.log('Waitlist prompt response:', offerToWaitlist, 'New status:', pendingAvailabilityChange);
     
     setPendingAvailabilityChange(null);
