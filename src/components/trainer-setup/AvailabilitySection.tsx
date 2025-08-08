@@ -22,6 +22,7 @@ export function AvailabilitySection({ formData, updateFormData }: AvailabilitySe
   const { availabilitySettings, updateAvailabilitySettings, loading, waitlistEntries, refetch } = useWaitlist();
   const { startExclusivePeriod } = useWaitlistExclusive();
   const { toast } = useToast();
+  const [availabilityStatus, setAvailabilityStatus] = useState('accepting');
   const [nextAvailableDate, setNextAvailableDate] = useState('');
   const [allowDiscoveryCalls, setAllowDiscoveryCalls] = useState(true);
   const [autoFollowUpDays, setAutoFollowUpDays] = useState(14);
@@ -30,12 +31,10 @@ export function AvailabilitySection({ formData, updateFormData }: AvailabilitySe
   const [showWaitlistPrompt, setShowWaitlistPrompt] = useState(false);
   const [pendingAvailabilityChange, setPendingAvailabilityChange] = useState<string | null>(null);
 
-  // Get current availability status from hook's state
-  const availabilityStatus = availabilitySettings?.availability_status || 'accepting';
-
   // Initialize form state from availability settings
   useEffect(() => {
     if (availabilitySettings) {
+      setAvailabilityStatus(availabilitySettings.availability_status || 'accepting');
       setNextAvailableDate(availabilitySettings.next_available_date || '');
       setAllowDiscoveryCalls(availabilitySettings.allow_discovery_calls_on_waitlist ?? true);
       setAutoFollowUpDays(availabilitySettings.auto_follow_up_days || 14);
@@ -47,7 +46,7 @@ export function AvailabilitySection({ formData, updateFormData }: AvailabilitySe
     return waitlistEntries.filter(entry => entry.status === 'active').length;
   };
 
-  const handleAvailabilityStatusChange = async (newStatus: string) => {
+  const handleAvailabilityStatusChange = (newStatus: string) => {
     const currentStatus = availabilityStatus;
     const waitlistCount = getWaitlistCount();
 
@@ -56,78 +55,23 @@ export function AvailabilitySection({ formData, updateFormData }: AvailabilitySe
       setPendingAvailabilityChange(newStatus);
       setShowWaitlistPrompt(true);
     } else {
-      // Update the availability status immediately through the hook
-      setIsSaving(true);
-      try {
-        await updateAvailabilitySettings({
-          availability_status: newStatus as any,
-          next_available_date: nextAvailableDate || null,
-          allow_discovery_calls_on_waitlist: allowDiscoveryCalls,
-          auto_follow_up_days: autoFollowUpDays,
-          waitlist_message: waitlistMessage || null,
-        });
-        // Refresh data to ensure UI is in sync
-        await refetch();
-        toast({
-          title: "Status Updated",
-          description: "Your availability status has been updated successfully.",
-        });
-      } catch (error) {
-        console.error('Failed to update status:', error);
-        toast({
-          title: "Error",
-          description: "Failed to update status. Please try again.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsSaving(false);
-      }
+      // Just update the local state - save will persist to database
+      setAvailabilityStatus(newStatus);
     }
   };
 
   const handleWaitlistPromptResponse = async (offerToWaitlist: boolean) => {
     if (!pendingAvailabilityChange || !user?.id) return;
 
-    setIsSaving(true);
-    try {
-      if (offerToWaitlist) {
-        // Start exclusive period and update status
-        const result = await startExclusivePeriod(user.id);
-        if (result.success) {
-          await updateAvailabilitySettings({
-            availability_status: pendingAvailabilityChange as any,
-            next_available_date: nextAvailableDate || null,
-            allow_discovery_calls_on_waitlist: allowDiscoveryCalls,
-            auto_follow_up_days: autoFollowUpDays,
-            waitlist_message: waitlistMessage || null,
-          });
-        }
-      } else {
-        // Just update the status normally
-        await updateAvailabilitySettings({
-          availability_status: pendingAvailabilityChange as any,
-          next_available_date: nextAvailableDate || null,
-          allow_discovery_calls_on_waitlist: allowDiscoveryCalls,
-          auto_follow_up_days: autoFollowUpDays,
-          waitlist_message: waitlistMessage || null,
-        });
+    if (offerToWaitlist) {
+      // Start exclusive period and update local status
+      const result = await startExclusivePeriod(user.id);
+      if (result.success) {
+        setAvailabilityStatus(pendingAvailabilityChange);
       }
-      
-      // Refresh data to ensure UI is in sync
-      await refetch();
-      toast({
-        title: "Status Updated",
-        description: "Your availability status has been updated successfully.",
-      });
-    } catch (error) {
-      console.error('Failed to update status:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update status. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
+    } else {
+      // Just update the local status
+      setAvailabilityStatus(pendingAvailabilityChange);
     }
 
     setPendingAvailabilityChange(null);
