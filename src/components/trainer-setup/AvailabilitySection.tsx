@@ -29,13 +29,17 @@ export function AvailabilitySection({ formData, updateFormData }: AvailabilitySe
   const [isSaving, setIsSaving] = useState(false);
   const [showWaitlistPrompt, setShowWaitlistPrompt] = useState(false);
   const [pendingAvailabilityChange, setPendingAvailabilityChange] = useState<string | null>(null);
+  
+  // Local state for the currently selected availability status
+  const [localAvailabilityStatus, setLocalAvailabilityStatus] = useState<string>('accepting');
 
-  // Get current availability status from hook's state
-  const availabilityStatus = availabilitySettings?.availability_status || 'accepting';
+  // Get current availability status from local state or hook's state
+  const availabilityStatus = localAvailabilityStatus || availabilitySettings?.availability_status || 'accepting';
 
   // Initialize form state from availability settings
   useEffect(() => {
     if (availabilitySettings) {
+      setLocalAvailabilityStatus(availabilitySettings.availability_status || 'accepting');
       setNextAvailableDate(availabilitySettings.next_available_date || '');
       setAllowDiscoveryCalls(availabilitySettings.allow_discovery_calls_on_waitlist ?? true);
       setAutoFollowUpDays(availabilitySettings.auto_follow_up_days || 14);
@@ -56,8 +60,8 @@ export function AvailabilitySection({ formData, updateFormData }: AvailabilitySe
       setPendingAvailabilityChange(newStatus);
       setShowWaitlistPrompt(true);
     } else {
-      // Just update the local state without auto-saving
-      // The updateAvailabilitySettings call has been removed
+      // Update the local availability status to reflect the selection
+      setLocalAvailabilityStatus(newStatus);
       console.log('Availability status changed to:', newStatus);
     }
   };
@@ -65,7 +69,8 @@ export function AvailabilitySection({ formData, updateFormData }: AvailabilitySe
   const handleWaitlistPromptResponse = async (offerToWaitlist: boolean) => {
     if (!pendingAvailabilityChange || !user?.id) return;
 
-    // Just handle the waitlist prompt response without auto-saving
+    // Update the local status when waitlist prompt is responded to
+    setLocalAvailabilityStatus(pendingAvailabilityChange);
     console.log('Waitlist prompt response:', offerToWaitlist, 'New status:', pendingAvailabilityChange);
     
     setPendingAvailabilityChange(null);
