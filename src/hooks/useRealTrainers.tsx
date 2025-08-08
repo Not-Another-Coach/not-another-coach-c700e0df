@@ -38,14 +38,15 @@ export function useRealTrainers(refreshTrigger?: number) {
             package_options,
             discovery_call_settings(
               offers_discovery_call
-            ),
+            )
           `)
           .eq('user_type', 'trainer')
           .eq('profile_published', true)
           .order('created_at');
 
         if (error) {
-          console.error('Error fetching trainers:', error);
+          console.error('Error fetching trainers in useRealTrainers:', error);
+          console.error('Error details:', JSON.stringify(error, null, 2));
           return;
         }
 

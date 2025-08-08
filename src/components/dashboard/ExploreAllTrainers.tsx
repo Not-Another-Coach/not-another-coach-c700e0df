@@ -86,14 +86,15 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
             is_verified,
             profile_photo_url,
             training_types,
-            discovery_call_settings(offers_discovery_call),
+            discovery_call_settings(offers_discovery_call)
           `)
           .eq('user_type', 'trainer')
           .eq('profile_published', true)
           .order('created_at');
 
         if (error) {
-          console.error('Error fetching trainers:', error);
+          console.error('Error fetching trainers in ExploreAllTrainers:', error);
+          console.error('Error details:', JSON.stringify(error, null, 2));
           return;
         }
 
