@@ -12,7 +12,7 @@ export interface CoachSelectionRequest {
   package_name: string;
   package_price: number;
   package_duration: string;
-  status: 'pending' | 'accepted' | 'declined' | 'alternative_suggested';
+  status: 'pending' | 'accepted' | 'declined' | 'alternative_suggested' | 'awaiting_payment';
   client_message?: string;
   trainer_response?: string;
   suggested_alternative_package_id?: string;
@@ -154,8 +154,11 @@ export function useCoachSelection() {
 
     setLoading(true);
     try {
+      // Set status to awaiting_payment when accepted, keep as-is for other responses
+      const finalStatus = status === 'accepted' ? 'awaiting_payment' : status;
+      
       const updateData: any = {
-        status,
+        status: finalStatus,
         trainer_response: trainerResponse,
         responded_at: new Date().toISOString()
       };
@@ -228,12 +231,12 @@ export function useCoachSelection() {
     if (!user) return { error: 'Not authenticated' };
 
     try {
-      // First get the selection requests
+      // First get the selection requests - include both pending and awaiting_payment
       const { data: requestsData, error: requestsError } = await supabase
         .from('coach_selection_requests')
         .select('*')
         .eq('trainer_id', user.id)
-        .eq('status', 'pending')
+        .in('status', ['pending', 'awaiting_payment'])
         .order('created_at', { ascending: false });
 
       if (requestsError) {

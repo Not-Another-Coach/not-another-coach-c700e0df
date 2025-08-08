@@ -69,7 +69,7 @@ export const CoachSelectionRequests = () => {
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Coach Selection Requests</h2>
         <Badge variant="secondary">
-          {requests.length} pending
+          {requests.length} active
         </Badge>
       </div>
 
@@ -106,18 +106,26 @@ export const CoachSelectionRequests = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="bg-blue-50 text-blue-700">
-                      New Request
-                    </Badge>
-                    <Button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRequestClick(request);
-                      }}
-                      className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
-                    >
-                      Respond
-                    </Button>
+                    {request.status === 'pending' ? (
+                      <>
+                        <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                          New Request
+                        </Badge>
+                        <Button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRequestClick(request);
+                          }}
+                          className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
+                        >
+                          Respond
+                        </Button>
+                      </>
+                    ) : request.status === 'awaiting_payment' ? (
+                      <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-300">
+                        Awaiting Payment - {request.package_name}
+                      </Badge>
+                    ) : null}
                   </div>
                 </div>
               </CardHeader>
@@ -146,11 +154,21 @@ export const CoachSelectionRequests = () => {
                     </div>
                   )}
                   
-                  <div className="pt-2 border-t">
-                    <p className="text-sm text-muted-foreground text-center">
-                      Click "Respond" to accept, decline, or suggest alternatives
-                    </p>
-                  </div>
+                   {request.status === 'pending' && (
+                     <div className="pt-2 border-t">
+                       <p className="text-sm text-muted-foreground text-center">
+                         Click "Respond" to accept, decline, or suggest alternatives
+                       </p>
+                     </div>
+                   )}
+                   
+                   {request.status === 'awaiting_payment' && (
+                     <div className="pt-2 border-t">
+                       <p className="text-sm text-orange-600 text-center font-medium">
+                         Request accepted - waiting for client payment
+                       </p>
+                     </div>
+                   )}
                 </div>
               </CardContent>
             </Card>
