@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
-export type EngagementStage = 'browsing' | 'liked' | 'shortlisted' | 'discovery_call_booked' | 'discovery_in_progress' | 'matched' | 'discovery_completed' | 'active_client' | 'unmatched' | 'declined' | 'declined_dismissed';
+export type EngagementStage = 'browsing' | 'liked' | 'shortlisted' | 'waitlist' | 'discovery_call_booked' | 'discovery_in_progress' | 'matched' | 'discovery_completed' | 'active_client' | 'unmatched' | 'declined' | 'declined_dismissed';
 
 interface EngagementData {
   id: string;
@@ -83,7 +83,7 @@ export function useEngagementStage(trainerId: string) {
   }, [user, trainerId, fetchEngagementStage]);
 
   const canViewContent = useCallback((requiredStage: EngagementStage) => {
-    const stageOrder: EngagementStage[] = ['browsing', 'liked', 'shortlisted', 'discovery_call_booked', 'discovery_in_progress', 'matched', 'discovery_completed', 'active_client'];
+    const stageOrder: EngagementStage[] = ['browsing', 'liked', 'shortlisted', 'waitlist', 'discovery_call_booked', 'discovery_in_progress', 'matched', 'discovery_completed', 'active_client'];
     const currentIndex = stageOrder.indexOf(stage);
     const requiredIndex = stageOrder.indexOf(requiredStage);
     return currentIndex >= requiredIndex;

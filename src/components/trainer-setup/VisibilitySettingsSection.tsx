@@ -22,6 +22,7 @@ const engagementStageLabels: Record<EngagementStage, string> = {
   browsing: 'Browsing',
   liked: 'Liked',
   shortlisted: 'Shortlisted',
+  waitlist: 'Waitlist',
   discovery_call_booked: 'Call Booked',
   discovery_in_progress: 'Discovery Active',
   matched: 'Matched',
