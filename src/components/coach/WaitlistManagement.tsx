@@ -241,24 +241,6 @@ export function WaitlistManagement() {
                           <MessageCircle className="w-3 h-3 mr-1" />
                           Message Client
                         </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleUpdateStatus(entry.id, 'converted')}
-                          disabled={isUpdating}
-                        >
-                          <UserPlus className="w-3 h-3 mr-1" />
-                          Open Slot + Invite
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleNotifySpaceAvailable(entry.id)}
-                          disabled={isUpdating}
-                        >
-                          <Bell className="w-3 h-3 mr-1" />
-                          Notify Space Available
-                        </Button>
                       </>
                     )}
                     
