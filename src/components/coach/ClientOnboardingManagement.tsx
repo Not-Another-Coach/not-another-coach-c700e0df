@@ -123,48 +123,113 @@ export function ClientOnboardingManagement() {
       }
     ];
 
+    // Collect all unique action items across all packages and sections
+    const allActionItems: Array<{
+      header1: string;
+      header2: string;
+      actionItem: string;
+      description?: string;
+      packages: { [packageName: string]: boolean };
+    }> = [];
+
+    sections.forEach(section => {
+      section.items.forEach(item => {
+        const itemsAcrossPackages: { [actionItem: string]: { packages: string[]; description?: string } } = {};
+        
+        // Collect items from all packages for this section/item combination
+        packageWorkflows.forEach(workflow => {
+          const items = (workflow[item.key as keyof typeof workflow] as any[]) || [];
+          items.forEach((listItem: any) => {
+            const actionText = typeof listItem === 'string' ? listItem : listItem.text;
+            const description = typeof listItem === 'object' ? listItem.description : undefined;
+            
+            if (!itemsAcrossPackages[actionText]) {
+              itemsAcrossPackages[actionText] = { packages: [], description };
+            }
+            itemsAcrossPackages[actionText].packages.push(workflow.package_name);
+          });
+        });
+
+        // Convert to our format
+        Object.entries(itemsAcrossPackages).forEach(([actionText, data]) => {
+          const packageFlags: { [packageName: string]: boolean } = {};
+          packageWorkflows.forEach(workflow => {
+            packageFlags[workflow.package_name] = data.packages.includes(workflow.package_name);
+          });
+
+          allActionItems.push({
+            header1: section.title,
+            header2: item.name,
+            actionItem: actionText,
+            description: data.description,
+            packages: packageFlags
+          });
+        });
+      });
+    });
+
     return (
-      <div className="space-y-6">
-        {packageWorkflows.map((workflow) => (
-          <Card key={workflow.id} className="border">
-            <CardHeader>
-              <CardTitle className="text-lg">{workflow.package_name}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                {sections.map((section) => (
-                  <div key={section.title}>
-                    <h2 className="text-xl font-semibold mb-4 text-primary">{section.title}</h2>
-                    <div className="space-y-4">
-                      {section.items.map((item) => {
-                        const items = (workflow[item.key as keyof typeof workflow] as any[]) || [];
-                        return (
-                          <div key={item.name} className="border-l-4 border-muted pl-4">
-                            <h3 className="text-lg font-medium mb-2">{item.name}</h3>
-                            <div className="bg-muted/30 rounded-lg p-4">
-                              {items.length > 0 ? (
-                                <ul className="space-y-2">
-                                  {items.map((listItem: any, idx: number) => (
-                                    <li key={idx} className="flex items-start gap-2">
-                                      <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
-                                      <span className="text-sm">{typeof listItem === 'string' ? listItem : listItem.text}</span>
-                                    </li>
-                                  ))}
-                                </ul>
-                              ) : (
-                                <p className="text-sm text-muted-foreground italic">No items defined</p>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="border-b-2 border-border">
+              <th className="text-left p-3 font-semibold bg-muted/50">Category</th>
+              <th className="text-left p-3 font-semibold bg-muted/50">Section</th>
+              <th className="text-left p-3 font-semibold bg-muted/50">Action Item</th>
+              <th className="text-left p-3 font-semibold bg-muted/50">Description</th>
+              {packageWorkflows.map(workflow => (
+                <th key={workflow.id} className="text-center p-3 font-semibold bg-primary/10 min-w-24">
+                  {workflow.package_name}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {allActionItems.length === 0 ? (
+              <tr>
+                <td colSpan={4 + packageWorkflows.length} className="text-center py-8 text-muted-foreground">
+                  No action items found. Add items to your Ways of Working sections.
+                </td>
+              </tr>
+            ) : (
+              allActionItems.map((item, index) => {
+                const isFirstInSection = index === 0 || allActionItems[index - 1].header1 !== item.header1;
+                const isFirstInSubsection = index === 0 || 
+                  allActionItems[index - 1].header1 !== item.header1 || 
+                  allActionItems[index - 1].header2 !== item.header2;
+                
+                return (
+                  <tr key={index} className="border-b border-border hover:bg-muted/20">
+                    <td className="p-3 font-medium text-primary">
+                      {isFirstInSection ? item.header1 : ''}
+                    </td>
+                    <td className="p-3 font-medium">
+                      {isFirstInSubsection ? item.header2 : ''}
+                    </td>
+                    <td className="p-3">
+                      <div className="flex items-start gap-2">
+                        <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+                        <span className="text-sm">{item.actionItem}</span>
+                      </div>
+                    </td>
+                    <td className="p-3 text-sm text-muted-foreground">
+                      {item.description || '-'}
+                    </td>
+                    {packageWorkflows.map(workflow => (
+                      <td key={workflow.id} className="text-center p-3">
+                        {item.packages[workflow.package_name] ? (
+                          <CheckCircle className="h-5 w-5 text-green-600 mx-auto" />
+                        ) : (
+                          <div className="w-5 h-5 border border-muted-foreground/30 rounded-full mx-auto"></div>
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
       </div>
     );
   };
@@ -330,7 +395,14 @@ export function ClientOnboardingManagement() {
           </TabsContent>
 
           <TabsContent value="workflows" className="space-y-4">
-            {renderWaysOfWorkingOverview()}
+            <Card>
+              <CardHeader>
+                <CardTitle>Ways of Working Comparison</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {renderWaysOfWorkingOverview()}
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </CardContent>
