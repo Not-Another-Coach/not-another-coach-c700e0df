@@ -61,19 +61,25 @@ export const ClientRescheduleModal = ({
     const scheduledDate = new Date(discoveryCall.scheduled_for);
     setLoading(true);
     try {
-      const { error } = await supabase
+      console.log('🚨 Starting discovery call cancellation via ClientRescheduleModal for call:', discoveryCall.id);
+      console.log('🚨 Cancellation reason:', cancellationReason.trim());
+      
+      const { data, error } = await supabase
         .from('discovery_calls')
         .update({ 
           status: 'cancelled',
           cancellation_reason: cancellationReason.trim()
         })
-        .eq('id', discoveryCall.id);
+        .eq('id', discoveryCall.id)
+        .select();
+
+      console.log('🚨 ClientRescheduleModal update result - data:', data, 'error:', error);
 
       if (error) {
-        console.error('Error cancelling discovery call:', error);
+        console.error('❌ Error cancelling discovery call via ClientRescheduleModal:', error);
         toast({
           title: "Failed to cancel call",
-          description: "Please try again or contact support.",
+          description: error.message || "Please try again or contact support.",
           variant: "destructive",
         });
         return;
