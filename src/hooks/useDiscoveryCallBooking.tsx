@@ -184,16 +184,9 @@ export function useDiscoveryCallBooking() {
         return null;
       }
 
-      // Update engagement stage to indicate discovery call is booked
-      try {
-        await supabase.rpc('update_engagement_stage', {
-          client_uuid: user.id,
-          trainer_uuid: trainerId,
-          new_stage: 'matched'
-        });
-      } catch (updateError) {
-        console.error('Error updating engagement stage:', updateError);
-      }
+      // The engagement stage will be updated automatically by the database trigger
+      // when the discovery call is inserted, so we don't need to manually update it here
+      console.log('Discovery call created successfully, database trigger will update engagement stage');
 
       // Create activity alert for trainer (skip if this is a reschedule)
       if (!isReschedule) {
