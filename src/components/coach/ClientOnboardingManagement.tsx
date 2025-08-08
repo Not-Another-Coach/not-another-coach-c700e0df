@@ -25,7 +25,7 @@ export function ClientOnboardingManagement() {
   } = useTrainerOnboarding();
   
   const { packageWorkflows, loading: workflowsLoading } = usePackageWaysOfWorking();
-  const { activities, loading: activitiesLoading, error: activitiesError, refresh: refreshActivities } = useTrainerActivities();
+  const { activities, loading: activitiesLoading, error: activitiesError, refresh: refreshActivities, createActivity } = useTrainerActivities();
   
   const [newTemplate, setNewTemplate] = useState<Partial<OnboardingTemplate>>({
     step_name: '',
@@ -38,7 +38,12 @@ export function ClientOnboardingManagement() {
     is_active: true
   });
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-
+  const [showCreateActivityDialog, setShowCreateActivityDialog] = useState(false);
+  const [newActivity, setNewActivity] = useState<{ name: string; category: string; description: string }>({
+    name: '',
+    category: 'Onboarding',
+    description: '',
+  });
   if (loading || workflowsLoading) {
     return (
       <Card>
@@ -86,6 +91,26 @@ export function ClientOnboardingManagement() {
       toast.error(result.error);
     } else {
       toast.success('Template updated successfully');
+    }
+  };
+
+  const handleCreateActivity = async () => {
+    if (!newActivity.name.trim()) {
+      toast.error('Activity name is required');
+      return;
+    }
+    const result: any = await createActivity(
+      newActivity.name.trim(),
+      newActivity.category,
+      newActivity.description.trim() || null
+    );
+    if (result?.error) {
+      toast.error(result.error);
+    } else {
+      toast.success('Activity created');
+      setShowCreateActivityDialog(false);
+      setNewActivity({ name: '', category: 'Onboarding', description: '' });
+      refreshActivities();
     }
   };
 
@@ -255,10 +280,61 @@ export function ClientOnboardingManagement() {
           <TabsContent value="activities" className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-medium">Reusable Activities</h3>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Create Activity
-              </Button>
+              <Dialog open={showCreateActivityDialog} onOpenChange={setShowCreateActivityDialog}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Activity
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Create Activity</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label>Name</Label>
+                      <Input
+                        value={newActivity.name}
+                        onChange={(e) => setNewActivity({ ...newActivity, name: e.target.value })}
+                        placeholder="e.g., Kickoff Questionnaire"
+                      />
+                    </div>
+                    <div>
+                      <Label>Category</Label>
+                      <Select
+                        value={newActivity.category}
+                        onValueChange={(value) => setNewActivity({ ...newActivity, category: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Onboarding">Onboarding</SelectItem>
+                          <SelectItem value="First Week">First Week</SelectItem>
+                          <SelectItem value="Ongoing Structure">Ongoing Structure</SelectItem>
+                          <SelectItem value="Tracking Tools">Tracking Tools</SelectItem>
+                          <SelectItem value="Client Expectations">Client Expectations</SelectItem>
+                          <SelectItem value="What I Bring">What I Bring</SelectItem>
+                          <SelectItem value="general">General</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Description</Label>
+                      <Textarea
+                        value={newActivity.description}
+                        onChange={(e) => setNewActivity({ ...newActivity, description: e.target.value })}
+                        placeholder="Optional: add helpful context for this activity"
+                      />
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <Button variant="outline" onClick={() => setShowCreateActivityDialog(false)}>Cancel</Button>
+                      <Button onClick={handleCreateActivity}>Create</Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
             
             {activitiesLoading ? (

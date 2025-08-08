@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 export type TrainerActivity = {
+  id: string;
   activity_name: string;
   category: string;
   is_system: boolean;
+  description?: string | null;
 };
 
 const SECTION_TO_CATEGORY: Record<string, string> = {
@@ -20,6 +23,7 @@ export function useTrainerActivities() {
   const [activities, setActivities] = useState<TrainerActivity[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
 
   const fetchAll = async () => {
     setLoading(true);
@@ -28,7 +32,7 @@ export function useTrainerActivities() {
       // RLS ensures we get: system activities + current trainer's activities
       const { data, error } = await supabase
         .from("trainer_onboarding_activities")
-        .select("activity_name, category, is_system")
+        .select("id, activity_name, category, is_system, description")
         .order("activity_name");
 
       if (error) throw error;
@@ -40,9 +44,41 @@ export function useTrainerActivities() {
     }
   };
 
-  useEffect(() => {
-    fetchAll();
-  }, []);
+const createActivity = async (name: string, category: string, description?: string | null) => {
+  if (!user?.id) {
+    const msg = "You must be signed in to create activities";
+    setError(msg);
+    return { error: msg } as const;
+  }
+  setLoading(true);
+  setError(null);
+  try {
+    const { data, error } = await supabase
+      .from("trainer_onboarding_activities")
+      .insert({
+        trainer_id: user.id,
+        activity_name: name,
+        category,
+        description: description ?? null,
+      })
+      .select("id, activity_name, category, is_system, description")
+      .maybeSingle();
+
+    if (error) throw error;
+    await fetchAll();
+    return { data } as const;
+  } catch (e: any) {
+    const msg = e.message || "Failed to create activity";
+    setError(msg);
+    return { error: msg } as const;
+  } finally {
+    setLoading(false);
+  }
+};
+
+useEffect(() => {
+  fetchAll();
+}, []);
 
   const getSuggestionsBySection = (sectionKey: string): string[] => {
     const category = SECTION_TO_CATEGORY[sectionKey];
@@ -61,5 +97,6 @@ export function useTrainerActivities() {
     refresh: fetchAll,
     getSuggestionsBySection,
     activities,
+    createActivity,
   };
 }
