@@ -93,30 +93,56 @@ export function useMyTrainers(refreshTrigger?: number) {
           return;
         }
 
+        console.log('🔍 Raw trainer data from database:', trainerData);
+        
+        // Debug log specifically for Lou
+        const louTrainer = trainerData?.find(t => t.first_name === 'TrainerLou');
+        if (louTrainer) {
+          console.log('🐛 Lou raw data from DB:', {
+            id: louTrainer.id,
+            discovery_call_settings: louTrainer.discovery_call_settings,
+            offers_discovery_call: louTrainer.discovery_call_settings?.[0]?.offers_discovery_call
+          });
+        }
+
         // Transform and combine trainer data with engagement status
         const trainersWithStatus: TrainerWithStatus[] = [];
         
         // Helper function to create trainer object
-        const createTrainerObject = (trainerProfile: any): Omit<TrainerWithStatus, 'status' | 'engagement' | 'statusLabel' | 'statusColor'> => ({
-          id: trainerProfile.id,
-          name: `${trainerProfile.first_name || ''} ${trainerProfile.last_name || ''}`.trim() || 'Unnamed Trainer',
-          firstName: trainerProfile.first_name,
-          lastName: trainerProfile.last_name,
-          specialties: trainerProfile.specializations || [],
-          rating: 4.5, // Default rating
-          reviews: 0, // Default reviews
-          experience: 'Professional', // Default experience
-          location: trainerProfile.location || '',
-          hourlyRate: trainerProfile.hourly_rate || 0,
-          image: trainerProfile.profile_photo_url || '/src/assets/trainer-alex.jpg', // Fallback image
-          profilePhotoUrl: trainerProfile.profile_photo_url,
-          certifications: trainerProfile.qualifications || [],
-          description: trainerProfile.bio || 'Professional fitness trainer',
-          availability: 'Available', // Default availability
-          trainingType: trainerProfile.training_types || [],
-          offers_discovery_call: trainerProfile.discovery_call_settings?.[0]?.offers_discovery_call || false,
-          package_options: trainerProfile.package_options || []
-        });
+        const createTrainerObject = (trainerProfile: any): Omit<TrainerWithStatus, 'status' | 'engagement' | 'statusLabel' | 'statusColor'> => {
+          const discoveryCallValue = trainerProfile.discovery_call_settings?.[0]?.offers_discovery_call || false;
+          
+          // Debug log for Lou specifically
+          if (trainerProfile.first_name === 'TrainerLou') {
+            console.log('🐛 Creating trainer object for Lou:', {
+              id: trainerProfile.id,
+              raw_discovery_settings: trainerProfile.discovery_call_settings,
+              extracted_value: discoveryCallValue,
+              fallback_used: !trainerProfile.discovery_call_settings?.[0]?.offers_discovery_call
+            });
+          }
+          
+          return {
+            id: trainerProfile.id,
+            name: `${trainerProfile.first_name || ''} ${trainerProfile.last_name || ''}`.trim() || 'Unnamed Trainer',
+            firstName: trainerProfile.first_name,
+            lastName: trainerProfile.last_name,
+            specialties: trainerProfile.specializations || [],
+            rating: 4.5, // Default rating
+            reviews: 0, // Default reviews
+            experience: 'Professional', // Default experience
+            location: trainerProfile.location || '',
+            hourlyRate: trainerProfile.hourly_rate || 0,
+            image: trainerProfile.profile_photo_url || '/src/assets/trainer-alex.jpg', // Fallback image
+            profilePhotoUrl: trainerProfile.profile_photo_url,
+            certifications: trainerProfile.qualifications || [],
+            description: trainerProfile.bio || 'Professional fitness trainer',
+            availability: 'Available', // Default availability
+            trainingType: trainerProfile.training_types || [],
+            offers_discovery_call: discoveryCallValue,
+            package_options: trainerProfile.package_options || []
+          };
+        };
 
         // Process saved trainers (liked)
         const likedTrainers = getLikedTrainers();
