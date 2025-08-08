@@ -7,8 +7,6 @@ import { Switch } from "@/components/ui/switch";
 import { Bell, Eye, CheckCircle, AlertTriangle } from "lucide-react";
 import { TrainerProfilePreview } from "@/components/TrainerProfilePreview";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { AvailabilitySection } from "./AvailabilitySection";
-import { WeeklyAvailabilitySection } from "./WeeklyAvailabilitySection";
 
 interface ProfileManagementSectionProps {
   formData: any;
@@ -18,10 +16,6 @@ interface ProfileManagementSectionProps {
 export function ProfileManagementSection({ formData, updateFormData }: ProfileManagementSectionProps) {
   return (
     <div className="space-y-6">
-      {/* Availability Management */}
-        <WeeklyAvailabilitySection formData={formData} updateFormData={updateFormData} />
-        <AvailabilitySection formData={formData} updateFormData={updateFormData} />
-
       {/* Notification Preferences */}
       <div className="space-y-4">
         <Label>Notification Preferences</Label>
