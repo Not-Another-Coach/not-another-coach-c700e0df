@@ -51,6 +51,15 @@ export function useRealTrainers(refreshTrigger?: number) {
         }
 
         const realTrainers: Trainer[] = data?.map((trainer, index) => {
+          // Debug logging for Lou specifically
+          if (trainer.bio?.includes('Lou') || trainer.id === 'f5562940-ccc4-40c2-b8dd-8f8c22311003') {
+            console.log(`🐛 DEBUG Raw trainer data for Lou:`, {
+              trainerId: trainer.id,
+              discovery_call_settings: trainer.discovery_call_settings,
+              offers_discovery_call: trainer.discovery_call_settings?.[0]?.offers_discovery_call
+            });
+          }
+          
           // Use profile photo if available, otherwise use fallback image
           const imageUrl = trainer.profile_photo_url || trainerImages[index % trainerImages.length];
           

@@ -233,7 +233,14 @@ export default function MyTrainers() {
           certifications: [],
           description: 'Loading trainer information...',
           availability: 'Unknown',
-          trainingType: ['Loading...']
+          trainingType: ['Loading...'],
+          offers_discovery_call: false
+        };
+      } else {
+        // Ensure discovery call setting is preserved for found trainers
+        trainer = {
+          ...trainer,
+          offers_discovery_call: trainer.offers_discovery_call ?? false
         };
       }
       
@@ -626,6 +633,7 @@ export default function MyTrainers() {
           console.log(`🐛 DEBUG Lou Discovery Call Logic:`, {
             trainerId: shortlistedTrainerId,
             trainerName: trainer.name,
+            trainerObject: trainer,
             availability,
             offersDiscoveryCall,
             isOnWaitlist,
