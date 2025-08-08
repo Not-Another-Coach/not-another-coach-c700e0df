@@ -49,17 +49,38 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
   const [loading, setLoading] = useState(true);
   const [isMessagingOpen, setIsMessagingOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Prospect | null>(null);
+  const [trainerOffersDiscoveryCall, setTrainerOffersDiscoveryCall] = useState(false);
 
   useEffect(() => {
     if (profile?.id) {
       console.log('Profile loaded, fetching prospects for trainer:', profile.id);
       fetchProspects();
+      // Fetch trainer's discovery call settings
+      fetchDiscoveryCallSettings();
     } else {
       console.log('No profile ID available');
       setLoading(false);
       onCountChange?.(0);
     }
   }, [profile?.id, onCountChange]);
+
+  const fetchDiscoveryCallSettings = async () => {
+    if (!profile?.id) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('discovery_call_settings')
+        .select('offers_discovery_call')
+        .eq('trainer_id', profile.id)
+        .maybeSingle();
+      
+      if (!error && data) {
+        setTrainerOffersDiscoveryCall(data.offers_discovery_call);
+      }
+    } catch (error) {
+      console.error('Error fetching discovery call settings:', error);
+    }
+  };
 
   const fetchProspects = async () => {
     if (!profile?.id) {
@@ -316,7 +337,7 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
                     </Button>
                   )}
                   
-                  {prospect.stage === 'shortlisted' && !prospect.discovery_call && profile?.free_discovery_call && (
+                  {prospect.stage === 'shortlisted' && !prospect.discovery_call && trainerOffersDiscoveryCall && (
                     <Button
                       size="sm"
                       variant="outline"
