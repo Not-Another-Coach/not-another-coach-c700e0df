@@ -12,6 +12,7 @@ interface StartConversationButtonProps {
   variant?: 'default' | 'outline' | 'secondary' | 'destructive' | 'ghost' | 'link';
   size?: 'default' | 'sm' | 'lg' | 'icon';
   className?: string;
+  bypassShortlistRequirement?: boolean;
 }
 
 export function StartConversationButton({ 
@@ -19,7 +20,8 @@ export function StartConversationButton({
   trainerName,
   variant = 'default',
   size = 'default',
-  className 
+  className,
+  bypassShortlistRequirement = false
 }: StartConversationButtonProps) {
   const { user } = useAuth();
   const { createConversation, conversations } = useConversations();
@@ -46,8 +48,8 @@ export function StartConversationButton({
       return;
     }
 
-    // Check if trainer is shortlisted (for clients)
-    if (user && !trainerIsShortlisted) {
+    // Check if trainer is shortlisted (for clients) - unless bypassed
+    if (user && !trainerIsShortlisted && !bypassShortlistRequirement) {
       toast.error('You can only message trainers you have shortlisted');
       return;
     }
@@ -74,8 +76,8 @@ export function StartConversationButton({
     );
   }
 
-  // Don't show button if trainer is not shortlisted (for clients)
-  if (user && !trainerIsShortlisted) {
+  // Don't show button if trainer is not shortlisted (for clients) - unless bypassed
+  if (user && !trainerIsShortlisted && !bypassShortlistRequirement) {
     return (
       <Button
         variant="outline"

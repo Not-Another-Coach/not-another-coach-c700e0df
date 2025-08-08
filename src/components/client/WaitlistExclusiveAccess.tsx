@@ -137,6 +137,7 @@ export function WaitlistExclusiveAccess({ trainer, exclusiveUntil }: WaitlistExc
               size="sm"
               className="flex-1"
               variant="default"
+              bypassShortlistRequirement={true}
             />
           )}
           
