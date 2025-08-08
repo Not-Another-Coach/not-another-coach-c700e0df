@@ -593,9 +593,24 @@ export default function MyTrainers() {
        case 'waitlist':
          const offersDiscoveryCallWaitlist = trainer.offers_discovery_call;
          const trainerName = trainer.name;
+         const waitlistEngagementStage = getEngagementStage(trainer.id);
          
          return (
            <div className="space-y-2">
+             {/* Choose Coach Button - Show when trainer becomes available */}
+             <ChooseCoachButton
+               trainer={{
+                 id: trainer.id,
+                 name: trainerName,
+                 firstName: trainerName?.split(' ')[0],
+                 lastName: trainerName?.split(' ')[1],
+                 profilePhotoUrl: trainer.image,
+                 package_options: trainer.package_options
+               }}
+               stage={waitlistEngagementStage}
+               className="w-full"
+             />
+             
              <div className="grid grid-cols-2 gap-2">
                {offersDiscoveryCallWaitlist ? (
                  <BookDiscoveryCallButton 
