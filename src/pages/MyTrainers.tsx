@@ -40,6 +40,8 @@ import {
 import { DiscoveryCallBookingModal } from "@/components/discovery-call/DiscoveryCallBookingModal";
 import { ClientRescheduleModal } from "@/components/dashboard/ClientRescheduleModal";
 import { ChooseCoachButton } from "@/components/coach-selection/ChooseCoachButton";
+import { BookDiscoveryCallButton } from "@/components/discovery-call/BookDiscoveryCallButton";
+import { StartConversationButton } from "@/components/StartConversationButton";
 
 import { toast } from "sonner";
 
@@ -589,16 +591,46 @@ export default function MyTrainers() {
          );
 
        case 'waitlist':
+         const offersDiscoveryCallWaitlist = trainer.offers_discovery_call;
+         const trainerName = trainer.name;
+         
          return (
            <div className="space-y-2">
-             <WaitlistJoinButton 
-               coachId={trainer.id}
-               coachName={trainer.name}
-               nextAvailableDate={null}
-               waitlistMessage={null}
-               className="w-full"
-               onWaitlistChange={() => setWaitlistRefreshKey(prev => prev + 1)}
-             />
+             <div className="grid grid-cols-2 gap-2">
+               {offersDiscoveryCallWaitlist ? (
+                 <BookDiscoveryCallButton 
+                   trainer={{ 
+                     id: trainer.id,
+                     name: trainerName,
+                     firstName: trainerName?.split(' ')[0],
+                     lastName: trainerName?.split(' ')[1],
+                     profilePhotoUrl: trainer.image,
+                     offers_discovery_call: true
+                   }}
+                   size="sm"
+                   className="flex-1"
+                 />
+               ) : (
+                 <StartConversationButton
+                   trainerId={trainer.id}
+                   trainerName={trainerName}
+                   size="sm"
+                   className="flex-1"
+                   variant="default"
+                   bypassShortlistRequirement={true}
+                 />
+               )}
+               
+               <Button
+                 size="sm"
+                 variant="outline"
+                 onClick={() => handleLeaveWaitlist(trainer.id)}
+                 className="flex-1"
+               >
+                 <X className="h-3 w-3 mr-1" />
+                 Remove from Waitlist
+               </Button>
+             </div>
            </div>
          );
 
