@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useKBArticles, useKBCategories } from '@/hooks/useKnowledgeBase';
+import { CreateCoachDeclineButton } from './CreateCoachDeclineButton';
 import { format } from 'date-fns';
 
 interface KBDocumentationTabProps {
@@ -267,6 +268,13 @@ export const KBDocumentationTab: React.FC<KBDocumentationTabProps> = ({
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {/* Add Coach Decline Article if it doesn't exist */}
+          {!articles.some(article => article.slug === 'coach-decline-behavior-history-preservation') && (
+            <div className="mb-4">
+              <CreateCoachDeclineButton />
+            </div>
+          )}
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <Button
               variant="outline"
