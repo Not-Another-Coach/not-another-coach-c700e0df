@@ -43,10 +43,30 @@ const tables = [
     items: [
       {
         name: 'client_trainer_engagement',
-        description: 'Tracks relationship stages between clients and trainers',
-        keyColumns: ['client_id', 'trainer_id', 'stage', 'liked_at', 'matched_at', 'notes'],
-        relationships: ['References profiles.id for both client and trainer'],
-        purpose: 'Core engagement tracking through discovery to active client stages'
+        description: 'Tracks the relationship status between a client and a trainer with comprehensive stage tracking',
+        keyColumns: ['client_id', 'trainer_id', 'stage', 'liked_at', 'matched_at', 'discovery_completed_at', 'became_client_at', 'notes'],
+        relationships: ['References profiles.id for both client_id and trainer_id'],
+        purpose: 'Core engagement tracking through discovery to active client stages',
+        detailedInfo: {
+          stageValues: [
+            'browsing - Initial state when viewing profiles',
+            'liked - Client has liked/saved the trainer',
+            'shortlisted - Trainer is on client\'s shortlist',
+            'discovery_call_booked - Discovery call has been scheduled',
+            'discovery_in_progress - Currently in discovery phase',
+            'matched - Both parties are engaged',
+            'discovery_completed - Discovery call finished',
+            'active_client - Client is actively training with this trainer',
+            'unmatched - Relationship ended',
+            'declined - One party declined'
+          ],
+          timestampFields: [
+            'liked_at - Timestamp when the client liked the trainer',
+            'matched_at - Timestamp when they matched',
+            'discovery_completed_at - Timestamp when discovery call was completed',
+            'became_client_at - Timestamp when the client became an active client'
+          ]
+        }
       },
       {
         name: 'coach_selection_requests',
@@ -308,6 +328,31 @@ export const DatabaseDocumentation: React.FC<DatabaseDocumentationProps> = ({ se
                       <h4 className="font-medium text-sm text-foreground mb-2">Purpose</h4>
                       <p className="text-sm text-muted-foreground">{table.purpose}</p>
                     </div>
+                    {/* Enhanced detail for client_trainer_engagement table */}
+                    {table.name === 'client_trainer_engagement' && (table as any).detailedInfo && (
+                      <>
+                        <div>
+                          <h4 className="font-medium text-sm text-foreground mb-2">Stage Values</h4>
+                          <div className="space-y-1">
+                            {(table as any).detailedInfo.stageValues.map((stage: string, index: number) => (
+                              <p key={index} className="text-xs text-muted-foreground font-mono">
+                                {stage}
+                              </p>
+                            ))}
+                          </div>
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-sm text-foreground mb-2">Timestamp Fields</h4>
+                          <div className="space-y-1">
+                            {(table as any).detailedInfo.timestampFields.map((field: string, index: number) => (
+                              <p key={index} className="text-xs text-muted-foreground font-mono">
+                                {field}
+                              </p>
+                            ))}
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </CardContent>
               </Card>
