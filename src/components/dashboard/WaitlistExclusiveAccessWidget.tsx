@@ -15,6 +15,9 @@ interface ExclusiveTrainer {
   hourly_rate?: number;
   rating?: number;
   package_options?: any;
+  discovery_call_settings?: {
+    offers_discovery_call: boolean;
+  };
   exclusive_until: string;
 }
 
@@ -95,7 +98,8 @@ export function WaitlistExclusiveAccessWidget() {
               location,
               hourly_rate,
               rating,
-              package_options
+              package_options,
+              discovery_call_settings(offers_discovery_call)
             `)
             .in('id', relevantCoachIds)
             .eq('user_type', 'trainer');

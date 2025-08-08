@@ -7,6 +7,7 @@ import { useWaitlistExclusive } from '@/hooks/useWaitlistExclusive';
 import { useAuth } from '@/hooks/useAuth';
 import { BookDiscoveryCallButton } from '@/components/discovery-call/BookDiscoveryCallButton';
 import { ChooseCoachButton } from '@/components/coach-selection/ChooseCoachButton';
+import { StartConversationButton } from '@/components/StartConversationButton';
 import { format, formatDistanceToNow } from 'date-fns';
 
 interface WaitlistExclusiveAccessProps {
@@ -20,6 +21,9 @@ interface WaitlistExclusiveAccessProps {
     hourly_rate?: number;
     rating?: number;
     package_options?: any;
+    discovery_call_settings?: {
+      offers_discovery_call: boolean;
+    };
   };
   exclusiveUntil: string;
 }
@@ -64,6 +68,7 @@ export function WaitlistExclusiveAccess({ trainer, exclusiveUntil }: WaitlistExc
   }
 
   const trainerName = `${trainer.first_name} ${trainer.last_name}`;
+  const offersDiscoveryCall = trainer.discovery_call_settings?.offers_discovery_call ?? false;
 
   return (
     <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10">
@@ -112,18 +117,28 @@ export function WaitlistExclusiveAccess({ trainer, exclusiveUntil }: WaitlistExc
         </div>
 
         <div className="flex gap-2">
-          <BookDiscoveryCallButton 
-            trainer={{ 
-              id: trainer.id,
-              name: `${trainer.first_name} ${trainer.last_name}`,
-              firstName: trainer.first_name,
-              lastName: trainer.last_name,
-              profilePhotoUrl: trainer.profile_photo_url,
-              offers_discovery_call: true
-            }}
-            size="sm"
-            className="flex-1"
-          />
+          {offersDiscoveryCall ? (
+            <BookDiscoveryCallButton 
+              trainer={{ 
+                id: trainer.id,
+                name: `${trainer.first_name} ${trainer.last_name}`,
+                firstName: trainer.first_name,
+                lastName: trainer.last_name,
+                profilePhotoUrl: trainer.profile_photo_url,
+                offers_discovery_call: true
+              }}
+              size="sm"
+              className="flex-1"
+            />
+          ) : (
+            <StartConversationButton
+              trainerId={trainer.id}
+              trainerName={trainerName}
+              size="sm"
+              className="flex-1"
+              variant="default"
+            />
+          )}
           
           {trainer.package_options && Array.isArray(trainer.package_options) && trainer.package_options.length > 0 && (
             <ChooseCoachButton 
