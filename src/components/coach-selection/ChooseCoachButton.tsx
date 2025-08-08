@@ -38,7 +38,7 @@ export const ChooseCoachButton = ({
 
   const isClient = profile?.user_type === 'client';
   // Show button when there's 2-way chat (matched), discovery call stages, or discovery in progress (for trainers who don't offer discovery calls)
-  const canChooseCoach = isClient && (stage === 'matched' || stage === 'discovery_call_booked' || stage === 'discovery_completed' || stage === 'discovery_in_progress');
+  const canChooseCoach = isClient && (stage === 'matched' || stage === 'discovery_call_booked' || stage === 'discovery_completed' || stage === 'discovery_in_progress' || stage === 'waitlist');
 
   useEffect(() => {
     const fetchSelectionRequest = async () => {
@@ -116,7 +116,7 @@ export const ChooseCoachButton = ({
           </Badge>
           <p className="text-sm text-muted-foreground">{config.description}</p>
           
-          {selectionRequest.status === 'accepted' && (
+          {(selectionRequest.status === 'accepted' || selectionRequest.status === 'awaiting_payment') && (
             <Button 
               className="w-full"
               onClick={() => setShowPaymentForm(true)}
