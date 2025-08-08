@@ -16,10 +16,21 @@ export const KBDocumentationTab: React.FC<KBDocumentationTabProps> = ({
   searchTerm,
   onElementClick,
 }) => {
-  const { data: categories = [] } = useKBCategories();
-  const { data: articles = [], isLoading } = useKBArticles({
+  const { data: categories = [], isLoading: categoriesLoading, error: categoriesError } = useKBCategories();
+  const { data: articles = [], isLoading: articlesLoading, error: articlesError } = useKBArticles({
     search: searchTerm || undefined,
     status: 'published',
+  });
+
+  // Debug logging
+  console.log('KB Debug:', { 
+    categories: categories.length, 
+    articles: articles.length, 
+    categoriesLoading, 
+    articlesLoading,
+    categoriesError,
+    articlesError,
+    searchTerm 
   });
 
   // Filter articles based on search term
@@ -29,6 +40,8 @@ export const KBDocumentationTab: React.FC<KBDocumentationTabProps> = ({
     article.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
     article.excerpt?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const isLoading = categoriesLoading || articlesLoading;
 
   const getContentTypeColor = (type: string) => {
     const colors = {
@@ -48,6 +61,14 @@ export const KBDocumentationTab: React.FC<KBDocumentationTabProps> = ({
       <div className="text-center py-8">
         <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         <p className="mt-2 text-muted-foreground">Loading knowledge base...</p>
+      </div>
+    );
+  }
+
+  if (categoriesError || articlesError) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-red-500">Error loading knowledge base: {categoriesError?.message || articlesError?.message}</p>
       </div>
     );
   }

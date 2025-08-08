@@ -163,13 +163,7 @@ const Documentation = () => {
           <TabsContent value="knowledge-base" className="mt-6">
             <div className="space-y-8">
               <KBDocumentationTab searchTerm={searchTerm} onElementClick={handleElementClick} />
-              <MessageComposer
-                message={message}
-                setMessage={setMessage}
-                clickedElements={clickedElements}
-                onClearElements={handleClearElements}
-                onRemoveElement={handleRemoveElement}
-              />
+              {/* Message Composer is disabled for Knowledge Base tab */}
             </div>
           </TabsContent>
         </Tabs>
