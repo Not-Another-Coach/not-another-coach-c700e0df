@@ -6,6 +6,7 @@ import { useCoachAnalytics } from "@/hooks/useCoachAnalytics";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { useWaitlist } from "@/hooks/useWaitlist";
+import { useCoachAvailability } from "@/hooks/useCoachAvailability";
 
 import { WaitlistManagement } from "@/components/coach/WaitlistManagement";
 import { CoachFeedbackSummary } from "@/components/coach/CoachFeedbackSummary";
@@ -66,6 +67,7 @@ const TrainerDashboard = () => {
   const { analytics, shortlistedClients, shortlistedStats, loading: analyticsLoading } = useCoachAnalytics(profile?.id);
   const { isAdmin } = useUserRoles();
   const { waitlistEntries } = useWaitlist();
+  const { settings: availabilitySettings, loading: availabilityLoading } = useCoachAvailability();
   const navigate = useNavigate();
   const [availabilityStatus, setAvailabilityStatus] = useState<'accepting' | 'waitlist' | 'unavailable'>('accepting');
   const [prospectsCount, setProspectsCount] = useState(0);
@@ -73,20 +75,13 @@ const TrainerDashboard = () => {
   const [activeView, setActiveView] = useState('dashboard');
   const [showProspectsDropdown, setShowProspectsDropdown] = useState(false);
 
-  // Sync availability status with profile data
+  // Sync availability status with coach availability settings
   useEffect(() => {
-    console.log('Profile client_status:', profile?.client_status);
-    if (profile?.client_status) {
-      const statusMap = {
-        'open': 'accepting' as const,
-        'waitlist': 'waitlist' as const,
-        'paused': 'unavailable' as const
-      };
-      const newStatus = statusMap[profile.client_status] || 'accepting';
-      console.log('Setting availability status to:', newStatus);
-      setAvailabilityStatus(newStatus);
+    if (availabilitySettings?.availability_status) {
+      console.log('Coach availability status:', availabilitySettings.availability_status);
+      setAvailabilityStatus(availabilitySettings.availability_status);
     }
-  }, [profile?.client_status]);
+  }, [availabilitySettings?.availability_status]);
 
   // Redirect if not trainer
   useEffect(() => {
@@ -217,7 +212,7 @@ const TrainerDashboard = () => {
             <Button 
               variant="outline" 
               size="sm"
-              onClick={() => navigate('/trainer/profile-setup')}
+              onClick={() => navigate('/trainer/profile-setup?tab=working-hours')}
             >
               <Settings className="w-4 h-4 mr-2" />
               Profile Management
@@ -333,7 +328,7 @@ const TrainerDashboard = () => {
                   <Button 
                     className="h-12 justify-start gap-3" 
                     variant="default"
-                    onClick={() => navigate('/trainer/profile-setup?tab=management')}
+                    onClick={() => navigate('/trainer/profile-setup?tab=working-hours')}
                   >
                     <Settings className="h-4 w-4" />
                     Manage Availability
