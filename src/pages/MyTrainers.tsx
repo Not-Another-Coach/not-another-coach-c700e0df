@@ -598,19 +598,21 @@ export default function MyTrainers() {
           
           return (
             <div className="space-y-2">
-              {/* Choose Coach Button - Show when trainer becomes available */}
-              <ChooseCoachButton
-                trainer={{
-                  id: trainer.id,
-                  name: trainerName,
-                  firstName: trainerName?.split(' ')[0],
-                  lastName: trainerName?.split(' ')[1],
-                  profilePhotoUrl: trainer.image,
-                  package_options: trainer.package_options
-                }}
-                stage={waitlistEngagementStage}
-                className="w-full"
-              />
+              {/* Choose Coach Button - Show only during exclusive access periods */}
+              {hasExclusiveAccess && (
+                <ChooseCoachButton
+                  trainer={{
+                    id: trainer.id,
+                    name: trainerName,
+                    firstName: trainerName?.split(' ')[0],
+                    lastName: trainerName?.split(' ')[1],
+                    profilePhotoUrl: trainer.image,
+                    package_options: trainer.package_options
+                  }}
+                  stage="discovery_in_progress" // Use discovery_in_progress stage to allow Choose Coach functionality
+                  className="w-full"
+                />
+              )}
               
               <div className="grid grid-cols-2 gap-2">
                 {/* Show Book Discovery Call button only if trainer offers discovery calls AND user has exclusive access */}
