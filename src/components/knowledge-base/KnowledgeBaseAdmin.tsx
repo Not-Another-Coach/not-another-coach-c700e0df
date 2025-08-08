@@ -16,6 +16,7 @@ import {
 } from '@/hooks/useKnowledgeBase';
 import { KBArticleEditor } from './KBArticleEditor';
 import { KBCategoryManager } from './KBCategoryManager';
+import { AddCoachDeclineArticle } from './AddCoachDeclineArticle';
 import { format } from 'date-fns';
 
 export const KnowledgeBaseAdmin: React.FC = () => {
@@ -173,6 +174,11 @@ export const KnowledgeBaseAdmin: React.FC = () => {
               </Select>
             </CardContent>
           </Card>
+
+          {/* Quick Actions */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <AddCoachDeclineArticle />
+          </div>
 
           {/* Articles List */}
           <div className="grid gap-4">
