@@ -106,6 +106,7 @@ export type Database = {
       }
       client_onboarding_progress: {
         Row: {
+          activity_id: string | null
           client_id: string
           completed_at: string | null
           completed_by: string | null
@@ -127,6 +128,7 @@ export type Database = {
           uploaded_file_url: string | null
         }
         Insert: {
+          activity_id?: string | null
           client_id: string
           completed_at?: string | null
           completed_by?: string | null
@@ -148,6 +150,7 @@ export type Database = {
           uploaded_file_url?: string | null
         }
         Update: {
+          activity_id?: string | null
           client_id?: string
           completed_at?: string | null
           completed_by?: string | null
@@ -169,6 +172,13 @@ export type Database = {
           uploaded_file_url?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "client_onboarding_progress_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "trainer_onboarding_activities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "client_onboarding_progress_template_step_id_fkey"
             columns: ["template_step_id"]
@@ -1555,6 +1565,95 @@ export type Database = {
           year_certified?: number | null
         }
         Relationships: []
+      }
+      template_activities: {
+        Row: {
+          activity_id: string
+          created_at: string
+          id: string
+          template_id: string
+        }
+        Insert: {
+          activity_id: string
+          created_at?: string
+          id?: string
+          template_id: string
+        }
+        Update: {
+          activity_id?: string
+          created_at?: string
+          id?: string
+          template_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_activities_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "trainer_onboarding_activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "template_activities_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "trainer_onboarding_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trainer_onboarding_activities: {
+        Row: {
+          activity_name: string
+          category: string
+          completion_method: string
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          instructions: string | null
+          is_active: boolean
+          requires_file_upload: boolean
+          trainer_id: string
+          updated_at: string
+        }
+        Insert: {
+          activity_name: string
+          category?: string
+          completion_method?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          instructions?: string | null
+          is_active?: boolean
+          requires_file_upload?: boolean
+          trainer_id: string
+          updated_at?: string
+        }
+        Update: {
+          activity_name?: string
+          category?: string
+          completion_method?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          instructions?: string | null
+          is_active?: boolean
+          requires_file_upload?: boolean
+          trainer_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainer_onboarding_activities_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trainer_onboarding_templates: {
         Row: {
