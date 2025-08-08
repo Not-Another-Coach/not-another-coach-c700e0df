@@ -47,6 +47,7 @@ export function DashboardSummary({ profile, onTabChange }: DashboardSummaryProps
   const [discoveryCallsData, setDiscoveryCallsData] = useState({
     scheduled: 0,
     completed: 0,
+    cancelled: 0,
     total: 0
   });
 
@@ -90,9 +91,11 @@ export function DashboardSummary({ profile, onTabChange }: DashboardSummaryProps
       if (data && !error) {
         const scheduled = data.filter(call => call.status === 'scheduled').length;
         const completed = data.filter(call => call.status === 'completed').length;
+        const cancelled = data.filter(call => call.status === 'cancelled').length;
         setDiscoveryCallsData({
           scheduled,
           completed,
+          cancelled,
           total: data.length
         });
       }
@@ -256,17 +259,21 @@ export function DashboardSummary({ profile, onTabChange }: DashboardSummaryProps
             </div>
             <h3 className="font-semibold text-purple-900 mb-4">Discovery Calls</h3>
             
-            <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="grid grid-cols-4 gap-2 text-center">
               <div>
-                <div className="text-2xl font-bold text-purple-700">{discoveryCallsData.scheduled}</div>
+                <div className="text-xl font-bold text-purple-700">{discoveryCallsData.scheduled}</div>
                 <p className="text-xs text-purple-600">Scheduled</p>
               </div>
               <div>
-                <div className="text-2xl font-bold text-purple-700">{discoveryCallsData.completed}</div>
+                <div className="text-xl font-bold text-purple-700">{discoveryCallsData.completed}</div>
                 <p className="text-xs text-purple-600">Completed</p>
               </div>
               <div>
-                <div className="text-2xl font-bold text-purple-700">{discoveryCallsData.total}</div>
+                <div className="text-xl font-bold text-purple-700">{discoveryCallsData.cancelled}</div>
+                <p className="text-xs text-purple-600">Cancelled</p>
+              </div>
+              <div>
+                <div className="text-xl font-bold text-purple-700">{discoveryCallsData.total}</div>
                 <p className="text-xs text-purple-600">Total</p>
               </div>
             </div>
