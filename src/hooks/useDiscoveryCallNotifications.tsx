@@ -194,17 +194,23 @@ export function useDiscoveryCallNotifications() {
   };
 
   const cancelCall = async (callId: string, reason?: string) => {
+    console.log('🚨 Starting discovery call cancellation via hook for call:', callId);
+    console.log('🚨 Cancellation reason:', reason);
+    
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('discovery_calls')
         .update({ 
           status: 'cancelled',
           cancellation_reason: reason 
         })
-        .eq('id', callId);
+        .eq('id', callId)
+        .select();
+
+      console.log('🚨 Hook update result - data:', data, 'error:', error);
 
       if (error) {
-        console.error('Error cancelling call:', error);
+        console.error('❌ Error cancelling call via hook:', error);
         return false;
       }
 
