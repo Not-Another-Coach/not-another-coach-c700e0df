@@ -590,64 +590,66 @@ export default function MyTrainers() {
           </div>
          );
 
-       case 'waitlist':
-         const offersDiscoveryCallWaitlist = trainer.offers_discovery_call;
-         const trainerName = trainer.name;
-         const waitlistEngagementStage = getEngagementStage(trainer.id);
-         
-         return (
-           <div className="space-y-2">
-             {/* Choose Coach Button - Show when trainer becomes available */}
-             <ChooseCoachButton
-               trainer={{
-                 id: trainer.id,
-                 name: trainerName,
-                 firstName: trainerName?.split(' ')[0],
-                 lastName: trainerName?.split(' ')[1],
-                 profilePhotoUrl: trainer.image,
-                 package_options: trainer.package_options
-               }}
-               stage={waitlistEngagementStage}
-               className="w-full"
-             />
-             
-             <div className="grid grid-cols-2 gap-2">
-               {offersDiscoveryCallWaitlist ? (
-                 <BookDiscoveryCallButton 
-                   trainer={{ 
-                     id: trainer.id,
-                     name: trainerName,
-                     firstName: trainerName?.split(' ')[0],
-                     lastName: trainerName?.split(' ')[1],
-                     profilePhotoUrl: trainer.image,
-                     offers_discovery_call: true
-                   }}
-                   size="sm"
-                   className="flex-1"
-                 />
-               ) : (
-                 <StartConversationButton
-                   trainerId={trainer.id}
-                   trainerName={trainerName}
-                   size="sm"
-                   className="flex-1"
-                   variant="default"
-                   bypassShortlistRequirement={true}
-                 />
-               )}
-               
-               <Button
-                 size="sm"
-                 variant="outline"
-                 onClick={() => handleLeaveWaitlist(trainer.id)}
-                 className="flex-1"
-               >
-                 <X className="h-3 w-3 mr-1" />
-                 Remove from Waitlist
-               </Button>
-             </div>
-           </div>
-         );
+        case 'waitlist':
+          const offersDiscoveryCallWaitlist = trainer.offers_discovery_call;
+          const trainerName = trainer.name;
+          const waitlistEngagementStage = getEngagementStage(trainer.id);
+          const hasExclusiveAccess = trainer.hasExclusiveAccess;
+          
+          return (
+            <div className="space-y-2">
+              {/* Choose Coach Button - Show when trainer becomes available */}
+              <ChooseCoachButton
+                trainer={{
+                  id: trainer.id,
+                  name: trainerName,
+                  firstName: trainerName?.split(' ')[0],
+                  lastName: trainerName?.split(' ')[1],
+                  profilePhotoUrl: trainer.image,
+                  package_options: trainer.package_options
+                }}
+                stage={waitlistEngagementStage}
+                className="w-full"
+              />
+              
+              <div className="grid grid-cols-2 gap-2">
+                {/* Show Book Discovery Call button only if trainer offers discovery calls AND user has exclusive access */}
+                {offersDiscoveryCallWaitlist && hasExclusiveAccess ? (
+                  <BookDiscoveryCallButton 
+                    trainer={{ 
+                      id: trainer.id,
+                      name: trainerName,
+                      firstName: trainerName?.split(' ')[0],
+                      lastName: trainerName?.split(' ')[1],
+                      profilePhotoUrl: trainer.image,
+                      offers_discovery_call: true
+                    }}
+                    size="sm"
+                    className="flex-1"
+                  />
+                ) : (
+                  <StartConversationButton
+                    trainerId={trainer.id}
+                    trainerName={trainerName}
+                    size="sm"
+                    className="flex-1"
+                    variant="default"
+                    bypassShortlistRequirement={true}
+                  />
+                )}
+                
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleLeaveWaitlist(trainer.id)}
+                  className="flex-1"
+                >
+                  <X className="h-3 w-3 mr-1" />
+                  Remove from Waitlist
+                </Button>
+              </div>
+            </div>
+          );
 
        default:
          return null;

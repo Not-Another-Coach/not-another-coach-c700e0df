@@ -5,6 +5,7 @@ import { useTrainerEngagement } from './useTrainerEngagement';
 import { useConversations } from './useConversations';
 import { useDiscoveryCallData } from './useDiscoveryCallData';
 import { useWaitlist } from './useWaitlist';
+import { useWaitlistExclusive } from './useWaitlistExclusive';
 
 export interface TrainerWithStatus {
   id: string;
@@ -30,6 +31,7 @@ export interface TrainerWithStatus {
   engagement?: any;
   statusLabel: string;
   statusColor: string;
+  hasExclusiveAccess?: boolean;
 }
 
 export function useMyTrainers(refreshTrigger?: number) {
@@ -37,6 +39,7 @@ export function useMyTrainers(refreshTrigger?: number) {
   const { conversations } = useConversations();
   const { hasActiveDiscoveryCall } = useDiscoveryCallData();
   const { checkClientWaitlistStatus } = useWaitlist();
+  const { checkClientExclusiveAccess } = useWaitlistExclusive();
   
   const { 
     engagements,
@@ -297,13 +300,17 @@ export function useMyTrainers(refreshTrigger?: number) {
         const waitlistPromises = waitlistTrainers.map(async (trainerId) => {
           const trainerProfile = trainerData?.find(t => t.id === trainerId);
           if (trainerProfile && !trainersWithStatus.find(t => t.id === trainerId)) {
+            // Check if user has exclusive access for this trainer
+            const hasExclusiveAccess = user?.id ? await checkClientExclusiveAccess(user.id, trainerId) : false;
+            
             // Only add if not already in list with another status
             return {
               ...createTrainerObject(trainerProfile),
               status: 'waitlist' as const,
               engagement: null,
               statusLabel: 'On Waitlist',
-              statusColor: 'bg-orange-100 text-orange-800'
+              statusColor: 'bg-orange-100 text-orange-800',
+              hasExclusiveAccess
             };
           }
           return null;
