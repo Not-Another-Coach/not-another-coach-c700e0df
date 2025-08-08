@@ -485,57 +485,51 @@ export default function MyTrainers() {
                  Message
               </Button>
               
-              {/* Show waitlist button if trainer has waitlist and client not on it */}
-              {hasWaitlistEnabled ? (
-                <WaitlistJoinButton
-                  coachId={trainer.id}
-                  coachName={trainer.name}
-                  nextAvailableDate={trainerAvailabilityForCTA?.next_available_date}
-                  waitlistMessage={trainerAvailabilityForCTA?.waitlist_message}
-                  onWaitlistChange={() => setWaitlistRefreshKey(prev => prev + 1)}
-                />
-              ) : discoveryCall && !isCallInPast ? (
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={() => handleRescheduleCall(trainer.id)}
-                >
-                  <Edit className="h-3 w-3 mr-1" />
-                  Reschedule Call
-                </Button>
-              ) : isDiscoveryInProgress ? (
-                <ChooseCoachButton
-                  trainer={trainer}
-                  stage={getEngagementStage(trainer.id)}
-                  className="w-full"
-                />
-              ) : discoveryCall && isCallInPast ? (
-                <ChooseCoachButton
-                  trainer={trainer}
-                  stage={getEngagementStage(trainer.id)}
-                  className="w-full"
-                />
-              ) : trainer.offers_discovery_call ? (
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  disabled
-                  className="opacity-75 cursor-not-allowed"
-                >
-                  <Calendar className="h-3 w-3 mr-1" />
-                  No Call Available
-                </Button>
-              ) : (
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  disabled
-                  className="opacity-75 cursor-not-allowed"
-                >
-                  <X className="h-3 w-3 mr-1" />
-                  No Call Available
-                </Button>
-              )}
+               {/* Show waitlist button if trainer has waitlist and client not on it */}
+               {hasWaitlistEnabled ? (
+                 <WaitlistJoinButton
+                   coachId={trainer.id}
+                   coachName={trainer.name}
+                   nextAvailableDate={trainerAvailabilityForCTA?.next_available_date}
+                   waitlistMessage={trainerAvailabilityForCTA?.waitlist_message}
+                   onWaitlistChange={() => setWaitlistRefreshKey(prev => prev + 1)}
+                 />
+               ) : discoveryCall && !isCallInPast ? (
+                 <Button 
+                   size="sm" 
+                   variant="outline"
+                   onClick={() => handleRescheduleCall(trainer.id)}
+                 >
+                   <Edit className="h-3 w-3 mr-1" />
+                   Reschedule Call
+                 </Button>
+               ) : (isDiscoveryInProgress || (discoveryCall && isCallInPast)) ? (
+                 <ChooseCoachButton
+                   trainer={trainer}
+                   stage={getEngagementStage(trainer.id)}
+                   className="w-full"
+                 />
+               ) : trainer.offers_discovery_call ? (
+                 <Button 
+                   size="sm" 
+                   variant="outline"
+                   disabled
+                   className="opacity-75 cursor-not-allowed"
+                 >
+                   <Calendar className="h-3 w-3 mr-1" />
+                   No Call Available
+                 </Button>
+               ) : (
+                 <Button 
+                   size="sm" 
+                   variant="outline"
+                   disabled
+                   className="opacity-75 cursor-not-allowed"
+                 >
+                   <X className="h-3 w-3 mr-1" />
+                   No Call Available
+                 </Button>
+               )}
               </div>
             </div>
           );
