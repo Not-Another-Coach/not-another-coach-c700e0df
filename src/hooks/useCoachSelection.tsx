@@ -190,8 +190,15 @@ export function useCoachSelection() {
         return { error };
       }
 
-      // If request is declined, check if client should be moved back to exploring coaches
+      // If request is declined, update engagement status and check if client should be moved back to exploring coaches
       if (status === 'declined' && requestData?.client_id) {
+        // Update the engagement status to 'declined'
+        await supabase.rpc('update_engagement_stage', {
+          client_uuid: requestData.client_id,
+          trainer_uuid: user.id,
+          new_stage: 'declined'
+        });
+
         const hasActiveEngagements = await checkForActiveEngagements(requestData.client_id);
         
         if (!hasActiveEngagements) {
