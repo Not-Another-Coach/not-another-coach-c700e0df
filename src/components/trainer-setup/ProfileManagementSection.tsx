@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { Bell, Eye, CheckCircle, AlertTriangle } from "lucide-react";
 import { TrainerProfilePreview } from "@/components/TrainerProfilePreview";
+import { AvailabilitySection } from "./AvailabilitySection";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface ProfileManagementSectionProps {
@@ -16,6 +17,9 @@ interface ProfileManagementSectionProps {
 export function ProfileManagementSection({ formData, updateFormData }: ProfileManagementSectionProps) {
   return (
     <div className="space-y-6">
+      {/* Availability Status Management */}
+      <AvailabilitySection formData={formData} updateFormData={updateFormData} />
+
       {/* Notification Preferences */}
       <div className="space-y-4">
         <Label>Notification Preferences</Label>
