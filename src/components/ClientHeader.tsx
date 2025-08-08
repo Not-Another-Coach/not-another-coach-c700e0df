@@ -12,6 +12,7 @@ interface ClientHeaderProps {
   activeTab?: string;
   onTabChange?: (tab: string) => void;
   showNavigation?: boolean;
+  isActiveClient?: boolean;
 }
 
 export function ClientHeader({ 
@@ -19,18 +20,26 @@ export function ClientHeader({
   onSignOut, 
   activeTab = "summary", 
   onTabChange, 
-  showNavigation = true 
+  showNavigation = true,
+  isActiveClient = false
 }: ClientHeaderProps) {
   const navigate = useNavigate();
   const { isAdmin } = useUserRoles();
   const { progress: journeyProgress, loading: journeyLoading } = useClientJourneyProgress();
 
-  const navigationItems = [
+  const defaultNavigationItems = [
     { key: "summary", label: "Dashboard", icon: Home, route: "/client/dashboard" },
     { key: "preferences", label: "Preferences", icon: Settings, route: "/client/preferences" },
     { key: "my-trainers", label: "My Trainers", icon: Users, route: "/my-trainers" },
     { key: "explore", label: "Explore", icon: UserSearch, route: "/client/explore" }
   ];
+
+  const activeClientNavigationItems = [
+    { key: "summary", label: "Dashboard", icon: Home, route: "/client/dashboard" },
+    { key: "onboarding", label: "Onboarding", icon: Users, route: "/client/onboarding" }
+  ];
+
+  const navigationItems = isActiveClient ? activeClientNavigationItems : defaultNavigationItems;
 
   const handleNavigation = (tab: string, route: string) => {
     if (onTabChange) {

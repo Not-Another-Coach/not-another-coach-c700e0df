@@ -20,6 +20,8 @@ import { DiscoveryCallFeedbackPrompt } from "@/components/dashboard/DiscoveryCal
 import { useClientJourneyProgress } from "@/hooks/useClientJourneyProgress";
 import { ClientHeader } from "@/components/ClientHeader";
 import { WaitlistExclusiveAccessWidget } from "@/components/dashboard/WaitlistExclusiveAccessWidget";
+import { OnboardingSection } from "@/components/dashboard/OnboardingSection";
+import { useTrainerEngagement } from "@/hooks/useTrainerEngagement";
 import { Heart, Settings, Search, MessageCircle, Menu, Users, Shuffle, Shield, ChevronRight, Home, User, UserSearch } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -29,11 +31,15 @@ export default function ClientDashboard() {
   
   const { isAdmin } = useUserRoles();
   const { progress: journeyProgress, loading: journeyLoading } = useClientJourneyProgress();
+  const { engagements } = useTrainerEngagement();
   const navigate = useNavigate();
   const location = useLocation();
   const [activeTab, setActiveTab] = useState("summary");
   const [completedDiscoveryCalls, setCompletedDiscoveryCalls] = useState([]);
   const [dismissedFeedbackPrompts, setDismissedFeedbackPrompts] = useState<string[]>([]);
+  
+  // Check if client is an active client with any trainer
+  const isActiveClient = engagements.some(engagement => engagement.stage === 'active_client');
 
   // Redirect if not logged in
   useEffect(() => {
@@ -124,6 +130,7 @@ export default function ClientDashboard() {
         onSignOut={handleSignOut}
         activeTab={activeTab}
         onTabChange={setActiveTab}
+        isActiveClient={isActiveClient}
       />
 
 
@@ -132,7 +139,7 @@ export default function ClientDashboard() {
         <div className="space-y-6">
 
           {/* Tab Content */}
-          {activeTab === "summary" && (
+          {activeTab === "summary" && !isActiveClient && (
             <div className="space-y-6">
               {/* Waitlist Exclusive Access */}
               <WaitlistExclusiveAccessWidget />
@@ -154,19 +161,27 @@ export default function ClientDashboard() {
             </div>
           )}
 
-          {activeTab === "preferences" && (
+          {activeTab === "summary" && isActiveClient && (
+            <OnboardingSection profile={profile} />
+          )}
+
+          {activeTab === "onboarding" && isActiveClient && (
+            <OnboardingSection profile={profile} />
+          )}
+
+          {!isActiveClient && activeTab === "preferences" && (
             <div className="space-y-6">
               <ClientSurveyWidget profile={profile} />
             </div>
           )}
 
-          {activeTab === "my-trainers" && (
+          {!isActiveClient && activeTab === "my-trainers" && (
             <div className="space-y-6">
               <MyTrainers />
             </div>
           )}
 
-          {activeTab === "explore" && (
+          {!isActiveClient && activeTab === "explore" && (
             <div className="space-y-6">
               <ExploreAllTrainers 
                 profile={profile}
