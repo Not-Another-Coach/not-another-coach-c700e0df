@@ -80,8 +80,8 @@ export function useTrainerEngagement(refreshTrigger?: number) {
         return;
       }
 
-      // Refresh engagements
-      await fetchEngagements();
+      // Refresh engagements only if needed to avoid unnecessary delays
+      setTimeout(() => fetchEngagements(), 100);
     } catch (error) {
       console.error('Error updating engagement stage:', error);
     }

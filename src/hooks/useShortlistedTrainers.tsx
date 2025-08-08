@@ -140,10 +140,13 @@ export function useShortlistedTrainers(refreshTrigger?: number) {
     }
 
     try {
+      // Update engagement stage first
       await engagementShortlistTrainer(trainerId);
       
-      // Update client journey progress
-      await updateClientJourney();
+      // Update client journey in parallel to avoid blocking
+      updateClientJourney().catch(error => 
+        console.error('Error updating client journey:', error)
+      );
       
       toast.success('Trainer shortlisted! Chat and discovery call options are now available.');
       return { data: { trainer_id: trainerId } };
