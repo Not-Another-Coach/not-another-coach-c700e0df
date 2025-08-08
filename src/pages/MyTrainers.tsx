@@ -566,11 +566,10 @@ export default function MyTrainers() {
           <Button
             variant="outline"
             size="sm"
-            onClick={refreshData}
-            disabled={isRefreshing}
+            onClick={() => window.location.reload()}
             className="flex items-center gap-2"
           >
-            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw className="h-4 w-4" />
             Refresh
           </Button>
         </div>
