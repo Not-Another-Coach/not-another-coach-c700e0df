@@ -350,13 +350,16 @@ export function ClientOnboardingManagement() {
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-medium">{a.activity_name}</h4>
-                            <Badge variant="outline">{a.category}</Badge>
-                            {a.is_system && (
-                              <Badge variant="secondary">System</Badge>
-                            )}
-                          </div>
+        <div className="flex items-center gap-2 min-w-0">
+          <h4 className="font-medium whitespace-nowrap">{a.activity_name}</h4>
+          {a.description && (
+            <span className="text-sm text-muted-foreground truncate flex-1">— {a.description}</span>
+          )}
+          <Badge variant="outline">{a.category}</Badge>
+          {a.is_system && (
+            <Badge variant="secondary">System</Badge>
+          )}
+        </div>
                         </div>
                         <div className="flex items-center gap-2">
                           <Button variant="outline" size="sm">Assign</Button>
