@@ -25,7 +25,7 @@ export function ClientOnboardingManagement() {
   } = useTrainerOnboarding();
   
   const { packageWorkflows, loading: workflowsLoading } = usePackageWaysOfWorking();
-  const { activities, loading: activitiesLoading, error: activitiesError, refresh: refreshActivities, createActivity } = useTrainerActivities();
+  const { activities, loading: activitiesLoading, error: activitiesError, refresh: refreshActivities, createActivity, updateActivity } = useTrainerActivities();
   
   const [newTemplate, setNewTemplate] = useState<Partial<OnboardingTemplate>>({
     step_name: '',
@@ -44,6 +44,8 @@ export function ClientOnboardingManagement() {
     category: 'Onboarding',
     description: '',
   });
+  const [showEditActivityDialog, setShowEditActivityDialog] = useState(false);
+  const [editActivity, setEditActivity] = useState<{ id: string; name: string; category: string; description: string | null } | null>(null);
   if (loading || workflowsLoading) {
     return (
       <Card>
@@ -110,6 +112,38 @@ export function ClientOnboardingManagement() {
       toast.success('Activity created');
       setShowCreateActivityDialog(false);
       setNewActivity({ name: '', category: 'Onboarding', description: '' });
+      refreshActivities();
+    }
+  };
+
+  const openEditActivity = (a: any) => {
+    setEditActivity({
+      id: a.id,
+      name: a.activity_name,
+      category: a.category,
+      description: a.description ?? ''
+    });
+    setShowEditActivityDialog(true);
+  };
+
+  const handleUpdateActivity = async () => {
+    if (!editActivity) return;
+    if (!editActivity.name.trim()) {
+      toast.error('Activity name is required');
+      return;
+    }
+    const result: any = await updateActivity(
+      editActivity.id,
+      editActivity.name.trim(),
+      editActivity.category,
+      (editActivity.description ?? '').trim() || null
+    );
+    if (result?.error) {
+      toast.error(result.error);
+    } else {
+      toast.success('Activity updated');
+      setShowEditActivityDialog(false);
+      setEditActivity(null);
       refreshActivities();
     }
   };
@@ -335,6 +369,57 @@ export function ClientOnboardingManagement() {
                   </div>
                 </DialogContent>
               </Dialog>
+              <Dialog open={showEditActivityDialog} onOpenChange={(open) => { setShowEditActivityDialog(open); if (!open) setEditActivity(null); }}>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Edit Activity</DialogTitle>
+                  </DialogHeader>
+                  {editActivity && (
+                    <div className="space-y-4">
+                      <div>
+                        <Label>Name</Label>
+                        <Input
+                          value={editActivity.name}
+                          onChange={(e) => setEditActivity({ ...editActivity, name: e.target.value })}
+                          placeholder="Activity name"
+                        />
+                      </div>
+                      <div>
+                        <Label>Category</Label>
+                        <Select
+                          value={editActivity.category}
+                          onValueChange={(value) => setEditActivity({ ...editActivity, category: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Onboarding">Onboarding</SelectItem>
+                            <SelectItem value="First Week">First Week</SelectItem>
+                            <SelectItem value="Ongoing Structure">Ongoing Structure</SelectItem>
+                            <SelectItem value="Tracking Tools">Tracking Tools</SelectItem>
+                            <SelectItem value="Client Expectations">Client Expectations</SelectItem>
+                            <SelectItem value="What I Bring">What I Bring</SelectItem>
+                            <SelectItem value="general">General</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label>Description</Label>
+                        <Textarea
+                          value={editActivity.description ?? ''}
+                          onChange={(e) => setEditActivity({ ...editActivity, description: e.target.value })}
+                          placeholder="Optional: add helpful context for this activity"
+                        />
+                      </div>
+                      <div className="flex justify-end gap-2">
+                        <Button variant="outline" onClick={() => { setShowEditActivityDialog(false); setEditActivity(null); }}>Cancel</Button>
+                        <Button onClick={handleUpdateActivity}>Save</Button>
+                      </div>
+                    </div>
+                  )}
+                </DialogContent>
+              </Dialog>
             </div>
             
             {activitiesLoading ? (
@@ -362,8 +447,13 @@ export function ClientOnboardingManagement() {
         </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm">Assign</Button>
-                          <Button variant="ghost" size="sm" disabled={a.is_system}>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            disabled={a.is_system}
+                            onClick={() => openEditActivity(a)}
+                            aria-label="Edit activity"
+                          >
                             <Edit className="h-4 w-4" />
                           </Button>
                         </div>

@@ -76,6 +76,29 @@ const createActivity = async (name: string, category: string, description?: stri
   }
 };
 
+const updateActivity = async (id: string, name: string, category: string, description?: string | null) => {
+  setLoading(true);
+  setError(null);
+  try {
+    const { data, error } = await supabase
+      .from("trainer_onboarding_activities")
+      .update({ activity_name: name, category, description: description ?? null })
+      .eq("id", id)
+      .select("id, activity_name, category, is_system, description")
+      .maybeSingle();
+
+    if (error) throw error;
+    await fetchAll();
+    return { data } as const;
+  } catch (e: any) {
+    const msg = e.message || "Failed to update activity";
+    setError(msg);
+    return { error: msg } as const;
+  } finally {
+    setLoading(false);
+  }
+};
+
 useEffect(() => {
   fetchAll();
 }, []);
@@ -98,5 +121,6 @@ useEffect(() => {
     getSuggestionsBySection,
     activities,
     createActivity,
+    updateActivity,
   };
 }
