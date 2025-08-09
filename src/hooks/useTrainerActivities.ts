@@ -146,6 +146,16 @@ const updateActivityDetails = async (
   }
 };
 
+  const getSuggestionsBySection = (sectionKey: string): string[] => {
+    const category = SECTION_TO_CATEGORY[sectionKey];
+    if (!category) return [];
+    const names = activities
+      .filter((a) => a.category === category)
+      .map((a) => a.activity_name.trim())
+      .filter((t) => t.length > 0);
+    return Array.from(new Set(names));
+  };
+
   return {
     loading,
     error,

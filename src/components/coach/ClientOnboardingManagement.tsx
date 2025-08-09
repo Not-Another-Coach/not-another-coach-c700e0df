@@ -478,7 +478,7 @@ export function ClientOnboardingManagement() {
                                     const range = quill?.getSelection(true);
                                     if (quill && range) {
                                       quill.insertEmbed(range.index, 'image', data.publicUrl);
-                                      quill.setSelection(range.index + 1);
+                                      quill.setSelection({ index: range.index + 1, length: 0 });
                                     }
                                   };
                                   input.click();
