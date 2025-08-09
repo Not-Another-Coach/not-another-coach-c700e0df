@@ -46,6 +46,26 @@ export function ClientOnboardingManagement() {
   });
   const [showEditActivityDialog, setShowEditActivityDialog] = useState(false);
   const [editActivity, setEditActivity] = useState<{ id: string; name: string; category: string; description: string | null } | null>(null);
+
+  // Filters for Activities
+  const [typeFilter, setTypeFilter] = useState<'all' | 'system' | 'trainer'>('all');
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState<string>('');
+
+  const categories = Array.from(new Set(activities.map((a) => a.category))).sort();
+  const filteredActivities = activities.filter((a) => {
+    if (typeFilter === 'system' && !a.is_system) return false;
+    if (typeFilter === 'trainer' && a.is_system) return false;
+    if (categoryFilter !== 'all' && a.category !== categoryFilter) return false;
+    const q = searchTerm.trim().toLowerCase();
+    if (q) {
+      const name = a.activity_name.toLowerCase();
+      const desc = (a.description || '').toLowerCase();
+      if (!name.includes(q) && !desc.includes(q)) return false;
+    }
+    return true;
+  });
+
   if (loading || workflowsLoading) {
     return (
       <Card>
@@ -421,7 +441,48 @@ export function ClientOnboardingManagement() {
                 </DialogContent>
               </Dialog>
             </div>
-            
+
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div className="sm:col-span-1">
+                <Label htmlFor="activity-search">Search</Label>
+                <Input
+                  id="activity-search"
+                  placeholder="Search name or description"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label>Type</Label>
+                <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as 'all' | 'system' | 'trainer')}>
+                  <SelectTrigger><SelectValue placeholder="All types" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="system">System</SelectItem>
+                    <SelectItem value="trainer">Trainer</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Category</Label>
+                <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v)}>
+                  <SelectTrigger><SelectValue placeholder="All categories" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    {categories.map((c) => (
+                      <SelectItem key={c} value={c}>{c}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-muted-foreground">
+                Showing {filteredActivities.length} of {activities.length}
+              </div>
+            </div>
+
             {activitiesLoading ? (
               <div className="text-sm text-muted-foreground py-8">Loading activities...</div>
             ) : activitiesError ? (
@@ -430,7 +491,7 @@ export function ClientOnboardingManagement() {
               <div className="text-center py-8 text-muted-foreground">No activities yet.</div>
             ) : (
               <div className="grid gap-4">
-                {activities.map((a, idx) => (
+                {filteredActivities.map((a, idx) => (
                   <Card key={idx}>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
