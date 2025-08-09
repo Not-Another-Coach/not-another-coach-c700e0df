@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { CheckCircle, Clock, AlertCircle, Plus, Edit, Trash2, Users, User } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,10 @@ import { useTrainerOnboarding, OnboardingTemplate, ClientOnboardingData } from '
 import { usePackageWaysOfWorking } from '@/hooks/usePackageWaysOfWorking';
 import { toast } from 'sonner';
 import { useTrainerActivities } from '@/hooks/useTrainerActivities';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 export function ClientOnboardingManagement() {
   const { 
@@ -25,8 +29,8 @@ export function ClientOnboardingManagement() {
   } = useTrainerOnboarding();
   
   const { packageWorkflows, loading: workflowsLoading } = usePackageWaysOfWorking();
-  const { activities, loading: activitiesLoading, error: activitiesError, refresh: refreshActivities, createActivity, updateActivity } = useTrainerActivities();
-  
+  const { activities, loading: activitiesLoading, error: activitiesError, refresh: refreshActivities, createActivity, updateActivity, updateActivityDetails } = useTrainerActivities();
+  const { user } = useAuth();
   const [newTemplate, setNewTemplate] = useState<Partial<OnboardingTemplate>>({
     step_name: '',
     step_type: 'mandatory',
@@ -45,8 +49,8 @@ export function ClientOnboardingManagement() {
     description: '',
   });
   const [showEditActivityDialog, setShowEditActivityDialog] = useState(false);
-  const [editActivity, setEditActivity] = useState<{ id: string; name: string; category: string; description: string | null } | null>(null);
-
+  const [editActivity, setEditActivity] = useState<{ id: string; name: string; category: string; description: string | null; guidance_html?: string | null; default_due_days?: number | null; default_sla_days?: number | null } | null>(null);
+  const quillRef = useRef<ReactQuill | null>(null);
   // Filters for Activities
   const [typeFilter, setTypeFilter] = useState<'all' | 'system' | 'trainer'>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
@@ -141,7 +145,10 @@ export function ClientOnboardingManagement() {
       id: a.id,
       name: a.activity_name,
       category: a.category,
-      description: a.description ?? ''
+      description: a.description ?? '',
+      guidance_html: a.guidance_html ?? '',
+      default_due_days: a.default_due_days ?? null,
+      default_sla_days: a.default_sla_days ?? null,
     });
     setShowEditActivityDialog(true);
   };
@@ -152,12 +159,19 @@ export function ClientOnboardingManagement() {
       toast.error('Activity name is required');
       return;
     }
-    const result: any = await updateActivity(
+
+    const result: any = await updateActivityDetails(
       editActivity.id,
-      editActivity.name.trim(),
-      editActivity.category,
-      (editActivity.description ?? '').trim() || null
+      {
+        name: editActivity.name.trim(),
+        category: editActivity.category,
+        description: (editActivity.description ?? '').trim() || null,
+        guidance_html: (editActivity.guidance_html ?? '').toString(),
+        default_due_days: editActivity.default_due_days ?? null,
+        default_sla_days: editActivity.default_sla_days ?? null,
+      }
     );
+
     if (result?.error) {
       toast.error(result.error);
     } else {
@@ -431,6 +445,70 @@ export function ClientOnboardingManagement() {
                           onChange={(e) => setEditActivity({ ...editActivity, description: e.target.value })}
                           placeholder="Optional: add helpful context for this activity"
                         />
+                      </div>
+                      <div>
+                        <Label>Guidance (rich text)</Label>
+                        <ReactQuill
+                          ref={quillRef}
+                          theme="snow"
+                          value={editActivity.guidance_html ?? ''}
+                          onChange={(value) => setEditActivity({ ...editActivity, guidance_html: value })}
+                          modules={{
+                            toolbar: {
+                              container: [
+                                ['bold', 'italic', 'underline', 'strike'],
+                                [{ 'header': [1, 2, 3, false] }],
+                                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                                ['link', 'image'],
+                                ['clean']
+                              ],
+                              handlers: {
+                                image: async () => {
+                                  const input = document.createElement('input');
+                                  input.type = 'file';
+                                  input.accept = 'image/*';
+                                  input.onchange = async () => {
+                                    const file = (input.files && input.files[0]) || null;
+                                    if (!file || !user?.id) return;
+                                    const path = `${user.id}/guidance/${crypto.randomUUID()}-${file.name}`;
+                                    const { error } = await supabase.storage.from('onboarding-public').upload(path, file, { upsert: false });
+                                    if (error) { toast.error('Image upload failed'); return; }
+                                    const { data } = supabase.storage.from('onboarding-public').getPublicUrl(path);
+                                    const quill = quillRef.current?.getEditor();
+                                    const range = quill?.getSelection(true);
+                                    if (quill && range) {
+                                      quill.insertEmbed(range.index, 'image', data.publicUrl);
+                                      quill.setSelection(range.index + 1);
+                                    }
+                                  };
+                                  input.click();
+                                }
+                              }
+                            }
+                          }}
+                        />
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <Label>Default due in (days)</Label>
+                          <Input
+                            type="number"
+                            min={0}
+                            value={editActivity.default_due_days ?? ''}
+                            onChange={(e) => setEditActivity({ ...editActivity, default_due_days: e.target.value ? parseInt(e.target.value, 10) : null })}
+                            placeholder="e.g., 7"
+                          />
+                        </div>
+                        <div>
+                          <Label>Default SLA (days)</Label>
+                          <Input
+                            type="number"
+                            min={0}
+                            value={editActivity.default_sla_days ?? ''}
+                            onChange={(e) => setEditActivity({ ...editActivity, default_sla_days: e.target.value ? parseInt(e.target.value, 10) : null })}
+                            placeholder="e.g., 2"
+                          />
+                        </div>
                       </div>
                       <div className="flex justify-end gap-2">
                         <Button variant="outline" onClick={() => { setShowEditActivityDialog(false); setEditActivity(null); }}>Cancel</Button>

@@ -46,6 +46,9 @@ verify_jwt = false
 [functions.check-user-validity]
 verify_jwt = true
 
+[functions.process-onboarding-sla]
+verify_jwt = false
+
 [edge-runtime]
 enabled = true
 port = 54329

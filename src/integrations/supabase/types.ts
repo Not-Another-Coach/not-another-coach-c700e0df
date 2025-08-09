@@ -107,6 +107,8 @@ export type Database = {
       client_onboarding_progress: {
         Row: {
           activity_id: string | null
+          allowed_attachments: Json | null
+          attachments: Json | null
           client_id: string
           completed_at: string | null
           completed_by: string | null
@@ -115,9 +117,15 @@ export type Database = {
           created_at: string
           description: string | null
           display_order: number
+          due_at: string | null
+          due_in_days: number | null
           id: string
           instructions: string | null
+          overdue_alert_sent_at: string | null
           requires_file_upload: boolean
+          sla_alert_sent_at: string | null
+          sla_days: number | null
+          sla_due_at: string | null
           status: string
           step_name: string
           step_type: string
@@ -126,9 +134,14 @@ export type Database = {
           trainer_notes: string | null
           updated_at: string
           uploaded_file_url: string | null
+          visibility:
+            | Database["public"]["Enums"]["onboarding_visibility"]
+            | null
         }
         Insert: {
           activity_id?: string | null
+          allowed_attachments?: Json | null
+          attachments?: Json | null
           client_id: string
           completed_at?: string | null
           completed_by?: string | null
@@ -137,9 +150,15 @@ export type Database = {
           created_at?: string
           description?: string | null
           display_order?: number
+          due_at?: string | null
+          due_in_days?: number | null
           id?: string
           instructions?: string | null
+          overdue_alert_sent_at?: string | null
           requires_file_upload?: boolean
+          sla_alert_sent_at?: string | null
+          sla_days?: number | null
+          sla_due_at?: string | null
           status?: string
           step_name: string
           step_type?: string
@@ -148,9 +167,14 @@ export type Database = {
           trainer_notes?: string | null
           updated_at?: string
           uploaded_file_url?: string | null
+          visibility?:
+            | Database["public"]["Enums"]["onboarding_visibility"]
+            | null
         }
         Update: {
           activity_id?: string | null
+          allowed_attachments?: Json | null
+          attachments?: Json | null
           client_id?: string
           completed_at?: string | null
           completed_by?: string | null
@@ -159,9 +183,15 @@ export type Database = {
           created_at?: string
           description?: string | null
           display_order?: number
+          due_at?: string | null
+          due_in_days?: number | null
           id?: string
           instructions?: string | null
+          overdue_alert_sent_at?: string | null
           requires_file_upload?: boolean
+          sla_alert_sent_at?: string | null
+          sla_days?: number | null
+          sla_due_at?: string | null
           status?: string
           step_name?: string
           step_type?: string
@@ -170,6 +200,9 @@ export type Database = {
           trainer_notes?: string | null
           updated_at?: string
           uploaded_file_url?: string | null
+          visibility?:
+            | Database["public"]["Enums"]["onboarding_visibility"]
+            | null
         }
         Relationships: [
           {
@@ -1608,8 +1641,11 @@ export type Database = {
           category: string
           completion_method: string
           created_at: string
+          default_due_days: number | null
+          default_sla_days: number | null
           description: string | null
           display_order: number
+          guidance_html: string | null
           id: string
           instructions: string | null
           is_active: boolean
@@ -1623,8 +1659,11 @@ export type Database = {
           category?: string
           completion_method?: string
           created_at?: string
+          default_due_days?: number | null
+          default_sla_days?: number | null
           description?: string | null
           display_order?: number
+          guidance_html?: string | null
           id?: string
           instructions?: string | null
           is_active?: boolean
@@ -1638,8 +1677,11 @@ export type Database = {
           category?: string
           completion_method?: string
           created_at?: string
+          default_due_days?: number | null
+          default_sla_days?: number | null
           description?: string | null
           display_order?: number
+          guidance_html?: string | null
           id?: string
           instructions?: string | null
           is_active?: boolean
@@ -2184,6 +2226,7 @@ export type Database = {
         | "database"
         | "business_rule"
         | "integration"
+      onboarding_visibility: "client" | "trainer" | "shared"
       user_type: "client" | "trainer" | "admin"
       verification_request_status:
         | "pending"
@@ -2371,6 +2414,7 @@ export const Constants = {
         "business_rule",
         "integration",
       ],
+      onboarding_visibility: ["client", "trainer", "shared"],
       user_type: ["client", "trainer", "admin"],
       verification_request_status: [
         "pending",

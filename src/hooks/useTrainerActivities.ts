@@ -8,6 +8,9 @@ export type TrainerActivity = {
   category: string;
   is_system: boolean;
   description?: string | null;
+  guidance_html?: string | null;
+  default_due_days?: number | null;
+  default_sla_days?: number | null;
 };
 
 const SECTION_TO_CATEGORY: Record<string, string> = {
@@ -32,7 +35,7 @@ export function useTrainerActivities() {
       // RLS ensures we get: system activities + current trainer's activities
       const { data, error } = await supabase
         .from("trainer_onboarding_activities")
-        .select("id, activity_name, category, is_system, description")
+        .select("id, activity_name, category, is_system, description, guidance_html, default_due_days, default_sla_days")
         .order("activity_name");
 
       if (error) throw error;
@@ -61,7 +64,7 @@ const createActivity = async (name: string, category: string, description?: stri
         category,
         description: description ?? null,
       })
-      .select("id, activity_name, category, is_system, description")
+      .select("id, activity_name, category, is_system, description, guidance_html, default_due_days, default_sla_days")
       .maybeSingle();
 
     if (error) throw error;
@@ -84,7 +87,7 @@ const updateActivity = async (id: string, name: string, category: string, descri
       .from("trainer_onboarding_activities")
       .update({ activity_name: name, category, description: description ?? null })
       .eq("id", id)
-      .select("id, activity_name, category, is_system, description")
+      .select("id, activity_name, category, is_system, description, guidance_html, default_due_days, default_sla_days")
       .maybeSingle();
 
     if (error) throw error;
@@ -103,16 +106,45 @@ useEffect(() => {
   fetchAll();
 }, []);
 
-  const getSuggestionsBySection = (sectionKey: string): string[] => {
-    const category = SECTION_TO_CATEGORY[sectionKey];
-    if (!category) return [];
-    const names = activities
-      .filter((a) => a.category === category)
-      .map((a) => a.activity_name.trim())
-      .filter((t) => t.length > 0);
-    // Deduplicate while preserving order
-    return Array.from(new Set(names));
-  };
+const updateActivityDetails = async (
+  id: string,
+  details: {
+    name: string;
+    category: string;
+    description?: string | null;
+    guidance_html?: string | null;
+    default_due_days?: number | null;
+    default_sla_days?: number | null;
+  }
+) => {
+  setLoading(true);
+  setError(null);
+  try {
+    const { data, error } = await supabase
+      .from("trainer_onboarding_activities")
+      .update({
+        activity_name: details.name,
+        category: details.category,
+        description: details.description ?? null,
+        guidance_html: details.guidance_html ?? null,
+        default_due_days: details.default_due_days ?? null,
+        default_sla_days: details.default_sla_days ?? null,
+      })
+      .eq("id", id)
+      .select("id, activity_name, category, is_system, description, guidance_html, default_due_days, default_sla_days")
+      .maybeSingle();
+
+    if (error) throw error;
+    await fetchAll();
+    return { data } as const;
+  } catch (e: any) {
+    const msg = e.message || "Failed to update activity details";
+    setError(msg);
+    return { error: msg } as const;
+  } finally {
+    setLoading(false);
+  }
+};
 
   return {
     loading,
@@ -122,5 +154,6 @@ useEffect(() => {
     activities,
     createActivity,
     updateActivity,
+    updateActivityDetails,
   };
 }
