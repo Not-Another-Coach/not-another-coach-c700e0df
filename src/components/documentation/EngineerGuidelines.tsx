@@ -33,6 +33,18 @@ export const EngineerGuidelines: React.FC = () => {
       </section>
 
       <section>
+        <h3 className="text-xl font-medium">Accessibility</h3>
+        <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
+          <li>WCAG 2.2 AA baseline. Keyboard-first navigation with visible focus; semantic HTML.</li>
+          <li>Icon-only controls must have a visible label or aria-label. No title-only buttons.</li>
+          <li>All inputs require id + name + associated label; placeholders are not labels.</li>
+          <li>Valid ARIA only: use aria-expanded only on the toggle control with matching aria-controls.</li>
+          <li>No nested interactive elements; make an entire card a single link or move secondary actions out.</li>
+          <li>Iframes must have meaningful title attributes.</li>
+        </ul>
+      </section>
+
+      <section>
         <h3 className="text-xl font-medium">State, Data, and Networking</h3>
         <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
           <li>Use dedicated hooks for data (e.g., useXxx hooks). Keep components presentational where possible.</li>
@@ -87,6 +99,25 @@ export const EngineerGuidelines: React.FC = () => {
           <li>Unit-test critical logic in hooks and utils. Snapshot-test presentational components when stable.</li>
           <li>Add Playwright smoke tests for headers/CSP/security where feasible.</li>
           <li>Code review checklist: types, RLS, accessibility, design tokens, error handling, and diagnostics.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3 className="text-xl font-medium">Accessibility Definition of Done</h3>
+        <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
+          <li>No icon-only controls without a visible name or aria-label.</li>
+          <li>No nested interactive elements.</li>
+          <li>All inputs have id + name + associated label; aria-describedby for hints/errors.</li>
+          <li>Any aria-expanded has a matching aria-controls and toggles visibility.</li>
+          <li>All iframes have titles.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3 className="text-xl font-medium">Lint & CI Guardrails</h3>
+        <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
+          <li>eslint-plugin-jsx-a11y: label-has-associated-control, anchor-has-content, aria-props, aria-roles, no-nested-interactive, no-noninteractive-element-interactions.</li>
+          <li>Playwright + axe-core smoke tests on key flows. PRs fail on serious/critical violations.</li>
         </ul>
       </section>
 

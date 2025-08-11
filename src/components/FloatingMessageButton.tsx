@@ -39,6 +39,8 @@ export const FloatingMessageButton = () => {
     <>
       <Button
         data-messaging-button
+        aria-label="Open messages"
+        title="Open messages"
         onClick={() => {
           console.log('🔥 FloatingMessageButton clicked directly');
           setIsPopupOpen(true);
