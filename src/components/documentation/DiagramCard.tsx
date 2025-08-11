@@ -51,90 +51,124 @@ export const DiagramCard: React.FC<DiagramCardProps> = ({ id, title, description
     const node = containerRef.current;
     if (!node) return;
 
-    // Prefer rendering the inline SVG to an image for reliability
-    const svg = node.querySelector('svg') as SVGSVGElement | null;
-    if (svg) {
-      try {
-        const serializer = new XMLSerializer();
-        const svgString = serializer.serializeToString(svg);
-        const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-
-        const img = new Image();
-        img.onload = () => {
-          try {
-            const vb = svg.viewBox && svg.viewBox.baseVal ? svg.viewBox.baseVal : null;
-            const rawWidth = vb && vb.width ? vb.width : svg.width.baseVal?.value || svg.clientWidth || 1200;
-            const rawHeight = vb && vb.height ? vb.height : svg.height.baseVal?.value || svg.clientHeight || 800;
-
-            const scale = 2; // improve sharpness
-            const canvas = document.createElement('canvas');
-            canvas.width = Math.max(1, Math.floor(rawWidth * scale));
-            canvas.height = Math.max(1, Math.floor(rawHeight * scale));
-
-            const ctx = canvas.getContext('2d');
-            if (!ctx) throw new Error('Canvas not supported');
-
-            const bg = getComputedStyle(document.body).backgroundColor || '#ffffff';
-            ctx.fillStyle = bg;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-            URL.revokeObjectURL(url);
-
-            const pdf = new jsPDF({ orientation: canvas.width >= canvas.height ? 'landscape' : 'portrait', unit: 'mm', format: 'a4' });
-            const pageWidth = pdf.internal.pageSize.getWidth();
-            const pageHeight = pdf.internal.pageSize.getHeight();
-            const margin = 10; // mm
-            const drawableWidth = pageWidth - margin * 2;
-            const drawableHeight = pageHeight - margin * 2;
-            const ratio = Math.min(drawableWidth / canvas.width, drawableHeight / canvas.height);
-            const imgWidth = canvas.width * ratio;
-            const imgHeight = canvas.height * ratio;
-            const x = (pageWidth - imgWidth) / 2;
-            const y = (pageHeight - imgHeight) / 2;
-
-            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', x, y, imgWidth, imgHeight, undefined, 'FAST');
-            pdf.setProperties({ title });
-            pdf.save(`${id}.pdf`);
-            toast({ title: 'Exported', description: `${title} downloaded as PDF.` });
-          } catch (err) {
-            console.error('SVG -> PDF failed, falling back to html2canvas', err);
-          }
-        };
-        img.onerror = (e) => {
-          console.error('SVG image load failed', e);
-        };
-        img.src = url;
-        return;
-      } catch (err) {
-        console.error('SVG serialization failed, falling back to html2canvas', err);
-      }
+    // Ensure the diagram SVG exists (Mermaid render is async)
+    let svg = node.querySelector('svg') as SVGSVGElement | null;
+    if (!svg) {
+      // Wait briefly for render
+      await new Promise((r) => setTimeout(r, 150));
+      svg = node.querySelector('svg');
     }
 
-    try {
-      const bg = getComputedStyle(document.body).backgroundColor;
-      const canvas = await html2canvas(node, { backgroundColor: bg || '#ffffff', scale: 2, useCORS: true });
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({ orientation: canvas.width >= canvas.height ? 'landscape' : 'portrait', unit: 'mm', format: 'a4' });
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const margin = 10; // mm
-      const drawableWidth = pageWidth - margin * 2;
-      const drawableHeight = pageHeight - margin * 2;
-      const ratio = Math.min(drawableWidth / canvas.width, drawableHeight / canvas.height);
-      const imgWidth = canvas.width * ratio;
-      const imgHeight = canvas.height * ratio;
-      const x = (pageWidth - imgWidth) / 2;
-      const y = (pageHeight - imgHeight) / 2;
+    const fallbackHtml2Canvas = async () => {
+      try {
+        const bg = getComputedStyle(document.body).backgroundColor;
+        const canvas = await html2canvas(node, { backgroundColor: bg || '#ffffff', scale: 2, useCORS: true });
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF({ orientation: canvas.width >= canvas.height ? 'landscape' : 'portrait', unit: 'mm', format: 'a4' });
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const margin = 10; // mm
+        const drawableWidth = pageWidth - margin * 2;
+        const drawableHeight = pageHeight - margin * 2;
+        const ratio = Math.min(drawableWidth / canvas.width, drawableHeight / canvas.height);
+        const imgWidth = canvas.width * ratio;
+        const imgHeight = canvas.height * ratio;
+        const x = (pageWidth - imgWidth) / 2;
+        const y = (pageHeight - imgHeight) / 2;
 
-      pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight, undefined, 'FAST');
-      pdf.setProperties({ title });
-      pdf.save(`${id}.pdf`);
-      toast({ title: 'Exported', description: `${title} downloaded as PDF.` });
+        pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight, undefined, 'FAST');
+        pdf.setProperties({ title });
+        pdf.save(`${id}.pdf`);
+        toast({ title: 'Exported', description: `${title} downloaded as PDF.` });
+      } catch (err) {
+        console.error('PDF export failed', err);
+        toast({ title: 'Export failed', description: 'Could not generate PDF for this diagram.', variant: 'destructive' });
+      }
+    };
+
+    if (!svg) {
+      // No SVG yet – use fallback to capture the node
+      return fallbackHtml2Canvas();
+    }
+
+    // Serialize SVG with xmlns to improve rasterization reliability
+    try {
+      const serializer = new XMLSerializer();
+      let svgString = serializer.serializeToString(svg);
+      if (!svgString.includes('xmlns="http://www.w3.org/2000/svg"')) {
+        svgString = svgString.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
+      }
+      if (!svgString.startsWith('<?xml')) {
+        svgString = `<?xml version="1.0" encoding="UTF-8"?>\n` + svgString;
+      }
+
+      const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+
+      const img = new Image();
+      img.decoding = 'async';
+      img.onload = async () => {
+        try {
+          // Determine intrinsic size
+          const vb = svg.viewBox && svg.viewBox.baseVal ? svg.viewBox.baseVal : null;
+          let rawWidth = vb && vb.width ? vb.width : (svg.width.baseVal?.value || svg.clientWidth || 1200);
+          let rawHeight = vb && vb.height ? vb.height : (svg.height.baseVal?.value || svg.clientHeight || 800);
+
+          // As another fallback, use getBBox if dimension is 0
+          if (!rawWidth || !rawHeight) {
+            try {
+              const bbox = svg.getBBox();
+              rawWidth = rawWidth || bbox.width || 1200;
+              rawHeight = rawHeight || bbox.height || 800;
+            } catch {}
+          }
+
+          const scale = 2; // improve sharpness
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.max(1, Math.floor(rawWidth * scale));
+          canvas.height = Math.max(1, Math.floor(rawHeight * scale));
+
+          const ctx = canvas.getContext('2d');
+          if (!ctx) throw new Error('Canvas not supported');
+
+          const bg = getComputedStyle(document.body).backgroundColor || '#ffffff';
+          ctx.fillStyle = bg;
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+          URL.revokeObjectURL(url);
+
+          const pdf = new jsPDF({ orientation: canvas.width >= canvas.height ? 'landscape' : 'portrait', unit: 'mm', format: 'a4' });
+          const pageWidth = pdf.internal.pageSize.getWidth();
+          const pageHeight = pdf.internal.pageSize.getHeight();
+          const margin = 10; // mm
+          const drawableWidth = pageWidth - margin * 2;
+          const drawableHeight = pageHeight - margin * 2;
+          const ratio = Math.min(drawableWidth / canvas.width, drawableHeight / canvas.height);
+          const imgWidth = canvas.width * ratio;
+          const imgHeight = canvas.height * ratio;
+          const x = (pageWidth - imgWidth) / 2;
+          const y = (pageHeight - imgHeight) / 2;
+
+          const dataUrl = canvas.toDataURL('image/png');
+          pdf.addImage(dataUrl, 'PNG', x, y, imgWidth, imgHeight, undefined, 'FAST');
+          pdf.setProperties({ title });
+          pdf.save(`${id}.pdf`);
+          toast({ title: 'Exported', description: `${title} downloaded as PDF.` });
+        } catch (err) {
+          console.error('SVG -> PDF failed, falling back to html2canvas', err);
+          await fallbackHtml2Canvas();
+        }
+      };
+      img.onerror = async (e) => {
+        console.error('SVG image load failed', e);
+        URL.revokeObjectURL(url);
+        await fallbackHtml2Canvas();
+      };
+      img.src = url;
     } catch (err) {
-      console.error('PDF export failed', err);
-      toast({ title: 'Export failed', description: 'Could not generate PDF for this diagram.', variant: 'destructive' });
+      console.error('SVG serialization failed, falling back to html2canvas', err);
+      await fallbackHtml2Canvas();
     }
   };
 
