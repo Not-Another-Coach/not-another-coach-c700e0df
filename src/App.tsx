@@ -20,6 +20,9 @@ import { TrainerProfile } from "./pages/TrainerProfile";
 import { Messaging } from "./pages/Messaging";
 import Documentation from "./pages/Documentation";
 import NotFound from "./pages/NotFound";
+import { DiagnosticsProvider } from "@/diagnostics/DiagnosticsContext";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import AdminDiagnostics from "@/pages/AdminDiagnostics";
 
 const queryClient = new QueryClient();
 
@@ -31,25 +34,30 @@ const App = () => (
         <Sonner />
         <SessionNotification />
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/client/dashboard" element={<ClientDashboard />} />
-            <Route path="/my-trainers" element={<MyTrainers />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/client-survey" element={<ClientSurvey />} />
-            <Route path="/client/journey" element={<ClientJourney />} />
-            <Route path="/discovery" element={<Discovery />} />
-            <Route path="/saved" element={<SavedTrainers />} />
-            <Route path="/trainer/dashboard" element={<TrainerDashboard />} />
-            <Route path="/trainer/profile-setup" element={<TrainerProfileSetup />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/trainer/:trainerId" element={<TrainerProfile />} />
-            <Route path="/messages/:trainerId?" element={<Messaging />} />
-            <Route path="/documentation" element={<Documentation />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <DiagnosticsProvider>
+            <ErrorBoundary>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/client/dashboard" element={<ClientDashboard />} />
+                <Route path="/my-trainers" element={<MyTrainers />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/client-survey" element={<ClientSurvey />} />
+                <Route path="/client/journey" element={<ClientJourney />} />
+                <Route path="/discovery" element={<Discovery />} />
+                <Route path="/saved" element={<SavedTrainers />} />
+                <Route path="/trainer/dashboard" element={<TrainerDashboard />} />
+                <Route path="/trainer/profile-setup" element={<TrainerProfileSetup />} />
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/admin/diagnostics" element={<AdminDiagnostics />} />
+                <Route path="/trainer/:trainerId" element={<TrainerProfile />} />
+                <Route path="/messages/:trainerId?" element={<Messaging />} />
+                <Route path="/documentation" element={<Documentation />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </ErrorBoundary>
+          </DiagnosticsProvider>
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
