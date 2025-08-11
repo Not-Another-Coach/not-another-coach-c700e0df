@@ -7,6 +7,7 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CheckCircle, Clock, User, Search, TrendingUp } from 'lucide-react';
 import { useTrainerOnboarding } from '@/hooks/useTrainerOnboarding';
+import { getOnboardingMetrics } from '@/utils/onboardingMetrics';
 
 export function ClientOnboardingTracker() {
   const { clientsOnboarding, loading, markClientStepComplete } = useTrainerOnboarding();
@@ -23,13 +24,12 @@ export function ClientOnboardingTracker() {
     return matchesSearch && matchesFilter;
   });
 
+  const metrics = getOnboardingMetrics(clientsOnboarding);
   const overallStats = {
-    totalClients: clientsOnboarding.length,
-    completedClients: clientsOnboarding.filter(c => c.percentageComplete === 100).length,
-    activeClients: clientsOnboarding.filter(c => c.percentageComplete > 0 && c.percentageComplete < 100).length,
-    averageCompletion: clientsOnboarding.length > 0 
-      ? Math.round(clientsOnboarding.reduce((sum, c) => sum + c.percentageComplete, 0) / clientsOnboarding.length)
-      : 0
+    totalClients: metrics.totalClients,
+    completedClients: metrics.completed,
+    activeClients: metrics.inProgress,
+    averageCompletion: metrics.avgCompletion
   };
 
   const handleMarkComplete = async (stepId: string, notes?: string) => {

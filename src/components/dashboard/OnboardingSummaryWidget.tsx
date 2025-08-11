@@ -1,17 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, Clock, Users, TrendingUp } from "lucide-react";
 import { useTrainerOnboarding } from "@/hooks/useTrainerOnboarding";
+import { getOnboardingMetrics } from "@/utils/onboardingMetrics";
 
 export function OnboardingSummaryWidget() {
   const { clientsOnboarding, loading, error } = useTrainerOnboarding();
 
-  const totalClients = clientsOnboarding.length;
-  const completed = clientsOnboarding.filter(c => c.percentageComplete === 100).length;
-  const inProgress = clientsOnboarding.filter(c => c.percentageComplete > 0 && c.percentageComplete < 100).length;
-  const avgCompletion = totalClients > 0
-    ? Math.round(clientsOnboarding.reduce((sum, c) => sum + (c.percentageComplete || 0), 0) / totalClients)
-    : 0;
-
+  const { totalClients, completed, inProgress, avgCompletion } = getOnboardingMetrics(clientsOnboarding);
   return (
     <Card>
       <CardHeader>
