@@ -12,7 +12,7 @@ export type DiagEvent = {
   message: string;
   details?: string;
   traceId?: string;
-  flags?: Record<string, boolean>;
+  flags?: Record<string, any>;
   owner?: string;
   count?: number;
 };
@@ -86,6 +86,20 @@ export const DiagnosticsProvider: React.FC<{ children: React.ReactNode }> = ({ c
     return enabled;
   }, [location.pathname]);
 
+  const getFlagsSnapshot = useCallback(() => {
+    const flags: Record<string, any> = {};
+    try {
+      for (let i = 0; i < window.localStorage.length; i++) {
+        const k = window.localStorage.key(i) || "";
+        if (k === FEATURE_FLAG_KEY || k.startsWith("ff_")) {
+          const v = window.localStorage.getItem(k);
+          flags[k] = v === "1" || v?.toLowerCase() === "true" ? true : v;
+        }
+      }
+    } catch {}
+    return flags;
+  }, []);
+
   const shouldSample = useCallback(() => {
     if (import.meta.env.DEV) return true;
     const now = Date.now();
@@ -123,6 +137,7 @@ export const DiagnosticsProvider: React.FC<{ children: React.ReactNode }> = ({ c
         diagnosticsEnabled: samplingEnabled,
         burstActive: now < burstUntilRef.current,
         dev: !!import.meta.env.DEV,
+        featureFlags: getFlagsSnapshot(),
       },
       owner,
       traceId: traceIdRef.current,

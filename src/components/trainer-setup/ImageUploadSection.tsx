@@ -54,12 +54,12 @@ export const ImageUploadSection = ({ onImageUpload, existingImages }: ImageUploa
           throw error;
         }
 
-        // Get public URL
-        const { data: { publicUrl } } = supabase.storage
+        // Get signed URL for private access
+        const { data: signed } = await supabase.storage
           .from('client-photos')
-          .getPublicUrl(filePath);
+          .createSignedUrl(filePath, 60 * 60 * 24 * 7); // 7 days
 
-        onImageUpload(publicUrl, type);
+        onImageUpload(signed?.signedUrl || '', type);
         
         toast({
           title: "Image uploaded successfully",

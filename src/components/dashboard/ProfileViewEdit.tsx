@@ -93,13 +93,13 @@ export function ProfileViewEdit({ profile }: ProfileViewEditProps) {
 
       if (uploadError) throw uploadError;
 
-      const { data } = supabase.storage
+      const { data: signed } = await supabase.storage
         .from('client-photos')
-        .getPublicUrl(fileName);
+        .createSignedUrl(fileName, 60 * 60 * 24 * 7); // 7 days
 
       setFormData(prev => ({
         ...prev,
-        profile_photo_url: data.publicUrl
+        profile_photo_url: signed?.signedUrl || ''
       }));
 
       toast({

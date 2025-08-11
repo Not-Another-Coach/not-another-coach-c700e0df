@@ -25,8 +25,8 @@ export const DiagramCard: React.FC<DiagramCardProps> = ({ id, title, description
 
   useEffect(() => {
     if (!mermaidInitialized) {
-      // Initialize once
-      mermaid.initialize({ startOnLoad: false, securityLevel: "loose" });
+      // Initialize once with strict security
+      mermaid.initialize({ startOnLoad: false, securityLevel: "strict" });
       mermaidInitialized = true;
     }
   }, []);
@@ -40,6 +40,14 @@ export const DiagramCard: React.FC<DiagramCardProps> = ({ id, title, description
         if (!code || !/(^|\n)\s*(graph|sequenceDiagram|classDiagram|erDiagram|journey|gantt)\b/.test(code)) {
           setRenderError("Invalid or unsupported Mermaid syntax.");
           add({ level: "warn", source: "DiagramCard", message: "Mermaid pre-validation failed", details: code.slice(0, 160) });
+          return;
+        }
+        // Strict parse validation before rendering
+        try {
+          mermaid.parse(code);
+        } catch (parseErr: any) {
+          setRenderError("Invalid Mermaid diagram.");
+          add({ level: "warn", source: "DiagramCard", message: "Mermaid.parse validation failed", details: String(parseErr?.message || parseErr) });
           return;
         }
         const { svg } = await mermaid.render(`${id}-svg`, code);
