@@ -11,11 +11,14 @@ import { FeaturesDocumentation } from '@/components/documentation/FeaturesDocume
 import { APIDocumentation } from '@/components/documentation/APIDocumentation';
 import { MessageComposer } from '@/components/documentation/MessageComposer';
 import { KBDocumentationTab } from '@/components/knowledge-base/KBDocumentationTab';
+import { ArchitectureDocumentation } from '@/components/documentation/ArchitectureDocumentation';
+import { useUserRoles } from '@/hooks/useUserRoles';
 
 const Documentation = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [message, setMessage] = useState('');
   const [clickedElements, setClickedElements] = useState<string[]>([]);
+  const { isAdmin } = useUserRoles();
 
   const handleElementClick = useCallback((elementText: string) => {
     setClickedElements(prev => [...prev, elementText]);
@@ -68,7 +71,7 @@ const Documentation = () => {
         </div>
 
         <Tabs defaultValue="pages" className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-7' : 'grid-cols-6'}`}>
             <TabsTrigger value="pages" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
               Pages
@@ -93,6 +96,11 @@ const Documentation = () => {
               <FileText className="h-4 w-4" />
               Knowledge Base
             </TabsTrigger>
+            {isAdmin && (
+              <TabsTrigger value="architecture" className="flex items-center gap-2">
+                Architecture
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="pages" className="mt-6">
@@ -166,6 +174,14 @@ const Documentation = () => {
               {/* Message Composer is disabled for Knowledge Base tab */}
             </div>
           </TabsContent>
+
+          {isAdmin && (
+            <TabsContent value="architecture" className="mt-6">
+              <div className="space-y-8">
+                <ArchitectureDocumentation />
+              </div>
+            </TabsContent>
+          )}
         </Tabs>
       </div>
     </div>
