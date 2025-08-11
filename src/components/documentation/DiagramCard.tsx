@@ -203,11 +203,18 @@ export const DiagramCard: React.FC<DiagramCardProps> = ({ id, title, description
         </div>
       </CardHeader>
       <CardContent>
-        <div
-          ref={containerRef}
-          className="w-full overflow-auto rounded-md border"
-          aria-label={`${title} diagram`}
-        />
+        {renderError ? (
+          <div className="w-full rounded-md border p-4 text-sm text-destructive-foreground bg-destructive/10" role="alert" aria-live="polite">
+            <p className="font-medium">Unable to render diagram</p>
+            <p className="opacity-80">{renderError}</p>
+          </div>
+        ) : (
+          <div
+            ref={containerRef}
+            className="w-full overflow-auto rounded-md border"
+            aria-label={`${title} diagram`}
+          />
+        )}
       </CardContent>
     </Card>
   );
