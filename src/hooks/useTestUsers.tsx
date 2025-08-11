@@ -19,6 +19,12 @@ export const useTestUsers = () => {
   const fetchTestUsers = async () => {
     setLoading(true);
     try {
+      // If not authenticated, return demo users immediately
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setTestUsers(getDefaultTestUsers());
+        return;
+      }
       // First fetch profiles
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
@@ -110,7 +116,7 @@ export const useTestUsers = () => {
       last_name: 'Client',
       user_type: 'client',
       roles: [],
-      password: 'demo123'
+      password: 'Password123!'
     },
     {
       id: 'demo-trainer-1',
@@ -120,7 +126,7 @@ export const useTestUsers = () => {
       last_name: 'Trainer', 
       user_type: 'trainer',
       roles: [],
-      password: 'demo123'
+      password: 'Password123!'
     },
     {
       id: 'demo-admin-1',
@@ -130,27 +136,7 @@ export const useTestUsers = () => {
       last_name: 'Admin',
       user_type: 'admin',
       roles: ['admin'],
-      password: 'admin123'
-    },
-    {
-      id: 'test-client-1',
-      email: 'test.client@example.com',
-      displayEmail: 'test.client@***',
-      first_name: 'Test',
-      last_name: 'Client',
-      user_type: 'client',
-      roles: [],
-      password: 'password123'
-    },
-    {
-      id: 'test-trainer-1',
-      email: 'test.trainer@example.com',
-      displayEmail: 'test.trainer@***',
-      first_name: 'Test',
-      last_name: 'Trainer',
-      user_type: 'trainer',
-      roles: [],
-      password: 'password123'
+      password: 'Password123!'
     }
   ];
 
