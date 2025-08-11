@@ -71,7 +71,7 @@ const Documentation = () => {
         </div>
 
         <Tabs defaultValue="pages" className="w-full">
-          <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-7' : 'grid-cols-6'}`}>
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="pages" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
               Pages
