@@ -19,6 +19,7 @@ import { UpcomingSessionsWidget } from "@/components/dashboard/UpcomingSessionsW
 import { CoachExclusivityEndedAlert } from "@/components/dashboard/CoachExclusivityEndedAlert";
 import { ClientOnboardingManagement } from "@/components/coach/ClientOnboardingManagement";
 import { ClientOnboardingTracker } from "@/components/coach/ClientOnboardingTracker";
+import { OnboardingSummaryWidget } from "@/components/dashboard/OnboardingSummaryWidget";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -405,6 +406,9 @@ const TrainerDashboard = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* 2b. Client Onboarding Summary */}
+            <OnboardingSummaryWidget />
 
             {/* 3. Upcoming Sessions and This Week's Goal - Side by Side */}
             <div className="grid md:grid-cols-2 gap-6">
