@@ -26,13 +26,10 @@ export const architectureDiagrams: ArchitectureDiagram[] = [
         G[process-waitlist-exclusivity]
         H[send-discovery-call-email]
       end
-      D <-.- E
-      D <-.- F
-      D <-.- G
-      E --> D
-      F --> D
-      G --> D
-      H --> D
+      E -.-> D
+      F -.-> D
+      G -.-> D
+      H -.-> D
       C --> I[(Storage: avatars, docs)]
       A -->|HTTP Calls| J[Public REST RPC]
       J --> D
@@ -45,75 +42,75 @@ export const architectureDiagrams: ArchitectureDiagram[] = [
     description:
       "Key tables related to trainers, clients, conversations, discovery calls, and feedback.",
     mermaid: `erDiagram
-      users ||--o{ profiles : has
-      users ||--o{ roles : has
-      profiles ||--o{ trainers : can_be
-      profiles ||--o{ clients : can_be
-      trainers ||--o{ discovery_calls : conducts
-      clients ||--o{ discovery_calls : books
-      trainers ||--o{ conversations : participates
-      clients ||--o{ conversations : participates
-      conversations ||--o{ messages : contains
-      discovery_calls ||--o{ feedback : receives
-      clients ||--o{ waitlist : in
+      USERS ||--o{ PROFILES : has
+      USERS ||--o{ ROLES : has
+      PROFILES ||--o{ TRAINERS : can_be
+      PROFILES ||--o{ CLIENTS : can_be
+      TRAINERS ||--o{ DISCOVERY_CALLS : conducts
+      CLIENTS ||--o{ DISCOVERY_CALLS : books
+      TRAINERS ||--o{ CONVERSATIONS : participates
+      CLIENTS ||--o{ CONVERSATIONS : participates
+      CONVERSATIONS ||--o{ MESSAGES : contains
+      DISCOVERY_CALLS ||--o{ FEEDBACK : receives
+      CLIENTS ||--o{ WAITLIST : in
 
-      users {
-        uuid id PK
-        text email
-        timestamptz created_at
+      USERS {
+        string id PK
+        string email
+        datetime created_at
       }
-      profiles {
-        uuid id PK
-        uuid user_id FK
-        text display_name
-        text avatar_url
-        timestamptz updated_at
+      PROFILES {
+        string id PK
+        string user_id FK
+        string display_name
+        string avatar_url
+        datetime updated_at
       }
-      roles {
-        uuid user_id FK
-        text role  // admin | trainer | client
+      ROLES {
+        string user_id FK
+        string role
       }
-      trainers {
-        uuid id PK
-        uuid user_id FK
-        text bio
+      TRAINERS {
+        string id PK
+        string user_id FK
+        string bio
       }
-      clients {
-        uuid id PK
-        uuid user_id FK
-        text goals
+      CLIENTS {
+        string id PK
+        string user_id FK
+        string goals
       }
-      conversations {
-        uuid id PK
-        uuid trainer_id FK
-        uuid client_id FK
-        timestamptz created_at
+      CONVERSATIONS {
+        string id PK
+        string trainer_id FK
+        string client_id FK
+        datetime created_at
       }
-      messages {
-        uuid id PK
-        uuid conversation_id FK
-        uuid sender_id FK
-        text content
-        timestamptz sent_at
+      MESSAGES {
+        string id PK
+        string conversation_id FK
+        string sender_id FK
+        string content
+        datetime sent_at
       }
-      discovery_calls {
-        uuid id PK
-        uuid trainer_id FK
-        uuid client_id FK
-        timestamptz scheduled_at
-        text status  // pending | confirmed | done | canceled
+      DISCOVERY_CALLS {
+        string id PK
+        string trainer_id FK
+        string client_id FK
+        datetime scheduled_at
+        string status
       }
-      feedback {
-        uuid id PK
-        uuid discovery_call_id FK
+      FEEDBACK {
+        string id PK
+        string discovery_call_id FK
         int rating
-        text notes
+        string notes
       }
-      waitlist {
-        uuid id PK
-        uuid client_id FK
-        text priority
-        timestamptz created_at
+      WAITLIST {
+        string id PK
+        string client_id FK
+        string priority
+        datetime created_at
       }
     `,
   },
