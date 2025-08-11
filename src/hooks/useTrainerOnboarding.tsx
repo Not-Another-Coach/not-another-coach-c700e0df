@@ -94,33 +94,64 @@ export function useTrainerOnboarding() {
         return;
       }
 
+      // Load active templates for this trainer to allow template-level overrides
+      const { data: activeTemplates } = await supabase
+        .from('trainer_onboarding_templates')
+        .select('*')
+        .eq('trainer_id', user.id)
+        .eq('is_active', true);
+
+      const templateByName = new Map<string, any>((activeTemplates || []).map(t => [t.step_name, t]));
+
+      // Load activities to apply default due/SLA days when names match
+      const { data: activities } = await supabase
+        .from('trainer_onboarding_activities')
+        .select('activity_name, default_due_days, default_sla_days, is_system, trainer_id')
+        .or(`trainer_id.eq.${user.id},is_system.eq.true`);
+
+      const activityDefaults = new Map<string, { due?: number | null; sla?: number | null }>();
+      (activities || []).forEach(a => {
+        activityDefaults.set(a.activity_name, {
+          due: a.default_due_days ?? null,
+          sla: a.default_sla_days ?? null,
+        });
+      });
+
       // Create onboarding steps from the package's onboarding items
-      const onboardingItems = packageWorkflow.onboarding_items as Array<{ id: string; text: string }> || [];
-      
+      const onboardingItems = packageWorkflow.onboarding_items as Array<{ id?: string; text: string }> || [];
       if (onboardingItems.length === 0) {
         console.log('No onboarding items found for package:', selectionRequest.package_id);
         return;
       }
 
-      const onboardingSteps = onboardingItems.map((item, index) => ({
-        client_id: clientId,
-        trainer_id: user.id,
-        step_name: item.text,
-        step_type: 'mandatory' as const,
-        description: `Onboarding step for ${selectionRequest.package_name}`,
-        instructions: item.text,
-        requires_file_upload: false,
-        completion_method: 'client' as const,
-        display_order: index,
-        status: 'pending' as const
-      }));
+      const onboardingSteps = onboardingItems.map((item, index) => {
+        const tmpl = templateByName.get(item.text);
+        const defaults = activityDefaults.get(item.text) || {};
+
+        return {
+          client_id: clientId,
+          trainer_id: user.id,
+          step_name: item.text,
+          step_type: (tmpl?.step_type ?? 'mandatory') as 'mandatory' | 'optional',
+          description: tmpl?.description ?? `Onboarding step for ${selectionRequest.package_name}`,
+          instructions: tmpl?.instructions ?? item.text,
+          requires_file_upload: Boolean(tmpl?.requires_file_upload) || false,
+          completion_method: (tmpl?.completion_method ?? 'client') as 'client' | 'trainer' | 'auto',
+          display_order: index,
+          status: 'pending' as const,
+          template_step_id: tmpl?.id ?? null,
+          // Apply timing defaults from Activities when available
+          due_in_days: (defaults.due ?? null) as number | null,
+          sla_days: (defaults.sla ?? null) as number | null,
+        };
+      });
 
       const { error: insertError } = await supabase
         .from('client_onboarding_progress')
         .insert(onboardingSteps);
 
       if (insertError) throw insertError;
-      
+
       console.log(`Created ${onboardingSteps.length} onboarding steps for client ${clientId} from package ${selectionRequest.package_name}`);
     } catch (err) {
       console.error('Error creating onboarding steps from package workflow:', err);
