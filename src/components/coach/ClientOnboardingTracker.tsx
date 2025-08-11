@@ -5,9 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CheckCircle, Clock, User, Search, TrendingUp } from 'lucide-react';
+import { CheckCircle, Clock, Search } from 'lucide-react';
 import { useTrainerOnboarding } from '@/hooks/useTrainerOnboarding';
 import { getOnboardingMetrics } from '@/utils/onboardingMetrics';
+import { OnboardingSummaryWidget } from '@/components/dashboard/OnboardingSummaryWidget';
 
 export function ClientOnboardingTracker() {
   const { clientsOnboarding, loading, markClientStepComplete } = useTrainerOnboarding();
@@ -58,55 +59,7 @@ export function ClientOnboardingTracker() {
   return (
     <div className="space-y-6">
       {/* Overview Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="pt-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Clients</p>
-                <p className="text-2xl font-bold">{overallStats.totalClients}</p>
-              </div>
-              <User className="h-8 w-8 text-muted-foreground" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Completed</p>
-                <p className="text-2xl font-bold text-green-600">{overallStats.completedClients}</p>
-              </div>
-              <CheckCircle className="h-8 w-8 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">In Progress</p>
-                <p className="text-2xl font-bold text-blue-600">{overallStats.activeClients}</p>
-              </div>
-              <Clock className="h-8 w-8 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Avg. Completion</p>
-                <p className="text-2xl font-bold">{overallStats.averageCompletion}%</p>
-              </div>
-              <TrendingUp className="h-8 w-8 text-muted-foreground" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <OnboardingSummaryWidget />
 
       {/* Main Tracker */}
       <Card>
