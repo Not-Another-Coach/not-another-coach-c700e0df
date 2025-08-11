@@ -1,5 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { rules as ownerRules } from "./rules";
 
 export type DiagLevel = "error" | "warn" | "info";
 
@@ -37,19 +38,14 @@ export function redactStr(s?: string) {
     // emails
     .replace(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g, "[email]")
     // bearer tokens
-    .replace(/Bearer\s+[A-Za-z0-9\-_.]+/g, "Bearer [redacted]");
+    .replace(/Bearer\s+[A-Za-z0-9\-_.]+/g, "Bearer [redacted]")
+    // JWT tokens (three-part base64url)
+    .replace(/\b[A-Za-z0-9\-_]{10,}\.[A-Za-z0-9\-_]{10,}\.[A-Za-z0-9\-_]{10,}\b/g, "[jwt]")
+    // phone numbers (common patterns)
+    .replace(/\b(?:\+?\d{1,3}[-.\s()]*)?(?:\d{3}[-.\s()]*){2}\d{4}\b/g, "[phone]");
 }
 
-// Simple owner mapping based on route or source patterns
-export type OwnerRule = { pattern: RegExp; owner: string };
-const ownerRules: OwnerRule[] = [
-  { pattern: /documentation|DiagramCard/i, owner: "KnowledgeBase" },
-  { pattern: /discovery|Discovery/i, owner: "DiscoveryCalls" },
-  { pattern: /messag/i, owner: "Messaging" },
-  { pattern: /dashboard|client/i, owner: "Client" },
-  { pattern: /trainer/i, owner: "Trainer" },
-  { pattern: /.*/, owner: "Core" },
-];
+// Owner resolution uses centralized rules
 function resolveOwner(route: string, source: string) {
   const hay = `${route} ${source}`;
   const rule = ownerRules.find((r) => r.pattern.test(hay));
@@ -71,6 +67,9 @@ const DiagnosticsContext = createContext<DiagnosticsCtx | undefined>(undefined);
 const DEDUPE_WINDOW_MS = 60 * 1000;
 const SAMPLE_RATE = import.meta.env.DEV ? 1 : 0.2; // 20% in prod by default
 const FEATURE_FLAG_KEY = "diagnosticsEnabled"; // localStorage: "1" to enable in prod
+const BURST_ERR_THRESHOLD = 10;
+const BURST_WINDOW_MS = 60 * 1000;
+const BURST_DURATION_MS = 10 * 60 * 1000;
 
 export const DiagnosticsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
@@ -78,6 +77,8 @@ export const DiagnosticsProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const groupedRef = useRef<Map<string, DiagEvent>>(new Map());
   const [groupedSnap, setGroupedSnap] = useState<DiagEvent[]>([]);
   const traceIdRef = useRef<string>(crypto?.randomUUID?.() || Math.random().toString(36).slice(2));
+  const burstUntilRef = useRef<number>(0);
+  const errorTimestampsRef = useRef<number[]>([]);
 
   const samplingEnabled = useMemo(() => {
     if (import.meta.env.DEV) return true;
@@ -87,14 +88,27 @@ export const DiagnosticsProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   const shouldSample = useCallback(() => {
     if (import.meta.env.DEV) return true;
+    const now = Date.now();
+    if (burstUntilRef.current > now) return true; // burst override
     if (!samplingEnabled) return false;
     return Math.random() < SAMPLE_RATE;
   }, [samplingEnabled]);
 
   const add = useCallback<DiagnosticsCtx["add"]>((e) => {
-    if (!shouldSample()) return;
     const route = e.route ?? location.pathname;
     const now = Date.now();
+
+    // Track errors for burst override window (even if unsampled)
+    if (e.level === "error") {
+      const arr = errorTimestampsRef.current;
+      arr.push(now);
+      while (arr.length && now - arr[0] > BURST_WINDOW_MS) arr.shift();
+      if (arr.length >= BURST_ERR_THRESHOLD) {
+        burstUntilRef.current = Math.max(burstUntilRef.current, now + BURST_DURATION_MS);
+      }
+    }
+
+    if (!shouldSample()) return;
     const owner = resolveOwner(route, e.source);
 
     const event: DiagEvent = {
@@ -104,7 +118,12 @@ export const DiagnosticsProvider: React.FC<{ children: React.ReactNode }> = ({ c
       source: e.source,
       message: redactStr(e.message) || "(no-message)",
       details: redactStr(e.details),
-      flags: e.flags,
+      flags: {
+        ...(e.flags || {}),
+        diagnosticsEnabled: samplingEnabled,
+        burstActive: now < burstUntilRef.current,
+        dev: !!import.meta.env.DEV,
+      },
       owner,
       traceId: traceIdRef.current,
     };
@@ -123,7 +142,7 @@ export const DiagnosticsProvider: React.FC<{ children: React.ReactNode }> = ({ c
     }
 
     setEvents((prevList) => [event, ...prevList].slice(0, 1000)); // cap in-memory
-  }, [location.pathname, shouldSample]);
+  }, [location.pathname, shouldSample, samplingEnabled]);
 
   const clear = useCallback(() => {
     groupedRef.current.clear();

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import mermaid from "mermaid";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { useDiagnostics } from "@/diagnostics/DiagnosticsContext";
 
 let mermaidInitialized = false;
 
@@ -19,6 +20,8 @@ export interface DiagramCardProps {
 export const DiagramCard: React.FC<DiagramCardProps> = ({ id, title, description, mermaid: mermaidCode }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const { toast } = useToast();
+  const { add } = useDiagnostics();
+  const [renderError, setRenderError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!mermaidInitialized) {
@@ -32,20 +35,28 @@ export const DiagramCard: React.FC<DiagramCardProps> = ({ id, title, description
     let cancelled = false;
     const renderDiagram = async () => {
       try {
-        const { svg } = await mermaid.render(`${id}-svg`, mermaidCode);
+        const code = (mermaidCode || "").trim();
+        // Simple pre-validation of Mermaid code to avoid throwing on empty/invalid strings
+        if (!code || !/(^|\n)\s*(graph|sequenceDiagram|classDiagram|erDiagram|journey|gantt)\b/.test(code)) {
+          setRenderError("Invalid or unsupported Mermaid syntax.");
+          add({ level: "warn", source: "DiagramCard", message: "Mermaid pre-validation failed", details: code.slice(0, 160) });
+          return;
+        }
+        const { svg } = await mermaid.render(`${id}-svg`, code);
         if (!cancelled && containerRef.current) {
           containerRef.current.innerHTML = svg;
+          setRenderError(null);
         }
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error("Mermaid render failed", err);
+      } catch (err: any) {
+        if (!cancelled) setRenderError("Diagram failed to render.");
+        add({ level: "error", source: "DiagramCard", message: "Mermaid render failed", details: String(err?.stack || err) });
       }
     };
     renderDiagram();
     return () => {
       cancelled = true;
     };
-  }, [id, mermaidCode]);
+  }, [id, mermaidCode, add]);
 
   const handleDownloadPdf = async () => {
     const node = containerRef.current;
