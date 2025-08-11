@@ -30,9 +30,13 @@ export const architectureDiagrams: ArchitectureDiagram[] = [
       F -.-> D
       G -.-> D
       H -.-> D
-      C --> I[(Storage: avatars, docs)]
+      C --> I[(Storage: onboarding-public)]
+      C --> K[(Storage: client-photos (private))]
+      A -->|Signed URLs| K
       A -->|HTTP Calls| J[Public REST RPC]
       J --> D
+      A --> L[Admin Diagnostics]
+      L -->|Reads grouped logs| A
     `,
   },
   {
@@ -189,4 +193,43 @@ export const architectureDiagrams: ArchitectureDiagram[] = [
       APP->>DB: Feedback created after call
     `,
   },
+  {
+    id: "diagnostics-pipeline",
+    title: "Diagnostics Pipeline and Sampling",
+    type: "sequence",
+    description:
+      "Client-side diagnostics with redaction, burst override sampling, grouping, and admin UI.",
+    mermaid: `sequenceDiagram
+      autonumber
+      participant APP as Client App
+      participant DIAG as DiagnosticsProvider
+      participant ADMIN as Admin Diagnostics
+
+      APP->>DIAG: add(event)
+      Note right of DIAG: Redact email/phone/JWT
+      Note right of DIAG: Sample or burst override (60s window)
+      Note right of DIAG: Group & dedupe (60s)
+      ADMIN->>DIAG: Reads grouped logs
+    `,
+  },
+  {
+    id: "private-storage-signed-urls",
+    title: "Private Storage and Signed URLs",
+    type: "sequence",
+    description:
+      "Image upload flow using private bucket client-photos with signed URL rendering.",
+    mermaid: `sequenceDiagram
+      autonumber
+      participant USER as User
+      participant APP as Client App
+      participant STORAGE as Storage: client-photos (private)
+
+      USER->>APP: Select image
+      APP->>STORAGE: upload(file)
+      STORAGE-->>APP: 200 OK
+      APP->>STORAGE: createSignedUrl(path, 7d)
+      STORAGE-->>APP: signedUrl
+      APP->>APP: Render via signed URL
+    `,
+  }
 ];
