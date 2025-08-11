@@ -16,9 +16,9 @@ export const architectureDiagrams: ArchitectureDiagram[] = [
     description:
       "Overview of the client app, Supabase services, and edge functions orchestration.",
     mermaid: `graph TD
-      A[Client App (React + Vite + Tailwind)] -->|Auth, Queries| B[Supabase Auth & JS SDK]
-      A -->|Realtime, Storage| C[Supabase Services]
-      B --> D[(Postgres DB)]
+      A["Client App (React + Vite + Tailwind)"] -->|Auth, Queries| B["Supabase Auth & JS SDK"]
+      A -->|Realtime, Storage| C["Supabase Services"]
+      B --> D[("Postgres DB")]
       C --> D
       subgraph Edge Functions
         E[process-onboarding-sla]
@@ -30,12 +30,12 @@ export const architectureDiagrams: ArchitectureDiagram[] = [
       F -.-> D
       G -.-> D
       H -.-> D
-      C --> I[(Storage: onboarding-public)]
-      C --> K[(Storage: client-photos (private))]
+      C --> I[("Storage: onboarding-public")]
+      C --> K[("Storage: client-photos (private)")]
       A -->|Signed URLs| K
-      A -->|HTTP Calls| J[Public REST RPC]
+      A -->|HTTP Calls| J["Public REST RPC"]
       J --> D
-      A --> L[Admin Diagnostics]
+      A --> L["Admin Diagnostics"]
       L -->|Reads grouped logs| A
     `,
   },
