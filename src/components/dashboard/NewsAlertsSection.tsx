@@ -23,6 +23,8 @@ export function NewsAlertsSection() {
     switch (alertType) {
       case 'coach_update':
         return <Package className="h-4 w-4" />;
+      case 'template_assigned':
+        return <Package className="h-4 w-4" />;
       case 'platform_nudge':
         return <MessageCircle className="h-4 w-4" />;
       case 'achievement':
@@ -42,6 +44,8 @@ export function NewsAlertsSection() {
         return 'default';
       case 'coach_update':
         return 'secondary';
+      case 'template_assigned':
+        return 'default';
       case 'availability':
         return 'outline';
       default:

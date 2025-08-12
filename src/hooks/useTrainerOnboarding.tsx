@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { createTemplateAssignmentNotification } from '@/utils/createTemplateAssignmentNotification';
 
 export interface OnboardingTemplate {
   id: string;
@@ -151,6 +152,17 @@ export function useTrainerOnboarding() {
         .insert(onboardingSteps);
 
       if (insertError) throw insertError;
+
+      // Create notification for template assignment
+      if (onboardingSteps.length > 0) {
+        const templateNames = onboardingSteps.map(step => step.step_name).join(', ');
+        await createTemplateAssignmentNotification({
+          clientId,
+          trainerId: user.id,
+          templateName: templateNames,
+          packageName: selectionRequest.package_name
+        });
+      }
 
       console.log(`Created ${onboardingSteps.length} onboarding steps for client ${clientId} from package ${selectionRequest.package_name}`);
     } catch (err) {

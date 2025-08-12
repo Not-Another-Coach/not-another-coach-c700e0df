@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { CheckCircle, Clock, AlertCircle, Upload, FileText, ChevronDown, ChevronUp } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { CheckCircle, Clock, AlertCircle, Upload, FileText, ChevronDown, ChevronUp, Bell } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -7,14 +7,21 @@ import { Progress } from '@/components/ui/progress';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { useClientOnboarding, OnboardingStep } from '@/hooks/useClientOnboarding';
+import { useAlerts } from '@/hooks/useAlerts';
 import { toast } from 'sonner';
 
 export function ClientOnboardingSection() {
   const { onboardingData, loading, markStepComplete, skipStep } = useClientOnboarding();
+  const { alerts } = useAlerts();
   const [expandedSteps, setExpandedSteps] = useState<Set<string>>(new Set());
   const [completingStep, setCompletingStep] = useState<string | null>(null);
   const [notes, setNotes] = useState<{ [key: string]: string }>({});
   const [uploadedFiles, setUploadedFiles] = useState<{ [key: string]: string }>({});
+
+  // Check for template assignment notifications
+  const templateAssignmentAlerts = alerts.filter(alert => 
+    alert.alert_type === 'template_assigned' && alert.is_active
+  );
 
   if (loading) {
     return (
@@ -123,19 +130,44 @@ export function ClientOnboardingSection() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Your onboarding journey with {onboardingData.trainerName}</CardTitle>
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">
-              You've completed {onboardingData.completedCount} of {onboardingData.totalCount} onboarding steps
-            </span>
-            <Badge variant="secondary">{onboardingData.percentageComplete}% Complete</Badge>
+    <div className="space-y-4">
+      {/* Template Assignment Notifications */}
+      {templateAssignmentAlerts.length > 0 && (
+        <Card className="border-blue-200 bg-blue-50/50">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-blue-900">
+              <Bell className="h-5 w-5" />
+              New Templates Assigned
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {templateAssignmentAlerts.map(alert => (
+                <div key={alert.id} className="flex items-start gap-3 p-3 bg-white rounded-lg border">
+                  <div className="flex-1">
+                    <h4 className="font-medium text-sm text-blue-900">{alert.title}</h4>
+                    <p className="text-sm text-blue-700">{alert.content}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Your onboarding journey with {onboardingData.trainerName}</CardTitle>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">
+                You've completed {onboardingData.completedCount} of {onboardingData.totalCount} onboarding steps
+              </span>
+              <Badge variant="secondary">{onboardingData.percentageComplete}% Complete</Badge>
+            </div>
+            <Progress value={onboardingData.percentageComplete} className="h-2" />
           </div>
-          <Progress value={onboardingData.percentageComplete} className="h-2" />
-        </div>
-      </CardHeader>
+        </CardHeader>
       <CardContent className="space-y-4">
         {onboardingData.steps.map((step) => {
           const isExpanded = expandedSteps.has(step.id);
@@ -270,7 +302,8 @@ export function ClientOnboardingSection() {
             Your trainer hasn't set up any onboarding steps yet.
           </p>
         )}
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
