@@ -343,7 +343,7 @@ export const architectureDiagrams: ArchitectureDiagram[] = [
       participant T as Trainer
       participant TB as TemplateBuilder
       participant AC as AccessibilityChecker
-      parameter VC as VersionControl
+      participant VC as VersionControl
       participant DB as Database
       participant AUDIT as AuditLogger
 
