@@ -33,112 +33,91 @@ export const EngineerGuidelines: React.FC = () => {
       </section>
 
       <section>
-        <h3 className="text-xl font-medium">Accessibility</h3>
+        <h3 className="text-xl font-medium">Stack Adaptation — Vite + React SPA on Supabase</h3>
         <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
-          <li>WCAG 2.2 AA baseline. Keyboard-first navigation with visible focus; semantic HTML.</li>
-          <li>Icon-only controls must have a visible label or aria-label. No title-only buttons.</li>
-          <li>All inputs require id + name + associated label; placeholders are not labels.</li>
-          <li>Valid ARIA only: use aria-expanded only on the toggle control with matching aria-controls.</li>
-          <li>No nested interactive elements; make an entire card a single link or move secondary actions out.</li>
-          <li>Iframes must have meaningful title attributes.</li>
+          <li><strong>Auth & data:</strong> Supabase Auth + Row Level Security on every table with PT/client scoping. No service role in the browser. Privileged logic only in Edge Functions.</li>
+          <li><strong>No SSR/RSC:</strong> Where docs mention SSR/ISR, use CDN rules + static prebuilds; cache app shell carefully.</li>
+          <li><strong>Storage:</strong> Buckets are private by default; serve media via signed URLs with explicit Cache-Control metadata; never hotlink third-party embeds in critical views.</li>
+          <li><strong>Contracts:</strong> Generate Supabase types and validate client responses with Zod; keep OpenAPI only for Edge Functions.</li>
         </ul>
       </section>
 
       <section>
-        <h3 className="text-xl font-medium">State, Data, and Networking</h3>
+        <h3 className="text-xl font-medium">Headers, CSP & Caching — enforced at CDN/host (not app)</h3>
         <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
-          <li>Use dedicated hooks for data (e.g., useXxx hooks). Keep components presentational where possible.</li>
-          <li>Use React Query for server data where applicable; cache keys must include all inputs.</li>
-          <li>Use the provided safeFetch wrapper or Supabase SDK; never roll raw fetch for Supabase endpoints.</li>
-          <li>Validate inputs/outputs at boundaries (Zod recommended) for edge functions and custom fetchers.</li>
-          <li>Prefer optimistic UI with proper rollback on failures when safe.</li>
+          <li><strong>Required (HTML/API):</strong> X-Content-Type-Options: nosniff, Referrer-Policy: strict-origin-when-cross-origin, CSP with frame-ancestors "self", correct Content-Type.</li>
+          <li><strong>Forbidden:</strong> X-XSS-Protection, X-Frame-Options, Pragma, Expires.</li>
+          <li><strong>Caching:</strong> index.html: Cache-Control: no-cache (or no-store for sensitive dashboards). Hashed assets (.js/.css/.woff2): public, max-age=31536000, immutable.</li>
+          <li><strong>Verify in CI:</strong> Playwright network assertions against a preview URL to assert headers/MIME/caching.</li>
+          <li><strong>CSP starter:</strong> default-src "self"; script-src "self" https://ogpiovfxjxcclptfybrk.supabase.co; style-src "self" "unsafe-inline"; img-src "self" data: blob:; connect-src "self" https://ogpiovfxjxcclptfybrk.supabase.co; frame-ancestors "self";</li>
         </ul>
       </section>
 
       <section>
-        <h3 className="text-xl font-medium">Supabase Usage</h3>
+        <h3 className="text-xl font-medium">Supabase RLS Policy Checklist</h3>
         <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
-          <li>Always rely on RLS for access control; use SECURITY DEFINER functions when needed.</li>
-          <li>Storage: user-generated content goes to private buckets (render with short-lived signed URLs).</li>
-          <li>No raw SQL in edge functions; use Supabase client methods. Keep search_path stable in DB functions.</li>
-          <li>Do not reference auth schema in frontend. Use public profiles table and RPCs as needed.</li>
-          <li>Secrets live in Supabase Edge Function secrets, never in the client code.</li>
+          <li>Each table has select/insert/update/delete policies with ownership checks (e.g., auth.uid() IN (pt_id, client_id)).</li>
+          <li>Admin bypass only via role claim in JWT; never via public API keys.</li>
+          <li>Add negative tests (unauthorised user cannot read/write).</li>
         </ul>
       </section>
 
       <section>
-        <h3 className="text-xl font-medium">Profiles data access model (RLS)</h3>
+        <h3 className="text-xl font-medium">Edge Functions: Webhooks & Idempotency</h3>
         <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
-          <li>RLS enforced on public.profiles: users can SELECT/UPDATE/INSERT only their own row; admins have full access.</li>
-          <li>Browsing: authenticated users may SELECT published trainer profiles only (user_type = trainer AND profile_published = true).</li>
-          <li>Engagement access: clients and trainers can view each other’s profiles when a client_trainer_engagement row exists.</li>
-          <li>Frontend: always include user_type='trainer' + profile_published=true when listing coaches; avoid selecting unnecessary columns.</li>
-          <li>Never read auth.users from the client; use profiles and RPCs. Treat billing/card fields as private.</li>
+          <li><strong>Pattern:</strong> verify signature → INSERT INTO webhook_events(id); on conflict do nothing → process only on first insert; wrap in a transaction; retry with backoff.</li>
+          <li>All side effects (emails, payouts, message sends) use idempotency keys and write to a ledger row first.</li>
         </ul>
       </section>
 
       <section>
-        <h3 className="text-xl font-medium">Coach availability access model (RLS)</h3>
+        <h3 className="text-xl font-medium">Onboarding Templates & Publishing</h3>
         <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
-          <li>No public reads. Remove permissive SELECT on coach_availability_settings.</li>
-          <li>Coaches can manage and view their own availability; admins have full access.</li>
-          <li>Clients may SELECT a coach’s availability only if either (a) an engagement exists (client_trainer_engagement) or (b) they are on that coach’s active waitlist.</li>
-          <li>Frontend: avoid prefetching availability for unaffiliated users; fetch after shortlist/engagement or on waitlist screens.</li>
+          <li>Builder enforces an a11y schema (headings, button text, link text, ALT text, List-Unsubscribe for emails). Preview runs axe; block publish on serious/critical issues.</li>
+          <li>Publishing writes an immutable template version and a consent snapshot (marketing vs service + policy version) into the message/publish ledger at send time.</li>
+          <li>Conditional logic evaluated client-side with server validation. Template analytics track usage and completion metrics.</li>
+          <li>Bulk operations use idempotent processing with progress tracking and error logging.</li>
         </ul>
       </section>
 
       <section>
-        <h3 className="text-xl font-medium">Diagnostics, Errors, and Logging</h3>
+        <h3 className="text-xl font-medium">Diagnostics (SPA)</h3>
         <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
-          <li>Use DiagnosticsProvider.add for noteworthy events; include source and concise messages.</li>
-          <li>Never log PII; redaction covers email/phone/JWT/Bearer but avoid sending sensitive data altogether.</li>
-          <li>Use toast notifications for user-visible issues; keep messages actionable.</li>
+          <li><strong>Redaction:</strong> emails, phone numbers, JWTs, non-allow-listed query params.</li>
+          <li><strong>Owner mapping:</strong> one src/diagnostics/rules. It's used by the provider & UI.</li>
+          <li><strong>Sampling:</strong> 20% in prod with burst override to 100% for 10 minutes on spikes.</li>
+          <li><strong>Traceability:</strong> attach trace_id (OTel) + current feature flags to each event.</li>
         </ul>
       </section>
 
       <section>
-        <h3 className="text-xl font-medium">Security & Privacy</h3>
+        <h3 className="text-xl font-medium">Performance & Web-vitals</h3>
         <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
-          <li>Validate and sanitize user inputs. Avoid dangerouslySetInnerHTML unless from trusted sources.</li>
-          <li>Follow least privilege in DB policies and functions. Avoid SELECT true unless intended public data.</li>
-          <li>Use mermaid securityLevel="strict" and validate diagrams before render (already implemented).</li>
+          <li>Collect FCP/LCP/CLS/INP (web vitals) → sample to diagnostics.</li>
+          <li>Set budgets in CI (Lighthouse) for LCP &lt; 2.5s, CLS &lt; 0.1, INP &lt; 200ms on median devices.</li>
+          <li>Animate transform/opacity only; no SMIL/inline SVG animation.</li>
         </ul>
       </section>
 
       <section>
-        <h3 className="text-xl font-medium">Performance</h3>
+        <h3 className="text-xl font-medium">Testing/CI Matrix (SPA fit)</h3>
         <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
-          <li>Code-split large routes/components. Memoize heavy computations; use useMemo/useCallback thoughtfully.</li>
-          <li>Defer non-critical scripts; lazy-load images. Avoid unnecessary re-renders by lifting state appropriately.</li>
-          <li>Prefer pagination/infinite queries over loading large datasets.</li>
+          <li>ESLint + jsx-a11y (recommended rules).</li>
+          <li>Playwright + axe-core smoke tests on login, onboarding, profile, and checkout; fail on serious/critical.</li>
+          <li>Headers & MIME assertions on preview.</li>
+          <li>RLS tests (positive/negative) using Supabase test users.</li>
+          <li>Contract tests: Zod validation of Edge Function responses + generated Supabase types compile.</li>
         </ul>
       </section>
 
       <section>
-        <h3 className="text-xl font-medium">Testing & Quality</h3>
+        <h3 className="text-xl font-medium">Definition of Done — SPA/Supabase Delta</h3>
         <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
-          <li>Unit-test critical logic in hooks and utils. Snapshot-test presentational components when stable.</li>
-          <li>Add Playwright smoke tests for headers/CSP/security where feasible.</li>
-          <li>Code review checklist: types, RLS, accessibility, design tokens, error handling, and diagnostics.</li>
-        </ul>
-      </section>
-
-      <section>
-        <h3 className="text-xl font-medium">Accessibility Definition of Done</h3>
-        <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
-          <li>No icon-only controls without a visible name or aria-label.</li>
-          <li>No nested interactive elements.</li>
-          <li>All inputs have id + name + associated label; aria-describedby for hints/errors.</li>
-          <li>Any aria-expanded has a matching aria-controls and toggles visibility.</li>
-          <li>All iframes have titles.</li>
-        </ul>
-      </section>
-
-      <section>
-        <h3 className="text-xl font-medium">Lint & CI Guardrails</h3>
-        <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
-          <li>eslint-plugin-jsx-a11y: label-has-associated-control, anchor-has-content, aria-props, aria-roles, no-nested-interactive, no-noninteractive-element-interactions.</li>
-          <li>Playwright + axe-core smoke tests on key flows. PRs fail on serious/critical violations.</li>
+          <li>Headers/CSP/caching verified on preview (not just local).</li>
+          <li>RLS present and tested for any new/changed table.</li>
+          <li>Ledger writes precede any external side effect; handlers are idempotent.</li>
+          <li>Template publish is blocked by a11y violations; template_version + consent_snapshot persisted.</li>
+          <li>No PII in diagnostics; events carry trace_id + flags; sampling active.</li>
         </ul>
       </section>
 

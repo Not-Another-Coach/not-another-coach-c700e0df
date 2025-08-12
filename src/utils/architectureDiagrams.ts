@@ -14,7 +14,7 @@ export const architectureDiagrams: ArchitectureDiagram[] = [
     title: "High-level System Architecture",
     type: "flowchart",
     description:
-      "Overview of the client app, Supabase services, and edge functions orchestration.",
+      "Overview of the client app, Supabase services, edge functions, and advanced template features.",
     mermaid: `graph TD
       A["Client App (React + Vite + Tailwind)"] -->|Auth, Queries| B["Supabase Auth & JS SDK"]
       A -->|Realtime, Storage| C["Supabase Services"]
@@ -25,350 +25,498 @@ export const architectureDiagrams: ArchitectureDiagram[] = [
         F[process-discovery-call-reminders]
         G[process-waitlist-exclusivity]
         H[send-discovery-call-email]
+        I[security-headers]
+        J[performance-optimizer]
       end
       E -.-> D
       F -.-> D
       G -.-> D
       H -.-> D
-      C --> I[("Storage: onboarding-public")]
-      C --> K[("Storage: client-photos (private)")]
-      A -->|Signed URLs| K
-      A -->|HTTP Calls| J["Public REST RPC"]
-      J --> D
-      A --> L["Admin Diagnostics"]
-      L -->|Reads grouped logs| A
-      
-      subgraph Onboarding System
-        M[TemplateBuilder]
-        N[ActivityAssignment]
-        O[PublishingWorkflow]
-        P[SLA Monitoring]
-      end
+      I -.-> A
+      J -.-> A
+      C --> K[("Storage: onboarding-public")]
+      C --> L[("Storage: client-photos (private)")]
+      A -->|Signed URLs| L
+      A -->|HTTP Calls| M["Public REST RPC"]
       M --> D
-      N --> D
+      A --> N["Admin Diagnostics"]
+      N -->|Reads grouped logs| A
+      
+      subgraph Advanced Template System
+        O[TemplateBuilder]
+        P[ConditionalLogic]
+        Q[AnalyticsDashboard]
+        R[BulkOperations]
+        S[VersionControl]
+        T[AccessibilityAudit]
+      end
       O --> D
-      P --> E
-      A --> M
+      P --> D
+      Q --> D
+      R --> D
+      S --> D
+      T --> D
+      A --> O
+      
+      subgraph Compliance & Security
+        U[DSAR Processing]
+        V[Retention Tracking]
+        W[Accessibility Schema]
+      end
+      U --> D
+      V --> D
+      W --> D
     `,
   },
   {
-    id: "core-data-model-selected",
-    title: "Core Data Model (Selected Entities)",
+    id: "advanced-template-features",
+    title: "Advanced Template Features Architecture",
+    type: "flowchart",
+    description:
+      "Phase 5 advanced template system with conditional logic, analytics, bulk operations, and versioning.",
+    mermaid: `graph TD
+      A[TemplateBuilder] --> B[ConditionalLogicBuilder]
+      A --> C[TemplateAnalyticsDashboard]
+      A --> D[BulkOperationsPanel]
+      A --> E[TemplateVersionControl]
+      
+      B --> F[evaluate_conditional_step Function]
+      F --> G[("onboarding_conditional_evaluations")]
+      F --> H[("client_onboarding_progress")]
+      
+      C --> I[("onboarding_template_analytics")]
+      C --> J[update_template_analytics Function]
+      J --> K[track_template_usage Trigger]
+      
+      D --> L[("onboarding_bulk_operations")]
+      D --> M[process_bulk_operation Function]
+      M --> N[Bulk Assignment/Update Logic]
+      
+      E --> O[("onboarding_template_versions")]
+      E --> P[create_template_version Function]
+      P --> Q[Version Snapshots]
+      
+      subgraph Conditional Rules
+        R[Package Type Rules]
+        S[Previous Answer Rules]
+        T[Step Dependency Rules]
+      end
+      B --> R
+      B --> S
+      B --> T
+      
+      subgraph Analytics Metrics
+        U[Usage Tracking]
+        V[Completion Rates]
+        W[Assignment Metrics]
+        X[Performance KPIs]
+      end
+      C --> U
+      C --> V
+      C --> W
+      C --> X
+      
+      subgraph Bulk Operations
+        Y[Template Assignment]
+        Z[Step Completion]
+        AA[Bulk Updates]
+      end
+      D --> Y
+      D --> Z
+      D --> AA
+      
+      subgraph Version Management
+        BB[Snapshot Creation]
+        CC[Rollback Capability]
+        DD[Change Tracking]
+      end
+      E --> BB
+      E --> CC
+      E --> DD
+    `,
+  },
+  {
+    id: "accessibility-compliance-schema",
+    title: "Accessibility & Compliance Schema",
+    type: "flowchart",
+    description:
+      "Phase 4 accessibility enforcement and compliance tracking with DSAR and retention policies.",
+    mermaid: `graph TD
+      A[Template Publishing] --> B[check_accessibility_compliance Function]
+      B --> C[("accessibility_audit_log")]
+      B --> D[validate_accessibility_before_publish Trigger]
+      
+      D --> E{Accessibility Check}
+      E -->|Pass| F[Allow Publish]
+      E -->|Fail| G[Block Publish]
+      
+      subgraph Accessibility Requirements
+        H[Alt Text Verification]
+        I[Color Contrast Check]
+        J[Keyboard Navigation]
+        K[Screen Reader Compatibility]
+        L[ARIA Labels Complete]
+        M[Semantic Markup Valid]
+      end
+      B --> H
+      B --> I
+      B --> J
+      B --> K
+      B --> L
+      B --> M
+      
+      subgraph DSAR Processing
+        N[("data_subject_access_requests")]
+        O[process_dsar_request Function]
+        P[Data Compilation]
+        Q[Deletion Processing]
+      end
+      N --> O
+      O --> P
+      O --> Q
+      
+      subgraph Data Retention
+        R[("data_retention_tracking")]
+        S[set_data_retention_period Function]
+        T[Auto-Purge System]
+        U[Legal Basis Tracking]
+      end
+      R --> S
+      S --> T
+      S --> U
+      
+      V[User Data Events] --> S
+      W[GDPR Requests] --> O
+    `,
+  },
+  {
+    id: "core-data-model-extended",
+    title: "Extended Data Model with Template Features",
     type: "er",
     description:
-      "Key tables related to trainers, clients, conversations, discovery calls, and feedback.",
+      "Comprehensive data model including advanced template features, analytics, and compliance.",
     mermaid: `erDiagram
       USERS ||--o{ PROFILES : has
       USERS ||--o{ ROLES : has
       PROFILES ||--o{ TRAINERS : can_be
       PROFILES ||--o{ CLIENTS : can_be
-      TRAINERS ||--o{ DISCOVERY_CALLS : conducts
-      CLIENTS ||--o{ DISCOVERY_CALLS : books
-      TRAINERS ||--o{ CONVERSATIONS : participates
-      CLIENTS ||--o{ CONVERSATIONS : participates
-      CONVERSATIONS ||--o{ MESSAGES : contains
-      DISCOVERY_CALLS ||--o{ FEEDBACK : receives
-      CLIENTS ||--o{ WAITLIST : in
       TRAINERS ||--o{ ONBOARDING_TEMPLATES : creates
-      ONBOARDING_TEMPLATES ||--o{ ONBOARDING_GETTING_STARTED : contains
-      ONBOARDING_TEMPLATES ||--o{ ONBOARDING_COMMITMENTS : defines
-      ONBOARDING_TEMPLATES ||--o{ ACTIVITY_ASSIGNMENTS : has
+      ONBOARDING_TEMPLATES ||--o{ TEMPLATE_ANALYTICS : generates
+      ONBOARDING_TEMPLATES ||--o{ TEMPLATE_VERSIONS : tracks
+      ONBOARDING_TEMPLATES ||--o{ CONDITIONAL_EVALUATIONS : evaluates
+      ONBOARDING_TEMPLATES ||--o{ BULK_OPERATIONS : processes
+      ONBOARDING_TEMPLATES ||--o{ ACCESSIBILITY_AUDITS : enforces
       CLIENTS ||--o{ ONBOARDING_PROGRESS : tracks
-      TRAINERS ||--o{ ONBOARDING_PROGRESS : manages
+      PROFILES ||--o{ DSAR_REQUESTS : submits
+      PROFILES ||--o{ RETENTION_TRACKING : monitors
 
-      USERS {
-        string id PK
-        string email
-        datetime created_at
-      }
-      PROFILES {
-        string id PK
-        string user_id FK
-        string display_name
-        string avatar_url
-        datetime updated_at
-      }
-      ROLES {
-        string user_id FK
-        string role
-      }
-      TRAINERS {
-        string id PK
-        string user_id FK
-        string bio
-      }
-      CLIENTS {
-        string id PK
-        string user_id FK
-        string goals
-      }
-      CONVERSATIONS {
-        string id PK
-        string trainer_id FK
-        string client_id FK
-        datetime created_at
-      }
-      MESSAGES {
-        string id PK
-        string conversation_id FK
-        string sender_id FK
-        string content
-        datetime sent_at
-      }
-      DISCOVERY_CALLS {
-        string id PK
-        string trainer_id FK
-        string client_id FK
-        datetime scheduled_at
-        string status
-      }
-      FEEDBACK {
-        string id PK
-        string discovery_call_id FK
-        int rating
-        string notes
-      }
-      WAITLIST {
-        string id PK
-        string client_id FK
-        string priority
-        datetime created_at
-      }
       ONBOARDING_TEMPLATES {
-        string id PK
-        string trainer_id FK
-        string template_name
-        boolean published
-        datetime created_at
-      }
-      ONBOARDING_GETTING_STARTED {
-        string id PK
-        string template_id FK
-        string task_name
+        uuid id PK
+        uuid trainer_id FK
+        string name
         text description
-        int sla_hours
-      }
-      ONBOARDING_COMMITMENTS {
-        string id PK
-        string template_id FK
-        string commitment_title
-        text commitment_description
-        boolean requires_signature
-      }
-      ACTIVITY_ASSIGNMENTS {
-        string id PK
-        string template_id FK
-        string activity_id FK
-        int assignment_order
-        boolean is_required
-      }
-      ONBOARDING_PROGRESS {
-        string id PK
-        string client_id FK
-        string trainer_id FK
-        string getting_started_id FK
+        jsonb conditional_logic
+        text[] package_type_restrictions
+        integer version_number
+        uuid parent_template_id FK
+        boolean is_version
+        jsonb accessibility_metadata
+        boolean accessibility_required
+        boolean accessibility_approved
+        timestamp accessibility_approved_at
         string status
-        datetime completed_at
+        timestamp created_at
+        timestamp updated_at
+      }
+      
+      TEMPLATE_ANALYTICS {
+        uuid id PK
+        uuid template_id FK
+        uuid trainer_id FK
+        string metric_type
+        integer metric_value
+        jsonb metric_data
+        date date_recorded
+        timestamp created_at
+        timestamp updated_at
+      }
+      
+      TEMPLATE_VERSIONS {
+        uuid id PK
+        uuid template_id FK
+        integer version_number
+        jsonb template_data
+        text changelog
+        uuid created_by FK
+        boolean is_current
+        timestamp created_at
+      }
+      
+      CONDITIONAL_EVALUATIONS {
+        uuid id PK
+        uuid client_id FK
+        uuid template_id FK
+        string step_id
+        boolean condition_result
+        jsonb evaluation_data
+        timestamp evaluated_at
+      }
+      
+      BULK_OPERATIONS {
+        uuid id PK
+        string operation_type
+        uuid template_id FK
+        uuid trainer_id FK
+        uuid[] target_clients
+        jsonb operation_data
+        string status
+        integer progress_count
+        integer total_count
+        text[] error_log
+        timestamp started_at
+        timestamp completed_at
+        timestamp created_at
+        timestamp updated_at
+      }
+      
+      ACCESSIBILITY_AUDITS {
+        uuid id PK
+        uuid template_id FK
+        string template_type
+        string audit_type
+        jsonb axe_results
+        integer violations_count
+        numeric compliance_score
+        string wcag_level
+        uuid audited_by FK
+        boolean passed
+        text notes
+        timestamp audited_at
+        timestamp created_at
+      }
+      
+      DSAR_REQUESTS {
+        uuid id PK
+        uuid user_id FK
+        string request_type
+        string status
+        timestamp requested_at
+        timestamp completed_at
+        uuid processed_by FK
+        jsonb request_details
+        jsonb response_data
+        string verification_token
+        timestamp verification_expires_at
+        timestamp verified_at
+        string legal_basis
+        string priority
+        text notes
+        timestamp created_at
+        timestamp updated_at
+      }
+      
+      RETENTION_TRACKING {
+        uuid id PK
+        uuid user_id FK
+        string data_category
+        string table_name
+        uuid record_id
+        integer retention_period_months
+        timestamp expires_at
+        timestamp purged_at
+        string purge_reason
+        string legal_basis
+        jsonb metadata
+        timestamp created_at
+        timestamp updated_at
       }
     `,
   },
   {
-    id: "sla-and-due-alerts",
-    title: "SLA and Due Alerts Flow",
+    id: "template-publishing-workflow",
+    title: "Advanced Template Publishing Workflow",
     type: "sequence",
     description:
-      "Edge function checks onboarding SLA status and creates due alerts.",
-    mermaid: `sequenceDiagram
-      autonumber
-      participant CRON as Scheduler/Cron
-      participant SLA as process-onboarding-sla (Edge Fn)
-      participant DB as Postgres
-      participant APP as Client App
-
-      CRON->>SLA: Trigger periodic run
-      SLA->>DB: Query onboarding steps nearing/over SLA
-      DB-->>SLA: Results set
-      alt Violations exist
-        SLA->>DB: Insert alerts/notifications rows
-        SLA-->>APP: Emit realtime events (RLS-protected)
-        APP->>APP: useActivityAlerts hook displays toaster/badges
-      else No violations
-        SLA-->>CRON: No action
-      end
-    `,
-  },
-  {
-    id: "messaging-engagement-progression",
-    title: "Messaging and Engagement Progression",
-    type: "sequence",
-    description:
-      "Client-trainer conversation lifecycle with engagement stage updates.",
-    mermaid: `sequenceDiagram
-      autonumber
-      participant C as Client
-      participant T as Trainer
-      participant APP as Client App
-      participant DB as Postgres
-
-      C->>APP: Send message
-      APP->>DB: Insert messages row
-      DB-->>APP: Realtime broadcast
-      APP->>T: UI updates (useConversations)
-      APP->>APP: useEngagementStage computes stage
-      APP->>DB: Update engagement stage on conversation
-      T->>APP: Replies
-      APP->>DB: Insert reply message
-      DB-->>APP: Realtime broadcast to C
-    `,
-  },
-  {
-    id: "discovery-call-emails",
-    title: "Discovery Call Emails",
-    type: "sequence",
-    description:
-      "Reminder pipeline across booking, confirmation, and notifications.",
-    mermaid: `sequenceDiagram
-      autonumber
-      participant C as Client
-      participant T as Trainer
-      participant APP as Client App
-      participant DB as Postgres
-      participant REM as process-discovery-call-reminders
-      participant EMAIL as send-discovery-call-email
-
-      C->>APP: Book discovery call
-      APP->>DB: Insert discovery_calls row (status=pending)
-      DB-->>REM: Picked up by scheduled edge function
-      REM->>DB: Find upcoming calls
-      REM->>EMAIL: Trigger email send (templates)
-      EMAIL->>C: Confirmation/Reminder
-      EMAIL->>T: Trainer notification
-      APP->>DB: Status transitions (confirmed/done)
-      APP->>DB: Feedback created after call
-    `,
-  },
-  {
-    id: "diagnostics-pipeline",
-    title: "Diagnostics Pipeline and Sampling",
-    type: "sequence",
-    description:
-      "Client-side diagnostics with redaction, burst override sampling, grouping, and admin UI.",
-    mermaid: `sequenceDiagram
-      autonumber
-      participant APP as Client App
-      participant DIAG as DiagnosticsProvider
-      participant ADMIN as Admin Diagnostics
-
-      APP->>DIAG: add(event)
-      Note right of DIAG: Redact email/phone/JWT
-      Note right of DIAG: Sample or burst override (60s window)
-      Note right of DIAG: Group & dedupe (60s)
-      ADMIN->>DIAG: Reads grouped logs
-    `,
-  },
-  {
-    id: "private-storage-signed-urls",
-    title: "Private Storage and Signed URLs",
-    type: "sequence",
-    description:
-      "Image upload flow using private bucket client-photos with signed URL rendering.",
-    mermaid: `sequenceDiagram
-      autonumber
-      participant USER as User
-      participant APP as Client App
-      participant STORAGE as Storage: client-photos (private)
-
-      USER->>APP: Select image
-      APP->>STORAGE: upload(file)
-      STORAGE-->>APP: 200 OK
-      APP->>STORAGE: createSignedUrl(path, 7d)
-      STORAGE-->>APP: signedUrl
-      APP->>APP: Render via signed URL
-    `,
-  },
-  {
-    id: "onboarding-template-builder",
-    title: "Onboarding Template Builder Architecture",
-    type: "flowchart",
-    description:
-      "Complete onboarding template management system with advanced features, SLA tracking, and publishing workflow.",
-    mermaid: `graph TD
-      A[TemplateBuilder Component] --> B[useTemplateBuilder Hook]
-      A --> C[useAdvancedOnboarding Hook]
-      A --> D[useOnboardingSections Hook]
-      
-      B --> E[("onboarding_templates")]
-      B --> F[("template_package_links")]
-      
-      C --> G[ActivityAssignmentPanel]
-      C --> H[PublishingWorkflow]
-      C --> I[AttachmentManager]
-      C --> J[VisibilityMatrix]
-      
-      G --> K[("onboarding_activity_assignments")]
-      H --> L[("onboarding_template_audit_log")]
-      I --> M[("Storage: onboarding-public")]
-      J --> N[("Visibility columns across tables")]
-      
-      D --> O[("getting_started_tasks")]
-      D --> P[("ongoing_support_settings")]
-      D --> Q[("commitment_expectations")]
-      D --> R[("trainer_notes")]
-      
-      S[SLA Monitoring] --> T[calculate_business_due_date Function]
-      S --> U[set_onboarding_due_dates Function]
-      T --> E
-      U --> E
-      
-      V[Publishing Flow] --> W[lock_template_on_publish Function]
-      W --> E
-      W --> L
-      
-      X[Edge Function: process-onboarding-sla] --> S
-      X --> Y[Activity Alerts System]
-    `,
-  },
-  {
-    id: "onboarding-publishing-workflow",
-    title: "Template Publishing and SLA Workflow",
-    type: "sequence",
-    description:
-      "Template publishing lifecycle with audit logging, SLA calculation, and due date management.",
+      "Complete template publishing pipeline with accessibility checks, versioning, and compliance tracking.",
     mermaid: `sequenceDiagram
       autonumber
       participant T as Trainer
       participant TB as TemplateBuilder
-      participant PW as PublishingWorkflow
+      participant AC as AccessibilityChecker
+      parameter VC as VersionControl
       participant DB as Database
-      participant SLA as SLA Functions
-      participant EDGE as Edge Function
+      participant AUDIT as AuditLogger
 
       T->>TB: Create/Edit Template
-      TB->>DB: Save draft template
-      T->>PW: Publish Template
-      PW->>DB: lock_template_on_publish()
-      DB->>DB: Set published=true, locked=true
-      DB->>DB: Insert audit log entry
+      TB->>DB: Save draft with conditional logic
+      T->>TB: Add conditional rules
+      TB->>DB: Update conditional_logic field
       
-      alt Template has SLA settings
-        PW->>SLA: calculate_business_due_date()
-        SLA-->>PW: Return due date
-        PW->>DB: Update template with due dates
+      T->>TB: Request publish
+      TB->>AC: check_accessibility_compliance()
+      AC->>DB: Query accessibility_metadata
+      
+      alt Accessibility passes
+        AC-->>TB: Compliance approved
+        TB->>VC: create_template_version()
+        VC->>DB: Insert template version snapshot
+        VC->>DB: Update version_number
+        TB->>DB: Set published=true, locked=true
+        TB->>AUDIT: Log accessibility approval
+      else Accessibility fails
+        AC-->>TB: Compliance blocked
+        TB-->>T: Show accessibility violations
+        T->>TB: Fix accessibility issues
+        TB->>AC: Re-check compliance
       end
       
-      T->>TB: Assign to Package
-      TB->>DB: Insert template_package_links
+      T->>TB: Assign to clients (bulk)
+      TB->>DB: Create bulk_operation record
+      DB->>DB: process_bulk_operation()
+      DB->>DB: Update template analytics
       
-      Note over EDGE: Scheduled monitoring
-      EDGE->>DB: Check SLA violations
-      alt SLA breach detected
-        EDGE->>DB: Create activity alerts
-        EDGE-->>TB: Realtime notification
+      T->>TB: View analytics
+      TB->>DB: Query template_analytics
+      TB-->>T: Show usage metrics and completion rates
+    `,
+  },
+  {
+    id: "conditional-logic-evaluation",
+    title: "Conditional Logic Evaluation Flow",
+    type: "sequence",
+    description:
+      "Dynamic step visibility based on client data, package types, and previous responses.",
+    mermaid: `sequenceDiagram
+      autonumber
+      participant C as Client
+      participant UI as OnboardingUI
+      participant EVAL as ConditionalEvaluator
+      participant DB as Database
+
+      C->>UI: Start onboarding step
+      UI->>EVAL: evaluate_conditional_step()
+      EVAL->>DB: Get template conditional_logic
+      EVAL->>DB: Get client progress data
+      
+      alt Package type condition
+        EVAL->>EVAL: Check client.package_type
+      else Previous answer condition
+        EVAL->>EVAL: Check client response data
+      else Step dependency condition
+        EVAL->>DB: Check if dependency step completed
       end
       
-      T->>PW: Unpublish (if needed)
-      PW->>DB: Set published=false, locked=false
-      PW->>DB: Insert audit log with reason
+      EVAL->>DB: Store evaluation result
+      EVAL-->>UI: Return visibility decision
+      
+      alt Step visible
+        UI-->>C: Show onboarding step
+      else Step hidden
+        UI-->>C: Skip to next step
+      end
+    `,
+  },
+  {
+    id: "bulk-operations-processing",
+    title: "Bulk Operations Processing",
+    type: "sequence",
+    description:
+      "Scalable bulk processing for template assignments and step updates across multiple clients.",
+    mermaid: `sequenceDiagram
+      autonumber
+      participant T as Trainer
+      participant BULK as BulkOperationsPanel
+      participant PROC as ProcessorFunction
+      participant DB as Database
+      participant NOTIFY as NotificationSystem
+
+      T->>BULK: Select clients and operation
+      BULK->>DB: Create bulk_operation record
+      BULK->>PROC: process_bulk_operation()
+      
+      PROC->>DB: Update status to 'processing'
+      
+      loop For each target client
+        PROC->>DB: Perform operation
+        alt Success
+          PROC->>DB: Increment progress_count
+        else Error
+          PROC->>DB: Add to error_log
+        end
+        PROC->>BULK: Update progress UI
+      end
+      
+      PROC->>DB: Set final status
+      PROC->>NOTIFY: Send completion notification
+      NOTIFY-->>T: Operation complete
+    `,
+  },
+  {
+    id: "analytics-and-metrics",
+    title: "Template Analytics and Metrics Collection",
+    type: "sequence",
+    description:
+      "Comprehensive analytics tracking for template usage, completion rates, and performance KPIs.",
+    mermaid: `sequenceDiagram
+      autonumber
+      participant SYSTEM as System Events
+      participant TRACKER as AnalyticsTracker
+      participant DB as Database
+      participant DASH as AnalyticsDashboard
+
+      SYSTEM->>TRACKER: Template assigned to client
+      TRACKER->>DB: update_template_analytics('assignment')
+      
+      SYSTEM->>TRACKER: Step completed by client
+      TRACKER->>DB: update_template_analytics('step_completion')
+      
+      SYSTEM->>TRACKER: Template accessed/viewed
+      TRACKER->>DB: update_template_analytics('usage')
+      
+      DASH->>DB: Fetch analytics data
+      DB-->>DASH: Return aggregated metrics
+      DASH->>DASH: Calculate completion rates
+      DASH->>DASH: Generate trend charts
+      DASH-->>TRAINER: Display insights
+    `,
+  },
+  {
+    id: "dsar-and-retention-compliance",
+    title: "DSAR and Data Retention Compliance",
+    type: "sequence",
+    description:
+      "GDPR compliance with data subject access requests and automated retention tracking.",
+    mermaid: `sequenceDiagram
+      autonumber
+      participant USER as Data Subject
+      participant PORTAL as User Portal
+      participant DSAR as DSAR Processor
+      participant DB as Database
+      participant ADMIN as Admin
+
+      USER->>PORTAL: Request data access/deletion
+      PORTAL->>DB: Create DSAR request
+      PORTAL->>ADMIN: Notify admin team
+      
+      ADMIN->>DSAR: process_dsar_request()
+      
+      alt Access request
+        DSAR->>DB: Compile all user data
+        DSAR->>DB: Generate data export
+      else Deletion request
+        DSAR->>DB: Mark for deletion
+        DSAR->>DB: Schedule data purge
+      else Rectification request
+        DSAR->>DB: Flag for manual review
+      end
+      
+      DSAR->>DB: Update request status
+      DSAR->>USER: Deliver response
+      
+      Note over DB: Automated retention tracking
+      DB->>DB: set_data_retention_period()
+      DB->>DB: Monitor expiry dates
+      DB->>DB: Auto-purge expired data
     `,
   }
 ];
