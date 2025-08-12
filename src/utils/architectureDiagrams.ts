@@ -231,5 +231,90 @@ export const architectureDiagrams: ArchitectureDiagram[] = [
       STORAGE-->>APP: signedUrl
       APP->>APP: Render via signed URL
     `,
+  },
+  {
+    id: "onboarding-template-builder",
+    title: "Onboarding Template Builder Architecture",
+    type: "flowchart",
+    description:
+      "Complete onboarding template management system with advanced features, SLA tracking, and publishing workflow.",
+    mermaid: `graph TD
+      A[TemplateBuilder Component] --> B[useTemplateBuilder Hook]
+      A --> C[useAdvancedOnboarding Hook]
+      A --> D[useOnboardingSections Hook]
+      
+      B --> E[("onboarding_templates")]
+      B --> F[("template_package_links")]
+      
+      C --> G[ActivityAssignmentPanel]
+      C --> H[PublishingWorkflow]
+      C --> I[AttachmentManager]
+      C --> J[VisibilityMatrix]
+      
+      G --> K[("onboarding_activity_assignments")]
+      H --> L[("onboarding_template_audit_log")]
+      I --> M[("Storage: onboarding-public")]
+      J --> N[("Visibility columns across tables")]
+      
+      D --> O[("getting_started_tasks")]
+      D --> P[("ongoing_support_settings")]
+      D --> Q[("commitment_expectations")]
+      D --> R[("trainer_notes")]
+      
+      S[SLA Monitoring] --> T[calculate_business_due_date Function]
+      S --> U[set_onboarding_due_dates Function]
+      T --> E
+      U --> E
+      
+      V[Publishing Flow] --> W[lock_template_on_publish Function]
+      W --> E
+      W --> L
+      
+      X[Edge Function: process-onboarding-sla] --> S
+      X --> Y[Activity Alerts System]
+    `,
+  },
+  {
+    id: "onboarding-publishing-workflow",
+    title: "Template Publishing and SLA Workflow",
+    type: "sequence",
+    description:
+      "Template publishing lifecycle with audit logging, SLA calculation, and due date management.",
+    mermaid: `sequenceDiagram
+      autonumber
+      participant T as Trainer
+      participant TB as TemplateBuilder
+      participant PW as PublishingWorkflow
+      participant DB as Database
+      participant SLA as SLA Functions
+      participant EDGE as Edge Function
+
+      T->>TB: Create/Edit Template
+      TB->>DB: Save draft template
+      T->>PW: Publish Template
+      PW->>DB: lock_template_on_publish()
+      DB->>DB: Set published=true, locked=true
+      DB->>DB: Insert audit log entry
+      
+      alt Template has SLA settings
+        PW->>SLA: calculate_business_due_date()
+        SLA-->>PW: Return due date
+        PW->>DB: Update template with due dates
+      end
+      
+      T->>TB: Assign to Package
+      TB->>DB: Insert template_package_links
+      
+      Note over EDGE: Scheduled monitoring
+      EDGE->>DB: Check SLA violations
+      alt SLA breach detected
+        EDGE->>DB: Create activity alerts
+        EDGE-->>TB: Realtime notification
+      end
+      
+      T->>PW: Unpublish (if needed)
+      PW->>DB: Set published=false, locked=false
+      PW->>DB: Insert audit log with reason
+    `,
   }
 ];
