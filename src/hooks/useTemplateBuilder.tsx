@@ -70,7 +70,13 @@ export function useTemplateBuilder() {
     } catch (err) {
       console.error('Error fetching package links:', err);
     }
-  }, [user, templates]);
+  }, [templates]);
+
+  React.useEffect(() => {
+    if (templates.length > 0) {
+      fetchPackageLinks();
+    }
+  }, [fetchPackageLinks]);
 
   const createTemplate = useCallback(async (template: Omit<ExtendedTemplate, 'id'>) => {
     if (!user) throw new Error('No user');
@@ -228,14 +234,15 @@ export function useTemplateBuilder() {
     }
   }, [user, fetchPackageLinks]);
 
-  const unlinkFromPackage = useCallback(async (linkId: string) => {
+  const unlinkFromPackage = useCallback(async (templateId: string, packageId: string) => {
     if (!user) throw new Error('No user');
 
     try {
       const { error } = await supabase
         .from('template_package_links')
         .delete()
-        .eq('id', linkId);
+        .eq('template_id', templateId)
+        .eq('package_id', packageId);
 
       if (error) throw error;
 

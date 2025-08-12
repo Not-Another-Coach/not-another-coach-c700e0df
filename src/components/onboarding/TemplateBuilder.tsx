@@ -30,6 +30,7 @@ import { toast } from 'sonner';
 interface TemplateBuilderProps {
   templates: OnboardingTemplate[];
   packages?: Array<{ id: string; name: string }>;
+  packageLinks?: Array<{ template_id: string; package_id: string; package_name: string; auto_assign: boolean }>;
   onCreateTemplate: (template: Omit<OnboardingTemplate, 'id'>) => Promise<void>;
   onUpdateTemplate: (templateId: string, updates: Partial<OnboardingTemplate>) => Promise<void>;
   onDuplicateTemplate: (templateId: string) => Promise<void>;
@@ -37,6 +38,8 @@ interface TemplateBuilderProps {
   onReorderTemplates: (reorderedTemplates: OnboardingTemplate[]) => Promise<void>;
   onPublishTemplate?: (templateId: string) => Promise<void>;
   onArchiveTemplate?: (templateId: string) => Promise<void>;
+  onLinkToPackage?: (templateId: string, packageId: string, packageName: string, autoAssign?: boolean) => Promise<void>;
+  onUnlinkFromPackage?: (templateId: string, packageId: string) => Promise<void>;
   loading?: boolean;
 }
 
@@ -50,6 +53,7 @@ interface ExtendedTemplate extends OnboardingTemplate {
 export function TemplateBuilder({
   templates,
   packages = [],
+  packageLinks = [],
   onCreateTemplate,
   onUpdateTemplate,
   onDuplicateTemplate,
@@ -57,6 +61,8 @@ export function TemplateBuilder({
   onReorderTemplates,
   onPublishTemplate,
   onArchiveTemplate,
+  onLinkToPackage,
+  onUnlinkFromPackage,
   loading = false
 }: TemplateBuilderProps) {
   const [filteredTemplates, setFilteredTemplates] = useState<ExtendedTemplate[]>(templates as ExtendedTemplate[]);
@@ -67,6 +73,7 @@ export function TemplateBuilder({
   const [showPackageLinkDialog, setShowPackageLinkDialog] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<ExtendedTemplate | null>(null);
   const [selectedTemplateForPackages, setSelectedTemplateForPackages] = useState<string | null>(null);
+  const [selectedPackageIds, setSelectedPackageIds] = useState<string[]>([]);
   const [newTemplate, setNewTemplate] = useState<Partial<ExtendedTemplate>>({
     step_name: '',
     step_type: 'mandatory',
@@ -78,6 +85,13 @@ export function TemplateBuilder({
     is_active: true,
     status: 'draft'
   });
+
+  // Get linked packages for a template
+  const getLinkedPackages = (templateId: string) => {
+    return packageLinks
+      .filter(link => link.template_id === templateId)
+      .map(link => link.package_id);
+  };
 
   // Filter templates based on status and search
   const filterTemplates = useCallback(() => {
@@ -168,6 +182,42 @@ export function TemplateBuilder({
     } catch (error) {
       toast.error('Failed to update template');
     }
+  };
+
+  const handleSavePackageLinks = async () => {
+    if (!selectedTemplateForPackages || !onLinkToPackage || !onUnlinkFromPackage) return;
+
+    try {
+      const currentLinks = getLinkedPackages(selectedTemplateForPackages);
+      
+      // Remove unchecked packages
+      for (const packageId of currentLinks) {
+        if (!selectedPackageIds.includes(packageId)) {
+          await onUnlinkFromPackage(selectedTemplateForPackages, packageId);
+        }
+      }
+      
+      // Add newly checked packages
+      for (const packageId of selectedPackageIds) {
+        if (!currentLinks.includes(packageId)) {
+          const packageName = packages.find(p => p.id === packageId)?.name || '';
+          await onLinkToPackage(selectedTemplateForPackages, packageId, packageName, true);
+        }
+      }
+      
+      setShowPackageLinkDialog(false);
+      setSelectedTemplateForPackages(null);
+      setSelectedPackageIds([]);
+      toast.success('Package links updated successfully');
+    } catch (error) {
+      toast.error('Failed to update package links');
+    }
+  };
+
+  const openPackageLinkDialog = (templateId: string) => {
+    setSelectedTemplateForPackages(templateId);
+    setSelectedPackageIds(getLinkedPackages(templateId));
+    setShowPackageLinkDialog(true);
   };
 
   const handleDuplicateTemplate = async (templateId: string) => {
@@ -272,6 +322,12 @@ export function TemplateBuilder({
                                     {template.package_links.length} package{template.package_links.length !== 1 ? 's' : ''}
                                   </Badge>
                                 )}
+                                {getLinkedPackages(template.id).length > 0 && (
+                                  <Badge variant="outline" className="gap-1">
+                                    <Package className="h-3 w-3" />
+                                    {getLinkedPackages(template.id).length} linked
+                                  </Badge>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -279,10 +335,7 @@ export function TemplateBuilder({
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => {
-                                setSelectedTemplateForPackages(template.id);
-                                setShowPackageLinkDialog(true);
-                              }}
+                              onClick={() => openPackageLinkDialog(template.id)}
                             >
                               <Package className="h-4 w-4" />
                             </Button>
@@ -548,19 +601,33 @@ export function TemplateBuilder({
               </p>
             ) : (
               <div className="space-y-2">
-                {packages.map(pkg => (
-                  <div key={pkg.id} className="flex items-center space-x-2">
-                    <input type="checkbox" id={pkg.id} />
-                    <Label htmlFor={pkg.id}>{pkg.name}</Label>
-                  </div>
-                ))}
+                {packages.map(pkg => {
+                  const isLinked = selectedPackageIds.includes(pkg.id);
+                  return (
+                    <div key={pkg.id} className="flex items-center space-x-2">
+                      <input 
+                        type="checkbox" 
+                        id={pkg.id}
+                        checked={isLinked}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedPackageIds([...selectedPackageIds, pkg.id]);
+                          } else {
+                            setSelectedPackageIds(selectedPackageIds.filter(id => id !== pkg.id));
+                          }
+                        }}
+                      />
+                      <Label htmlFor={pkg.id}>{pkg.name}</Label>
+                    </div>
+                  );
+                })}
               </div>
             )}
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowPackageLinkDialog(false)}>
                 Cancel
               </Button>
-              <Button onClick={() => setShowPackageLinkDialog(false)}>
+              <Button onClick={handleSavePackageLinks}>
                 Save Links
               </Button>
             </div>
