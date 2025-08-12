@@ -614,6 +614,54 @@ export type Database = {
         }
         Relationships: []
       }
+      consent_audit_log: {
+        Row: {
+          consent_method: string
+          consent_type: string
+          consent_version: string
+          created_at: string
+          id: string
+          ip_address: unknown | null
+          legal_basis: string
+          metadata: Json | null
+          new_value: boolean
+          previous_value: boolean | null
+          source_url: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          consent_method: string
+          consent_type: string
+          consent_version?: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          legal_basis?: string
+          metadata?: Json | null
+          new_value: boolean
+          previous_value?: boolean | null
+          source_url?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          consent_method?: string
+          consent_type?: string
+          consent_version?: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          legal_basis?: string
+          metadata?: Json | null
+          new_value?: boolean
+          previous_value?: boolean | null
+          source_url?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       conversations: {
         Row: {
           client_id: string
@@ -643,6 +691,39 @@ export type Database = {
           last_message_at?: string | null
           trainer_id?: string
           trainer_last_read_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      data_retention_policies: {
+        Row: {
+          auto_purge_enabled: boolean | null
+          created_at: string
+          created_by: string | null
+          data_category: string
+          id: string
+          legal_basis: string
+          retention_period_months: number
+          updated_at: string
+        }
+        Insert: {
+          auto_purge_enabled?: boolean | null
+          created_at?: string
+          created_by?: string | null
+          data_category: string
+          id?: string
+          legal_basis: string
+          retention_period_months: number
+          updated_at?: string
+        }
+        Update: {
+          auto_purge_enabled?: boolean | null
+          created_at?: string
+          created_by?: string | null
+          data_category?: string
+          id?: string
+          legal_basis?: string
+          retention_period_months?: number
           updated_at?: string
         }
         Relationships: []
@@ -1285,6 +1366,78 @@ export type Database = {
           },
         ]
       }
+      message_publish_ledger: {
+        Row: {
+          consent_snapshot: Json
+          content_hash: string | null
+          correlation_id: string
+          created_at: string
+          delivered_at: string | null
+          delivery_provider: string | null
+          delivery_provider_id: string | null
+          delivery_status: string
+          failed_at: string | null
+          failure_reason: string | null
+          id: string
+          legal_basis: string
+          message_type: string
+          metadata: Json | null
+          recipient_id: string
+          retry_count: number | null
+          sender_id: string | null
+          sent_at: string | null
+          template_id: string | null
+          template_version: string | null
+          updated_at: string
+        }
+        Insert: {
+          consent_snapshot?: Json
+          content_hash?: string | null
+          correlation_id?: string
+          created_at?: string
+          delivered_at?: string | null
+          delivery_provider?: string | null
+          delivery_provider_id?: string | null
+          delivery_status?: string
+          failed_at?: string | null
+          failure_reason?: string | null
+          id?: string
+          legal_basis?: string
+          message_type: string
+          metadata?: Json | null
+          recipient_id: string
+          retry_count?: number | null
+          sender_id?: string | null
+          sent_at?: string | null
+          template_id?: string | null
+          template_version?: string | null
+          updated_at?: string
+        }
+        Update: {
+          consent_snapshot?: Json
+          content_hash?: string | null
+          correlation_id?: string
+          created_at?: string
+          delivered_at?: string | null
+          delivery_provider?: string | null
+          delivery_provider_id?: string | null
+          delivery_status?: string
+          failed_at?: string | null
+          failure_reason?: string | null
+          id?: string
+          legal_basis?: string
+          message_type?: string
+          metadata?: Json | null
+          recipient_id?: string
+          retry_count?: number | null
+          sender_id?: string | null
+          sent_at?: string | null
+          template_id?: string | null
+          template_version?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string
@@ -1789,7 +1942,12 @@ export type Database = {
           communication_restricted: boolean | null
           communication_restricted_reason: string | null
           communication_style: string | null
+          consent_marketing: boolean | null
+          consent_service: boolean | null
+          consent_timestamp: string | null
+          consent_version: string | null
           created_at: string
+          data_retention_until: string | null
           delivery_format: string | null
           discovery_call_price: number | null
           experience_level: string | null
@@ -1816,6 +1974,7 @@ export type Database = {
           last_verification_request: string | null
           location: string | null
           login_attempts: number | null
+          marketing_unsubscribed_at: string | null
           max_clients: number | null
           messaging_support: boolean | null
           motivation_factors: string[] | null
@@ -1830,6 +1989,7 @@ export type Database = {
           preferred_training_frequency: number | null
           pricing_unlock_required: boolean | null
           primary_goals: string[] | null
+          privacy_policy_version: string | null
           profile_blocks: Json | null
           profile_photo_url: string | null
           profile_published: boolean | null
@@ -1850,6 +2010,7 @@ export type Database = {
           suspended_until: string | null
           tagline: string | null
           terms_agreed: boolean | null
+          terms_version: string | null
           testimonials: Json | null
           total_client_survey_steps: number | null
           total_onboarding_steps: number | null
@@ -1908,7 +2069,12 @@ export type Database = {
           communication_restricted?: boolean | null
           communication_restricted_reason?: string | null
           communication_style?: string | null
+          consent_marketing?: boolean | null
+          consent_service?: boolean | null
+          consent_timestamp?: string | null
+          consent_version?: string | null
           created_at?: string
+          data_retention_until?: string | null
           delivery_format?: string | null
           discovery_call_price?: number | null
           experience_level?: string | null
@@ -1935,6 +2101,7 @@ export type Database = {
           last_verification_request?: string | null
           location?: string | null
           login_attempts?: number | null
+          marketing_unsubscribed_at?: string | null
           max_clients?: number | null
           messaging_support?: boolean | null
           motivation_factors?: string[] | null
@@ -1949,6 +2116,7 @@ export type Database = {
           preferred_training_frequency?: number | null
           pricing_unlock_required?: boolean | null
           primary_goals?: string[] | null
+          privacy_policy_version?: string | null
           profile_blocks?: Json | null
           profile_photo_url?: string | null
           profile_published?: boolean | null
@@ -1969,6 +2137,7 @@ export type Database = {
           suspended_until?: string | null
           tagline?: string | null
           terms_agreed?: boolean | null
+          terms_version?: string | null
           testimonials?: Json | null
           total_client_survey_steps?: number | null
           total_onboarding_steps?: number | null
@@ -2027,7 +2196,12 @@ export type Database = {
           communication_restricted?: boolean | null
           communication_restricted_reason?: string | null
           communication_style?: string | null
+          consent_marketing?: boolean | null
+          consent_service?: boolean | null
+          consent_timestamp?: string | null
+          consent_version?: string | null
           created_at?: string
+          data_retention_until?: string | null
           delivery_format?: string | null
           discovery_call_price?: number | null
           experience_level?: string | null
@@ -2054,6 +2228,7 @@ export type Database = {
           last_verification_request?: string | null
           location?: string | null
           login_attempts?: number | null
+          marketing_unsubscribed_at?: string | null
           max_clients?: number | null
           messaging_support?: boolean | null
           motivation_factors?: string[] | null
@@ -2068,6 +2243,7 @@ export type Database = {
           preferred_training_frequency?: number | null
           pricing_unlock_required?: boolean | null
           primary_goals?: string[] | null
+          privacy_policy_version?: string | null
           profile_blocks?: Json | null
           profile_photo_url?: string | null
           profile_published?: boolean | null
@@ -2088,6 +2264,7 @@ export type Database = {
           suspended_until?: string | null
           tagline?: string | null
           terms_agreed?: boolean | null
+          terms_version?: string | null
           testimonials?: Json | null
           total_client_survey_steps?: number | null
           total_onboarding_steps?: number | null
@@ -2649,6 +2826,10 @@ export type Database = {
         Args: { start_date: string; business_days: number }
         Returns: string
       }
+      can_send_marketing_message: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
       client_has_sent_first_message: {
         Args: { conversation_uuid: string; client_uuid: string }
         Returns: boolean
@@ -2667,6 +2848,10 @@ export type Database = {
           p_client_message?: string
         }
         Returns: string
+      }
+      create_consent_snapshot: {
+        Args: { p_user_id: string }
+        Returns: Json
       }
       end_waitlist_exclusive_period: {
         Args: { p_coach_id: string }
