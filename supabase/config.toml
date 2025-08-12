@@ -34,6 +34,12 @@ refresh_token_rotation_enabled = true
 security_update_password_required_for_email_change = true
 security_update_email_require_confirmation = true
 
+[functions.security-headers]
+verify_jwt = false
+
+[functions.performance-optimizer]
+verify_jwt = false
+
 [functions.webhook-handler]
 verify_jwt = false
 
