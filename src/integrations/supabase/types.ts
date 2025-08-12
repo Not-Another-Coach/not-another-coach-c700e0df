@@ -3302,9 +3302,22 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: Json
       }
+      create_template_version: {
+        Args: { p_template_id: string; p_changelog?: string }
+        Returns: string
+      }
       end_waitlist_exclusive_period: {
         Args: { p_coach_id: string }
         Returns: undefined
+      }
+      evaluate_conditional_step: {
+        Args: {
+          p_template_id: string
+          p_client_id: string
+          p_step_id: string
+          p_client_data?: Json
+        }
+        Returns: boolean
       }
       fail_webhook_event: {
         Args: { p_event_id: string; p_error_message: string }
@@ -3473,6 +3486,15 @@ export type Database = {
           client_uuid: string
           trainer_uuid: string
           new_stage: Database["public"]["Enums"]["engagement_stage"]
+        }
+        Returns: undefined
+      }
+      update_template_analytics: {
+        Args: {
+          p_template_id: string
+          p_metric_type: string
+          p_increment?: number
+          p_metric_data?: Json
         }
         Returns: undefined
       }
