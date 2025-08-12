@@ -17,8 +17,10 @@ import {
   Paperclip, 
   AlertCircle,
   CheckCircle,
-  GripVertical
+  GripVertical,
+  Download
 } from 'lucide-react';
+import { ActivityImporter } from '../ActivityImporter';
 import { GettingStartedTask, useOnboardingSections } from '@/hooks/useOnboardingSections';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -154,17 +156,41 @@ export function GettingStartedSection({ templateId, tasks, onTasksChange }: Gett
             <FileText className="h-5 w-5" />
             Getting Started Tasks
           </CardTitle>
-          <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Task
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Create Getting Started Task</DialogTitle>
-              </DialogHeader>
+          <div className="flex gap-2">
+            <ActivityImporter
+              onImportActivities={(activities) => {
+                activities.forEach(activity => {
+                  const newTaskData = {
+                    task_name: activity.name,
+                    task_description: activity.description || '',
+                    is_mandatory: true,
+                    due_days: activity.default_due_days || 7,
+                    sla_hours: activity.default_sla_days ? activity.default_sla_days * 24 : 48,
+                    activity_id: activity.id
+                  };
+                   // Create task using the existing create function pattern
+                   setNewTask(newTaskData);
+                   handleCreateTask();
+                });
+              }}
+              trigger={
+                <Button variant="outline">
+                  <Download className="h-4 w-4 mr-2" />
+                  Import Activities
+                </Button>
+              }
+            />
+            <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Task
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Create Getting Started Task</DialogTitle>
+                </DialogHeader>
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -264,8 +290,9 @@ export function GettingStartedSection({ templateId, tasks, onTasksChange }: Gett
                   </Button>
                 </div>
               </div>
-            </DialogContent>
-          </Dialog>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
       </CardHeader>
       <CardContent>

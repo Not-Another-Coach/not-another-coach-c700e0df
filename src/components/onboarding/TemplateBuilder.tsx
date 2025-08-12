@@ -25,7 +25,10 @@ import {
   Settings,
   Users,
   CheckSquare,
-  StickyNote
+  StickyNote,
+  Send,
+  Lock,
+  ArchiveX
 } from 'lucide-react';
 import { OnboardingTemplate } from '@/hooks/useTrainerOnboarding';
 import { useOnboardingSections } from '@/hooks/useOnboardingSections';
@@ -36,6 +39,7 @@ import { TrainerSpecificSection } from '@/components/onboarding/sections/Trainer
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { toast } from 'sonner';
+import { BulkTemplateActions } from './BulkTemplateActions';
 
 interface TemplateBuilderProps {
   templates: OnboardingTemplate[];
@@ -256,18 +260,19 @@ export function TemplateBuilder({
 
   const getStatusBadge = (status: string = 'draft') => {
     const variants = {
-      draft: { variant: 'secondary' as const, icon: FileText, color: 'text-muted-foreground' },
-      published: { variant: 'default' as const, icon: CheckCircle, color: 'text-green-600' },
-      archived: { variant: 'outline' as const, icon: Archive, color: 'text-orange-600' }
+      draft: { variant: 'secondary' as const, icon: FileText, color: 'text-muted-foreground', bg: '' },
+      published: { variant: 'default' as const, icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800' },
+      archived: { variant: 'outline' as const, icon: Archive, color: 'text-orange-600', bg: 'bg-orange-50 dark:bg-orange-950 border-orange-200 dark:border-orange-800' }
     };
     
     const config = variants[status as keyof typeof variants] || variants.draft;
     const Icon = config.icon;
     
     return (
-      <Badge variant={config.variant} className="gap-1">
+      <Badge variant={config.variant} className={`gap-1 ${config.bg}`}>
         <Icon className={`h-3 w-3 ${config.color}`} />
         {status.charAt(0).toUpperCase() + status.slice(1)}
+        {status === 'published' && <Lock className="h-3 w-3 ml-1 text-muted-foreground" />}
       </Badge>
     );
   };
@@ -300,10 +305,33 @@ export function TemplateBuilder({
             </SelectContent>
           </Select>
         </div>
-        <Button onClick={() => setShowCreateDialog(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Create Template
-        </Button>
+        <div className="flex items-center gap-2">
+          <BulkTemplateActions
+            templates={filteredTemplates}
+            onPublishTemplates={async (templateIds) => {
+              if (!onPublishTemplate) return;
+              for (const id of templateIds) {
+                await onPublishTemplate(id);
+              }
+            }}
+            onArchiveTemplates={async (templateIds) => {
+              if (!onArchiveTemplate) return;
+              for (const id of templateIds) {
+                await onArchiveTemplate(id);
+              }
+            }}
+            onReactivateTemplates={async (templateIds) => {
+              if (!onPublishTemplate) return;
+              for (const id of templateIds) {
+                await onPublishTemplate(id);
+              }
+            }}
+          />
+          <Button onClick={() => setShowCreateDialog(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Create Template
+          </Button>
+        </div>
       </div>
 
       {/* Templates list with drag and drop */}
@@ -357,6 +385,42 @@ export function TemplateBuilder({
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
+                            {/* Publishing Actions */}
+                            {template.status === 'draft' && onPublishTemplate && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => onPublishTemplate(template.id)}
+                                title="Publish Template"
+                                className="text-green-600 hover:text-green-700"
+                              >
+                                <Send className="h-4 w-4" />
+                              </Button>
+                            )}
+                            {template.status === 'published' && onArchiveTemplate && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => onArchiveTemplate(template.id)}
+                                title="Archive Template"
+                                className="text-orange-600 hover:text-orange-700"
+                              >
+                                <Archive className="h-4 w-4" />
+                              </Button>
+                            )}
+                            {template.status === 'archived' && onPublishTemplate && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => onPublishTemplate(template.id)}
+                                title="Reactivate Template"
+                                className="text-green-600 hover:text-green-700"
+                              >
+                                <ArchiveX className="h-4 w-4" />
+                              </Button>
+                            )}
+                            
+                            {/* Management Actions */}
                             <Button
                               variant="ghost"
                               size="sm"
@@ -394,12 +458,13 @@ export function TemplateBuilder({
                             >
                               <Copy className="h-4 w-4" />
                             </Button>
-                            {onDeleteTemplate && (
+                            {onDeleteTemplate && template.status !== 'published' && (
                               <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => onDeleteTemplate(template.id)}
                                 title="Delete Template"
+                                className="text-red-600 hover:text-red-700"
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>

@@ -220,7 +220,13 @@ export function ClientOnboardingManagement() {
 
           <TabsContent value="activities" className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium">Reusable Activities</h3>
+              <div>
+                <h3 className="text-lg font-medium">Reusable Activities</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Create reusable building blocks that can be imported into template sections. 
+                  These activities help standardize your onboarding process across different client packages.
+                </p>
+              </div>
               <Dialog open={showCreateActivityDialog} onOpenChange={setShowCreateActivityDialog}>
                 <DialogTrigger asChild>
                   <Button>
