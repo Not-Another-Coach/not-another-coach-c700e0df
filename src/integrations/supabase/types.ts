@@ -1326,6 +1326,48 @@ export type Database = {
           },
         ]
       }
+      onboarding_activity_assignments: {
+        Row: {
+          activity_id: string
+          assignment_order: number
+          created_at: string
+          custom_instructions: string | null
+          estimated_duration_minutes: number | null
+          id: string
+          is_required: boolean
+          section_item_id: string
+          section_type: string
+          template_id: string
+          updated_at: string
+        }
+        Insert: {
+          activity_id: string
+          assignment_order?: number
+          created_at?: string
+          custom_instructions?: string | null
+          estimated_duration_minutes?: number | null
+          id?: string
+          is_required?: boolean
+          section_item_id: string
+          section_type: string
+          template_id: string
+          updated_at?: string
+        }
+        Update: {
+          activity_id?: string
+          assignment_order?: number
+          created_at?: string
+          custom_instructions?: string | null
+          estimated_duration_minutes?: number | null
+          id?: string
+          is_required?: boolean
+          section_item_id?: string
+          section_type?: string
+          template_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       onboarding_commitments: {
         Row: {
           commitment_description: string
@@ -1336,8 +1378,11 @@ export type Database = {
           id: string
           requires_acknowledgment: boolean
           requires_signature: boolean
+          show_in_summary: boolean | null
           template_id: string
           updated_at: string
+          visibility_client: boolean | null
+          visibility_trainer: boolean | null
         }
         Insert: {
           commitment_description: string
@@ -1348,8 +1393,11 @@ export type Database = {
           id?: string
           requires_acknowledgment?: boolean
           requires_signature?: boolean
+          show_in_summary?: boolean | null
           template_id: string
           updated_at?: string
+          visibility_client?: boolean | null
+          visibility_trainer?: boolean | null
         }
         Update: {
           commitment_description?: string
@@ -1360,8 +1408,11 @@ export type Database = {
           id?: string
           requires_acknowledgment?: boolean
           requires_signature?: boolean
+          show_in_summary?: boolean | null
           template_id?: string
           updated_at?: string
+          visibility_client?: boolean | null
+          visibility_trainer?: boolean | null
         }
         Relationships: [
           {
@@ -1375,55 +1426,85 @@ export type Database = {
       }
       onboarding_getting_started: {
         Row: {
+          allowed_file_types: Json | null
           attachment_types: Json | null
+          attachment_upload_instructions: string | null
+          auto_calculate_due_date: boolean | null
           created_at: string
           description: string | null
           display_order: number
+          due_date_business_days_only: boolean | null
           due_days: number | null
           id: string
           is_mandatory: boolean
           max_attachments: number | null
           max_file_size_mb: number | null
+          max_file_size_per_attachment_mb: number | null
           requires_attachment: boolean
           rich_guidance: string | null
+          show_in_summary: boolean | null
+          sla_escalation_hours: number | null
           sla_hours: number | null
+          sla_reminder_hours: number | null
           task_name: string
           template_id: string
           updated_at: string
+          visibility_client: boolean | null
+          visibility_trainer: boolean | null
         }
         Insert: {
+          allowed_file_types?: Json | null
           attachment_types?: Json | null
+          attachment_upload_instructions?: string | null
+          auto_calculate_due_date?: boolean | null
           created_at?: string
           description?: string | null
           display_order?: number
+          due_date_business_days_only?: boolean | null
           due_days?: number | null
           id?: string
           is_mandatory?: boolean
           max_attachments?: number | null
           max_file_size_mb?: number | null
+          max_file_size_per_attachment_mb?: number | null
           requires_attachment?: boolean
           rich_guidance?: string | null
+          show_in_summary?: boolean | null
+          sla_escalation_hours?: number | null
           sla_hours?: number | null
+          sla_reminder_hours?: number | null
           task_name: string
           template_id: string
           updated_at?: string
+          visibility_client?: boolean | null
+          visibility_trainer?: boolean | null
         }
         Update: {
+          allowed_file_types?: Json | null
           attachment_types?: Json | null
+          attachment_upload_instructions?: string | null
+          auto_calculate_due_date?: boolean | null
           created_at?: string
           description?: string | null
           display_order?: number
+          due_date_business_days_only?: boolean | null
           due_days?: number | null
           id?: string
           is_mandatory?: boolean
           max_attachments?: number | null
           max_file_size_mb?: number | null
+          max_file_size_per_attachment_mb?: number | null
           requires_attachment?: boolean
           rich_guidance?: string | null
+          show_in_summary?: boolean | null
+          sla_escalation_hours?: number | null
           sla_hours?: number | null
+          sla_reminder_hours?: number | null
           task_name?: string
           template_id?: string
           updated_at?: string
+          visibility_client?: boolean | null
+          visibility_trainer?: boolean | null
         }
         Relationships: [
           {
@@ -1450,9 +1531,12 @@ export type Database = {
           preferred_communication_channel: string | null
           progress_tracking_frequency: string | null
           session_rescheduling_policy: string | null
+          show_in_summary: boolean | null
           template_id: string
           trainer_response_time_hours: number
           updated_at: string
+          visibility_client: boolean | null
+          visibility_trainer: boolean | null
         }
         Insert: {
           cancellation_policy?: string | null
@@ -1468,9 +1552,12 @@ export type Database = {
           preferred_communication_channel?: string | null
           progress_tracking_frequency?: string | null
           session_rescheduling_policy?: string | null
+          show_in_summary?: boolean | null
           template_id: string
           trainer_response_time_hours?: number
           updated_at?: string
+          visibility_client?: boolean | null
+          visibility_trainer?: boolean | null
         }
         Update: {
           cancellation_policy?: string | null
@@ -1486,9 +1573,12 @@ export type Database = {
           preferred_communication_channel?: string | null
           progress_tracking_frequency?: string | null
           session_rescheduling_policy?: string | null
+          show_in_summary?: boolean | null
           template_id?: string
           trainer_response_time_hours?: number
           updated_at?: string
+          visibility_client?: boolean | null
+          visibility_trainer?: boolean | null
         }
         Relationships: [
           {
@@ -1499,6 +1589,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      onboarding_template_audit_log: {
+        Row: {
+          action_by: string
+          action_details: Json | null
+          action_reason: string | null
+          action_type: string
+          created_at: string
+          id: string
+          template_id: string
+          version_number: number | null
+        }
+        Insert: {
+          action_by: string
+          action_details?: Json | null
+          action_reason?: string | null
+          action_type: string
+          created_at?: string
+          id?: string
+          template_id: string
+          version_number?: number | null
+        }
+        Update: {
+          action_by?: string
+          action_details?: Json | null
+          action_reason?: string | null
+          action_type?: string
+          created_at?: string
+          id?: string
+          template_id?: string
+          version_number?: number | null
+        }
+        Relationships: []
       }
       onboarding_trainer_notes: {
         Row: {
@@ -1511,9 +1634,12 @@ export type Database = {
           is_checklist_item: boolean
           note_type: string
           priority: string | null
+          show_in_summary: boolean | null
           template_id: string
           title: string
           updated_at: string
+          visibility_client: boolean | null
+          visibility_trainer: boolean | null
         }
         Insert: {
           content: string
@@ -1525,9 +1651,12 @@ export type Database = {
           is_checklist_item?: boolean
           note_type: string
           priority?: string | null
+          show_in_summary?: boolean | null
           template_id: string
           title: string
           updated_at?: string
+          visibility_client?: boolean | null
+          visibility_trainer?: boolean | null
         }
         Update: {
           content?: string
@@ -1539,9 +1668,12 @@ export type Database = {
           is_checklist_item?: boolean
           note_type?: string
           priority?: string | null
+          show_in_summary?: boolean | null
           template_id?: string
           title?: string
           updated_at?: string
+          visibility_client?: boolean | null
+          visibility_trainer?: boolean | null
         }
         Relationships: [
           {
@@ -2135,7 +2267,12 @@ export type Database = {
           id: string
           instructions: string | null
           is_active: boolean
+          is_locked: boolean | null
+          last_structural_change_at: string | null
+          lock_reason: string | null
           package_links: Json | null
+          published_at: string | null
+          published_version: number | null
           requires_file_upload: boolean
           status: string | null
           step_name: string
@@ -2153,7 +2290,12 @@ export type Database = {
           id?: string
           instructions?: string | null
           is_active?: boolean
+          is_locked?: boolean | null
+          last_structural_change_at?: string | null
+          lock_reason?: string | null
           package_links?: Json | null
+          published_at?: string | null
+          published_version?: number | null
           requires_file_upload?: boolean
           status?: string | null
           step_name: string
@@ -2171,7 +2313,12 @@ export type Database = {
           id?: string
           instructions?: string | null
           is_active?: boolean
+          is_locked?: boolean | null
+          last_structural_change_at?: string | null
+          lock_reason?: string | null
           package_links?: Json | null
+          published_at?: string | null
+          published_version?: number | null
           requires_file_upload?: boolean
           status?: string | null
           step_name?: string
@@ -2497,6 +2644,10 @@ export type Database = {
       auto_end_expired_exclusive_periods: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      calculate_business_due_date: {
+        Args: { start_date: string; business_days: number }
+        Returns: string
       }
       client_has_sent_first_message: {
         Args: { conversation_uuid: string; client_uuid: string }
