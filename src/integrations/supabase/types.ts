@@ -2105,6 +2105,17 @@ export type Database = {
         Args: { p_client_id: string; p_trainer_id: string }
         Returns: boolean
       }
+      list_users_minimal_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          email: string
+          first_name: string
+          last_name: string
+          user_type: string
+          roles: string[]
+        }[]
+      }
       log_admin_action: {
         Args: {
           p_target_user_id: string

@@ -51,22 +51,38 @@ export const useTestUsers = () => {
       let userEmails: any[] = [];
       let emailError: any = null;
       
-      // First try the development function
-      const { data: devEmails, error: devEmailError } = await supabase
-        .rpc('get_user_emails_for_development');
+      // First try the new admin-only RPC that combines profiles + emails
+      const { data: adminUserList, error: adminListError } = await supabase
+        .rpc('list_users_minimal_admin');
         
-      if (devEmailError) {
-        console.error('Development email fetch failed, trying admin function:', devEmailError);
-        // Fallback to admin function
-        const { data: adminEmails, error: adminEmailError } = await supabase
-          .rpc('get_user_emails_for_admin');
-        if (adminEmailError) {
-          emailError = adminEmailError;
+      if (adminListError) {
+        console.log('Admin list function failed (not admin or error):', adminListError);
+        // Fallback to development function for email only
+        const { data: devEmails, error: devEmailError } = await supabase
+          .rpc('get_user_emails_for_development');
+          
+        if (devEmailError) {
+          console.error('Development email fetch failed:', devEmailError);
+          emailError = devEmailError;
         } else {
-          userEmails = adminEmails || [];
+          userEmails = devEmails || [];
         }
       } else {
-        userEmails = devEmails || [];
+        // Admin RPC succeeded - use it directly
+        const combinedUsersFromAdmin = adminUserList.map((user: any) => ({
+          id: user.id,
+          email: user.email,
+          displayEmail: user.email,
+          first_name: user.first_name,
+          last_name: user.last_name,
+          user_type: user.user_type,
+          roles: user.roles || [],
+          password: getTestPassword(user.email)
+        }));
+        
+        setTestUsers(combinedUsersFromAdmin);
+        setLoading(false);
+        return;
       }
 
       let combinedUsers: TestUser[];
