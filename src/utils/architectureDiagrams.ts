@@ -37,6 +37,18 @@ export const architectureDiagrams: ArchitectureDiagram[] = [
       J --> D
       A --> L["Admin Diagnostics"]
       L -->|Reads grouped logs| A
+      
+      subgraph Onboarding System
+        M[TemplateBuilder]
+        N[ActivityAssignment]
+        O[PublishingWorkflow]
+        P[SLA Monitoring]
+      end
+      M --> D
+      N --> D
+      O --> D
+      P --> E
+      A --> M
     `,
   },
   {
@@ -57,6 +69,12 @@ export const architectureDiagrams: ArchitectureDiagram[] = [
       CONVERSATIONS ||--o{ MESSAGES : contains
       DISCOVERY_CALLS ||--o{ FEEDBACK : receives
       CLIENTS ||--o{ WAITLIST : in
+      TRAINERS ||--o{ ONBOARDING_TEMPLATES : creates
+      ONBOARDING_TEMPLATES ||--o{ ONBOARDING_GETTING_STARTED : contains
+      ONBOARDING_TEMPLATES ||--o{ ONBOARDING_COMMITMENTS : defines
+      ONBOARDING_TEMPLATES ||--o{ ACTIVITY_ASSIGNMENTS : has
+      CLIENTS ||--o{ ONBOARDING_PROGRESS : tracks
+      TRAINERS ||--o{ ONBOARDING_PROGRESS : manages
 
       USERS {
         string id PK
@@ -115,6 +133,42 @@ export const architectureDiagrams: ArchitectureDiagram[] = [
         string client_id FK
         string priority
         datetime created_at
+      }
+      ONBOARDING_TEMPLATES {
+        string id PK
+        string trainer_id FK
+        string template_name
+        boolean published
+        datetime created_at
+      }
+      ONBOARDING_GETTING_STARTED {
+        string id PK
+        string template_id FK
+        string task_name
+        text description
+        int sla_hours
+      }
+      ONBOARDING_COMMITMENTS {
+        string id PK
+        string template_id FK
+        string commitment_title
+        text commitment_description
+        boolean requires_signature
+      }
+      ACTIVITY_ASSIGNMENTS {
+        string id PK
+        string template_id FK
+        string activity_id FK
+        int assignment_order
+        boolean is_required
+      }
+      ONBOARDING_PROGRESS {
+        string id PK
+        string client_id FK
+        string trainer_id FK
+        string getting_started_id FK
+        string status
+        datetime completed_at
       }
     `,
   },
