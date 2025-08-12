@@ -104,6 +104,109 @@ export type Database = {
         }
         Relationships: []
       }
+      client_commitment_acknowledgments: {
+        Row: {
+          acknowledged_at: string | null
+          client_id: string
+          commitment_id: string
+          created_at: string
+          id: string
+          ip_address: unknown | null
+          notes: string | null
+          signature_data: string | null
+          trainer_id: string
+          user_agent: string | null
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          client_id: string
+          commitment_id: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          notes?: string | null
+          signature_data?: string | null
+          trainer_id: string
+          user_agent?: string | null
+        }
+        Update: {
+          acknowledged_at?: string | null
+          client_id?: string
+          commitment_id?: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          notes?: string | null
+          signature_data?: string | null
+          trainer_id?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_commitment_acknowledgments_commitment_id_fkey"
+            columns: ["commitment_id"]
+            isOneToOne: false
+            referencedRelation: "onboarding_commitments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_getting_started_progress: {
+        Row: {
+          attachments: Json | null
+          client_id: string
+          client_notes: string | null
+          completed_at: string | null
+          created_at: string
+          due_at: string | null
+          getting_started_id: string
+          id: string
+          sla_due_at: string | null
+          status: string
+          trainer_id: string
+          trainer_notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          attachments?: Json | null
+          client_id: string
+          client_notes?: string | null
+          completed_at?: string | null
+          created_at?: string
+          due_at?: string | null
+          getting_started_id: string
+          id?: string
+          sla_due_at?: string | null
+          status?: string
+          trainer_id: string
+          trainer_notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          attachments?: Json | null
+          client_id?: string
+          client_notes?: string | null
+          completed_at?: string | null
+          created_at?: string
+          due_at?: string | null
+          getting_started_id?: string
+          id?: string
+          sla_due_at?: string | null
+          status?: string
+          trainer_id?: string
+          trainer_notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_getting_started_progress_getting_started_id_fkey"
+            columns: ["getting_started_id"]
+            isOneToOne: false
+            referencedRelation: "onboarding_getting_started"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_onboarding_progress: {
         Row: {
           activity_id: string | null
@@ -217,6 +320,65 @@ export type Database = {
             columns: ["template_step_id"]
             isOneToOne: false
             referencedRelation: "trainer_onboarding_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_ongoing_support_agreements: {
+        Row: {
+          agreed_check_in_day: string | null
+          agreed_check_in_frequency: string | null
+          agreed_check_in_time: string | null
+          agreed_communication_channel: string | null
+          client_agreed_at: string | null
+          client_id: string
+          created_at: string
+          custom_notes: string | null
+          id: string
+          is_active: boolean
+          ongoing_support_id: string
+          trainer_agreed_at: string | null
+          trainer_id: string
+          updated_at: string
+        }
+        Insert: {
+          agreed_check_in_day?: string | null
+          agreed_check_in_frequency?: string | null
+          agreed_check_in_time?: string | null
+          agreed_communication_channel?: string | null
+          client_agreed_at?: string | null
+          client_id: string
+          created_at?: string
+          custom_notes?: string | null
+          id?: string
+          is_active?: boolean
+          ongoing_support_id: string
+          trainer_agreed_at?: string | null
+          trainer_id: string
+          updated_at?: string
+        }
+        Update: {
+          agreed_check_in_day?: string | null
+          agreed_check_in_frequency?: string | null
+          agreed_check_in_time?: string | null
+          agreed_communication_channel?: string | null
+          client_agreed_at?: string | null
+          client_id?: string
+          created_at?: string
+          custom_notes?: string | null
+          id?: string
+          is_active?: boolean
+          ongoing_support_id?: string
+          trainer_agreed_at?: string | null
+          trainer_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_ongoing_support_agreements_ongoing_support_id_fkey"
+            columns: ["ongoing_support_id"]
+            isOneToOne: false
+            referencedRelation: "onboarding_ongoing_support"
             referencedColumns: ["id"]
           },
         ]
@@ -1164,6 +1326,233 @@ export type Database = {
           },
         ]
       }
+      onboarding_commitments: {
+        Row: {
+          commitment_description: string
+          commitment_title: string
+          commitment_type: string
+          created_at: string
+          display_order: number
+          id: string
+          requires_acknowledgment: boolean
+          requires_signature: boolean
+          template_id: string
+          updated_at: string
+        }
+        Insert: {
+          commitment_description: string
+          commitment_title: string
+          commitment_type: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          requires_acknowledgment?: boolean
+          requires_signature?: boolean
+          template_id: string
+          updated_at?: string
+        }
+        Update: {
+          commitment_description?: string
+          commitment_title?: string
+          commitment_type?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          requires_acknowledgment?: boolean
+          requires_signature?: boolean
+          template_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_commitments_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "trainer_onboarding_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      onboarding_getting_started: {
+        Row: {
+          attachment_types: Json | null
+          created_at: string
+          description: string | null
+          display_order: number
+          due_days: number | null
+          id: string
+          is_mandatory: boolean
+          max_attachments: number | null
+          max_file_size_mb: number | null
+          requires_attachment: boolean
+          rich_guidance: string | null
+          sla_hours: number | null
+          task_name: string
+          template_id: string
+          updated_at: string
+        }
+        Insert: {
+          attachment_types?: Json | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          due_days?: number | null
+          id?: string
+          is_mandatory?: boolean
+          max_attachments?: number | null
+          max_file_size_mb?: number | null
+          requires_attachment?: boolean
+          rich_guidance?: string | null
+          sla_hours?: number | null
+          task_name: string
+          template_id: string
+          updated_at?: string
+        }
+        Update: {
+          attachment_types?: Json | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          due_days?: number | null
+          id?: string
+          is_mandatory?: boolean
+          max_attachments?: number | null
+          max_file_size_mb?: number | null
+          requires_attachment?: boolean
+          rich_guidance?: string | null
+          sla_hours?: number | null
+          task_name?: string
+          template_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_getting_started_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "trainer_onboarding_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      onboarding_ongoing_support: {
+        Row: {
+          cancellation_policy: string | null
+          check_in_day: string | null
+          check_in_duration: number | null
+          check_in_frequency: string | null
+          check_in_time: string | null
+          client_response_expectations: string | null
+          communication_channels: Json | null
+          created_at: string
+          emergency_contact_method: string | null
+          id: string
+          preferred_communication_channel: string | null
+          progress_tracking_frequency: string | null
+          session_rescheduling_policy: string | null
+          template_id: string
+          trainer_response_time_hours: number
+          updated_at: string
+        }
+        Insert: {
+          cancellation_policy?: string | null
+          check_in_day?: string | null
+          check_in_duration?: number | null
+          check_in_frequency?: string | null
+          check_in_time?: string | null
+          client_response_expectations?: string | null
+          communication_channels?: Json | null
+          created_at?: string
+          emergency_contact_method?: string | null
+          id?: string
+          preferred_communication_channel?: string | null
+          progress_tracking_frequency?: string | null
+          session_rescheduling_policy?: string | null
+          template_id: string
+          trainer_response_time_hours?: number
+          updated_at?: string
+        }
+        Update: {
+          cancellation_policy?: string | null
+          check_in_day?: string | null
+          check_in_duration?: number | null
+          check_in_frequency?: string | null
+          check_in_time?: string | null
+          client_response_expectations?: string | null
+          communication_channels?: Json | null
+          created_at?: string
+          emergency_contact_method?: string | null
+          id?: string
+          preferred_communication_channel?: string | null
+          progress_tracking_frequency?: string | null
+          session_rescheduling_policy?: string | null
+          template_id?: string
+          trainer_response_time_hours?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_ongoing_support_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "trainer_onboarding_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      onboarding_trainer_notes: {
+        Row: {
+          content: string
+          created_at: string
+          display_order: number
+          due_before_client_start: boolean
+          estimated_time_minutes: number | null
+          id: string
+          is_checklist_item: boolean
+          note_type: string
+          priority: string | null
+          template_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          display_order?: number
+          due_before_client_start?: boolean
+          estimated_time_minutes?: number | null
+          id?: string
+          is_checklist_item?: boolean
+          note_type: string
+          priority?: string | null
+          template_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          display_order?: number
+          due_before_client_start?: boolean
+          estimated_time_minutes?: number | null
+          id?: string
+          is_checklist_item?: boolean
+          note_type?: string
+          priority?: string | null
+          template_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_trainer_notes_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "trainer_onboarding_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       package_ways_of_working: {
         Row: {
           client_expectations_items: Json | null
@@ -1796,6 +2185,53 @@ export type Database = {
             columns: ["created_from_template_id"]
             isOneToOne: false
             referencedRelation: "trainer_onboarding_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trainer_setup_progress: {
+        Row: {
+          client_id: string
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          time_spent_minutes: number | null
+          trainer_id: string
+          trainer_note_id: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          time_spent_minutes?: number | null
+          trainer_id: string
+          trainer_note_id: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          time_spent_minutes?: number | null
+          trainer_id?: string
+          trainer_note_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainer_setup_progress_trainer_note_id_fkey"
+            columns: ["trainer_note_id"]
+            isOneToOne: false
+            referencedRelation: "onboarding_trainer_notes"
             referencedColumns: ["id"]
           },
         ]
