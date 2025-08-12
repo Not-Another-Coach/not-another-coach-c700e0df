@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Plus, 
   Edit, 
@@ -20,9 +21,18 @@ import {
   CheckCircle,
   Clock,
   Eye,
-  Package
+  Package,
+  Settings,
+  Users,
+  CheckSquare,
+  StickyNote
 } from 'lucide-react';
 import { OnboardingTemplate } from '@/hooks/useTrainerOnboarding';
+import { useOnboardingSections } from '@/hooks/useOnboardingSections';
+import { GettingStartedSection } from '@/components/onboarding/sections/GettingStartedSection';
+import { OngoingSupportSection } from '@/components/onboarding/sections/OngoingSupportSection';
+import { CommitmentsExpectationsSection } from '@/components/onboarding/sections/CommitmentsExpectationsSection';
+import { TrainerSpecificSection } from '@/components/onboarding/sections/TrainerSpecificSection';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { toast } from 'sonner';
@@ -71,9 +81,12 @@ export function TemplateBuilder({
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showPackageLinkDialog, setShowPackageLinkDialog] = useState(false);
+  const [showSectionsDialog, setShowSectionsDialog] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<ExtendedTemplate | null>(null);
   const [selectedTemplateForPackages, setSelectedTemplateForPackages] = useState<string | null>(null);
+  const [selectedTemplateForSections, setSelectedTemplateForSections] = useState<string | null>(null);
   const [selectedPackageIds, setSelectedPackageIds] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState<string>('getting-started');
   const [newTemplate, setNewTemplate] = useState<Partial<ExtendedTemplate>>({
     step_name: '',
     step_type: 'mandatory',
@@ -85,6 +98,9 @@ export function TemplateBuilder({
     is_active: true,
     status: 'draft'
   });
+
+  // Initialize onboarding sections hook
+  const onboardingSections = useOnboardingSections();
 
   // Get linked packages for a template
   const getLinkedPackages = (templateId: string) => {
@@ -220,6 +236,15 @@ export function TemplateBuilder({
     setShowPackageLinkDialog(true);
   };
 
+  const openSectionsDialog = async (templateId: string) => {
+    setSelectedTemplateForSections(templateId);
+    setActiveTab('getting-started');
+    setShowSectionsDialog(true);
+    
+    // Load all sections for this template
+    await onboardingSections.loadAllSections(templateId);
+  };
+
   const handleDuplicateTemplate = async (templateId: string) => {
     try {
       await onDuplicateTemplate(templateId);
@@ -335,7 +360,16 @@ export function TemplateBuilder({
                             <Button
                               variant="ghost"
                               size="sm"
+                              onClick={() => openSectionsDialog(template.id)}
+                              title="Edit Template Sections"
+                            >
+                              <Settings className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
                               onClick={() => openPackageLinkDialog(template.id)}
+                              title="Link to Packages"
                             >
                               <Package className="h-4 w-4" />
                             </Button>
@@ -346,6 +380,7 @@ export function TemplateBuilder({
                                 setEditingTemplate(template);
                                 setShowEditDialog(true);
                               }}
+                              title="Edit Template"
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
@@ -353,6 +388,7 @@ export function TemplateBuilder({
                               variant="ghost"
                               size="sm"
                               onClick={() => handleDuplicateTemplate(template.id)}
+                              title="Duplicate Template"
                             >
                               <Copy className="h-4 w-4" />
                             </Button>
@@ -361,6 +397,7 @@ export function TemplateBuilder({
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => onDeleteTemplate(template.id)}
+                                title="Delete Template"
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
@@ -631,6 +668,81 @@ export function TemplateBuilder({
                 Save Links
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Template Sections Dialog */}
+      <Dialog open={showSectionsDialog} onOpenChange={setShowSectionsDialog}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Template Sections</DialogTitle>
+          </DialogHeader>
+          {selectedTemplateForSections && (
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="getting-started" className="flex items-center gap-2">
+                  <CheckSquare className="h-4 w-4" />
+                  Getting Started
+                </TabsTrigger>
+                <TabsTrigger value="ongoing-support" className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Ongoing Support
+                </TabsTrigger>
+                <TabsTrigger value="commitments" className="flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  Commitments
+                </TabsTrigger>
+                <TabsTrigger value="trainer-notes" className="flex items-center gap-2">
+                  <StickyNote className="h-4 w-4" />
+                  Trainer Notes
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="getting-started" className="mt-6">
+                <GettingStartedSection
+                  templateId={selectedTemplateForSections}
+                  tasks={onboardingSections.gettingStartedTasks}
+                  onTasksChange={() => onboardingSections.fetchGettingStartedTasks(selectedTemplateForSections)}
+                />
+              </TabsContent>
+              
+              <TabsContent value="ongoing-support" className="mt-6">
+                <OngoingSupportSection
+                  templateId={selectedTemplateForSections}
+                  settings={onboardingSections.ongoingSupportSettings}
+                  onSettingsChange={() => onboardingSections.fetchOngoingSupportSettings(selectedTemplateForSections)}
+                />
+              </TabsContent>
+              
+              <TabsContent value="commitments" className="mt-6">
+                <CommitmentsExpectationsSection
+                  templateId={selectedTemplateForSections}
+                  commitments={onboardingSections.commitments}
+                  onCommitmentsChange={() => onboardingSections.fetchCommitments(selectedTemplateForSections)}
+                />
+              </TabsContent>
+              
+              <TabsContent value="trainer-notes" className="mt-6">
+                <TrainerSpecificSection
+                  templateId={selectedTemplateForSections}
+                  notes={onboardingSections.trainerNotes}
+                  onNotesChange={() => onboardingSections.fetchTrainerNotes(selectedTemplateForSections)}
+                />
+              </TabsContent>
+            </Tabs>
+          )}
+          
+          <div className="flex justify-end gap-2 mt-6 pt-4 border-t">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowSectionsDialog(false);
+                setSelectedTemplateForSections(null);
+              }}
+            >
+              Close
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
