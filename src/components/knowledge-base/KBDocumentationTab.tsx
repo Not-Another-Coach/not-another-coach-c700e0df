@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useKBArticles, useKBCategories } from '@/hooks/useKnowledgeBase';
 import { CreateCoachDeclineButton } from './CreateCoachDeclineButton';
+import { AdvancedTemplatesArticle } from './AdvancedTemplatesArticle';
 import { format } from 'date-fns';
 
 interface KBDocumentationTabProps {
@@ -13,15 +14,36 @@ interface KBDocumentationTabProps {
   onElementClick: (elementText: string) => void;
 }
 
+const STATIC_ARTICLES = [
+  {
+    id: 'advanced-templates',
+    title: 'Advanced Onboarding Templates',
+    excerpt: 'Powerful template features with conditional logic, analytics, bulk operations, and version control',
+    content: 'Advanced Onboarding Templates documentation with conditional logic, analytics, bulk operations, and version control features.',
+    content_type: 'feature',
+    featured: true,
+    component: AdvancedTemplatesArticle,
+    view_count: 0,
+    updated_at: new Date().toISOString(),
+    category: null,
+    slug: 'advanced-onboarding-templates',
+  }
+];
+
 export const KBDocumentationTab: React.FC<KBDocumentationTabProps> = ({
   searchTerm,
   onElementClick,
 }) => {
+  const [selectedArticle, setSelectedArticle] = React.useState<string | null>(null);
+  
   const { data: categories = [], isLoading: categoriesLoading, error: categoriesError } = useKBCategories();
-  const { data: articles = [], isLoading: articlesLoading, error: articlesError } = useKBArticles({
+  const { data: dbArticles = [], isLoading: articlesLoading, error: articlesError } = useKBArticles({
     search: searchTerm || undefined,
     status: 'published',
   });
+
+  // Combine database articles with static articles
+  const articles = [...STATIC_ARTICLES, ...dbArticles];
 
   // Debug logging
   console.log('KB Debug:', { 
@@ -38,7 +60,7 @@ export const KBDocumentationTab: React.FC<KBDocumentationTabProps> = ({
   const filteredArticles = articles.filter(article =>
     !searchTerm || 
     article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    article.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (article.content && article.content.toLowerCase().includes(searchTerm.toLowerCase())) ||
     article.excerpt?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -54,8 +76,29 @@ export const KBDocumentationTab: React.FC<KBDocumentationTabProps> = ({
       business_rule: 'bg-indigo-100 text-indigo-800',
       integration: 'bg-teal-100 text-teal-800',
     };
-    return colors[type as keyof typeof colors] || 'bg-gray-100 text-gray-800';
+  return colors[type as keyof typeof colors] || 'bg-gray-100 text-gray-800';
   };
+
+  // Show selected article
+  if (selectedArticle) {
+    const staticArticle = STATIC_ARTICLES.find(a => a.id === selectedArticle);
+    if (staticArticle) {
+      return (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <Button 
+              variant="outline" 
+              onClick={() => setSelectedArticle(null)}
+              className="flex items-center gap-2"
+            >
+              ← Back to Knowledge Base
+            </Button>
+          </div>
+          <staticArticle.component />
+        </div>
+      );
+    }
+  }
 
   if (isLoading) {
     return (
@@ -160,10 +203,16 @@ export const KBDocumentationTab: React.FC<KBDocumentationTabProps> = ({
                 .filter(article => article.featured)
                 .slice(0, 3)
                 .map((article) => (
-                  <button
-                    key={article.id}
-                    onClick={() => onElementClick(`Article: ${article.title}`)}
-                    className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted transition-colors text-left"
+                <button
+                  key={article.id}
+                  onClick={() => {
+                    if (STATIC_ARTICLES.find(a => a.id === article.id)) {
+                      setSelectedArticle(article.id);
+                    } else {
+                      onElementClick(`Article: ${article.title}`);
+                    }
+                  }}
+                  className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted transition-colors text-left"
                   >
                     <div className="flex-1">
                       <div className="font-medium">{article.title}</div>
@@ -214,7 +263,13 @@ export const KBDocumentationTab: React.FC<KBDocumentationTabProps> = ({
               filteredArticles.map((article) => (
                 <button
                   key={article.id}
-                  onClick={() => onElementClick(`Article: ${article.title}`)}
+                  onClick={() => {
+                    if (STATIC_ARTICLES.find(a => a.id === article.id)) {
+                      setSelectedArticle(article.id);
+                    } else {
+                      onElementClick(`Article: ${article.title}`);
+                    }
+                  }}
                   className="w-full flex items-center justify-between p-4 rounded-lg border hover:bg-muted transition-colors text-left"
                 >
                   <div className="flex-1">
@@ -243,7 +298,7 @@ export const KBDocumentationTab: React.FC<KBDocumentationTabProps> = ({
                     <Badge variant="outline" className={getContentTypeColor(article.content_type)}>
                       {article.content_type}
                     </Badge>
-                    {article.category && (
+                    {article.category && 'name' in article.category && (
                       <Badge variant="outline">
                         {article.category.name}
                       </Badge>
@@ -269,7 +324,7 @@ export const KBDocumentationTab: React.FC<KBDocumentationTabProps> = ({
         </CardHeader>
         <CardContent>
           {/* Add Coach Decline Article if it doesn't exist */}
-          {!articles.some(article => article.slug === 'coach-decline-behavior-history-preservation') && (
+          {!articles.some(article => article.slug && article.slug === 'coach-decline-behavior-history-preservation') && (
             <div className="mb-4">
               <CreateCoachDeclineButton />
             </div>
