@@ -19,6 +19,8 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { TemplateBuilder } from '@/components/onboarding/TemplateBuilder';
+import { useTemplateBuilder } from '@/hooks/useTemplateBuilder';
 
 export function ClientOnboardingManagement() {
   const { 
@@ -31,6 +33,20 @@ export function ClientOnboardingManagement() {
   const { packageWorkflows, loading: workflowsLoading } = usePackageWaysOfWorking();
   const { activities, loading: activitiesLoading, error: activitiesError, refresh: refreshActivities, createActivity, updateActivity, updateActivityDetails } = useTrainerActivities();
   const { user } = useAuth();
+  
+  // Enhanced template builder functionality
+  const {
+    templates: builderTemplates,
+    loading: builderLoading,
+    createTemplate: builderCreateTemplate,
+    updateTemplate: builderUpdateTemplate,
+    duplicateTemplate,
+    deleteTemplate,
+    reorderTemplates,
+    publishTemplate,
+    archiveTemplate,
+    fetchTemplates: refreshTemplates
+  } = useTemplateBuilder();
   const [newTemplate, setNewTemplate] = useState<Partial<OnboardingTemplate>>({
     step_name: '',
     step_type: 'mandatory',
@@ -341,7 +357,8 @@ export function ClientOnboardingManagement() {
         <Tabs defaultValue="templates" className="space-y-4">
           <TabsList>
             <TabsTrigger value="activities">Activities</TabsTrigger>
-            <TabsTrigger value="templates">Templates</TabsTrigger>
+            <TabsTrigger value="templates">Enhanced Templates</TabsTrigger>
+            <TabsTrigger value="legacy-templates">Legacy Templates</TabsTrigger>
             <TabsTrigger value="workflows">Ways of Working Overview</TabsTrigger>
           </TabsList>
 
@@ -605,6 +622,21 @@ export function ClientOnboardingManagement() {
           </TabsContent>
 
           <TabsContent value="templates" className="space-y-4">
+            <TemplateBuilder
+              templates={builderTemplates}
+              packages={packageWorkflows.map(pkg => ({ id: pkg.package_id, name: pkg.package_name }))}
+              onCreateTemplate={builderCreateTemplate}
+              onUpdateTemplate={builderUpdateTemplate}
+              onDuplicateTemplate={duplicateTemplate}
+              onDeleteTemplate={deleteTemplate}
+              onReorderTemplates={reorderTemplates}
+              onPublishTemplate={publishTemplate}
+              onArchiveTemplate={archiveTemplate}
+              loading={builderLoading}
+            />
+          </TabsContent>
+
+          <TabsContent value="legacy-templates" className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-medium">Onboarding Templates</h3>
               <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>

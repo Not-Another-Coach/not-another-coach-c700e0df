@@ -1635,6 +1635,41 @@ export type Database = {
           },
         ]
       }
+      template_package_links: {
+        Row: {
+          auto_assign: boolean | null
+          created_at: string
+          id: string
+          package_id: string
+          package_name: string
+          template_id: string
+        }
+        Insert: {
+          auto_assign?: boolean | null
+          created_at?: string
+          id?: string
+          package_id: string
+          package_name: string
+          template_id: string
+        }
+        Update: {
+          auto_assign?: boolean | null
+          created_at?: string
+          id?: string
+          package_id?: string
+          package_name?: string
+          template_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_package_links_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "trainer_onboarding_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trainer_onboarding_activities: {
         Row: {
           activity_name: string
@@ -1702,48 +1737,68 @@ export type Database = {
       }
       trainer_onboarding_templates: {
         Row: {
+          auto_assign_on_package: boolean | null
           completion_method: string
           created_at: string
+          created_from_template_id: string | null
           description: string | null
           display_order: number
           id: string
           instructions: string | null
           is_active: boolean
+          package_links: Json | null
           requires_file_upload: boolean
+          status: string | null
           step_name: string
           step_type: string
           trainer_id: string
           updated_at: string
         }
         Insert: {
+          auto_assign_on_package?: boolean | null
           completion_method?: string
           created_at?: string
+          created_from_template_id?: string | null
           description?: string | null
           display_order?: number
           id?: string
           instructions?: string | null
           is_active?: boolean
+          package_links?: Json | null
           requires_file_upload?: boolean
+          status?: string | null
           step_name: string
           step_type?: string
           trainer_id: string
           updated_at?: string
         }
         Update: {
+          auto_assign_on_package?: boolean | null
           completion_method?: string
           created_at?: string
+          created_from_template_id?: string | null
           description?: string | null
           display_order?: number
           id?: string
           instructions?: string | null
           is_active?: boolean
+          package_links?: Json | null
           requires_file_upload?: boolean
+          status?: string | null
           step_name?: string
           step_type?: string
           trainer_id?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "trainer_onboarding_templates_created_from_template_id_fkey"
+            columns: ["created_from_template_id"]
+            isOneToOne: false
+            referencedRelation: "trainer_onboarding_templates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trainer_verification_requests: {
         Row: {
