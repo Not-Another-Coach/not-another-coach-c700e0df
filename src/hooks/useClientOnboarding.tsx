@@ -36,12 +36,14 @@ export function useClientOnboarding() {
 
   const fetchOnboardingProgress = useCallback(async () => {
     if (!user) {
+      console.log('🔍 ClientOnboarding: No user, setting loading false');
       setLoading(false);
       return;
     }
 
     try {
       setError(null);
+      console.log('🔍 ClientOnboarding: Fetching for user:', user.id);
       
       // First, get the active client engagement to find the trainer
       const { data: engagement, error: engagementError } = await supabase
@@ -54,9 +56,12 @@ export function useClientOnboarding() {
         .eq('stage', 'active_client')
         .maybeSingle();
 
+      console.log('🔍 ClientOnboarding: Engagement data:', { engagement, engagementError });
+
       if (engagementError) throw engagementError;
       
       if (!engagement) {
+        console.log('🔍 ClientOnboarding: No active client engagement found');
         setOnboardingData(null);
         setLoading(false);
         return;
@@ -69,6 +74,8 @@ export function useClientOnboarding() {
         .eq('id', engagement.trainer_id)
         .single();
 
+      console.log('🔍 ClientOnboarding: Trainer profile:', { trainerProfile, trainerError });
+
       if (trainerError) throw trainerError;
 
       // Get onboarding progress
@@ -78,6 +85,8 @@ export function useClientOnboarding() {
         .eq('client_id', user.id)
         .eq('trainer_id', engagement.trainer_id)
         .order('display_order');
+
+      console.log('🔍 ClientOnboarding: Steps data:', { steps, stepsError, count: steps?.length });
 
       if (stepsError) throw stepsError;
 

@@ -39,8 +39,13 @@ export default function ClientDashboard() {
   const [completedDiscoveryCalls, setCompletedDiscoveryCalls] = useState([]);
   const [dismissedFeedbackPrompts, setDismissedFeedbackPrompts] = useState<string[]>([]);
   
+  console.log('🔍 ClientDashboard: Current engagements:', engagements);
+  console.log('🔍 ClientDashboard: Engagement stages:', engagements.map(e => ({ trainerId: e.trainerId, stage: e.stage })));
+  
   // Check if client is an active client with any trainer
   const isActiveClient = engagements.some(engagement => engagement.stage === 'active_client');
+  
+  console.log('🔍 ClientDashboard: isActiveClient?', isActiveClient);
 
   // Redirect if not logged in
   useEffect(() => {

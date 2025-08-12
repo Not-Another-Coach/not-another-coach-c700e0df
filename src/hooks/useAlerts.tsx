@@ -37,9 +37,9 @@ export function useAlerts() {
         .select('*')
         .order('priority', { ascending: false })
         .order('created_at', { ascending: false })
-        .limit(5);
+        .limit(10); // Increased limit to see more alerts
 
-      console.log('🔥 useAlerts: Raw alerts data:', { alertsData, alertsError });
+      console.log('🔥 useAlerts: Raw alerts data:', { alertsData, alertsError, alertTypes: alertsData?.map(a => a.alert_type) });
 
       if (alertsError) {
         console.error('Error fetching alerts:', alertsError);
