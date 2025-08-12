@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { useKBArticles, useKBCategories } from '@/hooks/useKnowledgeBase';
 import { CreateCoachDeclineButton } from './CreateCoachDeclineButton';
 import { AdvancedTemplatesArticle } from './AdvancedTemplatesArticle';
+import { TemplateAssignmentGuideArticle } from './TemplateAssignmentGuideArticle';
 import { format } from 'date-fns';
 
 interface KBDocumentationTabProps {
@@ -17,16 +18,29 @@ interface KBDocumentationTabProps {
 const STATIC_ARTICLES = [
   {
     id: 'advanced-templates',
-    title: 'Advanced Onboarding Templates',
-    excerpt: 'Powerful template features with conditional logic, analytics, bulk operations, and version control',
-    content: 'Advanced Onboarding Templates documentation with conditional logic, analytics, bulk operations, and version control features.',
+    title: 'Advanced Template Management System',
+    excerpt: 'Complete guide to template publishing, activity management, bulk operations, and workflow optimization',
+    content: 'Advanced Template Management System documentation with template publishing, activity management, bulk operations, and workflow optimization features.',
     content_type: 'feature',
     featured: true,
     component: AdvancedTemplatesArticle,
     view_count: 0,
     updated_at: new Date().toISOString(),
     category: null,
-    slug: 'advanced-onboarding-templates',
+    slug: 'advanced-template-management',
+  },
+  {
+    id: 'template-assignment',
+    title: 'Template Assignment & Client Onboarding',
+    excerpt: 'How templates are assigned to clients and how both trainers and clients view onboarding progress',
+    content: 'Template Assignment & Client Onboarding documentation covering the complete assignment process and user experience.',
+    content_type: 'system_guide',
+    featured: true,
+    component: TemplateAssignmentGuideArticle,
+    view_count: 0,
+    updated_at: new Date().toISOString(),
+    category: null,
+    slug: 'template-assignment-guide',
   }
 ];
 
