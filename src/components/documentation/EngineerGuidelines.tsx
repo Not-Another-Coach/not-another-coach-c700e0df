@@ -78,6 +78,16 @@ export const EngineerGuidelines: React.FC = () => {
       </section>
 
       <section>
+        <h3 className="text-xl font-medium">Coach availability access model (RLS)</h3>
+        <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
+          <li>No public reads. Remove permissive SELECT on coach_availability_settings.</li>
+          <li>Coaches can manage and view their own availability; admins have full access.</li>
+          <li>Clients may SELECT a coach’s availability only if either (a) an engagement exists (client_trainer_engagement) or (b) they are on that coach’s active waitlist.</li>
+          <li>Frontend: avoid prefetching availability for unaffiliated users; fetch after shortlist/engagement or on waitlist screens.</li>
+        </ul>
+      </section>
+
+      <section>
         <h3 className="text-xl font-medium">Diagnostics, Errors, and Logging</h3>
         <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
           <li>Use DiagnosticsProvider.add for noteworthy events; include source and concise messages.</li>
