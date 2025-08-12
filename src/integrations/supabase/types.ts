@@ -63,6 +63,7 @@ export type Database = {
         Row: {
           alert_type: string
           content: string
+          correlation_id: string | null
           created_at: string
           created_by: string | null
           expires_at: string | null
@@ -77,6 +78,7 @@ export type Database = {
         Insert: {
           alert_type: string
           content: string
+          correlation_id?: string | null
           created_at?: string
           created_by?: string | null
           expires_at?: string | null
@@ -91,6 +93,7 @@ export type Database = {
         Update: {
           alert_type?: string
           content?: string
+          correlation_id?: string | null
           created_at?: string
           created_by?: string | null
           expires_at?: string | null
@@ -217,6 +220,7 @@ export type Database = {
           completed_by: string | null
           completion_method: string
           completion_notes: string | null
+          correlation_id: string | null
           created_at: string
           description: string | null
           display_order: number
@@ -250,6 +254,7 @@ export type Database = {
           completed_by?: string | null
           completion_method?: string
           completion_notes?: string | null
+          correlation_id?: string | null
           created_at?: string
           description?: string | null
           display_order?: number
@@ -283,6 +288,7 @@ export type Database = {
           completed_by?: string | null
           completion_method?: string
           completion_notes?: string | null
+          correlation_id?: string | null
           created_at?: string
           description?: string | null
           display_order?: number
@@ -516,6 +522,7 @@ export type Database = {
         Row: {
           client_id: string
           client_message: string | null
+          correlation_id: string | null
           created_at: string
           id: string
           package_duration: string | null
@@ -534,6 +541,7 @@ export type Database = {
         Insert: {
           client_id: string
           client_message?: string | null
+          correlation_id?: string | null
           created_at?: string
           id?: string
           package_duration?: string | null
@@ -552,6 +560,7 @@ export type Database = {
         Update: {
           client_id?: string
           client_message?: string | null
+          correlation_id?: string | null
           created_at?: string
           id?: string
           package_duration?: string | null
@@ -575,6 +584,7 @@ export type Database = {
           client_id: string
           coach_id: string
           coach_notes: string | null
+          correlation_id: string | null
           created_at: string
           estimated_start_date: string | null
           follow_up_scheduled_date: string | null
@@ -589,6 +599,7 @@ export type Database = {
           client_id: string
           coach_id: string
           coach_notes?: string | null
+          correlation_id?: string | null
           created_at?: string
           estimated_start_date?: string | null
           follow_up_scheduled_date?: string | null
@@ -603,6 +614,7 @@ export type Database = {
           client_id?: string
           coach_id?: string
           coach_notes?: string | null
+          correlation_id?: string | null
           created_at?: string
           estimated_start_date?: string | null
           follow_up_scheduled_date?: string | null
@@ -791,6 +803,7 @@ export type Database = {
       discovery_call_feedback_notifications: {
         Row: {
           client_id: string
+          correlation_id: string | null
           created_at: string
           discovery_call_id: string
           id: string
@@ -800,6 +813,7 @@ export type Database = {
         }
         Insert: {
           client_id: string
+          correlation_id?: string | null
           created_at?: string
           discovery_call_id: string
           id?: string
@@ -809,6 +823,7 @@ export type Database = {
         }
         Update: {
           client_id?: string
+          correlation_id?: string | null
           created_at?: string
           discovery_call_id?: string
           id?: string
@@ -948,6 +963,7 @@ export type Database = {
       }
       discovery_call_notifications: {
         Row: {
+          correlation_id: string | null
           created_at: string
           discovery_call_id: string
           email_id: string | null
@@ -958,6 +974,7 @@ export type Database = {
           sent_at: string
         }
         Insert: {
+          correlation_id?: string | null
           created_at?: string
           discovery_call_id: string
           email_id?: string | null
@@ -968,6 +985,7 @@ export type Database = {
           sent_at?: string
         }
         Update: {
+          correlation_id?: string | null
           created_at?: string
           discovery_call_id?: string
           email_id?: string | null
@@ -1034,6 +1052,7 @@ export type Database = {
           calendar_event_id: string | null
           cancellation_reason: string | null
           client_id: string
+          correlation_id: string | null
           created_at: string
           duration_minutes: number
           id: string
@@ -1050,6 +1069,7 @@ export type Database = {
           calendar_event_id?: string | null
           cancellation_reason?: string | null
           client_id: string
+          correlation_id?: string | null
           created_at?: string
           duration_minutes?: number
           id?: string
@@ -1066,6 +1086,7 @@ export type Database = {
           calendar_event_id?: string | null
           cancellation_reason?: string | null
           client_id?: string
+          correlation_id?: string | null
           created_at?: string
           duration_minutes?: number
           id?: string
@@ -1093,6 +1114,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      event_processing_state: {
+        Row: {
+          completed_at: string | null
+          completed_steps: number
+          correlation_id: string
+          created_at: string
+          current_step: string
+          failed_at: string | null
+          failure_reason: string | null
+          id: string
+          max_retries: number | null
+          next_retry_at: string | null
+          retry_count: number | null
+          started_at: string
+          state_data: Json
+          total_steps: number
+          updated_at: string
+          workflow_type: string
+        }
+        Insert: {
+          completed_at?: string | null
+          completed_steps?: number
+          correlation_id: string
+          created_at?: string
+          current_step: string
+          failed_at?: string | null
+          failure_reason?: string | null
+          id?: string
+          max_retries?: number | null
+          next_retry_at?: string | null
+          retry_count?: number | null
+          started_at?: string
+          state_data?: Json
+          total_steps?: number
+          updated_at?: string
+          workflow_type: string
+        }
+        Update: {
+          completed_at?: string | null
+          completed_steps?: number
+          correlation_id?: string
+          created_at?: string
+          current_step?: string
+          failed_at?: string | null
+          failure_reason?: string | null
+          id?: string
+          max_retries?: number | null
+          next_retry_at?: string | null
+          retry_count?: number | null
+          started_at?: string
+          state_data?: Json
+          total_steps?: number
+          updated_at?: string
+          workflow_type?: string
+        }
+        Relationships: []
       }
       kb_article_revisions: {
         Row: {
@@ -2741,6 +2819,7 @@ export type Database = {
       waitlist_exclusive_periods: {
         Row: {
           coach_id: string
+          correlation_id: string | null
           created_at: string
           expires_at: string
           id: string
@@ -2750,6 +2829,7 @@ export type Database = {
         }
         Insert: {
           coach_id: string
+          correlation_id?: string | null
           created_at?: string
           expires_at: string
           id?: string
@@ -2759,6 +2839,7 @@ export type Database = {
         }
         Update: {
           coach_id?: string
+          correlation_id?: string | null
           created_at?: string
           expires_at?: string
           id?: string
@@ -2809,6 +2890,57 @@ export type Database = {
           },
         ]
       }
+      webhook_events: {
+        Row: {
+          correlation_id: string
+          created_at: string
+          event_type: string
+          id: string
+          last_processing_error: string | null
+          metadata: Json | null
+          processed_at: string | null
+          processing_attempts: number | null
+          processing_status: string
+          provider_event_id: string
+          provider_name: string
+          raw_payload: Json
+          updated_at: string
+          webhook_signature: string | null
+        }
+        Insert: {
+          correlation_id?: string
+          created_at?: string
+          event_type: string
+          id?: string
+          last_processing_error?: string | null
+          metadata?: Json | null
+          processed_at?: string | null
+          processing_attempts?: number | null
+          processing_status?: string
+          provider_event_id: string
+          provider_name: string
+          raw_payload: Json
+          updated_at?: string
+          webhook_signature?: string | null
+        }
+        Update: {
+          correlation_id?: string
+          created_at?: string
+          event_type?: string
+          id?: string
+          last_processing_error?: string | null
+          metadata?: Json | null
+          processed_at?: string | null
+          processing_attempts?: number | null
+          processing_status?: string
+          provider_event_id?: string
+          provider_name?: string
+          raw_payload?: Json
+          updated_at?: string
+          webhook_signature?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -2838,6 +2970,10 @@ export type Database = {
         Args: { p_client_id: string; p_coach_id: string }
         Returns: boolean
       }
+      complete_webhook_event: {
+        Args: { p_event_id: string; p_result?: Json }
+        Returns: undefined
+      }
       create_coach_selection_request: {
         Args: {
           p_trainer_id: string
@@ -2855,6 +2991,10 @@ export type Database = {
       }
       end_waitlist_exclusive_period: {
         Args: { p_coach_id: string }
+        Returns: undefined
+      }
+      fail_webhook_event: {
+        Args: { p_event_id: string; p_error_message: string }
         Returns: undefined
       }
       get_content_visibility: {
@@ -2952,6 +3092,16 @@ export type Database = {
         }
         Returns: undefined
       }
+      process_webhook_event: {
+        Args: {
+          p_provider_event_id: string
+          p_provider_name: string
+          p_event_type: string
+          p_webhook_signature: string
+          p_raw_payload: Json
+        }
+        Returns: Json
+      }
       reactivate_user: {
         Args: { p_user_id: string; p_reason?: string }
         Returns: undefined
@@ -2978,6 +3128,15 @@ export type Database = {
       }
       start_waitlist_exclusive_period: {
         Args: { p_coach_id: string; p_duration_hours?: number }
+        Returns: string
+      }
+      start_workflow: {
+        Args: {
+          p_workflow_type: string
+          p_total_steps?: number
+          p_initial_state?: Json
+          p_correlation_id?: string
+        }
         Returns: string
       }
       suspend_user: {
@@ -3015,6 +3174,14 @@ export type Database = {
       }
       update_user_email_for_admin: {
         Args: { target_user_id: string; new_email: string }
+        Returns: boolean
+      }
+      update_workflow_progress: {
+        Args: {
+          p_correlation_id: string
+          p_current_step: string
+          p_state_data?: Json
+        }
         Returns: boolean
       }
     }
