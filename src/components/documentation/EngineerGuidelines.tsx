@@ -67,6 +67,17 @@ export const EngineerGuidelines: React.FC = () => {
       </section>
 
       <section>
+        <h3 className="text-xl font-medium">Profiles data access model (RLS)</h3>
+        <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
+          <li>RLS enforced on public.profiles: users can SELECT/UPDATE/INSERT only their own row; admins have full access.</li>
+          <li>Browsing: authenticated users may SELECT published trainer profiles only (user_type = trainer AND profile_published = true).</li>
+          <li>Engagement access: clients and trainers can view each other’s profiles when a client_trainer_engagement row exists.</li>
+          <li>Frontend: always include user_type='trainer' + profile_published=true when listing coaches; avoid selecting unnecessary columns.</li>
+          <li>Never read auth.users from the client; use profiles and RPCs. Treat billing/card fields as private.</li>
+        </ul>
+      </section>
+
+      <section>
         <h3 className="text-xl font-medium">Diagnostics, Errors, and Logging</h3>
         <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
           <li>Use DiagnosticsProvider.add for noteworthy events; include source and concise messages.</li>
