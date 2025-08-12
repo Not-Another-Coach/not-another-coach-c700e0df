@@ -1599,6 +1599,65 @@ export type Database = {
         }
         Relationships: []
       }
+      onboarding_bulk_operations: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          error_log: string[] | null
+          id: string
+          operation_data: Json | null
+          operation_type: string
+          progress_count: number | null
+          started_at: string | null
+          status: string | null
+          target_clients: string[]
+          template_id: string | null
+          total_count: number
+          trainer_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          error_log?: string[] | null
+          id?: string
+          operation_data?: Json | null
+          operation_type: string
+          progress_count?: number | null
+          started_at?: string | null
+          status?: string | null
+          target_clients: string[]
+          template_id?: string | null
+          total_count: number
+          trainer_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          error_log?: string[] | null
+          id?: string
+          operation_data?: Json | null
+          operation_type?: string
+          progress_count?: number | null
+          started_at?: string | null
+          status?: string | null
+          target_clients?: string[]
+          template_id?: string | null
+          total_count?: number
+          trainer_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_bulk_operations_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "onboarding_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       onboarding_commitments: {
         Row: {
           commitment_description: string
@@ -1651,6 +1710,44 @@ export type Database = {
             columns: ["template_id"]
             isOneToOne: false
             referencedRelation: "trainer_onboarding_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      onboarding_conditional_evaluations: {
+        Row: {
+          client_id: string
+          condition_result: boolean
+          evaluated_at: string | null
+          evaluation_data: Json | null
+          id: string
+          step_id: string
+          template_id: string | null
+        }
+        Insert: {
+          client_id: string
+          condition_result: boolean
+          evaluated_at?: string | null
+          evaluation_data?: Json | null
+          id?: string
+          step_id: string
+          template_id?: string | null
+        }
+        Update: {
+          client_id?: string
+          condition_result?: boolean
+          evaluated_at?: string | null
+          evaluation_data?: Json | null
+          id?: string
+          step_id?: string
+          template_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_conditional_evaluations_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "onboarding_templates"
             referencedColumns: ["id"]
           },
         ]
@@ -1821,6 +1918,50 @@ export type Database = {
           },
         ]
       }
+      onboarding_template_analytics: {
+        Row: {
+          created_at: string | null
+          date_recorded: string | null
+          id: string
+          metric_data: Json | null
+          metric_type: string
+          metric_value: number | null
+          template_id: string | null
+          trainer_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          date_recorded?: string | null
+          id?: string
+          metric_data?: Json | null
+          metric_type: string
+          metric_value?: number | null
+          template_id?: string | null
+          trainer_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          date_recorded?: string | null
+          id?: string
+          metric_data?: Json | null
+          metric_type?: string
+          metric_value?: number | null
+          template_id?: string | null
+          trainer_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_template_analytics_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "onboarding_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       onboarding_template_audit_log: {
         Row: {
           action_by: string
@@ -1850,6 +1991,178 @@ export type Database = {
           created_at?: string
           id?: string
           template_id?: string
+          version_number?: number | null
+        }
+        Relationships: []
+      }
+      onboarding_template_sections: {
+        Row: {
+          allowed_attachments: Json | null
+          completion_method: string | null
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          due_date_business_days_only: boolean | null
+          due_days: number | null
+          id: string
+          instructions: string | null
+          is_active: boolean | null
+          requires_file_upload: boolean | null
+          section_type: string
+          sla_hours: number | null
+          step_name: string
+          step_type: string | null
+          template_id: string | null
+          updated_at: string | null
+          visibility: string | null
+        }
+        Insert: {
+          allowed_attachments?: Json | null
+          completion_method?: string | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          due_date_business_days_only?: boolean | null
+          due_days?: number | null
+          id?: string
+          instructions?: string | null
+          is_active?: boolean | null
+          requires_file_upload?: boolean | null
+          section_type: string
+          sla_hours?: number | null
+          step_name: string
+          step_type?: string | null
+          template_id?: string | null
+          updated_at?: string | null
+          visibility?: string | null
+        }
+        Update: {
+          allowed_attachments?: Json | null
+          completion_method?: string | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          due_date_business_days_only?: boolean | null
+          due_days?: number | null
+          id?: string
+          instructions?: string | null
+          is_active?: boolean | null
+          requires_file_upload?: boolean | null
+          section_type?: string
+          sla_hours?: number | null
+          step_name?: string
+          step_type?: string | null
+          template_id?: string | null
+          updated_at?: string | null
+          visibility?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_template_sections_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "onboarding_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      onboarding_template_versions: {
+        Row: {
+          changelog: string | null
+          created_at: string | null
+          created_by: string
+          id: string
+          is_current: boolean | null
+          template_data: Json
+          template_id: string | null
+          version_number: number
+        }
+        Insert: {
+          changelog?: string | null
+          created_at?: string | null
+          created_by: string
+          id?: string
+          is_current?: boolean | null
+          template_data: Json
+          template_id?: string | null
+          version_number: number
+        }
+        Update: {
+          changelog?: string | null
+          created_at?: string | null
+          created_by?: string
+          id?: string
+          is_current?: boolean | null
+          template_data?: Json
+          template_id?: string | null
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_template_versions_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "onboarding_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      onboarding_templates: {
+        Row: {
+          conditional_logic: Json | null
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          id: string
+          is_locked: boolean | null
+          is_version: boolean | null
+          lock_reason: string | null
+          name: string
+          package_type_restrictions: string[] | null
+          parent_template_id: string | null
+          published_at: string | null
+          published_version: number | null
+          status: string | null
+          trainer_id: string
+          updated_at: string | null
+          version_number: number | null
+        }
+        Insert: {
+          conditional_logic?: Json | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_locked?: boolean | null
+          is_version?: boolean | null
+          lock_reason?: string | null
+          name: string
+          package_type_restrictions?: string[] | null
+          parent_template_id?: string | null
+          published_at?: string | null
+          published_version?: number | null
+          status?: string | null
+          trainer_id: string
+          updated_at?: string | null
+          version_number?: number | null
+        }
+        Update: {
+          conditional_logic?: Json | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_locked?: boolean | null
+          is_version?: boolean | null
+          lock_reason?: string | null
+          name?: string
+          package_type_restrictions?: string[] | null
+          parent_template_id?: string | null
+          published_at?: string | null
+          published_version?: number | null
+          status?: string | null
+          trainer_id?: string
+          updated_at?: string | null
           version_number?: number | null
         }
         Relationships: []
