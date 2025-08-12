@@ -362,6 +362,7 @@ export function TemplateBuilder({
                               size="sm"
                               onClick={() => openSectionsDialog(template.id)}
                               title="Edit Template Sections"
+                              aria-label={`Edit sections for ${template.step_name}`}
                             >
                               <Settings className="h-4 w-4" />
                             </Button>
@@ -370,6 +371,7 @@ export function TemplateBuilder({
                               size="sm"
                               onClick={() => openPackageLinkDialog(template.id)}
                               title="Link to Packages"
+                              aria-label={`Link ${template.step_name} to packages`}
                             >
                               <Package className="h-4 w-4" />
                             </Button>

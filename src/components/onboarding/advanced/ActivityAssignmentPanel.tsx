@@ -47,8 +47,8 @@ export function ActivityAssignmentPanel({
     loading
   } = useAdvancedOnboarding();
   
-  // Mock activities for now - in a real implementation, this would come from a proper activities hook
-  const activities = [];
+  // TODO: Replace with proper activities hook when available
+  const activities: Array<{id: string; activity_name: string; category: string}> = [];
 
   // Filter assignments for this specific section item
   const sectionAssignments = activityAssignments.filter(
@@ -138,6 +138,7 @@ export function ActivityAssignmentPanel({
             size="sm"
             onClick={() => setShowAssignDialog(true)}
             disabled={loading}
+            aria-label={`Assign activity to ${sectionItemName}`}
           >
             <Plus className="h-4 w-4 mr-1" />
             Assign Activity
@@ -211,6 +212,7 @@ export function ActivityAssignmentPanel({
                               variant="ghost"
                               size="sm"
                               onClick={() => handleRemoveAssignment(assignment.id)}
+                              aria-label={`Remove ${getActivityName(assignment.activity_id)} from ${sectionItemName}`}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -234,9 +236,9 @@ export function ActivityAssignmentPanel({
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label>Select Activity</Label>
+                <Label htmlFor="activity-select">Select Activity</Label>
                 <Select value={selectedActivityId} onValueChange={setSelectedActivityId}>
-                  <SelectTrigger>
+                  <SelectTrigger id="activity-select">
                     <SelectValue placeholder="Choose an activity from your library" />
                   </SelectTrigger>
                   <SelectContent>
@@ -264,8 +266,10 @@ export function ActivityAssignmentPanel({
               </div>
 
               <div>
-                <Label>Custom Instructions (Optional)</Label>
+                <Label htmlFor="custom-instructions">Custom Instructions (Optional)</Label>
                 <Textarea
+                  id="custom-instructions"
+                  name="custom-instructions"
                   value={customInstructions}
                   onChange={(e) => setCustomInstructions(e.target.value)}
                   placeholder="Add specific instructions for this activity assignment..."
