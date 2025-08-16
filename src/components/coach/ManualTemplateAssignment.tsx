@@ -31,8 +31,6 @@ interface TemplateStep {
   completion_method: 'client' | 'trainer';
   requires_file_upload: boolean;
   display_order: number;
-  due_in_days?: number;
-  sla_days?: number;
 }
 
 interface CustomizedTemplate {
@@ -137,9 +135,7 @@ export function ManualTemplateAssignment() {
           step_type: template.step_type,
           completion_method: template.completion_method === 'auto' ? 'client' : template.completion_method,
           requires_file_upload: template.requires_file_upload || false,
-          display_order: 1,
-          due_in_days: 7,
-          sla_days: 2
+          display_order: 1
         }
       ]
     };
@@ -232,9 +228,7 @@ export function ManualTemplateAssignment() {
       step_type: 'mandatory',
       completion_method: 'client',
       requires_file_upload: false,
-      display_order: customizedTemplate.steps.length + 1,
-      due_in_days: 7,
-      sla_days: 2
+      display_order: customizedTemplate.steps.length + 1
     };
 
     setCustomizedTemplate({
@@ -454,7 +448,7 @@ export function ManualTemplateAssignment() {
                           />
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 gap-4">
                           <div>
                             <Label>Completion Method</Label>
                             <Select
@@ -471,28 +465,6 @@ export function ManualTemplateAssignment() {
                                 <SelectItem value="trainer">Trainer</SelectItem>
                               </SelectContent>
                             </Select>
-                          </div>
-                          <div>
-                            <Label>Due in (days)</Label>
-                            <Input
-                              type="number"
-                              value={step.due_in_days || ''}
-                              onChange={(e) => updateTemplateStep(index, { 
-                                due_in_days: e.target.value ? parseInt(e.target.value) : undefined 
-                              })}
-                              placeholder="7"
-                            />
-                          </div>
-                          <div>
-                            <Label>SLA (days)</Label>
-                            <Input
-                              type="number"
-                              value={step.sla_days || ''}
-                              onChange={(e) => updateTemplateStep(index, { 
-                                sla_days: e.target.value ? parseInt(e.target.value) : undefined 
-                              })}
-                              placeholder="2"
-                            />
                           </div>
                         </div>
 
