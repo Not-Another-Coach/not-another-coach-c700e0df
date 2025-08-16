@@ -109,7 +109,8 @@ export function ManualTemplateAssignment() {
     client.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const publishedTemplates = templates.filter(t => t.status === 'published' && t.is_active);
+  // Filter for published templates (active status not required for manual assignment)
+  const publishedTemplates = templates.filter(t => t.status === 'published');
 
   console.log('Templates loaded:', templates.length, 'Published:', publishedTemplates.length);
   console.log('Template details:', templates.map(t => ({ 
