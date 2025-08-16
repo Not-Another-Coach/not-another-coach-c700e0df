@@ -60,32 +60,39 @@ export function ManualTemplateAssignment() {
 
       try {
         setLoading(true);
-        const { data, error } = await supabase
+        // Get active client engagements first
+        const { data: engagements, error: engagementError } = await supabase
           .from('client_trainer_engagement')
-          .select(`
-            client_id,
-            profiles!inner(
-              id,
-              first_name,
-              last_name,
-              email,
-              client_status
-            )
-          `)
+          .select('client_id')
           .eq('trainer_id', user.id)
           .eq('stage', 'active_client');
 
-        if (error) throw error;
+        if (engagementError) throw engagementError;
 
-        const clients = data?.map(item => ({
-          id: item.client_id,
-          first_name: item.profiles.first_name || '',
-          last_name: item.profiles.last_name || '',
-          email: item.profiles.email || '',
-          client_status: item.profiles.client_status || ''
-        })) || [];
+        const clientIds = engagements?.map(e => e.client_id) || [];
+        
+        if (clientIds.length > 0) {
+          // Get profile information for these clients
+          const { data: profiles, error: profilesError } = await supabase
+            .from('profiles')
+            .select('id, first_name, last_name, client_status')
+            .in('id', clientIds);
 
-        setActiveClients(clients);
+          if (profilesError) throw profilesError;
+
+          // Get emails from auth.users (if accessible) or use a placeholder
+          const clients = profiles?.map(profile => ({
+            id: profile.id,
+            first_name: profile.first_name || '',
+            last_name: profile.last_name || '',
+            email: 'Email not available', // We'll show name instead
+            client_status: profile.client_status || ''
+          })) || [];
+
+          setActiveClients(clients);
+        } else {
+          setActiveClients([]);
+        }
       } catch (error) {
         console.error('Error fetching active clients:', error);
         toast.error('Failed to load active clients');
@@ -119,7 +126,7 @@ export function ManualTemplateAssignment() {
           description: template.description || '',
           instructions: template.instructions || '',
           step_type: template.step_type,
-          completion_method: template.completion_method,
+          completion_method: template.completion_method === 'auto' ? 'client' : template.completion_method,
           requires_file_upload: template.requires_file_upload || false,
           display_order: 1,
           due_in_days: 7,
@@ -300,7 +307,7 @@ export function ManualTemplateAssignment() {
                       <User className="h-8 w-8 text-muted-foreground" />
                       <div>
                         <p className="font-medium">{client.first_name} {client.last_name}</p>
-                        <p className="text-sm text-muted-foreground">{client.email}</p>
+                        <p className="text-sm text-muted-foreground">ID: {client.id.slice(0, 8)}...</p>
                         <Badge variant="secondary" className="text-xs">{client.client_status}</Badge>
                       </div>
                     </div>
