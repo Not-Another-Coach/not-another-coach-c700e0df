@@ -83,6 +83,24 @@ export function useClientOnboarding() {
 
       if (trainerError) throw trainerError;
 
+      // First, let's check if there are any onboarding progress records at all
+      const { data: allProgressRecords, error: allProgressError } = await supabase
+        .from('client_onboarding_progress')
+        .select('*')
+        .eq('client_id', user.id)
+        .eq('trainer_id', engagement.trainer_id);
+
+      console.log('🔍 ClientOnboarding: All progress records:', { allProgressRecords, allProgressError, count: allProgressRecords?.length });
+      
+      // Also check what template assignments exist
+      const { data: allAssignments, error: assignmentsError } = await supabase
+        .from('client_template_assignments')
+        .select('*')
+        .eq('client_id', user.id)
+        .eq('trainer_id', engagement.trainer_id);
+
+      console.log('🔍 ClientOnboarding: All template assignments:', { allAssignments, assignmentsError });
+
       // Get onboarding progress - only from active template assignments
       const { data: steps, error: stepsError } = await supabase
         .from('client_onboarding_progress')
@@ -99,6 +117,11 @@ export function useClientOnboarding() {
         .order('display_order');
 
       console.log('🔍 ClientOnboarding: Steps data:', { steps, stepsError, count: steps?.length });
+      console.log('🔍 ClientOnboarding: Individual steps:', steps?.map(s => ({ 
+        id: s.id, 
+        step_name: s.step_name, 
+        template_name: s.client_template_assignments?.template_name 
+      })));
 
       if (stepsError) throw stepsError;
 
