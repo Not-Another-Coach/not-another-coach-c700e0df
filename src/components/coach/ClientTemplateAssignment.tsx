@@ -66,13 +66,7 @@ export function ClientTemplateAssignment({ clientId, showHistoryOnly = false }: 
       
       let query = supabase
         .from('client_template_assignments')
-        .select(`
-          *,
-          client_profile:profiles!client_id(
-            first_name,
-            last_name
-          )
-        `)
+        .select('*')
         .eq('trainer_id', user.id)
         .order('assigned_at', { ascending: false });
 
@@ -84,11 +78,18 @@ export function ClientTemplateAssignment({ clientId, showHistoryOnly = false }: 
 
       if (error) throw error;
 
-      console.log('Fetched assignments with profiles:', assignmentsData);
+      console.log('Fetched assignments:', assignmentsData);
 
-      // Get progress counts for each assignment
+      // Get client profiles and progress counts for each assignment
       const assignmentsWithProgress = await Promise.all(
         (assignmentsData || []).map(async (assignment) => {
+          // Get client profile
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('first_name, last_name')
+            .eq('id', assignment.client_id)
+            .single();
+
           // Get progress data
           const { data: progressData } = await supabase
             .from('client_onboarding_progress')
@@ -100,12 +101,14 @@ export function ClientTemplateAssignment({ clientId, showHistoryOnly = false }: 
 
           return {
             ...assignment,
+            client_profile: profileData,
             progress_count: progressCount,
             completed_count: completedCount
           } as TemplateAssignment;
         })
       );
 
+      console.log('Assignments with profiles and progress:', assignmentsWithProgress);
       setAssignments(assignmentsWithProgress);
     } catch (error) {
       console.error('Error fetching template assignments:', error);
