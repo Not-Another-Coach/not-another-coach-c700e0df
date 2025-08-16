@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
@@ -15,6 +15,7 @@ interface DataLoadingState {
  */
 export function useDataSynchronization() {
   const { user } = useAuth();
+  const refreshTimeout = useRef<NodeJS.Timeout>();
   const [loadingState, setLoadingState] = useState<DataLoadingState>({
     trainersLoaded: false,
     engagementLoaded: false,
@@ -69,7 +70,7 @@ export function useDataSynchronization() {
 
     // Subscribe to engagement changes
     const engagementChannel = supabase
-      .channel('engagement-changes')
+      .channel(`engagement-changes-${user.id}`)
       .on(
         'postgres_changes',
         {
@@ -80,17 +81,18 @@ export function useDataSynchronization() {
         },
         (payload) => {
           console.log('🔄 Real-time engagement update:', payload);
-          // Trigger a small delay to ensure data consistency
-          setTimeout(() => {
-            refreshData();
-          }, 500);
+          // Debounced refresh to prevent excessive updates
+          clearTimeout(refreshTimeout.current);
+          refreshTimeout.current = setTimeout(() => {
+            setRefreshTrigger(prev => prev + 1);
+          }, 1000);
         }
       )
       .subscribe();
 
     // Subscribe to discovery call changes
     const discoveryCallChannel = supabase
-      .channel('discovery-call-changes')
+      .channel(`discovery-call-changes-${user.id}`)
       .on(
         'postgres_changes',
         {
@@ -101,16 +103,17 @@ export function useDataSynchronization() {
         },
         (payload) => {
           console.log('🔄 Real-time discovery call update:', payload);
-          setTimeout(() => {
-            refreshData();
-          }, 500);
+          clearTimeout(refreshTimeout.current);
+          refreshTimeout.current = setTimeout(() => {
+            setRefreshTrigger(prev => prev + 1);
+          }, 1000);
         }
       )
       .subscribe();
 
     // Subscribe to conversation changes
     const conversationChannel = supabase
-      .channel('conversation-changes')
+      .channel(`conversation-changes-${user.id}`)
       .on(
         'postgres_changes',
         {
@@ -121,20 +124,22 @@ export function useDataSynchronization() {
         },
         (payload) => {
           console.log('🔄 Real-time conversation update:', payload);
-          setTimeout(() => {
-            refreshData();
-          }, 500);
+          clearTimeout(refreshTimeout.current);
+          refreshTimeout.current = setTimeout(() => {
+            setRefreshTrigger(prev => prev + 1);
+          }, 1000);
         }
       )
       .subscribe();
 
     return () => {
       console.log('🔄 Cleaning up real-time subscriptions');
+      clearTimeout(refreshTimeout.current);
       supabase.removeChannel(engagementChannel);
       supabase.removeChannel(discoveryCallChannel);
       supabase.removeChannel(conversationChannel);
     };
-  }, [user?.id, refreshData]);
+  }, [user?.id]);
 
   // Listen for manual refresh events from dashboard
   useEffect(() => {

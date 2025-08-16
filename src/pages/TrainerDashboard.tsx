@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -7,14 +7,17 @@ import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { useWaitlist } from "@/hooks/useWaitlist";
 import { useCoachAvailability } from "@/hooks/useCoachAvailability";
+import { MemoryMonitor } from "@/components/MemoryMonitor";
 
-import { WaitlistManagement } from "@/components/coach/WaitlistManagement";
-import { CoachFeedbackSummary } from "@/components/coach/CoachFeedbackSummary";
-import { ActiveClientsSection } from "@/components/coach/ActiveClientsSection";
+// Lazy load heavy components
+const WaitlistManagement = lazy(() => import("@/components/coach/WaitlistManagement").then(m => ({ default: m.WaitlistManagement })));
+const CoachFeedbackSummary = lazy(() => import("@/components/coach/CoachFeedbackSummary").then(m => ({ default: m.CoachFeedbackSummary })));
+const ActiveClientsSection = lazy(() => import("@/components/coach/ActiveClientsSection").then(m => ({ default: m.ActiveClientsSection })));
+const LiveActivityFeed = lazy(() => import("@/components/dashboard/LiveActivityFeed").then(m => ({ default: m.LiveActivityFeed })));
+
 import { CoachSelectionRequests } from "@/components/coach-selection/CoachSelectionRequests";
 import { ProspectsSection } from "@/components/coach/ProspectsSection";
 import { FloatingMessageButton } from "@/components/FloatingMessageButton";
-import { LiveActivityFeed } from "@/components/dashboard/LiveActivityFeed";
 import { UpcomingSessionsWidget } from "@/components/dashboard/UpcomingSessionsWidget";
 import { CoachExclusivityEndedAlert } from "@/components/dashboard/CoachExclusivityEndedAlert";
 import { ClientOnboardingManagement } from "@/components/coach/ClientOnboardingManagement";
@@ -559,6 +562,9 @@ const TrainerDashboard = () => {
 
       {/* Floating Message Button */}
       <FloatingMessageButton />
+      
+      {/* Memory Monitor - Only in development */}
+      {process.env.NODE_ENV === 'development' && <MemoryMonitor />}
     </div>
   );
 };

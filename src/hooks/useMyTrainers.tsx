@@ -89,7 +89,7 @@ export function useMyTrainers(refreshTrigger?: number) {
     fetchWaitlistTrainers();
   }, [user, refreshTrigger]);
 
-  // Fetch trainer profiles for engaged trainers only
+  // Optimized trainer data fetching with reduced payload
   useEffect(() => {
     const fetchTrainerData = async () => {
       if (!user || trainerIds.length === 0) {
@@ -99,7 +99,7 @@ export function useMyTrainers(refreshTrigger?: number) {
       }
 
       try {
-        // Single query with proper join syntax for complete discovery call data
+        // Fetch only essential trainer data to reduce memory usage
         const { data: trainerData, error } = await supabase
           .from('profiles')
           .select(`
@@ -109,21 +109,17 @@ export function useMyTrainers(refreshTrigger?: number) {
             location,
             specializations,
             profile_photo_url,
-            bio,
             hourly_rate,
             training_types,
-            coaching_styles,
-            ideal_client_types,
-            qualifications,
-            package_options,
-            discovery_call_settings!inner(
-              offers_discovery_call,
-              discovery_call_availability_schedule,
-              discovery_call_duration,
-              prep_notes
-            )
+            package_options
           `)
           .eq('user_type', 'trainer')
+          .in('id', trainerIds);
+
+        // Fetch discovery call settings separately for trainers that need it
+        const { data: discoveryCallSettings } = await supabase
+          .from('discovery_call_settings')
+          .select('id, offers_discovery_call')
           .in('id', trainerIds);
 
         if (error) {
@@ -134,31 +130,16 @@ export function useMyTrainers(refreshTrigger?: number) {
 
         console.log('🔍 Raw trainer data with discovery settings:', trainerData);
         
-        // Debug log specifically for Lou
-        const louTrainer = trainerData?.find(t => t.first_name === 'TrainerLou');
-        if (louTrainer) {
-          console.log('🐛 Lou data with fixed join:', {
-            id: louTrainer.id,
-            discovery_call_settings: louTrainer.discovery_call_settings,
-            offers_discovery_call: louTrainer.discovery_call_settings?.offers_discovery_call
-          });
-        }
+        console.log('🔍 Trainer data fetched:', trainerData?.length || 0, 'trainers');
+        console.log('🔍 Discovery settings fetched:', discoveryCallSettings?.length || 0, 'settings');
 
         // Transform and combine trainer data with engagement status
         const trainersWithStatus: TrainerWithStatus[] = [];
         
-        // Helper function to create trainer object
+        // Helper function to create optimized trainer object
         const createTrainerObject = (trainerProfile: any): Omit<TrainerWithStatus, 'status' | 'engagement' | 'statusLabel' | 'statusColor'> => {
-          const discoveryCallValue = trainerProfile.discovery_call_settings?.offers_discovery_call || false;
-          
-          // Debug log for Lou specifically
-          if (trainerProfile.first_name === 'TrainerLou') {
-            console.log('🐛 Creating trainer object for Lou:', {
-              id: trainerProfile.id,
-              discovery_call_settings: trainerProfile.discovery_call_settings,
-              extracted_value: discoveryCallValue
-            });
-          }
+          const discoverySettings = discoveryCallSettings?.find(d => d.id === trainerProfile.id);
+          const discoveryCallValue = discoverySettings?.offers_discovery_call || false;
           
           return {
             id: trainerProfile.id,
@@ -173,8 +154,8 @@ export function useMyTrainers(refreshTrigger?: number) {
             hourlyRate: trainerProfile.hourly_rate || 0,
             image: trainerProfile.profile_photo_url || '/src/assets/trainer-alex.jpg', // Fallback image
             profilePhotoUrl: trainerProfile.profile_photo_url,
-            certifications: trainerProfile.qualifications || [],
-            description: trainerProfile.bio || 'Professional fitness trainer',
+            certifications: [], // Remove to reduce memory usage
+            description: '', // Remove to reduce memory usage
             availability: 'Available', // Default availability
             trainingType: trainerProfile.training_types || [],
             offers_discovery_call: discoveryCallValue,
