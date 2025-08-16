@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.12 (cd3cf9e)"
@@ -3268,7 +3268,7 @@ export type Database = {
         Returns: undefined
       }
       calculate_business_due_date: {
-        Args: { start_date: string; business_days: number }
+        Args: { business_days: number; start_date: string }
         Returns: string
       }
       can_send_marketing_message: {
@@ -3276,7 +3276,7 @@ export type Database = {
         Returns: boolean
       }
       client_has_sent_first_message: {
-        Args: { conversation_uuid: string; client_uuid: string }
+        Args: { client_uuid: string; conversation_uuid: string }
         Returns: boolean
       }
       client_has_waitlist_exclusive_access: {
@@ -3289,12 +3289,12 @@ export type Database = {
       }
       create_coach_selection_request: {
         Args: {
-          p_trainer_id: string
+          p_client_message?: string
+          p_package_duration: string
           p_package_id: string
           p_package_name: string
           p_package_price: number
-          p_package_duration: string
-          p_client_message?: string
+          p_trainer_id: string
         }
         Returns: string
       }
@@ -3303,7 +3303,7 @@ export type Database = {
         Returns: Json
       }
       create_template_version: {
-        Args: { p_template_id: string; p_changelog?: string }
+        Args: { p_changelog?: string; p_template_id: string }
         Returns: string
       }
       end_waitlist_exclusive_period: {
@@ -3312,22 +3312,22 @@ export type Database = {
       }
       evaluate_conditional_step: {
         Args: {
-          p_template_id: string
+          p_client_data?: Json
           p_client_id: string
           p_step_id: string
-          p_client_data?: Json
+          p_template_id: string
         }
         Returns: boolean
       }
       fail_webhook_event: {
-        Args: { p_event_id: string; p_error_message: string }
+        Args: { p_error_message: string; p_event_id: string }
         Returns: undefined
       }
       get_content_visibility: {
         Args: {
-          p_trainer_id: string
           p_content_type: Database["public"]["Enums"]["content_type"]
           p_engagement_stage: Database["public"]["Enums"]["engagement_stage"]
+          p_trainer_id: string
         }
         Returns: Database["public"]["Enums"]["visibility_state"]
       }
@@ -3346,15 +3346,15 @@ export type Database = {
       get_user_emails_for_admin: {
         Args: Record<PropertyKey, never>
         Returns: {
-          user_id: string
           email: string
+          user_id: string
         }[]
       }
       get_user_emails_for_development: {
         Args: Record<PropertyKey, never>
         Returns: {
-          user_id: string
           email: string
+          user_id: string
         }[]
       }
       get_user_roles: {
@@ -3369,8 +3369,8 @@ export type Database = {
       }
       has_role: {
         Args: {
-          _user_id: string
           _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
         }
         Returns: boolean
       }
@@ -3385,8 +3385,8 @@ export type Database = {
       initialize_client_onboarding_from_ways_of_working: {
         Args: {
           p_client_id: string
-          p_trainer_id: string
           p_package_id?: string
+          p_trainer_id: string
         }
         Returns: undefined
       }
@@ -3401,35 +3401,35 @@ export type Database = {
       list_users_minimal_admin: {
         Args: Record<PropertyKey, never>
         Returns: {
-          id: string
           email: string
           first_name: string
+          id: string
           last_name: string
-          user_type: string
           roles: string[]
+          user_type: string
         }[]
       }
       log_admin_action: {
         Args: {
-          p_target_user_id: string
-          p_action_type: string
           p_action_details?: Json
+          p_action_type: string
           p_reason?: string
+          p_target_user_id: string
         }
         Returns: undefined
       }
       process_webhook_event: {
         Args: {
+          p_event_type: string
           p_provider_event_id: string
           p_provider_name: string
-          p_event_type: string
-          p_webhook_signature: string
           p_raw_payload: Json
+          p_webhook_signature: string
         }
         Returns: Json
       }
       reactivate_user: {
-        Args: { p_user_id: string; p_reason?: string }
+        Args: { p_reason?: string; p_user_id: string }
         Returns: undefined
       }
       reorder_feedback_questions: {
@@ -3445,7 +3445,7 @@ export type Database = {
         Returns: string
       }
       restrict_communication: {
-        Args: { p_user_id: string; p_reason: string }
+        Args: { p_reason: string; p_user_id: string }
         Returns: undefined
       }
       revert_waitlist_client_conversion: {
@@ -3458,19 +3458,19 @@ export type Database = {
       }
       start_workflow: {
         Args: {
-          p_workflow_type: string
-          p_total_steps?: number
-          p_initial_state?: Json
           p_correlation_id?: string
+          p_initial_state?: Json
+          p_total_steps?: number
+          p_workflow_type: string
         }
         Returns: string
       }
       suspend_user: {
-        Args: { p_user_id: string; p_reason: string; p_duration_days?: number }
+        Args: { p_duration_days?: number; p_reason: string; p_user_id: string }
         Returns: undefined
       }
       update_admin_notes: {
-        Args: { p_user_id: string; p_notes: string }
+        Args: { p_notes: string; p_user_id: string }
         Returns: undefined
       }
       update_all_user_passwords_dev: {
@@ -3484,31 +3484,31 @@ export type Database = {
       update_engagement_stage: {
         Args: {
           client_uuid: string
-          trainer_uuid: string
           new_stage: Database["public"]["Enums"]["engagement_stage"]
+          trainer_uuid: string
         }
         Returns: undefined
       }
       update_template_analytics: {
         Args: {
-          p_template_id: string
-          p_metric_type: string
           p_increment?: number
           p_metric_data?: Json
+          p_metric_type: string
+          p_template_id: string
         }
         Returns: undefined
       }
       update_trainer_verification_status: {
         Args: {
-          p_trainer_id: string
-          p_status: Database["public"]["Enums"]["verification_status_enum"]
           p_admin_notes?: string
           p_rejection_reason?: string
+          p_status: Database["public"]["Enums"]["verification_status_enum"]
+          p_trainer_id: string
         }
         Returns: undefined
       }
       update_user_email_for_admin: {
-        Args: { target_user_id: string; new_email: string }
+        Args: { new_email: string; target_user_id: string }
         Returns: boolean
       }
       update_workflow_progress: {
