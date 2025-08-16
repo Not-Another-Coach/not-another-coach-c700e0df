@@ -5,14 +5,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { 
   Plus, 
   Edit, 
   Trash2, 
-  FileText, 
+  Calendar, 
   Clock, 
   Paperclip, 
   AlertCircle,
@@ -27,13 +26,13 @@ import 'react-quill/dist/quill.snow.css';
 import { toast } from 'sonner';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 
-interface GettingStartedSectionProps {
+interface FirstWeekSectionProps {
   templateId: string;
   tasks: GettingStartedTask[];
   onTasksChange: () => void;
 }
 
-export function GettingStartedSection({ templateId, tasks, onTasksChange }: GettingStartedSectionProps) {
+export function FirstWeekSection({ templateId, tasks, onTasksChange }: FirstWeekSectionProps) {
   const {
     createGettingStartedTask,
     updateGettingStartedTask,
@@ -52,8 +51,8 @@ export function GettingStartedSection({ templateId, tasks, onTasksChange }: Gett
     attachment_types: ['file', 'photo', 'link'],
     max_attachments: 5,
     max_file_size_mb: 10,
-    due_days: undefined,
-    sla_hours: 24,
+    due_days: 7,
+    sla_hours: 48,
     display_order: 0
   });
 
@@ -78,13 +77,13 @@ export function GettingStartedSection({ templateId, tasks, onTasksChange }: Gett
         attachment_types: ['file', 'photo', 'link'],
         max_attachments: 5,
         max_file_size_mb: 10,
-        due_days: undefined,
-        sla_hours: 24,
+        due_days: 7,
+        sla_hours: 48,
         display_order: 0
       });
       setShowCreateDialog(false);
       onTasksChange();
-      toast.success('Task created successfully');
+      toast.success('First Week task created successfully');
     } catch (error) {
       toast.error('Failed to create task');
     }
@@ -141,27 +140,20 @@ export function GettingStartedSection({ templateId, tasks, onTasksChange }: Gett
     }
   };
 
-  const attachmentTypeOptions = [
-    { value: 'file', label: 'Files (PDF, DOC, etc.)' },
-    { value: 'photo', label: 'Photos/Images' },
-    { value: 'link', label: 'Links/URLs' },
-    { value: 'video', label: 'Video files' }
-  ];
-
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Getting Started Tasks
+            <Calendar className="h-5 w-5" />
+            First Week Activities
           </CardTitle>
           <div className="flex gap-2">
             <ActivityImporter
               onImportActivities={async (activities) => {
-                // Only import activities relevant to "Getting Started" (Onboarding category)
+                // Only import activities relevant to "First Week"
                 const relevantActivities = activities.filter(activity => 
-                  activity.category === 'Onboarding'
+                  activity.category === 'First Week'
                 );
                 
                 for (const activity of relevantActivities) {
@@ -182,18 +174,21 @@ export function GettingStartedSection({ templateId, tasks, onTasksChange }: Gett
                   try {
                     await createGettingStartedTask(templateId, newTaskData);
                   } catch (error) {
-                    console.error('Error creating getting started task:', error);
+                    console.error('Error creating first week task:', error);
                   }
                 }
                 
                 if (relevantActivities.length === 0) {
-                  toast.info('No "Onboarding" category activities selected. Only Onboarding activities can be imported to Getting Started section.');
+                  toast.info('No "First Week" category activities selected. Only First Week activities can be imported to this section.');
+                } else {
+                  toast.success(`Imported ${relevantActivities.length} First Week activities`);
+                  onTasksChange();
                 }
               }}
               trigger={
                 <Button variant="outline">
                   <Download className="h-4 w-4 mr-2" />
-                  Import Onboarding Activities
+                  Import First Week Activities
                 </Button>
               }
             />
@@ -201,112 +196,112 @@ export function GettingStartedSection({ templateId, tasks, onTasksChange }: Gett
               <DialogTrigger asChild>
                 <Button>
                   <Plus className="h-4 w-4 mr-2" />
-                  Add Task
+                  Add Activity
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>Create Getting Started Task</DialogTitle>
+                  <DialogTitle>Create First Week Activity</DialogTitle>
                 </DialogHeader>
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>Task Name</Label>
-                    <Input
-                      value={newTask.task_name || ''}
-                      onChange={(e) => setNewTask({ ...newTask, task_name: e.target.value })}
-                      placeholder="e.g., Upload before photos"
-                    />
-                  </div>
-                  <div className="flex items-center space-x-2 pt-6">
-                    <Switch
-                      checked={newTask.is_mandatory}
-                      onCheckedChange={(checked) => setNewTask({ ...newTask, is_mandatory: checked })}
-                    />
-                    <Label>Mandatory</Label>
-                  </div>
-                </div>
-
-                <div>
-                  <Label>Description</Label>
-                  <Textarea
-                    value={newTask.description || ''}
-                    onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
-                    placeholder="Brief description of the task..."
-                  />
-                </div>
-
-                <div>
-                  <Label>Rich Guidance (Optional)</Label>
-                  <div className="mt-1">
-                    <ReactQuill
-                      value={newTask.rich_guidance || ''}
-                      onChange={(value) => setNewTask({ ...newTask, rich_guidance: value })}
-                      placeholder="Detailed guidance with formatting, links, etc..."
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>Due in Days (Optional)</Label>
-                    <Input
-                      type="number"
-                      value={newTask.due_days || ''}
-                      onChange={(e) => setNewTask({ ...newTask, due_days: e.target.value ? parseInt(e.target.value) : undefined })}
-                      placeholder="7"
-                    />
-                  </div>
-                  <div>
-                    <Label>Response SLA (Hours)</Label>
-                    <Input
-                      type="number"
-                      value={newTask.sla_hours || 24}
-                      onChange={(e) => setNewTask({ ...newTask, sla_hours: parseInt(e.target.value) || 24 })}
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      checked={newTask.requires_attachment}
-                      onCheckedChange={(checked) => setNewTask({ ...newTask, requires_attachment: checked })}
-                    />
-                    <Label>Requires Attachments</Label>
-                  </div>
-
-                  {newTask.requires_attachment && (
-                    <div className="grid grid-cols-2 gap-4 ml-6">
-                      <div>
-                        <Label>Max Attachments</Label>
-                        <Input
-                          type="number"
-                          value={newTask.max_attachments || 5}
-                          onChange={(e) => setNewTask({ ...newTask, max_attachments: parseInt(e.target.value) || 5 })}
-                        />
-                      </div>
-                      <div>
-                        <Label>Max File Size (MB)</Label>
-                        <Input
-                          type="number"
-                          value={newTask.max_file_size_mb || 10}
-                          onChange={(e) => setNewTask({ ...newTask, max_file_size_mb: parseInt(e.target.value) || 10 })}
-                        />
-                      </div>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Activity Name</Label>
+                      <Input
+                        value={newTask.task_name || ''}
+                        onChange={(e) => setNewTask({ ...newTask, task_name: e.target.value })}
+                        placeholder="e.g., Initial check-in call"
+                      />
                     </div>
-                  )}
-                </div>
+                    <div className="flex items-center space-x-2 pt-6">
+                      <Switch
+                        checked={newTask.is_mandatory}
+                        onCheckedChange={(checked) => setNewTask({ ...newTask, is_mandatory: checked })}
+                      />
+                      <Label>Mandatory</Label>
+                    </div>
+                  </div>
 
-                <div className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
-                    Cancel
-                  </Button>
-                  <Button onClick={handleCreateTask}>
-                    Create Task
-                  </Button>
+                  <div>
+                    <Label>Description</Label>
+                    <Textarea
+                      value={newTask.description || ''}
+                      onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
+                      placeholder="Brief description of the first week activity..."
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Rich Guidance (Optional)</Label>
+                    <div className="mt-1">
+                      <ReactQuill
+                        value={newTask.rich_guidance || ''}
+                        onChange={(value) => setNewTask({ ...newTask, rich_guidance: value })}
+                        placeholder="Detailed guidance for the first week activity..."
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Due in Days</Label>
+                      <Input
+                        type="number"
+                        value={newTask.due_days || ''}
+                        onChange={(e) => setNewTask({ ...newTask, due_days: e.target.value ? parseInt(e.target.value) : undefined })}
+                        placeholder="7"
+                      />
+                    </div>
+                    <div>
+                      <Label>Response SLA (Hours)</Label>
+                      <Input
+                        type="number"
+                        value={newTask.sla_hours || 48}
+                        onChange={(e) => setNewTask({ ...newTask, sla_hours: parseInt(e.target.value) || 48 })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        checked={newTask.requires_attachment}
+                        onCheckedChange={(checked) => setNewTask({ ...newTask, requires_attachment: checked })}
+                      />
+                      <Label>Requires Attachments</Label>
+                    </div>
+
+                    {newTask.requires_attachment && (
+                      <div className="grid grid-cols-2 gap-4 ml-6">
+                        <div>
+                          <Label>Max Attachments</Label>
+                          <Input
+                            type="number"
+                            value={newTask.max_attachments || 5}
+                            onChange={(e) => setNewTask({ ...newTask, max_attachments: parseInt(e.target.value) || 5 })}
+                          />
+                        </div>
+                        <div>
+                          <Label>Max File Size (MB)</Label>
+                          <Input
+                            type="number"
+                            value={newTask.max_file_size_mb || 10}
+                            onChange={(e) => setNewTask({ ...newTask, max_file_size_mb: parseInt(e.target.value) || 10 })}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={handleCreateTask}>
+                      Create Activity
+                    </Button>
+                  </div>
                 </div>
-              </div>
               </DialogContent>
             </Dialog>
           </div>
@@ -315,15 +310,15 @@ export function GettingStartedSection({ templateId, tasks, onTasksChange }: Gett
       <CardContent>
         {tasks.length === 0 ? (
           <div className="text-center py-8">
-            <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">No getting started tasks yet.</p>
+            <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <p className="text-muted-foreground">No first week activities yet.</p>
             <p className="text-sm text-muted-foreground mt-1">
-              Add tasks that clients need to complete when they start working with you.
+              Add activities that happen during the client's first week.
             </p>
           </div>
         ) : (
           <DragDropContext onDragEnd={handleDragEnd}>
-            <Droppable droppableId="getting-started-tasks">
+            <Droppable droppableId="first-week-tasks">
               {(provided) => (
                 <div
                   {...provided.droppableProps}
@@ -414,13 +409,13 @@ export function GettingStartedSection({ templateId, tasks, onTasksChange }: Gett
         <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
           <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Edit Getting Started Task</DialogTitle>
+              <DialogTitle>Edit First Week Activity</DialogTitle>
             </DialogHeader>
             {editingTask && (
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label>Task Name</Label>
+                    <Label>Activity Name</Label>
                     <Input
                       value={editingTask.task_name || ''}
                       onChange={(e) => setEditingTask({ ...editingTask, task_name: e.target.value })}
@@ -466,8 +461,8 @@ export function GettingStartedSection({ templateId, tasks, onTasksChange }: Gett
                     <Label>Response SLA (Hours)</Label>
                     <Input
                       type="number"
-                      value={editingTask.sla_hours || 24}
-                      onChange={(e) => setEditingTask({ ...editingTask, sla_hours: parseInt(e.target.value) || 24 })}
+                      value={editingTask.sla_hours || 48}
+                      onChange={(e) => setEditingTask({ ...editingTask, sla_hours: parseInt(e.target.value) || 48 })}
                     />
                   </div>
                 </div>
@@ -508,7 +503,7 @@ export function GettingStartedSection({ templateId, tasks, onTasksChange }: Gett
                     Cancel
                   </Button>
                   <Button onClick={handleEditTask}>
-                    Update Task
+                    Update Activity
                   </Button>
                 </div>
               </div>

@@ -33,6 +33,7 @@ import {
 import { OnboardingTemplate } from '@/hooks/useTrainerOnboarding';
 import { useOnboardingSections } from '@/hooks/useOnboardingSections';
 import { GettingStartedSection } from '@/components/onboarding/sections/GettingStartedSection';
+import { FirstWeekSection } from '@/components/onboarding/sections/FirstWeekSection';
 import { OngoingSupportSection } from '@/components/onboarding/sections/OngoingSupportSection';
 import { CommitmentsExpectationsSection } from '@/components/onboarding/sections/CommitmentsExpectationsSection';
 import { TrainerSpecificSection } from '@/components/onboarding/sections/TrainerSpecificSection';
@@ -747,10 +748,14 @@ export function TemplateBuilder({
           </DialogHeader>
           {selectedTemplateForSections && (
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="getting-started" className="flex items-center gap-2">
                   <CheckSquare className="h-4 w-4" />
                   Getting Started
+                </TabsTrigger>
+                <TabsTrigger value="first-week" className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  First Week
                 </TabsTrigger>
                 <TabsTrigger value="ongoing-support" className="flex items-center gap-2">
                   <Users className="h-4 w-4" />
@@ -768,6 +773,14 @@ export function TemplateBuilder({
               
               <TabsContent value="getting-started" className="mt-6">
                 <GettingStartedSection
+                  templateId={selectedTemplateForSections}
+                  tasks={onboardingSections.gettingStartedTasks}
+                  onTasksChange={() => onboardingSections.fetchGettingStartedTasks(selectedTemplateForSections)}
+                />
+              </TabsContent>
+              
+              <TabsContent value="first-week" className="mt-6">
+                <FirstWeekSection
                   templateId={selectedTemplateForSections}
                   tasks={onboardingSections.gettingStartedTasks}
                   onTasksChange={() => onboardingSections.fetchGettingStartedTasks(selectedTemplateForSections)}
