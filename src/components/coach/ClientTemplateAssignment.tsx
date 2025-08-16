@@ -66,7 +66,13 @@ export function ClientTemplateAssignment({ clientId, showHistoryOnly = false }: 
       
       let query = supabase
         .from('client_template_assignments')
-        .select('*')
+        .select(`
+          *,
+          client_profile:profiles!client_id(
+            first_name,
+            last_name
+          )
+        `)
         .eq('trainer_id', user.id)
         .order('assigned_at', { ascending: false });
 
@@ -78,16 +84,11 @@ export function ClientTemplateAssignment({ clientId, showHistoryOnly = false }: 
 
       if (error) throw error;
 
-      // Get client profiles and progress counts for each assignment
+      console.log('Fetched assignments with profiles:', assignmentsData);
+
+      // Get progress counts for each assignment
       const assignmentsWithProgress = await Promise.all(
         (assignmentsData || []).map(async (assignment) => {
-          // Get client profile
-          const { data: profileData } = await supabase
-            .from('profiles')
-            .select('first_name, last_name')
-            .eq('id', assignment.client_id)
-            .single();
-
           // Get progress data
           const { data: progressData } = await supabase
             .from('client_onboarding_progress')
@@ -99,7 +100,6 @@ export function ClientTemplateAssignment({ clientId, showHistoryOnly = false }: 
 
           return {
             ...assignment,
-            client_profile: profileData,
             progress_count: progressCount,
             completed_count: completedCount
           } as TemplateAssignment;
@@ -252,23 +252,29 @@ export function ClientTemplateAssignment({ clientId, showHistoryOnly = false }: 
           <Button
             size="sm"
             onClick={() => {
+              console.log('Assign Template clicked, clientId:', clientId);
               if (clientId) {
                 // Get client profile for assignment dialog
                 const clientProfile = activeAssignment?.client_profile || 
                   assignments[0]?.client_profile;
                 
-                if (clientProfile) {
+                console.log('Client profile found:', clientProfile);
+                
+                if (clientProfile?.first_name && clientProfile?.last_name) {
                   setClientForAssignment({
                     id: clientId,
-                    first_name: clientProfile.first_name || '',
-                    last_name: clientProfile.last_name || ''
+                    first_name: clientProfile.first_name,
+                    last_name: clientProfile.last_name
                   });
                   setShowAssignDialog(true);
+                  console.log('Opening assignment dialog for:', clientProfile);
                 } else {
                   // Fallback - fetch client profile
+                  console.log('Fetching client profile for:', clientId);
                   fetchClientProfile(clientId);
                 }
               } else {
+                console.log('No clientId, redirecting to template management');
                 window.location.href = '/trainer/dashboard?tab=template-management&section=assign';
               }
             }}
@@ -333,6 +339,7 @@ export function ClientTemplateAssignment({ clientId, showHistoryOnly = false }: 
 
   const fetchClientProfile = async (clientId: string) => {
     try {
+      console.log('Fetching profile for client:', clientId);
       const { data: profileData, error } = await supabase
         .from('profiles')
         .select('first_name, last_name')
@@ -341,6 +348,8 @@ export function ClientTemplateAssignment({ clientId, showHistoryOnly = false }: 
 
       if (error) throw error;
 
+      console.log('Fetched client profile:', profileData);
+
       if (profileData) {
         setClientForAssignment({
           id: clientId,
@@ -348,6 +357,7 @@ export function ClientTemplateAssignment({ clientId, showHistoryOnly = false }: 
           last_name: profileData.last_name || ''
         });
         setShowAssignDialog(true);
+        console.log('Setting up assignment dialog for client:', profileData);
       }
     } catch (error) {
       console.error('Error fetching client profile:', error);
