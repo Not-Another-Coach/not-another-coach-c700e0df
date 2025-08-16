@@ -66,20 +66,49 @@ export function TemplateAssignmentDialog({
     const template = templates.find(t => t.id === templateId);
     if (!template) return;
 
+    // Fetch trainer's activities to create multiple steps
+    const { data: activities, error: activitiesError } = await supabase
+      .from('trainer_onboarding_activities')
+      .select('*')
+      .eq('trainer_id', user?.id)
+      .eq('is_active', true)
+      .order('category', { ascending: true })
+      .order('display_order', { ascending: true });
+
+    if (activitiesError) {
+      console.error('Error fetching activities:', activitiesError);
+      toast.error('Failed to load activities');
+      return;
+    }
+
+    // Create steps from activities, grouped by category
+    const steps: TemplateStep[] = activities?.map((activity, index) => ({
+      step_name: activity.activity_name,
+      description: activity.description || '',
+      instructions: activity.instructions || '',
+      step_type: 'mandatory', // Default to mandatory since is_mandatory doesn't exist
+      completion_method: (activity.completion_method === 'client' || activity.completion_method === 'trainer') 
+        ? activity.completion_method as 'client' | 'trainer' 
+        : 'client',
+      requires_file_upload: activity.requires_file_upload || false,
+      display_order: index + 1
+    })) || [
+      // Fallback single step if no activities found
+      {
+        step_name: template.step_name,
+        description: template.description || '',
+        instructions: template.instructions || '',
+        step_type: template.step_type,
+        completion_method: template.completion_method === 'auto' ? 'client' : template.completion_method,
+        requires_file_upload: template.requires_file_upload || false,
+        display_order: 1
+      }
+    ];
+
     const customized: CustomizedTemplate = {
       name: `${template.step_name} (Customized)`,
       baseTemplateId: templateId,
-      steps: [
-        {
-          step_name: template.step_name,
-          description: template.description || '',
-          instructions: template.instructions || '',
-          step_type: template.step_type,
-          completion_method: template.completion_method === 'auto' ? 'client' : template.completion_method,
-          requires_file_upload: template.requires_file_upload || false,
-          display_order: 1
-        }
-      ]
+      steps
     };
 
     setCustomizedTemplate(customized);
