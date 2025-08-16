@@ -11,6 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Search, Plus, Edit2, Users, User, Copy } from 'lucide-react';
 import { useTemplateBuilder } from '@/hooks/useTemplateBuilder';
 import { useAuth } from '@/hooks/useAuth';
+import { useTemplateAssignments } from '@/hooks/useTemplateAssignments';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -42,6 +43,7 @@ interface CustomizedTemplate {
 export function ManualTemplateAssignment() {
   const { user } = useAuth();
   const { templates, loading: templatesLoading } = useTemplateBuilder();
+  const { hasActiveAssignment, getActiveAssignmentForClient } = useTemplateAssignments();
   const [activeClients, setActiveClients] = useState<ActiveClient[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -147,8 +149,33 @@ export function ManualTemplateAssignment() {
   const handleAssignTemplate = async () => {
     if (!selectedClient || !customizedTemplate || !user) return;
 
+    // Check if client already has an active assignment
+    if (hasActiveAssignment(selectedClient.id)) {
+      const existingAssignment = getActiveAssignmentForClient(selectedClient.id);
+      toast.error(`Client already has an active template assignment: ${existingAssignment?.template_name}. Please expire or remove it first.`);
+      return;
+    }
+
     try {
       setLoading(true);
+
+      const correlationId = crypto.randomUUID();
+
+      // First create template assignment record
+      const { data: assignmentData, error: assignmentError } = await supabase
+        .from('client_template_assignments')
+        .insert({
+          client_id: selectedClient.id,
+          trainer_id: user.id,
+          template_name: customizedTemplate.name,
+          template_base_id: customizedTemplate.baseTemplateId,
+          assignment_notes: `Manually assigned template with ${customizedTemplate.steps.length} steps`,
+          correlation_id: correlationId
+        })
+        .select()
+        .single();
+
+      if (assignmentError) throw assignmentError;
 
       // Create onboarding progress records for each step
       const steps = customizedTemplate.steps.map((step, index) => ({
@@ -161,7 +188,9 @@ export function ManualTemplateAssignment() {
         completion_method: step.completion_method,
         requires_file_upload: step.requires_file_upload,
         display_order: index + 1,
-        status: 'pending'
+        status: 'pending',
+        assignment_id: assignmentData.id,
+        correlation_id: correlationId
       }));
 
       const { error: stepsError } = await supabase
@@ -183,7 +212,8 @@ export function ManualTemplateAssignment() {
             client_id: selectedClient.id,
             trainer_id: user.id,
             template_name: customizedTemplate.name,
-            steps_count: customizedTemplate.steps.length
+            steps_count: customizedTemplate.steps.length,
+            assignment_id: assignmentData.id
           }
         });
 
@@ -297,24 +327,41 @@ export function ManualTemplateAssignment() {
             </div>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredClients.map((client) => (
-                <Card 
-                  key={client.id} 
-                  className={`cursor-pointer transition-colors ${selectedClient?.id === client.id ? 'ring-2 ring-primary' : 'hover:bg-muted/50'}`}
-                  onClick={() => setSelectedClient(client)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-3">
-                      <User className="h-8 w-8 text-muted-foreground" />
-                      <div>
-                        <p className="font-medium">{client.first_name} {client.last_name}</p>
-                        <p className="text-sm text-muted-foreground">ID: {client.id.slice(0, 8)}...</p>
-                        <Badge variant="secondary" className="text-xs">{client.client_status}</Badge>
+              {filteredClients.map((client) => {
+                const hasActive = hasActiveAssignment(client.id);
+                const activeAssignment = getActiveAssignmentForClient(client.id);
+                
+                return (
+                  <Card 
+                    key={client.id} 
+                    className={`cursor-pointer transition-colors ${selectedClient?.id === client.id ? 'ring-2 ring-primary' : 'hover:bg-muted/50'} ${hasActive ? 'border-orange-200 bg-orange-50/50' : ''}`}
+                    onClick={() => setSelectedClient(client)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-3">
+                        <User className="h-8 w-8 text-muted-foreground" />
+                        <div className="flex-1">
+                          <p className="font-medium">{client.first_name} {client.last_name}</p>
+                          <p className="text-sm text-muted-foreground">ID: {client.id.slice(0, 8)}...</p>
+                          <div className="flex gap-2 mt-1">
+                            <Badge variant="secondary" className="text-xs">{client.client_status}</Badge>
+                            {hasActive && (
+                              <Badge variant="outline" className="text-xs text-orange-600 border-orange-300">
+                                Has Active Template
+                              </Badge>
+                            )}
+                          </div>
+                          {hasActive && activeAssignment && (
+                            <p className="text-xs text-orange-600 mt-1">
+                              Active: {activeAssignment.template_name}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           )}
         </div>

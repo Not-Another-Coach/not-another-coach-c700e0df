@@ -8,6 +8,7 @@ import { format } from 'date-fns';
 import { Users, MessageCircle, Calendar, UserCheck } from 'lucide-react';
 import { DiscoveryCallNotesTaker } from '@/components/DiscoveryCallNotesTaker';
 import { MessagingPopup } from '@/components/MessagingPopup';
+import { ClientTemplateAssignment } from '@/components/coach/ClientTemplateAssignment';
 
 interface ActiveClient {
   id: string;
@@ -200,6 +201,11 @@ export function ActiveClientsSection({ onCountChange }: ActiveClientsSectionProp
                     <Users className="w-3 h-3 mr-1" />
                     View Profile
                   </Button>
+                </div>
+                
+                {/* Template Assignment Section */}
+                <div className="mt-4">
+                  <ClientTemplateAssignment clientId={client.client_id} />
                 </div>
                 
                 {/* Discovery Call Notes */}

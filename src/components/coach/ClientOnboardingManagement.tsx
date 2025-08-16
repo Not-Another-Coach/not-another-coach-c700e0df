@@ -23,6 +23,7 @@ import { TemplateBuilder } from '@/components/onboarding/TemplateBuilder';
 import { useTemplateBuilder } from '@/hooks/useTemplateBuilder';
 import { WaysOfWorkingOverview } from '@/components/onboarding/WaysOfWorkingOverview';
 import { ManualTemplateAssignment } from '@/components/coach/ManualTemplateAssignment';
+import { ClientTemplateAssignment } from '@/components/coach/ClientTemplateAssignment';
 
 export function ClientOnboardingManagement() {
   const { 
@@ -215,6 +216,7 @@ export function ClientOnboardingManagement() {
         <Tabs defaultValue="assign" className="space-y-4">
           <TabsList>
             <TabsTrigger value="assign">Assign Templates</TabsTrigger>
+            <TabsTrigger value="assignments">Assignments</TabsTrigger>
             <TabsTrigger value="activities">Activities</TabsTrigger>
             <TabsTrigger value="templates">Templates</TabsTrigger>
             <TabsTrigger value="workflows">Ways of Working</TabsTrigger>
@@ -222,6 +224,10 @@ export function ClientOnboardingManagement() {
 
           <TabsContent value="assign" className="space-y-4">
             <ManualTemplateAssignment />
+          </TabsContent>
+
+          <TabsContent value="assignments" className="space-y-4">
+            <ClientTemplateAssignment />
           </TabsContent>
 
           <TabsContent value="activities" className="space-y-4">
