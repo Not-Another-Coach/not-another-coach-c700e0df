@@ -75,7 +75,7 @@ export function useTrainerOnboarding() {
         .eq('client_id', clientId)
         .eq('trainer_id', user.id)
         .eq('status', 'completed')
-        .single();
+        .maybeSingle();
 
       if (selectionError || !selectionRequest) {
         console.error('Could not find coach selection request:', selectionError);
@@ -88,7 +88,7 @@ export function useTrainerOnboarding() {
         .select('*')
         .eq('trainer_id', user.id)
         .eq('package_id', selectionRequest.package_id)
-        .single();
+        .maybeSingle();
 
       if (workflowError || !packageWorkflow) {
         console.error('Could not find package workflow:', workflowError);
