@@ -214,6 +214,7 @@ export type Database = {
         Row: {
           activity_id: string | null
           allowed_attachments: Json | null
+          assignment_id: string | null
           attachments: Json | null
           client_id: string
           completed_at: string | null
@@ -248,6 +249,7 @@ export type Database = {
         Insert: {
           activity_id?: string | null
           allowed_attachments?: Json | null
+          assignment_id?: string | null
           attachments?: Json | null
           client_id: string
           completed_at?: string | null
@@ -282,6 +284,7 @@ export type Database = {
         Update: {
           activity_id?: string | null
           allowed_attachments?: Json | null
+          assignment_id?: string | null
           attachments?: Json | null
           client_id?: string
           completed_at?: string | null
@@ -319,6 +322,13 @@ export type Database = {
             columns: ["activity_id"]
             isOneToOne: false
             referencedRelation: "trainer_onboarding_activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_onboarding_progress_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "client_template_assignments"
             referencedColumns: ["id"]
           },
           {
@@ -388,6 +398,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      client_template_assignments: {
+        Row: {
+          assigned_at: string
+          assignment_notes: string | null
+          client_id: string
+          correlation_id: string
+          created_at: string
+          expired_at: string | null
+          expiry_reason: string | null
+          id: string
+          removal_reason: string | null
+          removed_at: string | null
+          removed_by: string | null
+          status: string
+          template_base_id: string | null
+          template_name: string
+          trainer_id: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_at?: string
+          assignment_notes?: string | null
+          client_id: string
+          correlation_id?: string
+          created_at?: string
+          expired_at?: string | null
+          expiry_reason?: string | null
+          id?: string
+          removal_reason?: string | null
+          removed_at?: string | null
+          removed_by?: string | null
+          status?: string
+          template_base_id?: string | null
+          template_name: string
+          trainer_id: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_at?: string
+          assignment_notes?: string | null
+          client_id?: string
+          correlation_id?: string
+          created_at?: string
+          expired_at?: string | null
+          expiry_reason?: string | null
+          id?: string
+          removal_reason?: string | null
+          removed_at?: string | null
+          removed_by?: string | null
+          status?: string
+          template_base_id?: string | null
+          template_name?: string
+          trainer_id?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       client_trainer_engagement: {
         Row: {
