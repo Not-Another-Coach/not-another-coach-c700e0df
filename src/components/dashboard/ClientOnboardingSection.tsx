@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { CheckCircle, Clock, AlertCircle, Upload, FileText, ChevronDown, ChevronUp, Bell } from 'lucide-react';
+import { CheckCircle, Clock, AlertCircle, Upload, FileText, ChevronDown, ChevronUp, Bell, User, UserCheck } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -29,7 +29,7 @@ export function ClientOnboardingSection() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Your Onboarding Journey</CardTitle>
+          <CardTitle>Your Training Activities</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="animate-pulse space-y-4">
@@ -50,11 +50,11 @@ export function ClientOnboardingSection() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Your Onboarding Journey</CardTitle>
+          <CardTitle>Your Training Activities</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">
-            No active onboarding journey found. Complete your coach selection to begin your personalized onboarding.
+            No training activities assigned yet. Your trainer will assign activities for you to complete once you begin working together.
           </p>
         </CardContent>
       </Card>
@@ -159,18 +159,24 @@ export function ClientOnboardingSection() {
 
       <Card>
         <CardHeader>
-          <div className="space-y-2">
-            <CardTitle>Your onboarding journey with {onboardingData.trainerName}</CardTitle>
-            {onboardingData.templateName && (
-              <p className="text-sm text-muted-foreground">
-                Active Template: <span className="font-medium">{onboardingData.templateName}</span>
-              </p>
-            )}
-          </div>
-          <div className="space-y-2">
+          <div className="space-y-3">
+            <CardTitle>Your Training Activities</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Complete these activities assigned by {onboardingData.trainerName}
+            </p>
+            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <User className="h-3 w-3 text-blue-500" />
+                <span>You complete</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <UserCheck className="h-3 w-3 text-purple-500" />
+                <span>Trainer completes</span>
+              </div>
+            </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">
-                You've completed {onboardingData.completedCount} of {onboardingData.totalCount} onboarding steps
+                Progress: {onboardingData.completedCount} of {onboardingData.totalCount} activities completed
               </span>
               <Badge variant="secondary">{onboardingData.percentageComplete}% Complete</Badge>
             </div>
@@ -189,23 +195,34 @@ export function ClientOnboardingSection() {
               <div className="flex items-start gap-3">
                 {getStepIcon(step)}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-medium">{step.step_name}</h4>
-                    <div className="flex items-center gap-2">
-                      <Badge variant={step.step_type === 'mandatory' ? 'default' : 'secondary'}>
-                        {getStepStatusText(step)}
-                      </Badge>
-                      {(step.description || step.instructions || step.requires_file_upload) && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => toggleStepExpansion(step.id)}
-                        >
-                          {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                        </Button>
-                      )}
-                    </div>
-                  </div>
+                   <div className="flex items-center justify-between">
+                     <div className="flex items-center gap-2">
+                       <h4 className="font-medium">{step.step_name}</h4>
+                       {step.completion_method === 'client' ? (
+                         <div className="flex items-center" title="You complete this activity">
+                           <User className="h-4 w-4 text-blue-500" />
+                         </div>
+                       ) : (
+                         <div className="flex items-center" title="Your trainer completes this activity">
+                           <UserCheck className="h-4 w-4 text-purple-500" />
+                         </div>
+                       )}
+                     </div>
+                     <div className="flex items-center gap-2">
+                       <Badge variant={step.step_type === 'mandatory' ? 'default' : 'secondary'}>
+                         {getStepStatusText(step)}
+                       </Badge>
+                       {(step.description || step.instructions || step.requires_file_upload) && (
+                         <Button
+                           variant="ghost"
+                           size="sm"
+                           onClick={() => toggleStepExpansion(step.id)}
+                         >
+                           {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                         </Button>
+                       )}
+                     </div>
+                   </div>
                   
                   {step.description && (
                     <p className="text-sm text-muted-foreground mt-1">{step.description}</p>
@@ -308,7 +325,7 @@ export function ClientOnboardingSection() {
         
         {onboardingData.steps.length === 0 && (
           <p className="text-center text-muted-foreground py-8">
-            Your trainer hasn't set up any onboarding steps yet.
+            No training activities assigned yet.
           </p>
         )}
         </CardContent>
