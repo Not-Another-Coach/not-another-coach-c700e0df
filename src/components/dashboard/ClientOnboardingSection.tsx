@@ -20,7 +20,9 @@ export function ClientOnboardingSection() {
 
   // Check for template assignment notifications
   const templateAssignmentAlerts = alerts.filter(alert => 
-    alert.alert_type === 'template_assigned' && alert.is_active
+    alert.alert_type === 'coach_update' && 
+    alert.is_active && 
+    alert.content?.includes('template')
   );
 
   if (loading) {
@@ -157,7 +159,14 @@ export function ClientOnboardingSection() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Your onboarding journey with {onboardingData.trainerName}</CardTitle>
+          <div className="space-y-2">
+            <CardTitle>Your onboarding journey with {onboardingData.trainerName}</CardTitle>
+            {onboardingData.templateName && (
+              <p className="text-sm text-muted-foreground">
+                Active Template: <span className="font-medium">{onboardingData.templateName}</span>
+              </p>
+            )}
+          </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">

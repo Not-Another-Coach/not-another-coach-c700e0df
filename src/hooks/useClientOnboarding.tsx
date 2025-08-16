@@ -17,11 +17,16 @@ export interface OnboardingStep {
   completion_notes?: string;
   uploaded_file_url?: string;
   trainer_notes?: string;
+  client_template_assignments?: {
+    status: string;
+    template_name: string;
+  };
 }
 
 export interface OnboardingProgress {
   trainerId: string;
   trainerName: string;
+  templateName?: string;
   steps: OnboardingStep[];
   completedCount: number;
   totalCount: number;
@@ -78,12 +83,19 @@ export function useClientOnboarding() {
 
       if (trainerError) throw trainerError;
 
-      // Get onboarding progress
+      // Get onboarding progress - only from active template assignments
       const { data: steps, error: stepsError } = await supabase
         .from('client_onboarding_progress')
-        .select('*')
+        .select(`
+          *,
+          client_template_assignments!inner (
+            status,
+            template_name
+          )
+        `)
         .eq('client_id', user.id)
         .eq('trainer_id', engagement.trainer_id)
+        .eq('client_template_assignments.status', 'active')
         .order('display_order');
 
       console.log('🔍 ClientOnboarding: Steps data:', { steps, stepsError, count: steps?.length });
@@ -93,10 +105,12 @@ export function useClientOnboarding() {
       const completedCount = steps?.filter(step => step.status === 'completed').length || 0;
       const totalCount = steps?.length || 0;
       const percentageComplete = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+      const templateName = steps?.[0]?.client_template_assignments?.template_name;
 
       setOnboardingData({
         trainerId: engagement.trainer_id,
         trainerName: `${trainerProfile.first_name} ${trainerProfile.last_name}`,
+        templateName,
         steps: (steps || []).map(step => ({
           ...step,
           step_type: step.step_type as 'mandatory' | 'optional',
