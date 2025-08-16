@@ -64,6 +64,7 @@ export function ActiveClientsSection({ onCountChange }: ActiveClientsSectionProp
         console.error('Error fetching engagement data:', engagementError);
         setActiveClients([]);
         onCountChange?.(0);
+        setLoading(false);
         return;
       }
 

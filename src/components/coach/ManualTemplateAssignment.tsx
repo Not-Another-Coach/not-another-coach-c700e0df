@@ -111,6 +111,8 @@ export function ManualTemplateAssignment() {
 
   const publishedTemplates = templates.filter(t => t.status === 'published' && t.is_active);
 
+  console.log('Templates loaded:', templates.length, 'Published:', publishedTemplates.length);
+
   const handleCustomizeTemplate = async (templateId: string) => {
     const template = templates.find(t => t.id === templateId);
     if (!template) return;
@@ -326,8 +328,13 @@ export function ManualTemplateAssignment() {
               <p className="text-sm text-muted-foreground mb-2">
                 Choose a published template for {selectedClient.first_name} {selectedClient.last_name}
               </p>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {publishedTemplates.map((template) => (
+              {publishedTemplates.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No published templates available. Create and publish templates first.
+                </div>
+              ) : (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {publishedTemplates.map((template) => (
                   <Card 
                     key={template.id}
                     className={`cursor-pointer transition-colors ${selectedTemplate === template.id ? 'ring-2 ring-primary' : 'hover:bg-muted/50'}`}
@@ -347,9 +354,10 @@ export function ManualTemplateAssignment() {
                         </div>
                       </div>
                     </CardContent>
-                  </Card>
-                ))}
-              </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </div>
 
             {selectedTemplate && (

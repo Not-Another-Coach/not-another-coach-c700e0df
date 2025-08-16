@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertTriangle, Activity } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { AlertTriangle, Activity, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface MemoryStats {
   usedJSMemory: number;
@@ -14,6 +15,7 @@ interface MemoryStats {
 export function MemoryMonitor() {
   const [memoryStats, setMemoryStats] = useState<MemoryStats | null>(null);
   const [showWarning, setShowWarning] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
 
   useEffect(() => {
     const updateMemoryStats = () => {
@@ -64,6 +66,29 @@ export function MemoryMonitor() {
   const memoryUsagePercent = memoryStats.jsMemoryLimit > 0 ? 
     (memoryStats.usedJSMemory / memoryStats.jsMemoryLimit) * 100 : 0;
 
+  if (isMinimized) {
+    return (
+      <div className="fixed bottom-4 right-4 z-50">
+        <Card className="bg-background/95 backdrop-blur border-2">
+          <CardContent className="p-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsMinimized(false)}
+              className="flex items-center gap-2"
+            >
+              <Activity className="h-4 w-4" />
+              <span className="text-xs font-mono">
+                {memoryStats.usedJSMemory}MB ({memoryUsagePercent.toFixed(1)}%)
+              </span>
+              <ChevronUp className="h-3 w-3" />
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed bottom-4 right-4 z-50 space-y-2">
       {showWarning && (
@@ -77,13 +102,23 @@ export function MemoryMonitor() {
       
       <Card className="w-80 bg-background/95 backdrop-blur border-2">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm flex items-center gap-2">
-            <Activity className="h-4 w-4" />
-            Memory Monitor
-            {!memoryStats.supportedMemoryAPI && (
-              <span className="text-xs text-muted-foreground">(Estimated)</span>
-            )}
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Activity className="h-4 w-4" />
+              Memory Monitor
+              {!memoryStats.supportedMemoryAPI && (
+                <span className="text-xs text-muted-foreground">(Estimated)</span>
+              )}
+            </CardTitle>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsMinimized(true)}
+              className="h-6 w-6 p-0"
+            >
+              <ChevronDown className="h-3 w-3" />
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="text-xs space-y-2">
           <div className="flex justify-between">
