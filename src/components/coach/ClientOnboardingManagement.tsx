@@ -22,6 +22,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { TemplateBuilder } from '@/components/onboarding/TemplateBuilder';
 import { useTemplateBuilder } from '@/hooks/useTemplateBuilder';
 import { WaysOfWorkingOverview } from '@/components/onboarding/WaysOfWorkingOverview';
+import { ManualTemplateAssignment } from '@/components/coach/ManualTemplateAssignment';
 
 export function ClientOnboardingManagement() {
   const { 
@@ -211,12 +212,17 @@ export function ClientOnboardingManagement() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="templates" className="space-y-4">
+        <Tabs defaultValue="assign" className="space-y-4">
           <TabsList>
+            <TabsTrigger value="assign">Assign Templates</TabsTrigger>
             <TabsTrigger value="activities">Activities</TabsTrigger>
             <TabsTrigger value="templates">Templates</TabsTrigger>
             <TabsTrigger value="workflows">Ways of Working</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="assign" className="space-y-4">
+            <ManualTemplateAssignment />
+          </TabsContent>
 
           <TabsContent value="activities" className="space-y-4">
             <div className="flex items-center justify-between">
