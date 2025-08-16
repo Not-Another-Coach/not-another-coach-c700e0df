@@ -21,7 +21,6 @@ import { FloatingMessageButton } from "@/components/FloatingMessageButton";
 import { UpcomingSessionsWidget } from "@/components/dashboard/UpcomingSessionsWidget";
 import { CoachExclusivityEndedAlert } from "@/components/dashboard/CoachExclusivityEndedAlert";
 import { ClientOnboardingManagement } from "@/components/coach/ClientOnboardingManagement";
-import { ClientOnboardingTracker } from "@/components/coach/ClientOnboardingTracker";
 import { OnboardingSummaryWidget } from "@/components/dashboard/OnboardingSummaryWidget";
 
 import { Button } from "@/components/ui/button";
@@ -280,29 +279,15 @@ const TrainerDashboard = () => {
               Active Clients ({activeClientsCount})
             </Button>
             
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant={activeView === 'onboarding' || activeView === 'onboarding-tracker' ? 'default' : 'ghost'}
-                  size="sm"
-                  className="flex items-center gap-2"
-                >
-                  <CheckCircle className="w-4 h-4" />
-                  Client Onboarding
-                  <ChevronDown className="w-3 h-3" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start">
-                <DropdownMenuItem onClick={() => setActiveView('onboarding-tracker')}>
-                  <TrendingUp className="w-4 h-4 mr-2" />
-                  Onboarding Tracker
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setActiveView('onboarding')}>
-                  <Settings className="w-4 h-4 mr-2" />
-                  Onboarding Management
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Button
+              variant={activeView === 'templates' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setActiveView('templates')}
+              className="flex items-center gap-2"
+            >
+              <CheckCircle className="w-4 h-4" />
+              Template Management
+            </Button>
             
             <Button
               variant={activeView === 'goals' ? 'default' : 'ghost'}
@@ -527,15 +512,15 @@ const TrainerDashboard = () => {
         )}
         
         {activeView === 'clients' && (
-          <ActiveClientsSection onCountChange={setActiveClientsCount} />
+          <Suspense fallback={<div className="text-center p-8">Loading active clients...</div>}>
+            <ActiveClientsSection onCountChange={setActiveClientsCount} />
+          </Suspense>
         )}
-        
-        {activeView === 'onboarding' && (
-          <ClientOnboardingManagement />
-        )}
-        
-        {activeView === 'onboarding-tracker' && (
-          <ClientOnboardingTracker />
+
+        {activeView === 'templates' && (
+          <Suspense fallback={<div className="text-center p-8">Loading template management...</div>}>
+            <ClientOnboardingManagement />
+          </Suspense>
         )}
         
         {activeView === 'goals' && (

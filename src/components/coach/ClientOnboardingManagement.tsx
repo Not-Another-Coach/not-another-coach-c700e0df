@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { CheckCircle, Clock, AlertCircle, Plus, Edit, Trash2, Users, User } from 'lucide-react';
+import { CheckCircle, Clock, AlertCircle, Plus, Edit, Trash2, Users, User, Settings } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -24,8 +24,11 @@ import { useTemplateBuilder } from '@/hooks/useTemplateBuilder';
 import { WaysOfWorkingOverview } from '@/components/onboarding/WaysOfWorkingOverview';
 import { ManualTemplateAssignment } from '@/components/coach/ManualTemplateAssignment';
 import { ClientTemplateAssignment } from '@/components/coach/ClientTemplateAssignment';
+import { ActiveClientsSection } from '@/components/coach/ActiveClientsSection';
+import { ClientOnboardingTracker } from '@/components/coach/ClientOnboardingTracker';
 
 export function ClientOnboardingManagement() {
+  const [activeClientsCount, setActiveClientsCount] = useState(0);
   const { 
     templates, 
     loading, 
@@ -208,26 +211,41 @@ export function ClientOnboardingManagement() {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Users className="h-5 w-5" />
+          <Settings className="h-5 w-5" />
           Template Management
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="assign" className="space-y-4">
+        <Tabs defaultValue="clients" className="space-y-4">
           <TabsList>
+            <TabsTrigger value="clients">Active Clients ({activeClientsCount})</TabsTrigger>
             <TabsTrigger value="assign">Assign Templates</TabsTrigger>
-            <TabsTrigger value="assignments">Assignments</TabsTrigger>
             <TabsTrigger value="activities">Activities</TabsTrigger>
             <TabsTrigger value="templates">Templates</TabsTrigger>
             <TabsTrigger value="workflows">Ways of Working</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="assign" className="space-y-4">
-            <ManualTemplateAssignment />
+          <TabsContent value="clients" className="space-y-4">
+            <div className="space-y-6">
+              <ActiveClientsSection onCountChange={setActiveClientsCount} />
+              <div className="border-t pt-6">
+                <h3 className="text-lg font-medium mb-4">Onboarding Tracker</h3>
+                <ClientOnboardingTracker />
+              </div>
+            </div>
           </TabsContent>
 
-          <TabsContent value="assignments" className="space-y-4">
-            <ClientTemplateAssignment />
+          <TabsContent value="assign" className="space-y-4">
+            <div>
+              <h3 className="text-lg font-medium mb-4">Template Assignment</h3>
+              <div className="space-y-6">
+                <ManualTemplateAssignment />
+                <div className="border-t pt-6">
+                  <h4 className="font-medium mb-4">Current Assignments</h4>
+                  <ClientTemplateAssignment />
+                </div>
+              </div>
+            </div>
           </TabsContent>
 
           <TabsContent value="activities" className="space-y-4">
