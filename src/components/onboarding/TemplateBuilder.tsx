@@ -31,7 +31,7 @@ import {
   ArchiveX
 } from 'lucide-react';
 import { OnboardingTemplate } from '@/hooks/useTrainerOnboarding';
-import { useOnboardingSections } from '@/hooks/useOnboardingSections';
+import { GettingStartedTask, FirstWeekTask, useOnboardingSections } from '@/hooks/useOnboardingSections';
 import { GettingStartedSection } from '@/components/onboarding/sections/GettingStartedSection';
 import { FirstWeekSection } from '@/components/onboarding/sections/FirstWeekSection';
 import { OngoingSupportSection } from '@/components/onboarding/sections/OngoingSupportSection';
@@ -782,8 +782,8 @@ export function TemplateBuilder({
               <TabsContent value="first-week" className="mt-6">
                 <FirstWeekSection
                   templateId={selectedTemplateForSections}
-                  tasks={onboardingSections.gettingStartedTasks}
-                  onTasksChange={() => onboardingSections.fetchGettingStartedTasks(selectedTemplateForSections)}
+                  tasks={onboardingSections.firstWeekTasks}
+                  onTasksChange={() => onboardingSections.fetchFirstWeekTasks(selectedTemplateForSections)}
                 />
               </TabsContent>
               

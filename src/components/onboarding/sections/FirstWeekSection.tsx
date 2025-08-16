@@ -20,7 +20,7 @@ import {
   Download
 } from 'lucide-react';
 import { ActivityImporter } from '../ActivityImporter';
-import { GettingStartedTask, useOnboardingSections } from '@/hooks/useOnboardingSections';
+import { FirstWeekTask, useOnboardingSections } from '@/hooks/useOnboardingSections';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { toast } from 'sonner';
@@ -28,21 +28,21 @@ import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautif
 
 interface FirstWeekSectionProps {
   templateId: string;
-  tasks: GettingStartedTask[];
+  tasks: FirstWeekTask[];
   onTasksChange: () => void;
 }
 
 export function FirstWeekSection({ templateId, tasks, onTasksChange }: FirstWeekSectionProps) {
   const {
-    createGettingStartedTask,
-    updateGettingStartedTask,
-    deleteGettingStartedTask
+    createFirstWeekTask,
+    updateFirstWeekTask,
+    deleteFirstWeekTask
   } = useOnboardingSections();
 
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const [editingTask, setEditingTask] = useState<GettingStartedTask | null>(null);
-  const [newTask, setNewTask] = useState<Partial<GettingStartedTask>>({
+  const [editingTask, setEditingTask] = useState<FirstWeekTask | null>(null);
+  const [newTask, setNewTask] = useState<Partial<FirstWeekTask>>({
     task_name: '',
     description: '',
     rich_guidance: '',
@@ -63,10 +63,10 @@ export function FirstWeekSection({ templateId, tasks, onTasksChange }: FirstWeek
     }
 
     try {
-      await createGettingStartedTask(templateId, {
+      await createFirstWeekTask(templateId, {
         ...newTask,
         display_order: tasks.length
-      } as Omit<GettingStartedTask, 'id' | 'template_id'>);
+      } as Omit<FirstWeekTask, 'id' | 'template_id'>);
       
       setNewTask({
         task_name: '',
@@ -96,7 +96,7 @@ export function FirstWeekSection({ templateId, tasks, onTasksChange }: FirstWeek
     }
 
     try {
-      await updateGettingStartedTask(editingTask.id, editingTask);
+      await updateFirstWeekTask(editingTask.id, editingTask);
       setShowEditDialog(false);
       setEditingTask(null);
       onTasksChange();
@@ -108,7 +108,7 @@ export function FirstWeekSection({ templateId, tasks, onTasksChange }: FirstWeek
 
   const handleDeleteTask = async (taskId: string) => {
     try {
-      await deleteGettingStartedTask(taskId);
+      await deleteFirstWeekTask(taskId);
       onTasksChange();
       toast.success('Task deleted successfully');
     } catch (error) {
@@ -131,7 +131,7 @@ export function FirstWeekSection({ templateId, tasks, onTasksChange }: FirstWeek
 
     try {
       await Promise.all(
-        updates.map(item => updateGettingStartedTask(item.id, { display_order: item.display_order }))
+        updates.map(item => updateFirstWeekTask(item.id, { display_order: item.display_order }))
       );
       onTasksChange();
       toast.success('Tasks reordered successfully');
@@ -172,7 +172,7 @@ export function FirstWeekSection({ templateId, tasks, onTasksChange }: FirstWeek
                   };
                   
                   try {
-                    await createGettingStartedTask(templateId, newTaskData);
+                    await createFirstWeekTask(templateId, newTaskData);
                   } catch (error) {
                     console.error('Error creating first week task:', error);
                   }

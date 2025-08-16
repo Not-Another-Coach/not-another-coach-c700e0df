@@ -20,6 +20,23 @@ export interface GettingStartedTask {
   activity_id?: string;
 }
 
+export interface FirstWeekTask {
+  id: string;
+  template_id: string;
+  task_name: string;
+  description?: string;
+  rich_guidance?: string;
+  is_mandatory: boolean;
+  requires_attachment: boolean;
+  attachment_types: string[];
+  max_attachments: number;
+  max_file_size_mb: number;
+  due_days?: number;
+  sla_hours?: number;
+  display_order: number;
+  activity_id?: string;
+}
+
 export interface OngoingSupportSettings {
   id: string;
   template_id: string;
@@ -64,6 +81,7 @@ export interface TrainerNote {
 export function useOnboardingSections() {
   const { user } = useAuth();
   const [gettingStartedTasks, setGettingStartedTasks] = useState<GettingStartedTask[]>([]);
+  const [firstWeekTasks, setFirstWeekTasks] = useState<FirstWeekTask[]>([]);
   const [ongoingSupportSettings, setOngoingSupportSettings] = useState<OngoingSupportSettings[]>([]);
   const [commitments, setCommitments] = useState<CommitmentExpectation[]>([]);
   const [trainerNotes, setTrainerNotes] = useState<TrainerNote[]>([]);
@@ -139,6 +157,79 @@ export function useOnboardingSections() {
       if (error) throw error;
     } catch (err) {
       console.error('Error deleting getting started task:', err);
+      throw err;
+    }
+  }, [user]);
+
+  // First Week Tasks
+  const fetchFirstWeekTasks = useCallback(async (templateId: string) => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('onboarding_first_week')
+        .select('*')
+        .eq('template_id', templateId)
+        .order('display_order');
+
+      if (error) throw error;
+      setFirstWeekTasks((data || []).map(task => ({
+        ...task,
+        attachment_types: Array.isArray(task.attachment_types) ? task.attachment_types as string[] : []
+      })));
+    } catch (err) {
+      console.error('Error fetching first week tasks:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load first week tasks');
+    }
+  }, [user]);
+
+  const createFirstWeekTask = useCallback(async (templateId: string, task: Omit<FirstWeekTask, 'id' | 'template_id'>) => {
+    if (!user) throw new Error('No user');
+
+    try {
+      const { error } = await supabase
+        .from('onboarding_first_week')
+        .insert({
+          template_id: templateId,
+          ...task
+        });
+
+      if (error) throw error;
+      await fetchFirstWeekTasks(templateId);
+    } catch (err) {
+      console.error('Error creating first week task:', err);
+      throw err;
+    }
+  }, [user, fetchFirstWeekTasks]);
+
+  const updateFirstWeekTask = useCallback(async (taskId: string, updates: Partial<FirstWeekTask>) => {
+    if (!user) throw new Error('No user');
+
+    try {
+      const { error } = await supabase
+        .from('onboarding_first_week')
+        .update(updates)
+        .eq('id', taskId);
+
+      if (error) throw error;
+    } catch (err) {
+      console.error('Error updating first week task:', err);
+      throw err;
+    }
+  }, [user]);
+
+  const deleteFirstWeekTask = useCallback(async (taskId: string) => {
+    if (!user) throw new Error('No user');
+
+    try {
+      const { error } = await supabase
+        .from('onboarding_first_week')
+        .delete()
+        .eq('id', taskId);
+
+      if (error) throw error;
+    } catch (err) {
+      console.error('Error deleting first week task:', err);
       throw err;
     }
   }, [user]);
@@ -354,6 +445,7 @@ export function useOnboardingSections() {
     try {
       await Promise.all([
         fetchGettingStartedTasks(templateId),
+        fetchFirstWeekTasks(templateId),
         fetchOngoingSupportSettings(templateId),
         fetchCommitments(templateId),
         fetchTrainerNotes(templateId)
@@ -363,11 +455,12 @@ export function useOnboardingSections() {
     } finally {
       setLoading(false);
     }
-  }, [fetchGettingStartedTasks, fetchOngoingSupportSettings, fetchCommitments, fetchTrainerNotes]);
+  }, [fetchGettingStartedTasks, fetchFirstWeekTasks, fetchOngoingSupportSettings, fetchCommitments, fetchTrainerNotes]);
 
   return {
     // State
     gettingStartedTasks,
+    firstWeekTasks,
     ongoingSupportSettings,
     commitments,
     trainerNotes,
@@ -379,6 +472,12 @@ export function useOnboardingSections() {
     createGettingStartedTask,
     updateGettingStartedTask,
     deleteGettingStartedTask,
+
+    // First Week
+    fetchFirstWeekTasks,
+    createFirstWeekTask,
+    updateFirstWeekTask,
+    deleteFirstWeekTask,
 
     // Ongoing Support
     fetchOngoingSupportSettings,

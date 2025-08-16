@@ -1819,6 +1819,63 @@ export type Database = {
           },
         ]
       }
+      onboarding_first_week: {
+        Row: {
+          activity_id: string | null
+          attachment_types: string[] | null
+          created_at: string
+          description: string | null
+          display_order: number
+          due_days: number | null
+          id: string
+          is_mandatory: boolean
+          max_attachments: number | null
+          max_file_size_mb: number | null
+          requires_attachment: boolean
+          rich_guidance: string | null
+          sla_hours: number | null
+          task_name: string
+          template_id: string
+          updated_at: string
+        }
+        Insert: {
+          activity_id?: string | null
+          attachment_types?: string[] | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          due_days?: number | null
+          id?: string
+          is_mandatory?: boolean
+          max_attachments?: number | null
+          max_file_size_mb?: number | null
+          requires_attachment?: boolean
+          rich_guidance?: string | null
+          sla_hours?: number | null
+          task_name: string
+          template_id: string
+          updated_at?: string
+        }
+        Update: {
+          activity_id?: string | null
+          attachment_types?: string[] | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          due_days?: number | null
+          id?: string
+          is_mandatory?: boolean
+          max_attachments?: number | null
+          max_file_size_mb?: number | null
+          requires_attachment?: boolean
+          rich_guidance?: string | null
+          sla_hours?: number | null
+          task_name?: string
+          template_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       onboarding_getting_started: {
         Row: {
           activity_id: string | null
