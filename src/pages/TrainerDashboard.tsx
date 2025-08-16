@@ -563,8 +563,8 @@ const TrainerDashboard = () => {
       {/* Floating Message Button */}
       <FloatingMessageButton />
       
-      {/* Memory Monitor - Only in development */}
-      {process.env.NODE_ENV === 'development' && <MemoryMonitor />}
+      {/* Memory Monitor - Always show in this environment */}
+      <MemoryMonitor />
     </div>
   );
 };
