@@ -9,8 +9,9 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
-import { Clock, FileText, AlertCircle, CheckCircle, Trash2, Archive, Plus } from 'lucide-react';
+import { Clock, FileText, AlertCircle, CheckCircle, Trash2, Archive, Plus, ChevronDown, ChevronUp } from 'lucide-react';
 import { toast } from 'sonner';
+import { TemplateAssignmentDialog } from './TemplateAssignmentDialog';
 
 interface TemplateAssignment {
   id: string;
@@ -47,6 +48,9 @@ export function ClientTemplateAssignment({ clientId, showHistoryOnly = false }: 
   const [actionType, setActionType] = useState<'expire' | 'remove'>('expire');
   const [actionReason, setActionReason] = useState('');
   const [processing, setProcessing] = useState(false);
+  const [showExpandedHistory, setShowExpandedHistory] = useState(false);
+  const [showAssignDialog, setShowAssignDialog] = useState(false);
+  const [clientForAssignment, setClientForAssignment] = useState<{ id: string; first_name: string; last_name: string } | null>(null);
 
   useEffect(() => {
     if (user?.id) {
@@ -247,7 +251,27 @@ export function ClientTemplateAssignment({ clientId, showHistoryOnly = false }: 
           <h4 className="font-medium">Template Assignment</h4>
           <Button
             size="sm"
-            onClick={() => window.location.href = '/trainer/dashboard?tab=template-management&section=assign'}
+            onClick={() => {
+              if (clientId) {
+                // Get client profile for assignment dialog
+                const clientProfile = activeAssignment?.client_profile || 
+                  assignments[0]?.client_profile;
+                
+                if (clientProfile) {
+                  setClientForAssignment({
+                    id: clientId,
+                    first_name: clientProfile.first_name || '',
+                    last_name: clientProfile.last_name || ''
+                  });
+                  setShowAssignDialog(true);
+                } else {
+                  // Fallback - fetch client profile
+                  fetchClientProfile(clientId);
+                }
+              } else {
+                window.location.href = '/trainer/dashboard?tab=template-management&section=assign';
+              }
+            }}
           >
             <Plus className="w-3 h-3 mr-1" />
             Assign Template
@@ -272,15 +296,64 @@ export function ClientTemplateAssignment({ clientId, showHistoryOnly = false }: 
         )}
         
         {assignments.length > 0 && (
-          <div>
-            <Button variant="link" size="sm" className="h-auto p-0 text-xs">
-              View History ({assignments.length})
+          <div className="space-y-2">
+            <Button 
+              variant="link" 
+              size="sm" 
+              className="h-auto p-0 text-xs flex items-center gap-1"
+              onClick={() => setShowExpandedHistory(!showExpandedHistory)}
+            >
+              {showExpandedHistory ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+              {showExpandedHistory ? 'Hide' : 'View'} History ({assignments.length})
             </Button>
+            
+            {showExpandedHistory && (
+              <div className="space-y-2 mt-2 pt-2 border-t">
+                {assignments.map((assignment) => (
+                  <div key={assignment.id} className="text-xs text-muted-foreground border-l-2 border-muted pl-2">
+                    <div className="flex items-center gap-2">
+                      {getStatusBadge(assignment)}
+                      <span className="font-medium">{assignment.template_name}</span>
+                    </div>
+                    <div className="text-muted-foreground">
+                      Assigned {format(new Date(assignment.assigned_at), 'MMM d')}
+                      {assignment.status === 'active' && assignment.progress_count && (
+                        <span className="ml-2">• {assignment.completed_count}/{assignment.progress_count} completed</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
     );
   }
+
+  const fetchClientProfile = async (clientId: string) => {
+    try {
+      const { data: profileData, error } = await supabase
+        .from('profiles')
+        .select('first_name, last_name')
+        .eq('id', clientId)
+        .single();
+
+      if (error) throw error;
+
+      if (profileData) {
+        setClientForAssignment({
+          id: clientId,
+          first_name: profileData.first_name || '',
+          last_name: profileData.last_name || ''
+        });
+        setShowAssignDialog(true);
+      }
+    } catch (error) {
+      console.error('Error fetching client profile:', error);
+      toast.error('Failed to load client information');
+    }
+  };
 
   return (
     <>
@@ -425,6 +498,21 @@ export function ClientTemplateAssignment({ clientId, showHistoryOnly = false }: 
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Template Assignment Dialog */}
+      {clientForAssignment && (
+        <TemplateAssignmentDialog
+          client={clientForAssignment}
+          isOpen={showAssignDialog}
+          onClose={() => {
+            setShowAssignDialog(false);
+            setClientForAssignment(null);
+          }}
+          onAssignmentComplete={() => {
+            fetchAssignments();
+          }}
+        />
+      )}
     </>
   );
 }
