@@ -17,6 +17,7 @@ export interface GettingStartedTask {
   due_days?: number;
   sla_hours?: number;
   display_order: number;
+  activity_id?: string;
 }
 
 export interface OngoingSupportSettings {

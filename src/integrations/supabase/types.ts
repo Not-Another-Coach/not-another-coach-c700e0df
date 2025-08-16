@@ -1821,6 +1821,7 @@ export type Database = {
       }
       onboarding_getting_started: {
         Row: {
+          activity_id: string | null
           allowed_file_types: Json | null
           attachment_types: Json | null
           attachment_upload_instructions: string | null
@@ -1848,6 +1849,7 @@ export type Database = {
           visibility_trainer: boolean | null
         }
         Insert: {
+          activity_id?: string | null
           allowed_file_types?: Json | null
           attachment_types?: Json | null
           attachment_upload_instructions?: string | null
@@ -1875,6 +1877,7 @@ export type Database = {
           visibility_trainer?: boolean | null
         }
         Update: {
+          activity_id?: string | null
           allowed_file_types?: Json | null
           attachment_types?: Json | null
           attachment_upload_instructions?: string | null
@@ -1902,6 +1905,13 @@ export type Database = {
           visibility_trainer?: boolean | null
         }
         Relationships: [
+          {
+            foreignKeyName: "onboarding_getting_started_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "trainer_onboarding_activities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "onboarding_getting_started_template_id_fkey"
             columns: ["template_id"]

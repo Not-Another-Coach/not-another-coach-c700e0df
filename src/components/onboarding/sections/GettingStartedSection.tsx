@@ -158,20 +158,28 @@ export function GettingStartedSection({ templateId, tasks, onTasksChange }: Gett
           </CardTitle>
           <div className="flex gap-2">
             <ActivityImporter
-              onImportActivities={(activities) => {
-                activities.forEach(activity => {
+              onImportActivities={async (activities) => {
+                for (const activity of activities) {
                   const newTaskData = {
                     task_name: activity.name,
-                    task_description: activity.description || '',
+                    description: activity.description || '',
                     is_mandatory: true,
                     due_days: activity.default_due_days || 7,
                     sla_hours: activity.default_sla_days ? activity.default_sla_days * 24 : 48,
-                    activity_id: activity.id
+                    activity_id: activity.id,
+                    requires_attachment: false,
+                    attachment_types: [] as string[],
+                    max_attachments: 3,
+                    max_file_size_mb: 10,
+                    display_order: tasks.length + 1
                   };
-                   // Create task using the existing create function pattern
-                   setNewTask(newTaskData);
-                   handleCreateTask();
-                });
+                  
+                  try {
+                    await createGettingStartedTask(templateId, newTaskData);
+                  } catch (error) {
+                    console.error('Error creating getting started task:', error);
+                  }
+                }
               }}
               trigger={
                 <Button variant="outline">
