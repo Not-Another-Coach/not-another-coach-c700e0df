@@ -112,6 +112,12 @@ export function ManualTemplateAssignment() {
   const publishedTemplates = templates.filter(t => t.status === 'published' && t.is_active);
 
   console.log('Templates loaded:', templates.length, 'Published:', publishedTemplates.length);
+  console.log('Template details:', templates.map(t => ({ 
+    id: t.id, 
+    name: t.step_name, 
+    status: t.status, 
+    is_active: t.is_active 
+  })));
 
   const handleCustomizeTemplate = async (templateId: string) => {
     const template = templates.find(t => t.id === templateId);
