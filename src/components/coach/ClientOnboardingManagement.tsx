@@ -28,8 +28,7 @@ import { ActiveClientsSection } from '@/components/coach/ActiveClientsSection';
 import { ClientOnboardingTracker } from '@/components/coach/ClientOnboardingTracker';
 
 export function ClientOnboardingManagement() {
-  const [activeClientsCount, setActiveClientsCount] = useState(0);
-  const { 
+  const {
     templates, 
     loading, 
     createTemplate, 
@@ -216,24 +215,14 @@ export function ClientOnboardingManagement() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="clients" className="space-y-4">
+        <Tabs defaultValue="assign" className="space-y-4">
           <TabsList>
-            <TabsTrigger value="clients">Active Clients ({activeClientsCount})</TabsTrigger>
             <TabsTrigger value="assign">Assign Templates</TabsTrigger>
+            <TabsTrigger value="tracker">Onboarding Tracker</TabsTrigger>
             <TabsTrigger value="activities">Activities</TabsTrigger>
             <TabsTrigger value="templates">Templates</TabsTrigger>
             <TabsTrigger value="workflows">Ways of Working</TabsTrigger>
           </TabsList>
-
-          <TabsContent value="clients" className="space-y-4">
-            <div className="space-y-6">
-              <ActiveClientsSection onCountChange={setActiveClientsCount} />
-              <div className="border-t pt-6">
-                <h3 className="text-lg font-medium mb-4">Onboarding Tracker</h3>
-                <ClientOnboardingTracker />
-              </div>
-            </div>
-          </TabsContent>
 
           <TabsContent value="assign" className="space-y-4">
             <div>
@@ -245,6 +234,13 @@ export function ClientOnboardingManagement() {
                   <ClientTemplateAssignment />
                 </div>
               </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="tracker" className="space-y-4">
+            <div>
+              <h3 className="text-lg font-medium mb-4">Onboarding Progress Tracker</h3>
+              <ClientOnboardingTracker />
             </div>
           </TabsContent>
 
