@@ -59,7 +59,7 @@ export function ActiveClientsSection({ onCountChange }: ActiveClientsSectionProp
   const { profile } = useProfile();
   const { user } = useAuth();
   const { templates, loading: templatesLoading } = useTemplateBuilder();
-  const { hasActiveAssignment, getActiveAssignmentForClient } = useTemplateAssignments();
+  const { hasActiveAssignment, getActiveAssignmentForClient, expireAssignment } = useTemplateAssignments();
   const [activeClients, setActiveClients] = useState<ActiveClient[]>([]);
   const [loading, setLoading] = useState(true);
   const [messagingPopupOpen, setMessagingPopupOpen] = useState(false);
@@ -70,6 +70,8 @@ export function ActiveClientsSection({ onCountChange }: ActiveClientsSectionProp
   const [customizedTemplate, setCustomizedTemplate] = useState<CustomizedTemplate | null>(null);
   const [showCustomizeDialog, setShowCustomizeDialog] = useState(false);
   const [processingAssignment, setProcessingAssignment] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [existingAssignment, setExistingAssignment] = useState<any>(null);
 
   useEffect(() => {
     if (profile?.id) {
@@ -144,6 +146,16 @@ export function ActiveClientsSection({ onCountChange }: ActiveClientsSectionProp
     const template = templates.find(t => t.id === templateId);
     if (!template) return;
 
+    // Check if client already has an active assignment
+    if (hasActiveAssignment(client.client_id)) {
+      const existing = getActiveAssignmentForClient(client.client_id);
+      setExistingAssignment(existing);
+      setSelectedClientForAssignment(client);
+      setSelectedTemplate(templateId);
+      setShowConfirmDialog(true);
+      return;
+    }
+
     const customized: CustomizedTemplate = {
       name: `${template.step_name} (Customized)`,
       baseTemplateId: templateId,
@@ -165,15 +177,52 @@ export function ActiveClientsSection({ onCountChange }: ActiveClientsSectionProp
     setShowCustomizeDialog(true);
   };
 
+  const handleConfirmExpireAndAssign = async () => {
+    if (!existingAssignment || !selectedTemplate || !selectedClientForAssignment) return;
+
+    try {
+      setProcessingAssignment(true);
+      
+      // First expire the existing assignment
+      const result = await expireAssignment(existingAssignment.id, 'Expired to assign new template');
+      if (result.error) {
+        toast.error(result.error);
+        return;
+      }
+
+      // Now proceed with template customization
+      const template = templates.find(t => t.id === selectedTemplate);
+      if (!template) return;
+
+      const customized: CustomizedTemplate = {
+        name: `${template.step_name} (Customized)`,
+        baseTemplateId: selectedTemplate,
+        steps: [
+          {
+            step_name: template.step_name,
+            description: template.description || '',
+            instructions: template.instructions || '',
+            step_type: template.step_type,
+            completion_method: template.completion_method === 'auto' ? 'client' : template.completion_method,
+            requires_file_upload: template.requires_file_upload || false,
+            display_order: 1
+          }
+        ]
+      };
+
+      setCustomizedTemplate(customized);
+      setShowConfirmDialog(false);
+      setShowCustomizeDialog(true);
+    } catch (error) {
+      console.error('Error expiring assignment:', error);
+      toast.error('Failed to expire existing assignment');
+    } finally {
+      setProcessingAssignment(false);
+    }
+  };
+
   const handleAssignTemplate = async () => {
     if (!selectedClientForAssignment || !customizedTemplate || !user) return;
-
-    // Check if client already has an active assignment
-    if (hasActiveAssignment(selectedClientForAssignment.client_id)) {
-      const existingAssignment = getActiveAssignmentForClient(selectedClientForAssignment.client_id);
-      toast.error(`Client already has an active template assignment: ${existingAssignment?.template_name}. Please expire or remove it first.`);
-      return;
-    }
 
     try {
       setProcessingAssignment(true);
@@ -668,6 +717,59 @@ export function ActiveClientsSection({ onCountChange }: ActiveClientsSectionProp
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirmation Dialog for Existing Assignment */}
+      <Dialog open={showConfirmDialog} onOpenChange={(open) => {
+        setShowConfirmDialog(open);
+        if (!open) {
+          setExistingAssignment(null);
+          setSelectedClientForAssignment(null);
+          setSelectedTemplate('');
+          setProcessingAssignment(false);
+        }
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Client Already Has Active Template</DialogTitle>
+            <DialogDescription>
+              {selectedClientForAssignment?.client_profile?.first_name} {selectedClientForAssignment?.client_profile?.last_name} already has an active template assignment.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {existingAssignment && (
+              <div className="p-4 bg-muted rounded-lg">
+                <h4 className="font-medium mb-2">Current Assignment:</h4>
+                <p className="text-sm"><strong>Template:</strong> {existingAssignment.template_name}</p>
+                <p className="text-sm"><strong>Assigned:</strong> {format(new Date(existingAssignment.assigned_at), 'MMM d, yyyy')}</p>
+                {existingAssignment.assignment_notes && (
+                  <p className="text-sm"><strong>Notes:</strong> {existingAssignment.assignment_notes}</p>
+                )}
+              </div>
+            )}
+            
+            <p className="text-sm text-muted-foreground">
+              Would you like to expire the current template and assign the new one? This will mark the current template as expired and allow you to proceed with the new assignment.
+            </p>
+          </div>
+
+          <div className="flex justify-end gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowConfirmDialog(false)}
+              disabled={processingAssignment}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleConfirmExpireAndAssign}
+              disabled={processingAssignment}
+            >
+              {processingAssignment ? 'Processing...' : 'Expire & Assign New'}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </Card>
