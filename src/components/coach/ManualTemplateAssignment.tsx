@@ -165,8 +165,6 @@ export function ManualTemplateAssignment() {
         completion_method: step.completion_method,
         requires_file_upload: step.requires_file_upload,
         display_order: index + 1,
-        due_in_days: step.due_in_days,
-        sla_days: step.sla_days,
         status: 'pending'
       }));
 
