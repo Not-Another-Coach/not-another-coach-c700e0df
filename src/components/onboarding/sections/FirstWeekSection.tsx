@@ -185,6 +185,7 @@ export function FirstWeekSection({ templateId, tasks, onTasksChange }: FirstWeek
                   onTasksChange();
                 }
               }}
+              defaultCategory="First Week"
               trigger={
                 <Button variant="outline">
                   <Download className="h-4 w-4 mr-2" />

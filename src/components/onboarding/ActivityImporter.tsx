@@ -22,13 +22,14 @@ interface ActivityImporterProps {
     default_sla_days?: number;
   }[]) => void;
   trigger?: React.ReactNode;
+  defaultCategory?: string;
 }
 
-export function ActivityImporter({ onImportActivities, trigger }: ActivityImporterProps) {
+export function ActivityImporter({ onImportActivities, trigger, defaultCategory }: ActivityImporterProps) {
   const { activities, loading } = useTrainerActivities();
   const [open, setOpen] = useState(false);
   const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [categoryFilter, setCategoryFilter] = useState<string>(defaultCategory || 'all');
   const [searchTerm, setSearchTerm] = useState('');
 
   const categories = Array.from(new Set(activities.map(a => a.category))).sort();

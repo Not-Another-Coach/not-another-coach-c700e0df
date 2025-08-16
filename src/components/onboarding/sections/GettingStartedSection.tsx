@@ -188,8 +188,12 @@ export function GettingStartedSection({ templateId, tasks, onTasksChange }: Gett
                 
                 if (relevantActivities.length === 0) {
                   toast.info('No "Onboarding" category activities selected. Only Onboarding activities can be imported to Getting Started section.');
+                } else {
+                  toast.success(`Imported ${relevantActivities.length} Onboarding activities`);
+                  onTasksChange();
                 }
               }}
+              defaultCategory="Onboarding"
               trigger={
                 <Button variant="outline">
                   <Download className="h-4 w-4 mr-2" />
