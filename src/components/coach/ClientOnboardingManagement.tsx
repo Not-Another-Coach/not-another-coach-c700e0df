@@ -218,7 +218,6 @@ export function ClientOnboardingManagement() {
         <Tabs defaultValue="assign" className="space-y-4">
           <TabsList>
             <TabsTrigger value="assign">Assign Templates</TabsTrigger>
-            <TabsTrigger value="tracker">Onboarding Tracker</TabsTrigger>
             <TabsTrigger value="activities">Activities</TabsTrigger>
             <TabsTrigger value="templates">Templates</TabsTrigger>
             <TabsTrigger value="workflows">Ways of Working</TabsTrigger>
@@ -227,22 +226,12 @@ export function ClientOnboardingManagement() {
           <TabsContent value="assign" className="space-y-4">
             <div>
               <h3 className="text-lg font-medium mb-4">Template Assignment</h3>
-              <div className="space-y-6">
+              <div className="bg-muted/50 p-4 rounded-lg">
                 <ManualTemplateAssignment />
-                <div className="border-t pt-6">
-                  <h4 className="font-medium mb-4">Current Assignments</h4>
-                  <ClientTemplateAssignment />
-                </div>
               </div>
             </div>
           </TabsContent>
 
-          <TabsContent value="tracker" className="space-y-4">
-            <div>
-              <h3 className="text-lg font-medium mb-4">Onboarding Progress Tracker</h3>
-              <ClientOnboardingTracker />
-            </div>
-          </TabsContent>
 
           <TabsContent value="activities" className="space-y-4">
             <div className="flex items-center justify-between">

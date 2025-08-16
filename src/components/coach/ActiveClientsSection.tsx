@@ -203,20 +203,9 @@ export function ActiveClientsSection({ onCountChange }: ActiveClientsSectionProp
                   </Button>
                 </div>
                 
-                {/* Template Assignment Section */}
-                <div className="mt-4">
-                  <ClientTemplateAssignment clientId={client.client_id} />
-                </div>
-                
-                {/* Discovery Call Notes */}
-                <div className="mt-4">
-                  <DiscoveryCallNotesTaker 
-                    clientId={client.client_id}
-                    clientName={client.client_profile?.first_name && client.client_profile?.last_name
-                      ? `${client.client_profile.first_name} ${client.client_profile.last_name}`
-                      : undefined}
-                    compact={true}
-                  />
+                {/* Assign Template CTA */}
+                <div className="mt-4 pt-4 border-t">
+                  <ClientTemplateAssignment clientId={client.client_id} showHistoryOnly={true} />
                 </div>
               </div>
             ))}

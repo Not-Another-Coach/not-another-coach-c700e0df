@@ -199,11 +199,11 @@ export function ManualTemplateAssignment() {
 
       if (stepsError) throw stepsError;
 
-      // Create notification alert using a valid alert type
+      // Create notification alert for client
       const { error: alertError } = await supabase
         .from('alerts')
         .insert({
-          alert_type: 'coach_update',
+          alert_type: 'template_assigned',
           title: 'New Training Templates Assigned',
           content: `Your trainer has assigned you new onboarding templates. Check your onboarding section to get started!`,
           target_audience: JSON.stringify({ clients: [selectedClient.id] }),

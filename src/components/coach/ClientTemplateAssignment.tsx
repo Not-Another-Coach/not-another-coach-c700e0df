@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
-import { Clock, FileText, AlertCircle, CheckCircle, Trash2, Archive } from 'lucide-react';
+import { Clock, FileText, AlertCircle, CheckCircle, Trash2, Archive, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface TemplateAssignment {
@@ -35,9 +35,10 @@ interface TemplateAssignment {
 
 interface ClientTemplateAssignmentProps {
   clientId?: string; // If provided, shows assignments for specific client
+  showHistoryOnly?: boolean; // If true, show compact history view with assign CTA
 }
 
-export function ClientTemplateAssignment({ clientId }: ClientTemplateAssignmentProps) {
+export function ClientTemplateAssignment({ clientId, showHistoryOnly = false }: ClientTemplateAssignmentProps) {
   const { user } = useAuth();
   const [assignments, setAssignments] = useState<TemplateAssignment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -214,6 +215,15 @@ export function ClientTemplateAssignment({ clientId }: ClientTemplateAssignmentP
   };
 
   if (loading) {
+    if (showHistoryOnly) {
+      return (
+        <div className="animate-pulse space-y-2">
+          <div className="h-4 bg-muted rounded w-1/3"></div>
+          <div className="h-8 bg-muted rounded"></div>
+        </div>
+      );
+    }
+    
     return (
       <Card>
         <CardContent className="p-6">
@@ -225,6 +235,50 @@ export function ClientTemplateAssignment({ clientId }: ClientTemplateAssignmentP
           </div>
         </CardContent>
       </Card>
+    );
+  }
+
+  if (showHistoryOnly) {
+    const activeAssignment = assignments.find(a => a.status === 'active');
+    
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h4 className="font-medium">Template Assignment</h4>
+          <Button
+            size="sm"
+            onClick={() => window.location.href = '/trainer/dashboard?tab=template-management&section=assign'}
+          >
+            <Plus className="w-3 h-3 mr-1" />
+            Assign Template
+          </Button>
+        </div>
+        
+        {activeAssignment ? (
+          <div className="text-sm space-y-1">
+            <div className="flex items-center gap-2">
+              <Badge variant="default">Active</Badge>
+              <span className="font-medium">{activeAssignment.template_name}</span>
+            </div>
+            <p className="text-muted-foreground">
+              Assigned {format(new Date(activeAssignment.assigned_at), 'MMM d, yyyy')}
+            </p>
+            {getProgressBadge(activeAssignment)}
+          </div>
+        ) : (
+          <div className="text-sm text-muted-foreground">
+            No active template assigned
+          </div>
+        )}
+        
+        {assignments.length > 0 && (
+          <div>
+            <Button variant="link" size="sm" className="h-auto p-0 text-xs">
+              View History ({assignments.length})
+            </Button>
+          </div>
+        )}
+      </div>
     );
   }
 
