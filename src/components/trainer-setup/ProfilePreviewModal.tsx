@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { TieredTrainerProfile } from '@/components/tiered-profile/TieredTrainerProfile';
 import { ProfileViewSelector, ProfileViewMode } from '@/components/profile-views/ProfileViewSelector';
 import { OverviewView } from '@/components/profile-views/OverviewView';
 import { ResultsView } from '@/components/profile-views/ResultsView';
@@ -19,7 +18,6 @@ interface ProfilePreviewModalProps {
   onClose: () => void;
   trainer: any;
   stage?: EngagementStage;
-  showViewModes?: boolean;
 }
 
 const stageLabels: Record<EngagementStage, { label: string; description: string; color: string }> = {
@@ -85,12 +83,11 @@ const stageLabels: Record<EngagementStage, { label: string; description: string;
   }
 };
 
-export const ProfilePreviewModal: React.FC<ProfilePreviewModalProps> = ({
+export const ProfilePreviewModal = ({
   isOpen,
   onClose,
   trainer,
-  stage = 'browsing',
-  showViewModes = false
+  stage = 'browsing'
 }) => {
   const [currentView, setCurrentView] = useState<ProfileViewMode>('overview');
   const isMobile = useIsMobile();
@@ -105,18 +102,7 @@ export const ProfilePreviewModal: React.FC<ProfilePreviewModalProps> = ({
   };
 
   const renderCurrentView = () => {
-    if (!showViewModes) {
-      // Legacy behavior - use TieredTrainerProfile
-      return (
-        <TieredTrainerProfile
-          trainer={trainer}
-          className="border rounded-lg"
-          previewStage={stage}
-        />
-      );
-    }
-
-    // New behavior - use view modes
+    // Always use new view mode system
     switch (currentView) {
       case 'overview':
         return (
@@ -146,10 +132,10 @@ export const ProfilePreviewModal: React.FC<ProfilePreviewModalProps> = ({
         );
       default:
         return (
-          <TieredTrainerProfile
-            trainer={trainer}
-            className="border rounded-lg"
-            previewStage={stage}
+          <OverviewView 
+            trainer={trainer} 
+            onMessage={handleMessage}
+            onBookDiscovery={trainer.offers_discovery_call ? handleBookDiscovery : undefined}
           />
         );
     }
@@ -161,36 +147,35 @@ export const ProfilePreviewModal: React.FC<ProfilePreviewModalProps> = ({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
             Profile Preview
-            {!showViewModes && (
-              <Badge className={stageInfo.color}>
-                {stageInfo.label}
-              </Badge>
-            )}
+            <Badge className={stageInfo.color}>
+              {stageInfo.label}
+            </Badge>
           </DialogTitle>
           <p className="text-sm text-muted-foreground">
-            {showViewModes 
-              ? "See how your profile appears to clients across different view modes" 
-              : stageInfo.description
-            }
+            {stageInfo.description}
           </p>
         </DialogHeader>
         
-        {showViewModes && (
-          <div className="mt-4">
+        <div className="space-y-4">
+          <div className="border-b pb-4">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-muted-foreground">Preview Mode</h3>
+              <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+                This is how clients will see your profile
+              </div>
+            </div>
             <ProfileViewSelector
               currentView={currentView}
               onViewChange={setCurrentView}
               isMobile={isMobile}
             />
           </div>
-        )}
-        
-        <div className="mt-4">
-          {renderCurrentView()}
-        </div>
+          
+          <div className="max-h-[60vh] overflow-y-auto">
+            {renderCurrentView()}
+          </div>
 
-        {showViewModes && (
-          <div className="mt-4 pt-4 border-t">
+          <div className="pt-4 border-t">
             <div className="flex flex-col sm:flex-row gap-3">
               <Button onClick={handleMessage} className="flex-1" disabled>
                 <MessageCircle className="w-4 h-4 mr-2" />
@@ -207,7 +192,7 @@ export const ProfilePreviewModal: React.FC<ProfilePreviewModalProps> = ({
               Actions are disabled in preview mode
             </p>
           </div>
-        )}
+        </div>
       </DialogContent>
     </Dialog>
   );

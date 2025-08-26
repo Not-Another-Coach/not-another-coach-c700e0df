@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { TieredTrainerProfile } from '@/components/tiered-profile/TieredTrainerProfile';
+
 import { MessagingPopup } from '@/components/MessagingPopup';
 import { useRealTrainers } from '@/hooks/useRealTrainers';
 import { ProfileViewSelector, ProfileViewMode } from '@/components/profile-views/ProfileViewSelector';
@@ -100,7 +100,7 @@ export const TrainerProfile = () => {
           </Card>
         );
       default:
-        return <TieredTrainerProfile trainer={trainer} onMessage={handleMessage} />;
+        return <OverviewView trainer={trainer} onMessage={handleMessage} onBookDiscovery={handleBookDiscovery} />;
     }
   };
 

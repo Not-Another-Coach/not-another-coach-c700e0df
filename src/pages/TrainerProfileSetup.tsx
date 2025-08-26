@@ -923,7 +923,6 @@ const TrainerProfileSetup = () => {
           offers_discovery_call: formData.free_discovery_call || false,
           package_options: formData.package_options || []
         }}
-        showViewModes={true}
       />
     </div>
   );

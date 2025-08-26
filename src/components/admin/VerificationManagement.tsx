@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { CheckCircle2, XCircle, Clock, Eye, FileText, AlertCircle, User } from 'lucide-react';
 import { useTrainerVerification } from '@/hooks/useTrainerVerification';
-import { TieredTrainerProfile } from '@/components/tiered-profile/TieredTrainerProfile';
+import { OverviewView } from '@/components/profile-views/OverviewView';
 import { toast } from 'sonner';
 
 const statusIcons = {
@@ -329,27 +329,41 @@ export const VerificationManagement = () => {
           </DialogHeader>
           
           {profileToView && (
-            <TieredTrainerProfile
-              trainer={{
-                id: profileToView.id,
-                name: `${profileToView.first_name} ${profileToView.last_name}`,
-                firstName: profileToView.first_name,
-                lastName: profileToView.last_name,
-                profilePhotoUrl: profileToView.profile_photo_url,
-                location: profileToView.location,
-                tagline: profileToView.tagline,
-                bio: profileToView.bio,
-                specializations: profileToView.specializations || [],
-                trainingTypes: profileToView.training_types || [],
-                coachingStyles: profileToView.coaching_styles || [],
-                hourlyRate: profileToView.hourly_rate,
-                packageOptions: profileToView.package_options || [],
-                testimonials: profileToView.testimonials || [],
-                qualifications: profileToView.qualifications || [],
-                offers_discovery_call: profileToView.free_discovery_call
-              }}
-              previewStage="active_client" // Show all content for admin review
-            />
+            <div className="space-y-4">
+              <div className="bg-muted/50 p-3 rounded-lg">
+                <p className="text-sm text-muted-foreground">
+                  <strong>Admin Review Mode:</strong> This shows all content as clients would see it after full engagement.
+                </p>
+              </div>
+              <OverviewView
+                trainer={{
+                  id: profileToView.id,
+                  name: `${profileToView.first_name} ${profileToView.last_name}`,
+                  firstName: profileToView.first_name,
+                  lastName: profileToView.last_name,
+                  profilePhotoUrl: profileToView.profile_photo_url,
+                  location: profileToView.location || "Location not specified",
+                  description: profileToView.bio || "No description provided",
+                  specialties: profileToView.specializations || [],
+                  trainingType: profileToView.training_types || [],
+                  hourlyRate: profileToView.hourly_rate || 0,
+                  rating: profileToView.rating || 0,
+                  reviews: profileToView.total_ratings || 0,
+                  experience: "Trainer",
+                  availability: "Available",
+                  certifications: profileToView.qualifications || [],
+                  offers_discovery_call: profileToView.free_discovery_call || false,
+                  image: profileToView.profile_photo_url || "",
+                  package_options: profileToView.package_options || []
+                }}
+                onMessage={() => {
+                  // Disabled in admin review
+                }}
+                onBookDiscovery={() => {
+                  // Disabled in admin review
+                }}
+              />
+            </div>
           )}
         </DialogContent>
       </Dialog>
