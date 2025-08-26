@@ -23,6 +23,7 @@ import { UpcomingSessionsWidget } from "@/components/dashboard/UpcomingSessionsW
 import { CoachExclusivityEndedAlert } from "@/components/dashboard/CoachExclusivityEndedAlert";
 import { ClientOnboardingManagement } from "@/components/coach/ClientOnboardingManagement";
 import { OnboardingSummaryWidget } from "@/components/dashboard/OnboardingSummaryWidget";
+import { GoalsSection } from "@/components/goals/GoalsSection";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -297,7 +298,7 @@ const TrainerDashboard = () => {
               className="flex items-center gap-2"
             >
               <Goal className="w-4 h-4" />
-              Goals
+              Goals & Tasks
             </Button>
           </nav>
         </div>
@@ -528,23 +529,7 @@ const TrainerDashboard = () => {
         )}
         
         {activeView === 'goals' && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Goal className="w-5 h-5" />
-                Goals & Targets
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8">
-                <Goal className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-muted-foreground mb-2">Goals Section</h3>
-                <p className="text-sm text-muted-foreground">
-                  Set and track your coaching goals and targets.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <GoalsSection />
         )}
 
       </div>
