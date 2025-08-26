@@ -19,6 +19,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { ProfilePreviewModal } from "@/components/trainer-setup/ProfilePreviewModal";
 
 // Import form sections
 import { BasicInfoSection } from "@/components/trainer-setup/BasicInfoSection";
@@ -47,6 +48,7 @@ const TrainerProfileSetup = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showExitDialog, setShowExitDialog] = useState(false);
   const [pendingAvailabilityChanges, setPendingAvailabilityChanges] = useState<any>(null);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
   const hasInitialized = useRef(false);
   const initialFormData = useRef<typeof formData | null>(null);
 
@@ -539,10 +541,7 @@ const TrainerProfileSetup = () => {
         setPendingAvailabilityChanges(null);
       }
       
-      toast({
-        title: "Preview coming soon",
-        description: "Profile preview feature will be available soon.",
-      });
+      setShowPreviewModal(true);
     } catch (error) {
       // Error already handled in handleSave
     }
@@ -898,6 +897,34 @@ const TrainerProfileSetup = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Profile Preview Modal */}
+      <ProfilePreviewModal
+        isOpen={showPreviewModal}
+        onClose={() => setShowPreviewModal(false)}
+        trainer={{
+          ...formData,
+          id: profile?.id,
+          name: `${formData.first_name} ${formData.last_name}`.trim(),
+          firstName: formData.first_name,
+          lastName: formData.last_name,
+          specialties: formData.specializations || [],
+          rating: 4.8,
+          reviews: 127,
+          experience: "Verified Professional",
+          location: formData.location || "Location TBD",
+          hourlyRate: formData.hourly_rate || 75,
+          image: formData.profile_photo_url || "/api/placeholder/150/150",
+          profilePhotoUrl: formData.profile_photo_url,
+          certifications: formData.qualifications || [],
+          description: formData.bio || "Professional fitness trainer dedicated to helping you achieve your goals.",
+          availability: "Available",
+          trainingType: formData.training_types || ["In-Person", "Online"],
+          offers_discovery_call: formData.free_discovery_call || false,
+          package_options: formData.package_options || []
+        }}
+        showViewModes={true}
+      />
     </div>
   );
 };

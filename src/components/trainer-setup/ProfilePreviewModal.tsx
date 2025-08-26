@@ -1,14 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { TieredTrainerProfile } from '@/components/tiered-profile/TieredTrainerProfile';
+import { ProfileViewSelector, ProfileViewMode } from '@/components/profile-views/ProfileViewSelector';
+import { OverviewView } from '@/components/profile-views/OverviewView';
+import { ResultsView } from '@/components/profile-views/ResultsView';
+import { StoryView } from '@/components/profile-views/StoryView';
+import { ContentView } from '@/components/profile-views/ContentView';
+import { CompareView } from '@/components/profile-views/CompareView';
 import { EngagementStage } from '@/hooks/useEngagementStage';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Card, CardContent } from '@/components/ui/card';
+import { Eye, MessageCircle, Calendar } from 'lucide-react';
 
 interface ProfilePreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   trainer: any;
-  stage: EngagementStage;
+  stage?: EngagementStage;
+  showViewModes?: boolean;
 }
 
 const stageLabels: Record<EngagementStage, { label: string; description: string; color: string }> = {
@@ -78,32 +89,125 @@ export const ProfilePreviewModal: React.FC<ProfilePreviewModalProps> = ({
   isOpen,
   onClose,
   trainer,
-  stage
+  stage = 'browsing',
+  showViewModes = false
 }) => {
+  const [currentView, setCurrentView] = useState<ProfileViewMode>('overview');
+  const isMobile = useIsMobile();
   const stageInfo = stageLabels[stage];
 
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-3">
-            Profile Preview
-            <Badge className={stageInfo.color}>
-              {stageInfo.label}
-            </Badge>
-          </DialogTitle>
-          <p className="text-sm text-muted-foreground">
-            {stageInfo.description}
-          </p>
-        </DialogHeader>
-        
-        <div className="mt-4">
+  const handleMessage = () => {
+    console.log('Message action (preview mode)');
+  };
+
+  const handleBookDiscovery = () => {
+    console.log('Book discovery call action (preview mode)');
+  };
+
+  const renderCurrentView = () => {
+    if (!showViewModes) {
+      // Legacy behavior - use TieredTrainerProfile
+      return (
+        <TieredTrainerProfile
+          trainer={trainer}
+          className="border rounded-lg"
+          previewStage={stage}
+        />
+      );
+    }
+
+    // New behavior - use view modes
+    switch (currentView) {
+      case 'overview':
+        return (
+          <OverviewView 
+            trainer={trainer} 
+            onMessage={handleMessage}
+            onBookDiscovery={trainer.offers_discovery_call ? handleBookDiscovery : undefined}
+          />
+        );
+      case 'results':
+        return <ResultsView trainer={trainer} />;
+      case 'story':
+        return <StoryView trainer={trainer} />;
+      case 'content':
+        return <ContentView trainer={trainer} />;
+      case 'compare':
+        return (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <Eye className="h-12 w-12 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Comparison Mode</h3>
+              <p className="text-muted-foreground text-center max-w-md">
+                This view shows how your profile will appear when clients compare you with other trainers side-by-side.
+              </p>
+            </CardContent>
+          </Card>
+        );
+      default:
+        return (
           <TieredTrainerProfile
             trainer={trainer}
             className="border rounded-lg"
             previewStage={stage}
           />
+        );
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-3">
+            Profile Preview
+            {!showViewModes && (
+              <Badge className={stageInfo.color}>
+                {stageInfo.label}
+              </Badge>
+            )}
+          </DialogTitle>
+          <p className="text-sm text-muted-foreground">
+            {showViewModes 
+              ? "See how your profile appears to clients across different view modes" 
+              : stageInfo.description
+            }
+          </p>
+        </DialogHeader>
+        
+        {showViewModes && (
+          <div className="mt-4">
+            <ProfileViewSelector
+              currentView={currentView}
+              onViewChange={setCurrentView}
+              isMobile={isMobile}
+            />
+          </div>
+        )}
+        
+        <div className="mt-4">
+          {renderCurrentView()}
         </div>
+
+        {showViewModes && (
+          <div className="mt-4 pt-4 border-t">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button onClick={handleMessage} className="flex-1" disabled>
+                <MessageCircle className="w-4 h-4 mr-2" />
+                Send Message (Preview)
+              </Button>
+              {trainer.offers_discovery_call && (
+                <Button onClick={handleBookDiscovery} variant="outline" className="flex-1" disabled>
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Book Discovery Call (Preview)
+                </Button>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground text-center mt-2">
+              Actions are disabled in preview mode
+            </p>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
