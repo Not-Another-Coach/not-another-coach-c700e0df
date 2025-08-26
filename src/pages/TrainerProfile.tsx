@@ -1,18 +1,25 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Clock, MapPin, Star, Award, Users } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import { TieredTrainerProfile } from '@/components/tiered-profile/TieredTrainerProfile';
 import { MessagingPopup } from '@/components/MessagingPopup';
 import { useRealTrainers } from '@/hooks/useRealTrainers';
+import { ProfileViewSelector, ProfileViewMode } from '@/components/profile-views/ProfileViewSelector';
+import { OverviewView } from '@/components/profile-views/OverviewView';
+import { ResultsView } from '@/components/profile-views/ResultsView';
+import { StoryView } from '@/components/profile-views/StoryView';
+import { ContentView } from '@/components/profile-views/ContentView';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export const TrainerProfile = () => {
   const { trainerId } = useParams<{ trainerId: string }>();
   const navigate = useNavigate();
   const { trainers, loading } = useRealTrainers();
   const [isMessagingOpen, setIsMessagingOpen] = useState(false);
+  const [currentView, setCurrentView] = useState<ProfileViewMode>('overview');
+  const isMobile = useIsMobile();
 
   const trainer = trainers.find(t => t.id === trainerId);
 
@@ -48,8 +55,57 @@ export const TrainerProfile = () => {
     );
   }
 
+  const handleMessage = () => {
+    setIsMessagingOpen(true);
+  };
+
+  const handleBookDiscovery = () => {
+    // Implement discovery call booking
+    console.log('Book discovery call for trainer:', trainer.id);
+  };
+
+  const renderCurrentView = () => {
+    switch (currentView) {
+      case 'overview':
+        return (
+          <OverviewView 
+            trainer={trainer} 
+            onMessage={handleMessage}
+            onBookDiscovery={trainer.offers_discovery_call ? handleBookDiscovery : undefined}
+          />
+        );
+      case 'results':
+        return <ResultsView trainer={trainer} />;
+      case 'story':
+        return <StoryView trainer={trainer} />;
+      case 'content':
+        return <ContentView trainer={trainer} />;
+      case 'compare':
+        // For individual profile, show message about comparison
+        return (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <h3 className="text-lg font-semibold mb-2">Comparison Mode</h3>
+              <p className="text-muted-foreground text-center max-w-md">
+                To compare trainers, visit your saved or shortlisted trainers and select multiple trainers for comparison.
+              </p>
+              <Button 
+                onClick={() => navigate('/saved-trainers')} 
+                className="mt-4"
+                variant="outline"
+              >
+                View Saved Trainers
+              </Button>
+            </CardContent>
+          </Card>
+        );
+      default:
+        return <TieredTrainerProfile trainer={trainer} onMessage={handleMessage} />;
+    }
+  };
+
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
+    <div className="container mx-auto p-6 max-w-6xl">
       {/* Header with back button */}
       <div className="flex items-center gap-4 mb-6">
         <Button
@@ -68,11 +124,17 @@ export const TrainerProfile = () => {
         </div>
       </div>
 
-      {/* Trainer Profile Component */}
-      <TieredTrainerProfile 
-        trainer={trainer}
-        onMessage={() => setIsMessagingOpen(true)}
-      />
+      {/* Profile View Selector */}
+      <div className="mb-6">
+        <ProfileViewSelector
+          currentView={currentView}
+          onViewChange={setCurrentView}
+          isMobile={isMobile}
+        />
+      </div>
+
+      {/* Dynamic Content Based on View */}
+      {renderCurrentView()}
 
       {/* Messaging Popup */}
       <MessagingPopup 
