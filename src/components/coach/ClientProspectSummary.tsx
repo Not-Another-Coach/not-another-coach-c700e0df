@@ -3,6 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/hooks/useProfile';
 import { format } from 'date-fns';
@@ -24,7 +28,11 @@ import {
   Target,
   Package,
   Clock,
-  TrendingUp
+  TrendingUp,
+  User,
+  Mail,
+  Phone,
+  Dumbbell
 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -32,6 +40,7 @@ import { Toggle } from '@/components/ui/toggle';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
 import { MessagingPopup } from '@/components/MessagingPopup';
+import { TemplateAssignmentDialog } from '@/components/coach/TemplateAssignmentDialog';
 
 type ClientStatus = 'active' | 'prospect' | 'inactive' | 'completed';
 type ViewMode = 'card' | 'table';
@@ -105,6 +114,10 @@ export function ClientProspectSummary({ onActiveClientsCountChange, onProspectsC
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
   const [selectedClient, setSelectedClient] = useState<ClientRecord | null>(null);
   const [messagingOpen, setMessagingOpen] = useState(false);
+  const [viewProfileOpen, setViewProfileOpen] = useState(false);
+  const [templateAssignOpen, setTemplateAssignOpen] = useState(false);
+  const [clientForProfile, setClientForProfile] = useState<any>(null);
+  const [clientForTemplate, setClientForTemplate] = useState<{ id: string; first_name: string; last_name: string } | null>(null);
 
   // Fetch all client and prospect data
   useEffect(() => {
@@ -323,6 +336,34 @@ export function ClientProspectSummary({ onActiveClientsCountChange, onProspectsC
     setMessagingOpen(true);
   };
 
+  const handleViewProfile = async (client: ClientRecord) => {
+    try {
+      // Fetch detailed client profile
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', client.client_id)
+        .single();
+
+      if (error) throw error;
+
+      setClientForProfile(profile);
+      setViewProfileOpen(true);
+    } catch (error) {
+      console.error('Error fetching client profile:', error);
+    }
+  };
+
+  const handleAssignTemplate = (client: ClientRecord) => {
+    const clientName = client.name.split(' ');
+    setClientForTemplate({
+      id: client.client_id,
+      first_name: clientName[0] || '',
+      last_name: clientName[1] || ''
+    });
+    setTemplateAssignOpen(true);
+  };
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -501,6 +542,8 @@ export function ClientProspectSummary({ onActiveClientsCountChange, onProspectsC
               expandedCards={expandedCards}
               onToggleExpansion={toggleCardExpansion}
               onMessageClient={handleMessageClient}
+              onViewProfile={handleViewProfile}
+              onAssignTemplate={handleAssignTemplate}
               getStatusBadge={getStatusBadge}
               getGoalTags={getGoalTags}
             />
@@ -508,6 +551,7 @@ export function ClientProspectSummary({ onActiveClientsCountChange, onProspectsC
             <TableView 
               clients={filteredAndSortedClients}
               onMessageClient={handleMessageClient}
+              onViewProfile={handleViewProfile}
               getStatusBadge={getStatusBadge}
               getGoalTags={getGoalTags}
             />
@@ -535,6 +579,122 @@ export function ClientProspectSummary({ onActiveClientsCountChange, onProspectsC
           }}
         />
       )}
+
+      {/* Client Profile Viewer */}
+      <Dialog open={viewProfileOpen} onOpenChange={setViewProfileOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Client Profile</DialogTitle>
+          </DialogHeader>
+          {clientForProfile && (
+            <div className="space-y-6">
+              <div className="flex items-center gap-4">
+                <Avatar className="h-16 w-16">
+                  <AvatarImage src={clientForProfile.profile_photo_url} />
+                  <AvatarFallback>
+                    {clientForProfile.first_name?.[0]}{clientForProfile.last_name?.[0]}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <h3 className="text-xl font-semibold">
+                    {clientForProfile.first_name} {clientForProfile.last_name}
+                  </h3>
+                  <p className="text-muted-foreground">{clientForProfile.user_type || 'Client'}</p>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      Personal Information
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div>
+                      <Label className="text-sm font-medium">Full Name</Label>
+                      <p className="text-sm text-muted-foreground">
+                        {clientForProfile.first_name} {clientForProfile.last_name}
+                      </p>
+                    </div>
+                    {clientForProfile.phone && (
+                      <div>
+                        <Label className="text-sm font-medium">Phone</Label>
+                        <p className="text-sm text-muted-foreground">{clientForProfile.phone}</p>
+                      </div>
+                    )}
+                    {clientForProfile.date_of_birth && (
+                      <div>
+                        <Label className="text-sm font-medium">Date of Birth</Label>
+                        <p className="text-sm text-muted-foreground">
+                          {format(new Date(clientForProfile.date_of_birth), 'MMM d, yyyy')}
+                        </p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Dumbbell className="h-4 w-4" />
+                      Fitness Profile
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {clientForProfile.primary_goals && (
+                      <div>
+                        <Label className="text-sm font-medium">Primary Goals</Label>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {clientForProfile.primary_goals.map((goal: string) => (
+                            <Badge key={goal} variant="secondary" className="text-xs">
+                              {goal}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {clientForProfile.training_location_preference && (
+                      <div>
+                        <Label className="text-sm font-medium">Location Preference</Label>
+                        <p className="text-sm text-muted-foreground flex items-center gap-1">
+                          <MapPin className="h-3 w-3" />
+                          {clientForProfile.training_location_preference}
+                        </p>
+                      </div>
+                    )}
+                    {clientForProfile.experience_level && (
+                      <div>
+                        <Label className="text-sm font-medium">Experience Level</Label>
+                        <p className="text-sm text-muted-foreground">{clientForProfile.experience_level}</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Template Assignment Dialog */}
+      {clientForTemplate && (
+        <TemplateAssignmentDialog
+          client={clientForTemplate}
+          isOpen={templateAssignOpen}
+          onClose={() => {
+            setTemplateAssignOpen(false);
+            setClientForTemplate(null);
+          }}
+          onAssignmentComplete={() => {
+            // Refresh data if needed
+            fetchClientData();
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -546,7 +706,9 @@ function CardView({
   onToggleExpansion, 
   onMessageClient, 
   getStatusBadge, 
-  getGoalTags 
+  getGoalTags,
+  onViewProfile,
+  onAssignTemplate 
 }: {
   clients: ClientRecord[];
   expandedCards: Set<string>;
@@ -554,6 +716,8 @@ function CardView({
   onMessageClient: (client: ClientRecord) => void;
   getStatusBadge: (status: ClientStatus) => JSX.Element;
   getGoalTags: (goals: string[]) => JSX.Element[];
+  onViewProfile: (client: ClientRecord) => void;
+  onAssignTemplate: (client: ClientRecord) => void;
 }) {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -647,7 +811,7 @@ function CardView({
                 </Button>
               )}
               
-              <Button size="sm" variant="outline">
+              <Button size="sm" variant="outline" onClick={() => onViewProfile(client)}>
                 <Eye className="w-3 h-3 mr-1" />
                 View Profile
               </Button>
@@ -660,7 +824,7 @@ function CardView({
               )}
 
               {client.status === 'active' && (
-                <Button size="sm" variant="outline">
+                <Button size="sm" variant="outline" onClick={() => onAssignTemplate(client)}>
                   <Target className="w-3 h-3 mr-1" />
                   Assign Template
                 </Button>
@@ -678,12 +842,14 @@ function TableView({
   clients, 
   onMessageClient, 
   getStatusBadge, 
-  getGoalTags 
+  getGoalTags,
+  onViewProfile 
 }: {
   clients: ClientRecord[];
   onMessageClient: (client: ClientRecord) => void;
   getStatusBadge: (status: ClientStatus) => JSX.Element;
   getGoalTags: (goals: string[]) => JSX.Element[];
+  onViewProfile: (client: ClientRecord) => void;
 }) {
   return (
     <div className="overflow-x-auto">
@@ -743,7 +909,7 @@ function TableView({
                       <MessageCircle className="w-3 h-3" />
                     </Button>
                   )}
-                  <Button size="sm" variant="outline">
+                  <Button size="sm" variant="outline" onClick={() => onViewProfile(client)}>
                     <Eye className="w-3 h-3" />
                   </Button>
                 </div>
