@@ -52,14 +52,25 @@ export function useUserRoles() {
     const checkAdminStatus = async () => {
       if (!user) return;
 
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-        .eq('role', 'admin')
-        .single();
+      try {
+        // Use the security definer function for role checking
+        const { data, error } = await supabase
+          .rpc('has_role', {
+            _user_id: user.id,
+            _role: 'admin'
+          });
 
-      setIsAdmin(!!data && !error);
+        if (error) {
+          console.error('Error checking admin role:', error);
+          setIsAdmin(false);
+          return;
+        }
+
+        setIsAdmin(!!data);
+      } catch (error) {
+        console.error('Error in admin check:', error);
+        setIsAdmin(false);
+      }
     };
 
     checkAdminStatus();
