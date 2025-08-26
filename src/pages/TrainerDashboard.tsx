@@ -18,6 +18,7 @@ const LiveActivityFeed = lazy(() => import("@/components/dashboard/LiveActivityF
 import { CoachSelectionRequests } from "@/components/coach-selection/CoachSelectionRequests";
 import { ProspectsSection } from "@/components/coach/ProspectsSection";
 import { FloatingMessageButton } from "@/components/FloatingMessageButton";
+import { ClientProspectSummary } from "@/components/coach/ClientProspectSummary";
 import { UpcomingSessionsWidget } from "@/components/dashboard/UpcomingSessionsWidget";
 import { CoachExclusivityEndedAlert } from "@/components/dashboard/CoachExclusivityEndedAlert";
 import { ClientOnboardingManagement } from "@/components/coach/ClientOnboardingManagement";
@@ -276,7 +277,7 @@ const TrainerDashboard = () => {
               className="flex items-center gap-2"
             >
               <Users className="w-4 h-4" />
-              Active Clients ({activeClientsCount})
+              Clients & Prospects ({activeClientsCount + prospectsCount})
             </Button>
             
             <Button
@@ -512,8 +513,11 @@ const TrainerDashboard = () => {
         )}
         
         {activeView === 'clients' && (
-          <Suspense fallback={<div className="text-center p-8">Loading active clients...</div>}>
-            <ActiveClientsSection onCountChange={setActiveClientsCount} />
+          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded"></div>}>
+            <ClientProspectSummary 
+              onActiveClientsCountChange={setActiveClientsCount}
+              onProspectsCountChange={setProspectsCount}
+            />
           </Suspense>
         )}
 
