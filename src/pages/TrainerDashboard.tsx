@@ -24,6 +24,7 @@ import { CoachExclusivityEndedAlert } from "@/components/dashboard/CoachExclusiv
 import { ClientOnboardingManagement } from "@/components/coach/ClientOnboardingManagement";
 import { OnboardingSummaryWidget } from "@/components/dashboard/OnboardingSummaryWidget";
 import { GoalsSection } from "@/components/goals/GoalsSection";
+import { WeeklyExecutionCard } from "@/components/dashboard/WeeklyExecutionCard";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -406,20 +407,8 @@ const TrainerDashboard = () => {
               {/* Upcoming Sessions */}
               <UpcomingSessionsWidget />
 
-              {/* This Week's Goal */}
-              <Card className="bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20">
-                <CardContent className="p-6 flex items-center justify-between min-h-[12rem]">
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">🎯 This Week's Goal</h3>
-                    <p className="text-muted-foreground">Convert 3 new clients</p>
-                    <div className="flex items-center gap-2 mt-2">
-                      <Progress value={33} className="w-32 h-2" />
-                      <span className="text-sm text-muted-foreground">1/3</span>
-                    </div>
-                  </div>
-                  <Target className="w-8 h-8 text-primary flex-shrink-0" />
-                </CardContent>
-              </Card>
+              {/* Weekly Execution & Today's Tasks */}
+              <WeeklyExecutionCard />
             </div>
 
             {/* 4. Live Activity and Coach Feedback - Side by Side */}
