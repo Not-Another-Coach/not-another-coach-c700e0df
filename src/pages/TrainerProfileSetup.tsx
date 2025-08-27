@@ -21,6 +21,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ProfilePreviewModal } from "@/components/trainer-setup/ProfilePreviewModal";
+import { CardsView } from "@/components/profile-views/CardsView";
 
 // Import form sections
 import { BasicInfoSection } from "@/components/trainer-setup/BasicInfoSection";
@@ -850,6 +851,34 @@ const TrainerProfileSetup = () => {
           </p>
         </div>
       )}
+
+      {/* Card Preview Section */}
+      <div className="max-w-4xl mx-auto p-6 pb-0">
+        {formData.first_name && formData.last_name && formData.bio && (
+          <CardsView 
+            trainer={{
+              id: user?.id || '',
+              name: `${formData.first_name} ${formData.last_name}`.trim(),
+              firstName: formData.first_name,
+              lastName: formData.last_name,
+              specialties: formData.specializations || [],
+              trainingType: formData.training_types || [],
+              rating: 4.8,
+              reviews: 127,
+              experience: "Verified Professional", 
+              location: formData.location || "Location TBD",
+              hourlyRate: formData.hourly_rate || 75,
+              image: formData.profile_photo_url || "/api/placeholder/150/150",
+              profilePhotoUrl: formData.profile_photo_url,
+              certifications: formData.qualifications || [],
+              description: formData.bio || "",
+              availability: "Available",
+              offers_discovery_call: formData.free_discovery_call || false,
+              package_options: formData.package_options || []
+            }}
+          />
+        )}
+      </div>
 
       {/* Main Content */}
       <div className="max-w-4xl mx-auto p-6">
