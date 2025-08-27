@@ -128,7 +128,16 @@ export default function MyTrainers() {
 
   // Get filtered trainers based on active filter
   const filteredTrainers = useMemo(() => {
-    return getFilteredTrainers(activeFilter);
+    try {
+      console.log('🔍 Filtering trainers with filter:', activeFilter);
+      console.log('🔍 All trainers before filtering:', allTrainers);
+      const result = getFilteredTrainers(activeFilter);
+      console.log('🔍 Filtered result:', result);
+      return result;
+    } catch (error) {
+      console.error('🚨 Error in filteredTrainers useMemo:', error);
+      return [];
+    }
   }, [getFilteredTrainers, activeFilter]);
 
   // Enhanced debug logging
@@ -685,7 +694,7 @@ export default function MyTrainers() {
     );
   }
 
-  // Add error handling and logging
+  // Enhanced error handling and logging
   console.log('🔍 MyTrainers render state:', {
     user: !!user,
     profile: !!profile,
@@ -693,8 +702,20 @@ export default function MyTrainers() {
     isDataReady,
     showComparison,
     allTrainers: allTrainers?.length,
-    counts
+    counts,
+    activeFilter,
+    engagementLoading,
+    trainersLoading
   });
+
+  // Check for potential null/undefined issues
+  if (filteredTrainers && !Array.isArray(filteredTrainers)) {
+    console.error('🚨 filteredTrainers is not an array:', filteredTrainers);
+  }
+
+  if (allTrainers && !Array.isArray(allTrainers)) {
+    console.error('🚨 allTrainers is not an array:', allTrainers);
+  }
 
   try {
     return (
