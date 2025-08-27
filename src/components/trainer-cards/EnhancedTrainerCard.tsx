@@ -93,9 +93,29 @@ export const EnhancedTrainerCard = ({
   // Use trainer-specific saved state
   const isSaved = isTrainerSaved(trainer.id);
 
-  // Available views in order
-  const views: TrainerCardViewMode[] = ['instagram', 'features', 'transformations'];
-  const currentViewIndex = views.indexOf(currentView);
+  // Available views in order - dynamically add transformation views for each testimonial
+  const getAvailableViews = (): TrainerCardViewMode[] => {
+    const baseViews: TrainerCardViewMode[] = ['instagram', 'features'];
+    
+    // Get testimonials for this trainer
+    const testimonials = ((trainer as any).testimonials || []);
+    const filteredTestimonials = testimonials.filter((t: any) => t.showImages && t.beforeImage && t.afterImage && t.consentGiven);
+    
+    // Add a transformation view for each testimonial
+    if (filteredTestimonials.length > 0) {
+      filteredTestimonials.forEach((_, index) => {
+        baseViews.push(`transformations-${index}` as TrainerCardViewMode);
+      });
+    } else {
+      // If no testimonials, still add one transformations view
+      baseViews.push('transformations');
+    }
+    
+    return baseViews;
+  };
+
+  const views = getAvailableViews();
+  const currentViewIndex = views.indexOf(currentView as any);
 
   const handleToggleSave = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -279,27 +299,6 @@ export const EnhancedTrainerCard = ({
         ) : null}
       </div>
 
-      {/* Debug logging and Navigation arrows logic */}
-      {(() => {
-        const testimonials = ((trainer as any).testimonials || []);
-        const filteredTestimonials = testimonials.filter((t: any) => t.showImages && t.beforeImage && t.afterImage && t.consentGiven);
-        const hasMultipleTestimonials = filteredTestimonials.length > 1;
-        const isTransformationsView = currentView === 'transformations';
-        const shouldHideViewArrows = isTransformationsView && hasMultipleTestimonials;
-        
-        console.log('🔍 Navigation Debug:', {
-          currentView,
-          isTransformationsView,
-          totalTestimonials: testimonials.length,
-          filteredTestimonials: filteredTestimonials.length,
-          hasMultipleTestimonials,
-          shouldHideViewArrows,
-          trainerId: trainer.id
-        });
-        
-        return null;
-      })()}
-
       {/* Navigation arrows - ALWAYS show view navigation arrows */}
       <Button
         variant="ghost"
@@ -308,7 +307,6 @@ export const EnhancedTrainerCard = ({
         onClick={(e) => {
           e.stopPropagation();
           e.preventDefault();
-          console.log('🔄 VIEW Navigation - Previous clicked');
           goToPreviousView();
         }}
       >
@@ -322,7 +320,6 @@ export const EnhancedTrainerCard = ({
         onClick={(e) => {
           e.stopPropagation();
           e.preventDefault();
-          console.log('🔄 VIEW Navigation - Next clicked');
           goToNextView();
         }}
       >
@@ -359,6 +356,16 @@ export const EnhancedTrainerCard = ({
 
   // Render current view with interactive elements
   const renderCurrentView = () => {
+    // Check if current view is a transformation view with index
+    if (currentView.startsWith('transformations-')) {
+      const testimonialIndex = parseInt(currentView.split('-')[1]);
+      return (
+        <ClientTransformationView trainer={trainer} testimonialIndex={testimonialIndex}>
+          {interactiveElements}
+        </ClientTransformationView>
+      );
+    }
+    
     switch (currentView) {
       case 'instagram':
         return (
@@ -368,7 +375,7 @@ export const EnhancedTrainerCard = ({
         );
       case 'transformations':
         return (
-          <ClientTransformationView trainer={trainer}>
+          <ClientTransformationView trainer={trainer} testimonialIndex={0}>
             {interactiveElements}
           </ClientTransformationView>
         );

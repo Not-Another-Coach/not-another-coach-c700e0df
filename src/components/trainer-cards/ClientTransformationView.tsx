@@ -1,14 +1,13 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star, MapPin, Quote, ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Star, MapPin, Quote } from "lucide-react";
 import { Trainer } from "@/components/TrainerCard";
 import { getTrainerDisplayPrice } from "@/lib/priceUtils";
-import { useState, useEffect } from "react";
 
 interface ClientTransformationViewProps {
   trainer: Trainer;
   children?: React.ReactNode; // For CTA buttons and interactive elements
+  testimonialIndex?: number; // Which specific testimonial to display (0-based index)
 }
 
 // Real transformation data from trainer's testimonials
@@ -56,22 +55,8 @@ const getTransformationData = (trainer: Trainer) => {
   };
 };
 
-export const ClientTransformationView = ({ trainer, children }: ClientTransformationViewProps) => {
+export const ClientTransformationView = ({ trainer, children, testimonialIndex = 0 }: ClientTransformationViewProps) => {
   const transformationData = getTransformationData(trainer);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  
-  console.log('🎯 ClientTransformationView Render:', {
-    trainerId: trainer.id,
-    trainerName: trainer.name,
-    currentIndex,
-    totalTransformations: transformationData.transformations.length,
-    hasMultiple: transformationData.transformations.length > 1
-  });
-  
-  // Reset to first testimonial when trainer changes or transformations change
-  useEffect(() => {
-    setCurrentIndex(0);
-  }, [trainer.id, transformationData.transformations.length]);
   
   // If no transformations available, show placeholder
   if (transformationData.transformations.length === 0) {
@@ -128,62 +113,14 @@ export const ClientTransformationView = ({ trainer, children }: ClientTransforma
     );
   }
 
-  const currentTransformation = transformationData.transformations[currentIndex];
-  const hasMultiple = transformationData.transformations.length > 1;
-
-  // Navigation functions
-  const goToPrevious = () => {
-    setCurrentIndex((prev) => {
-      const newIndex = prev > 0 ? prev - 1 : transformationData.transformations.length - 1;
-      return newIndex;
-    });
-  };
-
-  const goToNext = () => {
-    setCurrentIndex((prev) => {
-      const newIndex = prev < transformationData.transformations.length - 1 ? prev + 1 : 0;
-      return newIndex;
-    });
-  };
+  // Get the specific testimonial to display based on the index
+  const currentTransformation = transformationData.transformations[testimonialIndex] || transformationData.transformations[0];
 
   return (
     <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-card to-muted/30 border-0 relative overflow-hidden">
       <CardContent className="p-0">
         {/* Interactive elements overlay */}
         {children}
-        
-        {/* Navigation arrows for testimonials - positioned higher to avoid overlap with view arrows */}
-        {hasMultiple && (
-          <>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="absolute left-2 top-[30%] -translate-y-1/2 z-50 bg-black/60 backdrop-blur hover:bg-black/70 transition-all p-1 h-8 w-8"
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                console.log('🔄 TESTIMONIAL Navigation - Previous clicked');
-                goToPrevious();
-              }}
-            >
-              <ChevronLeft className="h-4 w-4 text-white" />
-            </Button>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              className="absolute right-2 top-[30%] -translate-y-1/2 z-50 bg-black/60 backdrop-blur hover:bg-black/70 transition-all p-1 h-8 w-8"
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                console.log('🔄 TESTIMONIAL Navigation - Next clicked');
-                goToNext();
-              }}
-            >
-              <ChevronRight className="h-4 w-4 text-white" />
-            </Button>
-          </>
-        )}
         
         {/* Current testimonial - Before/After Split */}
         <div className="aspect-square relative">
@@ -221,24 +158,12 @@ export const ClientTransformationView = ({ trainer, children }: ClientTransforma
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
         </div>
 
-        {/* Testimonial indicators - show which testimonial is active */}
-        {hasMultiple && (
-          <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30 flex gap-1">
-            {transformationData.transformations.map((_, index) => (
-              <button
-                key={index}
-                className={`w-2 h-2 rounded-full transition-all ${
-                  index === currentIndex 
-                    ? 'bg-white shadow-sm' 
-                    : 'bg-white/50 hover:bg-white/70'
-                }`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  setCurrentIndex(index);
-                }}
-              />
-            ))}
+        {/* Testimonial indicator - show which testimonial this is */}
+        {transformationData.transformations.length > 1 && (
+          <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm rounded-full px-2 py-1">
+            <span className="text-xs text-white">
+              {testimonialIndex + 1}/{transformationData.transformations.length}
+            </span>
           </div>
         )}
 
@@ -283,16 +208,9 @@ export const ClientTransformationView = ({ trainer, children }: ClientTransforma
                   <span className="text-xs text-white/70">
                     - {currentTransformation.clientName}
                   </span>
-                  <div className="flex items-center gap-2">
-                    <Badge className="text-xs bg-success/20 text-success-foreground border-success/30">
-                      {currentTransformation.achievement}
-                    </Badge>
-                    {hasMultiple && (
-                      <span className="text-xs text-white/60">
-                        {currentIndex + 1}/{transformationData.transformations.length}
-                      </span>
-                    )}
-                  </div>
+                  <Badge className="text-xs bg-success/20 text-success-foreground border-success/30">
+                    {currentTransformation.achievement}
+                  </Badge>
                 </div>
               </div>
             </div>
