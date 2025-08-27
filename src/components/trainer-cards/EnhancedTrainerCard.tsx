@@ -81,6 +81,11 @@ export const EnhancedTrainerCard = ({
   const navigate = useNavigate();
   const { isTrainerSaved, saveTrainer, unsaveTrainer } = useSavedTrainers();
   const [currentView, setCurrentView] = useState<TrainerCardViewMode>(initialView);
+  
+  // Update internal state when initialView prop changes
+  useEffect(() => {
+    setCurrentView(initialView);
+  }, [initialView]);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
