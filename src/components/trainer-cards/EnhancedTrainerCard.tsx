@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Heart, X, MoreVertical } from "lucide-react";
+import { Heart, X, MoreVertical, ChevronLeft, ChevronRight } from "lucide-react";
 import { Trainer } from "@/components/TrainerCard";
-import { TrainerCardViewSelector, TrainerCardViewMode } from "./TrainerCardViewSelector";
+import { TrainerCardViewMode } from "./TrainerCardViewSelector";
 import { InstagramGalleryView } from "./InstagramGalleryView";
 import { FeatureSummaryView } from "./FeatureSummaryView";
 import { ClientTransformationView } from "./ClientTransformationView";
@@ -48,7 +48,6 @@ interface EnhancedTrainerCardProps {
   
   // View control
   initialView?: TrainerCardViewMode;
-  showViewSelector?: boolean;
 }
 
 export const EnhancedTrainerCard = ({ 
@@ -77,15 +76,21 @@ export const EnhancedTrainerCard = ({
   waitlistRefreshKey = 0,
   onMoveToSaved,
   onRemoveCompletely,
-  initialView = 'features',
-  showViewSelector = true
+  initialView = 'features'
 }: EnhancedTrainerCardProps) => {
   const navigate = useNavigate();
   const { isTrainerSaved, saveTrainer, unsaveTrainer } = useSavedTrainers();
   const [currentView, setCurrentView] = useState<TrainerCardViewMode>(initialView);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
   
   // Use trainer-specific saved state
   const isSaved = isTrainerSaved(trainer.id);
+
+  // Available views in order
+  const views: TrainerCardViewMode[] = ['instagram', 'features', 'transformations'];
+  const currentViewIndex = views.indexOf(currentView);
 
   const handleToggleSave = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -108,6 +113,46 @@ export const EnhancedTrainerCard = ({
   const handleRemoveClick = () => {
     if (onRemove) {
       onRemove(trainer.id);
+    }
+  };
+
+  // Navigation functions
+  const goToPreviousView = () => {
+    const currentIndex = views.indexOf(currentView);
+    const previousIndex = currentIndex > 0 ? currentIndex - 1 : views.length - 1;
+    setCurrentView(views[previousIndex]);
+  };
+
+  const goToNextView = () => {
+    const currentIndex = views.indexOf(currentView);
+    const nextIndex = currentIndex < views.length - 1 ? currentIndex + 1 : 0;
+    setCurrentView(views[nextIndex]);
+  };
+
+  // Touch handlers for swipe
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      goToNextView();
+    }
+    if (isRightSwipe) {
+      goToPreviousView();
     }
   };
 
@@ -238,6 +283,49 @@ export const EnhancedTrainerCard = ({
         </div>
       )}
 
+      {/* Navigation arrows */}
+      <Button
+        variant="ghost"
+        size="sm"
+        className="absolute left-2 top-1/2 -translate-y-1/2 z-15 bg-white/80 backdrop-blur hover:bg-white/90 transition-all p-1 h-8 w-8"
+        onClick={(e) => {
+          e.stopPropagation();
+          goToPreviousView();
+        }}
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </Button>
+      
+      <Button
+        variant="ghost"
+        size="sm"
+        className="absolute right-2 top-1/2 -translate-y-1/2 z-15 bg-white/80 backdrop-blur hover:bg-white/90 transition-all p-1 h-8 w-8"
+        onClick={(e) => {
+          e.stopPropagation();
+          goToNextView();
+        }}
+      >
+        <ChevronRight className="h-4 w-4" />
+      </Button>
+
+      {/* View indicators */}
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-15 flex gap-1">
+        {views.map((view, index) => (
+          <button
+            key={view}
+            className={`w-2 h-2 rounded-full transition-all ${
+              index === currentViewIndex 
+                ? 'bg-white shadow-sm' 
+                : 'bg-white/50 hover:bg-white/70'
+            }`}
+            onClick={(e) => {
+              e.stopPropagation();
+              setCurrentView(view);
+            }}
+          />
+        ))}
+      </div>
+
       {/* Click handler for profile navigation */}
       <div 
         className="absolute inset-0 z-5 cursor-pointer" 
@@ -273,16 +361,13 @@ export const EnhancedTrainerCard = ({
   };
 
   return (
-    <div className="space-y-2">
-      {/* View Selector */}
-      {showViewSelector && (
-        <TrainerCardViewSelector
-          currentView={currentView}
-          onViewChange={setCurrentView}
-          className="mb-2"
-        />
-      )}
-      
+    <div 
+      ref={cardRef}
+      className="relative select-none"
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
       {/* Enhanced Trainer Card */}
       {renderCurrentView()}
     </div>

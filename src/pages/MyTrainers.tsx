@@ -788,7 +788,6 @@ export default function MyTrainers() {
                   waitlistRefreshKey={waitlistRefreshKey}
                   onMoveToSaved={handleMoveToSaved}
                   onRemoveCompletely={trainerData.status !== 'declined' ? handleRemoveCompletely : undefined}
-                  showViewSelector={true}
                   initialView="features"
                 />
               ) : (
