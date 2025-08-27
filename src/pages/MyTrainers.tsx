@@ -99,7 +99,6 @@ export default function MyTrainers() {
   const [waitlistRefreshKey, setWaitlistRefreshKey] = useState(0);
   const [selectedForComparison, setSelectedForComparison] = useState<string[]>([]);
   const [showComparison, setShowComparison] = useState(false);
-  const [useEnhancedCards, setUseEnhancedCards] = useState(false);
 
   // Notify sync hook when data is loaded
   useEffect(() => {
@@ -696,14 +695,6 @@ export default function MyTrainers() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setUseEnhancedCards(!useEnhancedCards)}
-            className="flex items-center gap-2"
-          >
-            {useEnhancedCards ? 'Standard View' : 'Enhanced View'}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
             onClick={() => window.location.reload()}
             className="flex items-center gap-2"
           >
@@ -774,38 +765,21 @@ export default function MyTrainers() {
         <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           {filteredTrainers.map((trainerData) => (
             <div key={`${trainerData.id}-${trainerData.status}`} className="space-y-3">
-              {useEnhancedCards ? (
-                <EnhancedTrainerCard
-                  trainer={trainerData}
-                  onViewProfile={handleViewProfile}
-                  cardState={trainerData.status}
-                  showComparisonCheckbox={true}
-                  comparisonChecked={selectedForComparison.includes(trainerData.id)}
-                  onComparisonToggle={handleComparisonToggle}
-                  comparisonDisabled={!selectedForComparison.includes(trainerData.id) && selectedForComparison.length >= 4}
-                  onStartConversation={handleStartConversation}
-                  onBookDiscoveryCall={handleBookDiscoveryCall}
-                  waitlistRefreshKey={waitlistRefreshKey}
-                  onMoveToSaved={handleMoveToSaved}
-                  onRemoveCompletely={trainerData.status !== 'declined' ? handleRemoveCompletely : undefined}
-                  initialView="features"
-                />
-              ) : (
-                <TrainerCard
-                  trainer={trainerData}
-                  onViewProfile={handleViewProfile}
-                  cardState={trainerData.status}
-                  showComparisonCheckbox={true}
-                  comparisonChecked={selectedForComparison.includes(trainerData.id)}
-                  onComparisonToggle={handleComparisonToggle}
-                  comparisonDisabled={!selectedForComparison.includes(trainerData.id) && selectedForComparison.length >= 4}
-                  onStartConversation={handleStartConversation}
-                  onBookDiscoveryCall={handleBookDiscoveryCall}
-                  waitlistRefreshKey={waitlistRefreshKey}
-                  onMoveToSaved={handleMoveToSaved}
-                  onRemoveCompletely={trainerData.status !== 'declined' ? handleRemoveCompletely : undefined}
-                />
-              )}
+              <EnhancedTrainerCard
+                trainer={trainerData}
+                onViewProfile={handleViewProfile}
+                cardState={trainerData.status}
+                showComparisonCheckbox={true}
+                comparisonChecked={selectedForComparison.includes(trainerData.id)}
+                onComparisonToggle={handleComparisonToggle}
+                comparisonDisabled={!selectedForComparison.includes(trainerData.id) && selectedForComparison.length >= 4}
+                onStartConversation={handleStartConversation}
+                onBookDiscoveryCall={handleBookDiscoveryCall}
+                waitlistRefreshKey={waitlistRefreshKey}
+                onMoveToSaved={handleMoveToSaved}
+                onRemoveCompletely={trainerData.status !== 'declined' ? handleRemoveCompletely : undefined}
+                initialView="features"
+              />
               
               
               {/* Status Badge */}
