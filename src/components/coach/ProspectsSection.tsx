@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/hooks/useProfile';
 import { format } from 'date-fns';
-import { Users, MessageCircle, Calendar, Video, Phone, UserPlus, UserMinus } from 'lucide-react';
+import { Users, MessageCircle, Calendar, Video, Phone, UserPlus, UserMinus, TrendingUp, Clock, Star, Target } from 'lucide-react';
 import { MessagingPopup } from '@/components/MessagingPopup';
 import { DiscoveryCallNotesTaker } from '@/components/DiscoveryCallNotesTaker';
 
@@ -50,6 +50,14 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
   const [isMessagingOpen, setIsMessagingOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Prospect | null>(null);
   const [trainerOffersDiscoveryCall, setTrainerOffersDiscoveryCall] = useState(false);
+  
+  // Statistics state
+  const [stats, setStats] = useState({
+    totalActive: 0,
+    discoveryCallsBooked: 0,
+    awaitingPayment: 0,
+    matchedProspects: 0
+  });
 
   useEffect(() => {
     if (profile?.id) {
@@ -199,11 +207,24 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
       setActiveProspects(active);
       setLostProspects(lost);
       onCountChange?.(active.length); // Count only active prospects for the main counter
+      
+      // Calculate statistics
+      const discoveryCallsBooked = active.filter(p => p.discovery_call).length;
+      const awaitingPayment = active.filter(p => p.selection_request?.status === 'awaiting_payment').length;
+      const matchedProspects = active.filter(p => p.stage === 'matched').length;
+      
+      setStats({
+        totalActive: active.length,
+        discoveryCallsBooked,
+        awaitingPayment,
+        matchedProspects
+      });
     } catch (error) {
       console.error('Error in fetchProspects:', error);
       setActiveProspects([]);
       setLostProspects([]);
       onCountChange?.(0);
+      setStats({ totalActive: 0, discoveryCallsBooked: 0, awaitingPayment: 0, matchedProspects: 0 });
     } finally {
       setLoading(false);
     }
@@ -389,6 +410,17 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
                       Convert to Client
                     </Button>
                   )}
+                  
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      console.log('View profile:', prospect.client_id);
+                    }}
+                  >
+                    <Users className="w-3 h-3 mr-1" />
+                    View Profile
+                  </Button>
                 </div>
               )}
               
@@ -413,59 +445,104 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
 
   if (loading) {
     return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="animate-pulse space-y-4">
-            <div className="h-6 bg-muted rounded w-1/4"></div>
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-20 bg-muted rounded"></div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <div className="space-y-6">
+        <Card>
+          <CardContent className="p-6">
+            <div className="animate-pulse space-y-4">
+              <div className="h-6 bg-muted rounded w-1/4"></div>
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-20 bg-muted rounded"></div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Users className="w-5 h-5" />
-          Prospects & Discovery Calls ({activeProspects.length})
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="active" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="active" className="flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              Active ({activeProspects.length})
-            </TabsTrigger>
-            <TabsTrigger value="lost" className="flex items-center gap-2">
-              <UserMinus className="w-4 h-4" />
-              Lost ({lostProspects.length})
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="active" className="mt-4">
-            {renderProspectsList(activeProspects, false)}
-          </TabsContent>
-          
-          <TabsContent value="lost" className="mt-4">
-            {renderProspectsList(lostProspects, true)}
-          </TabsContent>
-        </Tabs>
-      </CardContent>
+    <div className="space-y-6">
+      {/* Statistics Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="w-5 h-5" />
+            Prospect Analytics
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="text-center p-4 rounded-lg bg-blue-50 border border-blue-200">
+              <div className="text-3xl font-bold text-blue-600 mb-2">
+                {stats.totalActive}
+              </div>
+              <p className="text-sm font-medium text-blue-800">Active Prospects</p>
+            </div>
+            <div className="text-center p-4 rounded-lg bg-green-50 border border-green-200">
+              <div className="text-3xl font-bold text-green-600 mb-2">
+                {stats.discoveryCallsBooked}
+              </div>
+              <p className="text-sm font-medium text-green-800">Discovery Calls</p>
+            </div>
+            <div className="text-center p-4 rounded-lg bg-purple-50 border border-purple-200">
+              <div className="text-3xl font-bold text-purple-600 mb-2">
+                {stats.matchedProspects}
+              </div>
+              <p className="text-sm font-medium text-purple-800">Matched</p>
+            </div>
+            <div className="text-center p-4 rounded-lg bg-orange-50 border border-orange-200">
+              <div className="text-3xl font-bold text-orange-600 mb-2">
+                {stats.awaitingPayment}
+              </div>
+              <p className="text-sm font-medium text-orange-800">Awaiting Payment</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Prospects List */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="w-5 h-5" />
+            Prospects & Discovery Calls ({activeProspects.length})
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="active" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="active" className="flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                Active ({activeProspects.length})
+              </TabsTrigger>
+              <TabsTrigger value="lost" className="flex items-center gap-2">
+                <UserMinus className="w-4 h-4" />
+                Lost ({lostProspects.length})
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="active" className="mt-4">
+              {renderProspectsList(activeProspects, false)}
+            </TabsContent>
+            
+            <TabsContent value="lost" className="mt-4">
+              {renderProspectsList(lostProspects, true)}
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
       
       {/* Messaging Popup */}
-      <MessagingPopup 
-        isOpen={isMessagingOpen}
-        onClose={() => {
-          setIsMessagingOpen(false);
-          setSelectedClient(null);
-        }}
-        selectedClient={selectedClient}
-      />
-    </Card>
+      {selectedClient && (
+        <MessagingPopup 
+          isOpen={isMessagingOpen}
+          onClose={() => {
+            setIsMessagingOpen(false);
+            setSelectedClient(null);
+          }}
+          selectedClient={selectedClient}
+        />
+      )}
+    </div>
   );
 }
