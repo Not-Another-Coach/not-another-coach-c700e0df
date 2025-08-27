@@ -57,21 +57,6 @@ export const InstagramIntegration = () => {
     try {
       setConnecting(true);
       
-      // First test if environment is configured
-      console.log('Testing Instagram environment...');
-      const { data: testData, error: testError } = await supabase.functions.invoke('test-instagram');
-      
-      if (testError) {
-        console.error('Test function error:', testError);
-        throw new Error('Instagram function not available');
-      }
-      
-      console.log('Test function response:', testData);
-      
-      if (!testData.hasAppId || !testData.hasAppSecret) {
-        throw new Error('Instagram API credentials not configured. Please ensure INSTAGRAM_APP_ID and INSTAGRAM_APP_SECRET are set in Supabase secrets.');
-      }
-      
       // Call the Instagram OAuth edge function to get auth URL
       const { data, error } = await supabase.functions.invoke('instagram-oauth', {
         body: { action: 'get_auth_url' }
