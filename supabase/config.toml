@@ -61,6 +61,9 @@ verify_jwt = true
 [functions.process-onboarding-sla]
 verify_jwt = false
 
+[functions.test-instagram]
+verify_jwt = false
+
 [functions.instagram-oauth]
 verify_jwt = false
 

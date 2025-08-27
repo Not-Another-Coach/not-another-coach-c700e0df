@@ -5,33 +5,25 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-interface InstagramTokenResponse {
-  access_token: string
-  user_id: string
-}
-
-interface InstagramUserInfo {
-  id: string
-  username: string
-  account_type: string
-}
-
 Deno.serve(async (req) => {
+  console.log('Instagram OAuth function called - method:', req.method)
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('Handling CORS preflight')
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
+    console.log('Creating Supabase client')
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     )
 
-    console.log('Instagram OAuth function called with method:', req.method)
-
     // Handle OAuth callback from Instagram (GET request with code in URL params)
     if (req.method === 'GET') {
+      console.log('Handling GET request - OAuth callback')
       const url = new URL(req.url)
       const code = url.searchParams.get('code')
       const error = url.searchParams.get('error')
@@ -62,26 +54,31 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Handle POST requests - temporarily skip auth for debugging
-    console.log('Processing POST request for Instagram OAuth')
+    // Handle POST requests
+    console.log('Processing POST request')
     
     let body, action, code, redirect_uri
     try {
-      body = await req.json()
+      console.log('Parsing request body')
+      const bodyText = await req.text()
+      console.log('Raw body:', bodyText)
+      body = JSON.parse(bodyText)
       action = body.action
       code = body.code
       redirect_uri = body.redirect_uri
-      console.log('Request body parsed:', { action, code: code ? 'present' : 'missing', redirect_uri })
+      console.log('Parsed body:', { action, code: code ? 'present' : 'missing', redirect_uri })
     } catch (parseError) {
-      console.log('JSON parse error:', parseError)
+      console.error('JSON parse error:', parseError)
       throw new Error('Invalid JSON in request body')
     }
 
     const appId = Deno.env.get('INSTAGRAM_APP_ID')
     const appSecret = Deno.env.get('INSTAGRAM_APP_SECRET')
     
+    console.log('Checking Instagram credentials - appId:', !!appId, 'appSecret:', !!appSecret)
+    
     if (!appId || !appSecret) {
-      console.log('Missing Instagram credentials - appId:', !!appId, 'appSecret:', !!appSecret)
+      console.error('Missing Instagram credentials')
       throw new Error('Instagram API credentials not configured')
     }
 
@@ -89,12 +86,13 @@ Deno.serve(async (req) => {
 
     // Handle getting auth URL
     if (action === 'get_auth_url') {
+      console.log('Generating auth URL')
       const redirectUri = `${Deno.env.get('SUPABASE_URL')}/functions/v1/instagram-oauth`
       const scopes = 'user_profile,user_media'
       
       const authUrl = `https://api.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scopes}&response_type=code`
       
-      console.log('Generated auth URL:', authUrl)
+      console.log('Generated auth URL')
       
       return new Response(
         JSON.stringify({ auth_url: authUrl }),
@@ -119,7 +117,7 @@ Deno.serve(async (req) => {
     )
     
     if (authError || !user) {
-      console.log('Authentication failed:', authError)
+      console.error('Authentication failed:', authError)
       throw new Error('Unauthorized')
     }
 
@@ -156,7 +154,7 @@ Deno.serve(async (req) => {
       throw new Error(`Token exchange failed: ${errorText}`)
     }
 
-    const tokenData: InstagramTokenResponse = await tokenResponse.json()
+    const tokenData = await tokenResponse.json()
     console.log('Token exchange successful, user_id:', tokenData.user_id)
 
     // Get user info from Instagram
@@ -168,7 +166,7 @@ Deno.serve(async (req) => {
       throw new Error('Failed to fetch Instagram user info')
     }
 
-    const userInfo: InstagramUserInfo = await userInfoResponse.json()
+    const userInfo = await userInfoResponse.json()
     console.log('User info fetched:', userInfo.username)
 
     // Store connection in database
