@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { usePackageWaysOfWorking } from "@/hooks/usePackageWaysOfWorking";
+import { useInstagramConnection } from "@/hooks/useInstagramConnection";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -39,6 +40,7 @@ const TrainerProfileSetup = () => {
   const { user, loading } = useAuth();
   const { profile, loading: profileLoading, isTrainer, updateProfile } = useProfile();
   const { packageWorkflows, loading: waysOfWorkingLoading } = usePackageWaysOfWorking();
+  const { isConnected: isInstagramConnected } = useInstagramConnection();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
@@ -356,7 +358,8 @@ const TrainerProfileSetup = () => {
         
         return allPackagesConfigured ? 'completed' : (anyPackageConfigured ? 'partial' : 'not_started');
       case 8:
-        return 'completed'; // Instagram integration - optional step
+        // Instagram integration - optional step, show status based on connection
+        return isInstagramConnected ? 'completed' : 'not_started';
       case 9:
         return 'completed'; // Working hours step - always accessible
       case 10:
