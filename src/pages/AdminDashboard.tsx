@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UserManagement } from '@/components/admin/UserManagement';
 import { FeedbackQuestionBuilder } from '@/components/admin/FeedbackQuestionBuilder';
 import { BulkUserUpload } from '@/components/admin/BulkUserUpload';
@@ -18,6 +17,141 @@ import { useUserRoles } from '@/hooks/useUserRoles';
 export const AdminDashboard = () => {
   const { isAdmin } = useUserRoles();
   const navigate = useNavigate();
+  const [selectedSection, setSelectedSection] = useState<string>('users');
+
+  const adminSections = [
+    {
+      id: 'users',
+      title: 'Users & Roles',
+      description: 'Manage user accounts and permissions',
+      icon: Users,
+      color: 'from-blue-500/10 to-blue-600/10 border-blue-200'
+    },
+    {
+      id: 'verification',
+      title: 'Verification',
+      description: 'Handle trainer verification requests',
+      icon: CheckCircle,
+      color: 'from-green-500/10 to-green-600/10 border-green-200'
+    },
+    {
+      id: 'bulk-upload',
+      title: 'Bulk Upload',
+      description: 'Upload multiple users and manage test data',
+      icon: Upload,
+      color: 'from-purple-500/10 to-purple-600/10 border-purple-200'
+    },
+    {
+      id: 'feedback',
+      title: 'Feedback Builder',
+      description: 'Configure discovery call feedback questions',
+      icon: Settings,
+      color: 'from-amber-500/10 to-amber-600/10 border-amber-200'
+    },
+    {
+      id: 'knowledge-base',
+      title: 'Knowledge Base',
+      description: 'Manage articles and documentation',
+      icon: FileText,
+      color: 'from-indigo-500/10 to-indigo-600/10 border-indigo-200'
+    },
+    {
+      id: 'visibility',
+      title: 'Content Visibility',
+      description: 'Control trainer content visibility settings',
+      icon: Eye,
+      color: 'from-cyan-500/10 to-cyan-600/10 border-cyan-200'
+    },
+    {
+      id: 'cleanup',
+      title: 'Data Cleanup',
+      description: 'Clean up client-trainer interactions',
+      icon: Trash2,
+      color: 'from-red-500/10 to-red-600/10 border-red-200'
+    },
+    {
+      id: 'analytics',
+      title: 'Analytics',
+      description: 'View system analytics and reports',
+      icon: BarChart3,
+      color: 'from-emerald-500/10 to-emerald-600/10 border-emerald-200'
+    },
+    {
+      id: 'settings',
+      title: 'Settings',
+      description: 'System configuration and utilities',
+      icon: Settings,
+      color: 'from-gray-500/10 to-gray-600/10 border-gray-200'
+    }
+  ];
+
+  const renderSectionContent = () => {
+    switch (selectedSection) {
+      case 'users':
+        return <UserManagement />;
+      case 'verification':
+        return <VerificationManagement />;
+      case 'bulk-upload':
+        return (
+          <div className="space-y-6">
+            <BulkUserUpload />
+            <TestUserCleanup />
+          </div>
+        );
+      case 'cleanup':
+        return <ClientTrainerCleanup />;
+      case 'feedback':
+        return <FeedbackQuestionBuilder />;
+      case 'knowledge-base':
+        return <KnowledgeBaseAdmin />;
+      case 'visibility':
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>Content Visibility Matrix</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Manage how trainer content appears at different engagement stages
+              </p>
+            </CardHeader>
+            <CardContent>
+              <VisibilitySettingsSection />
+            </CardContent>
+          </Card>
+        );
+      case 'analytics':
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>System Analytics</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Analytics dashboard coming soon...
+              </p>
+            </CardContent>
+          </Card>
+        );
+      case 'settings':
+        return (
+          <div className="space-y-6">
+            <UserValidityChecker />
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>System Settings</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Additional system settings coming soon...
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
 
   if (!isAdmin) {
     return (
@@ -83,117 +217,52 @@ export const AdminDashboard = () => {
         </Button>
       </div>
 
-      <Tabs defaultValue="users" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-9">
-          <TabsTrigger value="users" className="flex items-center gap-2">
-            <Users className="w-4 h-4" />
-            Users & Roles
-          </TabsTrigger>
-          <TabsTrigger value="verification" className="flex items-center gap-2">
-            <CheckCircle className="w-4 h-4" />
-            Verification
-          </TabsTrigger>
-          <TabsTrigger value="bulk-upload" className="flex items-center gap-2">
-            <Upload className="w-4 h-4" />
-            Bulk Upload
-          </TabsTrigger>
-          <TabsTrigger value="feedback" className="flex items-center gap-2">
-            <Settings className="w-4 h-4" />
-            Feedback Builder
-          </TabsTrigger>
-          <TabsTrigger value="knowledge-base" className="flex items-center gap-2">
-            <FileText className="w-4 h-4" />
-            Knowledge Base
-          </TabsTrigger>
-          <TabsTrigger value="visibility" className="flex items-center gap-2">
-            <Eye className="w-4 h-4" />
-            Content Visibility
-          </TabsTrigger>
-          <TabsTrigger value="cleanup" className="flex items-center gap-2">
-            <Trash2 className="w-4 h-4" />
-            Data Cleanup
-          </TabsTrigger>
-          <TabsTrigger value="analytics" className="flex items-center gap-2">
-            <BarChart3 className="w-4 h-4" />
-            Analytics
-          </TabsTrigger>
-          <TabsTrigger value="settings" className="flex items-center gap-2">
-            <Settings className="w-4 h-4" />
-            Settings
-          </TabsTrigger>
-        </TabsList>
-
-          <TabsContent value="users">
-            <UserManagement />
-          </TabsContent>
-
-          <TabsContent value="verification">
-            <VerificationManagement />
-          </TabsContent>
-
-          <TabsContent value="bulk-upload">
-            <div className="space-y-6">
-              <BulkUserUpload />
-              <TestUserCleanup />
-            </div>
-          </TabsContent>
-
-          <TabsContent value="cleanup">
-            <ClientTrainerCleanup />
-          </TabsContent>
-
-          <TabsContent value="feedback">
-            <FeedbackQuestionBuilder />
-          </TabsContent>
-
-          <TabsContent value="knowledge-base">
-            <KnowledgeBaseAdmin />
-          </TabsContent>
-
-        <TabsContent value="visibility">
-          <Card>
-            <CardHeader>
-              <CardTitle>Content Visibility Matrix</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Manage how trainer content appears at different engagement stages
-              </p>
-            </CardHeader>
-            <CardContent>
-              <VisibilitySettingsSection />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="analytics">
-          <Card>
-            <CardHeader>
-              <CardTitle>System Analytics</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Analytics dashboard coming soon...
-              </p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="settings">
-          <div className="space-y-6">
-            <UserValidityChecker />
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>System Settings</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Additional system settings coming soon...
-                </p>
+      {/* Admin Section Tiles */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        {adminSections.map((section) => {
+          const IconComponent = section.icon;
+          const isSelected = selectedSection === section.id;
+          
+          return (
+            <Card 
+              key={section.id}
+              className={`cursor-pointer transition-all duration-200 hover:scale-105 bg-gradient-to-br ${section.color} ${
+                isSelected 
+                  ? 'ring-2 ring-primary shadow-lg transform scale-105' 
+                  : 'hover:shadow-md'
+              }`}
+              onClick={() => setSelectedSection(section.id)}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <div className={`p-3 rounded-lg ${
+                    isSelected 
+                      ? 'bg-primary text-primary-foreground' 
+                      : 'bg-white/50 text-muted-foreground'
+                  }`}>
+                    <IconComponent className="w-6 h-6" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className={`font-semibold text-lg ${
+                      isSelected ? 'text-primary' : 'text-foreground'
+                    }`}>
+                      {section.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {section.description}
+                    </p>
+                  </div>
+                </div>
               </CardContent>
             </Card>
-          </div>
-        </TabsContent>
-      </Tabs>
+          );
+        })}
+      </div>
+
+      {/* Selected Section Content */}
+      <div className="mt-8">
+        {renderSectionContent()}
+      </div>
     </div>
   );
 };
