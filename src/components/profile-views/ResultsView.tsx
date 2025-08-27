@@ -85,59 +85,6 @@ export const ResultsView = ({ trainer }: ResultsViewProps) => {
 
   return (
     <div className="space-y-6">
-      {/* Success Stats Overview */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Trophy className="h-5 w-5" />
-            Success Statistics
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center p-4 bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg">
-              <div className="text-2xl font-bold text-primary">{resultsData.stats.clientsTransformed}</div>
-              <div className="text-sm text-muted-foreground">Client Testimonials</div>
-            </div>
-            <div className="text-center p-4 bg-gradient-to-br from-success/10 to-success/5 rounded-lg">
-              <div className="text-2xl font-bold text-success">{resultsData.stats.imagesShared}</div>
-              <div className="text-sm text-muted-foreground">Visual Transformations</div>
-            </div>
-            <div className="text-center p-4 bg-gradient-to-br from-accent/10 to-accent/5 rounded-lg">
-              <div className="text-2xl font-bold text-accent">{resultsData.stats.outcomeVariety}</div>
-              <div className="text-sm text-muted-foreground">Different Outcomes</div>
-            </div>
-            <div className="text-center p-4 bg-gradient-to-br from-energy/10 to-energy/5 rounded-lg">
-              <div className="text-2xl font-bold text-energy">{trainer.rating}</div>
-              <div className="text-sm text-muted-foreground">Star Rating</div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Achievement Progress Bars */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
-            Performance Metrics
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {resultsData.achievements.map((achievement, index) => (
-              <div key={index} className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium">{achievement.label}</span>
-                  <span className="text-sm font-bold">{achievement.value}{achievement.unit}</span>
-                </div>
-                <Progress value={Math.min(achievement.value, 100)} className="h-2" />
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Before & After Gallery */}
       {resultsData.beforeAfterImages.length > 0 && (
         <Card>
