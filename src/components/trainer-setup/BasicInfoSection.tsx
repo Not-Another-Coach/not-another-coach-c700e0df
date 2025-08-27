@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Upload, Camera, Sparkles, User, Plus, X, Calendar } from "lucide-react";
 import { SectionHeader } from './SectionHeader';
+import { AIDescriptionHelper } from './AIDescriptionHelper';
 
 interface BasicInfoSectionProps {
   formData: any;
@@ -18,6 +19,8 @@ interface BasicInfoSectionProps {
 export function BasicInfoSection({ formData, updateFormData, errors = {}, clearFieldError }: BasicInfoSectionProps) {
   const [dragOver, setDragOver] = useState(false);
   const [bioAIHelperOpen, setBioAIHelperOpen] = useState(false);
+  const [howStartedAIHelperOpen, setHowStartedAIHelperOpen] = useState(false);
+  const [philosophyAIHelperOpen, setPhilosophyAIHelperOpen] = useState(false);
 
   const handleFileUpload = async (file: File) => {
     try {
@@ -228,7 +231,30 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
 
       {/* How it all started */}
       <div className="space-y-2">
-        <Label htmlFor="how_started">How it all started?</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="how_started">How it all started?</Label>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setHowStartedAIHelperOpen(!howStartedAIHelperOpen)}
+          >
+            <Sparkles className="h-4 w-4 mr-2" />
+            AI Helper
+          </Button>
+        </div>
+        
+        {howStartedAIHelperOpen && (
+          <AIDescriptionHelper
+            selectedClientTypes={formData.ideal_client_types || []}
+            selectedCoachingStyles={formData.coaching_styles || []}
+            currentDescription={formData.how_started || ''}
+            onSuggestionSelect={(suggestion) => {
+              updateFormData({ how_started: suggestion });
+              setHowStartedAIHelperOpen(false);
+            }}
+          />
+        )}
+        
         <Textarea
           id="how_started"
           value={formData.how_started}
@@ -250,7 +276,30 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
 
       {/* My Philosophy */}
       <div className="space-y-2">
-        <Label htmlFor="philosophy">My Philosophy?</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="philosophy">My Philosophy?</Label>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPhilosophyAIHelperOpen(!philosophyAIHelperOpen)}
+          >
+            <Sparkles className="h-4 w-4 mr-2" />
+            AI Helper
+          </Button>
+        </div>
+        
+        {philosophyAIHelperOpen && (
+          <AIDescriptionHelper
+            selectedClientTypes={formData.ideal_client_types || []}
+            selectedCoachingStyles={formData.coaching_styles || []}
+            currentDescription={formData.philosophy || ''}
+            onSuggestionSelect={(suggestion) => {
+              updateFormData({ philosophy: suggestion });
+              setPhilosophyAIHelperOpen(false);
+            }}
+          />
+        )}
+        
         <Textarea
           id="philosophy"
           value={formData.philosophy}
