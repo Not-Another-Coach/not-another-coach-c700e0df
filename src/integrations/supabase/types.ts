@@ -1433,6 +1433,177 @@ export type Database = {
           },
         ]
       }
+      instagram_connections: {
+        Row: {
+          access_token: string
+          account_type: string
+          connected_at: string
+          created_at: string
+          id: string
+          instagram_user_id: string
+          instagram_username: string
+          is_active: boolean
+          reveal_handle_post_discovery: boolean
+          token_expires_at: string | null
+          trainer_id: string
+          updated_at: string
+        }
+        Insert: {
+          access_token: string
+          account_type: string
+          connected_at?: string
+          created_at?: string
+          id?: string
+          instagram_user_id: string
+          instagram_username: string
+          is_active?: boolean
+          reveal_handle_post_discovery?: boolean
+          token_expires_at?: string | null
+          trainer_id: string
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string
+          account_type?: string
+          connected_at?: string
+          created_at?: string
+          id?: string
+          instagram_user_id?: string
+          instagram_username?: string
+          is_active?: boolean
+          reveal_handle_post_discovery?: boolean
+          token_expires_at?: string | null
+          trainer_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "instagram_connections_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      instagram_handle_revelations: {
+        Row: {
+          client_id: string
+          connection_id: string
+          created_at: string
+          discovery_call_id: string | null
+          id: string
+          revealed_at: string
+          trainer_id: string
+        }
+        Insert: {
+          client_id: string
+          connection_id: string
+          created_at?: string
+          discovery_call_id?: string | null
+          id?: string
+          revealed_at?: string
+          trainer_id: string
+        }
+        Update: {
+          client_id?: string
+          connection_id?: string
+          created_at?: string
+          discovery_call_id?: string | null
+          id?: string
+          revealed_at?: string
+          trainer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "instagram_handle_revelations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "instagram_handle_revelations_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "instagram_connections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "instagram_handle_revelations_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      instagram_selected_media: {
+        Row: {
+          caption: string | null
+          connection_id: string
+          created_at: string
+          display_order: number
+          id: string
+          instagram_media_id: string
+          is_active: boolean
+          media_type: string
+          media_url: string
+          permalink: string
+          selected_at: string
+          thumbnail_url: string | null
+          trainer_id: string
+          updated_at: string
+        }
+        Insert: {
+          caption?: string | null
+          connection_id: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          instagram_media_id: string
+          is_active?: boolean
+          media_type: string
+          media_url: string
+          permalink: string
+          selected_at?: string
+          thumbnail_url?: string | null
+          trainer_id: string
+          updated_at?: string
+        }
+        Update: {
+          caption?: string | null
+          connection_id?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          instagram_media_id?: string
+          is_active?: boolean
+          media_type?: string
+          media_url?: string
+          permalink?: string
+          selected_at?: string
+          thumbnail_url?: string | null
+          trainer_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "instagram_selected_media_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "instagram_connections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "instagram_selected_media_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kb_article_revisions: {
         Row: {
           article_id: string
