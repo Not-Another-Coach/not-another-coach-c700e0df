@@ -280,7 +280,7 @@ export const EnhancedTrainerCard = ({
       </div>
 
       {/* Navigation arrows - hide in transformations view when there are multiple testimonials */}
-      {!(currentView === 'transformations' && trainer.testimonials && trainer.testimonials.length > 1) && (
+      {!(currentView === 'transformations' && ((trainer as any).testimonials || []).filter((t: any) => t.showImages && t.beforeImage && t.afterImage && t.consentGiven).length > 1) && (
         <>
           <Button
             variant="ghost"

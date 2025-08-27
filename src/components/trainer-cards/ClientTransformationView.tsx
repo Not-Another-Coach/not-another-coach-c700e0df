@@ -125,29 +125,15 @@ export const ClientTransformationView = ({ trainer, children }: ClientTransforma
 
   // Navigation functions
   const goToPrevious = () => {
-    console.log('🔄 Testimonial Navigation - Previous clicked', {
-      currentIndex,
-      totalTestimonials: transformationData.transformations.length,
-      willGoTo: currentIndex > 0 ? currentIndex - 1 : transformationData.transformations.length - 1
-    });
-    
     setCurrentIndex((prev) => {
       const newIndex = prev > 0 ? prev - 1 : transformationData.transformations.length - 1;
-      console.log('🔄 Previous navigation: from', prev, 'to', newIndex);
       return newIndex;
     });
   };
 
   const goToNext = () => {
-    console.log('🔄 Testimonial Navigation - Next clicked', {
-      currentIndex,
-      totalTestimonials: transformationData.transformations.length,
-      willGoTo: currentIndex < transformationData.transformations.length - 1 ? currentIndex + 1 : 0
-    });
-    
     setCurrentIndex((prev) => {
       const newIndex = prev < transformationData.transformations.length - 1 ? prev + 1 : 0;
-      console.log('🔄 Next navigation: from', prev, 'to', newIndex);
       return newIndex;
     });
   };
