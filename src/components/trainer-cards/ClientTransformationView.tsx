@@ -1,8 +1,10 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star, MapPin, Quote } from "lucide-react";
+import { Star, MapPin, Quote, ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Trainer } from "@/components/TrainerCard";
 import { getTrainerDisplayPrice } from "@/lib/priceUtils";
+import { useState } from "react";
 
 interface ClientTransformationViewProps {
   trainer: Trainer;
@@ -56,6 +58,7 @@ const getTransformationData = (trainer: Trainer) => {
 
 export const ClientTransformationView = ({ trainer, children }: ClientTransformationViewProps) => {
   const transformationData = getTransformationData(trainer);
+  const [currentIndex, setCurrentIndex] = useState(0);
   
   // If no transformations available, show placeholder
   if (transformationData.transformations.length === 0) {
@@ -112,122 +115,66 @@ export const ClientTransformationView = ({ trainer, children }: ClientTransforma
     );
   }
 
-  // For multiple testimonials, render each as a separate card
-  if (transformationData.transformations.length > 1) {
-    return (
-      <div className="space-y-4">
-        {transformationData.transformations.map((transformation, index) => (
-          <Card key={transformation.id || index} className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-card to-muted/30 border-0 relative overflow-hidden">
-            <CardContent className="p-0">
-              {/* Interactive elements overlay - only on first card */}
-              {index === 0 && children}
-              
-              {/* Single Before/After Split */}
-              <div className="aspect-square relative">
-                <div className="grid grid-cols-2 gap-1 h-full">
-                  {/* Before Image */}
-                  <div className="relative overflow-hidden">
-                    <img
-                      src={transformation.before}
-                      alt="Before transformation"
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute top-3 left-3">
-                      <Badge className="text-sm bg-black/70 text-white border-0 px-3 py-1">
-                        Before
-                      </Badge>
-                    </div>
-                  </div>
-                  
-                  {/* After Image */}
-                  <div className="relative overflow-hidden">
-                    <img
-                      src={transformation.after}
-                      alt="After transformation"
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute top-3 right-3">
-                      <Badge className="text-sm bg-success text-white border-0 px-3 py-1">
-                        After
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Gradient overlay for text readability */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-              </div>
+  const currentTransformation = transformationData.transformations[currentIndex];
+  const hasMultiple = transformationData.transformations.length > 1;
 
-              {/* Trainer Info & Testimonial Overlay */}
-              <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-lg mb-1 text-white drop-shadow-sm">
-                      {trainer.name}
-                    </h3>
-                    
-                    <div className="flex items-center gap-3 text-white/90 text-sm mb-2">
-                      <div className="flex items-center gap-1">
-                        <Star className="h-3 w-3 fill-current" />
-                        <span className="font-medium">{trainer.rating}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <MapPin className="h-3 w-3" />
-                        <span>{trainer.location}</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Price */}
-                  <div className="text-right">
-                    <div className="text-xl font-bold text-white drop-shadow-sm">
-                      {getTrainerDisplayPrice(trainer)}
-                    </div>
-                    <div className="text-xs text-white/80">packages</div>
-                  </div>
-                </div>
-
-                {/* Individual Testimonial */}
-                <div className="bg-black/30 backdrop-blur-sm rounded-lg p-3 border border-white/20">
-                  <div className="flex items-start gap-2">
-                    <Quote className="h-3 w-3 text-white/70 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-sm text-white/90 italic mb-1 leading-relaxed">
-                        "{transformation.testimonial}"
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-white/70">
-                          - {transformation.clientName}
-                        </span>
-                        <Badge className="text-xs bg-success/20 text-success-foreground border-success/30">
-                          {transformation.achievement}
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+  // Navigation functions
+  const goToPrevious = () => {
+    setCurrentIndex((prev) => 
+      prev > 0 ? prev - 1 : transformationData.transformations.length - 1
     );
-  }
+  };
 
-  // Single testimonial case
+  const goToNext = () => {
+    setCurrentIndex((prev) => 
+      prev < transformationData.transformations.length - 1 ? prev + 1 : 0
+    );
+  };
+
   return (
     <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-card to-muted/30 border-0 relative overflow-hidden">
       <CardContent className="p-0">
         {/* Interactive elements overlay */}
         {children}
         
-        {/* Single Before/After Split */}
+        {/* Navigation arrows for testimonials - only show if multiple testimonials */}
+        {hasMultiple && (
+          <>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute left-2 top-[45%] -translate-y-1/2 z-40 bg-white/80 backdrop-blur hover:bg-white/90 transition-all p-1 h-8 w-8"
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                goToPrevious();
+              }}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute right-2 top-[45%] -translate-y-1/2 z-40 bg-white/80 backdrop-blur hover:bg-white/90 transition-all p-1 h-8 w-8"
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                goToNext();
+              }}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </>
+        )}
+        
+        {/* Current testimonial - Before/After Split */}
         <div className="aspect-square relative">
           <div className="grid grid-cols-2 gap-1 h-full">
             {/* Before Image */}
             <div className="relative overflow-hidden">
               <img
-                src={transformationData.transformations[0].before}
+                src={currentTransformation.before}
                 alt="Before transformation"
                 className="w-full h-full object-cover"
               />
@@ -241,7 +188,7 @@ export const ClientTransformationView = ({ trainer, children }: ClientTransforma
             {/* After Image */}
             <div className="relative overflow-hidden">
               <img
-                src={transformationData.transformations[0].after}
+                src={currentTransformation.after}
                 alt="After transformation"
                 className="w-full h-full object-cover"
               />
@@ -257,7 +204,28 @@ export const ClientTransformationView = ({ trainer, children }: ClientTransforma
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
         </div>
 
-        {/* Trainer Info & Testimonial Overlay */}
+        {/* Testimonial indicators - show which testimonial is active */}
+        {hasMultiple && (
+          <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30 flex gap-1">
+            {transformationData.transformations.map((_, index) => (
+              <button
+                key={index}
+                className={`w-2 h-2 rounded-full transition-all ${
+                  index === currentIndex 
+                    ? 'bg-white shadow-sm' 
+                    : 'bg-white/50 hover:bg-white/70'
+                }`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  setCurrentIndex(index);
+                }}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Trainer Info & Current Testimonial Overlay */}
         <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
           <div className="flex items-start justify-between mb-3">
             <div className="flex-1 min-w-0">
@@ -286,21 +254,28 @@ export const ClientTransformationView = ({ trainer, children }: ClientTransforma
             </div>
           </div>
 
-          {/* Individual Testimonial */}
+          {/* Current Testimonial */}
           <div className="bg-black/30 backdrop-blur-sm rounded-lg p-3 border border-white/20">
             <div className="flex items-start gap-2">
               <Quote className="h-3 w-3 text-white/70 flex-shrink-0 mt-0.5" />
-              <div>
+              <div className="flex-1">
                 <p className="text-sm text-white/90 italic mb-1 leading-relaxed">
-                  "{transformationData.transformations[0].testimonial}"
+                  "{currentTransformation.testimonial}"
                 </p>
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-white/70">
-                    - {transformationData.transformations[0].clientName}
+                    - {currentTransformation.clientName}
                   </span>
-                  <Badge className="text-xs bg-success/20 text-success-foreground border-success/30">
-                    {transformationData.transformations[0].achievement}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge className="text-xs bg-success/20 text-success-foreground border-success/30">
+                      {currentTransformation.achievement}
+                    </Badge>
+                    {hasMultiple && (
+                      <span className="text-xs text-white/60">
+                        {currentIndex + 1}/{transformationData.transformations.length}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
