@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { MapPin, Monitor, Users, Globe, Target, Dumbbell } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { MapPin, Monitor, Users, Globe, Target, Dumbbell, Sparkles } from "lucide-react";
 import { SectionHeader } from './SectionHeader';
 
 interface ExpertiseSectionProps {
@@ -126,6 +127,22 @@ export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionP
   const removeLanguage = (language: string) => {
     const current = formData.languages || [];
     updateFormData({ languages: current.filter((l: string) => l !== language) });
+  };
+
+  const generateSpecializationDescription = () => {
+    const specialties = formData.specializations || [];
+    if (specialties.length === 0) return "Select specialties above to auto-generate";
+    
+    const mainSpecialties = specialties.slice(0, 3);
+    let description = `I specialize in ${mainSpecialties.join(", ")}`;
+    
+    if (specialties.length > 3) {
+      description += ` and ${specialties.length - 3} other areas`;
+    }
+    
+    description += ". My expertise allows me to create personalized programs that deliver real results for my clients.";
+    
+    updateFormData({ specialization_description: description });
   };
 
   return (
@@ -310,6 +327,33 @@ export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionP
           </div>
         </div>
       )}
+
+      {/* What I specialize in */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="specialization_description">What I specialize in</Label>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={generateSpecializationDescription}
+            disabled={!formData.specializations?.length}
+          >
+            <Sparkles className="h-4 w-4 mr-2" />
+            Auto-Generate
+          </Button>
+        </div>
+        <Textarea
+          id="specialization_description"
+          value={formData.specialization_description || ''}
+          onChange={(e) => updateFormData({ specialization_description: e.target.value })}
+          placeholder="Describe what you specialize in and your unique approach..."
+          rows={4}
+          className="resize-none"
+        />
+        <p className="text-xs text-muted-foreground">
+          This will appear in your profile's story section. Select specialties above and use auto-generate for a starting point.
+        </p>
+      </div>
 
       {/* Languages */}
       <div className="space-y-4">

@@ -226,6 +226,50 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
         </p>
       </div>
 
+      {/* How it all started */}
+      <div className="space-y-2">
+        <Label htmlFor="how_started">How it all started?</Label>
+        <Textarea
+          id="how_started"
+          value={formData.how_started}
+          onChange={(e) => {
+            updateFormData({ how_started: e.target.value });
+            if (errors.how_started && clearFieldError) clearFieldError('how_started');
+          }}
+          placeholder="Tell your origin story - what inspired you to become a trainer?"
+          rows={4}
+          className={`resize-none ${errors.how_started ? 'border-red-500' : ''}`}
+        />
+        {errors.how_started && (
+          <p className="text-sm text-red-500 mt-1">{errors.how_started}</p>
+        )}
+        <p className="text-xs text-muted-foreground">
+          Share what motivated you to start your fitness journey and become a trainer
+        </p>
+      </div>
+
+      {/* My Philosophy */}
+      <div className="space-y-2">
+        <Label htmlFor="philosophy">My Philosophy?</Label>
+        <Textarea
+          id="philosophy"
+          value={formData.philosophy}
+          onChange={(e) => {
+            updateFormData({ philosophy: e.target.value });
+            if (errors.philosophy && clearFieldError) clearFieldError('philosophy');
+          }}
+          placeholder="What's your training philosophy and approach?"
+          rows={4}
+          className={`resize-none ${errors.philosophy ? 'border-red-500' : ''}`}
+        />
+        {errors.philosophy && (
+          <p className="text-sm text-red-500 mt-1">{errors.philosophy}</p>
+        )}
+        <p className="text-xs text-muted-foreground">
+          Describe your core beliefs about fitness, training, and helping clients succeed
+        </p>
+      </div>
+
       {/* Bio/About Me */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
