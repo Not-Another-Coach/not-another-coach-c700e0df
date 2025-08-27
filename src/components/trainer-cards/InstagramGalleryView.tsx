@@ -6,6 +6,23 @@ import { getTrainerDisplayPrice } from "@/lib/priceUtils";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 
+const getGridClasses = (gridSize: number): string => {
+  switch (gridSize) {
+    case 1:
+      return "grid-cols-1";
+    case 4:
+      return "grid-cols-2 grid-rows-2";
+    case 6:
+      return "grid-cols-3 grid-rows-2";
+    case 9:
+      return "grid-cols-3 grid-rows-3";
+    case 12:
+      return "grid-cols-4 grid-rows-3";
+    default:
+      return "grid-cols-3 grid-rows-2";
+  }
+};
+
 interface InstagramGalleryViewProps {
   trainer: Trainer;
   children?: React.ReactNode; // For CTA buttons and interactive elements
@@ -14,6 +31,7 @@ interface InstagramGalleryViewProps {
 export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryViewProps) => {
   const [displayImages, setDisplayImages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [gridSize, setGridSize] = useState<number>(6);
 
   useEffect(() => {
     const fetchTrainerImages = async () => {
@@ -21,6 +39,18 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
 
       try {
         setLoading(true);
+        
+        // Fetch trainer image preferences to get grid size
+        const { data: preferences, error: preferencesError } = await supabase
+          .from('trainer_image_preferences')
+          .select('max_images_per_view')
+          .eq('trainer_id', trainer.id)
+          .maybeSingle();
+
+        if (preferencesError) console.error('Error fetching preferences:', preferencesError);
+        
+        const maxImages = preferences?.max_images_per_view || 6;
+        setGridSize(maxImages);
         
         // Fetch uploaded images
         const { data: uploadedImages, error: uploadedError } = await supabase
@@ -60,7 +90,7 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
           }))
         ].sort((a, b) => a.displayOrder - b.displayOrder);
 
-        setDisplayImages(allImages.slice(0, 6)); // Limit to 6 images
+        setDisplayImages(allImages.slice(0, maxImages));
       } catch (error) {
         console.error('Error fetching trainer images:', error);
         // Fallback to trainer profile image
@@ -87,7 +117,7 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
         {/* Gallery Grid */}
         <div className="relative">
           {displayImages.length > 0 ? (
-            <div className="grid grid-cols-3 gap-1 aspect-square">
+            <div className={`grid gap-1 aspect-square ${getGridClasses(gridSize)}`}>
               {displayImages.map((image, index) => (
                 <div key={image.id} className="relative overflow-hidden bg-muted">
                   <img
@@ -112,7 +142,7 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
               ))}
               
               {/* Fill remaining slots with trainer image if needed */}
-              {displayImages.length < 6 && Array.from({ length: 6 - displayImages.length }).map((_, index) => (
+              {displayImages.length < gridSize && Array.from({ length: gridSize - displayImages.length }).map((_, index) => (
                 <div key={`filler-${index}`} className="relative overflow-hidden bg-muted/50">
                   <img
                     src={trainer.image}

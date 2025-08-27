@@ -396,7 +396,7 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="max-images">Maximum images per card view</Label>
+                <Label htmlFor="max-images">Gallery Grid Size</Label>
                 <Select
                   value={(imagePreferences?.max_images_per_view || 6).toString()}
                   onValueChange={(value) => updateImagePreferences({ max_images_per_view: parseInt(value) })}
@@ -405,12 +405,16 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="4">4 images</SelectItem>
-                    <SelectItem value="6">6 images</SelectItem>
-                    <SelectItem value="8">8 images</SelectItem>
-                    <SelectItem value="9">9 images</SelectItem>
+                    <SelectItem value="1">1 image (Hero)</SelectItem>
+                    <SelectItem value="4">4 images (2×2)</SelectItem>
+                    <SelectItem value="6">6 images (3×2)</SelectItem>
+                    <SelectItem value="9">9 images (3×3)</SelectItem>
+                    <SelectItem value="12">12 images (4×3)</SelectItem>
                   </SelectContent>
                 </Select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Select exactly {imagePreferences?.max_images_per_view || 6} images to fill your gallery grid
+                </p>
               </div>
 
               <div className="flex items-center justify-between">
