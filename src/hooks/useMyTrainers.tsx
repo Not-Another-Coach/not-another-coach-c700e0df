@@ -26,6 +26,7 @@ export interface TrainerWithStatus {
   trainingType: string[];
   offers_discovery_call: boolean;
   package_options?: any[];
+  testimonials?: any[];
   // Status fields
   status: 'saved' | 'shortlisted' | 'discovery' | 'declined' | 'waitlist';
   engagement?: any;
@@ -111,7 +112,8 @@ export function useMyTrainers(refreshTrigger?: number) {
             profile_photo_url,
             hourly_rate,
             training_types,
-            package_options
+            package_options,
+            testimonials
           `)
           .eq('user_type', 'trainer')
           .in('id', trainerIds);
@@ -159,7 +161,8 @@ export function useMyTrainers(refreshTrigger?: number) {
             availability: 'Available', // Default availability
             trainingType: trainerProfile.training_types || [],
             offers_discovery_call: discoveryCallValue,
-            package_options: trainerProfile.package_options || []
+            package_options: trainerProfile.package_options || [],
+            testimonials: (trainerProfile.testimonials as any[]) || []
           };
         };
 
