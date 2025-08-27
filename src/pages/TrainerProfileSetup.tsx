@@ -32,7 +32,7 @@ import { RatesSection } from "@/components/trainer-setup/RatesSection";
 import { TestimonialsSection } from "@/components/trainer-setup/TestimonialsSection";
 import { PackageWaysOfWorkingSection } from "@/components/trainer-setup/PackageWaysOfWorkingSection";
 import { InstagramIntegration } from "@/components/instagram/InstagramIntegration";
-
+import { ImageManagementSection } from "@/components/trainer-setup/ImageManagementSection";
 import { WorkingHoursAndAvailabilitySection } from "@/components/trainer-setup/WorkingHoursAndAvailabilitySection";
 import { TermsAndNotificationsSection } from "@/components/trainer-setup/TermsAndNotificationsSection";
 import { VerificationSection } from "@/components/trainer-setup/VerificationSection";
@@ -116,7 +116,7 @@ const TrainerProfileSetup = () => {
     terms_agreed: false,
   });
 
-  const totalSteps = 11;
+  const totalSteps = 12;
 
   const stepTitles = [
     "Basic Info",
@@ -127,6 +127,7 @@ const TrainerProfileSetup = () => {
     "Testimonials & Case Studies",
     "Ways of Working",
     "Instagram Integration",
+    "Image Management",
     "Working Hours & New Client Availability",
     "T&Cs and Notifications",
     "Verification"
@@ -222,9 +223,10 @@ const TrainerProfileSetup = () => {
         'testimonials': 6,
         'ways-of-working': 7,
         'instagram': 8,
-        'working-hours': 9,
-        'terms-notifications': 10,
-        'verification': 11
+        'images': 9,
+        'working-hours': 10,
+        'terms-notifications': 11,
+        'verification': 12
       };
       
       const stepNumber = tabMap[tab];
@@ -362,10 +364,13 @@ const TrainerProfileSetup = () => {
         // Instagram integration - optional step, show status based on connection
         return isInstagramConnected ? 'completed' : 'not_started';
       case 9:
-        return 'completed'; // Working hours step - always accessible
+        // Image management - optional step, always accessible
+        return 'completed';
       case 10:
-        return formData.terms_agreed ? 'completed' : 'not_started';
+        return 'completed'; // Working hours step - always accessible
       case 11:
+        return formData.terms_agreed ? 'completed' : 'not_started';
+      case 12:
         // Verification step - always accessible but completion depends on verification status
         return 'completed'; // This is a read-only informational step
       default:
@@ -641,13 +646,15 @@ const TrainerProfileSetup = () => {
       case 8:
         return <InstagramIntegration />;
       case 9:
+        return <ImageManagementSection {...commonProps} />;
+      case 10:
         return <WorkingHoursAndAvailabilitySection 
           {...commonProps} 
           onAvailabilityChange={handleAvailabilityChange}
         />;
-      case 10:
-        return <TermsAndNotificationsSection {...commonProps} />;
       case 11:
+        return <TermsAndNotificationsSection {...commonProps} />;
+      case 12:
         return <VerificationSection />;
       default:
         return null;

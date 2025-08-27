@@ -1,9 +1,9 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star, MapPin, Instagram, Play } from "lucide-react";
+import { Star, MapPin, Instagram, Play, Image as ImageIcon } from "lucide-react";
 import { Trainer } from "@/components/TrainerCard";
 import { getTrainerDisplayPrice } from "@/lib/priceUtils";
-import { useInstagramIntegration } from "@/hooks/useInstagramIntegration";
+import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 
 interface InstagramGalleryViewProps {
@@ -12,21 +12,71 @@ interface InstagramGalleryViewProps {
 }
 
 export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryViewProps) => {
-  const { selectedMedia } = useInstagramIntegration();
-  const [displayMedia, setDisplayMedia] = useState<any[]>([]);
+  const [displayImages, setDisplayImages] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Use trainer's selected Instagram media or fallback to placeholder images
-    if (selectedMedia.length > 0) {
-      setDisplayMedia(selectedMedia.slice(0, 6));
-    } else {
-      // Fallback to trainer image and placeholder gallery
-      setDisplayMedia([
-        { media_url: trainer.image, media_type: 'IMAGE' },
-        // Add some placeholder gallery items if needed
-      ]);
-    }
-  }, [selectedMedia, trainer.image]);
+    const fetchTrainerImages = async () => {
+      if (!trainer.id) return;
+
+      try {
+        setLoading(true);
+        
+        // Fetch uploaded images
+        const { data: uploadedImages, error: uploadedError } = await supabase
+          .from('trainer_uploaded_images')
+          .select('*')
+          .eq('trainer_id', trainer.id)
+          .eq('is_selected_for_display', true)
+          .order('display_order', { ascending: true });
+
+        if (uploadedError) throw uploadedError;
+
+        // Fetch Instagram selections
+        const { data: instagramImages, error: instagramError } = await supabase
+          .from('trainer_instagram_selections')
+          .select('*')
+          .eq('trainer_id', trainer.id)
+          .eq('is_selected_for_display', true)
+          .order('display_order', { ascending: true });
+
+        if (instagramError) throw instagramError;
+
+        // Combine and format images
+        const allImages = [
+          ...(uploadedImages || []).map(img => ({
+            id: img.id,
+            type: 'uploaded',
+            url: supabase.storage.from('trainer-images').getPublicUrl(img.file_path).data.publicUrl,
+            displayOrder: img.display_order,
+            mediaType: 'IMAGE'
+          })),
+          ...(instagramImages || []).map(img => ({
+            id: img.id,
+            type: 'instagram',
+            url: img.media_url,
+            displayOrder: img.display_order,
+            mediaType: img.media_type
+          }))
+        ].sort((a, b) => a.displayOrder - b.displayOrder);
+
+        setDisplayImages(allImages.slice(0, 6)); // Limit to 6 images
+      } catch (error) {
+        console.error('Error fetching trainer images:', error);
+        // Fallback to trainer profile image
+        setDisplayImages([{ 
+          id: 'fallback', 
+          type: 'profile', 
+          url: trainer.image, 
+          mediaType: 'IMAGE' 
+        }]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTrainerImages();
+  }, [trainer.id, trainer.image]);
 
   return (
     <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-card to-muted/30 border-0 relative overflow-hidden">
@@ -34,29 +84,35 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
         {/* Interactive elements overlay */}
         {children}
         
-        {/* Instagram Gallery Grid */}
+        {/* Gallery Grid */}
         <div className="relative">
-          {displayMedia.length > 0 ? (
+          {displayImages.length > 0 ? (
             <div className="grid grid-cols-3 gap-1 aspect-square">
-              {displayMedia.map((media, index) => (
-                <div key={index} className="relative overflow-hidden bg-muted">
+              {displayImages.map((image, index) => (
+                <div key={image.id} className="relative overflow-hidden bg-muted">
                   <img
-                    src={media.media_url}
+                    src={image.url}
                     alt={`Gallery ${index + 1}`}
                     className="w-full h-full object-cover"
+                    loading="lazy"
                   />
-                  {media.media_type === 'VIDEO' && (
+                  {image.mediaType === 'VIDEO' && (
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="bg-black/50 rounded-full p-2">
                         <Play className="h-4 w-4 text-white fill-current" />
                       </div>
                     </div>
                   )}
+                  {image.type === 'instagram' && (
+                    <div className="absolute bottom-1 right-1 bg-black/70 rounded-full p-1">
+                      <Instagram className="h-2 w-2 text-white" />
+                    </div>
+                  )}
                 </div>
               ))}
               
               {/* Fill remaining slots with trainer image if needed */}
-              {displayMedia.length < 6 && Array.from({ length: 6 - displayMedia.length }).map((_, index) => (
+              {displayImages.length < 6 && Array.from({ length: 6 - displayImages.length }).map((_, index) => (
                 <div key={`filler-${index}`} className="relative overflow-hidden bg-muted/50">
                   <img
                     src={trainer.image}
@@ -65,6 +121,10 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
                   />
                 </div>
               ))}
+            </div>
+          ) : loading ? (
+            <div className="aspect-square relative flex items-center justify-center bg-muted">
+              <ImageIcon className="h-8 w-8 text-muted-foreground animate-pulse" />
             </div>
           ) : (
             // Single hero image fallback
@@ -80,8 +140,8 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
           {/* Gradient overlay for text readability */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
           
-          {/* Instagram indicator */}
-          {selectedMedia.length > 0 && (
+          {/* Content indicator */}
+          {displayImages.some(img => img.type === 'instagram') && (
             <div className="absolute top-3 left-3">
               <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0">
                 <Instagram className="w-3 h-3 mr-1" />
