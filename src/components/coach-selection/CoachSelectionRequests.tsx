@@ -125,6 +125,10 @@ export const CoachSelectionRequests = () => {
                       <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-300">
                         Awaiting Payment - {request.package_name}
                       </Badge>
+                    ) : request.status === 'alternative_suggested' ? (
+                      <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-300">
+                        Alternative Suggested - Awaiting Client Response
+                      </Badge>
                     ) : null}
                   </div>
                 </div>
@@ -133,7 +137,9 @@ export const CoachSelectionRequests = () => {
                 <div className="space-y-3">
                   <div className="p-3 bg-muted/50 rounded-lg">
                     <div className="flex justify-between items-center">
-                      <h4 className="font-medium">{request.package_name}</h4>
+                      <h4 className="font-medium">
+                        {request.status === 'alternative_suggested' ? 'Originally Requested:' : 'Package Requested:'}
+                      </h4>
                       <div className="text-right">
                         <div className="flex items-center gap-1 font-semibold">
                           <DollarSign className="w-4 h-4" />
@@ -145,7 +151,30 @@ export const CoachSelectionRequests = () => {
                         </div>
                       </div>
                     </div>
+                    <p className="text-sm text-muted-foreground mt-1">{request.package_name}</p>
                   </div>
+
+                  {/* Show suggested alternative if status is alternative_suggested */}
+                  {request.status === 'alternative_suggested' && request.suggested_alternative_package_name && (
+                    <div className="p-3 bg-blue-50 border-l-4 border-blue-400 rounded-lg">
+                      <div className="flex justify-between items-center">
+                        <h4 className="font-medium text-blue-900">Your Suggested Package:</h4>
+                        <div className="text-right">
+                          <div className="flex items-center gap-1 font-semibold text-blue-900">
+                            <DollarSign className="w-4 h-4" />
+                            {request.suggested_alternative_package_price}
+                          </div>
+                        </div>
+                      </div>
+                      <p className="text-sm text-blue-800 mt-1">{request.suggested_alternative_package_name}</p>
+                      {request.trainer_response && (
+                        <div className="mt-2 p-2 bg-blue-100 rounded">
+                          <p className="text-xs text-blue-700 font-medium">Your message:</p>
+                          <p className="text-sm text-blue-800">{request.trainer_response}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
                   
                   {request.client_message && (
                     <div className="p-3 bg-blue-50 rounded-lg">
@@ -166,6 +195,14 @@ export const CoachSelectionRequests = () => {
                      <div className="pt-2 border-t">
                        <p className="text-sm text-orange-600 text-center font-medium">
                          Request accepted - waiting for client payment
+                       </p>
+                     </div>
+                   )}
+                   
+                   {request.status === 'alternative_suggested' && (
+                     <div className="pt-2 border-t">
+                       <p className="text-sm text-blue-600 text-center font-medium">
+                         Alternative package suggested - waiting for client response
                        </p>
                      </div>
                    )}

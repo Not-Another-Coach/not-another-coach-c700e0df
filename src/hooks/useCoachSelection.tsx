@@ -236,7 +236,7 @@ export function useCoachSelection() {
         .from('coach_selection_requests')
         .select('*')
         .eq('trainer_id', user.id)
-        .in('status', ['pending', 'awaiting_payment'])
+        .in('status', ['pending', 'awaiting_payment', 'alternative_suggested'])
         .order('created_at', { ascending: false });
 
       if (requestsError) {
