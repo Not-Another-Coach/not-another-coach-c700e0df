@@ -57,7 +57,7 @@ export const InstagramIntegration = () => {
     try {
       setConnecting(true);
       
-      // Call the Instagram OAuth edge function
+      // Call the Instagram OAuth edge function to get auth URL
       const { data, error } = await supabase.functions.invoke('instagram-oauth', {
         body: { action: 'get_auth_url' }
       });
@@ -66,22 +66,46 @@ export const InstagramIntegration = () => {
       
       if (data?.auth_url) {
         // Open Instagram OAuth in new window
-        window.open(data.auth_url, 'instagram-oauth', 'width=600,height=600');
+        const popup = window.open(data.auth_url, 'instagram-oauth', 'width=600,height=600');
         
-        // Listen for OAuth completion
-        const checkConnection = setInterval(async () => {
-          await fetchConnection();
-          if (connection) {
-            clearInterval(checkConnection);
+        // Listen for OAuth completion message from popup
+        const handleMessage = async (event: MessageEvent) => {
+          if (event.data.type === 'INSTAGRAM_AUTH_SUCCESS' && event.data.code) {
+            // Clean up listener
+            window.removeEventListener('message', handleMessage);
+            
+            // Exchange code for access token
+            const { error: exchangeError } = await supabase.functions.invoke('instagram-oauth', {
+              body: { 
+                code: event.data.code,
+                redirect_uri: `https://ogpiovfxjxcclptfybrk.supabase.co/functions/v1/instagram-oauth`
+              }
+            });
+
+            if (exchangeError) {
+              throw exchangeError;
+            }
+
+            // Refresh connection data
+            await fetchConnection();
+            
             toast({
               title: 'Instagram Connected!',
               description: 'Your Instagram account has been successfully connected.',
             });
           }
-        }, 2000);
+        };
 
-        // Stop checking after 5 minutes
-        setTimeout(() => clearInterval(checkConnection), 300000);
+        window.addEventListener('message', handleMessage);
+
+        // Clean up if popup is closed manually
+        const checkClosed = setInterval(() => {
+          if (popup?.closed) {
+            clearInterval(checkClosed);
+            window.removeEventListener('message', handleMessage);
+            setConnecting(false);
+          }
+        }, 1000);
       }
       
     } catch (err: any) {
@@ -91,7 +115,6 @@ export const InstagramIntegration = () => {
         description: err.message || 'Failed to connect Instagram account',
         variant: 'destructive',
       });
-    } finally {
       setConnecting(false);
     }
   };
