@@ -14,10 +14,29 @@ const getTransformationData = (trainer: Trainer) => {
   // Get testimonials from trainer data
   const testimonials = (trainer as any).testimonials || [];
   
+  // Debug logging for Lou specifically
+  if (trainer.name && trainer.name.toLowerCase().includes('lou')) {
+    console.log(`🐛 DEBUG Lou Testimonials in ClientTransformationView:`, {
+      trainerId: trainer.id,
+      trainerName: trainer.name,
+      testimonials: testimonials,
+      testimonialsLength: testimonials.length,
+      fullTrainerObject: trainer
+    });
+  }
+  
   // Filter for testimonials with before/after images and consent
   const transformationsWithImages = testimonials.filter((t: any) => 
     t.showImages && t.beforeImage && t.afterImage && t.consentGiven
   );
+  
+  // Debug filtered results
+  if (trainer.name && trainer.name.toLowerCase().includes('lou')) {
+    console.log(`🐛 DEBUG Lou Filtered Transformations:`, {
+      transformationsWithImages,
+      filteredLength: transformationsWithImages.length
+    });
+  }
   
   // Limit to 5 transformations maximum
   const limitedTransformations = transformationsWithImages.slice(0, 5);

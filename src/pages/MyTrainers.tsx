@@ -778,7 +778,7 @@ export default function MyTrainers() {
                 waitlistRefreshKey={waitlistRefreshKey}
                 onMoveToSaved={handleMoveToSaved}
                 onRemoveCompletely={trainerData.status !== 'declined' ? handleRemoveCompletely : undefined}
-                initialView="features"
+                initialView="instagram"
               />
               
               
