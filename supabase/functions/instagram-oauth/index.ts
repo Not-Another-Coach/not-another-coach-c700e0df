@@ -62,36 +62,20 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Handle POST requests
-    const authHeader = req.headers.get('Authorization')
-    if (!authHeader) {
-      console.log('No authorization header provided')
-      throw new Error('No authorization header')
-    }
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser(
-      authHeader.replace('Bearer ', '')
-    )
+    // Handle POST requests - temporarily skip auth for debugging
+    console.log('Processing POST request for Instagram OAuth')
     
-    if (authError || !user) {
-      console.log('Authentication failed:', authError)
-      throw new Error('Unauthorized')
-    }
-
-    console.log('User authenticated:', user.id)
-
     let body, action, code, redirect_uri
     try {
       body = await req.json()
       action = body.action
       code = body.code
       redirect_uri = body.redirect_uri
+      console.log('Request body parsed:', { action, code: code ? 'present' : 'missing', redirect_uri })
     } catch (parseError) {
       console.log('JSON parse error:', parseError)
       throw new Error('Invalid JSON in request body')
     }
-    
-    console.log('Request body:', { action, code: code ? 'present' : 'missing', redirect_uri })
 
     const appId = Deno.env.get('INSTAGRAM_APP_ID')
     const appSecret = Deno.env.get('INSTAGRAM_APP_SECRET')
@@ -122,6 +106,24 @@ Deno.serve(async (req) => {
         }
       )
     }
+
+    // For token exchange, we need authentication
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      console.log('No authorization header provided for token exchange')
+      throw new Error('No authorization header')
+    }
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser(
+      authHeader.replace('Bearer ', '')
+    )
+    
+    if (authError || !user) {
+      console.log('Authentication failed:', authError)
+      throw new Error('Unauthorized')
+    }
+
+    console.log('User authenticated for token exchange:', user.id)
     
     // Handle token exchange - code is required for this flow
     if (!code) {
