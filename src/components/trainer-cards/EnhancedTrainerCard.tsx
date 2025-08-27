@@ -279,32 +279,36 @@ export const EnhancedTrainerCard = ({
         ) : null}
       </div>
 
-      {/* Navigation arrows - prevent event propagation */}
-      <Button
-        variant="ghost"
-        size="sm"
-        className="absolute left-2 top-1/2 -translate-y-1/2 z-30 bg-white/80 backdrop-blur hover:bg-white/90 transition-all p-1 h-8 w-8"
-        onClick={(e) => {
-          e.stopPropagation();
-          e.preventDefault();
-          goToPreviousView();
-        }}
-      >
-        <ChevronLeft className="h-4 w-4" />
-      </Button>
-      
-      <Button
-        variant="ghost"
-        size="sm"
-        className="absolute right-2 top-1/2 -translate-y-1/2 z-30 bg-white/80 backdrop-blur hover:bg-white/90 transition-all p-1 h-8 w-8"
-        onClick={(e) => {
-          e.stopPropagation();
-          e.preventDefault();
-          goToNextView();
-        }}
-      >
-        <ChevronRight className="h-4 w-4" />
-      </Button>
+      {/* Navigation arrows - hide in transformations view when there are multiple testimonials */}
+      {!(currentView === 'transformations' && trainer.testimonials && trainer.testimonials.length > 1) && (
+        <>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-30 bg-white/80 backdrop-blur hover:bg-white/90 transition-all p-1 h-8 w-8"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              goToPreviousView();
+            }}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-30 bg-white/80 backdrop-blur hover:bg-white/90 transition-all p-1 h-8 w-8"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              goToNextView();
+            }}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </>
+      )}
 
       {/* View indicators - prevent event propagation */}
       <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 flex gap-1">
