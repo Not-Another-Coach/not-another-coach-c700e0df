@@ -14,7 +14,7 @@ const getTransformationData = (trainer: Trainer) => {
   // Get testimonials from trainer data
   const testimonials = (trainer as any).testimonials || [];
   
-  // Filter for testimonials with before/after images
+  // Filter for testimonials with before/after images and consent
   const transformationsWithImages = testimonials.filter((t: any) => 
     t.showImages && t.beforeImage && t.afterImage && t.consentGiven
   );
@@ -23,14 +23,14 @@ const getTransformationData = (trainer: Trainer) => {
   const limitedTransformations = transformationsWithImages.slice(0, 5);
   
   return {
-    transformations: limitedTransformations.map((t: any) => ({
-      id: t.id,
+    transformations: limitedTransformations.map((t: any, index: number) => ({
+      id: t.id || `transformation-${index}`,
       before: t.beforeImage,
       after: t.afterImage,
-      clientName: t.clientName,
-      testimonial: t.clientQuote,
-      achievement: t.achievement,
-      outcomeTag: t.outcomeTag
+      clientName: t.clientName || 'Client',
+      testimonial: t.clientQuote || 'Amazing results achieved!',
+      achievement: t.achievement || 'Transformation',
+      outcomeTag: t.outcomeTag || 'Success'
     }))
   };
 };

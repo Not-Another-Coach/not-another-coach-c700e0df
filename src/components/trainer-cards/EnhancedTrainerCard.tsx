@@ -76,7 +76,7 @@ export const EnhancedTrainerCard = ({
   waitlistRefreshKey = 0,
   onMoveToSaved,
   onRemoveCompletely,
-  initialView = 'features'
+  initialView = 'instagram'
 }: EnhancedTrainerCardProps) => {
   const navigate = useNavigate();
   const { isTrainerSaved, saveTrainer, unsaveTrainer } = useSavedTrainers();
