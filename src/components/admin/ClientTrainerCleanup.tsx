@@ -27,6 +27,14 @@ interface CleanupResult {
   discovery_calls: number;
   selection_requests: number;
   waitlist_entries: number;
+  commitment_acknowledgments: number;
+  getting_started_progress: number;
+  onboarding_progress: number;
+  template_assignments: number;
+  ongoing_support_agreements: number;
+  conditional_evaluations: number;
+  goal_client_links: number;
+  instagram_revelations: number;
   alerts: number;
   engagement_records: number;
 }
@@ -87,6 +95,9 @@ export const ClientTrainerCleanup = () => {
       `• Discovery calls and feedback\n` +
       `• Coach selection requests\n` +
       `• Waitlist entries\n` +
+      `• Onboarding data (templates, progress, tasks)\n` +
+      `• Goal assignments and critical tasks\n` +
+      `• Instagram handle revelations\n` +
       `• Engagement records (likes, shortlists)\n` +
       `• Related alerts and notifications`
     );
