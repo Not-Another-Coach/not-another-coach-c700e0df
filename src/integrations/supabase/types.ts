@@ -868,6 +868,56 @@ export type Database = {
           },
         ]
       }
+      customer_payments: {
+        Row: {
+          amount_currency: string
+          amount_value: number
+          created_at: string
+          id: string
+          metadata: Json | null
+          package_id: string
+          paid_at: string
+          payment_method: string
+          status: string
+          stripe_payment_intent_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount_currency?: string
+          amount_value: number
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          package_id: string
+          paid_at: string
+          payment_method?: string
+          status?: string
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount_currency?: string
+          amount_value?: number
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          package_id?: string
+          paid_at?: string
+          payment_method?: string
+          status?: string
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_payments_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "payment_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       data_retention_policies: {
         Row: {
           auto_purge_enabled: boolean | null
@@ -2776,6 +2826,275 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_packages: {
+        Row: {
+          applied_onboarding_fee_kind: string | null
+          applied_onboarding_fee_value: number | null
+          coach_selection_request_id: string | null
+          created_at: string
+          customer_id: string
+          customer_payment_mode: Database["public"]["Enums"]["customer_payment_mode_enum"]
+          duration_months: number | null
+          duration_weeks: number | null
+          final_price_amount: number
+          final_price_currency: string
+          id: string
+          installment_config: Json | null
+          list_price_amount: number
+          list_price_currency: string
+          payout_frequency: Database["public"]["Enums"]["payout_frequency_enum"]
+          start_date: string
+          status: string
+          title: string
+          trainer_id: string
+          updated_at: string
+        }
+        Insert: {
+          applied_onboarding_fee_kind?: string | null
+          applied_onboarding_fee_value?: number | null
+          coach_selection_request_id?: string | null
+          created_at?: string
+          customer_id: string
+          customer_payment_mode?: Database["public"]["Enums"]["customer_payment_mode_enum"]
+          duration_months?: number | null
+          duration_weeks?: number | null
+          final_price_amount: number
+          final_price_currency?: string
+          id?: string
+          installment_config?: Json | null
+          list_price_amount: number
+          list_price_currency?: string
+          payout_frequency?: Database["public"]["Enums"]["payout_frequency_enum"]
+          start_date: string
+          status?: string
+          title: string
+          trainer_id: string
+          updated_at?: string
+        }
+        Update: {
+          applied_onboarding_fee_kind?: string | null
+          applied_onboarding_fee_value?: number | null
+          coach_selection_request_id?: string | null
+          created_at?: string
+          customer_id?: string
+          customer_payment_mode?: Database["public"]["Enums"]["customer_payment_mode_enum"]
+          duration_months?: number | null
+          duration_weeks?: number | null
+          final_price_amount?: number
+          final_price_currency?: string
+          id?: string
+          installment_config?: Json | null
+          list_price_amount?: number
+          list_price_currency?: string
+          payout_frequency?: Database["public"]["Enums"]["payout_frequency_enum"]
+          start_date?: string
+          status?: string
+          title?: string
+          trainer_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_packages_coach_selection_request_id_fkey"
+            columns: ["coach_selection_request_id"]
+            isOneToOne: false
+            referencedRelation: "coach_selection_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_statement_views: {
+        Row: {
+          created_at: string
+          generated_at: string
+          id: string
+          package_id: string
+          statement_data: Json
+          viewer_id: string
+          viewer_role: string
+        }
+        Insert: {
+          created_at?: string
+          generated_at?: string
+          id?: string
+          package_id: string
+          statement_data: Json
+          viewer_id: string
+          viewer_role: string
+        }
+        Update: {
+          created_at?: string
+          generated_at?: string
+          id?: string
+          package_id?: string
+          statement_data?: Json
+          viewer_id?: string
+          viewer_role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_statement_views_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "payment_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payout_disbursements: {
+        Row: {
+          amount_currency: string
+          amount_value: number
+          created_at: string
+          disbursed_at: string
+          id: string
+          metadata: Json | null
+          payout_period_id: string
+          status: string
+          stripe_transfer_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount_currency?: string
+          amount_value: number
+          created_at?: string
+          disbursed_at: string
+          id?: string
+          metadata?: Json | null
+          payout_period_id: string
+          status?: string
+          stripe_transfer_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount_currency?: string
+          amount_value?: number
+          created_at?: string
+          disbursed_at?: string
+          id?: string
+          metadata?: Json | null
+          payout_period_id?: string
+          status?: string
+          stripe_transfer_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payout_disbursements_payout_period_id_fkey"
+            columns: ["payout_period_id"]
+            isOneToOne: true
+            referencedRelation: "payout_periods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payout_periods: {
+        Row: {
+          approval_deadline_at: string
+          approval_opened_at: string
+          approval_status: Database["public"]["Enums"]["approval_status_enum"]
+          approved_at: string | null
+          approved_by: string | null
+          commission_deduction_amount: number
+          commission_deduction_currency: string
+          created_at: string
+          gross_portion_amount: number
+          gross_portion_currency: string
+          id: string
+          net_payable_amount: number
+          net_payable_currency: string
+          package_id: string
+          period_end: string
+          period_index: number
+          period_start: string
+          rejected_at: string | null
+          rejected_by: string | null
+          rejection_attachments: Json | null
+          rejection_reason: string | null
+          updated_at: string
+        }
+        Insert: {
+          approval_deadline_at: string
+          approval_opened_at: string
+          approval_status?: Database["public"]["Enums"]["approval_status_enum"]
+          approved_at?: string | null
+          approved_by?: string | null
+          commission_deduction_amount?: number
+          commission_deduction_currency?: string
+          created_at?: string
+          gross_portion_amount: number
+          gross_portion_currency?: string
+          id?: string
+          net_payable_amount: number
+          net_payable_currency?: string
+          package_id: string
+          period_end: string
+          period_index: number
+          period_start: string
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejection_attachments?: Json | null
+          rejection_reason?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approval_deadline_at?: string
+          approval_opened_at?: string
+          approval_status?: Database["public"]["Enums"]["approval_status_enum"]
+          approved_at?: string | null
+          approved_by?: string | null
+          commission_deduction_amount?: number
+          commission_deduction_currency?: string
+          created_at?: string
+          gross_portion_amount?: number
+          gross_portion_currency?: string
+          id?: string
+          net_payable_amount?: number
+          net_payable_currency?: string
+          package_id?: string
+          period_end?: string
+          period_index?: number
+          period_start?: string
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejection_attachments?: Json | null
+          rejection_reason?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payout_periods_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "payment_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      platform_settings: {
+        Row: {
+          created_at: string
+          id: string
+          setting_key: string
+          setting_value: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          setting_key: string
+          setting_value?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          setting_key?: string
+          setting_value?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profile_update_streaks: {
         Row: {
           created_at: string
@@ -3345,6 +3664,36 @@ export type Database = {
           thumbnail_url?: string | null
           trainer_id?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      trainer_membership_settings: {
+        Row: {
+          created_at: string
+          id: string
+          onboarding_fee_kind: string | null
+          onboarding_fee_value: number | null
+          plan_type: Database["public"]["Enums"]["membership_plan_type_enum"]
+          trainer_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          onboarding_fee_kind?: string | null
+          onboarding_fee_value?: number | null
+          plan_type?: Database["public"]["Enums"]["membership_plan_type_enum"]
+          trainer_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          onboarding_fee_kind?: string | null
+          onboarding_fee_value?: number | null
+          plan_type?: Database["public"]["Enums"]["membership_plan_type_enum"]
+          trainer_id?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -4330,6 +4679,11 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "trainer" | "client"
+      approval_status_enum:
+        | "pending"
+        | "approved"
+        | "rejected"
+        | "auto_approved"
       client_status:
         | "onboarding"
         | "survey_completed"
@@ -4356,6 +4710,7 @@ export type Database = {
         | "learning"
         | "sales"
         | "delivery"
+      customer_payment_mode_enum: "upfront" | "installments"
       discovery_call_status:
         | "scheduled"
         | "completed"
@@ -4398,7 +4753,11 @@ export type Database = {
         | "database"
         | "business_rule"
         | "integration"
+      membership_plan_type_enum:
+        | "low_sub_with_onboarding"
+        | "high_sub_no_onboarding"
       onboarding_visibility: "client" | "trainer" | "shared"
+      payout_frequency_enum: "weekly" | "monthly"
       user_type: "client" | "trainer" | "admin"
       verification_request_status:
         | "pending"
@@ -4537,6 +4896,12 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "trainer", "client"],
+      approval_status_enum: [
+        "pending",
+        "approved",
+        "rejected",
+        "auto_approved",
+      ],
       client_status: [
         "onboarding",
         "survey_completed",
@@ -4566,6 +4931,7 @@ export const Constants = {
         "sales",
         "delivery",
       ],
+      customer_payment_mode_enum: ["upfront", "installments"],
       discovery_call_status: [
         "scheduled",
         "completed",
@@ -4606,7 +4972,12 @@ export const Constants = {
         "business_rule",
         "integration",
       ],
+      membership_plan_type_enum: [
+        "low_sub_with_onboarding",
+        "high_sub_no_onboarding",
+      ],
       onboarding_visibility: ["client", "trainer", "shared"],
+      payout_frequency_enum: ["weekly", "monthly"],
       user_type: ["client", "trainer", "admin"],
       verification_request_status: [
         "pending",
