@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Upload, Camera, Sparkles, User } from "lucide-react";
+import { Upload, Camera, Sparkles, User, Plus, X, Calendar } from "lucide-react";
 import { SectionHeader } from './SectionHeader';
 
 interface BasicInfoSectionProps {
@@ -62,6 +62,24 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
   const handleBioSuggestion = (suggestion: string) => {
     updateFormData({ bio: suggestion });
     setBioAIHelperOpen(false);
+  };
+
+  const addMilestone = () => {
+    const milestones = formData.professional_milestones || [];
+    const newMilestone = { year: new Date().getFullYear().toString(), event: "" };
+    updateFormData({ professional_milestones: [...milestones, newMilestone] });
+  };
+
+  const updateMilestone = (index: number, field: 'year' | 'event', value: string) => {
+    const milestones = [...(formData.professional_milestones || [])];
+    milestones[index] = { ...milestones[index], [field]: value };
+    updateFormData({ professional_milestones: milestones });
+  };
+
+  const removeMilestone = (index: number) => {
+    const milestones = formData.professional_milestones || [];
+    const updated = milestones.filter((_: any, i: number) => i !== index);
+    updateFormData({ professional_milestones: updated });
   };
 
   return (
@@ -259,6 +277,71 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
         <p className="text-xs text-muted-foreground">
           Share your story, qualifications, and what makes you unique as a trainer
         </p>
+      </div>
+
+      {/* Professional Milestones */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <Label>Professional Milestones</Label>
+            <p className="text-xs text-muted-foreground mt-1">
+              Add key achievements and career milestones that showcase your professional journey
+            </p>
+          </div>
+          <Button variant="outline" size="sm" onClick={addMilestone}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Milestone
+          </Button>
+        </div>
+        
+        {formData.professional_milestones && formData.professional_milestones.length > 0 && (
+          <div className="space-y-3">
+            {formData.professional_milestones.map((milestone: any, index: number) => (
+              <Card key={index} className="p-4">
+                <div className="flex items-start gap-3">
+                  <Calendar className="h-4 w-4 mt-1 text-muted-foreground shrink-0" />
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-3 flex-1">
+                    <Input
+                      placeholder="Year"
+                      value={milestone.year}
+                      onChange={(e) => updateMilestone(index, 'year', e.target.value)}
+                      maxLength={4}
+                    />
+                    <Input
+                      placeholder="Achievement or milestone event..."
+                      value={milestone.event}
+                      onChange={(e) => updateMilestone(index, 'event', e.target.value)}
+                      className="md:col-span-3"
+                    />
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeMilestone(index)}
+                    className="text-muted-foreground hover:text-red-500"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+        
+        {(!formData.professional_milestones || formData.professional_milestones.length === 0) && (
+          <Card className="border-dashed">
+            <CardContent className="p-6 text-center">
+              <Calendar className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+              <p className="text-sm text-muted-foreground mb-3">
+                No milestones added yet. Share your professional achievements to build credibility.
+              </p>
+              <Button variant="outline" size="sm" onClick={addMilestone}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add First Milestone
+              </Button>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
