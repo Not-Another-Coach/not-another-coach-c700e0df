@@ -28,11 +28,15 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     )
 
+    console.log('Instagram OAuth function called with method:', req.method)
+
     // Handle OAuth callback from Instagram (GET request with code in URL params)
     if (req.method === 'GET') {
       const url = new URL(req.url)
       const code = url.searchParams.get('code')
       const error = url.searchParams.get('error')
+      
+      console.log('GET request - code:', code ? 'present' : 'missing', 'error:', error)
       
       if (error) {
         return new Response(
@@ -58,8 +62,10 @@ Deno.serve(async (req) => {
       )
     }
 
+    // Handle POST requests
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
+      console.log('No authorization header provided')
       throw new Error('No authorization header')
     }
 
@@ -68,18 +74,34 @@ Deno.serve(async (req) => {
     )
     
     if (authError || !user) {
+      console.log('Authentication failed:', authError)
       throw new Error('Unauthorized')
     }
 
-    const body = await req.json()
-    const { action, code, redirect_uri } = body
+    console.log('User authenticated:', user.id)
+
+    let body, action, code, redirect_uri
+    try {
+      body = await req.json()
+      action = body.action
+      code = body.code
+      redirect_uri = body.redirect_uri
+    } catch (parseError) {
+      console.log('JSON parse error:', parseError)
+      throw new Error('Invalid JSON in request body')
+    }
+    
+    console.log('Request body:', { action, code: code ? 'present' : 'missing', redirect_uri })
 
     const appId = Deno.env.get('INSTAGRAM_APP_ID')
     const appSecret = Deno.env.get('INSTAGRAM_APP_SECRET')
     
     if (!appId || !appSecret) {
+      console.log('Missing Instagram credentials - appId:', !!appId, 'appSecret:', !!appSecret)
       throw new Error('Instagram API credentials not configured')
     }
+
+    console.log('Instagram credentials configured')
 
     // Handle getting auth URL
     if (action === 'get_auth_url') {
@@ -87,6 +109,8 @@ Deno.serve(async (req) => {
       const scopes = 'user_profile,user_media'
       
       const authUrl = `https://api.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scopes}&response_type=code`
+      
+      console.log('Generated auth URL:', authUrl)
       
       return new Response(
         JSON.stringify({ auth_url: authUrl }),
@@ -101,6 +125,7 @@ Deno.serve(async (req) => {
     
     // Handle token exchange - code is required for this flow
     if (!code) {
+      console.log('No authorization code provided for token exchange')
       throw new Error('No authorization code provided')
     }
 
