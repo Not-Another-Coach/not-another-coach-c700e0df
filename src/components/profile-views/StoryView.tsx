@@ -7,20 +7,17 @@ interface StoryViewProps {
   trainer: Trainer;
 }
 
-// Helper function to split bio into journey sections
-const parseJourneyFromBio = (bio: string) => {
-  // For now, split bio into three parts or use full bio for each section
-  // In the future, trainers could have separate fields for each journey section
-  const sections = bio.split('\n\n');
+// Helper function to get journey content from trainer data
+const getJourneyContent = (trainer: any) => {
   return {
-    journey: sections[0] || bio,
-    philosophy: sections[1] || "My coaching philosophy centers on sustainable, personalized approaches to fitness and wellness.",
-    specialization: sections[2] || "I specialize in helping clients achieve their unique goals through evidence-based training methods."
+    howStarted: trainer.how_started || "My fitness journey began with a passion for helping others discover their potential.",
+    philosophy: trainer.philosophy || "My coaching philosophy centers on sustainable, personalized approaches to fitness and wellness.",
+    specialization: trainer.specialization_description || "I specialize in helping clients achieve their unique goals through evidence-based training methods."
   };
 };
 
 export const StoryView = ({ trainer }: StoryViewProps) => {
-  const journeyContent = parseJourneyFromBio((trainer as any).bio || '');
+  const journeyContent = getJourneyContent(trainer as any);
   const milestones = (trainer as any).professional_milestones || [];
   const testimonials = (trainer as any).testimonials || [];
 
@@ -38,7 +35,7 @@ export const StoryView = ({ trainer }: StoryViewProps) => {
           <div>
             <h4 className="font-semibold mb-2 text-primary">How It All Started</h4>
             <p className="text-muted-foreground leading-relaxed">
-              {journeyContent.journey}
+              {journeyContent.howStarted}
             </p>
           </div>
           
@@ -50,7 +47,7 @@ export const StoryView = ({ trainer }: StoryViewProps) => {
           </div>
           
           <div>
-            <h4 className="font-semibold mb-2 text-primary">Why I Specialize</h4>
+            <h4 className="font-semibold mb-2 text-primary">What I Specialize In</h4>
             <p className="text-muted-foreground leading-relaxed">
               {journeyContent.specialization}
             </p>
