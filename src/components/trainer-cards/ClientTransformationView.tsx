@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star, MapPin, TrendingUp, Trophy, Users, ArrowRight } from "lucide-react";
+import { Star, MapPin, Quote } from "lucide-react";
 import { Trainer } from "@/components/TrainerCard";
 import { getTrainerDisplayPrice } from "@/lib/priceUtils";
 
@@ -13,20 +13,28 @@ interface ClientTransformationViewProps {
 const getTransformationData = (trainer: Trainer) => {
   // This would be fetched from the trainer's testimonials/results data
   return {
-    totalTransformations: trainer.reviews || 24,
-    averageResults: "15% body fat reduction",
-    keyAchievements: [
-      "Weight Loss",
-      "Muscle Gain",
-      "Strength"
-    ],
-    beforeAfterImages: [
+    transformations: [
       {
         before: trainer.image, // Placeholder - would be actual before images
         after: trainer.image,   // Placeholder - would be actual after images
-        achievement: "Lost 30lbs"
+        clientName: "Sarah M.",
+        testimonial: "Amazing results in just 3 months! I feel stronger and more confident than ever before.",
+        achievement: "Lost 25lbs & gained strength"
       },
-      // Would have more transformation images
+      {
+        before: trainer.image,
+        after: trainer.image,
+        clientName: "Mike T.",
+        testimonial: "The personalized approach made all the difference. Highly recommend!",
+        achievement: "Built lean muscle"
+      },
+      {
+        before: trainer.image,
+        after: trainer.image,
+        clientName: "Emma K.",
+        testimonial: "Life-changing experience. Thank you for helping me reach my goals!",
+        achievement: "Total transformation"
+      }
     ]
   };
 };
@@ -40,137 +48,110 @@ export const ClientTransformationView = ({ trainer, children }: ClientTransforma
         {/* Interactive elements overlay */}
         {children}
         
-        {/* Header with stats */}
-        <div className="relative bg-gradient-to-r from-success/10 to-energy/10 p-4 border-b border-success/20">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-3">
-              <img
-                src={trainer.image}
-                alt={trainer.name}
-                className="w-12 h-12 rounded-full object-cover border-2 border-success/30"
-              />
-              <div>
-                <h3 className="font-bold text-lg text-foreground">{trainer.name}</h3>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Star className="h-3 w-3 fill-accent text-accent" />
-                  <span>{trainer.rating}</span>
-                  <span>•</span>
+        {/* Transformation Gallery Grid */}
+        <div className="relative">
+          <div className="grid grid-cols-2 gap-1 aspect-square">
+            {/* Before/After pairs */}
+            {transformationData.transformations.slice(0, 3).map((transformation, index) => (
+              <div key={index} className="relative overflow-hidden bg-muted">
+                <div className="grid grid-cols-2 gap-0.5 h-full">
+                  {/* Before Image */}
+                  <div className="relative">
+                    <img
+                      src={transformation.before}
+                      alt="Before transformation"
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute top-1 left-1">
+                      <Badge className="text-xs bg-black/60 text-white border-0">
+                        Before
+                      </Badge>
+                    </div>
+                  </div>
+                  
+                  {/* After Image */}
+                  <div className="relative">
+                    <img
+                      src={transformation.after}
+                      alt="After transformation"
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute top-1 right-1">
+                      <Badge className="text-xs bg-success text-white border-0">
+                        After
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+            
+            {/* Fill remaining slots if needed */}
+            {Array.from({ length: Math.max(0, 3 - transformationData.transformations.length) }).map((_, index) => (
+              <div key={`filler-${index}`} className="relative overflow-hidden bg-muted/50">
+                <img
+                  src={trainer.image}
+                  alt={trainer.name}
+                  className="w-full h-full object-cover opacity-60"
+                />
+              </div>
+            ))}
+          </div>
+          
+          {/* Gradient overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+        </div>
+
+        {/* Trainer Info & Testimonial Overlay */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+          <div className="flex items-start justify-between mb-3">
+            <div className="flex-1 min-w-0">
+              <h3 className="font-bold text-lg mb-1 text-white drop-shadow-sm">
+                {trainer.name}
+              </h3>
+              
+              <div className="flex items-center gap-3 text-white/90 text-sm mb-2">
+                <div className="flex items-center gap-1">
+                  <Star className="h-3 w-3 fill-current" />
+                  <span className="font-medium">{trainer.rating}</span>
+                </div>
+                <div className="flex items-center gap-1">
                   <MapPin className="h-3 w-3" />
                   <span>{trainer.location}</span>
                 </div>
               </div>
             </div>
             
+            {/* Price */}
             <div className="text-right">
-              <div className="text-xl font-bold text-primary">
+              <div className="text-xl font-bold text-white drop-shadow-sm">
                 {getTrainerDisplayPrice(trainer)}
               </div>
-              <div className="text-xs text-muted-foreground">packages</div>
+              <div className="text-xs text-white/80">packages</div>
             </div>
           </div>
-          
-          {/* Results Stats */}
-          <div className="grid grid-cols-3 gap-3 text-center">
-            <div className="bg-white/50 rounded-lg p-2 border border-success/20">
-              <div className="text-lg font-bold text-success">{transformationData.totalTransformations}+</div>
-              <div className="text-xs text-muted-foreground">Transformations</div>
-            </div>
-            <div className="bg-white/50 rounded-lg p-2 border border-energy/20">
-              <div className="text-lg font-bold text-energy">15%</div>
-              <div className="text-xs text-muted-foreground">Avg. Results</div>
-            </div>
-            <div className="bg-white/50 rounded-lg p-2 border border-primary/20">
-              <div className="text-lg font-bold text-primary">{trainer.experience}</div>
-              <div className="text-xs text-muted-foreground">Experience</div>
-            </div>
-          </div>
-        </div>
 
-        {/* Transformation Preview */}
-        <div className="p-4">
-          {transformationData.beforeAfterImages.length > 0 ? (
-            <div className="mb-4">
-              <div className="flex items-center gap-2 mb-3">
-                <Trophy className="h-4 w-4 text-accent" />
-                <span className="text-sm font-medium">Client Transformations</span>
-              </div>
-              
-              {/* Before/After Showcase */}
-              <div className="bg-gradient-to-r from-muted/50 to-muted/30 rounded-lg p-3 border">
-                <div className="flex items-center gap-3">
-                  {/* Before Image */}
-                  <div className="text-center">
-                    <div className="w-16 h-20 bg-muted rounded-lg mb-1 flex items-center justify-center border">
-                      <img
-                        src={transformationData.beforeAfterImages[0].before}
-                        alt="Before"
-                        className="w-full h-full object-cover rounded-lg opacity-70"
-                      />
-                    </div>
-                    <div className="text-xs text-muted-foreground">Before</div>
-                  </div>
-                  
-                  {/* Arrow */}
-                  <ArrowRight className="h-4 w-4 text-primary flex-shrink-0" />
-                  
-                  {/* After Image */}
-                  <div className="text-center">
-                    <div className="w-16 h-20 bg-success/10 rounded-lg mb-1 flex items-center justify-center border border-success/30">
-                      <img
-                        src={transformationData.beforeAfterImages[0].after}
-                        alt="After"
-                        className="w-full h-full object-cover rounded-lg"
-                      />
-                    </div>
-                    <div className="text-xs text-success font-medium">After</div>
-                  </div>
-                  
-                  {/* Achievement Text */}
-                  <div className="flex-1 ml-3">
-                    <div className="text-sm font-medium text-foreground">
-                      {transformationData.beforeAfterImages[0].achievement}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      Real client result
-                    </div>
+          {/* Featured Testimonial */}
+          {transformationData.transformations.length > 0 && (
+            <div className="bg-black/30 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+              <div className="flex items-start gap-2">
+                <Quote className="h-3 w-3 text-white/70 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm text-white/90 italic mb-1 leading-relaxed">
+                    "{transformationData.transformations[0].testimonial}"
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-white/70">
+                      - {transformationData.transformations[0].clientName}
+                    </span>
+                    <Badge className="text-xs bg-success/20 text-success-foreground border-success/30">
+                      {transformationData.transformations[0].achievement}
+                    </Badge>
                   </div>
                 </div>
               </div>
             </div>
-          ) : (
-            /* Fallback - Achievement badges */
-            <div className="mb-4">
-              <div className="flex items-center gap-2 mb-3">
-                <TrendingUp className="h-4 w-4 text-success" />
-                <span className="text-sm font-medium">Proven Results</span>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-2">
-                {transformationData.keyAchievements.map((achievement, index) => (
-                  <div 
-                    key={achievement}
-                    className="bg-gradient-to-br from-success/5 to-success/10 border border-success/20 rounded-lg p-2 text-center"
-                  >
-                    <Trophy className="h-3 w-3 mx-auto text-success mb-1" />
-                    <div className="text-xs font-medium text-success">{achievement}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
           )}
-
-          {/* Top Specialties */}
-          <div className="flex gap-1 flex-wrap justify-center">
-            {trainer.specialties.slice(0, 3).map((specialty) => (
-              <Badge 
-                key={specialty} 
-                variant="outline" 
-                className="text-xs border-primary/30 text-primary"
-              >
-                {specialty}
-              </Badge>
-            ))}
-          </div>
         </div>
       </CardContent>
     </Card>
