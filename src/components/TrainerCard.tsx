@@ -37,6 +37,7 @@ export interface Trainer {
   trainingType: string[];
   offers_discovery_call?: boolean;
   package_options?: any[];
+  testimonials?: any[];
 }
 
 interface MatchDetail {

@@ -36,6 +36,7 @@ export function useRealTrainers(refreshTrigger?: number) {
             is_verified,
             verification_status,
             package_options,
+            testimonials,
             discovery_call_settings(
               offers_discovery_call
             )
@@ -81,7 +82,8 @@ export function useRealTrainers(refreshTrigger?: number) {
             availability: "Available",
             trainingType: trainer.training_types || ["In-Person", "Online"],
             offers_discovery_call: trainer.discovery_call_settings?.[0]?.offers_discovery_call || false,
-            package_options: (trainer.package_options as any[]) || []
+            package_options: (trainer.package_options as any[]) || [],
+            testimonials: (trainer.testimonials as any[]) || []
           };
         }) || [];
 
