@@ -279,6 +279,27 @@ export const EnhancedTrainerCard = ({
         ) : null}
       </div>
 
+      {/* Debug logging and Navigation arrows logic */}
+      {(() => {
+        const testimonials = ((trainer as any).testimonials || []);
+        const filteredTestimonials = testimonials.filter((t: any) => t.showImages && t.beforeImage && t.afterImage && t.consentGiven);
+        const hasMultipleTestimonials = filteredTestimonials.length > 1;
+        const isTransformationsView = currentView === 'transformations';
+        const shouldHideViewArrows = isTransformationsView && hasMultipleTestimonials;
+        
+        console.log('🔍 Navigation Debug:', {
+          currentView,
+          isTransformationsView,
+          totalTestimonials: testimonials.length,
+          filteredTestimonials: filteredTestimonials.length,
+          hasMultipleTestimonials,
+          shouldHideViewArrows,
+          trainerId: trainer.id
+        });
+        
+        return null;
+      })()}
+
       {/* Navigation arrows - hide in transformations view when there are multiple testimonials */}
       {!(currentView === 'transformations' && ((trainer as any).testimonials || []).filter((t: any) => t.showImages && t.beforeImage && t.afterImage && t.consentGiven).length > 1) && (
         <>
@@ -289,6 +310,7 @@ export const EnhancedTrainerCard = ({
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
+              console.log('🔄 VIEW Navigation - Previous clicked');
               goToPreviousView();
             }}
           >
@@ -302,6 +324,7 @@ export const EnhancedTrainerCard = ({
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
+              console.log('🔄 VIEW Navigation - Next clicked');
               goToNextView();
             }}
           >

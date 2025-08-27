@@ -60,6 +60,14 @@ export const ClientTransformationView = ({ trainer, children }: ClientTransforma
   const transformationData = getTransformationData(trainer);
   const [currentIndex, setCurrentIndex] = useState(0);
   
+  console.log('🎯 ClientTransformationView Render:', {
+    trainerId: trainer.id,
+    trainerName: trainer.name,
+    currentIndex,
+    totalTransformations: transformationData.transformations.length,
+    hasMultiple: transformationData.transformations.length > 1
+  });
+  
   // Reset to first testimonial when trainer changes or transformations change
   useEffect(() => {
     setCurrentIndex(0);
@@ -154,6 +162,7 @@ export const ClientTransformationView = ({ trainer, children }: ClientTransforma
               onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
+                console.log('🔄 TESTIMONIAL Navigation - Previous clicked');
                 goToPrevious();
               }}
             >
@@ -167,6 +176,7 @@ export const ClientTransformationView = ({ trainer, children }: ClientTransforma
               onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
+                console.log('🔄 TESTIMONIAL Navigation - Next clicked');
                 goToNext();
               }}
             >
