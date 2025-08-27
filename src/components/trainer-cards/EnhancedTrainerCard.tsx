@@ -300,52 +300,34 @@ export const EnhancedTrainerCard = ({
         return null;
       })()}
 
-      {/* Navigation arrows - hide in transformations view when there are multiple testimonials */}
-      {(() => {
-        const testimonials = ((trainer as any).testimonials || []);
-        const filteredTestimonials = testimonials.filter((t: any) => t.showImages && t.beforeImage && t.afterImage && t.consentGiven);
-        const hasMultipleTestimonials = filteredTestimonials.length > 1;
-        const isTransformationsView = currentView === 'transformations';
-        const shouldHideViewArrows = isTransformationsView && hasMultipleTestimonials;
-        
-        if (shouldHideViewArrows) {
-          console.log('🚫 HIDING VIEW ARROWS - Multiple testimonials detected');
-          return null; // Hide the view arrows
-        }
-        
-        console.log('✅ SHOWING VIEW ARROWS');
-        return (
-          <>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="absolute left-2 top-1/2 -translate-y-1/2 z-30 bg-white/80 backdrop-blur hover:bg-white/90 transition-all p-1 h-8 w-8"
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                console.log('🔄 VIEW Navigation - Previous clicked');
-                goToPreviousView();
-              }}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              className="absolute right-2 top-1/2 -translate-y-1/2 z-30 bg-white/80 backdrop-blur hover:bg-white/90 transition-all p-1 h-8 w-8"
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                console.log('🔄 VIEW Navigation - Next clicked');
-                goToNextView();
-              }}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </>
-        );
-      })()}
+      {/* Navigation arrows - ALWAYS show view navigation arrows */}
+      <Button
+        variant="ghost"
+        size="sm"
+        className="absolute left-2 top-1/2 -translate-y-1/2 z-30 bg-white/80 backdrop-blur hover:bg-white/90 transition-all p-1 h-8 w-8"
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          console.log('🔄 VIEW Navigation - Previous clicked');
+          goToPreviousView();
+        }}
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </Button>
+      
+      <Button
+        variant="ghost"
+        size="sm"
+        className="absolute right-2 top-1/2 -translate-y-1/2 z-30 bg-white/80 backdrop-blur hover:bg-white/90 transition-all p-1 h-8 w-8"
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          console.log('🔄 VIEW Navigation - Next clicked');
+          goToNextView();
+        }}
+      >
+        <ChevronRight className="h-4 w-4" />
+      </Button>
 
       {/* View indicators - prevent event propagation */}
       <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 flex gap-1">

@@ -152,13 +152,13 @@ export const ClientTransformationView = ({ trainer, children }: ClientTransforma
         {/* Interactive elements overlay */}
         {children}
         
-        {/* Navigation arrows for testimonials - only show if multiple testimonials */}
+        {/* Navigation arrows for testimonials - positioned higher to avoid overlap with view arrows */}
         {hasMultiple && (
           <>
             <Button
               variant="ghost"
               size="sm"
-              className="absolute left-2 top-[45%] -translate-y-1/2 z-40 bg-white/80 backdrop-blur hover:bg-white/90 transition-all p-1 h-8 w-8"
+              className="absolute left-2 top-[30%] -translate-y-1/2 z-50 bg-black/60 backdrop-blur hover:bg-black/70 transition-all p-1 h-8 w-8"
               onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
@@ -166,13 +166,13 @@ export const ClientTransformationView = ({ trainer, children }: ClientTransforma
                 goToPrevious();
               }}
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-4 w-4 text-white" />
             </Button>
             
             <Button
               variant="ghost"
               size="sm"
-              className="absolute right-2 top-[45%] -translate-y-1/2 z-40 bg-white/80 backdrop-blur hover:bg-white/90 transition-all p-1 h-8 w-8"
+              className="absolute right-2 top-[30%] -translate-y-1/2 z-50 bg-black/60 backdrop-blur hover:bg-black/70 transition-all p-1 h-8 w-8"
               onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
@@ -180,7 +180,7 @@ export const ClientTransformationView = ({ trainer, children }: ClientTransforma
                 goToNext();
               }}
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-4 w-4 text-white" />
             </Button>
           </>
         )}
