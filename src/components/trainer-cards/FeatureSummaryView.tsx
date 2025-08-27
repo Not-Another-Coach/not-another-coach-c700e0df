@@ -22,101 +22,93 @@ export const FeatureSummaryView = ({ trainer, children }: FeatureSummaryViewProp
         {/* Interactive elements overlay */}
         {children}
         
-        {/* Header with trainer image and basic info */}
-        <div className="relative p-4 pb-2">
-          <div className="flex items-start gap-4">
-            <div className="relative">
-              <img
-                src={trainer.image}
-                alt={trainer.name}
-                className="w-16 h-16 rounded-full object-cover border-2 border-secondary/20"
-              />
-              {trainer.certifications.length > 0 && (
-                <div className="absolute -bottom-1 -right-1 bg-success text-white rounded-full p-1">
-                  <Award className="h-3 w-3" />
+        {/* Feature Cards Grid - Full Height */}
+        <div className="relative aspect-square">
+          <div className="h-full p-4 pb-20">
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              {/* Specialties Cards */}
+              {topSpecialties.map((specialty, index) => (
+                <div 
+                  key={specialty}
+                  className="bg-gradient-to-br from-primary/10 to-primary/20 border border-primary/30 rounded-lg p-4 text-center"
+                >
+                  <Target className="h-5 w-5 mx-auto text-primary mb-2" />
+                  <div className="text-sm font-medium text-primary">{specialty}</div>
+                </div>
+              ))}
+              
+              {/* Training Type Card */}
+              {trainingTypes.length > 0 && (
+                <div className="bg-gradient-to-br from-success/10 to-success/20 border border-success/30 rounded-lg p-4 text-center">
+                  <Users className="h-5 w-5 mx-auto text-success mb-2" />
+                  <div className="text-sm font-medium text-success">
+                    {trainingTypes.join(' & ')}
+                  </div>
                 </div>
               )}
-            </div>
-            
-            <div className="flex-1 min-w-0">
-              <h3 className="font-bold text-lg text-foreground mb-1 truncate">
-                {trainer.name}
-              </h3>
               
-              <div className="flex items-center gap-3 text-sm text-muted-foreground mb-2">
-                <div className="flex items-center gap-1">
-                  <Star className="h-3 w-3 fill-accent text-accent" />
-                  <span className="font-medium">{trainer.rating}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <MapPin className="h-3 w-3" />
-                  <span className="truncate">{trainer.location}</span>
+              {/* Availability Card */}
+              <div className="bg-gradient-to-br from-accent/10 to-accent/20 border border-accent/30 rounded-lg p-4 text-center">
+                <Clock className="h-5 w-5 mx-auto text-accent mb-2" />
+                <div className="text-sm font-medium text-accent">
+                  {trainer.availability}
                 </div>
               </div>
-              
-              <Badge variant="secondary" className="text-xs">
-                {trainer.experience}
-              </Badge>
             </div>
-            
-            {/* Price */}
-            <div className="text-right">
-              <div className="text-xl font-bold text-primary">
-                {getTrainerDisplayPrice(trainer)}
-              </div>
-              <div className="text-xs text-muted-foreground">package</div>
-            </div>
-          </div>
-        </div>
 
-        {/* Feature Cards Grid */}
-        <div className="px-4 pb-4">
-          <div className="grid grid-cols-2 gap-2 mb-3">
-            {/* Specialties Cards */}
-            {topSpecialties.map((specialty, index) => (
-              <div 
-                key={specialty}
-                className="bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 rounded-lg p-3 text-center"
-              >
-                <Target className="h-4 w-4 mx-auto text-primary mb-1" />
-                <div className="text-xs font-medium text-primary">{specialty}</div>
-              </div>
-            ))}
-            
-            {/* Training Type Card */}
-            {trainingTypes.length > 0 && (
-              <div className="bg-gradient-to-br from-success/5 to-success/10 border border-success/20 rounded-lg p-3 text-center">
-                <Users className="h-4 w-4 mx-auto text-success mb-1" />
-                <div className="text-xs font-medium text-success">
-                  {trainingTypes.join(' & ')}
-                </div>
+            {/* Description */}
+            <div className="bg-muted/40 rounded-lg p-4 border border-muted-foreground/10">
+              <p className="text-sm text-muted-foreground line-clamp-4 leading-relaxed">
+                {trainer.description}
+              </p>
+            </div>
+
+            {/* Additional specialties if any */}
+            {trainer.specialties.length > 3 && (
+              <div className="mt-3 flex justify-center">
+                <Badge variant="outline" className="text-xs">
+                  +{trainer.specialties.length - 3} more specialties
+                </Badge>
               </div>
             )}
-            
-            {/* Availability Card */}
-            <div className="bg-gradient-to-br from-accent/5 to-accent/10 border border-accent/20 rounded-lg p-3 text-center">
-              <Clock className="h-4 w-4 mx-auto text-accent mb-1" />
-              <div className="text-xs font-medium text-accent truncate">
-                {trainer.availability}
+          </div>
+          
+          {/* Gradient overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+          
+          {/* Trainer Info Overlay */}
+          <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+            <div className="flex items-end justify-between">
+              <div className="flex-1">
+                <h3 className="font-bold text-lg mb-1 text-white drop-shadow-sm">
+                  {trainer.name}
+                </h3>
+                
+                <div className="flex items-center gap-3 text-white/90 text-sm mb-2">
+                  <div className="flex items-center gap-1">
+                    <Star className="h-3 w-3 fill-current" />
+                    <span className="font-medium">{trainer.rating}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <MapPin className="h-3 w-3" />
+                    <span>{trainer.location}</span>
+                  </div>
+                </div>
+                
+                <Badge variant="secondary" className="text-xs bg-white/20 text-white border-white/30 backdrop-blur-sm">
+                  {trainer.experience}
+                </Badge>
+              </div>
+              
+              {/* Price */}
+              <div className="text-right">
+                <div className="text-xl font-bold text-white drop-shadow-sm">
+                  {getTrainerDisplayPrice(trainer)}
+                </div>
+                <div className="text-xs text-white/80">package</div>
               </div>
             </div>
           </div>
-
-          {/* Description */}
-          <div className="bg-muted/30 rounded-lg p-3 border border-muted-foreground/10">
-            <p className="text-xs text-muted-foreground line-clamp-3 leading-relaxed">
-              {trainer.description}
-            </p>
-          </div>
-
-          {/* Additional specialties if any */}
-          {trainer.specialties.length > 3 && (
-            <div className="mt-3 flex justify-center">
-              <Badge variant="outline" className="text-xs">
-                +{trainer.specialties.length - 3} more specialties
-              </Badge>
-            </div>
-          )}
         </div>
       </CardContent>
     </Card>
