@@ -82,7 +82,8 @@ const TrainerDashboard = () => {
   const [prospectsCount, setProspectsCount] = useState(0);
   const [activeClientsCount, setActiveClientsCount] = useState(0);
   const [activeView, setActiveView] = useState('dashboard');
-  const [showProspectsDropdown, setShowProspectsDropdown] = useState(false);
+  // Remove unused state
+  // const [showProspectsDropdown, setShowProspectsDropdown] = useState(false);
 
   // Sync availability status with coach availability settings
   useEffect(() => {
@@ -248,29 +249,7 @@ const TrainerDashboard = () => {
               Dashboard
             </Button>
             
-            <DropdownMenu open={showProspectsDropdown} onOpenChange={setShowProspectsDropdown}>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant={activeView === 'prospects' || activeView === 'waitlist' ? 'default' : 'ghost'}
-                  size="sm"
-                  className="flex items-center gap-2"
-                >
-                  <UserSearch className="w-4 h-4" />
-                  Prospects ({prospectsCount + (waitlistEntries?.length || 0)})
-                  <ChevronDown className="w-3 h-3" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start">
-                <DropdownMenuItem onClick={() => { setActiveView('prospects'); setShowProspectsDropdown(false); }}>
-                  <UserSearch className="w-4 h-4 mr-2" />
-                  Active Prospects ({prospectsCount})
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => { setActiveView('waitlist'); setShowProspectsDropdown(false); }}>
-                  <Users className="w-4 h-4 mr-2" />
-                  Waitlist ({waitlistEntries?.length || 0})
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {/* Remove the old dropdown since we now have separate tabs */}
             
             <Button
               variant={activeView === 'clients' ? 'default' : 'ghost'}
@@ -279,7 +258,17 @@ const TrainerDashboard = () => {
               className="flex items-center gap-2"
             >
               <Users className="w-4 h-4" />
-              Clients & Prospects ({activeClientsCount + prospectsCount})
+              Clients ({activeClientsCount})
+            </Button>
+            
+            <Button
+              variant={activeView === 'all-prospects' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setActiveView('all-prospects')}
+              className="flex items-center gap-2"
+            >
+              <UserSearch className="w-4 h-4" />
+              Prospects ({prospectsCount + (waitlistEntries?.length || 0)})
             </Button>
             
             <Button
@@ -491,24 +480,32 @@ const TrainerDashboard = () => {
           </div>
         )}
         
-        {activeView === 'prospects' && (
-          <div className="space-y-6">
-            <CoachSelectionRequests />
-            <ProspectsSection onCountChange={setProspectsCount} />
-          </div>
-        )}
-        
-        {activeView === 'waitlist' && (
-          <WaitlistManagement />
-        )}
+        {/* Remove old prospects and waitlist views - now handled in all-prospects */}
         
         {activeView === 'clients' && (
-          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded"></div>}>
-            <ClientProspectSummary 
-              onActiveClientsCountChange={setActiveClientsCount}
-              onProspectsCountChange={setProspectsCount}
-            />
-          </Suspense>
+          <div className="space-y-6">
+            <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded"></div>}>
+              <ActiveClientsSection onCountChange={setActiveClientsCount} />
+            </Suspense>
+          </div>
+        )}
+
+        {activeView === 'all-prospects' && (
+          <div className="space-y-6">
+            <Tabs defaultValue="active" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="active">Active Prospects</TabsTrigger>
+                <TabsTrigger value="waitlist">Waitlist</TabsTrigger>
+              </TabsList>
+              <TabsContent value="active" className="space-y-6">
+                <CoachSelectionRequests />
+                <ProspectsSection onCountChange={setProspectsCount} />
+              </TabsContent>
+              <TabsContent value="waitlist" className="space-y-6">
+                <WaitlistManagement />
+              </TabsContent>
+            </Tabs>
+          </div>
         )}
 
         {activeView === 'templates' && (
