@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { TrainerCard } from "@/components/TrainerCard";
+import { EnhancedTrainerCard } from "@/components/trainer-cards/EnhancedTrainerCard";
 import { ComparisonView } from "@/components/ComparisonView";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -472,7 +472,7 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
           <div className={viewMode === 'grid' ? "grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6" : "space-y-4"}>
             {paginatedTrainers.map((trainer) => (
               <div key={trainer.id} className="space-y-3">
-                <TrainerCard
+                <EnhancedTrainerCard
                   trainer={trainer}
                   onViewProfile={handleViewProfile}
                   cardState={

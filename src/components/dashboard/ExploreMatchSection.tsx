@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { TrainerCard } from "@/components/TrainerCard";
+import { EnhancedTrainerCard } from "@/components/trainer-cards/EnhancedTrainerCard";
 import { ComparisonView } from "@/components/ComparisonView";
 import { toast } from "sonner";
 import { 
@@ -376,12 +376,11 @@ export function ExploreMatchSection({ profile }: ExploreMatchSectionProps) {
         <div className={viewMode === 'grid' ? "grid md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}>
           {filteredTrainers.map((match) => (
             <div key={match.trainer.id} className="space-y-3">
-              <TrainerCard
+              <EnhancedTrainerCard
                 trainer={match.trainer}
                 onViewProfile={handleViewProfile}
                 matchScore={match.score}
                 matchReasons={match.matchReasons}
-                matchDetails={match.matchDetails}
                 cardState={
                   isShortlisted(match.trainer.id) ? "shortlisted" : 
                   isTrainerSaved(match.trainer.id) ? "saved" : 

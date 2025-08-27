@@ -15,7 +15,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TrainerCard } from "@/components/TrainerCard";
 import { EnhancedTrainerCard } from "@/components/trainer-cards/EnhancedTrainerCard";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { FloatingMessageButton } from "@/components/FloatingMessageButton";
