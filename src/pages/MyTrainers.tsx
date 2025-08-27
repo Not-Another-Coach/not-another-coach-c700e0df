@@ -685,10 +685,22 @@ export default function MyTrainers() {
     );
   }
 
-  return (
-    <div className="space-y-6">
-      {/* Header with sync status */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-2">
+  // Add error handling and logging
+  console.log('🔍 MyTrainers render state:', {
+    user: !!user,
+    profile: !!profile,
+    filteredTrainers: filteredTrainers?.length,
+    isDataReady,
+    showComparison,
+    allTrainers: allTrainers?.length,
+    counts
+  });
+
+  try {
+    return (
+      <div className="space-y-6">
+        {/* Header with sync status */}
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-2">
         <div className="flex items-center gap-4">
           <h1 className="text-2xl font-bold">My Trainers</h1>
           <Button
@@ -861,4 +873,21 @@ export default function MyTrainers() {
       <FloatingMessageButton />
     </div>
   );
+  } catch (error) {
+    console.error('🚨 Error in MyTrainers render:', error);
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-lg text-red-600 mb-2">Error loading My Trainers</div>
+          <div className="text-sm text-muted-foreground mb-4">
+            {error instanceof Error ? error.message : 'Unknown error occurred'}
+          </div>
+          <Button onClick={() => window.location.reload()}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh Page
+          </Button>
+        </div>
+      </div>
+    );
+  }
 }
