@@ -29,6 +29,7 @@ import { ClientFitSection } from "@/components/trainer-setup/ClientFitSection";
 import { RatesSection } from "@/components/trainer-setup/RatesSection";
 import { TestimonialsSection } from "@/components/trainer-setup/TestimonialsSection";
 import { PackageWaysOfWorkingSection } from "@/components/trainer-setup/PackageWaysOfWorkingSection";
+import { InstagramIntegration } from "@/components/instagram/InstagramIntegration";
 
 import { WorkingHoursAndAvailabilitySection } from "@/components/trainer-setup/WorkingHoursAndAvailabilitySection";
 import { TermsAndNotificationsSection } from "@/components/trainer-setup/TermsAndNotificationsSection";
@@ -112,7 +113,7 @@ const TrainerProfileSetup = () => {
     terms_agreed: false,
   });
 
-  const totalSteps = 10;
+  const totalSteps = 11;
 
   const stepTitles = [
     "Basic Info",
@@ -122,6 +123,7 @@ const TrainerProfileSetup = () => {
     "Rates & Discovery Calls",
     "Testimonials & Case Studies",
     "Ways of Working",
+    "Instagram Integration",
     "Working Hours & New Client Availability",
     "T&Cs and Notifications",
     "Verification"
@@ -216,9 +218,10 @@ const TrainerProfileSetup = () => {
         'rates': 5,
         'testimonials': 6,
         'ways-of-working': 7,
-        'working-hours': 8,
-        'terms-notifications': 9,
-        'verification': 10
+        'instagram': 8,
+        'working-hours': 9,
+        'terms-notifications': 10,
+        'verification': 11
       };
       
       const stepNumber = tabMap[tab];
@@ -284,7 +287,7 @@ const TrainerProfileSetup = () => {
           newErrors.package_options = "At least one tiered pricing package is required";
         }
         break;
-      case 9:
+      case 10:
         if (!formData.terms_agreed) {
           newErrors.terms_agreed = "You must agree to the terms";
         }
@@ -353,10 +356,12 @@ const TrainerProfileSetup = () => {
         
         return allPackagesConfigured ? 'completed' : (anyPackageConfigured ? 'partial' : 'not_started');
       case 8:
-        return 'completed'; // Working hours step - always accessible
+        return 'completed'; // Instagram integration - optional step
       case 9:
-        return formData.terms_agreed ? 'completed' : 'not_started';
+        return 'completed'; // Working hours step - always accessible
       case 10:
+        return formData.terms_agreed ? 'completed' : 'not_started';
+      case 11:
         // Verification step - always accessible but completion depends on verification status
         return 'completed'; // This is a read-only informational step
       default:
@@ -630,13 +635,15 @@ const TrainerProfileSetup = () => {
       case 7:
         return <PackageWaysOfWorkingSection {...commonProps} />;
       case 8:
+        return <InstagramIntegration />;
+      case 9:
         return <WorkingHoursAndAvailabilitySection 
           {...commonProps} 
           onAvailabilityChange={handleAvailabilityChange}
         />;
-      case 9:
-        return <TermsAndNotificationsSection {...commonProps} />;
       case 10:
+        return <TermsAndNotificationsSection {...commonProps} />;
+      case 11:
         return <VerificationSection />;
       default:
         return null;
