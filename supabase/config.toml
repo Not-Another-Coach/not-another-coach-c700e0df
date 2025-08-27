@@ -61,6 +61,15 @@ verify_jwt = true
 [functions.process-onboarding-sla]
 verify_jwt = false
 
+[functions.instagram-oauth]
+verify_jwt = true
+
+[functions.instagram-media]
+verify_jwt = true
+
+[functions.instagram-refresh-token]
+verify_jwt = true
+
 [edge-runtime]
 enabled = true
 port = 54329
