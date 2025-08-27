@@ -11,17 +11,21 @@ import { OverviewView } from '@/components/profile-views/OverviewView';
 import { ResultsView } from '@/components/profile-views/ResultsView';
 import { StoryView } from '@/components/profile-views/StoryView';
 import { ContentView } from '@/components/profile-views/ContentView';
+import { CardsView } from '@/components/profile-views/CardsView';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useAuth } from '@/hooks/useAuth';
 
 export const TrainerProfile = () => {
   const { trainerId } = useParams<{ trainerId: string }>();
   const navigate = useNavigate();
   const { trainers, loading } = useRealTrainers();
+  const { user } = useAuth();
   const [isMessagingOpen, setIsMessagingOpen] = useState(false);
   const [currentView, setCurrentView] = useState<ProfileViewMode>('overview');
   const isMobile = useIsMobile();
 
   const trainer = trainers.find(t => t.id === trainerId);
+  const isOwnProfile = user?.id === trainerId;
 
   if (loading) {
     return (
@@ -70,10 +74,12 @@ export const TrainerProfile = () => {
         return (
           <OverviewView 
             trainer={trainer} 
-            onMessage={handleMessage}
-            onBookDiscovery={trainer.offers_discovery_call ? handleBookDiscovery : undefined}
+            onMessage={!isOwnProfile ? handleMessage : undefined}
+            onBookDiscovery={!isOwnProfile && trainer.offers_discovery_call ? handleBookDiscovery : undefined}
           />
         );
+      case 'cards':
+        return <CardsView trainer={trainer} />;
       case 'results':
         return <ResultsView trainer={trainer} />;
       case 'story':
@@ -100,7 +106,7 @@ export const TrainerProfile = () => {
           </Card>
         );
       default:
-        return <OverviewView trainer={trainer} onMessage={handleMessage} onBookDiscovery={handleBookDiscovery} />;
+        return <OverviewView trainer={trainer} onMessage={!isOwnProfile ? handleMessage : undefined} onBookDiscovery={!isOwnProfile ? handleBookDiscovery : undefined} />;
     }
   };
 
@@ -120,7 +126,9 @@ export const TrainerProfile = () => {
         
         <div className="flex-1">
           <h1 className="text-2xl font-bold">{trainer.name}</h1>
-          <p className="text-muted-foreground">Personal Trainer Profile</p>
+          <p className="text-muted-foreground">
+            {isOwnProfile ? 'Your Profile Preview' : 'Personal Trainer Profile'}
+          </p>
         </div>
       </div>
 
