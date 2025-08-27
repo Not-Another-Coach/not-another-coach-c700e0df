@@ -774,6 +774,100 @@ export type Database = {
         }
         Relationships: []
       }
+      critical_tasks: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          ct_type: Database["public"]["Enums"]["ct_type"]
+          current_count: number | null
+          cycle_id: string | null
+          description: string | null
+          due_date: string
+          goal_id: string | null
+          id: string
+          status: Database["public"]["Enums"]["ct_status"]
+          target_count: number | null
+          title: string
+          trainer_id: string
+          updated_at: string
+          week_start: string
+          weight: number | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          ct_type?: Database["public"]["Enums"]["ct_type"]
+          current_count?: number | null
+          cycle_id?: string | null
+          description?: string | null
+          due_date: string
+          goal_id?: string | null
+          id?: string
+          status?: Database["public"]["Enums"]["ct_status"]
+          target_count?: number | null
+          title: string
+          trainer_id: string
+          updated_at?: string
+          week_start: string
+          weight?: number | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          ct_type?: Database["public"]["Enums"]["ct_type"]
+          current_count?: number | null
+          cycle_id?: string | null
+          description?: string | null
+          due_date?: string
+          goal_id?: string | null
+          id?: string
+          status?: Database["public"]["Enums"]["ct_status"]
+          target_count?: number | null
+          title?: string
+          trainer_id?: string
+          updated_at?: string
+          week_start?: string
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "critical_tasks_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ct_client_links: {
+        Row: {
+          client_id: string
+          created_at: string
+          ct_id: string
+          id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          ct_id: string
+          id?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          ct_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ct_client_links_ct_id_fkey"
+            columns: ["ct_id"]
+            isOneToOne: false
+            referencedRelation: "critical_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       data_retention_policies: {
         Row: {
           auto_purge_enabled: boolean | null
@@ -1238,6 +1332,106 @@ export type Database = {
           workflow_type?: string
         }
         Relationships: []
+      }
+      goal_client_links: {
+        Row: {
+          client_id: string
+          created_at: string
+          goal_id: string
+          id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          goal_id: string
+          id?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          goal_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_client_links_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goals: {
+        Row: {
+          created_at: string
+          current_value: number | null
+          cycle_id: string | null
+          description: string | null
+          display_order: number | null
+          end_date: string
+          goal_type: Database["public"]["Enums"]["goal_type"]
+          id: string
+          is_archived: boolean | null
+          parent_goal_id: string | null
+          start_date: string
+          status: Database["public"]["Enums"]["goal_status"]
+          target_unit: string | null
+          target_value: number | null
+          timeframe: Database["public"]["Enums"]["goal_timeframe"]
+          title: string
+          trainer_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_value?: number | null
+          cycle_id?: string | null
+          description?: string | null
+          display_order?: number | null
+          end_date: string
+          goal_type?: Database["public"]["Enums"]["goal_type"]
+          id?: string
+          is_archived?: boolean | null
+          parent_goal_id?: string | null
+          start_date: string
+          status?: Database["public"]["Enums"]["goal_status"]
+          target_unit?: string | null
+          target_value?: number | null
+          timeframe: Database["public"]["Enums"]["goal_timeframe"]
+          title: string
+          trainer_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_value?: number | null
+          cycle_id?: string | null
+          description?: string | null
+          display_order?: number | null
+          end_date?: string
+          goal_type?: Database["public"]["Enums"]["goal_type"]
+          id?: string
+          is_archived?: boolean | null
+          parent_goal_id?: string | null
+          start_date?: string
+          status?: Database["public"]["Enums"]["goal_status"]
+          target_unit?: string | null
+          target_value?: number | null
+          timeframe?: Database["public"]["Enums"]["goal_timeframe"]
+          title?: string
+          trainer_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goals_parent_goal_id_fkey"
+            columns: ["parent_goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       kb_article_revisions: {
         Row: {
@@ -2482,6 +2676,7 @@ export type Database = {
           force_password_reset: boolean | null
           free_discovery_call: boolean | null
           hourly_rate: number | null
+          how_started: string | null
           id: string
           ideal_client_age_range: string | null
           ideal_client_fitness_level: string | null
@@ -2507,6 +2702,7 @@ export type Database = {
           open_to_virtual_coaching: boolean | null
           package_inclusions: Json | null
           package_options: Json | null
+          philosophy: string | null
           phone: string | null
           preferred_coaching_style: string[] | null
           preferred_package_type: string | null
@@ -2515,6 +2711,7 @@ export type Database = {
           pricing_unlock_required: boolean | null
           primary_goals: string[] | null
           privacy_policy_version: string | null
+          professional_milestones: Json | null
           profile_blocks: Json | null
           profile_photo_url: string | null
           profile_published: boolean | null
@@ -2528,6 +2725,7 @@ export type Database = {
           rating: number | null
           secondary_goals: string[] | null
           special_credentials: string[] | null
+          specialization_description: string | null
           specializations: string[] | null
           start_timeline: string | null
           suspended_at: string | null
@@ -2609,6 +2807,7 @@ export type Database = {
           force_password_reset?: boolean | null
           free_discovery_call?: boolean | null
           hourly_rate?: number | null
+          how_started?: string | null
           id: string
           ideal_client_age_range?: string | null
           ideal_client_fitness_level?: string | null
@@ -2634,6 +2833,7 @@ export type Database = {
           open_to_virtual_coaching?: boolean | null
           package_inclusions?: Json | null
           package_options?: Json | null
+          philosophy?: string | null
           phone?: string | null
           preferred_coaching_style?: string[] | null
           preferred_package_type?: string | null
@@ -2642,6 +2842,7 @@ export type Database = {
           pricing_unlock_required?: boolean | null
           primary_goals?: string[] | null
           privacy_policy_version?: string | null
+          professional_milestones?: Json | null
           profile_blocks?: Json | null
           profile_photo_url?: string | null
           profile_published?: boolean | null
@@ -2655,6 +2856,7 @@ export type Database = {
           rating?: number | null
           secondary_goals?: string[] | null
           special_credentials?: string[] | null
+          specialization_description?: string | null
           specializations?: string[] | null
           start_timeline?: string | null
           suspended_at?: string | null
@@ -2736,6 +2938,7 @@ export type Database = {
           force_password_reset?: boolean | null
           free_discovery_call?: boolean | null
           hourly_rate?: number | null
+          how_started?: string | null
           id?: string
           ideal_client_age_range?: string | null
           ideal_client_fitness_level?: string | null
@@ -2761,6 +2964,7 @@ export type Database = {
           open_to_virtual_coaching?: boolean | null
           package_inclusions?: Json | null
           package_options?: Json | null
+          philosophy?: string | null
           phone?: string | null
           preferred_coaching_style?: string[] | null
           preferred_package_type?: string | null
@@ -2769,6 +2973,7 @@ export type Database = {
           pricing_unlock_required?: boolean | null
           primary_goals?: string[] | null
           privacy_policy_version?: string | null
+          professional_milestones?: Json | null
           profile_blocks?: Json | null
           profile_photo_url?: string | null
           profile_published?: boolean | null
@@ -2782,6 +2987,7 @@ export type Database = {
           rating?: number | null
           secondary_goals?: string[] | null
           special_credentials?: string[] | null
+          specialization_description?: string | null
           specializations?: string[] | null
           start_timeline?: string | null
           suspended_at?: string | null
@@ -3388,6 +3594,166 @@ export type Database = {
         }
         Relationships: []
       }
+      weekly_cycles: {
+        Row: {
+          avg_execution_score: number | null
+          completed_goals_count: number | null
+          created_at: string
+          current_week: number | null
+          description: string | null
+          end_date: string
+          id: string
+          is_active: boolean | null
+          is_completed: boolean | null
+          start_date: string
+          title: string
+          total_goals_count: number | null
+          trainer_id: string
+          updated_at: string
+        }
+        Insert: {
+          avg_execution_score?: number | null
+          completed_goals_count?: number | null
+          created_at?: string
+          current_week?: number | null
+          description?: string | null
+          end_date: string
+          id?: string
+          is_active?: boolean | null
+          is_completed?: boolean | null
+          start_date: string
+          title: string
+          total_goals_count?: number | null
+          trainer_id: string
+          updated_at?: string
+        }
+        Update: {
+          avg_execution_score?: number | null
+          completed_goals_count?: number | null
+          created_at?: string
+          current_week?: number | null
+          description?: string | null
+          end_date?: string
+          id?: string
+          is_active?: boolean | null
+          is_completed?: boolean | null
+          start_date?: string
+          title?: string
+          total_goals_count?: number | null
+          trainer_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      weekly_execution_scores: {
+        Row: {
+          completed_cts: number | null
+          completed_weight: number | null
+          created_at: string
+          cycle_id: string | null
+          execution_score: number
+          id: string
+          review_completed: boolean | null
+          review_notes: string | null
+          total_cts: number | null
+          total_weight: number | null
+          trainer_id: string
+          updated_at: string
+          week_end: string
+          week_number: number | null
+          week_start: string
+        }
+        Insert: {
+          completed_cts?: number | null
+          completed_weight?: number | null
+          created_at?: string
+          cycle_id?: string | null
+          execution_score?: number
+          id?: string
+          review_completed?: boolean | null
+          review_notes?: string | null
+          total_cts?: number | null
+          total_weight?: number | null
+          trainer_id: string
+          updated_at?: string
+          week_end: string
+          week_number?: number | null
+          week_start: string
+        }
+        Update: {
+          completed_cts?: number | null
+          completed_weight?: number | null
+          created_at?: string
+          cycle_id?: string | null
+          execution_score?: number
+          id?: string
+          review_completed?: boolean | null
+          review_notes?: string | null
+          total_cts?: number | null
+          total_weight?: number | null
+          trainer_id?: string
+          updated_at?: string
+          week_end?: string
+          week_number?: number | null
+          week_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weekly_execution_scores_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "weekly_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      weekly_reviews: {
+        Row: {
+          carry_forward_notes: string | null
+          challenges: string | null
+          created_at: string
+          id: string
+          learnings: string | null
+          next_week_focus: string | null
+          trainer_id: string
+          updated_at: string
+          week_score_id: string
+          wins: string | null
+        }
+        Insert: {
+          carry_forward_notes?: string | null
+          challenges?: string | null
+          created_at?: string
+          id?: string
+          learnings?: string | null
+          next_week_focus?: string | null
+          trainer_id: string
+          updated_at?: string
+          week_score_id: string
+          wins?: string | null
+        }
+        Update: {
+          carry_forward_notes?: string | null
+          challenges?: string | null
+          created_at?: string
+          id?: string
+          learnings?: string | null
+          next_week_focus?: string | null
+          trainer_id?: string
+          updated_at?: string
+          week_score_id?: string
+          wins?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weekly_reviews_week_score_id_fkey"
+            columns: ["week_score_id"]
+            isOneToOne: false
+            referencedRelation: "weekly_execution_scores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -3405,9 +3771,21 @@ export type Database = {
         Args: { business_days: number; start_date: string }
         Returns: string
       }
+      calculate_execution_score: {
+        Args: { p_trainer_id: string; p_week_start: string }
+        Returns: number
+      }
       can_send_marketing_message: {
         Args: { p_user_id: string }
         Returns: boolean
+      }
+      carry_forward_incomplete_cts: {
+        Args: {
+          p_from_week_start: string
+          p_to_week_start?: string
+          p_trainer_id: string
+        }
+        Returns: number
       }
       client_has_sent_first_message: {
         Args: { client_uuid: string; conversation_uuid: string }
@@ -3496,6 +3874,14 @@ export type Database = {
         Returns: {
           role: Database["public"]["Enums"]["app_role"]
         }[]
+      }
+      get_week_end: {
+        Args: { input_date: string }
+        Returns: string
+      }
+      get_week_start: {
+        Args: { input_date: string }
+        Returns: string
       }
       grant_admin_role: {
         Args: { _user_id: string }
@@ -3673,6 +4059,15 @@ export type Database = {
         | "testimonial_images"
         | "certification_images"
         | "gallery_images"
+      ct_status: "to_do" | "doing" | "done" | "skipped" | "deferred"
+      ct_type:
+        | "outreach"
+        | "check_in"
+        | "content"
+        | "admin"
+        | "learning"
+        | "sales"
+        | "delivery"
       discovery_call_status:
         | "scheduled"
         | "completed"
@@ -3691,6 +4086,21 @@ export type Database = {
         | "declined"
         | "declined_dismissed"
         | "waitlist"
+      goal_status:
+        | "not_started"
+        | "in_progress"
+        | "on_track"
+        | "at_risk"
+        | "completed"
+        | "cancelled"
+      goal_timeframe: "weekly" | "monthly" | "quarterly" | "yearly"
+      goal_type:
+        | "coaching"
+        | "sales"
+        | "program"
+        | "content"
+        | "ops"
+        | "learning"
       kb_article_status: "draft" | "published" | "archived" | "staging"
       kb_content_type:
         | "feature"
@@ -3858,6 +4268,16 @@ export const Constants = {
         "certification_images",
         "gallery_images",
       ],
+      ct_status: ["to_do", "doing", "done", "skipped", "deferred"],
+      ct_type: [
+        "outreach",
+        "check_in",
+        "content",
+        "admin",
+        "learning",
+        "sales",
+        "delivery",
+      ],
       discovery_call_status: [
         "scheduled",
         "completed",
@@ -3878,6 +4298,16 @@ export const Constants = {
         "declined_dismissed",
         "waitlist",
       ],
+      goal_status: [
+        "not_started",
+        "in_progress",
+        "on_track",
+        "at_risk",
+        "completed",
+        "cancelled",
+      ],
+      goal_timeframe: ["weekly", "monthly", "quarterly", "yearly"],
+      goal_type: ["coaching", "sales", "program", "content", "ops", "learning"],
       kb_article_status: ["draft", "published", "archived", "staging"],
       kb_content_type: [
         "feature",
