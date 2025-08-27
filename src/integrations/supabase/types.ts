@@ -3270,6 +3270,84 @@ export type Database = {
           },
         ]
       }
+      trainer_image_preferences: {
+        Row: {
+          auto_sync_instagram: boolean | null
+          created_at: string | null
+          id: string
+          instagram_sync_frequency: string | null
+          last_instagram_sync: string | null
+          max_images_per_view: number | null
+          trainer_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          auto_sync_instagram?: boolean | null
+          created_at?: string | null
+          id?: string
+          instagram_sync_frequency?: string | null
+          last_instagram_sync?: string | null
+          max_images_per_view?: number | null
+          trainer_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          auto_sync_instagram?: boolean | null
+          created_at?: string | null
+          id?: string
+          instagram_sync_frequency?: string | null
+          last_instagram_sync?: string | null
+          max_images_per_view?: number | null
+          trainer_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      trainer_instagram_selections: {
+        Row: {
+          caption: string | null
+          created_at: string | null
+          display_order: number | null
+          id: string
+          instagram_media_id: string
+          is_selected_for_display: boolean | null
+          media_type: string
+          media_url: string
+          synced_at: string | null
+          thumbnail_url: string | null
+          trainer_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          instagram_media_id: string
+          is_selected_for_display?: boolean | null
+          media_type: string
+          media_url: string
+          synced_at?: string | null
+          thumbnail_url?: string | null
+          trainer_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          instagram_media_id?: string
+          is_selected_for_display?: boolean | null
+          media_type?: string
+          media_url?: string
+          synced_at?: string | null
+          thumbnail_url?: string | null
+          trainer_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       trainer_onboarding_activities: {
         Row: {
           activity_name: string
@@ -3461,6 +3539,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      trainer_uploaded_images: {
+        Row: {
+          created_at: string | null
+          display_order: number | null
+          file_name: string
+          file_path: string
+          file_size: number | null
+          id: string
+          is_selected_for_display: boolean | null
+          mime_type: string | null
+          trainer_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          display_order?: number | null
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          id?: string
+          is_selected_for_display?: boolean | null
+          mime_type?: string | null
+          trainer_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          display_order?: number | null
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          is_selected_for_display?: boolean | null
+          mime_type?: string | null
+          trainer_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       trainer_verification_requests: {
         Row: {
