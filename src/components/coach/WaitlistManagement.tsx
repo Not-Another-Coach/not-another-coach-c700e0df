@@ -11,7 +11,7 @@ import { format } from 'date-fns';
 import { Users, MessageCircle, Calendar, UserPlus, Archive, Clock, Settings, ExternalLink, Bell } from 'lucide-react';
 import { MessagingPopup } from '@/components/MessagingPopup';
 
-export function WaitlistManagement() {
+export default function WaitlistManagement() {
   const { waitlistEntries, updateWaitlistEntry, loading } = useWaitlist();
   const { toast } = useToast();
   const navigate = useNavigate();

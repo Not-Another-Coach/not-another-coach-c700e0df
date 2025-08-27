@@ -10,7 +10,7 @@ import { useCoachAvailability } from "@/hooks/useCoachAvailability";
 import { MemoryMonitor } from "@/components/MemoryMonitor";
 
 // Lazy load heavy components
-const WaitlistManagement = lazy(() => import("@/components/coach/WaitlistManagement").then(m => ({ default: m.WaitlistManagement })));
+const WaitlistManagement = lazy(() => import("@/components/coach/WaitlistManagement"));
 const CoachFeedbackSummary = lazy(() => import("@/components/coach/CoachFeedbackSummary").then(m => ({ default: m.CoachFeedbackSummary })));
 const ActiveClientsSection = lazy(() => import("@/components/coach/ActiveClientsSection").then(m => ({ default: m.ActiveClientsSection })));
 const LiveActivityFeed = lazy(() => import("@/components/dashboard/LiveActivityFeed").then(m => ({ default: m.LiveActivityFeed })));
