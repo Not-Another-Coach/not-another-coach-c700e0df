@@ -148,10 +148,47 @@ export const useClientJourneyProgress = () => {
         currentStage = 'coach_chosen';
       }
 
+      // Get onboarding progress to check completion
+      const { data: onboardingProgress, error: onboardingError } = await supabase
+        .from('client_onboarding_progress')
+        .select(`
+          *,
+          client_template_assignments!inner (
+            status,
+            template_name
+          )
+        `)
+        .eq('client_id', user.id)
+        .eq('client_template_assignments.status', 'active');
+
+      if (onboardingError) {
+        console.error('Error fetching onboarding progress:', onboardingError);
+      }
+
+      // Calculate onboarding completion percentage
+      const totalOnboardingSteps = onboardingProgress?.length || 0;
+      const completedOnboardingSteps = onboardingProgress?.filter(step => step.status === 'completed').length || 0;
+      const onboardingCompletionPercentage = totalOnboardingSteps > 0 ? (completedOnboardingSteps / totalOnboardingSteps) * 100 : 0;
+
       // Stage 5: Became active client (onboarding)
       const isOnboarding = engagements?.some(e => e.became_client_at && !e.discovery_completed_at);
       if (isOnboarding) {
         currentStage = 'onboarding_in_progress';
+        
+        // Auto-advance to "on_your_journey" if onboarding is 100% complete
+        if (onboardingCompletionPercentage === 100) {
+          currentStage = 'on_your_journey';
+          
+          // Update the engagement to mark discovery as completed to prevent regression
+          await supabase
+            .from('client_trainer_engagement')
+            .update({ 
+              discovery_completed_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            })
+            .eq('client_id', user.id)
+            .eq('stage', 'active_client');
+        }
       }
 
       // Stage 6: Fully active (on journey)
