@@ -267,7 +267,8 @@ export const useTrainerImages = () => {
           trainer_id: user.id,
           ...preferences
         }, {
-          onConflict: 'trainer_id'
+          onConflict: 'trainer_id',
+          ignoreDuplicates: false
         })
         .select()
         .single();
