@@ -50,52 +50,37 @@ export const ClientTransformationView = ({ trainer, children }: ClientTransforma
         
         {/* Transformation Gallery Grid */}
         <div className="relative">
-          <div className="grid grid-cols-2 gap-1 aspect-square">
-            {/* Before/After pairs */}
-            {transformationData.transformations.slice(0, 3).map((transformation, index) => (
-              <div key={index} className="relative overflow-hidden bg-muted">
-                <div className="grid grid-cols-2 gap-0.5 h-full">
-                  {/* Before Image */}
-                  <div className="relative">
-                    <img
-                      src={transformation.before}
-                      alt="Before transformation"
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute top-1 left-1">
-                      <Badge className="text-xs bg-black/60 text-white border-0">
-                        Before
-                      </Badge>
-                    </div>
-                  </div>
-                  
-                  {/* After Image */}
-                  <div className="relative">
-                    <img
-                      src={transformation.after}
-                      alt="After transformation"
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute top-1 right-1">
-                      <Badge className="text-xs bg-success text-white border-0">
-                        After
-                      </Badge>
-                    </div>
-                  </div>
+          {/* Single Before/After Split */}
+          <div className="aspect-square relative">
+            <div className="grid grid-cols-2 gap-1 h-full">
+              {/* Before Image */}
+              <div className="relative overflow-hidden">
+                <img
+                  src={transformationData.transformations[0]?.before || trainer.image}
+                  alt="Before transformation"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-3 left-3">
+                  <Badge className="text-sm bg-black/70 text-white border-0 px-3 py-1">
+                    Before
+                  </Badge>
                 </div>
               </div>
-            ))}
-            
-            {/* Fill remaining slots if needed */}
-            {Array.from({ length: Math.max(0, 3 - transformationData.transformations.length) }).map((_, index) => (
-              <div key={`filler-${index}`} className="relative overflow-hidden bg-muted/50">
+              
+              {/* After Image */}
+              <div className="relative overflow-hidden">
                 <img
-                  src={trainer.image}
-                  alt={trainer.name}
-                  className="w-full h-full object-cover opacity-60"
+                  src={transformationData.transformations[0]?.after || trainer.image}
+                  alt="After transformation"
+                  className="w-full h-full object-cover"
                 />
+                <div className="absolute top-3 right-3">
+                  <Badge className="text-sm bg-success text-white border-0 px-3 py-1">
+                    After
+                  </Badge>
+                </div>
               </div>
-            ))}
+            </div>
           </div>
           
           {/* Gradient overlay for text readability */}
