@@ -25,6 +25,7 @@ import { ClientOnboardingManagement } from "@/components/coach/ClientOnboardingM
 import { OnboardingSummaryWidget } from "@/components/dashboard/OnboardingSummaryWidget";
 import { GoalsSection } from "@/components/goals/GoalsSection";
 import { WeeklyExecutionCard } from "@/components/dashboard/WeeklyExecutionCard";
+import { InstagramIntegration } from "@/components/instagram/InstagramIntegration";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -59,7 +60,8 @@ import {
   ChevronDown,
   Home,
   UserSearch,
-  Goal
+  Goal,
+  Instagram
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -301,6 +303,16 @@ const TrainerDashboard = () => {
               <Goal className="w-4 h-4" />
               Goals & Tasks
             </Button>
+            
+            <Button
+              variant={activeView === 'instagram' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setActiveView('instagram')}
+              className="flex items-center gap-2"
+            >
+              <Instagram className="w-4 h-4" />
+              Instagram
+            </Button>
           </nav>
         </div>
       </div>
@@ -519,6 +531,10 @@ const TrainerDashboard = () => {
         
         {activeView === 'goals' && (
           <GoalsSection />
+        )}
+
+        {activeView === 'instagram' && (
+          <InstagramIntegration />
         )}
 
       </div>
