@@ -58,6 +58,10 @@ const TrainerProfileSetup = () => {
     last_name: "",
     tagline: "",
     bio: "",
+    how_started: "",
+    philosophy: "",
+    specialization_description: "",
+    professional_milestones: [] as any[],
     profile_photo_url: "",
     
     // Qualifications
@@ -146,6 +150,10 @@ const TrainerProfileSetup = () => {
         last_name: profile.last_name || "",
         tagline: profile.tagline || "",
         bio: profile.bio || "",
+        how_started: (profile as any).how_started || "",
+        philosophy: (profile as any).philosophy || "",
+        specialization_description: (profile as any).specialization_description || "",
+        professional_milestones: (profile as any).professional_milestones || [],
         profile_photo_url: profile.profile_photo_url || "",
         qualifications: profile.qualifications || [],
         specializations: profile.specializations || [],
@@ -362,7 +370,8 @@ const TrainerProfileSetup = () => {
       
       // Whitelist of valid columns that exist in the profiles table
       const validProfileFields = [
-        'first_name', 'last_name', 'bio', 'profile_photo_url', 'location',
+        'first_name', 'last_name', 'bio', 'how_started', 'philosophy', 
+        'specialization_description', 'professional_milestones', 'profile_photo_url', 'location',
         'specializations', 'qualifications', 'tagline', 'hourly_rate', 'class_rate',
         'training_types', 'terms_agreed', 'profile_setup_completed',
         'user_type', 'is_verified', 'rating', 'total_ratings',
