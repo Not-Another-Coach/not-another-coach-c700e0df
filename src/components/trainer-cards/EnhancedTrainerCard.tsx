@@ -274,15 +274,6 @@ export const EnhancedTrainerCard = ({
         ) : null}
       </div>
 
-      {/* State badge */}
-      {stateBadge && (
-        <div className="absolute top-12 left-2 z-10">
-          <Badge className={`text-xs ${stateBadge.className}`}>
-            {stateBadge.text}
-          </Badge>
-        </div>
-      )}
-
       {/* Navigation arrows - prevent event propagation */}
       <Button
         variant="ghost"
