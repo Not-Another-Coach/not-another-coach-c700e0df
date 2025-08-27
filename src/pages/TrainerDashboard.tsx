@@ -502,7 +502,9 @@ const TrainerDashboard = () => {
                 <ProspectsSection onCountChange={setProspectsCount} />
               </TabsContent>
               <TabsContent value="waitlist" className="space-y-6">
-                <WaitlistManagement />
+                <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded"></div>}>
+                  <WaitlistManagement />
+                </Suspense>
               </TabsContent>
             </Tabs>
           </div>
