@@ -266,6 +266,8 @@ export const useTrainerImages = () => {
         .upsert({
           trainer_id: user.id,
           ...preferences
+        }, {
+          onConflict: 'trainer_id'
         })
         .select()
         .single();
