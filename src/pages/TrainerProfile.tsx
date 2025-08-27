@@ -78,8 +78,6 @@ export const TrainerProfile = () => {
             onBookDiscovery={!isOwnProfile && trainer.offers_discovery_call ? handleBookDiscovery : undefined}
           />
         );
-      case 'cards':
-        return <CardsView trainer={trainer} />;
       case 'results':
         return <ResultsView trainer={trainer} />;
       case 'story':
@@ -131,6 +129,13 @@ export const TrainerProfile = () => {
           </p>
         </div>
       </div>
+
+      {/* Card Preview - Only for own profile */}
+      {isOwnProfile && (
+        <div className="mb-6">
+          <CardsView trainer={trainer} />
+        </div>
+      )}
 
       {/* Profile View Selector */}
       <div className="mb-6">

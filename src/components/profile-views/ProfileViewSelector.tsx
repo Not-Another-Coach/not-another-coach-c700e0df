@@ -5,7 +5,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Eye, Trophy, BookOpen, Play, GitCompare, ChevronDown, Grid3X3 } from 'lucide-react';
 
-export type ProfileViewMode = 'overview' | 'results' | 'story' | 'content' | 'cards' | 'compare';
+export type ProfileViewMode = 'overview' | 'results' | 'story' | 'content' | 'compare';
 
 interface ProfileViewSelectorProps {
   currentView: ProfileViewMode;
@@ -20,12 +20,6 @@ const viewOptions = [
     label: 'Overview',
     icon: Eye,
     description: 'Brief summary of coach'
-  },
-  {
-    value: 'cards' as ProfileViewMode,
-    label: 'Card Views',
-    icon: Grid3X3,
-    description: 'How your profile appears as cards'
   },
   {
     value: 'results' as ProfileViewMode,
@@ -132,7 +126,7 @@ export const ProfileViewSelector = ({
       </div>
       
       <Tabs value={currentView} onValueChange={(value) => onViewChange(value as ProfileViewMode)}>
-        <TabsList className="grid w-full grid-cols-6 h-auto p-1">
+        <TabsList className="grid w-full grid-cols-5 h-auto p-1">
           {viewOptions.map((option) => {
             const Icon = option.icon;
             return (
