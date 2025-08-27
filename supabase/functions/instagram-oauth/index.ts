@@ -99,7 +99,7 @@ Deno.serve(async (req) => {
       )
     }
     
-    // Handle OAuth callback
+    // Handle token exchange - code is required for this flow
     if (!code) {
       throw new Error('No authorization code provided')
     }
