@@ -27,6 +27,9 @@ export const architectureDiagrams: ArchitectureDiagram[] = [
         H[send-discovery-call-email]
         I[security-headers]
         J[performance-optimizer]
+        K[instagram-oauth]
+        L[instagram-media]
+        M[instagram-refresh-token]
       end
       E -.-> D
       F -.-> D
@@ -34,6 +37,9 @@ export const architectureDiagrams: ArchitectureDiagram[] = [
       H -.-> D
       I -.-> A
       J -.-> A
+      K -.-> D
+      L -.-> D
+      M -.-> D
       C --> K[("Storage: onboarding-public")]
       C --> L[("Storage: client-photos (private)")]
       A -->|Signed URLs| L
@@ -66,6 +72,26 @@ export const architectureDiagrams: ArchitectureDiagram[] = [
       U --> D
       V --> D
       W --> D
+      
+      subgraph Instagram Integration
+        X[Instagram OAuth]
+        Y[Media Sync]
+        Z[Handle Revelation]
+      end
+      X --> D
+      Y --> D
+      Z --> D
+      A --> X
+      
+      subgraph Goal Management
+        AA[Goal Setting]
+        BB[Client Goals]
+        CC[Critical Tasks]
+      end
+      AA --> D
+      BB --> D
+      CC --> D
+      A --> AA
     `,
   },
   {
@@ -201,6 +227,11 @@ export const architectureDiagrams: ArchitectureDiagram[] = [
       PROFILES ||--o{ TRAINERS : can_be
       PROFILES ||--o{ CLIENTS : can_be
       TRAINERS ||--o{ ONBOARDING_TEMPLATES : creates
+      TRAINERS ||--o{ INSTAGRAM_CONNECTIONS : manages
+      TRAINERS ||--o{ GOALS : creates
+      CLIENTS ||--o{ GOAL_CLIENT_LINKS : assigned
+      GOALS ||--o{ CRITICAL_TASKS : generates
+      INSTAGRAM_CONNECTIONS ||--o{ HANDLE_REVELATIONS : enables
       ONBOARDING_TEMPLATES ||--o{ TEMPLATE_ANALYTICS : generates
       ONBOARDING_TEMPLATES ||--o{ TEMPLATE_VERSIONS : tracks
       ONBOARDING_TEMPLATES ||--o{ CONDITIONAL_EVALUATIONS : evaluates
@@ -327,6 +358,63 @@ export const architectureDiagrams: ArchitectureDiagram[] = [
         string purge_reason
         string legal_basis
         jsonb metadata
+        timestamp created_at
+        timestamp updated_at
+      }
+      
+      INSTAGRAM_CONNECTIONS {
+        uuid id PK
+        uuid trainer_id FK
+        text instagram_user_id
+        text username
+        text access_token
+        text refresh_token
+        boolean reveal_handle_post_discovery
+        boolean is_active
+        timestamp connected_at
+        timestamp last_sync_at
+        timestamp created_at
+        timestamp updated_at
+      }
+      
+      HANDLE_REVELATIONS {
+        uuid id PK
+        uuid trainer_id FK
+        uuid client_id FK
+        uuid connection_id FK
+        uuid discovery_call_id FK
+        timestamp revealed_at
+        timestamp created_at
+      }
+      
+      GOALS {
+        uuid id PK
+        uuid trainer_id FK
+        text title
+        text description
+        text category
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
+      }
+      
+      GOAL_CLIENT_LINKS {
+        uuid id PK
+        uuid goal_id FK
+        uuid client_id FK
+        timestamp assigned_at
+        timestamp created_at
+      }
+      
+      CRITICAL_TASKS {
+        uuid id PK
+        uuid trainer_id FK
+        uuid goal_id FK
+        text title
+        text description
+        text status
+        date due_date
+        timestamp completed_at
         timestamp created_at
         timestamp updated_at
       }
@@ -517,6 +605,82 @@ export const architectureDiagrams: ArchitectureDiagram[] = [
       DB->>DB: set_data_retention_period()
       DB->>DB: Monitor expiry dates
       DB->>DB: Auto-purge expired data
+    `,
+  },
+  {
+    id: "instagram-integration-workflow",
+    title: "Instagram Integration Workflow",
+    type: "sequence",
+    description:
+      "Complete Instagram OAuth flow with media sync and handle revelation system.",
+    mermaid: `sequenceDiagram
+      autonumber
+      participant T as Trainer
+      participant UI as Instagram UI
+      participant OAUTH as instagram-oauth
+      participant INSTA as Instagram API
+      participant DB as Database
+      participant CLIENT as Client
+
+      T->>UI: Connect Instagram
+      UI->>OAUTH: Request auth URL
+      OAUTH->>INSTA: Generate OAuth URL
+      OAUTH-->>UI: Return auth URL
+      UI-->>T: Redirect to Instagram
+      
+      T->>INSTA: Authorize application
+      INSTA->>OAUTH: Return auth code
+      OAUTH->>INSTA: Exchange for tokens
+      INSTA-->>OAUTH: Access & refresh tokens
+      OAUTH->>DB: Store encrypted tokens
+      
+      T->>UI: Configure revelation settings
+      UI->>DB: Update revelation preferences
+      
+      Note over DB: After discovery call completion
+      DB->>DB: Check revelation settings
+      DB->>DB: Create handle revelation record
+      
+      CLIENT->>UI: View trainer profile
+      UI->>DB: Check revelation access
+      DB-->>UI: Return Instagram handle
+      UI-->>CLIENT: Display Instagram content
+    `,
+  },
+  {
+    id: "goal-management-workflow", 
+    title: "Goal Management and Critical Tasks",
+    type: "sequence",
+    description:
+      "Goal assignment workflow with critical task creation and progress tracking.",
+    mermaid: `sequenceDiagram
+      autonumber
+      participant C as Client
+      participant SURVEY as Client Survey
+      participant T as Trainer
+      participant GOALS as Goal System
+      participant DB as Database
+      participant TASKS as Critical Tasks
+
+      C->>SURVEY: Complete initial survey
+      SURVEY->>DB: Store client goals
+      
+      T->>GOALS: Review client goals
+      GOALS->>DB: Fetch client preferences
+      T->>GOALS: Create/assign specific goals
+      GOALS->>DB: Link goals to client
+      
+      T->>TASKS: Create critical tasks
+      TASKS->>DB: Link tasks to goals
+      TASKS->>DB: Set due dates and priorities
+      
+      C->>TASKS: Complete task
+      TASKS->>DB: Update completion status
+      TASKS->>GOALS: Update goal progress
+      
+      T->>GOALS: Review progress
+      GOALS->>DB: Generate progress analytics
+      GOALS-->>T: Display goal metrics
     `,
   }
 ];
