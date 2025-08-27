@@ -29,7 +29,7 @@ export const ChooseCoachButton = ({
   className 
 }: ChooseCoachButtonProps) => {
   const { profile } = useProfile();
-  const { getSelectionRequest } = useCoachSelection();
+  const { getSelectionRequest, acceptAlternativePackage } = useCoachSelection();
   const { updateEngagementStage } = useEngagementStage(trainer.id);
   const [showModal, setShowModal] = useState(false);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
@@ -67,6 +67,21 @@ export const ChooseCoachButton = ({
         setSelectionRequest(result.data);
       }
     });
+  };
+
+  const handleAcceptAlternative = async () => {
+    if (!selectionRequest?.suggested_alternative_package_id) return;
+    
+    const result = await acceptAlternativePackage(
+      selectionRequest.id,
+      selectionRequest.suggested_alternative_package_id,
+      selectionRequest.suggested_alternative_package_name,
+      selectionRequest.suggested_alternative_package_price
+    );
+    
+    if (result.success) {
+      handleSuccess();
+    }
   };
 
   // Show status if there's an existing request
@@ -125,7 +140,7 @@ export const ChooseCoachButton = ({
             </Button>
           )}
           
-          {(selectionRequest.status === 'declined' || selectionRequest.status === 'alternative_suggested') && (
+          {(selectionRequest.status === 'declined') && (
             <Button 
               variant="outline" 
               onClick={() => setShowModal(true)}
@@ -136,15 +151,35 @@ export const ChooseCoachButton = ({
           )}
           
           {selectionRequest.status === 'alternative_suggested' && selectionRequest.suggested_alternative_package_name && (
-            <div className="p-3 bg-blue-50 rounded-lg">
-              <p className="text-sm font-medium text-blue-900">Suggested Package:</p>
-              <p className="text-sm text-blue-800">{selectionRequest.suggested_alternative_package_name}</p>
-              {selectionRequest.suggested_alternative_package_price && (
-                <p className="text-sm text-blue-800">${selectionRequest.suggested_alternative_package_price}</p>
-              )}
-              {selectionRequest.trainer_response && (
-                <p className="text-sm text-blue-700 mt-2">{selectionRequest.trainer_response}</p>
-              )}
+            <div className="p-3 bg-blue-50 rounded-lg space-y-3">
+              <div>
+                <p className="text-sm font-medium text-blue-900">Suggested Package:</p>
+                <p className="text-sm text-blue-800">{selectionRequest.suggested_alternative_package_name}</p>
+                {selectionRequest.suggested_alternative_package_price && (
+                  <p className="text-sm text-blue-800 font-semibold">${selectionRequest.suggested_alternative_package_price}</p>
+                )}
+                {selectionRequest.trainer_response && (
+                  <p className="text-sm text-blue-700 mt-2">{selectionRequest.trainer_response}</p>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  size="sm"
+                  onClick={handleAcceptAlternative}
+                  disabled={loading}
+                  className="flex-1"
+                >
+                  Accept Alternative Package
+                </Button>
+                <Button 
+                  size="sm"
+                  variant="outline" 
+                  onClick={() => setShowModal(true)}
+                  className="flex-1"
+                >
+                  Send New Request
+                </Button>
+              </div>
             </div>
           )}
         </div>

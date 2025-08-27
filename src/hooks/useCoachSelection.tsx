@@ -273,11 +273,54 @@ export function useCoachSelection() {
     }
   }, [user]);
 
+  const acceptAlternativePackage = useCallback(async (
+    requestId: string,
+    alternativePackageId: string,
+    alternativePackageName: string,
+    alternativePackagePrice: number
+  ) => {
+    if (!user) {
+      toast.error('You must be logged in to accept packages');
+      return { error: 'Not authenticated' };
+    }
+
+    setLoading(true);
+    try {
+      // Update the selection request to accept the alternative package
+      const { error } = await supabase
+        .from('coach_selection_requests')
+        .update({
+          package_id: alternativePackageId,
+          package_name: alternativePackageName,
+          package_price: alternativePackagePrice,
+          status: 'awaiting_payment',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', requestId);
+
+      if (error) {
+        console.error('Error accepting alternative package:', error);
+        toast.error('Failed to accept alternative package');
+        return { error };
+      }
+
+      toast.success('Alternative package accepted! Proceed to payment.');
+      return { success: true };
+    } catch (error) {
+      console.error('Error accepting alternative package:', error);
+      toast.error('Failed to accept alternative package');
+      return { error };
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
+
   return {
     loading,
     createSelectionRequest,
     getSelectionRequest,
     respondToRequest,
-    getPendingRequests
+    getPendingRequests,
+    acceptAlternativePackage
   };
 }
