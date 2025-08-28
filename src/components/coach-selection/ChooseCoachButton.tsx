@@ -7,6 +7,7 @@ import { PaymentForm } from '@/components/payment/PaymentForm';
 import { useCoachSelection } from '@/hooks/useCoachSelection';
 import { useProfile } from '@/hooks/useProfile';
 import { useEngagementStage, EngagementStage } from '@/hooks/useEngagementStage';
+import { useMessageExchange } from '@/hooks/useMessageExchange';
 
 interface ChooseCoachButtonProps {
   trainer: {
@@ -31,14 +32,23 @@ export const ChooseCoachButton = ({
   const { profile } = useProfile();
   const { getSelectionRequest, acceptAlternativePackage } = useCoachSelection();
   const { updateEngagementStage } = useEngagementStage(trainer.id);
+  const { hasExchangedMessages } = useMessageExchange(trainer.id);
   const [showModal, setShowModal] = useState(false);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [selectionRequest, setSelectionRequest] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
   const isClient = profile?.user_type === 'client';
-  // Show button when client can proceed with coach selection: agreed, discovery completed, or discovery in progress
-  const canChooseCoach = isClient && (stage === 'agreed' || stage === 'getting_to_know_your_coach' || stage === 'discovery_completed' || stage === 'discovery_in_progress');
+  // Show button when client can proceed with coach selection: 
+  // - Later stages (agreed, getting_to_know_your_coach, discovery_completed, discovery_in_progress)
+  // - OR shortlisted with message exchange (meaningful interaction has occurred)
+  const canChooseCoach = isClient && (
+    stage === 'agreed' || 
+    stage === 'getting_to_know_your_coach' || 
+    stage === 'discovery_completed' || 
+    stage === 'discovery_in_progress' ||
+    (stage === 'shortlisted' && hasExchangedMessages)
+  );
 
   useEffect(() => {
     const fetchSelectionRequest = async () => {
