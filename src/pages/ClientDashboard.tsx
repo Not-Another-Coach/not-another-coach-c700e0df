@@ -23,6 +23,7 @@ import { WaitlistExclusiveAccessWidget } from "@/components/dashboard/WaitlistEx
 import { OnboardingSection } from "@/components/dashboard/OnboardingSection";
 import { ClientOnboardingSection } from "@/components/dashboard/ClientOnboardingSection";
 import { useTrainerEngagement } from "@/hooks/useTrainerEngagement";
+import { ClientPaymentWidget } from "@/components/payment/ClientPaymentWidget";
 import { Heart, Settings, Search, MessageCircle, Menu, Users, Shuffle, Shield, ChevronRight, Home, User, UserSearch } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -192,6 +193,12 @@ export default function ClientDashboard() {
               <ExploreAllTrainers 
                 profile={profile}
               />
+            </div>
+          )}
+
+          {activeTab === "payments" && (
+            <div className="space-y-6">
+              <ClientPaymentWidget />
             </div>
           )}
         </div>

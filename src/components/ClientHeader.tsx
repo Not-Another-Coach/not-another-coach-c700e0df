@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { useClientJourneyProgress } from "@/hooks/useClientJourneyProgress";
 import { useUserRoles } from "@/hooks/useUserRoles";
-import { Shield, ChevronRight, Home, Settings, Users, UserSearch } from "lucide-react";
+import { Shield, ChevronRight, Home, Settings, Users, UserSearch, CreditCard } from "lucide-react";
 
 interface ClientHeaderProps {
   profile: any;
@@ -31,7 +31,8 @@ export function ClientHeader({
     { key: "summary", label: "Dashboard", icon: Home, route: "/client/dashboard" },
     { key: "preferences", label: "Preferences", icon: Settings, route: "/client/preferences" },
     { key: "my-trainers", label: "My Trainers", icon: Users, route: "/my-trainers" },
-    { key: "explore", label: "Explore", icon: UserSearch, route: "/client/explore" }
+    { key: "explore", label: "Explore", icon: UserSearch, route: "/client/explore" },
+    { key: "payments", label: "Payments", icon: CreditCard, route: "/client/payments" }
   ];
 
   const activeClientNavigationItems = [
