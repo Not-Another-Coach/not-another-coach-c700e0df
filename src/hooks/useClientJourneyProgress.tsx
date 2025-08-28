@@ -136,9 +136,10 @@ export const useClientJourneyProgress = () => {
         currentStage = 'exploring_coaches';
       }
 
-      // Stage 3: Has discovery call booked (matched stage or scheduled discovery call)
+      // Stage 3: Getting to know your coach (discovery call booked, matched stage, or directly in getting_to_know_your_coach stage)
       const hasDiscoveryCall = engagements?.some(e => e.matched_at) || discoveryCalls?.some(dc => dc.status === 'scheduled');
-      if (hasDiscoveryCall) {
+      const isInGettingToKnowStage = engagements?.some(e => e.stage === 'getting_to_know_your_coach');
+      if (hasDiscoveryCall || isInGettingToKnowStage) {
         currentStage = 'getting_to_know_your_coach';
       }
 
@@ -219,7 +220,7 @@ export const useClientJourneyProgress = () => {
         } else if (stageKey === 'exploring_coaches') {
           hasData = hasLikedCoaches;
         } else if (stageKey === 'getting_to_know_your_coach') {
-          hasData = hasDiscoveryCall;
+          hasData = hasDiscoveryCall || isInGettingToKnowStage;
         } else if (stageKey === 'coach_chosen') {
           hasData = hasChosenCoach;
         } else if (stageKey === 'onboarding_in_progress') {
