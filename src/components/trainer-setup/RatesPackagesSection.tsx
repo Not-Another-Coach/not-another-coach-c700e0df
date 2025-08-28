@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Trash2, Plus, DollarSign, PoundSterling, Euro, Calendar as CalendarIcon, Sparkles, Edit } from "lucide-react";
+import { Trash2, Plus, DollarSign, PoundSterling, Euro, Calendar as CalendarIcon, Sparkles, Edit, CreditCard } from "lucide-react";
 import { SectionHeader } from './SectionHeader';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -62,6 +62,11 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
     isPromotion: false,
     promotionStartDate: undefined as Date | undefined,
     promotionEndDate: undefined as Date | undefined,
+    durationWeeks: "",
+    durationMonths: "",
+    payoutFrequency: "monthly" as 'weekly' | 'monthly',
+    customerPaymentMode: "upfront" as 'upfront' | 'installments',
+    installmentCount: "",
   });
   const [newPackage, setNewPackage] = useState({
     name: "",
@@ -154,6 +159,11 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
       isPromotion: clonedPackage.isPromotion || false,
       promotionStartDate: clonedPackage.promotionStartDate,
       promotionEndDate: clonedPackage.promotionEndDate,
+      durationWeeks: pkg.durationWeeks?.toString() || "",
+      durationMonths: pkg.durationMonths?.toString() || "",
+      payoutFrequency: pkg.payoutFrequency || "monthly",
+      customerPaymentMode: pkg.customerPaymentMode || "upfront",
+      installmentCount: pkg.installmentCount?.toString() || "",
     });
 
     // Store the cloning info for later use when package is saved
@@ -222,6 +232,11 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
       isPromotion: pkg.isPromotion || false,
       promotionStartDate: pkg.promotionStartDate,
       promotionEndDate: pkg.promotionEndDate,
+      durationWeeks: pkg.durationWeeks?.toString() || "",
+      durationMonths: pkg.durationMonths?.toString() || "",
+      payoutFrequency: pkg.payoutFrequency || "monthly",
+      customerPaymentMode: pkg.customerPaymentMode || "upfront",
+      installmentCount: pkg.installmentCount?.toString() || "",
     });
   };
 
@@ -236,6 +251,11 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
         isPromotion: editPackageData.isPromotion,
         promotionStartDate: editPackageData.promotionStartDate,
         promotionEndDate: editPackageData.promotionEndDate,
+        durationWeeks: editPackageData.durationWeeks ? parseInt(editPackageData.durationWeeks) : undefined,
+        durationMonths: editPackageData.durationMonths ? parseInt(editPackageData.durationMonths) : undefined,
+        payoutFrequency: editPackageData.payoutFrequency,
+        customerPaymentMode: editPackageData.customerPaymentMode,
+        installmentCount: editPackageData.installmentCount ? parseInt(editPackageData.installmentCount) : undefined,
       };
       
       let updatedPackages;
@@ -281,8 +301,31 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
         isPromotion: false,
         promotionStartDate: undefined,
         promotionEndDate: undefined,
+        durationWeeks: "",
+        durationMonths: "",
+        payoutFrequency: "monthly",
+        customerPaymentMode: "upfront",
+        installmentCount: "",
       });
     }
+  };
+
+  const formatDuration = (pkg: TrainingPackage) => {
+    if (pkg.durationMonths) {
+      return `${pkg.durationMonths} month${pkg.durationMonths > 1 ? 's' : ''}`;
+    }
+    if (pkg.durationWeeks) {
+      return `${pkg.durationWeeks} week${pkg.durationWeeks > 1 ? 's' : ''}`;
+    }
+    return "Duration TBD";
+  };
+
+  const formatPaymentMode = (pkg: TrainingPackage) => {
+    if (pkg.customerPaymentMode === 'upfront') {
+      return "Full payment upfront";
+    }
+    const count = pkg.installmentCount || 2;
+    return `${count} installments`;
   };
 
   const standardInclusions = [
@@ -380,12 +423,28 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
                            {pkg.currency === 'GBP' ? '£' : pkg.currency === 'USD' ? '$' : '€'}{pkg.price}
                          </Badge>
                        </div>
-                       <p className="text-sm text-muted-foreground">{pkg.description}</p>
-                       {pkg.isPromotion && pkg.promotionStartDate && pkg.promotionEndDate && (
-                         <p className="text-xs text-orange-600 mt-1">
-                           🎯 Valid from {format(pkg.promotionStartDate, 'MMM dd, yyyy')} to {format(pkg.promotionEndDate, 'MMM dd, yyyy')}
-                         </p>
-                       )}
+                        <p className="text-sm text-muted-foreground mb-2">{pkg.description}</p>
+                        
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
+                          <div className="flex items-center gap-1">
+                            <CalendarIcon className="h-4 w-4" />
+                            {formatDuration(pkg)}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <CreditCard className="h-4 w-4" />
+                            {formatPaymentMode(pkg)}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <DollarSign className="h-4 w-4" />
+                            Paid {pkg.payoutFrequency || 'monthly'}
+                          </div>
+                        </div>
+                        
+                        {pkg.isPromotion && pkg.promotionStartDate && pkg.promotionEndDate && (
+                          <p className="text-xs text-orange-600 mt-1">
+                            🎯 Valid from {format(pkg.promotionStartDate, 'MMM dd, yyyy')} to {format(pkg.promotionEndDate, 'MMM dd, yyyy')}
+                          </p>
+                        )}
                      </div>
                       <div className="flex items-center gap-2">
                         <Button
@@ -470,6 +529,81 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
                 placeholder="e.g., 400"
               />
             </div>
+            <div>
+              <Label htmlFor="payout-frequency">Payout Frequency</Label>
+              <Select 
+                value={newPackage.payoutFrequency} 
+                onValueChange={(value: 'weekly' | 'monthly') => 
+                  setNewPackage(prev => ({...prev, payoutFrequency: value}))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="weekly">Weekly</SelectItem>
+                  <SelectItem value="monthly">Monthly</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">  
+            <div>
+              <Label htmlFor="duration-weeks">Duration (Weeks)</Label>
+              <Input
+                id="duration-weeks"
+                type="number"
+                value={newPackage.durationWeeks}
+                onChange={(e) => setNewPackage(prev => ({...prev, durationWeeks: e.target.value}))}
+                placeholder="e.g., 12"
+              />
+            </div>
+            <div>
+              <Label htmlFor="duration-months">Duration (Months)</Label>
+              <Input
+                id="duration-months"
+                type="number"
+                value={newPackage.durationMonths}
+                onChange={(e) => setNewPackage(prev => ({...prev, durationMonths: e.target.value}))}
+                placeholder="e.g., 3"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="payment-mode">Customer Payment Mode</Label>
+              <Select 
+                value={newPackage.customerPaymentMode} 
+                onValueChange={(value: 'upfront' | 'installments') => 
+                  setNewPackage(prev => ({...prev, customerPaymentMode: value}))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="upfront">Full Payment Upfront</SelectItem>
+                  <SelectItem value="installments">Installment Payments</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {newPackage.customerPaymentMode === 'installments' && (
+              <div>
+                <Label htmlFor="installment-count">Number of Installments</Label>
+                <Input
+                  id="installment-count"
+                  type="number"
+                  min="2"
+                  max="12"
+                  value={newPackage.installmentCount}
+                  onChange={(e) => setNewPackage(prev => ({...prev, installmentCount: e.target.value}))}
+                  placeholder="e.g., 3"
+                />
+              </div>
+            )}
           </div>
 
           {/* Enhanced Promotion Settings */}
@@ -605,46 +739,131 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
         setEditingPackage(null);
         setIsCloning(false);
       }}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>{isCloning ? "Complete Cloned Package" : "Edit Package"}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="edit-name">Package Name</Label>
-              <Input
-                id="edit-name"
-                value={editPackageData.name}
-                onChange={(e) => setEditPackageData(prev => ({...prev, name: e.target.value}))}
-              />
+          <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="edit-name">Package Name *</Label>
+                <Input
+                  id="edit-name"
+                  value={editPackageData.name}
+                  onChange={(e) => setEditPackageData(prev => ({...prev, name: e.target.value}))}
+                  placeholder="e.g., Personal Training Package"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-sessions">Sessions</Label>
+                <Input
+                  id="edit-sessions"
+                  type="number"
+                  value={editPackageData.sessions}
+                  onChange={(e) => setEditPackageData(prev => ({...prev, sessions: e.target.value}))}
+                  placeholder="e.g., 12"
+                />
+              </div>
             </div>
+            
             <div>
-              <Label htmlFor="edit-sessions">Sessions</Label>
-              <Input
-                id="edit-sessions"
-                type="number"
-                value={editPackageData.sessions}
-                onChange={(e) => setEditPackageData(prev => ({...prev, sessions: e.target.value}))}
-              />
-            </div>
-            <div>
-              <Label htmlFor="edit-price">Price</Label>
-              <Input
-                id="edit-price"
-                type="number"
-                step="0.01"
-                value={editPackageData.price}
-                onChange={(e) => setEditPackageData(prev => ({...prev, price: e.target.value}))}
-              />
-            </div>
-            <div>
-              <Label htmlFor="edit-description">Description</Label>
+              <Label htmlFor="edit-description">Description *</Label>
               <Textarea
                 id="edit-description"
                 value={editPackageData.description}
                 onChange={(e) => setEditPackageData(prev => ({...prev, description: e.target.value}))}
+                placeholder="Describe what's included in this package"
                 rows={3}
               />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="edit-price">Package Price ({currency === 'GBP' ? '£' : currency === 'USD' ? '$' : '€'}) *</Label>
+                <Input
+                  id="edit-price"
+                  type="number"
+                  step="0.01"
+                  value={editPackageData.price}
+                  onChange={(e) => setEditPackageData(prev => ({...prev, price: e.target.value}))}
+                  placeholder="e.g., 800"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-payoutFrequency">Payout Frequency</Label>
+                <Select 
+                  value={editPackageData.payoutFrequency} 
+                  onValueChange={(value: 'weekly' | 'monthly') => 
+                    setEditPackageData(prev => ({...prev, payoutFrequency: value}))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="edit-durationWeeks">Duration (Weeks)</Label>
+                <Input
+                  id="edit-durationWeeks"
+                  type="number"
+                  value={editPackageData.durationWeeks}
+                  onChange={(e) => setEditPackageData(prev => ({...prev, durationWeeks: e.target.value}))}
+                  placeholder="e.g., 12"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-durationMonths">Duration (Months)</Label>
+                <Input
+                  id="edit-durationMonths"
+                  type="number"
+                  value={editPackageData.durationMonths}
+                  onChange={(e) => setEditPackageData(prev => ({...prev, durationMonths: e.target.value}))}
+                  placeholder="e.g., 3"
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="edit-paymentMode">Customer Payment Mode</Label>
+                <Select 
+                  value={editPackageData.customerPaymentMode} 
+                  onValueChange={(value: 'upfront' | 'installments') => 
+                    setEditPackageData(prev => ({...prev, customerPaymentMode: value}))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="upfront">Full Payment Upfront</SelectItem>
+                    <SelectItem value="installments">Installment Payments</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {editPackageData.customerPaymentMode === 'installments' && (
+                <div>
+                  <Label htmlFor="edit-installmentCount">Number of Installments</Label>
+                  <Input
+                    id="edit-installmentCount"
+                    type="number"
+                    min="2"
+                    max="12"
+                    value={editPackageData.installmentCount}
+                    onChange={(e) => setEditPackageData(prev => ({...prev, installmentCount: e.target.value}))}
+                    placeholder="e.g., 3"
+                  />
+                </div>
+              )}
             </div>
             
             {/* Promotion Settings in Edit */}
@@ -727,7 +946,7 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
               )}
             </div>
             
-            <div className="flex justify-end gap-2">
+            <div className="flex justify-end gap-3 pt-4 border-t">
               <Button variant="outline" onClick={() => {
                 setEditingPackage(null);
                 setIsCloning(false);
