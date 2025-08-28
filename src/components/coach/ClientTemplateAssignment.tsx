@@ -11,7 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
 import { Clock, FileText, AlertCircle, CheckCircle, Trash2, Archive, Plus, ChevronDown, ChevronUp } from 'lucide-react';
 import { toast } from 'sonner';
-import { TemplateAssignmentDialog } from './TemplateAssignmentDialog';
+import { ClientTemplateAssignmentButtons } from '@/components/coach/ClientTemplateAssignmentButtons';
 
 interface TemplateAssignment {
   id: string;
