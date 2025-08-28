@@ -95,7 +95,6 @@ export function ClientTemplateAssignmentButtons({
           trainer_id: user.id,
           template_id: selectedTemplate,
           template_name: template.step_name,
-          assignment_type: 'direct',
           assignment_notes: `Directly assigned template: ${template.step_name}`
         })
         .select()
