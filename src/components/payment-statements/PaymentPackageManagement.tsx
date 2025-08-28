@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { usePaymentStatements } from "@/hooks/usePaymentStatements";
@@ -42,6 +43,7 @@ export const PaymentPackageManagement = () => {
   const { profile, updateProfile } = useProfile();
   const { packages, loading } = usePaymentStatements();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [localPackages, setLocalPackages] = useState<PaymentPackage[]>([]);
   const [editingPackage, setEditingPackage] = useState<PaymentPackage | null>(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -412,10 +414,16 @@ export const PaymentPackageManagement = () => {
               <p className="text-muted-foreground mb-4">
                 Create your first training package with payment terms
               </p>
-              <Button onClick={() => setIsCreating(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Create Package
-              </Button>
+                    <div className="flex gap-2">
+                      <Button onClick={() => setIsCreating(true)}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create Package
+                      </Button>
+                      <Button variant="outline" onClick={() => navigate('/trainer/profile-setup?tab=rates')}>
+                        <Settings className="h-4 w-4 mr-2" />
+                        Basic Package Setup
+                      </Button>
+                    </div>
             </div>
           )}
         </CardContent>
