@@ -102,26 +102,38 @@ export function ClientTemplateAssignmentButtons({
 
       if (assignmentError) throw assignmentError;
 
-      // Create progress record for the step
-      const progressRecord = {
-        client_id: clientId,
-        trainer_id: user.id,
-        template_step_id: template.id,
-        step_name: template.step_name,
-        step_type: template.step_type || 'mandatory',
-        description: template.description || '',
-        instructions: template.instructions || '',
-        requires_file_upload: template.requires_file_upload || false,
-        completion_method: template.completion_method || 'client',
-        display_order: 1,
-        status: 'pending'
-      };
-
-      const { error: progressError } = await supabase
+      // Check if progress record already exists
+      const { data: existingProgress } = await supabase
         .from('client_onboarding_progress')
-        .insert([progressRecord]);
+        .select('id')
+        .eq('client_id', clientId)
+        .eq('trainer_id', user.id)
+        .eq('template_step_id', template.id)
+        .maybeSingle();
 
-      if (progressError) throw progressError;
+      // Only create progress record if it doesn't already exist
+      if (!existingProgress) {
+        // Create progress record for the step
+        const progressRecord = {
+          client_id: clientId,
+          trainer_id: user.id,
+          template_step_id: template.id,
+          step_name: template.step_name,
+          step_type: template.step_type || 'mandatory',
+          description: template.description || '',
+          instructions: template.instructions || '',
+          requires_file_upload: template.requires_file_upload || false,
+          completion_method: template.completion_method || 'client',
+          display_order: 1,
+          status: 'pending'
+        };
+
+        const { error: progressError } = await supabase
+          .from('client_onboarding_progress')
+          .insert([progressRecord]);
+
+        if (progressError) throw progressError;
+      }
 
       // Send notification to client
       await supabase.from('alerts').insert({

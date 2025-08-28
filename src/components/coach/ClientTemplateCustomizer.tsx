@@ -207,7 +207,7 @@ export function ClientTemplateCustomizer({
 
       if (assignmentError) throw assignmentError;
 
-      // Create progress records for customized tasks
+      // Create progress records for customized tasks (check for duplicates first)
       const progressRecords = tasks.map((task, index) => ({
         client_id: clientId,
         trainer_id: user.id,
@@ -222,11 +222,37 @@ export function ClientTemplateCustomizer({
         status: 'pending'
       }));
 
-      const { error: progressError } = await supabase
+      // Check for existing progress records to avoid duplicates
+      const existingProgressQuery = supabase
         .from('client_onboarding_progress')
-        .insert(progressRecords);
+        .select('template_step_id')
+        .eq('client_id', clientId)
+        .eq('trainer_id', user.id);
 
-      if (progressError) throw progressError;
+      // Only check for existing records that have valid template_step_ids
+      const validStepIds = progressRecords
+        .map(record => record.template_step_id)
+        .filter(id => id !== null);
+
+      if (validStepIds.length > 0) {
+        existingProgressQuery.in('template_step_id', validStepIds);
+      }
+
+      const { data: existingProgress } = await existingProgressQuery;
+      const existingStepIds = new Set(existingProgress?.map(p => p.template_step_id) || []);
+
+      // Filter out records that already exist
+      const newProgressRecords = progressRecords.filter(record => 
+        record.template_step_id === null || !existingStepIds.has(record.template_step_id)
+      );
+
+      if (newProgressRecords.length > 0) {
+        const { error: progressError } = await supabase
+          .from('client_onboarding_progress')
+          .insert(newProgressRecords);
+
+        if (progressError) throw progressError;
+      }
 
       // Send notification to client
       await supabase.from('alerts').insert({
