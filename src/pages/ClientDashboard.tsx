@@ -24,7 +24,11 @@ import { OnboardingSection } from "@/components/dashboard/OnboardingSection";
 import { ClientOnboardingSection } from "@/components/dashboard/ClientOnboardingSection";
 import { useTrainerEngagement } from "@/hooks/useTrainerEngagement";
 import { ClientPaymentWidget } from "@/components/payment/ClientPaymentWidget";
-import { Heart, Settings, Search, MessageCircle, Menu, Users, Shuffle, Shield, ChevronRight, Home, User, UserSearch } from "lucide-react";
+import { useClientOnboarding } from "@/hooks/useClientOnboarding";
+import { useClientOnboardingEnhanced } from "@/hooks/useClientOnboardingEnhanced";
+import { ActivityCompletionInterface } from "@/components/client/ActivityCompletionInterface";
+import { Heart, Settings, Search, MessageCircle, Menu, Users, Shuffle, Shield, ChevronRight, Home, User, UserSearch, CheckSquare } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function ClientDashboard() {
@@ -39,6 +43,14 @@ export default function ClientDashboard() {
   const [activeTab, setActiveTab] = useState("summary");
   const [completedDiscoveryCalls, setCompletedDiscoveryCalls] = useState([]);
   const [dismissedFeedbackPrompts, setDismissedFeedbackPrompts] = useState<string[]>([]);
+  const { onboardingData, loading: onboardingLoading, markStepComplete, skipStep } = useClientOnboarding();
+  const { 
+    onboardingData: enhancedOnboardingData, 
+    loading: enhancedOnboardingLoading, 
+    markStepComplete: markEnhancedStepComplete, 
+    scheduleAppointment, 
+    skipStep: skipEnhancedStep 
+  } = useClientOnboardingEnhanced();
   
   console.log('🔍 ClientDashboard: Current engagements:', engagements);
   console.log('🔍 ClientDashboard: Engagement stages:', engagements.map(e => ({ trainerId: e.trainerId, stage: e.stage })));
@@ -169,11 +181,87 @@ export default function ClientDashboard() {
           )}
 
           {activeTab === "summary" && isActiveClient && (
-            <OnboardingSection profile={profile} />
+            <div className="space-y-6">
+              {/* Enhanced Onboarding Section */}
+              {enhancedOnboardingData ? (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <CheckSquare className="h-5 w-5" />
+                      Your Onboarding with {enhancedOnboardingData.trainer_name}
+                    </CardTitle>
+                    <div className="flex items-center gap-4">
+                      <Progress 
+                        value={enhancedOnboardingData.completion_percentage} 
+                        className="flex-1" 
+                      />
+                      <span className="text-sm font-medium">
+                        {enhancedOnboardingData.completed_steps}/{enhancedOnboardingData.total_steps} Complete
+                      </span>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {enhancedOnboardingData.steps.slice(0, 3).map((step) => (
+                      <ActivityCompletionInterface
+                        key={step.id}
+                        activity={step}
+                        onComplete={(completionData) => markEnhancedStepComplete(step.id, completionData)}
+                        onScheduleAppointment={step.activity_type === 'appointment' ? 
+                          (appointmentData) => scheduleAppointment(step.id, appointmentData) : undefined
+                        }
+                      />
+                    ))}
+                    
+                    {enhancedOnboardingData.steps.length > 3 && (
+                      <Button 
+                        variant="outline" 
+                        className="w-full"
+                        onClick={() => setActiveTab('onboarding')}
+                      >
+                        View All Onboarding Steps ({enhancedOnboardingData.steps.length})
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              ) : (
+                <OnboardingSection profile={profile} />
+              )}
+            </div>
           )}
 
           {activeTab === "onboarding" && isActiveClient && (
-            <ClientOnboardingSection />
+            <div className="space-y-6">
+              {enhancedOnboardingData ? (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Complete Onboarding with {enhancedOnboardingData.trainer_name}</CardTitle>
+                    <div className="flex items-center gap-4">
+                      <Progress 
+                        value={enhancedOnboardingData.completion_percentage} 
+                        className="flex-1" 
+                      />
+                      <span className="text-sm font-medium">
+                        {enhancedOnboardingData.completed_steps}/{enhancedOnboardingData.total_steps} Complete ({enhancedOnboardingData.completion_percentage}%)
+                      </span>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {enhancedOnboardingData.steps.map((step) => (
+                      <ActivityCompletionInterface
+                        key={step.id}
+                        activity={step}
+                        onComplete={(completionData) => markEnhancedStepComplete(step.id, completionData)}
+                        onScheduleAppointment={step.activity_type === 'appointment' ? 
+                          (appointmentData) => scheduleAppointment(step.id, appointmentData) : undefined
+                        }
+                      />
+                    ))}
+                  </CardContent>
+                </Card>
+              ) : (
+                <ClientOnboardingSection />
+              )}
+            </div>
           )}
 
           {!isActiveClient && activeTab === "preferences" && (

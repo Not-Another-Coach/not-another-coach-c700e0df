@@ -25,6 +25,7 @@ import { ClientOnboardingManagement } from "@/components/coach/ClientOnboardingM
 import { OnboardingSummaryWidget } from "@/components/dashboard/OnboardingSummaryWidget";
 import { GoalsSection } from "@/components/goals/GoalsSection";
 import { WeeklyExecutionCard } from "@/components/dashboard/WeeklyExecutionCard";
+import { EnhancedActivityManagement } from "@/components/coach/EnhancedActivityManagement";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -48,12 +49,13 @@ import {
   DollarSign,
   Package,
   Target,
+  FileText,
+  CreditCard,
   Zap,
   Award,
   MessageCircle,
   TrendingDown,
   ArrowUpRight,
-  CreditCard,
   Filter,
   Shield,
   ChevronDown,
@@ -299,6 +301,16 @@ const TrainerDashboard = () => {
             </Button>
             
             <Button
+              variant={activeView === 'activities' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setActiveView('activities')}
+              className="flex items-center gap-2"
+            >
+              <FileText className="w-4 h-4" />
+              Enhanced Activities
+            </Button>
+            
+            <Button
               variant={activeView === 'payments' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setActiveView('payments')}
@@ -535,6 +547,10 @@ const TrainerDashboard = () => {
         
         {activeView === 'goals' && (
           <GoalsSection />
+        )}
+        
+        {activeView === 'activities' && (
+          <EnhancedActivityManagement />
         )}
         
         {activeView === 'payments' && (
