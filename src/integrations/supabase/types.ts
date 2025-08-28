@@ -4729,6 +4729,8 @@ export type Database = {
         | "declined"
         | "declined_dismissed"
         | "waitlist"
+        | "agreed"
+        | "payment_pending"
       goal_status:
         | "not_started"
         | "in_progress"
@@ -4951,6 +4953,8 @@ export const Constants = {
         "declined",
         "declined_dismissed",
         "waitlist",
+        "agreed",
+        "payment_pending",
       ],
       goal_status: [
         "not_started",
