@@ -28,7 +28,8 @@ import { BasicInfoSection } from "@/components/trainer-setup/BasicInfoSection";
 import { QualificationsSection } from "@/components/trainer-setup/QualificationsSection";
 import { ExpertiseSection } from "@/components/trainer-setup/ExpertiseSection";
 import { ClientFitSection } from "@/components/trainer-setup/ClientFitSection";
-import { RatesSection } from "@/components/trainer-setup/RatesSection";
+import { RatesPackagesSection } from "@/components/trainer-setup/RatesPackagesSection";
+import { DiscoveryCallSection } from "@/components/trainer-setup/DiscoveryCallSection";
 import { TestimonialsSection } from "@/components/trainer-setup/TestimonialsSection";
 import { PackageWaysOfWorkingSection } from "@/components/trainer-setup/PackageWaysOfWorkingSection";
 import { InstagramIntegration } from "@/components/instagram/InstagramIntegration";
@@ -116,14 +117,15 @@ const TrainerProfileSetup = () => {
     terms_agreed: false,
   });
 
-  const totalSteps = 12;
+  const totalSteps = 13;
 
   const stepTitles = [
     "Basic Info",
     "Qualifications",
     "Expertise & Services", 
     "Client Fit Preferences",
-    "Rates & Discovery Calls",
+    "Rates & Packages",
+    "Discovery Calls",
     "Testimonials & Case Studies",
     "Ways of Working",
     "Instagram Integration",
@@ -220,13 +222,14 @@ const TrainerProfileSetup = () => {
         'expertise': 3,
         'client-fit': 4,
         'rates': 5,
-        'testimonials': 6,
-        'ways-of-working': 7,
-        'instagram': 8,
-        'images': 9,
-        'working-hours': 10,
-        'terms-notifications': 11,
-        'verification': 12
+        'discovery-calls': 6,
+        'testimonials': 7,
+        'ways-of-working': 8,
+        'instagram': 9,
+        'images': 10,
+        'working-hours': 11,
+        'terms-notifications': 12,
+        'verification': 13
       };
       
       const stepNumber = tabMap[tab];
@@ -638,23 +641,25 @@ const TrainerProfileSetup = () => {
       case 4:
         return <ClientFitSection {...commonProps} />;
       case 5:
-        return <RatesSection {...commonProps} />;
+        return <RatesPackagesSection {...commonProps} />;
       case 6:
-        return <TestimonialsSection {...commonProps} />;
+        return <DiscoveryCallSection {...commonProps} />;
       case 7:
-        return <PackageWaysOfWorkingSection {...commonProps} />;
+        return <TestimonialsSection {...commonProps} />;
       case 8:
-        return <InstagramIntegration />;
+        return <PackageWaysOfWorkingSection {...commonProps} />;
       case 9:
-        return <ImageManagementSection {...commonProps} />;
+        return <InstagramIntegration />;
       case 10:
+        return <ImageManagementSection {...commonProps} />;
+      case 11:
         return <WorkingHoursAndAvailabilitySection 
           {...commonProps} 
           onAvailabilityChange={handleAvailabilityChange}
         />;
-      case 11:
-        return <TermsAndNotificationsSection {...commonProps} />;
       case 12:
+        return <TermsAndNotificationsSection {...commonProps} />;
+      case 13:
         return <VerificationSection />;
       default:
         return null;
