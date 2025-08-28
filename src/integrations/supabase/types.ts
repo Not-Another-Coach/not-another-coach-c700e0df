@@ -14,6 +14,125 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_appointments: {
+        Row: {
+          activity_id: string | null
+          calendar_event_id: string | null
+          client_id: string
+          client_notes: string | null
+          created_at: string | null
+          duration_minutes: number | null
+          id: string
+          meeting_link: string | null
+          scheduled_at: string
+          status: string | null
+          trainer_id: string
+          trainer_notes: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          activity_id?: string | null
+          calendar_event_id?: string | null
+          client_id: string
+          client_notes?: string | null
+          created_at?: string | null
+          duration_minutes?: number | null
+          id?: string
+          meeting_link?: string | null
+          scheduled_at: string
+          status?: string | null
+          trainer_id: string
+          trainer_notes?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          activity_id?: string | null
+          calendar_event_id?: string | null
+          client_id?: string
+          client_notes?: string | null
+          created_at?: string | null
+          duration_minutes?: number | null
+          id?: string
+          meeting_link?: string | null
+          scheduled_at?: string
+          status?: string | null
+          trainer_id?: string
+          trainer_notes?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_appointments_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "trainer_onboarding_activities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      activity_completions: {
+        Row: {
+          activity_id: string | null
+          activity_type: string
+          client_id: string
+          completed_at: string | null
+          completion_data: Json | null
+          created_at: string | null
+          due_at: string | null
+          id: string
+          sla_due_at: string | null
+          status: string | null
+          template_assignment_id: string | null
+          trainer_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          activity_id?: string | null
+          activity_type: string
+          client_id: string
+          completed_at?: string | null
+          completion_data?: Json | null
+          created_at?: string | null
+          due_at?: string | null
+          id?: string
+          sla_due_at?: string | null
+          status?: string | null
+          template_assignment_id?: string | null
+          trainer_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          activity_id?: string | null
+          activity_type?: string
+          client_id?: string
+          completed_at?: string | null
+          completion_data?: Json | null
+          created_at?: string | null
+          due_at?: string | null
+          id?: string
+          sla_due_at?: string | null
+          status?: string | null
+          template_assignment_id?: string | null
+          trainer_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_completions_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "trainer_onboarding_activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_completions_template_assignment_id_fkey"
+            columns: ["template_assignment_id"]
+            isOneToOne: false
+            referencedRelation: "client_template_assignments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admin_actions_log: {
         Row: {
           action_details: Json | null
@@ -3700,8 +3819,11 @@ export type Database = {
       trainer_onboarding_activities: {
         Row: {
           activity_name: string
+          activity_type: string | null
+          appointment_config: Json | null
           category: string
           completion_method: string
+          content_config: Json | null
           created_at: string
           default_due_days: number | null
           default_sla_days: number | null
@@ -3713,13 +3835,18 @@ export type Database = {
           is_active: boolean
           is_system: boolean
           requires_file_upload: boolean
+          survey_config: Json | null
           trainer_id: string | null
           updated_at: string
+          upload_config: Json | null
         }
         Insert: {
           activity_name: string
+          activity_type?: string | null
+          appointment_config?: Json | null
           category?: string
           completion_method?: string
+          content_config?: Json | null
           created_at?: string
           default_due_days?: number | null
           default_sla_days?: number | null
@@ -3731,13 +3858,18 @@ export type Database = {
           is_active?: boolean
           is_system?: boolean
           requires_file_upload?: boolean
+          survey_config?: Json | null
           trainer_id?: string | null
           updated_at?: string
+          upload_config?: Json | null
         }
         Update: {
           activity_name?: string
+          activity_type?: string | null
+          appointment_config?: Json | null
           category?: string
           completion_method?: string
+          content_config?: Json | null
           created_at?: string
           default_due_days?: number | null
           default_sla_days?: number | null
@@ -3749,8 +3881,10 @@ export type Database = {
           is_active?: boolean
           is_system?: boolean
           requires_file_upload?: boolean
+          survey_config?: Json | null
           trainer_id?: string | null
           updated_at?: string
+          upload_config?: Json | null
         }
         Relationships: [
           {
