@@ -37,6 +37,7 @@ interface CleanupResult {
   instagram_revelations: number;
   alerts: number;
   engagement_records: number;
+  journey_stage_reset: number;
 }
 
 export const ClientTrainerCleanup = () => {
@@ -99,7 +100,9 @@ export const ClientTrainerCleanup = () => {
       `• Goal assignments and critical tasks\n` +
       `• Instagram handle revelations\n` +
       `• Engagement records (likes, shortlists)\n` +
-      `• Related alerts and notifications`
+      `• Related alerts and notifications\n\n` +
+      `ADDITIONAL ACTIONS:\n` +
+      `• Client journey stage will be reset to allow recalculation`
     );
 
     if (!confirmed) return;
