@@ -37,7 +37,8 @@ export function ClientHeader({
 
   const activeClientNavigationItems = [
     { key: "summary", label: "Dashboard", icon: Home, route: "/client/dashboard" },
-    { key: "onboarding", label: "Onboarding", icon: Users, route: "/client/onboarding" }
+    { key: "onboarding", label: "Onboarding", icon: Users, route: "/client/onboarding" },
+    { key: "payments", label: "Payments", icon: CreditCard, route: "/client/payments" }
   ];
 
   const navigationItems = isActiveClient ? activeClientNavigationItems : defaultNavigationItems;
