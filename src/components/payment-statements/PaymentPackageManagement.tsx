@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Package, 
   Plus, 
@@ -20,9 +20,15 @@ import {
   DollarSign,
   Calendar,
   CreditCard,
-  Settings 
+  Settings,
+  Play 
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { PackagePaymentSelector } from "@/components/payment/PackagePaymentSelector";
+import { PaymentConfirmation } from "@/components/payment/PaymentConfirmation";
+import { PaymentHistoryWidget } from "@/components/payment/PaymentHistoryWidget";
+import { validatePackagePaymentConfig, formatPaymentOptionsForCustomer } from "@/lib/packagePaymentUtils";
+import type { PaymentRecord } from "@/hooks/useManualPayment";
 
 interface PaymentPackage {
   id: string;
@@ -34,7 +40,7 @@ interface PaymentPackage {
   durationWeeks?: number;
   durationMonths?: number;
   payoutFrequency: 'weekly' | 'monthly';
-  customerPaymentMode: 'upfront' | 'installments';
+  customerPaymentModes?: ('upfront' | 'installments')[];
   installmentCount?: number;
 }
 
@@ -47,6 +53,8 @@ export const PaymentPackageManagement = () => {
   const [localPackages, setLocalPackages] = useState<PaymentPackage[]>([]);
   const [editingPackage, setEditingPackage] = useState<PaymentPackage | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [testingPackage, setTestingPackage] = useState<PaymentPackage | null>(null);
+  const [paymentRecord, setPaymentRecord] = useState<PaymentRecord | null>(null);
   const [packageData, setPackageData] = useState<{
     name: string;
     sessions: string;
@@ -55,7 +63,7 @@ export const PaymentPackageManagement = () => {
     durationWeeks: string;
     durationMonths: string;
     payoutFrequency: 'weekly' | 'monthly';
-    customerPaymentMode: 'upfront' | 'installments';
+    customerPaymentModes: ('upfront' | 'installments')[];
     installmentCount: string;
   }>({
     name: "",
@@ -65,7 +73,7 @@ export const PaymentPackageManagement = () => {
     durationWeeks: "",
     durationMonths: "",
     payoutFrequency: "monthly",
-    customerPaymentMode: "upfront",
+    customerPaymentModes: ["upfront"],
     installmentCount: "",
   });
 
@@ -76,8 +84,10 @@ export const PaymentPackageManagement = () => {
         ...pkg,
         durationWeeks: pkg.durationWeeks || 12,
         payoutFrequency: pkg.payoutFrequency || 'monthly',
-        customerPaymentMode: pkg.customerPaymentMode || 'upfront',
-        installmentCount: pkg.installmentCount || 1,
+        // Convert legacy single mode to array format
+        customerPaymentModes: pkg.customerPaymentModes || 
+          (pkg.customerPaymentMode ? [pkg.customerPaymentMode] : ['upfront']),
+        installmentCount: pkg.installmentCount || 2,
       }));
       setLocalPackages(enhancedPackages);
     }
@@ -103,9 +113,20 @@ export const PaymentPackageManagement = () => {
       durationWeeks: packageData.durationWeeks ? parseInt(packageData.durationWeeks) : undefined,
       durationMonths: packageData.durationMonths ? parseInt(packageData.durationMonths) : undefined,
       payoutFrequency: packageData.payoutFrequency,
-      customerPaymentMode: packageData.customerPaymentMode,
+      customerPaymentModes: packageData.customerPaymentModes,
       installmentCount: packageData.installmentCount ? parseInt(packageData.installmentCount) : undefined,
     };
+
+    // Validate payment configuration
+    const validationErrors = validatePackagePaymentConfig(newPackage);
+    if (validationErrors.length > 0) {
+      toast({
+        title: "Configuration Error",
+        description: validationErrors[0],
+        variant: "destructive"
+      });
+      return;
+    }
 
     let updatedPackages;
     if (editingPackage) {
@@ -138,7 +159,7 @@ export const PaymentPackageManagement = () => {
       durationWeeks: "",
       durationMonths: "",
       payoutFrequency: "monthly",
-      customerPaymentMode: "upfront",
+      customerPaymentModes: ["upfront"],
       installmentCount: "",
     });
     setEditingPackage(null);
@@ -155,7 +176,7 @@ export const PaymentPackageManagement = () => {
       durationWeeks: pkg.durationWeeks?.toString() || "",
       durationMonths: pkg.durationMonths?.toString() || "",
       payoutFrequency: pkg.payoutFrequency,
-      customerPaymentMode: pkg.customerPaymentMode,
+      customerPaymentModes: pkg.customerPaymentModes || ['upfront'],
       installmentCount: pkg.installmentCount?.toString() || "",
     });
     setIsCreating(true);
@@ -182,11 +203,26 @@ export const PaymentPackageManagement = () => {
   };
 
   const formatPaymentMode = (pkg: PaymentPackage) => {
-    if (pkg.customerPaymentMode === 'upfront') {
-      return "Full payment upfront";
+    if (!pkg.customerPaymentModes || pkg.customerPaymentModes.length === 0) {
+      return "No payment options configured";
     }
-    const count = pkg.installmentCount || 2;
-    return `${count} installments`;
+    return formatPaymentOptionsForCustomer({
+      packageId: pkg.id,
+      packageName: pkg.name,
+      totalPrice: pkg.price,
+      currency: pkg.currency,
+      availableOptions: [],
+      defaultOption: { mode: 'upfront', amount: pkg.price, description: '' }
+    });
+  };
+
+  const handleTestPayment = (pkg: PaymentPackage) => {
+    setTestingPackage(pkg);
+  };
+
+  const handlePaymentComplete = (record: PaymentRecord) => {
+    setPaymentRecord(record);
+    setTestingPackage(null);
   };
 
   return (
@@ -304,40 +340,72 @@ export const PaymentPackageManagement = () => {
                     </div>
                   </div>
                   
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="paymentMode">Customer Payment Mode</Label>
-                      <Select 
-                        value={packageData.customerPaymentMode} 
-                        onValueChange={(value: 'upfront' | 'installments') => 
-                          setPackageData(prev => ({...prev, customerPaymentMode: value}))
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="upfront">Full Payment Upfront</SelectItem>
-                          <SelectItem value="installments">Installment Payments</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    {packageData.customerPaymentMode === 'installments' && (
-                      <div>
-                        <Label htmlFor="installmentCount">Number of Installments</Label>
-                        <Input
-                          id="installmentCount"
-                          type="number"
-                          min="2"
-                          max="12"
-                          value={packageData.installmentCount}
-                          onChange={(e) => setPackageData(prev => ({...prev, installmentCount: e.target.value}))}
-                          placeholder="e.g., 3"
-                        />
-                      </div>
-                    )}
-                  </div>
+                   <div className="space-y-4">
+                     <div>
+                       <Label>Customer Payment Options</Label>
+                       <div className="space-y-3 mt-2">
+                         <div className="flex items-center space-x-2">
+                           <Checkbox
+                             id="upfront"
+                             checked={packageData.customerPaymentModes.includes('upfront')}
+                             onCheckedChange={(checked) => {
+                               if (checked) {
+                                 setPackageData(prev => ({
+                                   ...prev, 
+                                   customerPaymentModes: [...prev.customerPaymentModes, 'upfront']
+                                 }));
+                               } else {
+                                 setPackageData(prev => ({
+                                   ...prev, 
+                                   customerPaymentModes: prev.customerPaymentModes.filter(mode => mode !== 'upfront')
+                                 }));
+                               }
+                             }}
+                           />
+                           <Label htmlFor="upfront" className="text-sm font-normal">
+                             Full Payment Upfront
+                           </Label>
+                         </div>
+                         <div className="flex items-center space-x-2">
+                           <Checkbox
+                             id="installments"
+                             checked={packageData.customerPaymentModes.includes('installments')}
+                             onCheckedChange={(checked) => {
+                               if (checked) {
+                                 setPackageData(prev => ({
+                                   ...prev, 
+                                   customerPaymentModes: [...prev.customerPaymentModes, 'installments']
+                                 }));
+                               } else {
+                                 setPackageData(prev => ({
+                                   ...prev, 
+                                   customerPaymentModes: prev.customerPaymentModes.filter(mode => mode !== 'installments')
+                                 }));
+                               }
+                             }}
+                           />
+                           <Label htmlFor="installments" className="text-sm font-normal">
+                             Installment Payments
+                           </Label>
+                         </div>
+                       </div>
+                     </div>
+                     
+                     {packageData.customerPaymentModes.includes('installments') && (
+                       <div>
+                         <Label htmlFor="installmentCount">Number of Installments</Label>
+                         <Input
+                           id="installmentCount"
+                           type="number"
+                           min="2"
+                           max="12"
+                           value={packageData.installmentCount}
+                           onChange={(e) => setPackageData(prev => ({...prev, installmentCount: e.target.value}))}
+                           placeholder="e.g., 3"
+                         />
+                       </div>
+                     )}
+                   </div>
                   
                   <div className="flex justify-end gap-3 pt-4 border-t">
                     <Button variant="outline" onClick={() => setIsCreating(false)}>
@@ -386,23 +454,31 @@ export const PaymentPackageManagement = () => {
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEditPackage(pkg)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeletePackage(pkg.id)}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+                     <div className="flex items-center gap-2">
+                       <Button
+                         variant="ghost"
+                         size="sm"
+                         onClick={() => handleTestPayment(pkg)}
+                         className="text-primary hover:text-primary"
+                       >
+                         <Play className="h-4 w-4" />
+                       </Button>
+                       <Button
+                         variant="ghost"
+                         size="sm"
+                         onClick={() => handleEditPackage(pkg)}
+                       >
+                         <Edit className="h-4 w-4" />
+                       </Button>
+                       <Button
+                         variant="ghost"
+                         size="sm"
+                         onClick={() => handleDeletePackage(pkg.id)}
+                         className="text-destructive hover:text-destructive"
+                       >
+                         <Trash2 className="h-4 w-4" />
+                       </Button>
+                     </div>
                   </div>
                 </div>
               ))}
@@ -428,6 +504,39 @@ export const PaymentPackageManagement = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Payment History Widget */}
+      <PaymentHistoryWidget limit={5} />
+
+      {/* Test Payment Modal */}
+      {testingPackage && (
+        <Dialog open={!!testingPackage} onOpenChange={() => setTestingPackage(null)}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Test Payment - {testingPackage.name}</DialogTitle>
+            </DialogHeader>
+            <PackagePaymentSelector
+              package={testingPackage}
+              onPaymentSelection={handlePaymentComplete}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Payment Confirmation Modal */}
+      {paymentRecord && (
+        <Dialog open={!!paymentRecord} onOpenChange={() => setPaymentRecord(null)}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Payment Successful</DialogTitle>
+            </DialogHeader>
+            <PaymentConfirmation
+              paymentRecord={paymentRecord}
+              onClose={() => setPaymentRecord(null)}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };
