@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 export type ClientJourneyStage = 
   | 'preferences_identified'
   | 'exploring_coaches' 
-  | 'discovery_call_booked'
+  | 'getting_to_know_your_coach'
   | 'coach_chosen'
   | 'onboarding_in_progress'
   | 'on_your_journey'
@@ -47,10 +47,10 @@ const CLIENT_JOURNEY_STAGES: Record<ClientJourneyStage, {
     description: 'Discovering matches',
     tooltip: 'You\'ve started exploring and liking coaches. Keep browsing to find your perfect match!'
   },
-  discovery_call_booked: {
-    title: 'Discovery Call Booked',
-    description: 'First call scheduled',
-    tooltip: 'Great! You\'ve booked your first discovery call with a coach.'
+  getting_to_know_your_coach: {
+    title: 'Getting to Know Your Coach',
+    description: 'Learning about your match',
+    tooltip: 'You\'re getting to know your coach through discovery calls or messaging to see if they\'re the right fit'
   },
   coach_chosen: {
     title: 'Coach Chosen',
@@ -139,7 +139,7 @@ export const useClientJourneyProgress = () => {
       // Stage 3: Has discovery call booked (matched stage or scheduled discovery call)
       const hasDiscoveryCall = engagements?.some(e => e.matched_at) || discoveryCalls?.some(dc => dc.status === 'scheduled');
       if (hasDiscoveryCall) {
-        currentStage = 'discovery_call_booked';
+        currentStage = 'getting_to_know_your_coach';
       }
 
       // Stage 4: Discovery completed (coach chosen)
@@ -218,7 +218,7 @@ export const useClientJourneyProgress = () => {
           hasData = profile?.client_survey_completed || false;
         } else if (stageKey === 'exploring_coaches') {
           hasData = hasLikedCoaches;
-        } else if (stageKey === 'discovery_call_booked') {
+        } else if (stageKey === 'getting_to_know_your_coach') {
           hasData = hasDiscoveryCall;
         } else if (stageKey === 'coach_chosen') {
           hasData = hasChosenCoach;
@@ -273,7 +273,7 @@ export const useClientJourneyProgress = () => {
             nextAction = 'Like and shortlist coaches you\'re interested in';
           }
           break;
-        case 'discovery_call_booked':
+        case 'getting_to_know_your_coach':
           nextAction = 'Complete your discovery call and choose your coach';
           break;
         case 'coach_chosen':

@@ -74,7 +74,7 @@ export function useCoachAnalytics(trainerId?: string) {
         .from('client_trainer_engagement')
         .select('client_id, created_at, stage')
         .eq('trainer_id', trainerId)
-        .in('stage', ['shortlisted', 'discovery_in_progress', 'discovery_call_booked', 'discovery_completed']);
+        .in('stage', ['shortlisted', 'discovery_in_progress', 'getting_to_know_your_coach', 'discovery_completed']);
 
       if (engagementError) {
         console.error('Error fetching shortlisted clients:', engagementError);
@@ -143,7 +143,7 @@ export function useCoachAnalytics(trainerId?: string) {
         .from('client_trainer_engagement')
         .select('id', { count: 'exact' })
         .eq('trainer_id', trainerId)
-        .in('stage', ['shortlisted', 'discovery_in_progress', 'discovery_call_booked', 'discovery_completed']);
+        .in('stage', ['shortlisted', 'discovery_in_progress', 'getting_to_know_your_coach', 'discovery_completed']);
 
       if (totalError) {
         console.error('Error fetching total shortlisted count:', totalError);
@@ -158,7 +158,7 @@ export function useCoachAnalytics(trainerId?: string) {
         .from('client_trainer_engagement')
         .select('id', { count: 'exact' })
         .eq('trainer_id', trainerId)
-        .in('stage', ['shortlisted', 'discovery_in_progress', 'discovery_call_booked', 'discovery_completed'])
+        .in('stage', ['shortlisted', 'discovery_in_progress', 'getting_to_know_your_coach', 'discovery_completed'])
         .gte('created_at', sevenDaysAgo.toISOString());
 
       if (recentError) {

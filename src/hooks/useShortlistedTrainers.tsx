@@ -200,7 +200,7 @@ export function useShortlistedTrainers(refreshTrigger?: number) {
       try {
         await supabase
           .from('profiles')
-          .update({ client_journey_stage: 'discovery_call_booked' })
+          .update({ client_journey_stage: 'getting_to_know_your_coach' })
           .eq('id', user.id);
 
         // Track the journey step
@@ -208,8 +208,8 @@ export function useShortlistedTrainers(refreshTrigger?: number) {
           .from('user_journey_tracking')
           .upsert({
             user_id: user.id,
-            stage: 'discovery_call_booked',
-            step_name: 'discovery_call_booked',
+            stage: 'getting_to_know_your_coach',
+            step_name: 'getting_to_know_your_coach',
             metadata: { trainer_id: trainerId, action: 'booked_discovery_call' }
           });
       } catch (journeyError) {

@@ -38,7 +38,7 @@ export const ChooseCoachButton = ({
 
   const isClient = profile?.user_type === 'client';
   // Show button when client can proceed with coach selection: agreed, discovery completed, or discovery in progress
-  const canChooseCoach = isClient && (stage === 'agreed' || stage === 'discovery_call_booked' || stage === 'discovery_completed' || stage === 'discovery_in_progress');
+  const canChooseCoach = isClient && (stage === 'agreed' || stage === 'getting_to_know_your_coach' || stage === 'discovery_completed' || stage === 'discovery_in_progress');
 
   useEffect(() => {
     const fetchSelectionRequest = async () => {

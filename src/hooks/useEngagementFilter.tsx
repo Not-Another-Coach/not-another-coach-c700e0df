@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
-type EngagementStage = 'browsing' | 'liked' | 'shortlisted' | 'waitlist' | 'matched' | 'discovery_call_booked' | 'discovery_in_progress' | 'discovery_completed' | 'active_client';
+type EngagementStage = 'browsing' | 'liked' | 'shortlisted' | 'waitlist' | 'matched' | 'getting_to_know_your_coach' | 'discovery_in_progress' | 'discovery_completed' | 'active_client';
 
 interface EngagementFilterResult {
   trainersByStage: Record<EngagementStage, any[]>;
@@ -19,7 +19,7 @@ export function useEngagementFilter() {
     shortlisted: [],
     waitlist: [],
     matched: [],
-    discovery_call_booked: [],
+    getting_to_know_your_coach: [],
     discovery_in_progress: [],
     discovery_completed: [],
     active_client: []
@@ -56,7 +56,7 @@ export function useEngagementFilter() {
         shortlisted: [],
         waitlist: [],
         matched: [],
-        discovery_call_booked: [],
+        getting_to_know_your_coach: [],
         discovery_in_progress: [],
         discovery_completed: [],
         active_client: []

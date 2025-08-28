@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
-export type EngagementStage = 'browsing' | 'liked' | 'shortlisted' | 'discovery_call_booked' | 'discovery_in_progress' | 'matched' | 'discovery_completed' | 'agreed' | 'payment_pending' | 'active_client' | 'unmatched' | 'declined' | 'declined_dismissed';
+export type EngagementStage = 'browsing' | 'liked' | 'shortlisted' | 'getting_to_know_your_coach' | 'discovery_in_progress' | 'matched' | 'discovery_completed' | 'agreed' | 'payment_pending' | 'active_client' | 'unmatched' | 'declined' | 'declined_dismissed';
 
 interface TrainerEngagement {
   trainerId: string;
@@ -102,7 +102,7 @@ export function useTrainerEngagement(refreshTrigger?: number) {
     // The consuming component will filter these based on their specific needs
     return engagements.filter(e => 
       e.stage === 'shortlisted' || 
-      e.stage === 'discovery_call_booked' || 
+      e.stage === 'getting_to_know_your_coach' || 
       e.stage === 'discovery_in_progress' ||
       e.stage === 'discovery_completed'
     );
@@ -116,7 +116,7 @@ export function useTrainerEngagement(refreshTrigger?: number) {
   const getDiscoveryStageTrainers = () => {
     // Return trainers with discovery call stages and discovery in progress
     return engagements.filter(e => 
-      e.stage === 'discovery_call_booked' || 
+      e.stage === 'getting_to_know_your_coach' || 
       e.stage === 'discovery_in_progress' ||
       e.stage === 'discovery_completed'
     );
@@ -140,7 +140,7 @@ export function useTrainerEngagement(refreshTrigger?: number) {
 
   const isTrainerShortlisted = (trainerId: string) => {
     const stage = getEngagementStage(trainerId);
-    return stage === 'shortlisted' || stage === 'discovery_call_booked' || stage === 'discovery_in_progress';
+    return stage === 'shortlisted' || stage === 'getting_to_know_your_coach' || stage === 'discovery_in_progress';
   };
 
   const likeTrainer = async (trainerId: string) => {
@@ -172,7 +172,7 @@ export function useTrainerEngagement(refreshTrigger?: number) {
   };
 
   const bookDiscoveryCall = async (trainerId: string) => {
-    await updateEngagementStage(trainerId, 'discovery_call_booked');
+    await updateEngagementStage(trainerId, 'getting_to_know_your_coach');
   };
 
   const completeDiscoveryCall = async (trainerId: string) => {

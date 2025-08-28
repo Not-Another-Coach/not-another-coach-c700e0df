@@ -43,7 +43,7 @@ export function useCoachSelection() {
         .from('client_trainer_engagement')
         .select('stage')
         .eq('client_id', clientId)
-        .in('stage', ['shortlisted', 'discovery_call_booked', 'discovery_in_progress', 'matched', 'discovery_completed', 'active_client'])
+        .in('stage', ['shortlisted', 'getting_to_know_your_coach', 'discovery_in_progress', 'matched', 'discovery_completed', 'active_client'])
         .limit(1);
 
       // Check for other pending coach selection requests

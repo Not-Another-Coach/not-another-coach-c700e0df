@@ -47,9 +47,9 @@ const stageLabels: Record<EngagementStage, { label: string; description: string;
     description: 'How your profile appears when payment is being processed',
     color: 'bg-yellow-100 text-yellow-800'
   },
-  discovery_call_booked: {
-    label: 'Discovery Call Booked', 
-    description: 'How your profile appears when a discovery call is booked',
+  getting_to_know_your_coach: {
+    label: 'Getting to Know Your Coach', 
+    description: 'How your profile appears when discovery is happening',
     color: 'bg-amber-100 text-amber-800'
   },
   discovery_in_progress: { 

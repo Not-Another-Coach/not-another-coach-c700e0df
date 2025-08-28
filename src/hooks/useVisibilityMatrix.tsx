@@ -16,7 +16,7 @@ export type EngagementStage =
   | 'browsing' 
   | 'liked' 
   | 'shortlisted'
-  | 'discovery_call_booked'
+  | 'getting_to_know_your_coach'
   | 'discovery_in_progress'
   | 'matched'
   | 'discovery_completed'

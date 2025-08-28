@@ -129,7 +129,7 @@ export function useOptimizedTrainers() {
             statusColor = 'bg-yellow-100 text-yellow-800';
             break;
           case 'discovery_in_progress':
-          case 'discovery_call_booked':
+          case 'getting_to_know_your_coach':
           case 'discovery_completed':
             status = 'discovery';
             statusLabel = 'Discovery Active';

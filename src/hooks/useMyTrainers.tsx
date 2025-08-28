@@ -216,13 +216,13 @@ export function useMyTrainers(refreshTrigger?: number) {
         
         // Add trainers with discovery-related engagement stages
         const discoveryStageTrainers = getDiscoveryStageTrainers();
-        discoveryStageTrainers.forEach(engagement => {
-          if (engagement.stage === 'discovery_in_progress' || 
-              engagement.stage === 'discovery_call_booked' || 
-              engagement.stage === 'discovery_completed') {
-            discoveryTrainerIds.add(engagement.trainerId);
-          }
-        });
+         discoveryStageTrainers.forEach(engagement => {
+           if (engagement.stage === 'discovery_in_progress' || 
+               engagement.stage === 'getting_to_know_your_coach' || 
+               engagement.stage === 'discovery_completed') {
+             discoveryTrainerIds.add(engagement.trainerId);
+           }
+         });
         
         // Add shortlisted trainers with conversations
         trainersWithStatus.forEach(trainerWithStatus => {
