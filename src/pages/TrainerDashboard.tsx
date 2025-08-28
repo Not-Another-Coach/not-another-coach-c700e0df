@@ -290,6 +290,16 @@ const TrainerDashboard = () => {
               <Goal className="w-4 h-4" />
               Goals & Tasks
             </Button>
+            
+            <Button
+              variant={activeView === 'payments' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setActiveView('payments')}
+              className="flex items-center gap-2"
+            >
+              <CreditCard className="w-4 h-4" />
+              Payment & Payouts
+            </Button>
           </nav>
         </div>
       </div>
@@ -323,10 +333,10 @@ const TrainerDashboard = () => {
                   <Button 
                     className="h-12 justify-start gap-3" 
                     variant="default"
-                    onClick={() => navigate('/trainer/profile-setup?tab=rates')}
+                    onClick={() => setActiveView('payments')}
                   >
                     <DollarSign className="h-4 w-4" />
-                    Update Rates
+                    Payment Statements
                   </Button>
                   <Button 
                     className="h-12 justify-start gap-3" 
@@ -519,13 +529,75 @@ const TrainerDashboard = () => {
         {activeView === 'goals' && (
           <GoalsSection />
         )}
-
+        
+        {activeView === 'payments' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold">Payment & Payouts</h2>
+                <p className="text-muted-foreground">Manage your packages and view earnings</p>
+              </div>
+              <Button onClick={() => navigate('/payment-management')}>
+                View Full Payment Dashboard
+              </Button>
+            </div>
+            
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Package className="h-5 w-5" />
+                    Quick Package Setup
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Configure packages with payment terms and payout schedules
+                  </p>
+                  <div className="flex gap-2">
+                    <Button onClick={() => navigate('/trainer/profile-setup?tab=rates')}>
+                      Manage Packages
+                    </Button>
+                    <Button variant="outline" onClick={() => navigate('/payment-management')}>
+                      Advanced Settings
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <DollarSign className="h-5 w-5" />
+                    Earnings Overview
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-sm">This Month</span>
+                      <span className="font-medium">£2,450</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm">Pending Payouts</span>
+                      <span className="font-medium text-orange-600">£520</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm">Next Payout</span>
+                      <span className="font-medium">Sep 1, 2024</span>
+                    </div>
+                  </div>
+                  <Button variant="outline" className="w-full mt-4" onClick={() => navigate('/payment-management?tab=statements')}>
+                    View Statements
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Floating Message Button */}
       <FloatingMessageButton />
-      
-      {/* Memory Monitor - Always show in this environment */}
       <MemoryMonitor />
     </div>
   );

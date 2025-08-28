@@ -23,6 +23,7 @@ import NotFound from "./pages/NotFound";
 import { DiagnosticsProvider } from "@/diagnostics/DiagnosticsContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import AdminDiagnostics from "@/pages/AdminDiagnostics";
+import { PaymentManagement } from "./pages/PaymentManagement";
 
 const queryClient = new QueryClient();
 
@@ -54,7 +55,8 @@ const App = () => (
                 <Route path="/messages/:trainerId?" element={<Messaging />} />
                 <Route path="/documentation" element={<Documentation />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
+                  <Route path="/payment-management" element={<PaymentManagement />} />
+                  <Route path="*" element={<NotFound />} />
               </Routes>
             </ErrorBoundary>
           </DiagnosticsProvider>

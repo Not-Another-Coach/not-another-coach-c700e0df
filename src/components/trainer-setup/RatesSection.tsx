@@ -35,6 +35,11 @@ interface TrainingPackage {
   isPromotion?: boolean;
   promotionStartDate?: Date;
   promotionEndDate?: Date;
+  durationWeeks?: number;
+  durationMonths?: number;
+  payoutFrequency?: 'weekly' | 'monthly';
+  customerPaymentMode?: 'upfront' | 'installments';
+  installmentCount?: number;
 }
 
 // Helper function to check if two time slots overlap
@@ -120,6 +125,11 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
     isPromotion: false,
     promotionStartDate: undefined as Date | undefined,
     promotionEndDate: undefined as Date | undefined,
+    durationWeeks: "",
+    durationMonths: "",
+    payoutFrequency: "monthly" as 'weekly' | 'monthly',
+    customerPaymentMode: "upfront" as 'upfront' | 'installments',
+    installmentCount: "",
   });
 
   // Use the discovery call settings hook
@@ -139,6 +149,11 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
         isPromotion: newPackage.isPromotion,
         promotionStartDate: newPackage.promotionStartDate,
         promotionEndDate: newPackage.promotionEndDate,
+        durationWeeks: newPackage.durationWeeks ? parseInt(newPackage.durationWeeks) : undefined,
+        durationMonths: newPackage.durationMonths ? parseInt(newPackage.durationMonths) : undefined,
+        payoutFrequency: newPackage.payoutFrequency,
+        customerPaymentMode: newPackage.customerPaymentMode,
+        installmentCount: newPackage.installmentCount ? parseInt(newPackage.installmentCount) : undefined,
       };
       
       const updatedPackages = [...packages, trainingPackage];
@@ -155,6 +170,11 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
         isPromotion: false,
         promotionStartDate: undefined,
         promotionEndDate: undefined,
+        durationWeeks: "",
+        durationMonths: "",
+        payoutFrequency: "monthly",
+        customerPaymentMode: "upfront",
+        installmentCount: "",
       });
     }
   };
