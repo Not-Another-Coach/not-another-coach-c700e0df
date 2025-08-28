@@ -76,60 +76,128 @@ export function ClientTemplateCustomizer({
   const loadTemplateData = async () => {
     setLoading(true);
     try {
-      // Load template sections data
+      // First, check if this template has sections data
       const [gettingStartedRes, firstWeekRes, ongoingSupportRes, commitmentsRes] = await Promise.all([
-        supabase.from('onboarding_getting_started').select('*').eq('template_id', templateId),
+        supabase.from('onboarding_getting_started').select('*').eq('template_id', templateId).order('display_order'),
         supabase.from('onboarding_first_week').select('*').eq('template_id', templateId).order('display_order'),
         supabase.from('onboarding_ongoing_support').select('*').eq('template_id', templateId),
         supabase.from('onboarding_commitments').select('*').eq('template_id', templateId).order('display_order')
       ]);
 
-      const allTasks: CustomTask[] = [
-        ...(gettingStartedRes.data || []).map((task, index) => ({
+      const allTasks: CustomTask[] = [];
+
+      // Load Getting Started tasks
+      if (gettingStartedRes.data && gettingStartedRes.data.length > 0) {
+        allTasks.push(...gettingStartedRes.data.map(task => ({
           id: task.id,
-          task_name: task.task_name,
+          task_name: task.task_name || 'Getting Started Task',
           description: task.description || '',
           instructions: task.rich_guidance || '',
-          is_mandatory: task.is_mandatory,
-          requires_attachment: task.requires_attachment,
+          is_mandatory: task.is_mandatory ?? true,
+          requires_attachment: task.requires_attachment ?? false,
           due_days: task.due_days,
-          display_order: task.display_order,
+          display_order: task.display_order || 0,
           section_type: 'getting_started' as const
-        })),
-        ...(firstWeekRes.data || []).map((task, index) => ({
+        })));
+      }
+
+      // Load First Week tasks
+      if (firstWeekRes.data && firstWeekRes.data.length > 0) {
+        allTasks.push(...firstWeekRes.data.map(task => ({
           id: task.id,
-          task_name: task.task_name,
+          task_name: task.task_name || 'First Week Task',
           description: task.description || '',
           instructions: task.rich_guidance || '',
-          is_mandatory: task.is_mandatory,
-          requires_attachment: task.requires_attachment,
+          is_mandatory: task.is_mandatory ?? true,
+          requires_attachment: task.requires_attachment ?? false,
           due_days: task.due_days,
-          display_order: task.display_order,
+          display_order: task.display_order || 0,
           section_type: 'first_week' as const
-        })),
-        ...(ongoingSupportRes.data || []).map((task, index) => ({
+        })));
+      }
+
+      // Load Ongoing Support tasks
+      if (ongoingSupportRes.data && ongoingSupportRes.data.length > 0) {
+        allTasks.push(...ongoingSupportRes.data.map((task, index) => ({
           id: task.id,
-          task_name: `${task.check_in_frequency} Check-in` || 'Ongoing Support',
-          description: task.client_response_expectations || '',
-          instructions: typeof task.communication_channels === 'string' ? task.communication_channels : JSON.stringify(task.communication_channels || {}),
+          task_name: task.check_in_frequency ? `${task.check_in_frequency.charAt(0).toUpperCase() + task.check_in_frequency.slice(1)} Check-in` : 'Ongoing Support',
+          description: task.client_response_expectations || 'Regular check-in with client',
+          instructions: typeof task.communication_channels === 'string' 
+            ? task.communication_channels 
+            : JSON.stringify(task.communication_channels || {}),
           is_mandatory: true,
           requires_attachment: false,
           display_order: index,
           check_in_frequency: task.check_in_frequency as any,
           check_in_notes: task.client_response_expectations,
           section_type: 'ongoing_support' as const
-        })),
-        ...(commitmentsRes.data || []).map(task => ({
+        })));
+      }
+
+      // Load Commitments tasks
+      if (commitmentsRes.data && commitmentsRes.data.length > 0) {
+        allTasks.push(...commitmentsRes.data.map(task => ({
           id: task.id,
-          task_name: task.commitment_title,
+          task_name: task.commitment_title || 'Commitment',
           description: task.commitment_description || '',
-          instructions: '',
-          is_mandatory: task.requires_acknowledgment,
-          requires_attachment: task.requires_signature,
-          display_order: task.display_order,
+          instructions: 'Client must acknowledge this commitment',
+          is_mandatory: task.requires_acknowledgment ?? true,
+          requires_attachment: task.requires_signature ?? false,
+          display_order: task.display_order || 0,
           section_type: 'commitments' as const
-        }))
-      ];
+        })));
+      }
+
+      // If no tasks found, provide some default structure
+      if (allTasks.length === 0) {
+        const defaultTasks: CustomTask[] = [
+          {
+            id: 'default-getting-started-1',
+            task_name: 'Welcome & Introduction',
+            description: 'Complete your profile and initial assessment',
+            instructions: 'Fill out your fitness goals and current fitness level',
+            is_mandatory: true,
+            requires_attachment: false,
+            display_order: 0,
+            section_type: 'getting_started'
+          },
+          {
+            id: 'default-first-week-1',
+            task_name: 'Initial Workout Session',
+            description: 'Complete your first workout with your trainer',
+            instructions: 'Schedule and attend your first training session',
+            is_mandatory: true,
+            requires_attachment: false,
+            display_order: 0,
+            section_type: 'first_week'
+          },
+          {
+            id: 'default-ongoing-1',
+            task_name: 'Weekly Check-in',
+            description: 'Regular progress check with your trainer',
+            instructions: 'Update your trainer on your progress and any challenges',
+            is_mandatory: true,
+            requires_attachment: false,
+            display_order: 0,
+            check_in_frequency: 'weekly',
+            section_type: 'ongoing_support'
+          },
+          {
+            id: 'default-commitment-1',
+            task_name: 'Training Agreement',
+            description: 'Agree to training terms and expectations',
+            instructions: 'Read and acknowledge the training agreement',
+            is_mandatory: true,
+            requires_attachment: false,
+            display_order: 0,
+            section_type: 'commitments'
+          }
+        ];
+        allTasks.push(...defaultTasks);
+        toast.info('Template has no existing tasks. Starting with default structure that you can customize.');
+      } else {
+        toast.success(`Loaded ${allTasks.length} existing tasks from template for customization`);
+      }
 
       setTasks(allTasks);
     } catch (error) {
