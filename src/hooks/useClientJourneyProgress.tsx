@@ -87,19 +87,70 @@ export const useClientJourneyProgress = () => {
     }
 
     try {
-      // Get user profile with survey completion
+      // Use the new consolidated function to get client journey stage
+      const { data: journeyStage, error: journeyError } = await supabase
+        .rpc('get_client_journey_stage', { p_client_id: user.id });
+
+      if (journeyError) {
+        console.error('Error fetching journey stage:', journeyError);
+        return;
+      }
+
+      // Get user profile for survey completion check
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('client_survey_completed, client_journey_stage')
+        .select('client_survey_completed')
         .eq('id', user.id)
         .single();
 
       if (profileError) throw profileError;
 
-      // Get engagement data to determine current stage
+      // If survey not complete, don't show journey tracker yet
+      if (!profile?.client_survey_completed) {
+        setProgress(null);
+        setLoading(false);
+        return;
+      }
+
+      // Map database stage to local ClientJourneyStage enum
+      let currentStage: ClientJourneyStage;
+      switch (journeyStage) {
+        case 'browsing':
+          currentStage = 'preferences_identified';
+          break;
+        case 'exploring_coaches':
+        case 'liked':
+        case 'shortlisted':
+          currentStage = 'exploring_coaches';
+          break;
+        case 'getting_to_know_your_coach':
+        case 'discovery_scheduled':
+        case 'discovery_in_progress':
+          currentStage = 'getting_to_know_your_coach';
+          break;
+        case 'discovery_completed':
+        case 'agreed':
+        case 'payment_pending':
+        case 'coach_chosen':
+          currentStage = 'coach_chosen';
+          break;
+        case 'onboarding_in_progress':
+          currentStage = 'onboarding_in_progress';
+          break;
+        case 'active_client':
+          currentStage = 'on_your_journey';
+          break;
+        case 'goal_achieved':
+          currentStage = 'goal_achieved';
+          break;
+        default:
+          currentStage = 'preferences_identified';
+      }
+
+      // Get engagement data to check for progress indicators
       const { data: engagements, error: engagementError } = await supabase
         .from('client_trainer_engagement')
-        .select('stage, liked_at, matched_at, discovery_completed_at, became_client_at')
+        .select('stage, trainer_id, liked_at, matched_at, discovery_completed_at, became_client_at')
         .eq('client_id', user.id);
 
       if (engagementError) throw engagementError;
@@ -111,43 +162,6 @@ export const useClientJourneyProgress = () => {
         .eq('client_id', user.id);
 
       if (discoveryError) throw discoveryError;
-
-      // Determine current stage based on data
-      let currentStage: ClientJourneyStage = 'preferences_identified';
-      
-      // Check if survey is completed (100%)
-      if (!profile?.client_survey_completed) {
-        // If survey not complete, don't show journey tracker yet
-        setProgress(null);
-        setLoading(false);
-        return;
-      }
-
-      
-      // Stage 1: Survey completed - automatically advance to exploring coaches
-      if (profile?.client_survey_completed) {
-        currentStage = 'exploring_coaches';
-      }
-
-      // Stage 2: Has actually liked coaches or has engagement records
-      const hasLikedCoaches = engagements?.some(e => e.liked_at) || (engagements?.length || 0) > 0;
-      if (hasLikedCoaches) {
-        // Keep at exploring_coaches stage but with data
-        currentStage = 'exploring_coaches';
-      }
-
-      // Stage 3: Getting to know your coach (discovery call booked, matched stage, or directly in getting_to_know_your_coach stage)
-      const hasDiscoveryCall = engagements?.some(e => e.matched_at) || discoveryCalls?.some(dc => dc.status === 'scheduled');
-      const isInGettingToKnowStage = engagements?.some(e => e.stage === 'getting_to_know_your_coach');
-      if (hasDiscoveryCall || isInGettingToKnowStage) {
-        currentStage = 'getting_to_know_your_coach';
-      }
-
-      // Stage 4: Discovery completed (coach chosen)
-      const hasChosenCoach = engagements?.some(e => e.discovery_completed_at);
-      if (hasChosenCoach) {
-        currentStage = 'coach_chosen';
-      }
 
       // Get onboarding progress to check completion
       const { data: onboardingProgress, error: onboardingError } = await supabase
@@ -171,37 +185,16 @@ export const useClientJourneyProgress = () => {
       const completedOnboardingSteps = onboardingProgress?.filter(step => step.status === 'completed').length || 0;
       const onboardingCompletionPercentage = totalOnboardingSteps > 0 ? (completedOnboardingSteps / totalOnboardingSteps) * 100 : 0;
 
-      // Stage 5: Became active client (onboarding)
-      const isOnboarding = engagements?.some(e => e.became_client_at && !e.discovery_completed_at);
-      if (isOnboarding) {
-        currentStage = 'onboarding_in_progress';
-        
-        // Auto-advance to "on_your_journey" if onboarding is 100% complete
-        if (onboardingCompletionPercentage === 100) {
-          currentStage = 'on_your_journey';
-          
-          // Update the engagement to mark discovery as completed to prevent regression
-          await supabase
-            .from('client_trainer_engagement')
-            .update({ 
-              discovery_completed_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            })
-            .eq('client_id', user.id)
-            .eq('stage', 'active_client');
-        }
-      }
-
-      // Stage 6: Fully active (on journey)
-      const isActiveClient = engagements?.some(e => e.became_client_at && e.discovery_completed_at);
-      if (isActiveClient) {
+      // Auto-advance to "on_your_journey" if onboarding is 100% complete
+      if (currentStage === 'onboarding_in_progress' && onboardingCompletionPercentage === 100) {
         currentStage = 'on_your_journey';
-      }
-
-      // Use stored stage if available and more advanced
-      const storedStage = profile?.client_journey_stage as ClientJourneyStage;
-      if (storedStage && getStageIndex(storedStage) > getStageIndex(currentStage)) {
-        currentStage = storedStage;
+        
+        // Update the engagement to mark as active_client
+        await supabase.rpc('update_engagement_stage', {
+          client_uuid: user.id,
+          trainer_uuid: engagements?.[0]?.trainer_id || user.id,
+          new_stage: 'active_client'
+        });
       }
 
       const currentStageIndex = getStageIndex(currentStage);
@@ -215,6 +208,13 @@ export const useClientJourneyProgress = () => {
         
         // Determine if stage has data/progress
         let hasData = false;
+        const hasLikedCoaches = engagements?.some(e => e.liked_at) || (engagements?.length || 0) > 0;
+        const hasDiscoveryCall = engagements?.some(e => e.matched_at) || discoveryCalls?.some(dc => dc.status === 'scheduled');
+        const isInGettingToKnowStage = engagements?.some(e => e.stage === 'getting_to_know_your_coach');
+        const hasChosenCoach = engagements?.some(e => e.discovery_completed_at);
+        const isOnboarding = engagements?.some(e => e.became_client_at && !e.discovery_completed_at);
+        const isActiveClient = engagements?.some(e => e.became_client_at && e.discovery_completed_at);
+
         if (stageKey === 'preferences_identified') {
           hasData = profile?.client_survey_completed || false;
         } else if (stageKey === 'exploring_coaches') {
@@ -228,7 +228,6 @@ export const useClientJourneyProgress = () => {
         } else if (stageKey === 'on_your_journey') {
           hasData = isActiveClient;
         } else if (stageKey === 'goal_achieved') {
-          // Goal achieved is manually set by coach/admin
           hasData = false;
         }
         
@@ -258,14 +257,15 @@ export const useClientJourneyProgress = () => {
 
       // Determine next action
       let nextAction = '';
+      const hasLikedCoaches = engagements?.some(e => e.liked_at) || (engagements?.length || 0) > 0;
+      const hasShortlisted = engagements?.some(e => e.stage === 'shortlisted');
+      const hasDiscoveryCallBookedFromEngagement = discoveryCalls?.length > 0;
+
       switch (currentStage) {
         case 'preferences_identified':
           nextAction = 'Start exploring coaches that match your preferences';
           break;
         case 'exploring_coaches':
-          const hasShortlisted = engagements?.some(e => e.stage === 'shortlisted');
-          const hasDiscoveryCallBookedFromEngagement = discoveryCalls?.length > 0;
-          
           if (hasShortlisted && !hasDiscoveryCallBookedFromEngagement) {
             nextAction = 'Book discovery calls with your shortlisted coaches';
           } else if (hasLikedCoaches) {
@@ -311,10 +311,38 @@ export const useClientJourneyProgress = () => {
     if (!user) return;
 
     try {
-      await supabase
-        .from('profiles')
-        .update({ client_journey_stage: newStage })
-        .eq('id', user.id);
+      // Map local stage to database engagement stage
+      let dbStage: any = newStage;
+      switch (newStage) {
+        case 'preferences_identified':
+          dbStage = 'browsing';
+          break;
+        case 'exploring_coaches':
+          dbStage = 'exploring_coaches';
+          break;
+        case 'getting_to_know_your_coach':
+          dbStage = 'getting_to_know_your_coach';
+          break;
+        case 'coach_chosen':
+          dbStage = 'coach_chosen';
+          break;
+        case 'onboarding_in_progress':
+          dbStage = 'onboarding_in_progress';
+          break;
+        case 'on_your_journey':
+          dbStage = 'active_client';
+          break;
+        case 'goal_achieved':
+          dbStage = 'goal_achieved';
+          break;
+      }
+
+      // Update via the engagement system instead of profile
+      await supabase.rpc('update_engagement_stage', {
+        client_uuid: user.id,
+        trainer_uuid: user.id, // Use self-reference for general journey tracking
+        new_stage: dbStage
+      });
 
       await fetchProgress();
     } catch (error) {

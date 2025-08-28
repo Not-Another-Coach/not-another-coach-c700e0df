@@ -91,6 +91,16 @@ export function useProfile() {
   const isTrainer = useCallback(() => profile?.user_type === 'trainer', [profile?.user_type]);
   const isClient = useCallback(() => profile?.user_type === 'client', [profile?.user_type]);
 
+  // Get client status using the new consolidated function
+  const getClientStatus = useCallback(async () => {
+    if (!profile?.id || profile?.user_type !== 'client') return null;
+    
+    const { data } = await supabase.rpc('get_client_status', { 
+      p_client_id: profile.id 
+    });
+    return data;
+  }, [profile?.id, profile?.user_type]);
+
   return {
     profile,
     loading,
@@ -99,5 +109,6 @@ export function useProfile() {
     isAdmin,
     isTrainer,
     isClient,
+    getClientStatus,
   };
 }

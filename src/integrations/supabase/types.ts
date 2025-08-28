@@ -4472,6 +4472,14 @@ export type Database = {
         Args: { p_error_message: string; p_event_id: string }
         Returns: undefined
       }
+      get_client_journey_stage: {
+        Args: { p_client_id: string }
+        Returns: Database["public"]["Enums"]["engagement_stage"]
+      }
+      get_client_status: {
+        Args: { p_client_id: string }
+        Returns: string
+      }
       get_content_visibility: {
         Args: {
           p_content_type: Database["public"]["Enums"]["content_type"]
@@ -4731,6 +4739,13 @@ export type Database = {
         | "waitlist"
         | "agreed"
         | "payment_pending"
+        | "preferences_identified"
+        | "exploring_coaches"
+        | "discovery_scheduled"
+        | "coach_chosen"
+        | "onboarding_in_progress"
+        | "goal_achieved"
+        | "relationship_ended"
       goal_status:
         | "not_started"
         | "in_progress"
@@ -4955,6 +4970,13 @@ export const Constants = {
         "waitlist",
         "agreed",
         "payment_pending",
+        "preferences_identified",
+        "exploring_coaches",
+        "discovery_scheduled",
+        "coach_chosen",
+        "onboarding_in_progress",
+        "goal_achieved",
+        "relationship_ended",
       ],
       goal_status: [
         "not_started",
