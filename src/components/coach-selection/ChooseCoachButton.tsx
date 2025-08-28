@@ -86,6 +86,20 @@ export const ChooseCoachButton = ({
 
   // Show status if there's an existing request
   if (selectionRequest) {
+    // Find the selected package from trainer's package options to get enhanced payment data
+    const selectedPackage = trainer.package_options?.find(pkg => 
+      pkg.name === selectionRequest?.package_name || 
+      pkg.id === selectionRequest?.package_id
+    );
+
+    const enhancedPackageData = selectedPackage ? {
+      packageId: selectedPackage.id,
+      customerPaymentModes: selectedPackage.customerPaymentModes || 
+        (selectedPackage.customerPaymentMode ? [selectedPackage.customerPaymentMode] : ['upfront']),
+      installmentCount: selectedPackage.installmentCount || 2,
+      currency: selectedPackage.currency || 'GBP'
+    } : {};
+
     const statusConfig = {
       pending: {
         icon: Clock,
@@ -200,6 +214,7 @@ export const ChooseCoachButton = ({
           trainerName={trainer.name || `${trainer.firstName || ''} ${trainer.lastName || ''}`.trim()}
           trainerId={trainer.id}
           onPaymentSuccess={handleSuccess}
+          {...enhancedPackageData}
         />
       </div>
     );
@@ -222,17 +237,6 @@ export const ChooseCoachButton = ({
         onOpenChange={setShowModal}
         trainer={trainer}
         onSuccess={handleSuccess}
-      />
-      
-      <PaymentForm
-        open={showPaymentForm}
-        onOpenChange={setShowPaymentForm}
-        packageName={selectionRequest?.package_name || ''}
-        packagePrice={selectionRequest?.package_price || 0}
-        packageDuration={selectionRequest?.package_duration || ''}
-        trainerName={trainer.name || `${trainer.firstName || ''} ${trainer.lastName || ''}`.trim()}
-        trainerId={trainer.id}
-        onPaymentSuccess={handleSuccess}
       />
     </div>
   );
