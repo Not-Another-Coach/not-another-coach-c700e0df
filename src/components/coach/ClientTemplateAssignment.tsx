@@ -49,8 +49,6 @@ export function ClientTemplateAssignment({ clientId, showHistoryOnly = false }: 
   const [actionReason, setActionReason] = useState('');
   const [processing, setProcessing] = useState(false);
   const [showExpandedHistory, setShowExpandedHistory] = useState(false);
-  const [showAssignDialog, setShowAssignDialog] = useState(false);
-  const [clientForAssignment, setClientForAssignment] = useState<{ id: string; first_name: string; last_name: string } | null>(null);
 
   useEffect(() => {
     if (user?.id) {
@@ -252,39 +250,11 @@ export function ClientTemplateAssignment({ clientId, showHistoryOnly = false }: 
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h4 className="font-medium">Template Assignment</h4>
-          <Button
-            size="sm"
-            onClick={() => {
-              console.log('Assign Template clicked, clientId:', clientId);
-              if (clientId) {
-                // Get client profile for assignment dialog
-                const clientProfile = activeAssignment?.client_profile || 
-                  assignments[0]?.client_profile;
-                
-                console.log('Client profile found:', clientProfile);
-                
-                if (clientProfile?.first_name && clientProfile?.last_name) {
-                  setClientForAssignment({
-                    id: clientId,
-                    first_name: clientProfile.first_name,
-                    last_name: clientProfile.last_name
-                  });
-                  setShowAssignDialog(true);
-                  console.log('Opening assignment dialog for:', clientProfile);
-                } else {
-                  // Fallback - fetch client profile
-                  console.log('Fetching client profile for:', clientId);
-                  fetchClientProfile(clientId);
-                }
-              } else {
-                console.log('No clientId, redirecting to template management');
-                window.location.href = '/trainer/dashboard?tab=template-management&section=assign';
-              }
-            }}
-          >
-            <Plus className="w-3 h-3 mr-1" />
-            Assign Template
-          </Button>
+          <ClientTemplateAssignmentButtons 
+            clientId={clientId}
+            clientName="Client"
+            onAssignmentComplete={fetchAssignments}
+          />
         </div>
         
         {activeAssignment ? (
@@ -339,34 +309,6 @@ export function ClientTemplateAssignment({ clientId, showHistoryOnly = false }: 
       </div>
     );
   }
-
-  const fetchClientProfile = async (clientId: string) => {
-    try {
-      console.log('Fetching profile for client:', clientId);
-      const { data: profileData, error } = await supabase
-        .from('profiles')
-        .select('first_name, last_name')
-        .eq('id', clientId)
-        .single();
-
-      if (error) throw error;
-
-      console.log('Fetched client profile:', profileData);
-
-      if (profileData) {
-        setClientForAssignment({
-          id: clientId,
-          first_name: profileData.first_name || '',
-          last_name: profileData.last_name || ''
-        });
-        setShowAssignDialog(true);
-        console.log('Setting up assignment dialog for client:', profileData);
-      }
-    } catch (error) {
-      console.error('Error fetching client profile:', error);
-      toast.error('Failed to load client information');
-    }
-  };
 
   return (
     <>
@@ -512,20 +454,6 @@ export function ClientTemplateAssignment({ clientId, showHistoryOnly = false }: 
         </DialogContent>
       </Dialog>
 
-      {/* Template Assignment Dialog */}
-      {clientForAssignment && (
-        <TemplateAssignmentDialog
-          client={clientForAssignment}
-          isOpen={showAssignDialog}
-          onClose={() => {
-            setShowAssignDialog(false);
-            setClientForAssignment(null);
-          }}
-          onAssignmentComplete={() => {
-            fetchAssignments();
-          }}
-        />
-      )}
     </>
   );
 }

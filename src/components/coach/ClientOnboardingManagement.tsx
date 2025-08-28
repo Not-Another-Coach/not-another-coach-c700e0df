@@ -216,9 +216,7 @@ export function ClientOnboardingManagement() {
       </CardHeader>
       <CardContent>
         <TemplateManagementTabs />
-    </Card>
-  );
-}
+      </CardContent>
     </Card>
   );
 }
