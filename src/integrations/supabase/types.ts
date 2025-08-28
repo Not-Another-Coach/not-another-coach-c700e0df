@@ -4432,6 +4432,15 @@ export type Database = {
         Args: { p_client_id: string; p_coach_id: string }
         Returns: boolean
       }
+      complete_coach_selection_payment: {
+        Args: {
+          p_client_id: string
+          p_payment_method?: string
+          p_stripe_payment_intent_id?: string
+          p_trainer_id: string
+        }
+        Returns: Json
+      }
       complete_webhook_event: {
         Args: { p_event_id: string; p_result?: Json }
         Returns: undefined

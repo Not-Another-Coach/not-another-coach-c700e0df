@@ -17,41 +17,35 @@ export const useManualPaymentCompletion = () => {
         throw new Error('No client ID found');
       }
 
-      // Update coach selection request status to completed
-      const { error: selectionError } = await supabase
-        .from('coach_selection_requests')
-        .update({ 
-          status: 'completed',
-          updated_at: new Date().toISOString()
-        })
-        .eq('client_id', currentClientId)
-        .eq('trainer_id', trainerId);
+      // Use the new atomic payment completion function
+      const { data, error } = await supabase.rpc('complete_coach_selection_payment', {
+        p_client_id: currentClientId,
+        p_trainer_id: trainerId,
+        p_payment_method: 'manual'
+      });
 
-      if (selectionError) {
-        throw selectionError;
+      if (error) {
+        throw error;
       }
 
-      // Update engagement stage to active_client
-      const { error: engagementError } = await supabase
-        .from('client_trainer_engagement')
-        .upsert({
-          client_id: currentClientId,
-          trainer_id: trainerId,
-          stage: 'active_client',
-          became_client_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        });
+      // Parse the JSON response
+      const result = data as { success: boolean; error?: string; package_id?: string; payment_id?: string };
 
-      if (engagementError) {
-        throw engagementError;
+      // Check if the function returned success
+      if (!result?.success) {
+        throw new Error(result?.error || 'Payment completion failed');
       }
 
       toast({
         title: "Payment Completed!",
-        description: "The client has been successfully onboarded.",
+        description: "The client has been successfully onboarded and payment package created.",
       });
 
-      return { success: true };
+      return { 
+        success: true, 
+        packageId: result.package_id,
+        paymentId: result.payment_id 
+      };
     } catch (error: any) {
       console.error('Error completing payment:', error);
       toast({
