@@ -3,15 +3,14 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Plus, Edit2, AlertTriangle } from 'lucide-react';
 import { useTemplateBuilder } from '@/hooks/useTemplateBuilder';
 import { useTemplateAssignments } from '@/hooks/useTemplateAssignments';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { ClientTemplateCustomizer } from './ClientTemplateCustomizer';
 
 interface ClientTemplateAssignmentButtonsProps {
   clientId: string;
@@ -19,25 +18,6 @@ interface ClientTemplateAssignmentButtonsProps {
   onAssignmentComplete?: () => void;
 }
 
-interface TemplateStep {
-  id?: string;
-  step_name: string;
-  description: string;
-  instructions: string;
-  step_type: 'mandatory' | 'optional';
-  completion_method: 'client' | 'trainer' | 'auto';
-  requires_file_upload: boolean;
-  display_order: number;
-  due_in_days?: number;
-  check_in_frequency?: 'daily' | 'weekly' | 'bi-weekly' | 'monthly' | 'none';
-  check_in_notes?: string;
-}
-
-interface CustomizedTemplate {
-  name: string;
-  baseTemplateId: string;
-  steps: TemplateStep[];
-}
 
 export function ClientTemplateAssignmentButtons({ 
   clientId, 
@@ -52,7 +32,7 @@ export function ClientTemplateAssignmentButtons({
   const [showCustomizeDialog, setShowCustomizeDialog] = useState(false);
   const [showExistingAssignmentDialog, setShowExistingAssignmentDialog] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
-  const [customizedTemplate, setCustomizedTemplate] = useState<CustomizedTemplate | null>(null);
+  const [selectedTemplateForCustomization, setSelectedTemplateForCustomization] = useState<{id: string, name: string} | null>(null);
   const [processingAssignment, setProcessingAssignment] = useState(false);
   const [pendingAssignmentType, setPendingAssignmentType] = useState<'assign' | 'customize'>('assign');
 
@@ -86,20 +66,7 @@ export function ClientTemplateAssignmentButtons({
       // Load template for customization
       const template = publishedTemplates.find(t => t.id === templateId);
       if (template) {
-        setCustomizedTemplate({
-          name: template.step_name,
-          baseTemplateId: templateId,
-          steps: [{
-            id: template.id,
-            step_name: template.step_name,
-            description: template.description || '',
-            instructions: template.instructions || '',
-            step_type: template.step_type || 'mandatory',
-            completion_method: template.completion_method || 'client',
-            requires_file_upload: template.requires_file_upload || false,
-            display_order: 0
-          }]
-        });
+        setSelectedTemplateForCustomization({ id: template.id, name: template.step_name });
         setShowAssignDialog(false);
         setShowCustomizeDialog(true);
       }
@@ -129,8 +96,7 @@ export function ClientTemplateAssignmentButtons({
           template_id: selectedTemplate,
           template_name: template.step_name,
           assignment_type: 'direct',
-          assignment_notes: `Directly assigned template: ${template.step_name}`,
-          assigned_by: user.id
+          assignment_notes: `Directly assigned template: ${template.step_name}`
         })
         .select()
         .single();
@@ -188,81 +154,6 @@ export function ClientTemplateAssignmentButtons({
     }
   };
 
-  const handleCustomizedAssignment = async () => {
-    if (!customizedTemplate || !user) return;
-
-    setProcessingAssignment(true);
-    try {
-      // Create template assignment
-      const { data: assignment, error: assignmentError } = await supabase
-        .from('client_template_assignments')
-        .insert({
-          client_id: clientId,
-          trainer_id: user.id,
-          template_id: customizedTemplate.baseTemplateId,
-          template_name: customizedTemplate.name,
-          assignment_type: 'customized',
-          assignment_notes: `Customized template with ${customizedTemplate.steps.length} steps`,
-          assigned_by: user.id
-        })
-        .select()
-        .single();
-
-      if (assignmentError) throw assignmentError;
-
-      // Create progress records for customized steps
-      if (customizedTemplate.steps.length > 0) {
-        const progressRecords = customizedTemplate.steps.map((step, index) => ({
-          client_id: clientId,
-          trainer_id: user.id,
-          template_step_id: step.id || null,
-          step_name: step.step_name,
-          step_type: step.step_type,
-          description: step.description,
-          instructions: step.instructions,
-          requires_file_upload: step.requires_file_upload,
-          completion_method: step.completion_method,
-          display_order: index + 1,
-          status: 'pending'
-        }));
-
-        const { error: progressError } = await supabase
-          .from('client_onboarding_progress')
-          .insert(progressRecords);
-
-        if (progressError) throw progressError;
-      }
-
-      // Send notification to client
-      await supabase.from('alerts').insert({
-        title: 'Customized Onboarding Template Assigned',
-        content: `Your trainer has assigned you a customized onboarding template. Check your onboarding section to get started!`,
-        alert_type: 'template_assigned',
-        priority: 1,
-        target_audience: { clients: [clientId] },
-        metadata: {
-          client_id: clientId,
-          trainer_id: user.id,
-          template_name: customizedTemplate.name,
-          assignment_id: assignment.id,
-          customized: true
-        },
-        created_by: user.id
-      });
-
-      toast.success(`Customized template "${customizedTemplate.name}" assigned successfully`);
-      setShowCustomizeDialog(false);
-      setCustomizedTemplate(null);
-      setSelectedTemplate('');
-      onAssignmentComplete?.();
-      
-    } catch (error) {
-      console.error('Error assigning customized template:', error);
-      toast.error('Failed to assign customized template');
-    } finally {
-      setProcessingAssignment(false);
-    }
-  };
 
   const handleExpireAndContinue = async () => {
     if (!existingAssignment) return;
@@ -361,143 +252,25 @@ export function ClientTemplateAssignmentButtons({
       </Dialog>
 
       {/* Template Customization Dialog */}
-      <Dialog open={showCustomizeDialog} onOpenChange={setShowCustomizeDialog}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Customize Template for {clientName}</DialogTitle>
-          </DialogHeader>
-          {customizedTemplate && (
-            <div className="space-y-6">
-              <div>
-                <Label>Template Name</Label>
-                <Input
-                  value={customizedTemplate.name}
-                  onChange={(e) => setCustomizedTemplate({
-                    ...customizedTemplate,
-                    name: e.target.value
-                  })}
-                />
-              </div>
-
-              <div className="space-y-4">
-                <h4 className="font-medium">Template Steps</h4>
-                {customizedTemplate.steps.map((step, index) => (
-                  <div key={index} className="border rounded-lg p-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <Label>Step {index + 1}: {step.step_name}</Label>
-                      <Badge variant={step.step_type === 'mandatory' ? 'default' : 'secondary'}>
-                        {step.step_type}
-                      </Badge>
-                    </div>
-                    
-                    <div>
-                      <Label>Step Name</Label>
-                      <Input
-                        value={step.step_name}
-                        onChange={(e) => {
-                          const updatedSteps = [...customizedTemplate.steps];
-                          updatedSteps[index] = { ...step, step_name: e.target.value };
-                          setCustomizedTemplate({ ...customizedTemplate, steps: updatedSteps });
-                        }}
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label>Description</Label>
-                      <Textarea
-                        value={step.description}
-                        onChange={(e) => {
-                          const updatedSteps = [...customizedTemplate.steps];
-                          updatedSteps[index] = { ...step, description: e.target.value };
-                          setCustomizedTemplate({ ...customizedTemplate, steps: updatedSteps });
-                        }}
-                        rows={2}
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label>Instructions</Label>
-                      <Textarea
-                        value={step.instructions}
-                        onChange={(e) => {
-                          const updatedSteps = [...customizedTemplate.steps];
-                          updatedSteps[index] = { ...step, instructions: e.target.value };
-                          setCustomizedTemplate({ ...customizedTemplate, steps: updatedSteps });
-                        }}
-                        rows={3}
-                      />
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label>Due in (days)</Label>
-                        <Input
-                          type="number"
-                          min="0"
-                          value={step.due_in_days || ''}
-                          onChange={(e) => {
-                            const updatedSteps = [...customizedTemplate.steps];
-                            updatedSteps[index] = { ...step, due_in_days: e.target.value ? parseInt(e.target.value) : undefined };
-                            setCustomizedTemplate({ ...customizedTemplate, steps: updatedSteps });
-                          }}
-                          placeholder="e.g., 7"
-                        />
-                      </div>
-                      <div>
-                        <Label>Check-in Frequency</Label>
-                        <Select
-                          value={step.check_in_frequency || 'none'}
-                          onValueChange={(value: 'daily' | 'weekly' | 'bi-weekly' | 'monthly' | 'none') => {
-                            const updatedSteps = [...customizedTemplate.steps];
-                            updatedSteps[index] = { ...step, check_in_frequency: value };
-                            setCustomizedTemplate({ ...customizedTemplate, steps: updatedSteps });
-                          }}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="none">No check-ins</SelectItem>
-                            <SelectItem value="daily">Daily</SelectItem>
-                            <SelectItem value="weekly">Weekly</SelectItem>
-                            <SelectItem value="bi-weekly">Bi-weekly</SelectItem>
-                            <SelectItem value="monthly">Monthly</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    
-                    {step.check_in_frequency && step.check_in_frequency !== 'none' && (
-                      <div>
-                        <Label>Check-in Instructions</Label>
-                        <Textarea
-                          value={step.check_in_notes || ''}
-                          onChange={(e) => {
-                            const updatedSteps = [...customizedTemplate.steps];
-                            updatedSteps[index] = { ...step, check_in_notes: e.target.value };
-                            setCustomizedTemplate({ ...customizedTemplate, steps: updatedSteps });
-                          }}
-                          placeholder="What should the client report during check-ins?"
-                          rows={2}
-                        />
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setShowCustomizeDialog(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={handleCustomizedAssignment} disabled={processingAssignment}>
-                  {processingAssignment ? 'Assigning...' : 'Assign Customized Template'}
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      {selectedTemplateForCustomization && (
+        <ClientTemplateCustomizer
+          isOpen={showCustomizeDialog}
+          onClose={() => {
+            setShowCustomizeDialog(false);
+            setSelectedTemplateForCustomization(null);
+          }}
+          templateId={selectedTemplateForCustomization.id}
+          templateName={selectedTemplateForCustomization.name}
+          clientId={clientId}
+          clientName={clientName}
+          onAssignmentComplete={() => {
+            setShowCustomizeDialog(false);
+            setSelectedTemplateForCustomization(null);
+            setSelectedTemplate('');
+            onAssignmentComplete?.();
+          }}
+        />
+      )}
 
       {/* Existing Assignment Dialog */}
       <Dialog open={showExistingAssignmentDialog} onOpenChange={setShowExistingAssignmentDialog}>
