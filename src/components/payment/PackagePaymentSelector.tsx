@@ -9,8 +9,10 @@ import {
   calculatePackagePaymentOptions, 
   calculateInitialPayment, 
   formatPaymentOptionsForCustomer,
+  getCurrencySymbol,
   type PackagePaymentCalculation 
 } from "@/lib/packagePaymentUtils";
+import { useManualPayment, type PaymentRecord } from "@/hooks/useManualPayment";
 
 interface PackagePaymentSelectorProps {
   package: {
@@ -21,7 +23,7 @@ interface PackagePaymentSelectorProps {
     customerPaymentModes?: ('upfront' | 'installments')[];
     installmentCount?: number;
   };
-  onPaymentSelection: (paymentMode: 'upfront' | 'installments', amount: number) => void;
+  onPaymentSelection: (paymentRecord: PaymentRecord) => void;
   loading?: boolean;
 }
 
@@ -31,21 +33,17 @@ export function PackagePaymentSelector({
   loading = false 
 }: PackagePaymentSelectorProps) {
   const calculation = calculatePackagePaymentOptions(pkg);
+  const { processPayment, processing } = useManualPayment();
   const [selectedMode, setSelectedMode] = useState<'upfront' | 'installments'>(
     calculation.defaultOption.mode
   );
 
-  const handlePayment = () => {
-    const initialAmount = calculateInitialPayment(calculation, selectedMode);
-    onPaymentSelection(selectedMode, initialAmount);
-  };
-
-  const getCurrencySymbol = (currency: string) => {
-    switch (currency.toUpperCase()) {
-      case 'GBP': return '£';
-      case 'USD': return '$';
-      case 'EUR': return '€';
-      default: return currency;
+  const handlePayment = async () => {
+    try {
+      const paymentRecord = await processPayment(pkg, selectedMode);
+      onPaymentSelection(paymentRecord);
+    } catch (error) {
+      console.error('Payment failed:', error);
     }
   };
 
@@ -79,11 +77,11 @@ export function PackagePaymentSelector({
           
           <Button 
             onClick={handlePayment} 
-            disabled={loading}
+            disabled={processing}
             className="w-full"
             size="lg"
           >
-            {loading ? 'Processing...' : `Pay ${getCurrencySymbol(pkg.currency)}${calculateInitialPayment(calculation, option.mode).toFixed(2)}`}
+            {processing ? 'Processing Payment...' : `Pay ${getCurrencySymbol(pkg.currency)}${calculateInitialPayment(calculation, option.mode).toFixed(2)}`}
           </Button>
         </CardContent>
       </Card>
@@ -172,11 +170,11 @@ export function PackagePaymentSelector({
           
           <Button 
             onClick={handlePayment} 
-            disabled={loading}
+            disabled={processing}
             className="w-full"
             size="lg"
           >
-            {loading ? 'Processing...' : `Continue to Payment`}
+            {processing ? 'Processing Payment...' : `Process Payment`}
           </Button>
         </div>
       </CardContent>
