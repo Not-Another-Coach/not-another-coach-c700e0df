@@ -38,8 +38,11 @@ interface TrainingPackage {
   durationWeeks?: number;
   durationMonths?: number;
   payoutFrequency?: 'weekly' | 'monthly';
-  customerPaymentMode?: 'upfront' | 'installments';
+  customerPaymentModes?: ('upfront' | 'installments')[];  // Changed to array
   installmentCount?: number;
+  // Add calculated fields for display
+  upfrontAmount?: number;
+  installmentAmount?: number;
 }
 
 export function RatesPackagesSection({ formData, updateFormData, errors, clearFieldError }: RatesPackagesSectionProps) {
@@ -65,7 +68,7 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
     durationWeeks: "",
     durationMonths: "",
     payoutFrequency: "monthly" as 'weekly' | 'monthly',
-    customerPaymentMode: "upfront" as 'upfront' | 'installments',
+    customerPaymentModes: ['upfront'] as ('upfront' | 'installments')[],  // Changed to array
     installmentCount: "",
   });
   const [newPackage, setNewPackage] = useState({
@@ -81,7 +84,7 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
     durationWeeks: "",
     durationMonths: "",
     payoutFrequency: "monthly" as 'weekly' | 'monthly',
-    customerPaymentMode: "upfront" as 'upfront' | 'installments',
+    customerPaymentModes: ['upfront'] as ('upfront' | 'installments')[],  // Changed to array
     installmentCount: "",
   });
 
@@ -103,8 +106,12 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
         durationWeeks: newPackage.durationWeeks ? parseInt(newPackage.durationWeeks) : undefined,
         durationMonths: newPackage.durationMonths ? parseInt(newPackage.durationMonths) : undefined,
         payoutFrequency: newPackage.payoutFrequency,
-        customerPaymentMode: newPackage.customerPaymentMode,
+        customerPaymentModes: newPackage.customerPaymentModes,
         installmentCount: newPackage.installmentCount ? parseInt(newPackage.installmentCount) : undefined,
+        // Calculate payment amounts for display
+        upfrontAmount: parseFloat(newPackage.price),
+        installmentAmount: newPackage.installmentCount ? 
+          parseFloat(newPackage.price) / parseInt(newPackage.installmentCount) : undefined,
       };
       
       const updatedPackages = [...packages, trainingPackage];
@@ -124,7 +131,7 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
         durationWeeks: "",
         durationMonths: "",
         payoutFrequency: "monthly",
-        customerPaymentMode: "upfront",
+        customerPaymentModes: ['upfront'],
         installmentCount: "",
       });
     }
@@ -162,7 +169,7 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
       durationWeeks: pkg.durationWeeks?.toString() || "",
       durationMonths: pkg.durationMonths?.toString() || "",
       payoutFrequency: pkg.payoutFrequency || "monthly",
-      customerPaymentMode: pkg.customerPaymentMode || "upfront",
+      customerPaymentModes: pkg.customerPaymentModes || ['upfront'],
       installmentCount: pkg.installmentCount?.toString() || "",
     });
 
@@ -235,7 +242,7 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
       durationWeeks: pkg.durationWeeks?.toString() || "",
       durationMonths: pkg.durationMonths?.toString() || "",
       payoutFrequency: pkg.payoutFrequency || "monthly",
-      customerPaymentMode: pkg.customerPaymentMode || "upfront",
+      customerPaymentModes: pkg.customerPaymentModes || ['upfront'],
       installmentCount: pkg.installmentCount?.toString() || "",
     });
   };
@@ -254,8 +261,12 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
         durationWeeks: editPackageData.durationWeeks ? parseInt(editPackageData.durationWeeks) : undefined,
         durationMonths: editPackageData.durationMonths ? parseInt(editPackageData.durationMonths) : undefined,
         payoutFrequency: editPackageData.payoutFrequency,
-        customerPaymentMode: editPackageData.customerPaymentMode,
+        customerPaymentModes: editPackageData.customerPaymentModes,
         installmentCount: editPackageData.installmentCount ? parseInt(editPackageData.installmentCount) : undefined,
+        // Calculate payment amounts for display
+        upfrontAmount: parseFloat(editPackageData.price),
+        installmentAmount: editPackageData.installmentCount ? 
+          parseFloat(editPackageData.price) / parseInt(editPackageData.installmentCount) : undefined,
       };
       
       let updatedPackages;
@@ -304,7 +315,7 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
         durationWeeks: "",
         durationMonths: "",
         payoutFrequency: "monthly",
-        customerPaymentMode: "upfront",
+        customerPaymentModes: ['upfront'],
         installmentCount: "",
       });
     }
@@ -321,11 +332,24 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
   };
 
   const formatPaymentMode = (pkg: TrainingPackage) => {
-    if (pkg.customerPaymentMode === 'upfront') {
-      return "Full payment upfront";
+    if (!pkg.customerPaymentModes || pkg.customerPaymentModes.length === 0) {
+      return "Payment TBD";
     }
-    const count = pkg.installmentCount || 2;
-    return `${count} installments`;
+    
+    const modes = pkg.customerPaymentModes;
+    if (modes.length === 1) {
+      if (modes[0] === 'upfront') {
+        return "Full payment upfront";
+      } else {
+        const count = pkg.installmentCount || 2;
+        return `${count} installments`;
+      }
+    } else {
+      // Both options available
+      const installmentText = pkg.installmentCount ? 
+        `${pkg.installmentCount} installments` : "installments";
+      return `Upfront or ${installmentText}`;
+    }
   };
 
   const standardInclusions = [
@@ -573,24 +597,45 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
 
           <div className="space-y-4">
             <div>
-              <Label htmlFor="payment-mode">Customer Payment Mode</Label>
-              <Select 
-                value={newPackage.customerPaymentMode} 
-                onValueChange={(value: 'upfront' | 'installments') => 
-                  setNewPackage(prev => ({...prev, customerPaymentMode: value}))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="upfront">Full Payment Upfront</SelectItem>
-                  <SelectItem value="installments">Installment Payments</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label>Customer Payment Options</Label>
+              <p className="text-sm text-muted-foreground mb-3">
+                Select which payment options clients can choose from
+              </p>
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="payment-upfront"
+                    checked={newPackage.customerPaymentModes.includes('upfront')}
+                    onChange={(e) => {
+                      const modes = e.target.checked 
+                        ? [...newPackage.customerPaymentModes, 'upfront' as const]
+                        : newPackage.customerPaymentModes.filter(m => m !== 'upfront');
+                      setNewPackage(prev => ({...prev, customerPaymentModes: modes.length > 0 ? modes : ['upfront' as const]}));
+                    }}
+                    className="rounded"
+                  />
+                  <Label htmlFor="payment-upfront">Full Payment Upfront</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="payment-installments"
+                    checked={newPackage.customerPaymentModes.includes('installments')}
+                    onChange={(e) => {
+                      const modes = e.target.checked 
+                        ? [...newPackage.customerPaymentModes, 'installments' as const]
+                        : newPackage.customerPaymentModes.filter(m => m !== 'installments');
+                      setNewPackage(prev => ({...prev, customerPaymentModes: modes.length > 0 ? modes : ['upfront' as const]}));
+                    }}
+                    className="rounded"
+                  />
+                  <Label htmlFor="payment-installments">Installment Payments</Label>
+                </div>
+              </div>
             </div>
             
-            {newPackage.customerPaymentMode === 'installments' && (
+            {newPackage.customerPaymentModes.includes('installments') && (
               <div>
                 <Label htmlFor="installment-count">Number of Installments</Label>
                 <Input
@@ -602,6 +647,12 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
                   onChange={(e) => setNewPackage(prev => ({...prev, installmentCount: e.target.value}))}
                   placeholder="e.g., 3"
                 />
+                <p className="text-xs text-muted-foreground mt-1">
+                  {newPackage.price && newPackage.installmentCount ? 
+                    `Each installment: ${currency === 'GBP' ? '£' : currency === 'USD' ? '$' : '€'}${(parseFloat(newPackage.price) / parseInt(newPackage.installmentCount)).toFixed(2)}` 
+                    : 'Enter price and installment count to see amount per installment'
+                  }
+                </p>
               </div>
             )}
           </div>
@@ -833,24 +884,45 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
             
             <div className="space-y-4">
               <div>
-                <Label htmlFor="edit-paymentMode">Customer Payment Mode</Label>
-                <Select 
-                  value={editPackageData.customerPaymentMode} 
-                  onValueChange={(value: 'upfront' | 'installments') => 
-                    setEditPackageData(prev => ({...prev, customerPaymentMode: value}))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="upfront">Full Payment Upfront</SelectItem>
-                    <SelectItem value="installments">Installment Payments</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label>Customer Payment Options</Label>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Select which payment options clients can choose from
+                </p>
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="edit-payment-upfront"
+                      checked={editPackageData.customerPaymentModes.includes('upfront')}
+                      onChange={(e) => {
+                        const modes = e.target.checked 
+                          ? [...editPackageData.customerPaymentModes, 'upfront' as const]
+                          : editPackageData.customerPaymentModes.filter(m => m !== 'upfront');
+                        setEditPackageData(prev => ({...prev, customerPaymentModes: modes.length > 0 ? modes : ['upfront' as const]}));
+                      }}
+                      className="rounded"
+                    />
+                    <Label htmlFor="edit-payment-upfront">Full Payment Upfront</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="edit-payment-installments"
+                      checked={editPackageData.customerPaymentModes.includes('installments')}
+                      onChange={(e) => {
+                        const modes = e.target.checked 
+                          ? [...editPackageData.customerPaymentModes, 'installments' as const]
+                          : editPackageData.customerPaymentModes.filter(m => m !== 'installments');
+                        setEditPackageData(prev => ({...prev, customerPaymentModes: modes.length > 0 ? modes : ['upfront' as const]}));
+                      }}
+                      className="rounded"
+                    />
+                    <Label htmlFor="edit-payment-installments">Installment Payments</Label>
+                  </div>
+                </div>
               </div>
               
-              {editPackageData.customerPaymentMode === 'installments' && (
+              {editPackageData.customerPaymentModes.includes('installments') && (
                 <div>
                   <Label htmlFor="edit-installmentCount">Number of Installments</Label>
                   <Input
@@ -862,6 +934,12 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
                     onChange={(e) => setEditPackageData(prev => ({...prev, installmentCount: e.target.value}))}
                     placeholder="e.g., 3"
                   />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {editPackageData.price && editPackageData.installmentCount ? 
+                      `Each installment: ${currency === 'GBP' ? '£' : currency === 'USD' ? '$' : '€'}${(parseFloat(editPackageData.price) / parseInt(editPackageData.installmentCount)).toFixed(2)}` 
+                      : 'Enter price and installment count to see amount per installment'
+                    }
+                  </p>
                 </div>
               )}
             </div>
