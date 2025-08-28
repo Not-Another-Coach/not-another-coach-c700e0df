@@ -151,7 +151,7 @@ export function WaitlistExclusiveAccess({ trainer, exclusiveUntil }: WaitlistExc
                 profilePhotoUrl: trainer.profile_photo_url,
                 package_options: trainer.package_options
               }}
-              stage="waitlist"
+              stage="browsing"
               className="flex-1"
             />
           )}

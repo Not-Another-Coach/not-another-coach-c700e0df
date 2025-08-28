@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
-export type EngagementStage = 'browsing' | 'liked' | 'shortlisted' | 'discovery_call_booked' | 'discovery_in_progress' | 'matched' | 'discovery_completed' | 'active_client' | 'unmatched' | 'declined' | 'declined_dismissed';
+export type EngagementStage = 'browsing' | 'liked' | 'shortlisted' | 'discovery_call_booked' | 'discovery_in_progress' | 'matched' | 'discovery_completed' | 'agreed' | 'payment_pending' | 'active_client' | 'unmatched' | 'declined' | 'declined_dismissed';
 
 interface TrainerEngagement {
   trainerId: string;
@@ -122,8 +122,12 @@ export function useTrainerEngagement(refreshTrigger?: number) {
     );
   };
 
-  const getMatchedTrainers = () => {
-    return engagements.filter(e => e.stage === 'matched');
+  const getAgreedTrainers = () => {
+    return engagements.filter(e => e.stage === 'agreed');
+  };
+
+  const getPaymentPendingTrainers = () => {
+    return engagements.filter(e => e.stage === 'payment_pending');
   };
 
   const getActiveClients = () => {
@@ -147,8 +151,16 @@ export function useTrainerEngagement(refreshTrigger?: number) {
     await updateEngagementStage(trainerId, 'shortlisted');
   };
 
-  const matchTrainer = async (trainerId: string) => {
-    await updateEngagementStage(trainerId, 'matched');
+  const agreeWithTrainer = async (trainerId: string) => {
+    await updateEngagementStage(trainerId, 'agreed');
+  };
+
+  const startPaymentProcess = async (trainerId: string) => {
+    await updateEngagementStage(trainerId, 'payment_pending');
+  };
+
+  const proceedWithCoach = async (trainerId: string) => {
+    await updateEngagementStage(trainerId, 'agreed');
   };
 
   const unmatchTrainer = async (trainerId: string) => {
@@ -167,10 +179,6 @@ export function useTrainerEngagement(refreshTrigger?: number) {
     await updateEngagementStage(trainerId, 'discovery_completed');
   };
 
-  const proceedWithCoach = async (trainerId: string) => {
-    await updateEngagementStage(trainerId, 'matched');
-  };
-
   const rejectCoach = async (trainerId: string) => {
     await updateEngagementStage(trainerId, 'declined');
   };
@@ -184,13 +192,15 @@ export function useTrainerEngagement(refreshTrigger?: number) {
     getShortlistedTrainers,
     getOnlyShortlistedTrainers,
     getDiscoveryStageTrainers,
-    getMatchedTrainers,
+    getAgreedTrainers,
+    getPaymentPendingTrainers,
     getActiveClients,
     isTrainerLiked,
     isTrainerShortlisted,
     likeTrainer,
     shortlistTrainer,
-    matchTrainer,
+    agreeWithTrainer,
+    startPaymentProcess,
     unmatchTrainer,
     declineTrainer,
     bookDiscoveryCall,

@@ -37,10 +37,15 @@ const stageLabels: Record<EngagementStage, { label: string; description: string;
     description: 'How your profile appears when a client shortlists you',
     color: 'bg-indigo-100 text-indigo-800'
   },
-  waitlist: { 
-    label: 'Waitlist Stage', 
-    description: 'How your profile appears when a client joins your waitlist',
-    color: 'bg-orange-100 text-orange-800'
+  agreed: { 
+    label: 'Agreed Stage', 
+    description: 'How your profile appears when both parties have agreed to work together',
+    color: 'bg-green-100 text-green-800'
+  },
+  payment_pending: { 
+    label: 'Payment Pending Stage', 
+    description: 'How your profile appears when payment is being processed',
+    color: 'bg-yellow-100 text-yellow-800'
   },
   discovery_call_booked: {
     label: 'Discovery Call Booked', 

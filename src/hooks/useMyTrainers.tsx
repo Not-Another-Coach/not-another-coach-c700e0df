@@ -48,7 +48,7 @@ export function useMyTrainers(refreshTrigger?: number) {
     getLikedTrainers,
     getOnlyShortlistedTrainers,
     getDiscoveryStageTrainers,
-    getMatchedTrainers,
+    getAgreedTrainers,
     engagements: allEngagements
   } = useTrainerEngagement(refreshTrigger);
   
@@ -258,9 +258,9 @@ export function useMyTrainers(refreshTrigger?: number) {
           }
         });
 
-        // Process matched trainers (show in discovery section)
-        const matchedTrainers = getMatchedTrainers();
-        matchedTrainers.forEach(engagement => {
+        // Process agreed trainers (show in discovery section)  
+        const agreedTrainers = getAgreedTrainers();
+        agreedTrainers.forEach(engagement => {
           const trainerProfile = trainerData?.find(t => t.id === engagement.trainerId);
           if (trainerProfile) {
             const existingIndex = trainersWithStatus.findIndex(t => t.id === engagement.trainerId);
@@ -268,7 +268,7 @@ export function useMyTrainers(refreshTrigger?: number) {
               ...createTrainerObject(trainerProfile),
               status: 'discovery' as const,
               engagement,
-              statusLabel: 'Matched',
+              statusLabel: 'Agreed',
               statusColor: 'bg-green-100 text-green-800'
             };
             
@@ -340,7 +340,7 @@ export function useMyTrainers(refreshTrigger?: number) {
     };
 
     fetchTrainerData();
-  }, [user, trainerIds, getLikedTrainers, getOnlyShortlistedTrainers, getDiscoveryStageTrainers, getMatchedTrainers, hasActiveDiscoveryCall, conversations]);
+  }, [user, trainerIds, getLikedTrainers, getOnlyShortlistedTrainers, getDiscoveryStageTrainers, getAgreedTrainers, hasActiveDiscoveryCall, conversations]);
 
   // Fetch availability data for shortlisted and discovery trainers
   useEffect(() => {

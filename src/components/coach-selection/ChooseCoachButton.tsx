@@ -37,8 +37,8 @@ export const ChooseCoachButton = ({
   const [loading, setLoading] = useState(false);
 
   const isClient = profile?.user_type === 'client';
-  // Show button when there's 2-way chat (matched), discovery call stages, or discovery in progress (for trainers who don't offer discovery calls)
-  const canChooseCoach = isClient && (stage === 'matched' || stage === 'discovery_call_booked' || stage === 'discovery_completed' || stage === 'discovery_in_progress' || stage === 'waitlist');
+  // Show button when client can proceed with coach selection: agreed, discovery completed, or discovery in progress
+  const canChooseCoach = isClient && (stage === 'agreed' || stage === 'discovery_call_booked' || stage === 'discovery_completed' || stage === 'discovery_in_progress');
 
   useEffect(() => {
     const fetchSelectionRequest = async () => {
