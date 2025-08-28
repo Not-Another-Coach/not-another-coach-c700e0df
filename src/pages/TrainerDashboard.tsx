@@ -70,6 +70,11 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
+import { PaymentPackageManagement } from "@/components/payment-statements/PaymentPackageManagement";
+import { PaymentStatementView } from "@/components/payment-statements/PaymentStatementView";
+import { MembershipSettings } from "@/components/payment-statements/MembershipSettings";
+import { usePaymentStatements } from "@/hooks/usePaymentStatements";
+
 const TrainerDashboard = () => {
   const { user, signOut, loading } = useAuth();
   const { profile, loading: profileLoading, isTrainer, updateProfile } = useProfile();
@@ -77,6 +82,7 @@ const TrainerDashboard = () => {
   const { isAdmin } = useUserRoles();
   const { waitlistEntries } = useWaitlist();
   const { settings: availabilitySettings, loading: availabilityLoading } = useCoachAvailability();
+  const { packages } = usePaymentStatements();
   const navigate = useNavigate();
   const [availabilityStatus, setAvailabilityStatus] = useState<'accepting' | 'waitlist' | 'unavailable'>('accepting');
   const [prospectsCount, setProspectsCount] = useState(0);
@@ -532,17 +538,153 @@ const TrainerDashboard = () => {
         
         {activeView === 'payments' && (
           <div className="space-y-6">
-            <div className="text-center py-12">
-              <DollarSign className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-              <h2 className="text-2xl font-bold mb-2">Payment & Payouts</h2>
-              <p className="text-muted-foreground mb-6">
-                Manage your packages, view earnings, and configure payout settings
-              </p>
-              <Button onClick={() => navigate('/payment-management')} size="lg">
-                <Package className="h-4 w-4 mr-2" />
-                Open Payment Dashboard
-              </Button>
+            {/* Quick Stats */}
+            <div className="grid md:grid-cols-4 gap-6">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-blue-50">
+                      <Package className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Active Packages</p>
+                      <p className="text-2xl font-bold">{packages?.length || 0}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-green-50">
+                      <TrendingUp className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Monthly Revenue</p>
+                      <p className="text-2xl font-bold">£2,450</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-orange-50">
+                      <DollarSign className="h-5 w-5 text-orange-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Pending Payouts</p>
+                      <p className="text-2xl font-bold">£520</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-purple-50">
+                      <Calendar className="h-5 w-5 text-purple-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Next Payout</p>
+                      <p className="text-2xl font-bold">Sep 1</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
+
+            {/* Main Content */}
+            <Tabs defaultValue="packages" className="space-y-6">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="packages" className="flex items-center gap-2">
+                  <Package className="h-4 w-4" />
+                  Package Management
+                </TabsTrigger>
+                <TabsTrigger value="statements" className="flex items-center gap-2">
+                  <CreditCard className="h-4 w-4" />
+                  Payment Statements
+                </TabsTrigger>
+                <TabsTrigger value="history" className="flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4" />
+                  Payout History
+                </TabsTrigger>
+                <TabsTrigger value="settings" className="flex items-center gap-2">
+                  <Settings className="h-4 w-4" />
+                  Settings
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="packages">
+                <PaymentPackageManagement />
+              </TabsContent>
+
+              <TabsContent value="statements">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Payment Statements</CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      View detailed payment statements and payout schedules for your packages
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    {packages && packages.length > 0 ? (
+                      <div className="space-y-4">
+                        {packages.map((pkg) => (
+                          <div key={pkg.id} className="border rounded-lg p-4">
+                            <div className="flex items-center justify-between mb-2">
+                              <h4 className="font-medium">{(pkg as any).package_name || pkg.id}</h4>
+                              <Badge variant="secondary">
+                                £{(pkg as any).final_price?.amount || (pkg as any).price || 0}
+                              </Badge>
+                            </div>
+                            <PaymentStatementView packageId={pkg.id} viewerRole="trainer" />
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                        <h3 className="text-lg font-medium mb-2">No packages configured</h3>
+                        <p className="text-muted-foreground mb-4">
+                          Set up your first package to start viewing payment statements
+                        </p>
+                        <Button onClick={() => navigate('/trainer/profile-setup?tab=rates')}>
+                          Configure Packages
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="history">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Payout History</CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Track your completed payouts and earnings
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-center py-8">
+                      <TrendingUp className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                      <h3 className="text-lg font-medium mb-2">No payout history</h3>
+                      <p className="text-muted-foreground">
+                        Your payout history will appear here once you start receiving payments
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="settings">
+                <MembershipSettings />
+              </TabsContent>
+            </Tabs>
           </div>
         )}
       </div>
