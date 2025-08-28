@@ -22,6 +22,7 @@ interface RatesPackagesSectionProps {
   formData: any;
   updateFormData: (updates: any) => void;
   errors?: { [key: string]: string };
+  clearFieldError?: (field: string) => void;
 }
 
 interface TrainingPackage {
@@ -41,7 +42,7 @@ interface TrainingPackage {
   installmentCount?: number;
 }
 
-export function RatesPackagesSection({ formData, updateFormData, errors }: RatesPackagesSectionProps) {
+export function RatesPackagesSection({ formData, updateFormData, errors, clearFieldError }: RatesPackagesSectionProps) {
   const [currency, setCurrency] = useState<'GBP' | 'USD' | 'EUR'>('GBP');
   const [packages, setPackages] = useState<TrainingPackage[]>(formData.package_options || []);
   const [editingPackage, setEditingPackage] = useState<TrainingPackage | null>(null);
