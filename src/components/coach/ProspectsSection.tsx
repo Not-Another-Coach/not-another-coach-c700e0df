@@ -113,7 +113,7 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
           notes
         `)
         .eq('trainer_id', profile.id)
-        .in('stage', ['shortlisted', 'getting_to_know_your_coach', 'discovery_in_progress', 'matched', 'discovery_completed', 'declined', 'unmatched'])
+        .in('stage', ['shortlisted', 'getting_to_know_your_coach' as any, 'discovery_in_progress', 'matched', 'discovery_completed', 'declined', 'unmatched']) // Type cast needed until Supabase regenerates types
         .order('updated_at', { ascending: false });
 
       console.log('Engagement data:', engagementData);

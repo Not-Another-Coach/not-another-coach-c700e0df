@@ -74,7 +74,7 @@ export function useCoachAnalytics(trainerId?: string) {
         .from('client_trainer_engagement')
         .select('client_id, created_at, stage')
         .eq('trainer_id', trainerId)
-        .in('stage', ['shortlisted', 'discovery_in_progress', 'getting_to_know_your_coach', 'discovery_completed']);
+        .in('stage', ['shortlisted', 'getting_to_know_your_coach' as any, 'discovery_in_progress', 'matched', 'discovery_completed']); // Type cast needed until Supabase regenerates types
 
       if (engagementError) {
         console.error('Error fetching shortlisted clients:', engagementError);

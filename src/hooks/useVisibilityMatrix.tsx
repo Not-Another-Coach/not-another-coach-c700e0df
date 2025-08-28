@@ -56,7 +56,7 @@ export function useVisibilityMatrix(): VisibilityMatrixHook {
       const { data, error } = await supabase.rpc('get_content_visibility', {
         p_trainer_id: trainerId,
         p_content_type: contentType,
-        p_engagement_stage: engagementStage
+        p_engagement_stage: engagementStage as any // Type cast needed until Supabase regenerates types
       });
 
       if (error) {
@@ -86,7 +86,7 @@ export function useVisibilityMatrix(): VisibilityMatrixHook {
         .upsert({
           trainer_id: trainerId,
           content_type: contentType,
-          engagement_stage: engagementStage,
+          engagement_stage: engagementStage as any, // Type cast needed until Supabase regenerates types
           visibility_state: visibilityState
         }, {
           onConflict: 'trainer_id,content_type,engagement_stage'

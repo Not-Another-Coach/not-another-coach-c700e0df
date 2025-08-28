@@ -72,7 +72,7 @@ export function useTrainerEngagement(refreshTrigger?: number) {
       const { error } = await supabase.rpc('update_engagement_stage', {
         client_uuid: user.id,
         trainer_uuid: trainerId,
-        new_stage: newStage
+        new_stage: newStage as any // Type cast needed until Supabase regenerates types
       });
 
       if (error) {

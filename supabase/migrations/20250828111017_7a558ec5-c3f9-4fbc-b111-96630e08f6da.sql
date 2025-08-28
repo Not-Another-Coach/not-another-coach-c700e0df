@@ -1,0 +1,2 @@
+-- Update the engagement_stage enum to replace 'discovery_call_booked' with 'getting_to_know_your_coach'
+ALTER TYPE engagement_stage RENAME VALUE 'discovery_call_booked' TO 'getting_to_know_your_coach';

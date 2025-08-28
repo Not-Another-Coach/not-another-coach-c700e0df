@@ -136,7 +136,7 @@ export function ClientProspectSummary({ onActiveClientsCountChange, onProspectsC
         .from('client_trainer_engagement')
         .select('*')
         .eq('trainer_id', profile.id)
-        .in('stage', ['active_client', 'shortlisted', 'getting_to_know_your_coach', 'discovery_in_progress', 'matched', 'discovery_completed', 'declined', 'unmatched']);
+        .in('stage', ['active_client', 'shortlisted', 'getting_to_know_your_coach' as any, 'discovery_in_progress', 'matched', 'discovery_completed', 'declined', 'unmatched']); // Type cast needed until Supabase regenerates types
 
       if (engagementError) {
         console.error('Error fetching engagements:', engagementError);
