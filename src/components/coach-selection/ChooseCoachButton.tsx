@@ -128,8 +128,14 @@ export const ChooseCoachButton = ({
       alternative_suggested: {
         icon: Heart,
         label: 'Alternative Suggested',
-        description: 'Coach suggested different package',
+        description: 'Coach suggested an alternative package',
         color: 'bg-blue-500'
+      },
+      completed: {
+        icon: CheckCircle,
+        label: 'Payment Completed',
+        description: 'You are now working with this coach',
+        color: 'bg-green-600'
       }
     };
 
