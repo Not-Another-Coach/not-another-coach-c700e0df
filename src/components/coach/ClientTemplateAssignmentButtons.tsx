@@ -93,7 +93,7 @@ export function ClientTemplateAssignmentButtons({
         .insert({
           client_id: clientId,
           trainer_id: user.id,
-          template_id: selectedTemplate,
+          template_base_id: selectedTemplate,
           template_name: template.step_name,
           assignment_notes: `Directly assigned template: ${template.step_name}`
         })
@@ -202,13 +202,13 @@ export function ClientTemplateAssignmentButtons({
 
       {/* Template Selection Dialog */}
       <Dialog open={showAssignDialog} onOpenChange={setShowAssignDialog}>
-        <DialogContent>
+        <DialogContent aria-describedby="template-selection-description">
           <DialogHeader>
             <DialogTitle>
               {pendingAssignmentType === 'customize' ? 'Select Template to Customize' : `Assign Template to ${clientName}`}
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
+          <div id="template-selection-description" className="space-y-4">
             <div>
               <Label>Select Template</Label>
               <Select value={selectedTemplate} onValueChange={handleTemplateSelection}>
@@ -273,14 +273,14 @@ export function ClientTemplateAssignmentButtons({
 
       {/* Existing Assignment Dialog */}
       <Dialog open={showExistingAssignmentDialog} onOpenChange={setShowExistingAssignmentDialog}>
-        <DialogContent>
+        <DialogContent aria-describedby="existing-assignment-description">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-amber-500" />
               Active Template Assignment Exists
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
+          <div id="existing-assignment-description" className="space-y-4">
             <p className="text-sm text-muted-foreground">
               {clientName} already has an active template assignment.
             </p>

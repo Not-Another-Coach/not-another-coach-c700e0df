@@ -198,9 +198,8 @@ export function ClientTemplateCustomizer({
         .insert({
           client_id: clientId,
           trainer_id: user.id,
-          template_id: templateId,
+          template_base_id: templateId,
           template_name: customizedName,
-          assignment_type: 'customized',
           assignment_notes: `Customized template with ${tasks.length} tasks`
         })
         .select()
@@ -418,7 +417,7 @@ export function ClientTemplateCustomizer({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto" aria-describedby="customizer-description">
         <DialogHeader>
           <DialogTitle>Customize Template for {clientName}</DialogTitle>
         </DialogHeader>
@@ -428,7 +427,7 @@ export function ClientTemplateCustomizer({
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div id="customizer-description" className="space-y-6">
             <div>
               <Label>Template Name</Label>
               <Input
