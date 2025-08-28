@@ -19,6 +19,9 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useEnhancedActivities } from '@/hooks/useEnhancedActivities';
+import { EnhancedActivityBuilder } from '@/components/onboarding/EnhancedActivityBuilder';
+import { EnhancedActivity } from '@/hooks/useEnhancedActivities';
 import { TemplateBuilder } from '@/components/onboarding/TemplateBuilder';
 import { useTemplateBuilder } from '@/hooks/useTemplateBuilder';
 import { WaysOfWorkingOverview } from '@/components/onboarding/WaysOfWorkingOverview';
@@ -33,6 +36,13 @@ export function TemplateManagementTabs() {
   
   const { packageWorkflows, loading: workflowsLoading } = usePackageWaysOfWorking();
   const { activities, loading: activitiesLoading, error: activitiesError, refresh: refreshActivities, createActivity, updateActivity, updateActivityDetails } = useTrainerActivities();
+  const { 
+    activities: enhancedActivities, 
+    loading: enhancedLoading, 
+    createActivity: createEnhancedActivity, 
+    updateActivity: updateEnhancedActivity,
+    refresh: refreshEnhanced
+  } = useEnhancedActivities();
   const { user } = useAuth();
   
   // Enhanced template builder functionality
@@ -63,6 +73,8 @@ export function TemplateManagementTabs() {
   });
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showCreateActivityDialog, setShowCreateActivityDialog] = useState(false);
+  const [showEnhancedActivityBuilder, setShowEnhancedActivityBuilder] = useState(false);
+  const [editingEnhancedActivity, setEditingEnhancedActivity] = useState<EnhancedActivity | null>(null);
   const [newActivity, setNewActivity] = useState<{ name: string; category: string; description: string }>({
     name: '',
     category: 'Onboarding',
@@ -76,8 +88,40 @@ export function TemplateManagementTabs() {
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState<string>('');
 
-  const categories = Array.from(new Set(activities.map((a) => a.category))).sort();
-  const filteredActivities = activities.filter((a) => {
+  // Combine legacy and enhanced activities with proper typing
+  type CombinedActivity = {
+    id: string;
+    activity_name: string;
+    category: string;
+    description?: string;
+    is_system: boolean;
+    isEnhanced: boolean;
+    guidance_html?: string;
+    default_due_days?: number;
+    default_sla_days?: number;
+    activity_type?: string;
+    completion_method?: string;
+    requires_file_upload?: boolean;
+  };
+
+  const allActivities: CombinedActivity[] = [
+    ...activities.map(a => ({ 
+      ...a, 
+      isEnhanced: false,
+      activity_type: undefined,
+      completion_method: undefined,
+      requires_file_upload: undefined
+    })),
+    ...enhancedActivities.map(a => ({ 
+      ...a, 
+      activity_name: a.activity_name || 'Unnamed Activity',
+      isEnhanced: true, 
+      is_system: false
+    }))
+  ];
+  
+  const categories = Array.from(new Set(allActivities.map((a) => a.category))).sort();
+  const filteredActivities = allActivities.filter((a) => {
     if (typeFilter === 'system' && !a.is_system) return false;
     if (typeFilter === 'trainer' && a.is_system) return false;
     if (categoryFilter !== 'all' && a.category !== categoryFilter) return false;
@@ -90,7 +134,37 @@ export function TemplateManagementTabs() {
     return true;
   });
 
-  if (loading || workflowsLoading) {
+  const handleCreateEnhancedActivity = async (activity: Partial<EnhancedActivity>) => {
+    try {
+      await createEnhancedActivity(activity);
+      setShowEnhancedActivityBuilder(false);
+      toast.success('Enhanced activity created successfully');
+      refreshEnhanced();
+    } catch (error) {
+      toast.error('Failed to create enhanced activity');
+    }
+  };
+
+  const handleUpdateEnhancedActivity = async (activity: Partial<EnhancedActivity>) => {
+    if (!editingEnhancedActivity) return;
+    
+    try {
+      await updateEnhancedActivity(editingEnhancedActivity.id, activity);
+      setShowEnhancedActivityBuilder(false);
+      setEditingEnhancedActivity(null);
+      toast.success('Enhanced activity updated successfully');
+      refreshEnhanced();
+    } catch (error) {
+      toast.error('Failed to update enhanced activity');
+    }
+  };
+
+  const openEnhancedActivityEditor = (activity: EnhancedActivity) => {
+    setEditingEnhancedActivity(activity);
+    setShowEnhancedActivityBuilder(true);
+  };
+
+  if (loading || workflowsLoading || enhancedLoading) {
     return (
       <div className="animate-pulse space-y-4">
         <div className="h-8 bg-muted rounded w-1/3"></div>
@@ -150,6 +224,7 @@ export function TemplateManagementTabs() {
       setShowCreateActivityDialog(false);
       setNewActivity({ name: '', category: 'Onboarding', description: '' });
       refreshActivities();
+      refreshEnhanced();
     }
   };
 
@@ -192,6 +267,7 @@ export function TemplateManagementTabs() {
       setShowEditActivityDialog(false);
       setEditActivity(null);
       refreshActivities();
+      refreshEnhanced();
     }
   };
 
@@ -212,18 +288,22 @@ export function TemplateManagementTabs() {
               These activities help standardize your onboarding process across different client packages.
             </p>
           </div>
-          <Dialog open={showCreateActivityDialog} onOpenChange={setShowCreateActivityDialog}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Create Activity
-              </Button>
-            </DialogTrigger>
+          <div className="flex gap-2">
+            <Dialog open={showCreateActivityDialog} onOpenChange={setShowCreateActivityDialog}>
+              <DialogTrigger asChild>
+                <Button variant="outline">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Basic Activity
+                </Button>
+              </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Create Activity</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
+                <div className="text-sm text-muted-foreground mb-4">
+                  Create a basic text-based activity. For interactive features like appointments, surveys, or file uploads, use Enhanced Activities.
+                </div>
                 <div>
                   <Label>Name</Label>
                   <Input
@@ -266,7 +346,24 @@ export function TemplateManagementTabs() {
                 </div>
               </div>
             </DialogContent>
-          </Dialog>
+            </Dialog>
+            
+            <Button onClick={() => setShowEnhancedActivityBuilder(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Enhanced Activity
+            </Button>
+          </div>
+
+          <EnhancedActivityBuilder
+            isOpen={showEnhancedActivityBuilder}
+            onClose={() => {
+              setShowEnhancedActivityBuilder(false);
+              setEditingEnhancedActivity(null);
+            }}
+            onSave={editingEnhancedActivity ? handleUpdateEnhancedActivity : handleCreateEnhancedActivity}
+            activity={editingEnhancedActivity || undefined}
+            isEditing={!!editingEnhancedActivity}
+          />
           <Dialog open={showEditActivityDialog} onOpenChange={(open) => { setShowEditActivityDialog(open); if (!open) setEditActivity(null); }}>
             <DialogContent>
               <DialogHeader>
@@ -417,52 +514,62 @@ export function TemplateManagementTabs() {
           />
         </div>
 
-        {/* Activities Display */}
-        {activitiesLoading ? (
-          <div className="space-y-3">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="h-16 bg-muted rounded animate-pulse" />
-            ))}
-          </div>
-        ) : activitiesError ? (
-          <div className="p-4 bg-destructive/10 rounded-lg">
-            <p className="text-destructive">Error loading activities: {activitiesError}</p>
-          </div>
-        ) : filteredActivities.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            {activities.length === 0 ? 'No activities yet. Create your first one!' : 'No activities match your filters.'}
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {filteredActivities.map((activity) => (
-              <div key={activity.id} className="border rounded-lg p-4 space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <h4 className="font-medium">{activity.activity_name}</h4>
-                    <Badge variant={activity.is_system ? 'secondary' : 'outline'}>
-                      {activity.is_system ? 'System' : 'Custom'}
-                    </Badge>
-                    <Badge variant="outline" className="text-xs">
-                      {activity.category}
-                    </Badge>
+        {/* Activities List */}
+        <div className="space-y-4">
+          {(activitiesLoading || enhancedLoading) ? (
+            <div className="text-center py-8">Loading activities...</div>
+          ) : activitiesError ? (
+            <div className="text-center py-8 text-red-600">Error loading activities: {activitiesError}</div>
+          ) : filteredActivities.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">No activities found.</div>
+          ) : (
+            filteredActivities.map((a) => (
+              <Card key={a.id} className="relative">
+                <CardHeader className="pb-2">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1 flex-1">
+                      <CardTitle className="text-base">{a.activity_name}</CardTitle>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={a.is_system ? 'secondary' : 'default'}>
+                          {a.is_system ? 'System' : 'Custom'}
+                        </Badge>
+                        <Badge variant="outline">{a.category}</Badge>
+                        {a.isEnhanced && (
+                          <Badge variant="secondary" className="bg-primary/10 text-primary">
+                            {a.activity_type || 'Enhanced'}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 ml-4">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => a.isEnhanced ? openEnhancedActivityEditor(a as EnhancedActivity) : openEditActivity(a)}
+                        disabled={a.is_system}
+                        title={a.is_system ? 'System activities cannot be edited' : 'Edit activity'}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                  {!activity.is_system && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => openEditActivity(activity)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-                {activity.description && (
-                  <p className="text-sm text-muted-foreground">{activity.description}</p>
+                </CardHeader>
+                {a.description && (
+                  <CardContent className="pt-0">
+                    <p className="text-sm text-muted-foreground">{a.description}</p>
+                    {a.isEnhanced && a.activity_type && (
+                      <div className="mt-2 text-xs text-muted-foreground">
+                        <strong>Type:</strong> {a.activity_type} | 
+                        <strong> Completion:</strong> {a.completion_method || 'client'}
+                        {a.requires_file_upload && ' | File upload required'}
+                      </div>
+                    )}
+                  </CardContent>
                 )}
-              </div>
-            ))}
-          </div>
-        )}
+              </Card>
+            ))
+          )}
+        </div>
       </TabsContent>
 
       <TabsContent value="templates" className="space-y-4">

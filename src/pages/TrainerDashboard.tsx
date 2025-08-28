@@ -25,7 +25,6 @@ import { ClientOnboardingManagement } from "@/components/coach/ClientOnboardingM
 import { OnboardingSummaryWidget } from "@/components/dashboard/OnboardingSummaryWidget";
 import { GoalsSection } from "@/components/goals/GoalsSection";
 import { WeeklyExecutionCard } from "@/components/dashboard/WeeklyExecutionCard";
-import { EnhancedActivityManagement } from "@/components/coach/EnhancedActivityManagement";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -280,45 +279,35 @@ const TrainerDashboard = () => {
               Prospects ({prospectsCount + (waitlistEntries?.length || 0)})
             </Button>
             
-            <Button
-              variant={activeView === 'templates' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setActiveView('templates')}
-              className="flex items-center gap-2"
-            >
-              <CheckCircle className="w-4 h-4" />
-              Template Management
-            </Button>
-            
-            <Button
-              variant={activeView === 'goals' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setActiveView('goals')}
-              className="flex items-center gap-2"
-            >
-              <Goal className="w-4 h-4" />
-              Goals & Tasks
-            </Button>
-            
-            <Button
-              variant={activeView === 'activities' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setActiveView('activities')}
-              className="flex items-center gap-2"
-            >
-              <FileText className="w-4 h-4" />
-              Enhanced Activities
-            </Button>
-            
-            <Button
-              variant={activeView === 'payments' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setActiveView('payments')}
-              className="flex items-center gap-2"
-            >
-              <CreditCard className="w-4 h-4" />
-              Payment & Payouts
-            </Button>
+          <Button 
+            variant={activeView === 'templates' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setActiveView('templates')}
+            className="flex items-center gap-2"
+          >
+            <CheckCircle className="w-4 h-4" />
+            Template Management
+          </Button>
+          
+          <Button
+            variant={activeView === 'goals' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setActiveView('goals')}
+            className="flex items-center gap-2"
+          >
+            <Goal className="w-4 h-4" />
+            Goals & Tasks
+          </Button>
+          
+          <Button
+            variant={activeView === 'payments' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setActiveView('payments')}
+            className="flex items-center gap-2"
+          >
+            <CreditCard className="w-4 h-4" />
+            Payment & Payouts
+          </Button>
           </nav>
         </div>
       </div>
@@ -547,10 +536,6 @@ const TrainerDashboard = () => {
         
         {activeView === 'goals' && (
           <GoalsSection />
-        )}
-        
-        {activeView === 'activities' && (
-          <EnhancedActivityManagement />
         )}
         
         {activeView === 'payments' && (
