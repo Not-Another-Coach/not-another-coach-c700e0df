@@ -541,7 +541,7 @@ export default function MyTrainers() {
                    <Edit className="h-3 w-3 mr-1" />
                    Reschedule Call
                  </Button>
-               ) : (isDiscoveryInProgress || (discoveryCall && isCallInPast)) ? (
+               ) : (isDiscoveryInProgress || (discoveryCall && isCallInPast) || getEngagementStage(trainer.id) === 'getting_to_know_your_coach') ? (
                  <ChooseCoachButton
                    trainer={trainer}
                    stage={getEngagementStage(trainer.id) === 'matched' ? 'agreed' : getEngagementStage(trainer.id) as any}
