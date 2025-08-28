@@ -18,6 +18,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { ClientTemplateAssignmentButtons } from '@/components/coach/ClientTemplateAssignmentButtons';
 
 interface ActiveClient {
   id: string;
@@ -450,21 +451,19 @@ export function ActiveClientsSection({ onCountChange }: ActiveClientsSectionProp
                   </Button>
                 </div>
                 
-                {/* Template Assignment Section - Same logic as Template Management */}
+                {/* Template Assignment Section */}
                 <div className="mt-4 pt-4 border-t">
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <h4 className="font-medium">Template Assignment</h4>
-                      <Button
-                        size="sm"
-                        onClick={() => {
-                          setSelectedClientForAssignment(client);
-                          setShowAssignDialog(true);
+                      <ClientTemplateAssignmentButtons 
+                        clientId={client.client_id}
+                        clientName={`${client.client_profile?.first_name || ''} ${client.client_profile?.last_name || ''}`}
+                        onAssignmentComplete={() => {
+                          // Refresh the client data or assignments
+                          console.log('Assignment completed for client:', client.client_id);
                         }}
-                      >
-                        <Plus className="w-3 h-3 mr-1" />
-                        Assign Template
-                      </Button>
+                      />
                     </div>
                     
                     {/* Show active assignment if exists */}

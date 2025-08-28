@@ -28,6 +28,9 @@ interface TemplateStep {
   completion_method: 'client' | 'trainer' | 'auto';
   requires_file_upload: boolean;
   display_order: number;
+  due_in_days?: number;
+  check_in_frequency?: 'daily' | 'weekly' | 'bi-weekly' | 'monthly' | 'none';
+  check_in_notes?: string;
 }
 
 interface CustomizedTemplate {
@@ -424,6 +427,61 @@ export function ClientTemplateAssignmentButtons({
                         rows={3}
                       />
                     </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Due in (days)</Label>
+                        <Input
+                          type="number"
+                          min="0"
+                          value={step.due_in_days || ''}
+                          onChange={(e) => {
+                            const updatedSteps = [...customizedTemplate.steps];
+                            updatedSteps[index] = { ...step, due_in_days: e.target.value ? parseInt(e.target.value) : undefined };
+                            setCustomizedTemplate({ ...customizedTemplate, steps: updatedSteps });
+                          }}
+                          placeholder="e.g., 7"
+                        />
+                      </div>
+                      <div>
+                        <Label>Check-in Frequency</Label>
+                        <Select
+                          value={step.check_in_frequency || 'none'}
+                          onValueChange={(value: 'daily' | 'weekly' | 'bi-weekly' | 'monthly' | 'none') => {
+                            const updatedSteps = [...customizedTemplate.steps];
+                            updatedSteps[index] = { ...step, check_in_frequency: value };
+                            setCustomizedTemplate({ ...customizedTemplate, steps: updatedSteps });
+                          }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">No check-ins</SelectItem>
+                            <SelectItem value="daily">Daily</SelectItem>
+                            <SelectItem value="weekly">Weekly</SelectItem>
+                            <SelectItem value="bi-weekly">Bi-weekly</SelectItem>
+                            <SelectItem value="monthly">Monthly</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    
+                    {step.check_in_frequency && step.check_in_frequency !== 'none' && (
+                      <div>
+                        <Label>Check-in Instructions</Label>
+                        <Textarea
+                          value={step.check_in_notes || ''}
+                          onChange={(e) => {
+                            const updatedSteps = [...customizedTemplate.steps];
+                            updatedSteps[index] = { ...step, check_in_notes: e.target.value };
+                            setCustomizedTemplate({ ...customizedTemplate, steps: updatedSteps });
+                          }}
+                          placeholder="What should the client report during check-ins?"
+                          rows={2}
+                        />
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
