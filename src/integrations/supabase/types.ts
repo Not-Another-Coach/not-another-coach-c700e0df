@@ -4472,6 +4472,10 @@ export type Database = {
         Args: { p_error_message: string; p_event_id: string }
         Returns: undefined
       }
+      fix_client_lou_status: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       get_client_journey_stage: {
         Args: { p_client_id: string }
         Returns: Database["public"]["Enums"]["engagement_stage"]
