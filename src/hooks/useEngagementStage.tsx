@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
-export type EngagementStage = 'browsing' | 'liked' | 'shortlisted' | 'discovery_call_booked' | 'discovery_in_progress' | 'matched' | 'discovery_completed' | 'agreed' | 'payment_pending' | 'active_client' | 'unmatched' | 'declined' | 'declined_dismissed';
+export type EngagementStage = 'browsing' | 'liked' | 'shortlisted' | 'discovery_call_booked' | 'discovery_in_progress' | 'discovery_completed' | 'agreed' | 'payment_pending' | 'active_client' | 'unmatched' | 'declined' | 'declined_dismissed';
 
 interface EngagementData {
   id: string;
@@ -43,8 +43,18 @@ export function useEngagementStage(trainerId: string) {
         console.error('Error fetching engagement stage:', error);
         setStage('browsing');
       } else {
-        setEngagementData(data);
-        setStage(data?.stage || 'browsing');
+        // Convert old stages to new ones
+        const normalizedStage = data?.stage === 'waitlist' ? 'browsing' : 
+                               data?.stage === 'matched' ? 'agreed' : 
+                               data?.stage || 'browsing';
+        
+        const normalizedData = data ? {
+          ...data,
+          stage: normalizedStage as EngagementStage
+        } : null;
+        
+        setEngagementData(normalizedData);
+        setStage(normalizedStage as EngagementStage);
       }
     } catch (error) {
       console.error('Error fetching engagement stage:', error);

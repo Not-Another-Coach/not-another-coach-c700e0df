@@ -544,7 +544,7 @@ export default function MyTrainers() {
                ) : (isDiscoveryInProgress || (discoveryCall && isCallInPast)) ? (
                  <ChooseCoachButton
                    trainer={trainer}
-                   stage={getEngagementStage(trainer.id)}
+                   stage={getEngagementStage(trainer.id) === 'matched' ? 'agreed' : getEngagementStage(trainer.id) as any}
                    className="w-full"
                  />
                ) : trainer.offers_discovery_call ? (

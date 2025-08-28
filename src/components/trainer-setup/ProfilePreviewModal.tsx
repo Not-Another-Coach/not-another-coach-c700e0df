@@ -57,12 +57,7 @@ const stageLabels: Record<EngagementStage, { label: string; description: string;
     description: 'How your profile appears when discovery is happening through messaging',
     color: 'bg-teal-100 text-teal-800'
   },
-  matched: { 
-    label: 'Matched Stage', 
-    description: 'How your profile appears when you match with a client',
-    color: 'bg-green-100 text-green-800'
-  },
-  discovery_completed: { 
+  discovery_completed: {
     label: 'Discovery Completed', 
     description: 'How your profile appears after a discovery call',
     color: 'bg-orange-100 text-orange-800'
