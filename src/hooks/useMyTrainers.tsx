@@ -242,10 +242,12 @@ export function useMyTrainers(refreshTrigger?: number) {
           const trainerProfile = trainerData?.find(t => t.id === trainerId);
           if (trainerProfile) {
             const existingIndex = trainersWithStatus.findIndex(t => t.id === trainerId);
+            // Find engagement data for this trainer
+            const trainerEngagement = discoveryStageTrainers.find(e => e.trainerId === trainerId);
             const trainerObj = {
               ...createTrainerObject(trainerProfile),
               status: 'discovery' as const,
-              engagement: existingIndex >= 0 ? trainersWithStatus[existingIndex].engagement : null,
+              engagement: existingIndex >= 0 ? trainersWithStatus[existingIndex].engagement : trainerEngagement || null,
               statusLabel: 'Discovery Active',
               statusColor: 'bg-purple-100 text-purple-800'
             };
