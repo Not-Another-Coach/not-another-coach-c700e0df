@@ -81,7 +81,9 @@ const TrainerDashboard = () => {
   const { isAdmin } = useUserRoles();
   const { waitlistEntries } = useWaitlist();
   const { settings: availabilitySettings, loading: availabilityLoading } = useCoachAvailability();
-  const { packages } = usePaymentStatements();
+  const { packages, loading: packagesLoading } = usePaymentStatements();
+  
+  console.log('🔥 TrainerDashboard: Payment packages:', packages?.length || 0, 'loading:', packagesLoading);
   const navigate = useNavigate();
   const [availabilityStatus, setAvailabilityStatus] = useState<'accepting' | 'waitlist' | 'unavailable'>('accepting');
   const [prospectsCount, setProspectsCount] = useState(0);
@@ -647,33 +649,43 @@ const TrainerDashboard = () => {
                       View detailed payment statements and payout schedules for your packages
                     </p>
                   </CardHeader>
-                  <CardContent>
-                    {packages && packages.length > 0 ? (
-                      <div className="space-y-4">
-                        {packages.map((pkg) => (
-                          <div key={pkg.id} className="border rounded-lg p-4">
-                            <div className="flex items-center justify-between mb-2">
-                              <h4 className="font-medium">{(pkg as any).package_name || pkg.id}</h4>
-                              <Badge variant="secondary">
-                                £{(pkg as any).final_price?.amount || (pkg as any).price || 0}
-                              </Badge>
+                   <CardContent>
+                     {packagesLoading ? (
+                       <div className="text-center py-8">
+                         <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+                         <p className="text-muted-foreground">Loading payment statements...</p>
+                       </div>
+                     ) : packages && packages.length > 0 ? (
+                       <div className="space-y-4">
+                          {packages.map((pkg) => (
+                            <div key={pkg.id} className="border rounded-lg p-4">
+                              <div className="flex items-center justify-between mb-2">
+                                <h4 className="font-medium">{pkg.title}</h4>
+                                <Badge variant="secondary">
+                                  £{pkg.final_price_amount}
+                                </Badge>
+                              </div>
+                              <PaymentStatementView packageId={pkg.id} viewerRole="trainer" />
                             </div>
-                            <PaymentStatementView packageId={pkg.id} viewerRole="trainer" />
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-8">
-                        <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                        <h3 className="text-lg font-medium mb-2">No packages configured</h3>
-                        <p className="text-muted-foreground mb-4">
-                          Set up your first package to start viewing payment statements
-                        </p>
-                        <Button onClick={() => navigate('/trainer/profile-setup?tab=rates-packages')}>
-                          Configure Packages
-                        </Button>
-                      </div>
-                    )}
+                          ))}
+                       </div>
+                     ) : (
+                       <div className="text-center py-8">
+                         <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                         <h3 className="text-lg font-medium mb-2">No payment packages found</h3>
+                         <p className="text-muted-foreground mb-4">
+                           Payment packages will appear here once clients complete purchases
+                         </p>
+                         <div className="flex gap-2 justify-center">
+                           <Button onClick={() => navigate('/trainer/profile-setup?tab=rates-packages')}>
+                             Configure Packages
+                           </Button>
+                           <Button variant="outline" onClick={() => window.location.reload()}>
+                             Refresh Data
+                           </Button>
+                         </div>
+                       </div>
+                     )}
                   </CardContent>
                 </Card>
               </TabsContent>

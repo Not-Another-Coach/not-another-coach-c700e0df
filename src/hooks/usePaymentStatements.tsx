@@ -118,8 +118,12 @@ export function usePaymentStatements() {
   const [packages, setPackages] = useState<PaymentPackage[]>([]);
 
   const fetchPackages = async () => {
-    if (!user) return;
+    if (!user) {
+      console.log('🔥 usePaymentStatements: No user, skipping fetch');
+      return;
+    }
 
+    console.log('🔥 usePaymentStatements: Fetching packages for user:', user.id);
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -128,10 +132,14 @@ export function usePaymentStatements() {
         .or(`trainer_id.eq.${user.id},customer_id.eq.${user.id}`)
         .order('created_at', { ascending: false });
 
+      console.log('🔥 usePaymentStatements: Query result:', { data, error });
       if (error) throw error;
-      setPackages(data || []);
+      
+      const packages = data || [];
+      console.log('🔥 usePaymentStatements: Setting packages:', packages.length, 'items');
+      setPackages(packages);
     } catch (error) {
-      console.error('Error fetching packages:', error);
+      console.error('🔥 usePaymentStatements: Error fetching packages:', error);
       toast({
         title: "Error",
         description: "Failed to fetch payment packages",
@@ -278,6 +286,7 @@ export function usePaymentStatements() {
   };
 
   useEffect(() => {
+    console.log('🔥 usePaymentStatements: User changed, fetching packages for:', user?.id);
     fetchPackages();
   }, [user]);
 
