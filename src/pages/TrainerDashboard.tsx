@@ -60,7 +60,8 @@ import {
   Home,
   UserSearch,
   Goal,
-  Calendar
+  Calendar,
+  ExternalLink
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -69,7 +70,6 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
-import { PaymentPackageManagement } from "@/components/payment-statements/PaymentPackageManagement";
 import { PaymentStatementView } from "@/components/payment-statements/PaymentStatementView";
 import { MembershipSettings } from "@/components/payment-statements/MembershipSettings";
 import { usePaymentStatements } from "@/hooks/usePaymentStatements";
@@ -596,13 +596,35 @@ const TrainerDashboard = () => {
               </Card>
             </div>
 
+            {/* Package Management Quick Link */}
+            <Card className="mb-6 border-dashed border-2 border-primary/30 bg-primary/5">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <Package className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">Package Management</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Configure your training packages, rates, and payment options in Profile Setup
+                      </p>
+                    </div>
+                  </div>
+                  <Button 
+                    onClick={() => navigate('/trainer/profile-setup?tab=rates-packages')}
+                    className="flex items-center gap-2"
+                  >
+                    Manage Packages
+                    <ExternalLink className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Main Content */}
-            <Tabs defaultValue="packages" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="packages" className="flex items-center gap-2">
-                  <Package className="h-4 w-4" />
-                  Package Management
-                </TabsTrigger>
+            <Tabs defaultValue="statements" className="space-y-6">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="statements" className="flex items-center gap-2">
                   <CreditCard className="h-4 w-4" />
                   Payment Statements
@@ -616,10 +638,6 @@ const TrainerDashboard = () => {
                   Settings
                 </TabsTrigger>
               </TabsList>
-
-              <TabsContent value="packages">
-                <PaymentPackageManagement />
-              </TabsContent>
 
               <TabsContent value="statements">
                 <Card>
@@ -651,7 +669,7 @@ const TrainerDashboard = () => {
                         <p className="text-muted-foreground mb-4">
                           Set up your first package to start viewing payment statements
                         </p>
-                        <Button onClick={() => navigate('/trainer/profile-setup?tab=rates')}>
+                        <Button onClick={() => navigate('/trainer/profile-setup?tab=rates-packages')}>
                           Configure Packages
                         </Button>
                       </div>
