@@ -131,16 +131,24 @@ export function TemplateManagementTabs() {
   const groupedActivities = null;
 
   const categories = Array.from(new Set(allActivities.map((a) => a.category))).sort();
+  
+  // Apply filters with proper state dependencies
   const filteredActivities = allActivities.filter((a) => {
+    // Type filter
     if (typeFilter === 'system' && !a.is_system) return false;
     if (typeFilter === 'trainer' && a.is_system) return false;
+    
+    // Category filter
     if (categoryFilter !== 'all' && a.category !== categoryFilter) return false;
-    const q = searchTerm.trim().toLowerCase();
-    if (q) {
-      const name = a.activity_name.toLowerCase();
+    
+    // Search filter
+    const query = searchTerm.trim().toLowerCase();
+    if (query) {
+      const name = (a.activity_name || '').toLowerCase();
       const desc = (a.description || '').toLowerCase();
-      if (!name.includes(q) && !desc.includes(q)) return false;
+      if (!name.includes(query) && !desc.includes(query)) return false;
     }
+    
     return true;
   });
 
@@ -239,7 +247,7 @@ export function TemplateManagementTabs() {
   };
 
   const openEditActivity = (a: any) => {
-    // If it's an enhanced activity or admin editing system activity, use enhanced builder
+    // Always use enhanced builder for enhanced activities or for admin users editing system activities
     if (a.isEnhanced || (a.is_system && isAdmin)) {
       const enhancedActivity: EnhancedActivity = {
         id: a.id,
@@ -255,22 +263,46 @@ export function TemplateManagementTabs() {
         appointment_config: a.appointment_config || {},
         survey_config: a.survey_config || {},
         content_config: a.content_config || {},
-        upload_config: a.upload_config || {}
+        upload_config: a.upload_config || {},
+        is_system: a.is_system || false
       };
       setEditingEnhancedActivity(enhancedActivity);
       setShowEnhancedActivityBuilder(true);
     } else {
-      // Use legacy dialog for basic activities
-      setEditActivity({
-        id: a.id,
-        name: a.activity_name,
-        category: a.category,
-        description: a.description ?? '',
-        guidance_html: a.guidance_html ?? '',
-        default_due_days: a.default_due_days ?? null,
-        default_sla_days: a.default_sla_days ?? null,
-      });
-      setShowEditActivityDialog(true);
+      // For non-admin users editing their own custom activities, also use enhanced builder if it's enhanced
+      if (!a.is_system) {
+        const enhancedActivity: EnhancedActivity = {
+          id: a.id,
+          activity_name: a.activity_name,
+          category: a.category,
+          description: a.description || '',
+          activity_type: a.activity_type || 'task',
+          completion_method: a.completion_method || 'client',
+          requires_file_upload: a.requires_file_upload || false,
+          guidance_html: a.guidance_html || '',
+          default_due_days: a.default_due_days || null,
+          default_sla_days: a.default_sla_days || null,
+          appointment_config: a.appointment_config || {},
+          survey_config: a.survey_config || {},
+          content_config: a.content_config || {},
+          upload_config: a.upload_config || {},
+          is_system: false
+        };
+        setEditingEnhancedActivity(enhancedActivity);
+        setShowEnhancedActivityBuilder(true);
+      } else {
+        // Fallback to legacy dialog (should rarely happen now)
+        setEditActivity({
+          id: a.id,
+          name: a.activity_name,
+          category: a.category,
+          description: a.description ?? '',
+          guidance_html: a.guidance_html ?? '',
+          default_due_days: a.default_due_days ?? null,
+          default_sla_days: a.default_sla_days ?? null,
+        });
+        setShowEditActivityDialog(true);
+      }
     }
   };
 
@@ -400,15 +432,17 @@ export function TemplateManagementTabs() {
                       </div>
                     </div>
                     <div className="flex items-center gap-1 ml-4">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => openEditActivity(a)}
-                        disabled={!isAdmin && a.is_system}
-                        title={!isAdmin && a.is_system ? 'System activities can only be edited by administrators' : 'Edit activity'}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
+                      {/* Only show edit button for: admin users (all activities) or non-admin users (only custom activities) */}
+                      {(isAdmin || !a.is_system) && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => openEditActivity(a)}
+                          title="Edit activity"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      )}
                       {!a.is_system && !isAdmin && (
                         <Button
                           variant="ghost"
