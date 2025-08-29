@@ -24,7 +24,7 @@ import { EnhancedActivityBuilder } from '@/components/onboarding/EnhancedActivit
 import { EnhancedActivity } from '@/hooks/useEnhancedActivities';
 import { TemplateBuilder } from '@/components/onboarding/TemplateBuilder';
 import { useTemplateBuilder } from '@/hooks/useTemplateBuilder';
-import { WaysOfWorkingOverview } from '@/components/onboarding/WaysOfWorkingOverview';
+import { TemplateAssignmentView } from '@/components/coach/TemplateAssignmentView';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { useProfile } from '@/hooks/useProfile';
 
@@ -363,12 +363,26 @@ export function TemplateManagementTabs() {
   };
 
   return (
-    <Tabs defaultValue="activities" className="space-y-4">
-      <TabsList>
-        <TabsTrigger value="activities">Activities</TabsTrigger>
-        <TabsTrigger value="templates">Templates</TabsTrigger>
-        <TabsTrigger value="workflows">Ways of Working</TabsTrigger>
-      </TabsList>
+    <Tabs defaultValue="templates" className="space-y-4">
+      <div className="flex flex-col space-y-4">
+        <TabsList className="grid grid-cols-4 w-full max-w-md">
+          <TabsTrigger value="templates" className="flex items-center gap-2">
+            <Settings className="h-4 w-4" />
+            Templates
+          </TabsTrigger>
+          <TabsTrigger value="assignment" className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            Template Assignment
+          </TabsTrigger>
+          <TabsTrigger value="activities" className="flex items-center gap-2">
+            <User className="h-4 w-4" />
+            Activities
+          </TabsTrigger>
+          <TabsTrigger value="advanced" className="flex items-center gap-2">
+            <Settings className="h-4 w-4" />
+            Advanced
+          </TabsTrigger>
+        </TabsList>
 
       <TabsContent value="activities" className="space-y-4">
         {/* Header with Create Button */}
@@ -648,9 +662,23 @@ export function TemplateManagementTabs() {
         />
       </TabsContent>
 
-      <TabsContent value="workflows" className="space-y-4">
-        <WaysOfWorkingOverview />
+      <TabsContent value="assignment" className="space-y-4">
+        <TemplateAssignmentView onCreateTemplate={() => setShowCreateDialog(true)} />
       </TabsContent>
+
+      <TabsContent value="advanced" className="space-y-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Advanced Features</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-muted-foreground">
+              Advanced template management features will be available here.
+            </div>
+          </CardContent>
+        </Card>
+      </TabsContent>
+      </div>
     </Tabs>
   );
 }
