@@ -168,6 +168,14 @@ export function TemplateAssignmentView({ onCreateTemplate }: TemplateAssignmentV
 
         {/* Activities Matrix */}
         <div className="overflow-x-auto">
+          <div className="mb-4 p-4 bg-muted/50 rounded-lg">
+            <p className="text-sm text-muted-foreground">
+              <strong>How ticks work:</strong> ✓ = Activity is assigned to the package's template | ○ = Activity not assigned to template
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Activities come from the Activities tab. Ticks appear when both: (1) Package has template assigned AND (2) Activity is included in that template.
+            </p>
+          </div>
           <table className="w-full border-collapse">
             <thead>
               <tr className="border-b-2 border-border">
@@ -177,8 +185,10 @@ export function TemplateAssignmentView({ onCreateTemplate }: TemplateAssignmentV
                   <th key={assignment.packageId} className="text-center p-3 font-semibold bg-primary/10 min-w-24">
                     <div className="flex flex-col items-center gap-1">
                       <span className="text-xs font-medium">{assignment.packageName}</span>
-                      {assignment.templateId && (
-                        <span className="text-xs text-muted-foreground">({assignment.templateName})</span>
+                      {assignment.templateId ? (
+                        <span className="text-xs text-green-600 font-medium">📋 {assignment.templateName}</span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">No template</span>
                       )}
                     </div>
                   </th>
@@ -207,15 +217,20 @@ export function TemplateAssignmentView({ onCreateTemplate }: TemplateAssignmentV
                           <span className="text-sm">{activity.activityName}</span>
                         </div>
                       </td>
-                      {assignments.map(assignment => (
-                        <td key={assignment.packageId} className="text-center p-3">
-                          {assignment.templateId && activity.assignmentStatus[assignment.packageId] ? (
-                            <CheckCircle className="h-5 w-5 text-green-600 mx-auto" />
-                          ) : (
-                            <div className="w-5 h-5 border border-muted-foreground/30 rounded-full mx-auto"></div>
-                          )}
-                        </td>
-                      ))}
+                      {assignments.map(assignment => {
+                        const activityInPackage = assignment.activities.find(a => a.id === activity.activityId);
+                        const isIncluded = activityInPackage?.included || false;
+                        
+                        return (
+                           <td key={assignment.packageId} className="text-center p-3">
+                             {assignment.templateId && isIncluded ? (
+                               <CheckCircle className="h-5 w-5 text-green-600 mx-auto" />
+                             ) : (
+                               <div className="w-5 h-5 border border-muted-foreground/30 rounded-full mx-auto"></div>
+                             )}
+                           </td>
+                        );
+                      })}
                     </tr>
                   );
                 })

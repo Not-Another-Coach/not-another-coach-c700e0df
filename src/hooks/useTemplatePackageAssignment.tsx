@@ -73,16 +73,12 @@ export function useTemplatePackageAssignment() {
         templates.find(t => t.id === linkedTemplate.template_id) : 
         undefined;
 
-      console.log(`Package: ${pkg.name}, LinkedTemplate:`, linkedTemplate, 'Template:', template);
-
       // Get assigned activity IDs for this template
       const assignedActivityIds = template ? 
         activityAssignments
           .filter(aa => aa.template_id === template.id)
           .map(aa => aa.activity_id) : 
         [];
-
-      console.log(`Template ${template?.step_name} has activities:`, assignedActivityIds);
 
       // Map all activities with inclusion status based on actual template-activity assignments
       const templateActivities = activities.map(activity => ({
