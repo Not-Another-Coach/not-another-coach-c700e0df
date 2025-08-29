@@ -89,105 +89,140 @@ export function TemplateAssignmentView({ onCreateTemplate }: TemplateAssignmentV
       );
     }
 
+    // Get all unique activities across all categories
+    const allActivities: Array<{
+      category: string;
+      activityId: string;
+      activityName: string;
+      assignmentStatus: { [packageId: string]: boolean };
+    }> = [];
+
+    categories.forEach(category => {
+      const categoryActivities = assignments[0]?.activities.filter(a => a.category === category) || [];
+      
+      categoryActivities.forEach(activity => {
+        const assignmentStatus: { [packageId: string]: boolean } = {};
+        
+        assignments.forEach(assignment => {
+          // For now, assume all activities are included when template is assigned
+          // TODO: Implement proper activity inclusion logic
+          assignmentStatus[assignment.packageId] = !!assignment.templateId;
+        });
+
+        allActivities.push({
+          category,
+          activityId: activity.id,
+          activityName: activity.name,
+          assignmentStatus
+        });
+      });
+    });
+
     return (
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="border-b-2 border-border">
-              <th className="text-left p-3 font-semibold bg-muted/50 min-w-32">Package</th>
-              <th className="text-left p-3 font-semibold bg-muted/50 min-w-48">Template</th>
-              {categories.map(category => (
-                <th key={category} className="text-left p-3 font-semibold bg-primary/10 min-w-48">
-                  {category}
-                </th>
-              ))}
-              <th className="text-center p-3 font-semibold bg-muted/50 min-w-24">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {assignments.map((assignment, index) => (
-              <tr key={assignment.packageId} className="border-b border-border hover:bg-muted/20">
-                <td className="p-3 font-medium">
-                  <div className="flex flex-col">
-                    <span>{assignment.packageName}</span>
-                    <span className="text-xs text-muted-foreground">ID: {assignment.packageId}</span>
-                  </div>
-                </td>
-                <td className="p-3">
-                  <Select
-                    value={assignment.templateId || 'none'}
-                    onValueChange={(value) => handleTemplateChange(assignment.packageId, value)}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select template..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">
-                        <span className="text-muted-foreground">No template assigned</span>
-                      </SelectItem>
-                      {templates.filter(t => t.status === 'published').map(template => (
-                        <SelectItem key={template.id} value={template.id}>
-                          <div className="flex items-center gap-2">
-                            <span>{template.step_name}</span>
-                            <Badge variant={template.status === 'published' ? 'default' : 'secondary'} className="text-xs">
-                              {template.status}
-                            </Badge>
-                          </div>
+      <div className="space-y-4">
+        {/* Template Assignment Row */}
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="border-b-2 border-border">
+                <th className="text-left p-3 font-semibold bg-muted/50 min-w-48">Package</th>
+                <th className="text-left p-3 font-semibold bg-muted/50 min-w-64">Assigned Template</th>
+              </tr>
+            </thead>
+            <tbody>
+              {assignments.map((assignment) => (
+                <tr key={assignment.packageId} className="border-b border-border hover:bg-muted/20">
+                  <td className="p-3 font-medium">
+                    {assignment.packageName}
+                  </td>
+                  <td className="p-3">
+                    <Select
+                      value={assignment.templateId || 'none'}
+                      onValueChange={(value) => handleTemplateChange(assignment.packageId, value)}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select template..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">
+                          <span className="text-muted-foreground">No template assigned</span>
                         </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </td>
-                {categories.map(category => {
-                  const categoryActivities = assignment.activities.filter(a => a.category === category);
-                  const includedCount = categoryActivities.filter(a => a.included).length;
-                  const totalCount = categoryActivities.length;
+                        {templates.filter(t => t.status === 'published').map(template => (
+                          <SelectItem key={template.id} value={template.id}>
+                            <div className="flex items-center gap-2">
+                              <span>{template.step_name}</span>
+                              <Badge variant="default" className="text-xs">
+                                {template.status}
+                              </Badge>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Activities Matrix */}
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="border-b-2 border-border">
+                <th className="text-left p-3 font-semibold bg-muted/50">Category</th>
+                <th className="text-left p-3 font-semibold bg-muted/50">Activity</th>
+                {assignments.map(assignment => (
+                  <th key={assignment.packageId} className="text-center p-3 font-semibold bg-primary/10 min-w-24">
+                    <div className="flex flex-col items-center gap-1">
+                      <span className="text-xs font-medium">{assignment.packageName}</span>
+                      {assignment.templateId && (
+                        <span className="text-xs text-muted-foreground">({assignment.templateName})</span>
+                      )}
+                    </div>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {allActivities.length === 0 ? (
+                <tr>
+                  <td colSpan={2 + assignments.length} className="text-center py-8 text-muted-foreground">
+                    No activities found. Create activities in the Activities tab.
+                  </td>
+                </tr>
+              ) : (
+                allActivities.map((activity, index) => {
+                  const isFirstInCategory = index === 0 || allActivities[index - 1].category !== activity.category;
                   
                   return (
-                    <td key={category} className="p-3 text-left">
-                      <div className="space-y-1">
-                        {assignment.templateId ? (
-                          categoryActivities.length > 0 ? (
-                            categoryActivities.slice(0, 3).map((activity, idx) => (
-                              <div key={idx} className="flex items-start gap-2 text-sm">
-                                <div className="mt-1.5">
-                                  {activity.included ? (
-                                    <CheckCircle className="h-3 w-3 text-green-600" />
-                                  ) : (
-                                    <div className="w-3 h-3 border border-muted-foreground/30 rounded-full"></div>
-                                  )}
-                                </div>
-                                <span className={`text-xs leading-relaxed ${activity.included ? 'text-foreground' : 'text-muted-foreground'}`}>
-                                  {activity.name}
-                                </span>
-                              </div>
-                            ))
+                    <tr key={activity.activityId} className="border-b border-border hover:bg-muted/20">
+                      <td className="p-3 font-medium text-primary">
+                        {isFirstInCategory ? activity.category : ''}
+                      </td>
+                      <td className="p-3">
+                        <div className="flex items-start gap-2">
+                          <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+                          <span className="text-sm">{activity.activityName}</span>
+                        </div>
+                      </td>
+                      {assignments.map(assignment => (
+                        <td key={assignment.packageId} className="text-center p-3">
+                          {assignment.templateId && activity.assignmentStatus[assignment.packageId] ? (
+                            <CheckCircle className="h-5 w-5 text-green-600 mx-auto" />
                           ) : (
-                            <span className="text-xs text-muted-foreground italic">No activities</span>
-                          )
-                        ) : (
-                          <span className="text-xs text-muted-foreground">-</span>
-                        )}
-                        {categoryActivities.length > 3 && (
-                          <div className="text-xs text-muted-foreground">
-                            +{categoryActivities.length - 3} more ({includedCount}/{totalCount} included)
-                          </div>
-                        )}
-                      </div>
-                    </td>
+                            <div className="w-5 h-5 border border-muted-foreground/30 rounded-full mx-auto"></div>
+                          )}
+                        </td>
+                      ))}
+                    </tr>
                   );
-                })}
-                <td className="text-center p-3">
-                  {assignment.templateId && (
-                    <Button variant="ghost" size="sm">
-                      <Settings className="h-4 w-4" />
-                    </Button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     );
   };
