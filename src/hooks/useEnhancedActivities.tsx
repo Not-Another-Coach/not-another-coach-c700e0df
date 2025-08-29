@@ -64,10 +64,11 @@ export const useEnhancedActivities = () => {
     
     setLoading(true);
     try {
+      // Fetch both trainer's own activities and system activities
       const { data, error } = await supabase
         .from('trainer_onboarding_activities')
         .select('*')
-        .eq('trainer_id', user.id)
+        .or(`trainer_id.eq.${user.id},is_system.eq.true`)
         .order('category', { ascending: true })
         .order('display_order', { ascending: true });
 

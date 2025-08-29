@@ -25,6 +25,7 @@ import { EnhancedActivity } from '@/hooks/useEnhancedActivities';
 import { TemplateBuilder } from '@/components/onboarding/TemplateBuilder';
 import { useTemplateBuilder } from '@/hooks/useTemplateBuilder';
 import { WaysOfWorkingOverview } from '@/components/onboarding/WaysOfWorkingOverview';
+import { useUserRoles } from '@/hooks/useUserRoles';
 
 export function TemplateManagementTabs() {
   const {
@@ -44,6 +45,7 @@ export function TemplateManagementTabs() {
     refresh: refreshEnhanced
   } = useEnhancedActivities();
   const { user } = useAuth();
+  const { isAdmin } = useUserRoles();
   
   // Enhanced template builder functionality
   const {
@@ -229,16 +231,39 @@ export function TemplateManagementTabs() {
   };
 
   const openEditActivity = (a: any) => {
-    setEditActivity({
-      id: a.id,
-      name: a.activity_name,
-      category: a.category,
-      description: a.description ?? '',
-      guidance_html: a.guidance_html ?? '',
-      default_due_days: a.default_due_days ?? null,
-      default_sla_days: a.default_sla_days ?? null,
-    });
-    setShowEditActivityDialog(true);
+    // If it's an enhanced activity or admin editing system activity, use enhanced builder
+    if (a.isEnhanced || (a.is_system && isAdmin)) {
+      const enhancedActivity: EnhancedActivity = {
+        id: a.id,
+        activity_name: a.activity_name,
+        category: a.category,
+        description: a.description || '',
+        activity_type: a.activity_type || 'task',
+        completion_method: a.completion_method || 'client',
+        requires_file_upload: a.requires_file_upload || false,
+        guidance_html: a.guidance_html || '',
+        default_due_days: a.default_due_days || null,
+        default_sla_days: a.default_sla_days || null,
+        appointment_config: a.appointment_config || {},
+        survey_config: a.survey_config || {},
+        content_config: a.content_config || {},
+        upload_config: a.upload_config || {}
+      };
+      setEditingEnhancedActivity(enhancedActivity);
+      setShowEnhancedActivityBuilder(true);
+    } else {
+      // Use legacy dialog for basic activities
+      setEditActivity({
+        id: a.id,
+        name: a.activity_name,
+        category: a.category,
+        description: a.description ?? '',
+        guidance_html: a.guidance_html ?? '',
+        default_due_days: a.default_due_days ?? null,
+        default_sla_days: a.default_sla_days ?? null,
+      });
+      setShowEditActivityDialog(true);
+    }
   };
 
   const handleUpdateActivity = async () => {
@@ -474,20 +499,20 @@ export function TemplateManagementTabs() {
                           {a.is_system ? 'System' : 'Custom'}
                         </Badge>
                         <Badge variant="outline">{a.category}</Badge>
-                        {a.isEnhanced && (
-                          <Badge variant="secondary" className="bg-primary/10 text-primary">
-                            {a.activity_type || 'Enhanced'}
-                          </Badge>
-                        )}
+                         {a.isEnhanced && (
+                           <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200">
+                             {a.activity_type ? a.activity_type.replace('_', ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') : 'Enhanced'}
+                           </Badge>
+                         )}
                       </div>
                     </div>
                     <div className="flex items-center gap-1 ml-4">
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => a.isEnhanced ? openEnhancedActivityEditor(a as EnhancedActivity) : openEditActivity(a)}
-                        disabled={a.is_system}
-                        title={a.is_system ? 'System activities cannot be edited' : 'Edit activity'}
+                        onClick={() => openEditActivity(a)}
+                        disabled={a.is_system && !isAdmin}
+                        title={a.is_system && !isAdmin ? 'System activities can only be edited by administrators' : 'Edit activity'}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
