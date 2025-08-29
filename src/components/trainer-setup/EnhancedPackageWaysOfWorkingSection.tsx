@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2, Plus, Copy, ArrowRight, Activity, Zap, CheckCircle, Eye, EyeOff } from "lucide-react";
+import { Trash2, Plus, Copy, ArrowRight, Activity, Zap, CheckCircle, Eye, EyeOff, Package, Workflow } from "lucide-react";
 import { SectionHeader } from "./SectionHeader";
 import { usePackageWaysOfWorking } from "@/hooks/usePackageWaysOfWorking";
 import { useActivitySynchronization } from "@/hooks/useActivitySynchronization";
@@ -388,6 +388,7 @@ export function EnhancedPackageWaysOfWorkingSection({ formData }: PackageWaysOfW
     return (
       <div className="space-y-6">
         <SectionHeader 
+          icons={[Package, Workflow, Activity]}
           title="Enhanced Package Ways of Working"
           description="Define how you work with clients for each package with smart activity integration"
         />
@@ -412,6 +413,7 @@ export function EnhancedPackageWaysOfWorkingSection({ formData }: PackageWaysOfW
   return (
     <div className="space-y-6">
       <SectionHeader 
+        icons={[Package, Workflow, Activity]}
         title="Enhanced Package Ways of Working"
         description="Define how you work with clients for each package with smart activity integration"
       />
