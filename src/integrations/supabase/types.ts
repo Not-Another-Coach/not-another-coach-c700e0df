@@ -2899,48 +2899,66 @@ export type Database = {
       }
       package_ways_of_working: {
         Row: {
+          client_expectations_activity_ids: Json | null
           client_expectations_items: Json | null
           created_at: string
+          first_week_activity_ids: Json | null
           first_week_items: Json | null
           id: string
+          onboarding_activity_ids: Json | null
           onboarding_items: Json | null
+          ongoing_structure_activity_ids: Json | null
           ongoing_structure_items: Json | null
           package_id: string
           package_name: string
+          tracking_tools_activity_ids: Json | null
           tracking_tools_items: Json | null
           trainer_id: string
           updated_at: string
           visibility: string | null
+          what_i_bring_activity_ids: Json | null
           what_i_bring_items: Json | null
         }
         Insert: {
+          client_expectations_activity_ids?: Json | null
           client_expectations_items?: Json | null
           created_at?: string
+          first_week_activity_ids?: Json | null
           first_week_items?: Json | null
           id?: string
+          onboarding_activity_ids?: Json | null
           onboarding_items?: Json | null
+          ongoing_structure_activity_ids?: Json | null
           ongoing_structure_items?: Json | null
           package_id: string
           package_name: string
+          tracking_tools_activity_ids?: Json | null
           tracking_tools_items?: Json | null
           trainer_id: string
           updated_at?: string
           visibility?: string | null
+          what_i_bring_activity_ids?: Json | null
           what_i_bring_items?: Json | null
         }
         Update: {
+          client_expectations_activity_ids?: Json | null
           client_expectations_items?: Json | null
           created_at?: string
+          first_week_activity_ids?: Json | null
           first_week_items?: Json | null
           id?: string
+          onboarding_activity_ids?: Json | null
           onboarding_items?: Json | null
+          ongoing_structure_activity_ids?: Json | null
           ongoing_structure_items?: Json | null
           package_id?: string
           package_name?: string
+          tracking_tools_activity_ids?: Json | null
           tracking_tools_items?: Json | null
           trainer_id?: string
           updated_at?: string
           visibility?: string | null
+          what_i_bring_activity_ids?: Json | null
           what_i_bring_items?: Json | null
         }
         Relationships: []
@@ -3673,6 +3691,51 @@ export type Database = {
           },
         ]
       }
+      template_activity_usage: {
+        Row: {
+          activity_id: string
+          created_at: string | null
+          id: string
+          last_used_at: string | null
+          template_id: string
+          updated_at: string | null
+          usage_count: number | null
+        }
+        Insert: {
+          activity_id: string
+          created_at?: string | null
+          id?: string
+          last_used_at?: string | null
+          template_id: string
+          updated_at?: string | null
+          usage_count?: number | null
+        }
+        Update: {
+          activity_id?: string
+          created_at?: string | null
+          id?: string
+          last_used_at?: string | null
+          template_id?: string
+          updated_at?: string | null
+          usage_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_activity_usage_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "trainer_onboarding_activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "template_activity_usage_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "onboarding_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       template_package_links: {
         Row: {
           auto_assign: boolean | null
@@ -3835,6 +3898,9 @@ export type Database = {
           is_active: boolean
           is_system: boolean
           requires_file_upload: boolean
+          source_package_id: string | null
+          source_section: string | null
+          source_type: string | null
           survey_config: Json | null
           trainer_id: string | null
           updated_at: string
@@ -3858,6 +3924,9 @@ export type Database = {
           is_active?: boolean
           is_system?: boolean
           requires_file_upload?: boolean
+          source_package_id?: string | null
+          source_section?: string | null
+          source_type?: string | null
           survey_config?: Json | null
           trainer_id?: string | null
           updated_at?: string
@@ -3881,6 +3950,9 @@ export type Database = {
           is_active?: boolean
           is_system?: boolean
           requires_file_upload?: boolean
+          source_package_id?: string | null
+          source_section?: string | null
+          source_type?: string | null
           survey_config?: Json | null
           trainer_id?: string | null
           updated_at?: string
@@ -4619,6 +4691,16 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      get_activity_recommendations_for_template: {
+        Args: { p_package_ids?: string[]; p_trainer_id: string }
+        Returns: {
+          activity_id: string
+          activity_name: string
+          category: string
+          source_packages: string[]
+          usage_count: number
+        }[]
+      }
       get_client_journey_stage: {
         Args: { p_client_id: string }
         Returns: Database["public"]["Enums"]["engagement_stage"]
@@ -4780,6 +4862,15 @@ export type Database = {
       suspend_user: {
         Args: { p_duration_days?: number; p_reason: string; p_user_id: string }
         Returns: undefined
+      }
+      sync_ways_of_working_to_activities: {
+        Args: {
+          p_items: Json
+          p_package_id: string
+          p_section: string
+          p_trainer_id: string
+        }
+        Returns: Json
       }
       update_admin_notes: {
         Args: { p_notes: string; p_user_id: string }
