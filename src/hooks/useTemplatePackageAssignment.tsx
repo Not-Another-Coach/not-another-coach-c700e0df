@@ -74,6 +74,8 @@ export function useTemplatePackageAssignment() {
         templates.find(t => t.id === linkedTemplate.template_id) : 
         undefined;
 
+      console.log(`Package: ${pkg.name}, LinkedTemplate:`, linkedTemplate, 'Template:', template);
+
       // Map all activities with inclusion status based on package template assignment
       const templateActivities = activities.map(activity => ({
         id: activity.id,
@@ -92,7 +94,7 @@ export function useTemplatePackageAssignment() {
     });
 
     setAssignments(packageAssignments);
-  }, [packages, packageLinks, templates, activities, activityAssignments]);
+  }, [packages, packageLinks, templates, activities]);
 
   useEffect(() => {
     fetchActivityAssignments();
