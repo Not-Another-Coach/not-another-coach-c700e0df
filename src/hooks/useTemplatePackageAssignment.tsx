@@ -18,6 +18,14 @@ interface PackageTemplateAssignment {
   }>;
 }
 
+interface ActivityAssignment {
+  id: string;
+  template_id: string;
+  activity_id: string;
+  section_type: string;
+  assignment_order: number;
+}
+
 export function useTemplatePackageAssignment() {
   const { user } = useAuth();
   const { profile } = useProfile();
@@ -25,11 +33,30 @@ export function useTemplatePackageAssignment() {
   const { activities } = useTrainerActivities();
   
   const [assignments, setAssignments] = useState<PackageTemplateAssignment[]>([]);
+  const [activityAssignments, setActivityAssignments] = useState<ActivityAssignment[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Get packages from profile
   const packages = (profile as any)?.package_options || [];
+
+  // Fetch activity assignments for all templates
+  const fetchActivityAssignments = useCallback(async () => {
+    if (!user || templates.length === 0) return;
+
+    try {
+      const templateIds = templates.map(t => t.id);
+      const { data, error } = await supabase
+        .from('onboarding_activity_assignments')
+        .select('*')
+        .in('template_id', templateIds);
+
+      if (error) throw error;
+      setActivityAssignments(data || []);
+    } catch (err) {
+      console.error('Error fetching activity assignments:', err);
+    }
+  }, [user, templates]);
 
   const buildAssignments = useCallback(() => {
     if (!packages || !Array.isArray(packages)) {
@@ -47,12 +74,19 @@ export function useTemplatePackageAssignment() {
         templates.find(t => t.id === linkedTemplate.template_id) : 
         undefined;
 
-      // Get activities associated with this template
+      // Get assigned activity IDs for this template
+      const assignedActivityIds = template ? 
+        activityAssignments
+          .filter(aa => aa.template_id === template.id)
+          .map(aa => aa.activity_id) : 
+        [];
+
+      // Map all activities with inclusion status
       const templateActivities = activities.map(activity => ({
         id: activity.id,
         name: activity.activity_name,
         category: activity.category,
-        included: false // TODO: Determine if activity is included in template
+        included: assignedActivityIds.includes(activity.id)
       }));
 
       return {
@@ -65,7 +99,11 @@ export function useTemplatePackageAssignment() {
     });
 
     setAssignments(packageAssignments);
-  }, [packages, packageLinks, templates, activities]);
+  }, [packages, packageLinks, templates, activities, activityAssignments]);
+
+  useEffect(() => {
+    fetchActivityAssignments();
+  }, [fetchActivityAssignments]);
 
   useEffect(() => {
     buildAssignments();
@@ -142,6 +180,9 @@ export function useTemplatePackageAssignment() {
     error,
     assignTemplate,
     unassignTemplate,
-    refetch: buildAssignments
+    refetch: () => {
+      fetchActivityAssignments();
+      buildAssignments();
+    }
   };
 }
