@@ -20,6 +20,7 @@ export interface EnhancedActivity {
   completion_method: string;
   instructions?: string;
   guidance_html?: string;
+  is_system?: boolean;
   profiles?: {
     first_name: string;
     last_name: string;
@@ -79,8 +80,8 @@ export const useEnhancedActivities = (isAdminMode = false) => {
         `);
 
       if (isAdminMode) {
-        // Admins see all custom activities (non-system) from all trainers
-        query = query.eq('is_system', false);
+        // Admins see only system activities for management
+        query = query.eq('is_system', true);
       } else {
         // Regular users see their own activities and system activities
         query = query.or(`trainer_id.eq.${user.id},is_system.eq.true`);
@@ -108,7 +109,8 @@ export const useEnhancedActivities = (isAdminMode = false) => {
         .from('trainer_onboarding_activities')
         .insert({
           activity_name: activityData.activity_name || '',
-          trainer_id: user.id,
+          trainer_id: isAdminMode ? null : user.id, // System activities have null trainer_id
+          is_system: isAdminMode, // Mark as system activity if admin creates it
           category: activityData.category || 'Onboarding',
           activity_type: activityData.activity_type || 'task',
           description: activityData.description,
@@ -130,8 +132,8 @@ export const useEnhancedActivities = (isAdminMode = false) => {
       
       setActivities(prev => [...prev, data as EnhancedActivity]);
       toast({
-        title: "Activity Created",
-        description: `${data.activity_name} has been added to your activities.`,
+        title: isAdminMode ? "System Activity Created" : "Activity Created",
+        description: `${data.activity_name} has been ${isAdminMode ? 'added as a system activity' : 'added to your activities'}.`,
       });
       
       return data;
