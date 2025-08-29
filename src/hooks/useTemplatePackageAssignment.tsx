@@ -22,8 +22,7 @@ interface ActivityAssignment {
   id: string;
   template_id: string;
   activity_id: string;
-  section_type: string;
-  assignment_order: number;
+  created_at: string;
 }
 
 export function useTemplatePackageAssignment() {
@@ -47,14 +46,14 @@ export function useTemplatePackageAssignment() {
     try {
       const templateIds = templates.map(t => t.id);
       const { data, error } = await supabase
-        .from('onboarding_activity_assignments')
+        .from('template_activities')
         .select('*')
         .in('template_id', templateIds);
 
       if (error) throw error;
       setActivityAssignments(data || []);
     } catch (err) {
-      console.error('Error fetching activity assignments:', err);
+      console.error('Error fetching template activities:', err);
     }
   }, [user, templates]);
 
@@ -76,12 +75,21 @@ export function useTemplatePackageAssignment() {
 
       console.log(`Package: ${pkg.name}, LinkedTemplate:`, linkedTemplate, 'Template:', template);
 
-      // Map all activities with inclusion status based on package template assignment
+      // Get assigned activity IDs for this template
+      const assignedActivityIds = template ? 
+        activityAssignments
+          .filter(aa => aa.template_id === template.id)
+          .map(aa => aa.activity_id) : 
+        [];
+
+      console.log(`Template ${template?.step_name} has activities:`, assignedActivityIds);
+
+      // Map all activities with inclusion status based on actual template-activity assignments
       const templateActivities = activities.map(activity => ({
         id: activity.id,
         name: activity.activity_name,
         category: activity.category,
-        included: !!template // Show as included if package has any template assigned
+        included: !!template && assignedActivityIds.includes(activity.id)
       }));
 
       return {
@@ -94,7 +102,7 @@ export function useTemplatePackageAssignment() {
     });
 
     setAssignments(packageAssignments);
-  }, [packages, packageLinks, templates, activities]);
+  }, [packages, packageLinks, templates, activities, activityAssignments]);
 
   useEffect(() => {
     fetchActivityAssignments();
