@@ -6,8 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, X, Eye, EyeOff, Info, Package, AlertCircle, Settings, Workflow } from "lucide-react";
+import { Plus, X, Eye, EyeOff, Info, Package, AlertCircle, Settings, Workflow, Activity, Zap } from "lucide-react";
 import { usePackageWaysOfWorking, PackageWaysOfWorking } from "@/hooks/usePackageWaysOfWorking";
+import { useActivitySynchronization } from "@/hooks/useActivitySynchronization";
 import { useToast } from "@/hooks/use-toast";
 import { SectionHeader } from "./SectionHeader";
 import { useTrainerActivities } from "@/hooks/useTrainerActivities";
@@ -26,6 +27,7 @@ interface WaysOfWorkingItem {
 
 export function PackageWaysOfWorkingSection({ formData }: PackageWaysOfWorkingSectionProps) {
   const { packageWorkflows, loading, savePackageWorkflow, getPackageWorkflow } = usePackageWaysOfWorking();
+  const { syncWaysOfWorkingToActivities, loading: syncLoading } = useActivitySynchronization();
   const { toast } = useToast();
   const [activePackageId, setActivePackageId] = useState<string>("");
   const [activeTab, setActiveTab] = useState<string>("onboarding");
@@ -112,12 +114,23 @@ export function PackageWaysOfWorkingSection({ formData }: PackageWaysOfWorkingSe
         [`${section}_items`]: updatedItems
       });
 
+      // Automatically sync the new item to activities
+      try {
+        await syncWaysOfWorkingToActivities(activePackageId, section, [newItem]);
+        
+        toast({
+          title: "Item added & synced",
+          description: `Added to ${sectionTitles[section as keyof typeof sectionTitles]} and synced to activities`,
+        });
+      } catch (syncError) {
+        // Still show success for adding item, but warn about sync failure
+        toast({
+          title: "Item added",
+          description: `Added to ${sectionTitles[section as keyof typeof sectionTitles]} (sync to activities failed)`,
+        });
+      }
+
       setNewItems(prev => ({ ...prev, [section]: "" }));
-      
-      toast({
-        title: "Item added",
-        description: `Added to ${sectionTitles[section as keyof typeof sectionTitles]}`,
-      });
     } catch (error) {
       toast({
         title: "Error",
@@ -168,10 +181,46 @@ export function PackageWaysOfWorkingSection({ formData }: PackageWaysOfWorkingSe
         ...currentWorkflow,
         [`${section}_items`]: updatedItems
       });
+
+      // Automatically sync the suggestion to activities
+      try {
+        await syncWaysOfWorkingToActivities(activePackageId, section, [newItem]);
+      } catch (syncError) {
+        console.error('Failed to sync suggestion to activities:', syncError);
+      }
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to add suggestion. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const syncSectionToActivities = async (section: string) => {
+    if (!activePackageId || !currentWorkflow) return;
+
+    try {
+      const items = currentWorkflow[`${section}_items` as keyof PackageWaysOfWorking] as WaysOfWorkingItem[] || [];
+      
+      if (items.length === 0) {
+        toast({
+          title: "No items to sync",
+          description: `No items found in ${sectionTitles[section as keyof typeof sectionTitles]}`,
+        });
+        return;
+      }
+
+      await syncWaysOfWorkingToActivities(activePackageId, section, items);
+      
+      toast({
+        title: "Section synced",
+        description: `${items.length} items from ${sectionTitles[section as keyof typeof sectionTitles]} synced to activities`,
+      });
+    } catch (error) {
+      toast({
+        title: "Sync failed",
+        description: "Failed to sync section to activities. Please try again.",
         variant: "destructive",
       });
     }
@@ -226,10 +275,29 @@ export function PackageWaysOfWorkingSection({ formData }: PackageWaysOfWorkingSe
     return (
       <Card key={section} className="space-y-4">
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg">{sectionTitles[section as keyof typeof sectionTitles]}</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            {sectionDescriptions[section as keyof typeof sectionDescriptions]}
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-lg flex items-center gap-2">
+                {sectionTitles[section as keyof typeof sectionTitles]}
+                <Activity className="h-4 w-4 text-muted-foreground" />
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                {sectionDescriptions[section as keyof typeof sectionDescriptions]}
+              </p>
+            </div>
+            {items.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => syncSectionToActivities(section)}
+                disabled={syncLoading}
+                className="flex items-center gap-2"
+              >
+                <Zap className="h-4 w-4" />
+                Sync to Activities
+              </Button>
+            )}
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Current items */}
@@ -239,7 +307,13 @@ export function PackageWaysOfWorkingSection({ formData }: PackageWaysOfWorkingSe
               <div className="space-y-2">
                 {items.map((item: WaysOfWorkingItem) => (
                   <div key={item.id} className="flex items-center justify-between p-3 bg-primary/10 border border-primary/20 rounded-lg">
-                    <span className="text-sm font-medium text-primary">{item.text}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-primary">{item.text}</span>
+                      <Badge variant="outline" className="text-xs">
+                        <Activity className="h-3 w-3 mr-1" />
+                        Activity
+                      </Badge>
+                    </div>
                     <Button
                       variant="ghost"
                       size="sm"
