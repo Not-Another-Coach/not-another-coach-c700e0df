@@ -20,6 +20,10 @@ export interface EnhancedActivity {
   completion_method: string;
   instructions?: string;
   guidance_html?: string;
+  profiles?: {
+    first_name: string;
+    last_name: string;
+  };
 }
 
 export interface ActivityCompletion {
@@ -50,7 +54,7 @@ export interface ActivityAppointment {
   trainer_notes?: string;
 }
 
-export const useEnhancedActivities = () => {
+export const useEnhancedActivities = (isAdminMode = false) => {
   const [activities, setActivities] = useState<EnhancedActivity[]>([]);
   const [completions, setCompletions] = useState<ActivityCompletion[]>([]);
   const [appointments, setAppointments] = useState<ActivityAppointment[]>([]);
@@ -64,11 +68,25 @@ export const useEnhancedActivities = () => {
     
     setLoading(true);
     try {
-      // Fetch both trainer's own activities and system activities
-      const { data, error } = await supabase
+      let query = supabase
         .from('trainer_onboarding_activities')
-        .select('*')
-        .or(`trainer_id.eq.${user.id},is_system.eq.true`)
+        .select(`
+          *,
+          profiles!trainer_id (
+            first_name,
+            last_name
+          )
+        `);
+
+      if (isAdminMode) {
+        // Admins see all custom activities (non-system) from all trainers
+        query = query.eq('is_system', false);
+      } else {
+        // Regular users see their own activities and system activities
+        query = query.or(`trainer_id.eq.${user.id},is_system.eq.true`);
+      }
+
+      const { data, error } = await query
         .order('category', { ascending: true })
         .order('display_order', { ascending: true });
 
@@ -233,7 +251,7 @@ export const useEnhancedActivities = () => {
     if (user) {
       fetchActivities();
     }
-  }, [user]);
+  }, [user, isAdminMode]);
 
   return {
     activities,

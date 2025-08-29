@@ -37,15 +37,16 @@ export function TemplateManagementTabs() {
   
   const { packageWorkflows, loading: workflowsLoading } = usePackageWaysOfWorking();
   const { activities, loading: activitiesLoading, error: activitiesError, refresh: refreshActivities, createActivity, updateActivity, updateActivityDetails } = useTrainerActivities();
+  const { user } = useAuth();
+  const { isAdmin } = useUserRoles();
+  
   const { 
     activities: enhancedActivities, 
     loading: enhancedLoading, 
     createActivity: createEnhancedActivity, 
     updateActivity: updateEnhancedActivity,
     refresh: refreshEnhanced
-  } = useEnhancedActivities();
-  const { user } = useAuth();
-  const { isAdmin } = useUserRoles();
+  } = useEnhancedActivities(isAdmin);
   
   // Enhanced template builder functionality
   const {
@@ -104,24 +105,39 @@ export function TemplateManagementTabs() {
     activity_type?: string;
     completion_method?: string;
     requires_file_upload?: boolean;
+    trainerName?: string;
+    trainer_id?: string;
   };
 
   const allActivities: CombinedActivity[] = [
-    ...activities.map(a => ({ 
+    ...(isAdmin ? [] : activities.map(a => ({ 
       ...a, 
       isEnhanced: false,
       activity_type: undefined,
       completion_method: undefined,
-      requires_file_upload: undefined
-    })),
+      requires_file_upload: undefined,
+      trainerName: 'Current User'
+    }))),
     ...enhancedActivities.map(a => ({ 
       ...a, 
       activity_name: a.activity_name || 'Unnamed Activity',
       isEnhanced: true, 
-      is_system: false
+      is_system: false,
+      trainerName: a.profiles ? `${a.profiles.first_name} ${a.profiles.last_name}` : 'Unknown Trainer'
     }))
   ];
   
+  // Group activities by trainer for admin view
+  const groupedActivities = isAdmin ? 
+    allActivities.reduce((groups, activity) => {
+      const trainerName = activity.trainerName || 'Unknown Trainer';
+      if (!groups[trainerName]) {
+        groups[trainerName] = [];
+      }
+      groups[trainerName].push(activity);
+      return groups;
+    }, {} as Record<string, typeof allActivities>) : null;
+
   const categories = Array.from(new Set(allActivities.map((a) => a.category))).sort();
   const filteredActivities = allActivities.filter((a) => {
     if (typeFilter === 'system' && !a.is_system) return false;
@@ -305,19 +321,169 @@ export function TemplateManagementTabs() {
       </TabsList>
 
       <TabsContent value="activities" className="space-y-4">
-        <div className="flex items-center justify-between">
+        {/* Header with Create Button - only show for non-admin */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h3 className="text-lg font-medium">Reusable Activities</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              Create reusable building blocks that can be imported into template sections. 
-              These activities help standardize your onboarding process across different client packages.
+            <h3 className="text-lg font-semibold">
+              {isAdmin ? 'Custom Trainer Activities' : 'Reusable Activities'}
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              {isAdmin 
+                ? 'View and edit custom activities created by trainers'
+                : 'Activities you can assign to clients in different templates'
+              }
             </p>
           </div>
-          <Button onClick={() => setShowEnhancedActivityBuilder(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Create Activity
-          </Button>
+          {!isAdmin && (
+            <Button
+              onClick={() => setShowEnhancedActivityBuilder(true)}
+              className="flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Create Activity
+            </Button>
+          )}
         </div>
+
+        {/* Filtering Controls - only show for non-admin */}
+        {!isAdmin && (
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex gap-2">
+              <Select value={typeFilter} onValueChange={(value: 'all' | 'system' | 'trainer') => setTypeFilter(value)}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="system">System</SelectItem>
+                  <SelectItem value="trainer">Custom</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger className="w-[160px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {categories.map(cat => (
+                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Input
+              placeholder="Search activities..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="flex-1 max-w-sm"
+            />
+          </div>
+        )}
+
+        {/* Activities List - Admin view with grouping */}
+        {isAdmin && groupedActivities ? (
+          <div className="space-y-6">
+            {Object.entries(groupedActivities).map(([trainerName, trainerActivities]) => (
+              <Card key={trainerName} className="p-4">
+                <h4 className="text-lg font-medium mb-4 flex items-center gap-2">
+                  <Users className="w-4 h-4" />
+                  {trainerName}
+                  <Badge variant="outline">{trainerActivities.length} activities</Badge>
+                </h4>
+                <div className="space-y-3">
+                  {trainerActivities.map((a) => (
+                    <Card key={a.id} className="relative">
+                      <CardHeader className="pb-2">
+                        <div className="flex items-start justify-between">
+                          <div className="space-y-1 flex-1">
+                            <CardTitle className="text-base">{a.activity_name}</CardTitle>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="default">Custom</Badge>
+                              <Badge variant="outline">{a.category}</Badge>
+                              <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200">
+                                {a.activity_type ? a.activity_type.replace('_', ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') : 'Enhanced'}
+                              </Badge>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1 ml-4">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => openEditActivity(a)}
+                              title="Edit activity"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        {a.description && (
+                          <p className="text-sm text-muted-foreground mt-2">{a.description}</p>
+                        )}
+                      </CardHeader>
+                    </Card>
+                  ))}
+                </div>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          /* Regular Activities List for non-admin users */
+          <div className="space-y-4">
+            {(activitiesLoading || enhancedLoading) ? (
+              <div className="text-center py-8">Loading activities...</div>
+            ) : activitiesError ? (
+              <div className="text-center py-8 text-red-600">Error loading activities: {activitiesError}</div>
+            ) : filteredActivities.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">No activities found.</div>
+            ) : (
+              filteredActivities.map((a) => (
+                <Card key={a.id} className="relative">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-1 flex-1">
+                        <CardTitle className="text-base">{a.activity_name}</CardTitle>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={a.is_system ? 'secondary' : 'default'}>
+                            {a.is_system ? 'System' : 'Custom'}
+                          </Badge>
+                          <Badge variant="outline">{a.category}</Badge>
+                           {a.isEnhanced && (
+                             <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200">
+                               {a.activity_type ? a.activity_type.replace('_', ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') : 'Enhanced'}
+                             </Badge>
+                           )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 ml-4">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => openEditActivity(a)}
+                          disabled={a.is_system && !isAdmin}
+                          title={a.is_system && !isAdmin ? 'System activities can only be edited by administrators' : 'Edit activity'}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  {a.description && (
+                    <CardContent className="pt-0">
+                      <p className="text-sm text-muted-foreground">{a.description}</p>
+                      {a.isEnhanced && a.activity_type && (
+                        <div className="mt-2 text-xs text-muted-foreground">
+                          <strong>Type:</strong> {a.activity_type} | 
+                          <strong> Completion:</strong> {a.completion_method || 'client'}
+                          {a.requires_file_upload && ' | File upload required'}
+                        </div>
+                      )}
+                    </CardContent>
+                  )}
+                </Card>
+              ))
+            )}
+          </div>
+        )}
 
         <EnhancedActivityBuilder
           isOpen={showEnhancedActivityBuilder}
@@ -446,95 +612,6 @@ export function TemplateManagementTabs() {
           </DialogContent>
         </Dialog>
 
-        {/* Filtering Controls */}
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex gap-2">
-            <Select value={typeFilter} onValueChange={(value: 'all' | 'system' | 'trainer') => setTypeFilter(value)}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="system">System</SelectItem>
-                <SelectItem value="trainer">Custom</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-[160px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {categories.map(cat => (
-                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <Input
-            placeholder="Search activities..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="flex-1 max-w-sm"
-          />
-        </div>
-
-        {/* Activities List */}
-        <div className="space-y-4">
-          {(activitiesLoading || enhancedLoading) ? (
-            <div className="text-center py-8">Loading activities...</div>
-          ) : activitiesError ? (
-            <div className="text-center py-8 text-red-600">Error loading activities: {activitiesError}</div>
-          ) : filteredActivities.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">No activities found.</div>
-          ) : (
-            filteredActivities.map((a) => (
-              <Card key={a.id} className="relative">
-                <CardHeader className="pb-2">
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-1 flex-1">
-                      <CardTitle className="text-base">{a.activity_name}</CardTitle>
-                      <div className="flex items-center gap-2">
-                        <Badge variant={a.is_system ? 'secondary' : 'default'}>
-                          {a.is_system ? 'System' : 'Custom'}
-                        </Badge>
-                        <Badge variant="outline">{a.category}</Badge>
-                         {a.isEnhanced && (
-                           <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200">
-                             {a.activity_type ? a.activity_type.replace('_', ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') : 'Enhanced'}
-                           </Badge>
-                         )}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1 ml-4">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => openEditActivity(a)}
-                        disabled={a.is_system && !isAdmin}
-                        title={a.is_system && !isAdmin ? 'System activities can only be edited by administrators' : 'Edit activity'}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                {a.description && (
-                  <CardContent className="pt-0">
-                    <p className="text-sm text-muted-foreground">{a.description}</p>
-                    {a.isEnhanced && a.activity_type && (
-                      <div className="mt-2 text-xs text-muted-foreground">
-                        <strong>Type:</strong> {a.activity_type} | 
-                        <strong> Completion:</strong> {a.completion_method || 'client'}
-                        {a.requires_file_upload && ' | File upload required'}
-                      </div>
-                    )}
-                  </CardContent>
-                )}
-              </Card>
-            ))
-          )}
-        </div>
       </TabsContent>
 
       <TabsContent value="templates" className="space-y-4">
