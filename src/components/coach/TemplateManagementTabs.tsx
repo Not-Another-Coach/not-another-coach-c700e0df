@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { CheckCircle, Clock, AlertCircle, Plus, Edit, Trash2, Users, User, Settings } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,6 +26,7 @@ import { TemplateBuilder } from '@/components/onboarding/TemplateBuilder';
 import { useTemplateBuilder } from '@/hooks/useTemplateBuilder';
 import { WaysOfWorkingOverview } from '@/components/onboarding/WaysOfWorkingOverview';
 import { useUserRoles } from '@/hooks/useUserRoles';
+import { useProfile } from '@/hooks/useProfile';
 
 export function TemplateManagementTabs() {
   const {
@@ -39,6 +40,7 @@ export function TemplateManagementTabs() {
   const { activities, loading: activitiesLoading, error: activitiesError, refresh: refreshActivities, createActivity, updateActivity, updateActivityDetails } = useTrainerActivities();
   const { user } = useAuth();
   const { isAdmin } = useUserRoles();
+  const { profile, loading: profileLoading } = useProfile();
   
   const { 
     activities: enhancedActivities, 
@@ -64,6 +66,25 @@ export function TemplateManagementTabs() {
     unlinkFromPackage,
     fetchTemplates: refreshTemplates
   } = useTemplateBuilder();
+
+  // For now, return an empty array since packages might be stored differently
+  // TODO: Update this once we know the correct property name for packages in the profile
+  const packages = React.useMemo(() => {
+    // Check different possible property names
+    const packageData = (profile as any)?.package_options || 
+                       (profile as any)?.packages || 
+                       (profile as any)?.trainer_packages || 
+                       [];
+    
+    if (!Array.isArray(packageData)) {
+      return [];
+    }
+    
+    return packageData.map((pkg: any) => ({
+      id: pkg.id || pkg.package_id || `package-${pkg.name}`,
+      name: pkg.name || pkg.package_name || 'Unnamed Package'
+    }));
+  }, [profile]);
   const [newTemplate, setNewTemplate] = useState<Partial<OnboardingTemplate>>({
     step_name: '',
     step_type: 'mandatory',
@@ -184,7 +205,7 @@ export function TemplateManagementTabs() {
     setShowEnhancedActivityBuilder(true);
   };
 
-  if (loading || workflowsLoading || enhancedLoading) {
+  if (loading || workflowsLoading || enhancedLoading || profileLoading) {
     return (
       <div className="animate-pulse space-y-4">
         <div className="h-8 bg-muted rounded w-1/3"></div>
@@ -612,10 +633,18 @@ export function TemplateManagementTabs() {
       <TabsContent value="templates" className="space-y-4">
         <TemplateBuilder 
           templates={builderTemplates}
+          packages={packages}
+          packageLinks={packageLinks}
           onCreateTemplate={builderCreateTemplate}
           onUpdateTemplate={builderUpdateTemplate}
           onDuplicateTemplate={duplicateTemplate}
+          onDeleteTemplate={deleteTemplate}
           onReorderTemplates={reorderTemplates}
+          onPublishTemplate={publishTemplate}
+          onArchiveTemplate={archiveTemplate}
+          onLinkToPackage={linkToPackage}
+          onUnlinkFromPackage={unlinkFromPackage}
+          loading={builderLoading}
         />
       </TabsContent>
 
