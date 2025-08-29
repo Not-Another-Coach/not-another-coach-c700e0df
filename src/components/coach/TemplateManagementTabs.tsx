@@ -288,35 +288,43 @@ export function TemplateManagementTabs() {
               These activities help standardize your onboarding process across different client packages.
             </p>
           </div>
-          <div className="flex gap-2">
-            <Dialog open={showCreateActivityDialog} onOpenChange={setShowCreateActivityDialog}>
-              <DialogTrigger asChild>
-                <Button variant="outline">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Basic Activity
-                </Button>
-              </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create Activity</DialogTitle>
-              </DialogHeader>
+          <Button onClick={() => setShowEnhancedActivityBuilder(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Create Activity
+          </Button>
+        </div>
+
+        <EnhancedActivityBuilder
+          isOpen={showEnhancedActivityBuilder}
+          onClose={() => {
+            setShowEnhancedActivityBuilder(false);
+            setEditingEnhancedActivity(null);
+          }}
+          onSave={editingEnhancedActivity ? handleUpdateEnhancedActivity : handleCreateEnhancedActivity}
+          activity={editingEnhancedActivity || undefined}
+          isEditing={!!editingEnhancedActivity}
+        />
+        
+        <Dialog open={showEditActivityDialog} onOpenChange={(open) => { setShowEditActivityDialog(open); if (!open) setEditActivity(null); }}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Activity</DialogTitle>
+            </DialogHeader>
+            {editActivity && (
               <div className="space-y-4">
-                <div className="text-sm text-muted-foreground mb-4">
-                  Create a basic text-based activity. For interactive features like appointments, surveys, or file uploads, use Enhanced Activities.
-                </div>
                 <div>
                   <Label>Name</Label>
                   <Input
-                    value={newActivity.name}
-                    onChange={(e) => setNewActivity({ ...newActivity, name: e.target.value })}
-                    placeholder="e.g., Kickoff Questionnaire"
+                    value={editActivity.name}
+                    onChange={(e) => setEditActivity({ ...editActivity, name: e.target.value })}
+                    placeholder="Activity name"
                   />
                 </div>
                 <div>
                   <Label>Category</Label>
                   <Select
-                    value={newActivity.category}
-                    onValueChange={(value) => setNewActivity({ ...newActivity, category: value })}
+                    value={editActivity.category}
+                    onValueChange={(value) => setEditActivity({ ...editActivity, category: value })}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -335,151 +343,83 @@ export function TemplateManagementTabs() {
                 <div>
                   <Label>Description</Label>
                   <Textarea
-                    value={newActivity.description}
-                    onChange={(e) => setNewActivity({ ...newActivity, description: e.target.value })}
+                    value={editActivity.description ?? ''}
+                    onChange={(e) => setEditActivity({ ...editActivity, description: e.target.value })}
                     placeholder="Optional: add helpful context for this activity"
                   />
                 </div>
-                <div className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={() => setShowCreateActivityDialog(false)}>Cancel</Button>
-                  <Button onClick={handleCreateActivity}>Create</Button>
-                </div>
-              </div>
-            </DialogContent>
-            </Dialog>
-            
-            <Button onClick={() => setShowEnhancedActivityBuilder(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Enhanced Activity
-            </Button>
-          </div>
-
-          <EnhancedActivityBuilder
-            isOpen={showEnhancedActivityBuilder}
-            onClose={() => {
-              setShowEnhancedActivityBuilder(false);
-              setEditingEnhancedActivity(null);
-            }}
-            onSave={editingEnhancedActivity ? handleUpdateEnhancedActivity : handleCreateEnhancedActivity}
-            activity={editingEnhancedActivity || undefined}
-            isEditing={!!editingEnhancedActivity}
-          />
-          <Dialog open={showEditActivityDialog} onOpenChange={(open) => { setShowEditActivityDialog(open); if (!open) setEditActivity(null); }}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Edit Activity</DialogTitle>
-              </DialogHeader>
-              {editActivity && (
-                <div className="space-y-4">
-                  <div>
-                    <Label>Name</Label>
-                    <Input
-                      value={editActivity.name}
-                      onChange={(e) => setEditActivity({ ...editActivity, name: e.target.value })}
-                      placeholder="Activity name"
-                    />
-                  </div>
-                  <div>
-                    <Label>Category</Label>
-                    <Select
-                      value={editActivity.category}
-                      onValueChange={(value) => setEditActivity({ ...editActivity, category: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Onboarding">Onboarding</SelectItem>
-                        <SelectItem value="First Week">First Week</SelectItem>
-                        <SelectItem value="Ongoing Structure">Ongoing Structure</SelectItem>
-                        <SelectItem value="Tracking Tools">Tracking Tools</SelectItem>
-                        <SelectItem value="Client Expectations">Client Expectations</SelectItem>
-                        <SelectItem value="What I Bring">What I Bring</SelectItem>
-                        <SelectItem value="general">General</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label>Description</Label>
-                    <Textarea
-                      value={editActivity.description ?? ''}
-                      onChange={(e) => setEditActivity({ ...editActivity, description: e.target.value })}
-                      placeholder="Optional: add helpful context for this activity"
-                    />
-                  </div>
-                  <div>
-                    <Label>Guidance (rich text)</Label>
-                    <ReactQuill
-                      ref={quillRef}
-                      theme="snow"
-                      value={editActivity.guidance_html ?? ''}
-                      onChange={(value) => setEditActivity({ ...editActivity, guidance_html: value })}
-                      modules={{
-                        toolbar: {
-                          container: [
-                            ['bold', 'italic', 'underline', 'strike'],
-                            [{ 'header': [1, 2, 3, false] }],
-                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                            ['link', 'image'],
-                            ['clean']
-                          ],
-                          handlers: {
-                            image: async () => {
-                              const input = document.createElement('input');
-                              input.type = 'file';
-                              input.accept = 'image/*';
-                              input.onchange = async () => {
-                                const file = (input.files && input.files[0]) || null;
-                                if (!file || !user?.id) return;
-                                const path = `${user.id}/guidance/${crypto.randomUUID()}-${file.name}`;
-                                const { error } = await supabase.storage.from('onboarding-public').upload(path, file, { upsert: false });
-                                if (error) { toast.error('Image upload failed'); return; }
-                                const { data } = supabase.storage.from('onboarding-public').getPublicUrl(path);
-                                const quill = quillRef.current?.getEditor();
-                                const range = quill?.getSelection(true);
-                                if (quill && range) {
-                                  quill.insertEmbed(range.index, 'image', data.publicUrl);
-                                  quill.setSelection({ index: range.index + 1, length: 0 });
-                                }
-                              };
-                              input.click();
-                            }
+                <div>
+                  <Label>Guidance (rich text)</Label>
+                  <ReactQuill
+                    ref={quillRef}
+                    theme="snow"
+                    value={editActivity.guidance_html ?? ''}
+                    onChange={(value) => setEditActivity({ ...editActivity, guidance_html: value })}
+                    modules={{
+                      toolbar: {
+                        container: [
+                          ['bold', 'italic', 'underline', 'strike'],
+                          [{ 'header': [1, 2, 3, false] }],
+                          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                          ['link', 'image'],
+                          ['clean']
+                        ],
+                        handlers: {
+                          image: async () => {
+                            const input = document.createElement('input');
+                            input.type = 'file';
+                            input.accept = 'image/*';
+                            input.onchange = async () => {
+                              const file = (input.files && input.files[0]) || null;
+                              if (!file || !user?.id) return;
+                              const path = `${user.id}/guidance/${crypto.randomUUID()}-${file.name}`;
+                              const { error } = await supabase.storage.from('onboarding-public').upload(path, file, { upsert: false });
+                              if (error) { toast.error('Image upload failed'); return; }
+                              const { data } = supabase.storage.from('onboarding-public').getPublicUrl(path);
+                              const quill = quillRef.current?.getEditor();
+                              const range = quill?.getSelection(true);
+                              if (quill && range) {
+                                quill.insertEmbed(range.index, 'image', data.publicUrl);
+                                quill.setSelection({ index: range.index + 1, length: 0 });
+                              }
+                            };
+                            input.click();
                           }
                         }
-                      }}
+                      }
+                    }}
+                  />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label>Default due in (days)</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={editActivity.default_due_days ?? ''}
+                      onChange={(e) => setEditActivity({ ...editActivity, default_due_days: e.target.value ? parseInt(e.target.value, 10) : null })}
+                      placeholder="e.g., 7"
                     />
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <Label>Default due in (days)</Label>
-                      <Input
-                        type="number"
-                        min={0}
-                        value={editActivity.default_due_days ?? ''}
-                        onChange={(e) => setEditActivity({ ...editActivity, default_due_days: e.target.value ? parseInt(e.target.value, 10) : null })}
-                        placeholder="e.g., 7"
-                      />
-                    </div>
-                    <div>
-                      <Label>Default SLA (days)</Label>
-                      <Input
-                        type="number"
-                        min={0}
-                        value={editActivity.default_sla_days ?? ''}
-                        onChange={(e) => setEditActivity({ ...editActivity, default_sla_days: e.target.value ? parseInt(e.target.value, 10) : null })}
-                        placeholder="e.g., 14"
-                      />
-                    </div>
-                  </div>
-                  <div className="flex justify-end gap-2">
-                    <Button variant="outline" onClick={() => setShowEditActivityDialog(false)}>Cancel</Button>
-                    <Button onClick={handleUpdateActivity}>Update</Button>
+                  <div>
+                    <Label>Default SLA (days)</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={editActivity.default_sla_days ?? ''}
+                      onChange={(e) => setEditActivity({ ...editActivity, default_sla_days: e.target.value ? parseInt(e.target.value, 10) : null })}
+                      placeholder="e.g., 14"
+                    />
                   </div>
                 </div>
-              )}
-            </DialogContent>
-          </Dialog>
-        </div>
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => setShowEditActivityDialog(false)}>Cancel</Button>
+                  <Button onClick={handleUpdateActivity}>Update</Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
 
         {/* Filtering Controls */}
         <div className="flex flex-col sm:flex-row gap-4">
