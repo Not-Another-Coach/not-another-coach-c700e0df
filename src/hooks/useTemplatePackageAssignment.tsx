@@ -57,8 +57,11 @@ export function useTemplatePackageAssignment() {
     }
   }, [user, templates]);
 
+  // For now, since template-activity relationships aren't in template_activities table,
+  // let's show ticks based on whether package has template assigned
+  // This matches the current system where activities are embedded in template instructions
   const buildAssignments = useCallback(() => {
-    if (!packages || !Array.isArray(packages)) {
+    if (!packages || !Array.isArray(packages) || packages.length === 0) {
       setAssignments([]);
       return;
     }
@@ -73,19 +76,13 @@ export function useTemplatePackageAssignment() {
         templates.find(t => t.id === linkedTemplate.template_id) : 
         undefined;
 
-      // Get assigned activity IDs for this template
-      const assignedActivityIds = template ? 
-        activityAssignments
-          .filter(aa => aa.template_id === template.id)
-          .map(aa => aa.activity_id) : 
-        [];
-
-      // Map all activities with inclusion status based on actual template-activity assignments
+      // For now, show all activities as included if template is assigned
+      // since activities are embedded in template instructions, not stored separately
       const templateActivities = activities.map(activity => ({
         id: activity.id,
         name: activity.activity_name,
         category: activity.category,
-        included: !!template && assignedActivityIds.includes(activity.id)
+        included: !!template // Show all activities as included if template assigned
       }));
 
       return {
@@ -98,11 +95,12 @@ export function useTemplatePackageAssignment() {
     });
 
     setAssignments(packageAssignments);
-  }, [packages, packageLinks, templates, activities, activityAssignments]);
-
-  useEffect(() => {
-    fetchActivityAssignments();
-  }, [fetchActivityAssignments]);
+  }, [
+    JSON.stringify(packages), 
+    JSON.stringify(packageLinks), 
+    JSON.stringify(templates), 
+    JSON.stringify(activities)
+  ]);
 
   useEffect(() => {
     buildAssignments();
