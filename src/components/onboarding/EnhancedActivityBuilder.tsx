@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -44,27 +44,32 @@ export const EnhancedActivityBuilder = ({
   activity, 
   isEditing = false 
 }: EnhancedActivityBuilderProps) => {
-  const [formData, setFormData] = useState<Partial<EnhancedActivity>>({
-    activity_name: activity?.activity_name || '',
-    description: activity?.description || '',
-    category: activity?.category || 'Onboarding',
-    activity_type: activity?.activity_type || 'task',
-    completion_method: activity?.completion_method || 'client',
-    requires_file_upload: activity?.requires_file_upload || false,
-    default_due_days: activity?.default_due_days || 7,
-    default_sla_days: activity?.default_sla_days || 3,
-    instructions: activity?.instructions || '',
-    guidance_html: activity?.guidance_html || '',
-    appointment_config: activity?.appointment_config || {},
-    survey_config: activity?.survey_config || {},
-    content_config: activity?.content_config || {},
-    upload_config: activity?.upload_config || {
-      uploader: 'client',
-      file_types: ['jpg', 'png', 'pdf'],
-      max_files: 5,
-      max_file_size_mb: 10
-    }
-  });
+  const [formData, setFormData] = useState<Partial<EnhancedActivity>>({});
+
+  // Update form data whenever activity prop changes
+  useEffect(() => {
+    setFormData({
+      activity_name: activity?.activity_name || '',
+      description: activity?.description || '',
+      category: activity?.category || 'Onboarding',
+      activity_type: activity?.activity_type || 'task',
+      completion_method: activity?.completion_method || 'client',
+      requires_file_upload: activity?.requires_file_upload || false,
+      default_due_days: activity?.default_due_days || 7,
+      default_sla_days: activity?.default_sla_days || 3,
+      instructions: activity?.instructions || '',
+      guidance_html: activity?.guidance_html || '',
+      appointment_config: activity?.appointment_config || {},
+      survey_config: activity?.survey_config || {},
+      content_config: activity?.content_config || {},
+      upload_config: activity?.upload_config || {
+        uploader: 'client',
+        file_types: ['jpg', 'png', 'pdf'],
+        max_files: 5,
+        max_file_size_mb: 10
+      }
+    });
+  }, [activity, isOpen]);
 
   const handleSave = () => {
     if (!formData.activity_name?.trim()) return;
