@@ -112,6 +112,7 @@ export function TemplateManagementTabs() {
   const allActivities: CombinedActivity[] = [
     ...(isAdmin ? [] : activities.map(a => ({ 
       ...a, 
+      id: `legacy-${a.id}`, // Ensure unique IDs to prevent React key conflicts
       isEnhanced: false,
       activity_type: undefined,
       completion_method: undefined,
@@ -120,6 +121,7 @@ export function TemplateManagementTabs() {
     }))),
     ...enhancedActivities.map(a => ({ 
       ...a, 
+      id: `enhanced-${a.id}`, // Ensure unique IDs to prevent React key conflicts
       activity_name: a.activity_name || 'Unnamed Activity',
       isEnhanced: true, 
       is_system: a.is_system || false,
@@ -247,10 +249,13 @@ export function TemplateManagementTabs() {
   };
 
   const openEditActivity = (a: any) => {
+    // Extract the original ID (remove prefix)
+    const originalId = a.id.replace(/^(legacy-|enhanced-)/, '');
+    
     // Always use enhanced builder for enhanced activities or for admin users editing system activities
     if (a.isEnhanced || (a.is_system && isAdmin)) {
       const enhancedActivity: EnhancedActivity = {
-        id: a.id,
+        id: originalId,
         activity_name: a.activity_name,
         category: a.category,
         description: a.description || '',
@@ -272,7 +277,7 @@ export function TemplateManagementTabs() {
       // For non-admin users editing their own custom activities, also use enhanced builder if it's enhanced
       if (!a.is_system) {
         const enhancedActivity: EnhancedActivity = {
-          id: a.id,
+          id: originalId,
           activity_name: a.activity_name,
           category: a.category,
           description: a.description || '',
@@ -293,7 +298,7 @@ export function TemplateManagementTabs() {
       } else {
         // Fallback to legacy dialog (should rarely happen now)
         setEditActivity({
-          id: a.id,
+          id: originalId,
           name: a.activity_name,
           category: a.category,
           description: a.description ?? '',
@@ -373,7 +378,7 @@ export function TemplateManagementTabs() {
             <div className="flex gap-2">
               <Select value={typeFilter} onValueChange={(value: 'all' | 'system' | 'trainer') => setTypeFilter(value)}>
                 <SelectTrigger className="w-[140px]">
-                  <SelectValue />
+                  <SelectValue placeholder="All Types" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Types</SelectItem>
@@ -383,7 +388,7 @@ export function TemplateManagementTabs() {
               </Select>
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                 <SelectTrigger className="w-[160px]">
-                  <SelectValue />
+                  <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Categories</SelectItem>
