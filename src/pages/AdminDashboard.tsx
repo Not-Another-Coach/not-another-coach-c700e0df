@@ -11,7 +11,8 @@ import { KnowledgeBaseAdmin } from '@/components/knowledge-base/KnowledgeBaseAdm
 import { VisibilitySettingsSection } from '@/components/trainer-setup/VisibilitySettingsSection';
 import { UserValidityChecker } from '@/components/admin/UserValidityChecker';
 import { VerificationManagement } from '@/components/admin/VerificationManagement';
-import { Settings, Users, Shield, BarChart3, ArrowLeft, Home, Eye, Upload, FileText, ExternalLink, CheckCircle, Trash2 } from 'lucide-react';
+import { TemplateManagementTabs } from '@/components/coach/TemplateManagementTabs';
+import { Settings, Users, Shield, BarChart3, ArrowLeft, Home, Eye, Upload, FileText, ExternalLink, CheckCircle, Trash2, Layout } from 'lucide-react';
 import { useUserRoles } from '@/hooks/useUserRoles';
 
 export const AdminDashboard = () => {
@@ -54,6 +55,13 @@ export const AdminDashboard = () => {
       description: 'Manage articles and documentation',
       icon: FileText,
       color: 'from-indigo-500/10 to-indigo-600/10 border-indigo-200'
+    },
+    {
+      id: 'template-management',
+      title: 'Template Management',
+      description: 'Manage system activities and onboarding templates',
+      icon: Layout,
+      color: 'from-orange-500/10 to-orange-600/10 border-orange-200'
     },
     {
       id: 'visibility',
@@ -104,6 +112,20 @@ export const AdminDashboard = () => {
         return <FeedbackQuestionBuilder />;
       case 'knowledge-base':
         return <KnowledgeBaseAdmin />;
+      case 'template-management':
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>Template Management</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Manage system activities and onboarding templates for all trainers
+              </p>
+            </CardHeader>
+            <CardContent>
+              <TemplateManagementTabs />
+            </CardContent>
+          </Card>
+        );
       case 'visibility':
         return (
           <Card>
