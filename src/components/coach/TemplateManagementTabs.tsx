@@ -372,7 +372,7 @@ export function TemplateManagementTabs() {
           </TabsTrigger>
           <TabsTrigger value="assignment" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
-            Template Assignment
+            Assignment
           </TabsTrigger>
           <TabsTrigger value="activities" className="flex items-center gap-2">
             <User className="h-4 w-4" />

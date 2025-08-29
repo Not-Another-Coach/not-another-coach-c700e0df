@@ -97,7 +97,7 @@ export function TemplateAssignmentView({ onCreateTemplate }: TemplateAssignmentV
               <th className="text-left p-3 font-semibold bg-muted/50 min-w-32">Package</th>
               <th className="text-left p-3 font-semibold bg-muted/50 min-w-48">Template</th>
               {categories.map(category => (
-                <th key={category} className="text-center p-3 font-semibold bg-primary/10 min-w-28">
+                <th key={category} className="text-left p-3 font-semibold bg-primary/10 min-w-48">
                   {category}
                 </th>
               ))}
@@ -125,7 +125,7 @@ export function TemplateAssignmentView({ onCreateTemplate }: TemplateAssignmentV
                       <SelectItem value="none">
                         <span className="text-muted-foreground">No template assigned</span>
                       </SelectItem>
-                      {templates.filter(t => t.status !== 'archived').map(template => (
+                      {templates.filter(t => t.status === 'published').map(template => (
                         <SelectItem key={template.id} value={template.id}>
                           <div className="flex items-center gap-2">
                             <span>{template.step_name}</span>
@@ -144,28 +144,34 @@ export function TemplateAssignmentView({ onCreateTemplate }: TemplateAssignmentV
                   const totalCount = categoryActivities.length;
                   
                   return (
-                    <td key={category} className="text-center p-3">
-                      <div className="flex flex-col items-center gap-1">
+                    <td key={category} className="p-3 text-left">
+                      <div className="space-y-1">
                         {assignment.templateId ? (
-                          <>
-                            <div className="flex items-center gap-1">
-                              {Array.from({ length: Math.min(totalCount, 5) }).map((_, idx) => (
-                                <div key={idx} className="relative">
-                                  {idx < includedCount ? (
-                                    <CheckCircle className="h-4 w-4 text-green-600" />
+                          categoryActivities.length > 0 ? (
+                            categoryActivities.slice(0, 3).map((activity, idx) => (
+                              <div key={idx} className="flex items-start gap-2 text-sm">
+                                <div className="mt-1.5">
+                                  {activity.included ? (
+                                    <CheckCircle className="h-3 w-3 text-green-600" />
                                   ) : (
-                                    <div className="w-4 h-4 border border-muted-foreground/30 rounded-full"></div>
+                                    <div className="w-3 h-3 border border-muted-foreground/30 rounded-full"></div>
                                   )}
                                 </div>
-                              ))}
-                              {totalCount > 5 && <span className="text-xs text-muted-foreground">+{totalCount - 5}</span>}
-                            </div>
-                            <span className="text-xs text-muted-foreground">
-                              {includedCount}/{totalCount}
-                            </span>
-                          </>
+                                <span className={`text-xs leading-relaxed ${activity.included ? 'text-foreground' : 'text-muted-foreground'}`}>
+                                  {activity.name}
+                                </span>
+                              </div>
+                            ))
+                          ) : (
+                            <span className="text-xs text-muted-foreground italic">No activities</span>
+                          )
                         ) : (
                           <span className="text-xs text-muted-foreground">-</span>
+                        )}
+                        {categoryActivities.length > 3 && (
+                          <div className="text-xs text-muted-foreground">
+                            +{categoryActivities.length - 3} more ({includedCount}/{totalCount} included)
+                          </div>
                         )}
                       </div>
                     </td>
