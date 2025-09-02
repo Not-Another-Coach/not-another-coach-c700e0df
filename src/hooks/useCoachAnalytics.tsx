@@ -21,17 +21,15 @@ interface ClientVisibility {
   id: string;
   primary_goals?: string[];
   training_location_preference?: string;
-  preferred_training_frequency?: number;
+  preferred_training_frequency?: string; // Changed from number to string to match database
   preferred_time_slots?: string[];
   client_personality_type?: string[];
   preferred_coaching_style?: string[];
   budget_range_min?: number;
   budget_range_max?: number;
   experience_level?: string;
-  // Hide identity fields until discovery call
-  first_name?: never;
-  last_name?: never;
-  profile_photo_url?: never;
+  discovery_call_booked: boolean;
+  engagement_stage: string;
 }
 
 export function useCoachAnalytics(trainerId?: string) {
@@ -89,7 +87,7 @@ export function useCoachAnalytics(trainerId?: string) {
       // Get limited client info for those who shortlisted (excluding identity info)
       const clientIds = engagementData.map(e => e.client_id);
       const { data: clientData, error: clientError } = await supabase
-        .from('profiles')
+        .from('v_clients')
         .select(`
           id,
           primary_goals,
@@ -102,8 +100,7 @@ export function useCoachAnalytics(trainerId?: string) {
           budget_range_max,
           experience_level
         `)
-        .in('id', clientIds)
-        .eq('user_type', 'client');
+        .in('id', clientIds);
 
       if (clientError) {
         console.error('Error fetching client data:', clientError);

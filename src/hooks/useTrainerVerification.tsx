@@ -27,10 +27,11 @@ interface TrainerProfile {
   first_name: string;
   last_name: string;
   email: string;
-  verification_status: 'pending' | 'verified' | 'rejected';
-  verification_requested_at?: string;
-  verification_documents: any;
-  admin_review_notes?: string;
+  is_verified: boolean;
+  verification_status?: 'pending' | 'verified' | 'rejected'; // Optional for compatibility
+  verification_requested_at?: string; // Optional for compatibility  
+  verification_documents?: any; // Optional for compatibility
+  admin_review_notes?: string; // Optional for compatibility
 }
 
 export function useTrainerVerification() {
@@ -107,18 +108,14 @@ export function useTrainerVerification() {
 
     try {
       const { data, error } = await supabase
-        .from('profiles')
+        .from('v_trainers')
         .select(`
           id,
           first_name,
           last_name,
-          verification_status,
-          verification_requested_at,
-          verification_documents,
-          admin_review_notes
+          is_verified
         `)
-        .eq('user_type', 'trainer')
-        .order('created_at', { ascending: false });
+        .order('id', { ascending: false }); // Use id instead of created_at since created_at doesn't exist in v_trainers
 
       if (error) throw error;
       

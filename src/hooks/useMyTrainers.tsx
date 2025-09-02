@@ -102,7 +102,7 @@ export function useMyTrainers(refreshTrigger?: number) {
       try {
         // Fetch only essential trainer data to reduce memory usage
         const { data: trainerData, error } = await supabase
-          .from('profiles')
+          .from('v_trainers')
           .select(`
             id,
             first_name,
@@ -115,7 +115,6 @@ export function useMyTrainers(refreshTrigger?: number) {
             package_options,
             testimonials
           `)
-          .eq('user_type', 'trainer')
           .in('id', trainerIds);
 
         // Fetch discovery call settings separately for trainers that need it

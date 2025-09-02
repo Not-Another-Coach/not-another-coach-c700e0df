@@ -92,29 +92,18 @@ export function useShortlistedTrainers(refreshTrigger?: number) {
 
     try {
       // Check current journey stage
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('client_journey_stage')
-        .eq('id', user.id)
-        .single();
-
-      // Only update if currently in early stages
-      if (!profile?.client_journey_stage || profile.client_journey_stage === 'preferences_identified') {
-        await supabase
-          .from('profiles')
-          .update({ client_journey_stage: 'exploring_coaches' })
-          .eq('id', user.id);
-
-        // Track the journey step
-        await supabase
-          .from('user_journey_tracking')
-          .upsert({
-            user_id: user.id,
-            stage: 'exploring_coaches',
-            step_name: 'trainer_shortlisted',
-            metadata: { action: 'shortlisted_trainer' }
-          });
-      }
+      // Note: client_journey_stage column doesn't exist, skipping check
+      console.log('Skipping client journey stage check - column does not exist');
+      
+      // Just track the journey step without checking/updating journey stage
+      await supabase
+        .from('user_journey_tracking')
+        .upsert({
+          user_id: user.id,
+          stage: 'exploring_coaches',
+          step_name: 'trainer_shortlisted',
+          metadata: { action: 'shortlisted_trainer' }
+        });
     } catch (error) {
       console.error('Error updating client journey:', error);
     }
@@ -198,10 +187,10 @@ export function useShortlistedTrainers(refreshTrigger?: number) {
       
       // Update client journey to discovery call booked stage
       try {
-        await supabase
-          .from('profiles')
-          .update({ client_journey_stage: 'getting_to_know_your_coach' })
-          .eq('id', user.id);
+      // Note: client_journey_stage column doesn't exist, skipping update
+      console.log('Would update client journey stage but column does not exist');
+      
+      // Track the journey step without updating journey stage
 
         // Track the journey step
         await supabase
