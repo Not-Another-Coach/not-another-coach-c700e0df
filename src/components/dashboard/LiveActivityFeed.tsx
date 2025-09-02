@@ -6,14 +6,14 @@ import { Filter } from 'lucide-react';
 import { useActivityAlerts } from '@/hooks/useActivityAlerts';
 import { useTrainerStreak } from '@/hooks/useTrainerStreak';
 import { useAuth } from '@/hooks/useAuth';
-import { useProfile } from '@/hooks/useProfile';
+import { useUserTypeChecks } from '@/hooks/useUserType';
 import { format } from 'date-fns';
 
 export const LiveActivityFeed = () => {
   const { alerts, loading } = useActivityAlerts();
   const { streakCount, loading: streakLoading } = useTrainerStreak();
   const { user } = useAuth();
-  const { isTrainer } = useProfile();
+  const { isTrainer } = useUserTypeChecks();
 
   if (loading) {
     return (

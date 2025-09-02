@@ -100,16 +100,16 @@ This document provides a comprehensive analysis of all components using the lega
 - [x] `coach-selection/CoachSelectionRequests.tsx` (Low complexity) - ⚠️ TODO (depends on shared utilities)
 - [x] `dashboard/ClientSurveyWidget.tsx` (Medium complexity) - ⚠️ TODO (depends on shared utilities)
 
-### Step 4: Handle Shared Components ✅ MIGRATED
+### Step 4: Handle Shared Components ✅ COMPLETED
 - [x] `RoleSwitcher.tsx` ✅ Updated - Uses `useProfileByType` and `useUserRoles`
 - [x] `MessagingPopup.tsx` ✅ Updated - Uses `useProfileByType` for basic profile info
 - [x] `TrainerCard.tsx` ✅ Updated - Uses `useProfileByType` for user type checking
 - [x] `FloatingMessageButton.tsx` ✅ Updated - Uses `useProfileByType` for basic profile info
-- [ ] `dashboard/UpcomingSessionsWidget.tsx` ⚠️ TODO
-- [ ] `dashboard/LiveActivityFeed.tsx` ⚠️ TODO
-- [ ] `dashboard/DiscoveryCallNotificationsWidget.tsx` ⚠️ TODO
-- [ ] `waitlist/WaitlistJoinButton.tsx` ⚠️ TODO
-- [ ] `dashboard/ProfileViewEdit.tsx` ⚠️ **COMPLEX** - TODO
+- [x] `dashboard/UpcomingSessionsWidget.tsx` ✅ Updated - Uses `useUserTypeChecks()` for user type checking
+- [x] `dashboard/LiveActivityFeed.tsx` ✅ Updated - Uses `useUserTypeChecks()` for `isTrainer()` function
+- [x] `dashboard/DiscoveryCallNotificationsWidget.tsx` ✅ Updated - Uses `useUserTypeChecks()` for user type checking
+- [x] `waitlist/WaitlistJoinButton.tsx` ✅ Updated - Uses `useProfileByType()` for client-specific field access
+- [x] `dashboard/ProfileViewEdit.tsx` ✅ Updated - Uses `useProfileByType()` for profile data and updates
 
 ### Step 5: Update Hook Dependencies ✅ TODO
 - [ ] `useActivityAlerts.tsx`

@@ -4,13 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, User, CheckCircle, X, Bell, Edit } from 'lucide-react';
 import { useDiscoveryCallNotifications } from '@/hooks/useDiscoveryCallNotifications';
-import { useProfile } from '@/hooks/useProfile';
+import { useUserTypeChecks } from '@/hooks/useUserType';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { ClientRescheduleModal } from './ClientRescheduleModal';
 
 export const DiscoveryCallNotificationsWidget = () => {
-  const { profile } = useProfile();
+  const { isTrainer } = useUserTypeChecks();
   const {
     notifications,
     upcomingCalls,
@@ -23,7 +23,7 @@ export const DiscoveryCallNotificationsWidget = () => {
   const [selectedCall, setSelectedCall] = useState<any>(null);
   const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
 
-  const isTrainer = profile?.user_type === 'trainer';
+  const isTrainerUser = isTrainer();
 
   const handleMarkCompleted = async (callId: string) => {
     const success = await markCallAsCompleted(callId);
@@ -100,7 +100,7 @@ export const DiscoveryCallNotificationsWidget = () => {
             <div className="space-y-4">
               {upcomingCalls.map((call) => {
                 const isUpcoming = new Date(call.scheduled_for) > new Date();
-                const otherPerson = isTrainer ? call.client : call.trainer;
+                const otherPerson = isTrainerUser ? call.client : call.trainer;
                 
                 return (
                   <div
@@ -110,9 +110,9 @@ export const DiscoveryCallNotificationsWidget = () => {
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <User className="w-4 h-4" />
-                        <span className="font-medium">
-                          {isTrainer ? 'Call with' : 'Call with'} {otherPerson?.first_name} {otherPerson?.last_name}
-                        </span>
+                         <span className="font-medium">
+                           {isTrainerUser ? 'Call with' : 'Call with'} {otherPerson?.first_name} {otherPerson?.last_name}
+                         </span>
                         {call.reminder_24h_sent && (
                           <Badge variant="outline" className="text-xs">
                             24h reminder sent
@@ -142,8 +142,8 @@ export const DiscoveryCallNotificationsWidget = () => {
                     </div>
                     
                     
-                    <div className="flex items-center gap-2">
-                      {isUpcoming && !isTrainer && (
+                     <div className="flex items-center gap-2">
+                       {isUpcoming && !isTrainerUser && (
                         <Button
                           variant="outline"
                           size="sm"
@@ -155,8 +155,8 @@ export const DiscoveryCallNotificationsWidget = () => {
                           <Edit className="w-4 h-4 mr-1" />
                           Reschedule
                         </Button>
-                      )}
-                      {isUpcoming && isTrainer && (
+                       )}
+                       {isUpcoming && isTrainerUser && (
                         <Button
                           variant="outline"
                           size="sm"
@@ -165,8 +165,8 @@ export const DiscoveryCallNotificationsWidget = () => {
                           <X className="w-4 h-4 mr-1" />
                           Cancel
                         </Button>
-                      )}
-                      {isTrainer && (
+                       )}
+                       {isTrainerUser && (
                         <Button
                           variant="default"
                           size="sm"

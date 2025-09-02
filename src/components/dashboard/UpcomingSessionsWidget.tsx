@@ -4,11 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CalendarIcon, Clock, User } from 'lucide-react';
 import { useDiscoveryCallNotifications } from '@/hooks/useDiscoveryCallNotifications';
-import { useProfile } from '@/hooks/useProfile';
+import { useUserTypeChecks } from '@/hooks/useUserType';
 import { format } from 'date-fns';
 
 export const UpcomingSessionsWidget = () => {
-  const { profile } = useProfile();
+  const { isTrainer } = useUserTypeChecks();
   const { upcomingCalls, loading } = useDiscoveryCallNotifications();
 
   if (loading) {
@@ -30,7 +30,7 @@ export const UpcomingSessionsWidget = () => {
     );
   }
 
-  const isTrainer = profile?.user_type === 'trainer';
+  const isTrainerUser = isTrainer();
 
   return (
     <Card>
@@ -56,7 +56,7 @@ export const UpcomingSessionsWidget = () => {
         ) : (
           <div className="space-y-3">
             {upcomingCalls.slice(0, 3).map((call) => {
-              const otherPerson = isTrainer ? call.client : call.trainer;
+              const otherPerson = isTrainerUser ? call.client : call.trainer;
               return (
                 <div key={call.id} className="flex items-center justify-between p-3 border rounded-lg">
                   <div className="space-y-1">

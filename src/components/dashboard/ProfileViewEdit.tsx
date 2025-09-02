@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useProfile } from "@/hooks/useProfile";
+import { useProfileByType } from "@/hooks/useProfileByType";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -31,7 +31,7 @@ interface ProfileViewEditProps {
 
 export function ProfileViewEdit({ profile }: ProfileViewEditProps) {
   const { user } = useAuth();
-  const { updateProfile } = useProfile();
+  const { updateProfile } = useProfileByType();
   const { toast } = useToast();
   
   const [isEditing, setIsEditing] = useState(false);
