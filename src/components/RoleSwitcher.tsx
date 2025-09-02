@@ -4,14 +4,16 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Users, Dumbbell, ArrowLeftRight, ChevronDown } from 'lucide-react';
-import { useProfile } from '@/hooks/useProfile';
+import { useProfileByType } from '@/hooks/useProfileByType';
+import { useUserRoles } from '@/hooks/useUserRoles';
 import { useRealTrainers } from '@/hooks/useRealTrainers';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 
 export function RoleSwitcher() {
-  const { profile, refetchProfile, isAdmin } = useProfile();
+  const { profile, updateProfile } = useProfileByType();
+  const { isAdmin } = useUserRoles();
   const { trainers, loading: trainersLoading } = useRealTrainers();
   const navigate = useNavigate();
   const [selectedTrainerId, setSelectedTrainerId] = useState<string>('');
@@ -28,12 +30,7 @@ export function RoleSwitcher() {
         .update({ user_type: newRole })
         .eq('id', profile.id);
 
-      if (error) {
-        toast.error('Failed to switch role');
-        return;
-      }
-
-      await refetchProfile();
+      await updateProfile({ user_type: newRole } as any);
       toast.success(`Switched to ${newRole} role`);
       
       // Navigate to appropriate dashboard
@@ -56,20 +53,11 @@ export function RoleSwitcher() {
       sessionStorage.setItem('originalUserType', profile.user_type);
       
       // Switch to the selected trainer temporarily
-      const { error } = await supabase
-        .from('profiles')
-        .update({ user_type: 'trainer' })
-        .eq('id', profile.id);
-
-      if (error) {
-        toast.error('Failed to switch to trainer view');
-        return;
-      }
-
+      await updateProfile({ user_type: 'trainer' } as any);
+      
       // Store which trainer we're viewing
       sessionStorage.setItem('viewingTrainerId', selectedTrainerId);
       
-      await refetchProfile();
       toast.success('Viewing trainer dashboard');
       navigate('/trainer/dashboard');
     } catch (error) {
@@ -82,22 +70,13 @@ export function RoleSwitcher() {
     if (!originalUserType || !profile) return;
 
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ user_type: originalUserType as any })
-        .eq('id', profile.id);
-
-      if (error) {
-        toast.error('Failed to restore original view');
-        return;
-      }
+      await updateProfile({ user_type: originalUserType } as any);
 
       // Clear session storage
       sessionStorage.removeItem('originalUserId');
       sessionStorage.removeItem('originalUserType');
       sessionStorage.removeItem('viewingTrainerId');
       
-      await refetchProfile();
       toast.success('Restored to original view');
       
       if (originalUserType === 'client') {

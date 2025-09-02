@@ -4,13 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MessagingPopup } from '@/components/MessagingPopup';
 import { useSavedTrainers } from '@/hooks/useSavedTrainers';
-import { useProfile } from '@/hooks/useProfile';
+import { useProfileByType } from '@/hooks/useProfileByType';
 
 export const FloatingMessageButton = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [preSelectedTrainerId, setPreSelectedTrainerId] = useState<string | null>(null);
   const { savedTrainers } = useSavedTrainers();
-  const { profile } = useProfile();
+  const { profile } = useProfileByType();
   
   const isTrainer = profile?.user_type === 'trainer';
   

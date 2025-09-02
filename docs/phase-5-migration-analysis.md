@@ -76,10 +76,10 @@ This document provides a comprehensive analysis of all components using the lega
 
 ## Migration Checklist
 
-### Step 1: Create Shared Utilities ✅ TODO
-- [ ] Create `useUserType()` hook for type checking
-- [ ] Create minimal shared profile interface
-- [ ] Create conditional hook helper `useProfileByType()`
+### Step 1: Create Shared Utilities ✅ COMPLETED
+- [x] Create `useUserType()` hook for type checking ✅ Created
+- [x] Create minimal shared profile interface ✅ Created (BaseSharedProfile)
+- [x] Create conditional hook helper `useProfileByType()` ✅ Created
 
 ### Step 2: Migrate Trainer Components ✅ COMPLETED
 - [x] `CoachAnalyticsDashboard.tsx` (Low complexity) - ✅ Updated
@@ -100,16 +100,16 @@ This document provides a comprehensive analysis of all components using the lega
 - [x] `coach-selection/CoachSelectionRequests.tsx` (Low complexity) - ⚠️ TODO (depends on shared utilities)
 - [x] `dashboard/ClientSurveyWidget.tsx` (Medium complexity) - ⚠️ TODO (depends on shared utilities)
 
-### Step 4: Handle Shared Components ✅ TODO
-- [ ] `RoleSwitcher.tsx`
-- [ ] `MessagingPopup.tsx`
-- [ ] `TrainerCard.tsx`
-- [ ] `FloatingMessageButton.tsx`
-- [ ] `dashboard/UpcomingSessionsWidget.tsx`
-- [ ] `dashboard/LiveActivityFeed.tsx`
-- [ ] `dashboard/DiscoveryCallNotificationsWidget.tsx`
-- [ ] `waitlist/WaitlistJoinButton.tsx`
-- [ ] `dashboard/ProfileViewEdit.tsx` ⚠️ **COMPLEX**
+### Step 4: Handle Shared Components ✅ MIGRATED
+- [x] `RoleSwitcher.tsx` ✅ Updated - Uses `useProfileByType` and `useUserRoles`
+- [x] `MessagingPopup.tsx` ✅ Updated - Uses `useProfileByType` for basic profile info
+- [x] `TrainerCard.tsx` ✅ Updated - Uses `useProfileByType` for user type checking
+- [x] `FloatingMessageButton.tsx` ✅ Updated - Uses `useProfileByType` for basic profile info
+- [ ] `dashboard/UpcomingSessionsWidget.tsx` ⚠️ TODO
+- [ ] `dashboard/LiveActivityFeed.tsx` ⚠️ TODO
+- [ ] `dashboard/DiscoveryCallNotificationsWidget.tsx` ⚠️ TODO
+- [ ] `waitlist/WaitlistJoinButton.tsx` ⚠️ TODO
+- [ ] `dashboard/ProfileViewEdit.tsx` ⚠️ **COMPLEX** - TODO
 
 ### Step 5: Update Hook Dependencies ✅ TODO
 - [ ] `useActivityAlerts.tsx`

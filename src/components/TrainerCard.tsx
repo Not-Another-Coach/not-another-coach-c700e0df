@@ -12,7 +12,7 @@ import { useSavedTrainers } from "@/hooks/useSavedTrainers";
 import { useContentVisibility } from "@/hooks/useContentVisibility";
 import { useEngagementStage } from "@/hooks/useEngagementStage";
 import { useWaitlist } from "@/hooks/useWaitlist";
-import { useProfile } from "@/hooks/useProfile";
+import { useProfileByType } from "@/hooks/useProfileByType";
 import { WaitlistJoinButton } from "@/components/waitlist/WaitlistJoinButton";
 import { WaitlistStatusBadge } from "@/components/waitlist/WaitlistStatusBadge";
 import { getTrainerDisplayPrice } from "@/lib/priceUtils";
@@ -118,7 +118,7 @@ export const TrainerCard = ({
     engagementStage: stage
   });
   const { getCoachAvailability, checkClientWaitlistStatus } = useWaitlist();
-  const { profile } = useProfile();
+  const { profile } = useProfileByType();
   const [coachAvailability, setCoachAvailability] = useState<any>(null);
   const [clientWaitlistStatus, setClientWaitlistStatus] = useState<any>(null);
   

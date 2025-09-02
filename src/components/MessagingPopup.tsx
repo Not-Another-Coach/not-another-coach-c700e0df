@@ -8,7 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useSavedTrainers } from '@/hooks/useSavedTrainers';
 import { useRealTrainers } from '@/hooks/useRealTrainers';
 import { useConversations } from '@/hooks/useConversations';
-import { useProfile } from '@/hooks/useProfile';
+import { useProfileByType } from '@/hooks/useProfileByType';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { ProfileAvatar } from '@/components/ui/profile-avatar';
@@ -46,7 +46,7 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
   const [searchFilter, setSearchFilter] = useState('');
   const [unreadCounts, setUnreadCounts] = useState<{ [key: string]: number }>({});
   
-  const { profile } = useProfile();
+  const { profile } = useProfileByType();
   const { savedTrainers, savedTrainerIds } = useSavedTrainers();
   const { trainers } = useRealTrainers();
   const { conversations } = useConversations();
