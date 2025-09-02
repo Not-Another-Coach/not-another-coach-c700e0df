@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useProfile } from "@/hooks/useProfile";
+import { useClientProfile } from "@/hooks/useClientProfile";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -62,7 +62,7 @@ const personalityTypes = [
 ];
 
 export function EditPreferencesSection({ profile }: EditPreferencesSectionProps) {
-  const { updateProfile } = useProfile();
+  const { updateProfile } = useClientProfile();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [preferences, setPreferences] = useState({

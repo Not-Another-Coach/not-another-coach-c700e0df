@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useProfile } from "@/hooks/useProfile";
+import { useClientProfile } from "@/hooks/useClientProfile";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ interface InlineSurveyEditorProps {
 }
 
 export function InlineSurveyEditor({ profile }: InlineSurveyEditorProps) {
-  const { updateProfile } = useProfile();
+  const { updateProfile } = useClientProfile();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);

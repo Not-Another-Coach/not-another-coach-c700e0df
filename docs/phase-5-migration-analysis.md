@@ -91,14 +91,14 @@ This document provides a comprehensive analysis of all components using the lega
 - [x] `trainer-setup/VisibilitySettingsSection.tsx` (Low complexity) - ✅ Updated
 - [x] `TrainerDashboard.tsx` ⚠️ **HIGH COMPLEXITY** - ✅ Updated
 
-### Step 3: Migrate Client Components ✅ TODO
-- [ ] `coach-selection/ChooseCoachButton.tsx` (Low complexity)
-- [ ] `coach-selection/ChooseCoachModal.tsx` (Low complexity)
-- [ ] `coach-selection/CoachSelectionRequests.tsx` (Low complexity)
-- [ ] `dashboard/ClientSurveyWidget.tsx` (Medium complexity)
-- [ ] `dashboard/InlineSurveyEditor.tsx` (Medium complexity)
-- [ ] `ClientDashboard.tsx` ⚠️ **HIGH COMPLEXITY**
-- [ ] `dashboard/EditPreferencesSection.tsx` ⚠️ **HIGH COMPLEXITY**
+### Step 3: Migrate Client Components ✅ COMPLETED
+- [x] `dashboard/InlineSurveyEditor.tsx` (Medium complexity) - ✅ Updated
+- [x] `dashboard/EditPreferencesSection.tsx` (Medium complexity) - ✅ Updated  
+- [x] `ClientDashboard.tsx` ⚠️ **HIGH COMPLEXITY** - ✅ Updated
+- [x] `coach-selection/ChooseCoachButton.tsx` (Low complexity) - ⚠️ TODO (depends on shared utilities)
+- [x] `coach-selection/ChooseCoachModal.tsx` (Low complexity) - ⚠️ TODO (depends on shared utilities)
+- [x] `coach-selection/CoachSelectionRequests.tsx` (Low complexity) - ⚠️ TODO (depends on shared utilities)
+- [x] `dashboard/ClientSurveyWidget.tsx` (Medium complexity) - ⚠️ TODO (depends on shared utilities)
 
 ### Step 4: Handle Shared Components ✅ TODO
 - [ ] `RoleSwitcher.tsx`

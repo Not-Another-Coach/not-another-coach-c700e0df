@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useProfile } from "@/hooks/useProfile";
+import { useClientProfile } from "@/hooks/useClientProfile";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -33,7 +33,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export default function ClientDashboard() {
   const { user, signOut, loading } = useAuth();
-  const { profile, loading: profileLoading, isClient, isTrainer } = useProfile();
+  const { profile, loading: profileLoading } = useClientProfile();
   
   const { isAdmin } = useUserRoles();
   const { progress: journeyProgress, loading: journeyLoading } = useClientJourneyProgress();
@@ -67,17 +67,7 @@ export default function ClientDashboard() {
     }
   }, [user, loading, navigate]);
 
-  // Redirect trainers to their dashboard (only from client dashboard page)
-  useEffect(() => {
-    if (!loading && !profileLoading && user && profile && isTrainer() && location.pathname === '/client/dashboard') {
-      // Check if profile setup is needed
-      if (!profile.terms_agreed || !(profile as any).profile_setup_completed) {
-        navigate('/trainer/profile-setup');
-      } else {
-        navigate('/trainer/dashboard');
-      }
-    }
-  }, [user, profile, loading, profileLoading, isTrainer, navigate, location.pathname]);
+  // ClientDashboard should only be accessed by clients - no trainer redirect needed
 
   // Load completed discovery calls for feedback prompts
   useEffect(() => {
@@ -115,13 +105,13 @@ export default function ClientDashboard() {
 
   // Redirect clients to client survey if not completed (check both flags)
   useEffect(() => {
-    if (!loading && !profileLoading && user && profile && isClient()) {
-      const surveyCompleted = profile.quiz_completed && (profile as any).client_survey_completed;
+    if (!loading && !profileLoading && user && profile && profile.user_type === 'client') {
+      const surveyCompleted = profile.quiz_completed && profile.client_survey_completed;
       if (!surveyCompleted) {
         navigate('/client-survey');
       }
     }
-  }, [user, profile, loading, profileLoading, isClient, navigate]);
+  }, [user, profile, loading, profileLoading, navigate]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -137,7 +127,7 @@ export default function ClientDashboard() {
   }
 
   // Only render dashboard for clients with completed quiz
-  if (!profile || !user || !isClient() || !profile.quiz_completed) {
+  if (!profile || !user || profile.user_type !== 'client' || !profile.quiz_completed) {
     return null;
   }
 
