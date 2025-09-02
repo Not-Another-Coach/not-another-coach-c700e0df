@@ -12,11 +12,16 @@ import { VisibilitySettingsSection } from '@/components/trainer-setup/Visibility
 import { UserValidityChecker } from '@/components/admin/UserValidityChecker';
 import { VerificationManagement } from '@/components/admin/VerificationManagement';
 import { TemplateManagementTabs } from '@/components/coach/TemplateManagementTabs';
-import { Settings, Users, Shield, BarChart3, ArrowLeft, Home, Eye, Upload, FileText, ExternalLink, CheckCircle, Trash2, Layout } from 'lucide-react';
+import { ProfileDropdown } from '@/components/ProfileDropdown';
+import { Settings, Users, Shield, BarChart3, Home, Eye, Upload, FileText, ExternalLink, CheckCircle, Trash2, Layout } from 'lucide-react';
 import { useUserRoles } from '@/hooks/useUserRoles';
+import { useAuth } from '@/hooks/useAuth';
+import { useProfileByType } from '@/hooks/useProfileByType';
 
 export const AdminDashboard = () => {
   const { isAdmin } = useUserRoles();
+  const { user } = useAuth();
+  const { profile } = useProfileByType();
   const navigate = useNavigate();
   const [selectedSection, setSelectedSection] = useState<string>('users');
 
@@ -207,15 +212,21 @@ export const AdminDashboard = () => {
           </p>
         </div>
         
-        <Button 
-          onClick={() => navigate('/documentation')}
-          variant="outline"
-          className="flex items-center gap-2"
-        >
-          <FileText className="h-4 w-4" />
-          Documentation
-          <ExternalLink className="h-3 w-3" />
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button 
+            onClick={() => navigate('/documentation')}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <FileText className="h-4 w-4" />
+            Documentation
+            <ExternalLink className="h-3 w-3" />
+          </Button>
+          
+          {profile && (
+            <ProfileDropdown profile={profile} />
+          )}
+        </div>
       </div>
 
       {/* Admin Section Tiles */}
