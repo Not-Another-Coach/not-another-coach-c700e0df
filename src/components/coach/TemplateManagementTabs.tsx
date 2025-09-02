@@ -26,7 +26,7 @@ import { TemplateBuilder } from '@/components/onboarding/TemplateBuilder';
 import { useTemplateBuilder } from '@/hooks/useTemplateBuilder';
 import { TemplateAssignmentView } from '@/components/coach/TemplateAssignmentView';
 import { useUserRoles } from '@/hooks/useUserRoles';
-import { useProfile } from '@/hooks/useProfile';
+import { useTrainerProfile } from '@/hooks/useTrainerProfile';
 
 export function TemplateManagementTabs() {
   const {
@@ -40,7 +40,7 @@ export function TemplateManagementTabs() {
   const { activities, loading: activitiesLoading, error: activitiesError, refresh: refreshActivities, createActivity, updateActivity, updateActivityDetails } = useTrainerActivities();
   const { user } = useAuth();
   const { isAdmin } = useUserRoles();
-  const { profile, loading: profileLoading } = useProfile();
+  const { profile, loading: profileLoading } = useTrainerProfile();
   
   const { 
     activities: enhancedActivities, 

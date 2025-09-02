@@ -8,7 +8,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
-import { useProfile } from '@/hooks/useProfile';
+import { useTrainerProfile } from '@/hooks/useTrainerProfile';
 import { format } from 'date-fns';
 import { 
   Users, 
@@ -102,7 +102,7 @@ const GOAL_COLORS = {
 } as const;
 
 export function ClientProspectSummary({ onActiveClientsCountChange, onProspectsCountChange }: ClientProspectSummaryProps) {
-  const { profile } = useProfile();
+  const { profile } = useTrainerProfile();
   const [clients, setClients] = useState<ClientRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>('card');

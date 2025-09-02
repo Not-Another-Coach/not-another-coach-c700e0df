@@ -1,7 +1,7 @@
 import { useState, useEffect, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useProfile } from "@/hooks/useProfile";
+import { useTrainerProfile } from "@/hooks/useTrainerProfile";
 import { useCoachAnalytics } from "@/hooks/useCoachAnalytics";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { useUserRoles } from "@/hooks/useUserRoles";
@@ -77,7 +77,7 @@ import { usePaymentStatements } from "@/hooks/usePaymentStatements";
 
 const TrainerDashboard = () => {
   const { user, signOut, loading } = useAuth();
-  const { profile, loading: profileLoading, isTrainer, updateProfile } = useProfile();
+  const { profile, loading: profileLoading, updateProfile } = useTrainerProfile();
   const { analytics, shortlistedClients, shortlistedStats, loading: analyticsLoading } = useCoachAnalytics(profile?.id);
   const { isAdmin } = useUserRoles();
   const { waitlistEntries } = useWaitlist();
@@ -103,10 +103,10 @@ const TrainerDashboard = () => {
 
   // Redirect if not trainer
   useEffect(() => {
-    if (!loading && !profileLoading && user && profile && !isTrainer()) {
+    if (!loading && !profileLoading && user && profile && profile.user_type !== 'trainer') {
       navigate('/');
     }
-  }, [user, profile, loading, profileLoading, isTrainer, navigate]);
+  }, [user, profile, loading, profileLoading, navigate]);
 
   // Redirect to auth if not logged in
   useEffect(() => {

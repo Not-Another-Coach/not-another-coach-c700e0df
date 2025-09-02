@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useCoachAnalytics } from '@/hooks/useCoachAnalytics';
-import { useProfile } from '@/hooks/useProfile';
+import { useTrainerProfile } from '@/hooks/useTrainerProfile';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -26,7 +26,7 @@ interface CoachAnalyticsDashboardProps {
 }
 
 export const CoachAnalyticsDashboard = ({ trainerId }: CoachAnalyticsDashboardProps) => {
-  const { profile, isTrainer } = useProfile();
+  const { profile } = useTrainerProfile();
   const currentTrainerId = trainerId || profile?.id?.toString();
   const { analytics, shortlistedClients, shortlistedStats, loading } = useCoachAnalytics(currentTrainerId);
 
@@ -47,7 +47,7 @@ export const CoachAnalyticsDashboard = ({ trainerId }: CoachAnalyticsDashboardPr
 
   const stats = analytics || mockStats;
 
-  if (!isTrainer() && !trainerId) {
+  if (!profile && !trainerId) {
     return (
       <Card>
         <CardContent className="pt-6">

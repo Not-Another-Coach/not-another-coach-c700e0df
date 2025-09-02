@@ -15,7 +15,7 @@ import {
   Eye
 } from 'lucide-react';
 import { useTrainerVerification } from '@/hooks/useTrainerVerification';
-import { useProfile } from '@/hooks/useProfile';
+import { useTrainerProfile } from '@/hooks/useTrainerProfile';
 import { VerificationNotifications } from './VerificationNotifications';
 import { SectionHeader } from './SectionHeader';
 import { toast } from 'sonner';
@@ -48,7 +48,7 @@ const statusConfig = {
 };
 
 export const VerificationSection = () => {
-  const { profile } = useProfile();
+  const { profile } = useTrainerProfile();
   const { verificationRequest, submitVerificationRequest, loading } = useTrainerVerification();
   const [isSubmitting, setIsSubmitting] = useState(false);
 

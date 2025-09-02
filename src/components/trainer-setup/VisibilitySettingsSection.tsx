@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Eye, EyeOff, Lock, Settings, ExternalLink } from 'lucide-react';
 import { useVisibilityMatrix, ContentType, VisibilityState, EngagementStage } from '@/hooks/useVisibilityMatrix';
-import { useProfile } from '@/hooks/useProfile';
+import { useTrainerProfile } from '@/hooks/useTrainerProfile';
 import { ProfilePreviewModal } from './ProfilePreviewModal';
 import { toast } from 'sonner';
 
@@ -41,7 +41,7 @@ const visibilityStateLabels: Record<VisibilityState, { label: string; icon: any;
 };
 
 export const VisibilitySettingsSection = () => {
-  const { profile } = useProfile();
+  const { profile } = useTrainerProfile();
   const { updateVisibilitySettings, initializeDefaults, loading } = useVisibilityMatrix();
   const [settings, setSettings] = useState<Record<string, VisibilityState>>({});
   const [hasInitialized, setHasInitialized] = useState(false);
