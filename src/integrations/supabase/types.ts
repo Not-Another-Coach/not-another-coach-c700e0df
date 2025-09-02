@@ -5108,12 +5108,18 @@ export type Database = {
         Returns: boolean
       }
       complete_coach_selection_payment: {
-        Args: {
-          p_client_id: string
-          p_payment_method?: string
-          p_stripe_payment_intent_id?: string
-          p_trainer_id: string
-        }
+        Args:
+          | {
+              p_client_id: string
+              p_payment_method?: string
+              p_stripe_payment_intent_id?: string
+              p_trainer_id: string
+            }
+          | {
+              p_client_id: string
+              p_payment_method?: string
+              p_trainer_id: string
+            }
         Returns: Json
       }
       complete_webhook_event: {
@@ -5193,6 +5199,16 @@ export type Database = {
       get_engagement_stage: {
         Args: { client_uuid: string; trainer_uuid: string }
         Returns: Database["public"]["Enums"]["engagement_stage"]
+      }
+      get_secure_profile_data: {
+        Args: { p_user_id?: string }
+        Returns: {
+          email: string
+          first_name: string
+          id: string
+          last_name: string
+          user_type: string
+        }[]
       }
       get_trainer_streak_count: {
         Args: { trainer_uuid: string }
