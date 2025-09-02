@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { useProfile } from '@/hooks/useProfile';
+import { useUserTypeChecks } from '@/hooks/useUserType';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -35,7 +35,7 @@ interface Message {
 
 export function useConversations() {
   const { user } = useAuth();
-  const { profile } = useProfile();
+  const { user_type, isClient } = useUserTypeChecks();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -96,7 +96,7 @@ export function useConversations() {
 
       // Filter out conversations with declined trainers (for clients only)
       let filteredConversations = conversationsWithProfiles;
-      if (profile?.user_type === 'client') {
+      if (isClient()) {
         // Get engagement data to filter out declined trainers
         const { data: engagements } = await supabase
           .from('client_trainer_engagement')
@@ -119,7 +119,7 @@ export function useConversations() {
     } finally {
       setLoading(false);
     }
-  }, [user, profile]);
+  }, [user, user_type]);
 
   const createConversation = useCallback(async (trainerId: string) => {
     if (!user) {

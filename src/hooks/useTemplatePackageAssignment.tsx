@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
-import { useProfile } from './useProfile';
+import { useProfileByType } from './useProfileByType';
 import { useTemplateBuilder } from './useTemplateBuilder';
 import { useTrainerActivities } from './useTrainerActivities';
 
@@ -27,7 +27,7 @@ interface ActivityAssignment {
 
 export function useTemplatePackageAssignment() {
   const { user } = useAuth();
-  const { profile } = useProfile();
+  const { profile } = useProfileByType();
   const { templates, packageLinks, linkToPackage, unlinkFromPackage } = useTemplateBuilder();
   const { activities } = useTrainerActivities();
   
@@ -36,8 +36,8 @@ export function useTemplatePackageAssignment() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Get packages from profile
-  const packages = (profile as any)?.package_options || [];
+  // Get packages from trainer profile
+  const packages = profile?.package_options || [];
 
   // Fetch activity assignments for all templates
   const fetchActivityAssignments = useCallback(async () => {

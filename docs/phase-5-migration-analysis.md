@@ -111,10 +111,12 @@ This document provides a comprehensive analysis of all components using the lega
 - [x] `waitlist/WaitlistJoinButton.tsx` ✅ Updated - Uses `useProfileByType()` for client-specific field access
 - [x] `dashboard/ProfileViewEdit.tsx` ✅ Updated - Uses `useProfileByType()` for profile data and updates
 
-### Step 5: Update Hook Dependencies ✅ TODO
-- [ ] `useActivityAlerts.tsx`
-- [ ] `useConversations.tsx`
-- [ ] `useTemplatePackageAssignment.tsx`
+### Step 5: Update Hook Dependencies (3 hooks) - ✅ **COMPLETE**
+
+**All hooks migrated (3/3):**
+- ✅ `useActivityAlerts.tsx` - Updated to use `useUserTypeChecks()` for user type checking instead of profile access
+- ✅ `useConversations.tsx` - Updated to use `useUserTypeChecks()` for user type checking instead of profile access
+- ✅ `useTemplatePackageAssignment.tsx` - Updated to use `useProfileByType()` for trainer-specific package_options field
 
 ### Step 6: Handle Authentication Components ✅ TODO
 - [ ] `Home.tsx`

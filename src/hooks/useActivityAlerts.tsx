@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
-import { useProfile } from './useProfile';
+import { useUserTypeChecks } from './useUserType';
 
 interface ActivityAlert {
   id: string;
@@ -18,7 +18,7 @@ export function useActivityAlerts() {
   const [alerts, setAlerts] = useState<ActivityAlert[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
-  const { profile } = useProfile();
+  const { user_type, isClient, isTrainer } = useUserTypeChecks();
 
   useEffect(() => {
     if (user) {
@@ -87,7 +87,7 @@ export function useActivityAlerts() {
       const transformedAlerts: ActivityAlert[] = (alertsData || [])
         .filter(alert => {
           // For clients, show their own selection confirmations
-          if (profile?.user_type === 'client') {
+          if (isClient()) {
             // Check if this is a coach selection sent alert specifically for this client
             if (alert.alert_type === 'coach_selection_sent') {
               const targetAudience = alert.target_audience as any;
@@ -101,7 +101,7 @@ export function useActivityAlerts() {
           }
           
           // For trainers, show alerts targeted to them
-          if (profile?.user_type === 'trainer') {
+          if (isTrainer()) {
             // Show alerts where user is the creator (coach) or specifically targeted
             if (alert.created_by === user.id) return true;
             
