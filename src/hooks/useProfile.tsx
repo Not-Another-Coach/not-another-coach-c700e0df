@@ -38,6 +38,18 @@ interface Profile extends BaseProfile {
 }
 
 export function useProfile() {
+  // DEPRECATED: This hook is deprecated. Use useTrainerProfile, useClientProfile, or useProfileByType instead.
+  React.useEffect(() => {
+    console.warn(
+      '⚠️ DEPRECATED: useProfile hook is deprecated. Please migrate to:\n' +
+      '- useTrainerProfile() for trainer-specific data\n' +
+      '- useClientProfile() for client-specific data\n' +
+      '- useProfileByType() for shared components\n' +
+      '- useUserTypeChecks() for user type checking\n' +
+      'This hook will be removed in a future version.'
+    );
+  }, []);
+
   const { user, session } = useAuth();
   const [baseProfile, setBaseProfile] = useState<BaseProfile | null>(null);
   const [loading, setLoading] = useState(true);

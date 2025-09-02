@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useProfile } from "@/hooks/useProfile";
+import { useProfileByType } from "@/hooks/useProfileByType";
 import { usePaymentStatements } from "@/hooks/usePaymentStatements";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -46,7 +46,7 @@ interface PaymentPackage {
 
 export const PaymentPackageManagement = () => {
   const { user } = useAuth();
-  const { profile, updateProfile } = useProfile();
+  const { profile, updateProfile } = useProfileByType();
   const { packages, loading } = usePaymentStatements();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -79,8 +79,8 @@ export const PaymentPackageManagement = () => {
 
   // Initialize from profile data
   useEffect(() => {
-    if ((profile as any)?.package_options) {
-      const enhancedPackages = (profile as any).package_options.map((pkg: any) => ({
+    if (profile?.package_options) {
+      const enhancedPackages = profile.package_options.map((pkg: any) => ({
         ...pkg,
         durationWeeks: pkg.durationWeeks || 12,
         payoutFrequency: pkg.payoutFrequency || 'monthly',
@@ -91,7 +91,7 @@ export const PaymentPackageManagement = () => {
       }));
       setLocalPackages(enhancedPackages);
     }
-  }, [(profile as any)?.package_options]);
+  }, [profile?.package_options]);
 
   const handleSavePackage = async () => {
     if (!packageData.name || !packageData.price || !packageData.description) {
@@ -148,7 +148,7 @@ export const PaymentPackageManagement = () => {
     setLocalPackages(updatedPackages);
     
     // Update profile with enhanced package data
-    await updateProfile({ package_options: updatedPackages } as any);
+    await updateProfile({ package_options: updatedPackages });
 
     // Reset form
     setPackageData({
@@ -185,7 +185,7 @@ export const PaymentPackageManagement = () => {
   const handleDeletePackage = async (id: string) => {
     const updatedPackages = localPackages.filter(pkg => pkg.id !== id);
     setLocalPackages(updatedPackages);
-    await updateProfile({ package_options: updatedPackages } as any);
+    await updateProfile({ package_options: updatedPackages });
     toast({
       title: "Package Deleted",
       description: "The package has been removed successfully"

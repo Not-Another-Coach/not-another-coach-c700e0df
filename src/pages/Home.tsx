@@ -1,11 +1,13 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useProfile } from "@/hooks/useProfile";
+import { useProfileByType } from "@/hooks/useProfileByType";
+import { useUserTypeChecks } from "@/hooks/useUserType";
 
 export default function Home() {
   const { user, loading } = useAuth();
-  const { profile, loading: profileLoading, isClient, isTrainer, isAdmin } = useProfile();
+  const { profile, loading: profileLoading } = useProfileByType();
+  const { isClient, isTrainer, isAdmin } = useUserTypeChecks();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -18,13 +20,13 @@ export default function Home() {
       if (profile) {
         if (isTrainer()) {
           // Check if profile setup is needed
-          if (!profile.terms_agreed || !(profile as any).profile_setup_completed) {
+          if (!profile.terms_agreed || !profile.profile_setup_completed) {
             navigate('/trainer/profile-setup');
           } else {
             navigate('/trainer/dashboard');
           }
         } else if (isClient()) {
-          if (!profile.quiz_completed) {
+          if (!profile.client_survey_completed) {
             navigate('/client-survey');
           } else {
             navigate('/client/dashboard');
