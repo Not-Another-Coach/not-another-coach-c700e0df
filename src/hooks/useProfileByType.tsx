@@ -1,6 +1,9 @@
 import { useTrainerProfile } from '@/hooks/useTrainerProfile';
 import { useClientProfile } from '@/hooks/useClientProfile';
 import { useUserType } from '@/hooks/useUserType';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect, useCallback } from 'react';
 
 export interface BaseSharedProfile {
   id: string;
@@ -8,6 +11,72 @@ export interface BaseSharedProfile {
   first_name: string | null;
   last_name: string | null;
   profile_photo_url: string | null;
+}
+
+// Hook for admin users to get basic profile info
+function useAdminProfile() {
+  const { user } = useAuth();
+  const [profile, setProfile] = useState<BaseSharedProfile | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const fetchProfile = useCallback(async () => {
+    if (!user) return;
+
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, user_type, first_name, last_name, profile_photo_url')
+        .eq('id', user.id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching admin profile:', error);
+      } else {
+        setProfile(data as BaseSharedProfile);
+      }
+    } catch (error) {
+      console.error('Error fetching admin profile:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchProfile();
+    } else {
+      setProfile(null);
+      setLoading(false);
+    }
+  }, [user, fetchProfile]);
+
+  const updateProfile = useCallback(async (updates: Partial<BaseSharedProfile>) => {
+    if (!user) return { error: 'No user logged in' };
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', user.id);
+
+      if (error) {
+        return { error };
+      }
+
+      await fetchProfile();
+      return { data: true };
+    } catch (error) {
+      return { error };
+    }
+  }, [user, fetchProfile]);
+
+  return {
+    profile,
+    loading,
+    updateProfile,
+    refetchProfile: fetchProfile,
+  };
 }
 
 /**
@@ -18,6 +87,7 @@ export function useProfileByType() {
   const { user_type } = useUserType();
   const { profile: trainerProfile, loading: trainerLoading, updateProfile: updateTrainerProfile } = useTrainerProfile();
   const { profile: clientProfile, loading: clientLoading, updateProfile: updateClientProfile } = useClientProfile();
+  const { profile: adminProfile, loading: adminLoading, updateProfile: updateAdminProfile } = useAdminProfile();
 
   // Return appropriate profile based on user type
   if (user_type === 'trainer') {
@@ -51,6 +121,15 @@ export function useProfileByType() {
       loading: clientLoading,
       updateProfile: updateClientProfile,
       userType: 'client' as const
+    };
+  }
+
+  if (user_type === 'admin') {
+    return {
+      profile: adminProfile,
+      loading: adminLoading,
+      updateProfile: updateAdminProfile,
+      userType: 'admin' as const
     };
   }
 
