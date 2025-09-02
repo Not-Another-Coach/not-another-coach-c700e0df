@@ -9,6 +9,7 @@ import Home from "./pages/Home";
 import ClientDashboard from "./pages/ClientDashboard";
 import MyTrainers from "./pages/MyTrainers";
 import Auth from "./pages/Auth";
+import AuthCallback from "./pages/AuthCallback";
 import ClientSurvey from "./pages/ClientSurvey";
 import ClientJourney from "./pages/ClientJourney";
 import Discovery from "./pages/Discovery";
@@ -39,9 +40,10 @@ const App = () => (
             <ErrorBoundary>
               <Routes>
                 <Route path="/" element={<Home />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/auth/callback" element={<AuthCallback />} />
                 <Route path="/client/dashboard" element={<ClientDashboard />} />
                 <Route path="/my-trainers" element={<MyTrainers />} />
-                <Route path="/auth" element={<Auth />} />
                 <Route path="/client-survey" element={<ClientSurvey />} />
                 <Route path="/client/journey" element={<ClientJourney />} />
                 <Route path="/discovery" element={<Discovery />} />
