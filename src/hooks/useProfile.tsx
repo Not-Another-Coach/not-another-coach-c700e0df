@@ -1,10 +1,12 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { useTrainerProfile } from '@/hooks/useTrainerProfile';
+import { useClientProfile } from '@/hooks/useClientProfile';
 
 type UserRole = 'client' | 'trainer' | 'admin';
 
-interface Profile {
+interface BaseProfile {
   id: string;
   user_type: UserRole;
   first_name: string | null;
@@ -12,27 +14,37 @@ interface Profile {
   bio: string | null;
   profile_photo_url: string | null;
   location: string | null;
-  specializations: string[] | null;
-  qualifications: string[] | null;
-  is_verified: boolean;
-  rating: number;
-  total_ratings: number;
-  fitness_goals: string[] | null;
-  quiz_completed: boolean;
-  quiz_answers: any;
-  quiz_completed_at: string | null;
   tagline: string | null;
-  hourly_rate: number | null;
-  training_types: string[] | null;
-  terms_agreed: boolean | null;
-  profile_setup_completed: boolean | null;
-  client_status: 'onboarding' | 'survey_completed' | 'browsing' | 'shortlisted' | 'discovery_booked' | 'decision_pending' | 'coach_selected' | null;
+  is_uk_based: boolean | null;
+  profile_published: boolean | null;
+}
+
+// Legacy interface for backward compatibility
+interface Profile extends BaseProfile {
+  specializations?: string[] | null;
+  qualifications?: string[] | null;
+  is_verified?: boolean;
+  rating?: number;
+  total_ratings?: number;
+  fitness_goals?: string[] | null;
+  quiz_completed?: boolean;
+  quiz_answers?: any;
+  quiz_completed_at?: string | null;
+  hourly_rate?: number | null;
+  training_types?: string[] | null;
+  terms_agreed?: boolean | null;
+  profile_setup_completed?: boolean | null;
+  client_status?: 'onboarding' | 'survey_completed' | 'browsing' | 'shortlisted' | 'discovery_booked' | 'decision_pending' | 'coach_selected' | null;
 }
 
 export function useProfile() {
   const { user, session } = useAuth();
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [baseProfile, setBaseProfile] = useState<BaseProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Use domain-specific hooks
+  const trainerProfile = useTrainerProfile();
+  const clientProfile = useClientProfile();
 
   const fetchProfile = useCallback(async () => {
     if (!user) return;
@@ -40,14 +52,14 @@ export function useProfile() {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select('id, user_type, first_name, last_name, bio, profile_photo_url, location, tagline, is_uk_based, profile_published, created_at, updated_at')
         .eq('id', user.id)
         .maybeSingle();
 
       if (error) {
         console.error('Error fetching profile:', error);
       } else {
-        setProfile(data);
+        setBaseProfile(data);
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -60,36 +72,76 @@ export function useProfile() {
     if (user) {
       fetchProfile();
     } else {
-      setProfile(null);
+      setBaseProfile(null);
       setLoading(false);
     }
   }, [user, fetchProfile]);
 
+  // Create legacy profile for backward compatibility
+  const profile: Profile | null = React.useMemo(() => {
+    if (!baseProfile) return null;
+
+    const legacyProfile: Profile = { ...baseProfile };
+
+    // Add domain-specific fields for backward compatibility
+    if (baseProfile.user_type === 'trainer' && trainerProfile.profile) {
+      Object.assign(legacyProfile, {
+        specializations: trainerProfile.profile.specializations,
+        qualifications: trainerProfile.profile.qualifications,
+        is_verified: trainerProfile.profile.is_verified,
+        rating: trainerProfile.profile.rating,
+        total_ratings: trainerProfile.profile.total_ratings,
+        hourly_rate: trainerProfile.profile.hourly_rate,
+        training_types: trainerProfile.profile.training_types,
+        terms_agreed: trainerProfile.profile.terms_agreed,
+        profile_setup_completed: trainerProfile.profile.profile_setup_completed,
+      });
+    } else if (baseProfile.user_type === 'client' && clientProfile.profile) {
+      Object.assign(legacyProfile, {
+        fitness_goals: clientProfile.profile.fitness_goals,
+        quiz_completed: clientProfile.profile.quiz_completed,
+        quiz_answers: clientProfile.profile.quiz_answers,
+        quiz_completed_at: clientProfile.profile.quiz_completed_at,
+        client_status: clientProfile.profile.client_status as any,
+      });
+    }
+
+    return legacyProfile;
+  }, [baseProfile, trainerProfile.profile, clientProfile.profile]);
+
   const updateProfile = useCallback(async (updates: Partial<Profile>) => {
     if (!user) return { error: 'No user logged in' };
 
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .update(updates)
-        .eq('id', user.id)
-        .select()
-        .single();
+    // Route updates to the appropriate hook based on user type
+    if (baseProfile?.user_type === 'trainer') {
+      return trainerProfile.updateProfile(updates as any);
+    } else if (baseProfile?.user_type === 'client') {
+      return clientProfile.updateProfile(updates as any);
+    } else {
+      // Fallback for basic profile updates
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .update(updates)
+          .eq('id', user.id)
+          .select()
+          .single();
 
-      if (error) {
+        if (error) {
+          return { error };
+        }
+
+        await fetchProfile();
+        return { data };
+      } catch (error) {
         return { error };
       }
-
-      setProfile(data);
-      return { data };
-    } catch (error) {
-      return { error };
     }
-  }, [user]);
+  }, [user, baseProfile?.user_type, trainerProfile.updateProfile, clientProfile.updateProfile, fetchProfile]);
 
-  const isAdmin = useCallback(() => profile?.user_type === 'admin', [profile?.user_type]);
-  const isTrainer = useCallback(() => profile?.user_type === 'trainer', [profile?.user_type]);
-  const isClient = useCallback(() => profile?.user_type === 'client', [profile?.user_type]);
+  const isAdmin = useCallback(() => baseProfile?.user_type === 'admin', [baseProfile?.user_type]);
+  const isTrainer = useCallback(() => baseProfile?.user_type === 'trainer', [baseProfile?.user_type]);
+  const isClient = useCallback(() => baseProfile?.user_type === 'client', [baseProfile?.user_type]);
 
   // Get client status using the new consolidated function
   const getClientStatus = useCallback(async () => {
@@ -101,9 +153,11 @@ export function useProfile() {
     return data;
   }, [profile?.id, profile?.user_type]);
 
+  const combinedLoading = loading || (baseProfile?.user_type === 'trainer' ? trainerProfile.loading : false) || (baseProfile?.user_type === 'client' ? clientProfile.loading : false);
+
   return {
     profile,
-    loading,
+    loading: combinedLoading,
     updateProfile,
     refetchProfile: fetchProfile,
     isAdmin,
