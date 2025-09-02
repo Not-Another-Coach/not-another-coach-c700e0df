@@ -70,28 +70,26 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
     const fetchAllTrainers = async () => {
       try {
         setLoading(true);
-        const { data, error } = await supabase
-          .from('profiles')
-          .select(`
-            id,
-            first_name,
-            last_name,
-            bio,
-            location,
-            specializations,
-            qualifications,
-            hourly_rate,
-            rating,
-            total_ratings,
-            is_verified,
-            profile_photo_url,
-            training_types,
-            testimonials,
-            discovery_call_settings(offers_discovery_call)
-          `)
-          .eq('user_type', 'trainer')
-          .eq('profile_published', true)
-          .order('created_at');
+      const { data, error } = await supabase
+        .from('v_trainers')
+        .select(`
+          id,
+          first_name,
+          last_name,
+          bio,
+          location,
+          specializations,
+          qualifications,
+          hourly_rate,
+          rating,
+          total_ratings,
+          is_verified,
+          profile_photo_url,
+          training_types,
+          testimonials
+        `)
+        .eq('profile_published', true)
+        .order('created_at');
 
         if (error) {
           console.error('Error fetching trainers in ExploreAllTrainers:', error);
@@ -117,7 +115,7 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
             description: trainer.bio || "Professional fitness trainer dedicated to helping you achieve your goals.",
             availability: "Available",
             trainingType: trainer.training_types || ["In-Person", "Online"],
-            offers_discovery_call: trainer.discovery_call_settings?.[0]?.offers_discovery_call || false,
+            offers_discovery_call: false,
             testimonials: (trainer.testimonials as any[]) || []
           };
         }) || [];

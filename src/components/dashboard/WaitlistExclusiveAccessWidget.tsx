@@ -88,7 +88,7 @@ export function WaitlistExclusiveAccessWidget() {
           const relevantCoachIds = relevantPeriods.map(p => p.coach_id);
           
           const { data: trainers, error: trainersError } = await supabase
-            .from('profiles')
+            .from('v_trainers')
             .select(`
               id,
               first_name,
@@ -98,11 +98,9 @@ export function WaitlistExclusiveAccessWidget() {
               location,
               hourly_rate,
               rating,
-              package_options,
-              discovery_call_settings(offers_discovery_call)
+              package_options
             `)
-            .in('id', relevantCoachIds)
-            .eq('user_type', 'trainer');
+            .in('id', relevantCoachIds);
 
           console.log('🔥 WaitlistExclusiveAccessWidget: Trainer profiles query result:', { trainers, trainersError });
 

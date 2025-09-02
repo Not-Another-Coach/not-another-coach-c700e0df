@@ -98,7 +98,7 @@ export const useClientJourneyProgress = () => {
 
       // Get user profile for survey completion check
       const { data: profile, error: profileError } = await supabase
-        .from('profiles')
+        .from('v_clients')
         .select('client_survey_completed')
         .eq('id', user.id)
         .single();

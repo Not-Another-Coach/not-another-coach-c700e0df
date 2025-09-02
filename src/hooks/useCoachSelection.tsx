@@ -63,17 +63,10 @@ export function useCoachSelection() {
     }
   };
 
-  // Helper function to update client journey stage
-  const updateClientJourneyStage = async (clientId: string, stage: ClientJourneyStage) => {
-    try {
-      await supabase
-        .from('profiles')
-        .update({ client_journey_stage: stage })
-        .eq('id', clientId);
-    } catch (error) {
-      console.error('Error updating client journey stage:', error);
-    }
-  };
+  // Helper function to update client journey stage - REMOVED as column doesn't exist
+  // const updateClientJourneyStage = async (clientId: string, stage: ClientJourneyStage) => {
+  //   // This functionality is not available as client_journey_stage column doesn't exist
+  // };
 
   const createSelectionRequest = useCallback(async (
     trainerId: string,
@@ -206,7 +199,8 @@ export function useCoachSelection() {
         
         if (!hasActiveEngagements) {
           console.log('No active engagements found, moving client back to exploring_coaches stage');
-          await updateClientJourneyStage(requestData.client_id, 'exploring_coaches');
+          // Note: client_journey_stage column doesn't exist, skipping update
+          console.log('Would update client journey stage but column does not exist');
         }
       }
 

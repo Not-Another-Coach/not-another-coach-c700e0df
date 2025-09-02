@@ -19,7 +19,7 @@ export function useRealTrainers(refreshTrigger?: number) {
       setLoading(true);
       try {
         const { data, error } = await supabase
-          .from('profiles')
+          .from('v_trainers')
           .select(`
             id,
             first_name,
@@ -34,14 +34,9 @@ export function useRealTrainers(refreshTrigger?: number) {
             training_types,
             profile_photo_url,
             is_verified,
-            verification_status,
             package_options,
-            testimonials,
-            discovery_call_settings(
-              offers_discovery_call
-            )
+            testimonials
           `)
-          .eq('user_type', 'trainer')
           .eq('profile_published', true)
           .order('created_at');
 
@@ -56,8 +51,7 @@ export function useRealTrainers(refreshTrigger?: number) {
           if (trainer.bio?.includes('Lou') || trainer.id === 'f5562940-ccc4-40c2-b8dd-8f8c22311003') {
             console.log(`🐛 DEBUG Raw trainer data for Lou:`, {
               trainerId: trainer.id,
-              discovery_call_settings: trainer.discovery_call_settings,
-              offers_discovery_call: trainer.discovery_call_settings?.[0]?.offers_discovery_call
+              offers_discovery_call: false // Default to false since discovery_call_settings not available
             });
           }
           
@@ -81,7 +75,7 @@ export function useRealTrainers(refreshTrigger?: number) {
             description: trainer.bio || "Professional fitness trainer dedicated to helping you achieve your goals.",
             availability: "Available",
             trainingType: trainer.training_types || ["In-Person", "Online"],
-            offers_discovery_call: trainer.discovery_call_settings?.[0]?.offers_discovery_call || false,
+            offers_discovery_call: false, // Default to false since discovery_call_settings not available
             package_options: (trainer.package_options as any[]) || [],
             testimonials: (trainer.testimonials as any[]) || []
           };

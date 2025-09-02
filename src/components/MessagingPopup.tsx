@@ -145,7 +145,7 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
         // Get client profiles separately
         const clientIds = conversations.map(conv => conv.client_id);
         const { data: clientProfiles } = await supabase
-          .from('profiles')
+          .from('v_clients')
           .select('id, first_name, last_name, training_location_preference, profile_photo_url')
           .in('id', clientIds);
 

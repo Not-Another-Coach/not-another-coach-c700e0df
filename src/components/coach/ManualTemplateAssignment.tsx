@@ -74,7 +74,7 @@ export function ManualTemplateAssignment() {
         if (clientIds.length > 0) {
           // Get profile information for these clients
           const { data: profiles, error: profilesError } = await supabase
-            .from('profiles')
+            .from('v_clients')
             .select('id, first_name, last_name, client_status')
             .in('id', clientIds);
 

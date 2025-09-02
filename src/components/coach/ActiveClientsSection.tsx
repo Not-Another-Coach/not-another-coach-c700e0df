@@ -118,7 +118,7 @@ export function ActiveClientsSection({ onCountChange }: ActiveClientsSectionProp
       // Get client profiles for these engagements
       const clientIds = engagementData.map(eng => eng.client_id);
       const { data: profilesData, error: profilesError } = await supabase
-        .from('profiles')
+        .from('v_clients')
         .select('id, first_name, last_name, primary_goals, training_location_preference')
         .in('id', clientIds);
 

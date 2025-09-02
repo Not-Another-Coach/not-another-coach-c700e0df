@@ -77,8 +77,8 @@ export function useOptimizedTrainers() {
     // Fetch uncached trainers
     if (uncachedIds.length > 0) {
       try {
-        const { data, error } = await supabase
-          .from('profiles')
+        const { data: trainerProfiles, error: profileError } = await supabase
+          .from('v_trainers')
           .select(`
             id,
             first_name,
@@ -88,21 +88,20 @@ export function useOptimizedTrainers() {
             profile_photo_url,
             hourly_rate
           `)
-          .eq('user_type', 'trainer')
           .in('id', uncachedIds);
 
-        if (error) {
-          console.error('Error fetching trainer data:', error);
+        if (profileError) {
+          console.error('Error fetching trainer data:', profileError);
           return cachedTrainers;
         }
 
         // Cache the new data
-        data?.forEach(trainer => {
+        trainerProfiles?.forEach(trainer => {
           trainerCache.set(trainer.id, trainer);
           cacheExpiry.set(trainer.id, Date.now() + CACHE_DURATION);
         });
 
-        return [...cachedTrainers, ...(data || [])];
+        return [...cachedTrainers, ...(trainerProfiles || [])];
       } catch (error) {
         console.error('Error in fetchTrainerData:', error);
         return cachedTrainers;

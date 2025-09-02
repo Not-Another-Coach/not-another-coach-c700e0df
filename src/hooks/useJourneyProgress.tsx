@@ -101,7 +101,7 @@ export const useJourneyProgress = () => {
 
       if (stepsError) throw stepsError;
 
-      const currentStage = (profile?.journey_stage as JourneyStage) || 'profile_setup';
+      const currentStage = 'profile_setup' as JourneyStage; // Default since journey_stage column doesn't exist
       const stageConfig = JOURNEY_STAGES[currentStage];
       
       // Calculate progress
@@ -109,8 +109,8 @@ export const useJourneyProgress = () => {
       let totalSteps = stageConfig.steps.length;
       
       if (currentStage === 'onboarding') {
-        currentStep = profile?.onboarding_step || 1;
-        totalSteps = profile?.total_onboarding_steps || 5;
+        currentStep = 1; // Default since onboarding_step column doesn't exist
+        totalSteps = 5; // Default since total_onboarding_steps column doesn't exist
       } else {
         // Count completed steps for current stage
         const completedInStage = completedSteps?.filter(step => step.stage === currentStage).length || 0;

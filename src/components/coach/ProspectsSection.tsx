@@ -143,7 +143,7 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
       
       const [profilesResult, discoveryCallsResult, selectionRequestsResult] = await Promise.all([
         supabase
-          .from('profiles')
+          .from('v_clients')
           .select('id, first_name, last_name, primary_goals, training_location_preference')
           .in('id', clientIds),
         supabase

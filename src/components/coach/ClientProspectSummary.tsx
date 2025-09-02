@@ -150,8 +150,8 @@ export function ClientProspectSummary({ onActiveClientsCountChange, onProspectsC
 
       // Get client profiles
       const clientIds = engagements.map(e => e.client_id);
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
+      const { data: profiles, error: profileError } = await supabase
+        .from('v_clients')
         .select('id, first_name, last_name, primary_goals, training_location_preference')
         .in('id', clientIds);
 
@@ -169,8 +169,8 @@ export function ClientProspectSummary({ onActiveClientsCountChange, onProspectsC
         .eq('trainer_id', profile.id)
         .in('client_id', clientIds);
 
-      if (profilesError || selectionsError || callsError) {
-        console.error('Error fetching related data:', { profilesError, selectionsError, callsError });
+      if (profileError || selectionsError || callsError) {
+        console.error('Error fetching related data:', { profileError, selectionsError, callsError });
       }
 
       // Merge all data into ClientRecord format
