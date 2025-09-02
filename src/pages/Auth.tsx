@@ -24,6 +24,7 @@ export default function Auth() {
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
   const [rememberMe, setRememberMe] = useState(false);
+  const [activeTab, setActiveTab] = useState('login');
   const [signupForm, setSignupForm] = useState({
     email: '',
     password: '',
@@ -144,10 +145,22 @@ export default function Auth() {
     
     if (error) {
       if (error.message.includes('already registered')) {
+        // Pre-populate login form with the email and switch to login tab
+        setLoginForm({ email: signupForm.email, password: '' });
+        setActiveTab('login');
         toast({
           title: "Account exists",
-          description: "An account with this email already exists. Please try logging in instead.",
+          description: "An account with this email already exists. Please log in below.",
           variant: "destructive",
+        });
+        // Clear signup form
+        setSignupForm({
+          email: '',
+          password: '',
+          confirmPassword: '',
+          firstName: '',
+          lastName: '',
+          userType: 'client'
         });
       } else {
         toast({
@@ -157,12 +170,22 @@ export default function Auth() {
         });
       }
     } else {
+      // Pre-populate login form with the email and switch to login tab
+      setLoginForm({ email: signupForm.email, password: '' });
+      setActiveTab('login');
       toast({
         title: "Account created!",
-        description: "Please check your email to confirm your account.",
+        description: "Please check your email to confirm your account, then log in below.",
       });
-      // Don't navigate immediately - let the useEffect in Index.tsx handle the redirect
-      // based on user profile/role after confirmation
+      // Clear signup form
+      setSignupForm({
+        email: '',
+        password: '',
+        confirmPassword: '',
+        firstName: '',
+        lastName: '',
+        userType: 'client'
+      });
     }
     setIsLoading(false);
   };
@@ -397,7 +420,7 @@ export default function Auth() {
                 </form>
               </div>
             ) : (
-              <Tabs defaultValue="login" className="w-full">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="login">Login</TabsTrigger>
                   <TabsTrigger value="signup">Sign Up</TabsTrigger>
