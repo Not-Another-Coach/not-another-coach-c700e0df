@@ -3521,7 +3521,6 @@ export type Database = {
         Row: {
           account_status: string | null
           admin_notes: string | null
-          admin_review_notes: string | null
           admin_verification_notes: string | null
           availability_schedule: Json | null
           before_after_photos: Json | null
@@ -3536,11 +3535,6 @@ export type Database = {
           card_last_four: string | null
           card_type: string | null
           certifying_body: string | null
-          client_journey_stage: string | null
-          client_personality_type: string[] | null
-          client_status: Database["public"]["Enums"]["client_status"] | null
-          client_survey_completed: boolean | null
-          client_survey_completed_at: string | null
           client_survey_step: number | null
           coaching_styles: string[] | null
           communication_restricted: boolean | null
@@ -3556,11 +3550,9 @@ export type Database = {
           discovery_call_price: number | null
           experience_level: string | null
           first_name: string | null
-          fitness_goals: string[] | null
           flexible_scheduling: boolean | null
           force_password_reset: boolean | null
           free_discovery_call: boolean | null
-          hourly_rate: number | null
           how_started: string | null
           id: string
           ideal_client_age_range: string | null
@@ -3569,7 +3561,6 @@ export type Database = {
           ideal_client_types: string[] | null
           internal_tags: string[] | null
           is_uk_based: boolean | null
-          is_verified: boolean | null
           journey_progress: Json | null
           journey_stage: string | null
           languages: string[] | null
@@ -3582,36 +3573,21 @@ export type Database = {
           marketing_unsubscribed_at: string | null
           max_clients: number | null
           messaging_support: boolean | null
-          motivation_factors: string[] | null
           onboarding_step: number | null
           open_to_virtual_coaching: boolean | null
           package_inclusions: Json | null
-          package_options: Json | null
           philosophy: string | null
           phone: string | null
-          preferred_coaching_style: string[] | null
-          preferred_package_type: string | null
-          preferred_time_slots: string[] | null
-          preferred_training_frequency: number | null
           pricing_unlock_required: boolean | null
-          primary_goals: string[] | null
           privacy_policy_version: string | null
           professional_milestones: Json | null
           profile_blocks: Json | null
           profile_photo_url: string | null
           profile_published: boolean | null
-          profile_setup_completed: boolean | null
           profile_setup_step: number | null
           proof_upload_urls: string[] | null
-          qualifications: string[] | null
-          quiz_answers: Json | null
-          quiz_completed: boolean | null
-          quiz_completed_at: string | null
-          rating: number | null
-          secondary_goals: string[] | null
           special_credentials: string[] | null
           specialization_description: string | null
-          specializations: string[] | null
           start_timeline: string | null
           suspended_at: string | null
           suspended_reason: string | null
@@ -3623,18 +3599,10 @@ export type Database = {
           total_client_survey_steps: number | null
           total_onboarding_steps: number | null
           total_profile_setup_steps: number | null
-          total_ratings: number | null
-          training_location_preference: string | null
-          training_types: string[] | null
           training_vibe: string | null
           updated_at: string
           uploaded_certificates: Json | null
           user_type: Database["public"]["Enums"]["user_type"]
-          verification_documents: Json | null
-          verification_requested_at: string | null
-          verification_status:
-            | Database["public"]["Enums"]["verification_status_enum"]
-            | null
           video_checkins: boolean | null
           waitlist_preference: string | null
           ways_of_working_client_expectations: Json | null
@@ -3652,7 +3620,6 @@ export type Database = {
         Insert: {
           account_status?: string | null
           admin_notes?: string | null
-          admin_review_notes?: string | null
           admin_verification_notes?: string | null
           availability_schedule?: Json | null
           before_after_photos?: Json | null
@@ -3667,11 +3634,6 @@ export type Database = {
           card_last_four?: string | null
           card_type?: string | null
           certifying_body?: string | null
-          client_journey_stage?: string | null
-          client_personality_type?: string[] | null
-          client_status?: Database["public"]["Enums"]["client_status"] | null
-          client_survey_completed?: boolean | null
-          client_survey_completed_at?: string | null
           client_survey_step?: number | null
           coaching_styles?: string[] | null
           communication_restricted?: boolean | null
@@ -3687,11 +3649,9 @@ export type Database = {
           discovery_call_price?: number | null
           experience_level?: string | null
           first_name?: string | null
-          fitness_goals?: string[] | null
           flexible_scheduling?: boolean | null
           force_password_reset?: boolean | null
           free_discovery_call?: boolean | null
-          hourly_rate?: number | null
           how_started?: string | null
           id: string
           ideal_client_age_range?: string | null
@@ -3700,7 +3660,6 @@ export type Database = {
           ideal_client_types?: string[] | null
           internal_tags?: string[] | null
           is_uk_based?: boolean | null
-          is_verified?: boolean | null
           journey_progress?: Json | null
           journey_stage?: string | null
           languages?: string[] | null
@@ -3713,36 +3672,21 @@ export type Database = {
           marketing_unsubscribed_at?: string | null
           max_clients?: number | null
           messaging_support?: boolean | null
-          motivation_factors?: string[] | null
           onboarding_step?: number | null
           open_to_virtual_coaching?: boolean | null
           package_inclusions?: Json | null
-          package_options?: Json | null
           philosophy?: string | null
           phone?: string | null
-          preferred_coaching_style?: string[] | null
-          preferred_package_type?: string | null
-          preferred_time_slots?: string[] | null
-          preferred_training_frequency?: number | null
           pricing_unlock_required?: boolean | null
-          primary_goals?: string[] | null
           privacy_policy_version?: string | null
           professional_milestones?: Json | null
           profile_blocks?: Json | null
           profile_photo_url?: string | null
           profile_published?: boolean | null
-          profile_setup_completed?: boolean | null
           profile_setup_step?: number | null
           proof_upload_urls?: string[] | null
-          qualifications?: string[] | null
-          quiz_answers?: Json | null
-          quiz_completed?: boolean | null
-          quiz_completed_at?: string | null
-          rating?: number | null
-          secondary_goals?: string[] | null
           special_credentials?: string[] | null
           specialization_description?: string | null
-          specializations?: string[] | null
           start_timeline?: string | null
           suspended_at?: string | null
           suspended_reason?: string | null
@@ -3754,18 +3698,10 @@ export type Database = {
           total_client_survey_steps?: number | null
           total_onboarding_steps?: number | null
           total_profile_setup_steps?: number | null
-          total_ratings?: number | null
-          training_location_preference?: string | null
-          training_types?: string[] | null
           training_vibe?: string | null
           updated_at?: string
           uploaded_certificates?: Json | null
           user_type: Database["public"]["Enums"]["user_type"]
-          verification_documents?: Json | null
-          verification_requested_at?: string | null
-          verification_status?:
-            | Database["public"]["Enums"]["verification_status_enum"]
-            | null
           video_checkins?: boolean | null
           waitlist_preference?: string | null
           ways_of_working_client_expectations?: Json | null
@@ -3783,7 +3719,6 @@ export type Database = {
         Update: {
           account_status?: string | null
           admin_notes?: string | null
-          admin_review_notes?: string | null
           admin_verification_notes?: string | null
           availability_schedule?: Json | null
           before_after_photos?: Json | null
@@ -3798,11 +3733,6 @@ export type Database = {
           card_last_four?: string | null
           card_type?: string | null
           certifying_body?: string | null
-          client_journey_stage?: string | null
-          client_personality_type?: string[] | null
-          client_status?: Database["public"]["Enums"]["client_status"] | null
-          client_survey_completed?: boolean | null
-          client_survey_completed_at?: string | null
           client_survey_step?: number | null
           coaching_styles?: string[] | null
           communication_restricted?: boolean | null
@@ -3818,11 +3748,9 @@ export type Database = {
           discovery_call_price?: number | null
           experience_level?: string | null
           first_name?: string | null
-          fitness_goals?: string[] | null
           flexible_scheduling?: boolean | null
           force_password_reset?: boolean | null
           free_discovery_call?: boolean | null
-          hourly_rate?: number | null
           how_started?: string | null
           id?: string
           ideal_client_age_range?: string | null
@@ -3831,7 +3759,6 @@ export type Database = {
           ideal_client_types?: string[] | null
           internal_tags?: string[] | null
           is_uk_based?: boolean | null
-          is_verified?: boolean | null
           journey_progress?: Json | null
           journey_stage?: string | null
           languages?: string[] | null
@@ -3844,36 +3771,21 @@ export type Database = {
           marketing_unsubscribed_at?: string | null
           max_clients?: number | null
           messaging_support?: boolean | null
-          motivation_factors?: string[] | null
           onboarding_step?: number | null
           open_to_virtual_coaching?: boolean | null
           package_inclusions?: Json | null
-          package_options?: Json | null
           philosophy?: string | null
           phone?: string | null
-          preferred_coaching_style?: string[] | null
-          preferred_package_type?: string | null
-          preferred_time_slots?: string[] | null
-          preferred_training_frequency?: number | null
           pricing_unlock_required?: boolean | null
-          primary_goals?: string[] | null
           privacy_policy_version?: string | null
           professional_milestones?: Json | null
           profile_blocks?: Json | null
           profile_photo_url?: string | null
           profile_published?: boolean | null
-          profile_setup_completed?: boolean | null
           profile_setup_step?: number | null
           proof_upload_urls?: string[] | null
-          qualifications?: string[] | null
-          quiz_answers?: Json | null
-          quiz_completed?: boolean | null
-          quiz_completed_at?: string | null
-          rating?: number | null
-          secondary_goals?: string[] | null
           special_credentials?: string[] | null
           specialization_description?: string | null
-          specializations?: string[] | null
           start_timeline?: string | null
           suspended_at?: string | null
           suspended_reason?: string | null
@@ -3885,18 +3797,10 @@ export type Database = {
           total_client_survey_steps?: number | null
           total_onboarding_steps?: number | null
           total_profile_setup_steps?: number | null
-          total_ratings?: number | null
-          training_location_preference?: string | null
-          training_types?: string[] | null
           training_vibe?: string | null
           updated_at?: string
           uploaded_certificates?: Json | null
           user_type?: Database["public"]["Enums"]["user_type"]
-          verification_documents?: Json | null
-          verification_requested_at?: string | null
-          verification_status?:
-            | Database["public"]["Enums"]["verification_status_enum"]
-            | null
           video_checkins?: boolean | null
           waitlist_preference?: string | null
           ways_of_working_client_expectations?: Json | null
