@@ -171,25 +171,27 @@ export function useUserRoles() {
     }
   };
 
-  const deleteUser = async (userId: string) => {
+  const deleteUser = async (userId: string, confirmationPhrase: string) => {
     if (!isAdmin) return { error: 'Unauthorized' };
 
     try {
-      // First delete from profiles (this will cascade to user_roles due to foreign key)
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('id', userId);
+      // Call the complete user deletion edge function
+      const { data, error } = await supabase.functions.invoke('complete-user-deletion', {
+        body: { userId, confirmationPhrase }
+      });
 
-      if (profileError) throw profileError;
+      if (error) throw error;
 
-      // Note: Deleting from auth.users requires admin privileges
-      // You may need to handle this through Supabase dashboard or admin API
+      if (!data.success) {
+        throw new Error(data.error || 'Deletion failed');
+      }
+
+      // Remove user from local state
+      setUsers(prev => prev.filter(user => user.id !== userId));
       
-      // Refresh users list
-      await fetchUsers();
-      return { success: true };
-    } catch (error) {
+      // Success toast will be handled by UserManagement component
+      return { success: true, data };
+    } catch (error: any) {
       console.error('Error deleting user:', error);
       return { error: error.message };
     }

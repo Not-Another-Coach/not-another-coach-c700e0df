@@ -90,6 +90,8 @@ export const UserManagement = () => {
   const [suspensionForm, setSuspensionForm] = useState({ reason: '', duration: '' });
   const [notesForm, setNotesForm] = useState('');
   const [communicationForm, setCommunicationForm] = useState('');
+  const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
+  const [deleteConfirmation, setDeleteConfirmation] = useState<string>('');
 
   useEffect(() => {
     if (isAdmin) {
@@ -146,18 +148,42 @@ export const UserManagement = () => {
   };
 
   const handleDeleteUser = async (userId: string) => {
-    const result = await deleteUser(userId);
-    if (result.error) {
+    if (deleteConfirmation !== 'DELETE USER PERMANENTLY') {
       toast({
-        title: "Error",
-        description: result.error,
-        variant: "destructive"
+        title: "Invalid confirmation",
+        description: "Please type exactly: DELETE USER PERMANENTLY",
+        variant: "destructive",
       });
-    } else {
-      toast({
-        title: "Success",
-        description: "User deleted successfully"
-      });
+      return;
+    }
+
+    setDeletingUserId(userId);
+    try {
+      const result = await deleteUser(userId, deleteConfirmation);
+      if (result.error) {
+        toast({
+          title: "Error deleting user",
+          description: result.error,
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "User completely deleted",
+          description: `User ${result.data.userEmail} has been permanently deleted. ${result.data.totalRecordsDeleted} records removed across the system.`,
+        });
+
+        // Show warning if auth deletion failed
+        if (result.data.warning) {
+          toast({
+            title: "Warning",
+            description: result.data.warning,
+            variant: "destructive",
+          });
+        }
+      }
+      setDeleteConfirmation('');
+    } finally {
+      setDeletingUserId(null);
     }
   };
 
@@ -642,21 +668,53 @@ export const UserManagement = () => {
                               <Trash2 className="w-3 h-3" />
                             </Button>
                           </AlertDialogTrigger>
-                          <AlertDialogContent>
+                          <AlertDialogContent className="max-w-2xl">
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Delete User</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This will permanently delete {user.first_name} {user.last_name} and all associated data. 
-                                This action cannot be undone.
+                              <AlertDialogTitle className="text-destructive">⚠️ PERMANENT USER DELETION</AlertDialogTitle>
+                              <AlertDialogDescription className="space-y-4">
+                                <div className="p-4 border border-destructive rounded-lg bg-destructive/10">
+                                  <p className="font-semibold text-destructive mb-2">This will PERMANENTLY DELETE:</p>
+                                  <ul className="text-sm space-y-1 list-disc list-inside">
+                                    <li>User account from authentication system</li>
+                                    <li>User profile and personal information</li>
+                                    <li>All conversations and messages</li>
+                                    <li>Discovery calls and feedback</li>
+                                    <li>Training relationships and progress</li>
+                                    <li>Templates, activities, and onboarding data</li>
+                                    <li>Analytics, streaks, and usage history</li>
+                                    <li>All associated files and media</li>
+                                  </ul>
+                                </div>
+                                
+                                <div className="space-y-2">
+                                  <p className="font-semibold">User Details:</p>
+                                  <p className="text-sm">Email: <span className="font-mono">{user.email}</span></p>
+                                  <p className="text-sm">Type: <span className="font-mono">{user.user_type}</span></p>
+                                  <p className="text-sm">Name: <span className="font-mono">{user.first_name} {user.last_name}</span></p>
+                                </div>
+
+                                <div className="space-y-2">
+                                  <p className="font-semibold text-destructive">
+                                    Type exactly "DELETE USER PERMANENTLY" to confirm:
+                                  </p>
+                                  <Input
+                                    type="text"
+                                    value={deleteConfirmation}
+                                    onChange={(e) => setDeleteConfirmation(e.target.value)}
+                                    placeholder="DELETE USER PERMANENTLY"
+                                    className="font-mono text-sm"
+                                  />
+                                </div>
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction 
+                              <AlertDialogCancel onClick={() => setDeleteConfirmation('')}>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
                                 onClick={() => handleDeleteUser(user.id)}
-                                className="bg-red-600 hover:bg-red-700"
+                                disabled={deletingUserId === user.id || deleteConfirmation !== 'DELETE USER PERMANENTLY'}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                               >
-                                Delete User
+                                {deletingUserId === user.id ? "Deleting..." : "DELETE USER PERMANENTLY"}
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
