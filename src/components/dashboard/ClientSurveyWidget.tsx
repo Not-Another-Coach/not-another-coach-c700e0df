@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { useProfile } from "@/hooks/useProfile";
+import { useClientProfile } from "@/hooks/useClientProfile";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,7 +23,7 @@ interface ClientSurveyWidgetProps {
 }
 
 export function ClientSurveyWidget({ profile }: ClientSurveyWidgetProps) {
-  const { updateProfile } = useProfile();
+  const { updateProfile } = useClientProfile();
   const { toast } = useToast();
   const navigate = useNavigate();
 

@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { useProfile } from '@/hooks/useProfile';
+import { useClientProfile } from '@/hooks/useClientProfile';
 import { useEnhancedTrainerMatching } from '@/hooks/useEnhancedTrainerMatching';
 import { useSavedTrainers } from '@/hooks/useSavedTrainers';
 import { useJourneyProgress } from '@/hooks/useJourneyProgress';
@@ -86,7 +86,7 @@ const sampleTrainers: Trainer[] = [
 export default function Discovery() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { profile } = useProfile();
+  const { profile } = useClientProfile();
   const { saveTrainer } = useSavedTrainers();
   const { updateProgress, advanceToStage } = useJourneyProgress();
   const { progress: journeyProgress } = useJourneyProgress();
@@ -97,28 +97,28 @@ export default function Discovery() {
 
   // Get matched trainers with enhanced algorithm using client survey data
   const clientSurveyData = profile ? {
-    primary_goals: (profile as any).primary_goals,
-    secondary_goals: (profile as any).secondary_goals,
-    training_location_preference: (profile as any).training_location_preference,
-    open_to_virtual_coaching: (profile as any).open_to_virtual_coaching,
-    preferred_training_frequency: (profile as any).preferred_training_frequency,
-    preferred_time_slots: (profile as any).preferred_time_slots,
-    start_timeline: (profile as any).start_timeline,
-    preferred_coaching_style: (profile as any).preferred_coaching_style,
-    motivation_factors: (profile as any).motivation_factors,
-    client_personality_type: (profile as any).client_personality_type,
-    experience_level: (profile as any).experience_level,
-    preferred_package_type: (profile as any).preferred_package_type,
-    budget_range_min: (profile as any).budget_range_min,
-    budget_range_max: (profile as any).budget_range_max,
-    budget_flexibility: (profile as any).budget_flexibility,
-    waitlist_preference: (profile as any).waitlist_preference,
-    flexible_scheduling: (profile as any).flexible_scheduling,
+    primary_goals: profile.primary_goals,
+    secondary_goals: profile.secondary_goals,
+    training_location_preference: profile.training_location_preference as "hybrid" | "in-person" | "online" || "hybrid",
+    open_to_virtual_coaching: profile.open_to_virtual_coaching,
+    preferred_training_frequency: profile.preferred_training_frequency ? parseInt(profile.preferred_training_frequency) || null : null,
+    preferred_time_slots: profile.preferred_time_slots,
+    start_timeline: profile.start_timeline as "urgent" | "next_month" | "flexible" || "flexible",
+    preferred_coaching_style: profile.preferred_coaching_style,
+    motivation_factors: profile.motivation_factors,
+    client_personality_type: profile.client_personality_type,
+    experience_level: profile.experience_level as "beginner" | "intermediate" | "advanced" || "beginner",
+    preferred_package_type: profile.preferred_package_type as "ongoing" | "short_term" | "single_session" || "ongoing",
+    budget_range_min: profile.budget_range_min,
+    budget_range_max: profile.budget_range_max,
+    budget_flexibility: profile.budget_flexibility as "flexible" | "strict" | "negotiable" || "flexible",
+    waitlist_preference: (profile.waitlist_preference ? "asap" : "quality_over_speed") as "asap" | "quality_over_speed",
+    flexible_scheduling: profile.flexible_scheduling,
   } : undefined;
 
   const { matchedTrainers, topMatches, goodMatches } = useEnhancedTrainerMatching(
     trainersToShow, 
-    profile?.quiz_answers as any,
+    profile?.quiz_answers,
     clientSurveyData
   );
 

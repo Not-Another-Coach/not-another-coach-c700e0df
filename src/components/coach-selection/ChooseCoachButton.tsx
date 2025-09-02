@@ -5,7 +5,7 @@ import { Heart, Clock, CheckCircle } from 'lucide-react';
 import { ChooseCoachModal } from './ChooseCoachModal';
 import { PaymentForm } from '@/components/payment/PaymentForm';
 import { useCoachSelection } from '@/hooks/useCoachSelection';
-import { useProfile } from '@/hooks/useProfile';
+import { useUserTypeChecks } from '@/hooks/useUserType';
 import { useEngagementStage, EngagementStage } from '@/hooks/useEngagementStage';
 import { useMessageExchange } from '@/hooks/useMessageExchange';
 
@@ -29,7 +29,7 @@ export const ChooseCoachButton = ({
   onSuccess,
   className 
 }: ChooseCoachButtonProps) => {
-  const { profile } = useProfile();
+  const { isClient } = useUserTypeChecks();
   const { getSelectionRequest, acceptAlternativePackage } = useCoachSelection();
   const { updateEngagementStage } = useEngagementStage(trainer.id);
   const { hasExchangedMessages } = useMessageExchange(trainer.id);
@@ -38,11 +38,10 @@ export const ChooseCoachButton = ({
   const [selectionRequest, setSelectionRequest] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
-  const isClient = profile?.user_type === 'client';
   // Show button when client can proceed with coach selection: 
   // - Later stages (agreed, getting_to_know_your_coach, discovery_completed, discovery_in_progress)
   // - OR shortlisted with message exchange (meaningful interaction has occurred)
-  const canChooseCoach = isClient && (
+  const canChooseCoach = isClient() && (
     stage === 'agreed' || 
     stage === 'getting_to_know_your_coach' || 
     stage === 'discovery_completed' || 
@@ -52,7 +51,7 @@ export const ChooseCoachButton = ({
 
   useEffect(() => {
     const fetchSelectionRequest = async () => {
-      if (!isClient || !canChooseCoach) return;
+      if (!isClient() || !canChooseCoach) return;
       
       setLoading(true);
       const result = await getSelectionRequest(trainer.id);
@@ -65,7 +64,7 @@ export const ChooseCoachButton = ({
     fetchSelectionRequest();
   }, [trainer.id, isClient, canChooseCoach, getSelectionRequest]);
 
-  if (!isClient || !canChooseCoach) {
+  if (!isClient() || !canChooseCoach) {
     return null;
   }
 

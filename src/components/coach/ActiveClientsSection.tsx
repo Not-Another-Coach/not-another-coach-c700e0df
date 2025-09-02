@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { useProfile } from '@/hooks/useProfile';
+import { useUserTypeChecks } from '@/hooks/useUserType';
+import { useTrainerProfile } from '@/hooks/useTrainerProfile';
 import { format } from 'date-fns';
 import { Users, MessageCircle, Calendar, UserCheck, Plus, Edit2 } from 'lucide-react';
 import { DiscoveryCallNotesTaker } from '@/components/DiscoveryCallNotesTaker';
@@ -57,7 +58,8 @@ interface ActiveClientsSectionProps {
 }
 
 export function ActiveClientsSection({ onCountChange }: ActiveClientsSectionProps) {
-  const { profile } = useProfile();
+  const { profile } = useTrainerProfile();
+  const { isTrainer } = useUserTypeChecks();
   const { user } = useAuth();
   const { templates, loading: templatesLoading } = useTemplateBuilder();
   const { hasActiveAssignment, getActiveAssignmentForClient, expireAssignment } = useTemplateAssignments();

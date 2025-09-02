@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Heart, MessageCircle, DollarSign, Clock, CheckCircle } from 'lucide-react';
 import { useCoachSelection } from '@/hooks/useCoachSelection';
-import { useProfile } from '@/hooks/useProfile';
+import { useUserTypeChecks } from '@/hooks/useUserType';
 import { toast } from 'sonner';
 
 interface Package {
@@ -39,7 +39,7 @@ export const ChooseCoachModal = ({
   trainer, 
   onSuccess 
 }: ChooseCoachModalProps) => {
-  const { profile } = useProfile();
+  const { isClient } = useUserTypeChecks();
   const { createSelectionRequest, loading } = useCoachSelection();
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
   const [clientMessage, setClientMessage] = useState('');
@@ -81,9 +81,7 @@ export const ChooseCoachModal = ({
     }
   };
 
-  const isClient = profile?.user_type === 'client';
-
-  if (!isClient) {
+  if (!isClient()) {
     return null;
   }
 

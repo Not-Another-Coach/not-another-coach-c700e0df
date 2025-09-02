@@ -132,7 +132,7 @@ const features = [
       {
         name: 'Profile Status Management',
         description: 'Dynamic profile state management and visibility control',
-        components: ['ProfileManagementSection', 'VisibilitySettingsSection', 'useProfile'],
+        components: ['ProfileManagementSection', 'VisibilitySettingsSection', 'useProfileByType', 'useTrainerProfile', 'useClientProfile'],
         workflow: [
           'Profile creation starts in draft state',
           'Profile setup completion enables publishing',

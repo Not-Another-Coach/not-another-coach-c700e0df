@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Loader2, Save, Check, StickyNote } from 'lucide-react';
 import { useDiscoveryCallNotes } from '@/hooks/useDiscoveryCallNotes';
-import { useProfile } from '@/hooks/useProfile';
+import { useUserTypeChecks } from '@/hooks/useUserType';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
@@ -21,7 +21,7 @@ export function DiscoveryCallNotesTaker({
   className = "",
   compact = false 
 }: DiscoveryCallNotesTakerProps) {
-  const { profile } = useProfile();
+  const { isTrainer } = useUserTypeChecks();
   const { note, loading, saving, saveNote } = useDiscoveryCallNotes(clientId);
   const [content, setContent] = useState('');
   const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null);
@@ -77,7 +77,7 @@ export function DiscoveryCallNotesTaker({
   const shouldShowSaved = lastSaved && !saving && !hasUnsavedChanges;
 
   // Only show for trainers
-  if (profile?.user_type !== 'trainer') {
+  if (!isTrainer()) {
     return null;
   }
 

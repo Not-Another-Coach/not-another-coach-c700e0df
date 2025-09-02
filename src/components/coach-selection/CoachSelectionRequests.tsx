@@ -8,11 +8,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CheckCircle, X, MessageSquare, DollarSign, Clock } from 'lucide-react';
 import { useCoachSelection, CoachSelectionRequest } from '@/hooks/useCoachSelection';
-import { useProfile } from '@/hooks/useProfile';
+import { useUserTypeChecks } from '@/hooks/useUserType';
+import { useTrainerProfile } from '@/hooks/useTrainerProfile';
 import { formatDistanceToNow } from 'date-fns';
 
 export const CoachSelectionRequests = () => {
-  const { profile } = useProfile();
+  const { isTrainer } = useUserTypeChecks();
+  const { profile } = useTrainerProfile();
   const { getPendingRequests, respondToRequest, loading } = useCoachSelection();
   const [requests, setRequests] = useState<any[]>([]);
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
@@ -21,13 +23,13 @@ export const CoachSelectionRequests = () => {
   const [responseMessage, setResponseMessage] = useState('');
   const [alternativePackage, setAlternativePackage] = useState<any>(null);
 
-  const isTrainer = profile?.user_type === 'trainer';
+  const isTrainerUser = isTrainer();
 
   useEffect(() => {
-    if (isTrainer) {
+    if (isTrainerUser) {
       fetchRequests();
     }
-  }, [isTrainer]);
+  }, [isTrainerUser]);
 
   const fetchRequests = async () => {
     const result = await getPendingRequests();
@@ -60,7 +62,7 @@ export const CoachSelectionRequests = () => {
     }
   };
 
-  if (!isTrainer) {
+  if (!isTrainerUser) {
     return null;
   }
 
@@ -283,7 +285,7 @@ export const CoachSelectionRequests = () => {
                       <SelectValue placeholder="Select a package" />
                     </SelectTrigger>
                     <SelectContent>
-                      {(profile as any)?.package_options?.map((pkg: any) => (
+                      {profile?.package_options?.map((pkg: any) => (
                         <SelectItem 
                           key={pkg.id} 
                           value={JSON.stringify({ id: pkg.id, name: pkg.name, price: pkg.price })}

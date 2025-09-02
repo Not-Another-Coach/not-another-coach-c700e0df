@@ -21,7 +21,29 @@ const hooks = [
         usage: 'Authentication flows, protected routes, user session management'
       },
       {
-        name: 'useProfile',
+        name: 'useTrainerProfile',
+        file: 'useTrainerProfile.tsx',
+        description: 'Hook for fetching and updating trainer profile data from v_trainers view',
+        returnType: 'TrainerProfile',
+        features: [
+          'Fetches trainer-specific data',
+          'Provides updateProfile function',
+          'Returns loading states'
+        ]
+      },
+      {
+        name: 'useClientProfile', 
+        file: 'useClientProfile.tsx',
+        description: 'Hook for fetching and updating client profile data from v_clients view',
+        returnType: 'ClientProfile',
+        features: [
+          'Fetches client-specific data',
+          'Provides updateProfile function', 
+          'Returns loading states'
+        ]
+      },
+      {
+        name: 'useProfileByType',
         file: 'useProfile.tsx',
         description: 'Handles user profile data and updates',
         returns: ['profile', 'loading', 'updateProfile', 'refreshProfile'],
