@@ -15,6 +15,7 @@ import { User, Settings, LogOut, Key, Edit } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { ProfileViewEdit } from "@/components/dashboard/ProfileViewEdit";
 
 interface ProfileDropdownProps {
@@ -26,11 +27,11 @@ interface ProfileDropdownProps {
     quiz_completed?: boolean;
     email?: string;
   };
-  onSignOut: () => void;
 }
 
-export const ProfileDropdown = ({ profile, onSignOut }: ProfileDropdownProps) => {
+export const ProfileDropdown = ({ profile }: ProfileDropdownProps) => {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   const [showProfileModal, setShowProfileModal] = useState(false);
   
   const getInitials = () => {
@@ -85,6 +86,22 @@ export const ProfileDropdown = ({ profile, onSignOut }: ProfileDropdownProps) =>
 
   const handleUpdatePreferences = () => {
     navigate('/client-survey');
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Signed out successfully",
+        description: "You have been logged out.",
+      });
+    } catch (error) {
+      toast({
+        title: "Sign out failed",
+        description: "There was an error signing you out. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -180,7 +197,7 @@ export const ProfileDropdown = ({ profile, onSignOut }: ProfileDropdownProps) =>
         <DropdownMenuSeparator />
         <DropdownMenuItem 
           className="cursor-pointer text-red-600 focus:text-red-600"
-          onClick={onSignOut}
+          onClick={handleSignOut}
         >
           <LogOut className="mr-2 h-4 w-4" />
           <span>Sign Out</span>

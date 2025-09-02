@@ -8,7 +8,6 @@ import { Shield, ChevronRight, Home, Settings, Users, UserSearch, CreditCard } f
 
 interface ClientHeaderProps {
   profile: any;
-  onSignOut: () => void;
   activeTab?: string;
   onTabChange?: (tab: string) => void;
   showNavigation?: boolean;
@@ -16,8 +15,7 @@ interface ClientHeaderProps {
 }
 
 export function ClientHeader({ 
-  profile, 
-  onSignOut, 
+  profile,
   activeTab = "summary", 
   onTabChange, 
   showNavigation = true,
@@ -95,8 +93,7 @@ export function ClientHeader({
           )}
           
           <ProfileDropdown 
-            profile={profile} 
-            onSignOut={onSignOut}
+            profile={profile}
           />
         </div>
       </div>

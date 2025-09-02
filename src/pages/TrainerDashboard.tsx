@@ -76,7 +76,7 @@ import { MembershipSettings } from "@/components/payment-statements/MembershipSe
 import { usePaymentStatements } from "@/hooks/usePaymentStatements";
 
 const TrainerDashboard = () => {
-  const { user, signOut, loading } = useAuth();
+  const { user, loading } = useAuth();
   const { profile, loading: profileLoading, updateProfile } = useTrainerProfile();
   const { analytics, shortlistedClients, shortlistedStats, loading: analyticsLoading } = useCoachAnalytics(profile?.id);
   const { isAdmin } = useUserRoles();
@@ -114,11 +114,6 @@ const TrainerDashboard = () => {
       navigate('/auth');
     }
   }, [user, loading, navigate]);
-
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/auth');
-  };
 
   const calculateProfileCompletion = () => {
     if (!profile) return 0;
@@ -237,8 +232,7 @@ const TrainerDashboard = () => {
             </Button>
             {profile && (
               <ProfileDropdown 
-                profile={profile} 
-                onSignOut={handleSignOut}
+                profile={profile}
               />
             )}
           </div>

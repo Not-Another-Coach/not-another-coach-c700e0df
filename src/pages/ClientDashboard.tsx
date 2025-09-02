@@ -32,7 +32,7 @@ import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function ClientDashboard() {
-  const { user, signOut, loading } = useAuth();
+  const { user, loading } = useAuth();
   const { profile, loading: profileLoading } = useClientProfile();
   
   const { isAdmin } = useUserRoles();
@@ -113,11 +113,6 @@ export default function ClientDashboard() {
     }
   }, [user, profile, loading, profileLoading, navigate]);
 
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/auth');
-  };
-
   if (loading || profileLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -136,7 +131,6 @@ export default function ClientDashboard() {
       {/* Header */}
       <ClientHeader 
         profile={profile}
-        onSignOut={handleSignOut}
         activeTab={activeTab}
         onTabChange={setActiveTab}
         isActiveClient={isActiveClient}

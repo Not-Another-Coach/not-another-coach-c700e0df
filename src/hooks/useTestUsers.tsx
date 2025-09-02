@@ -53,13 +53,13 @@ export const useTestUsers = () => {
       
       // First try the new admin-only RPC that combines profiles + emails
       const { data: adminUserList, error: adminListError } = await supabase
-        .rpc('list_users_minimal_admin');
+        .rpc('list_users_minimal_admin', {});
         
       if (adminListError) {
         console.log('Admin list function failed (not admin or error):', adminListError);
         // Fallback to development function for email only
         const { data: devEmails, error: devEmailError } = await supabase
-          .rpc('get_user_emails_for_development');
+          .rpc('get_user_emails_for_development', {});
           
         if (devEmailError) {
           console.error('Development email fetch failed:', devEmailError);

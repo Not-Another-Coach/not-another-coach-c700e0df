@@ -62,7 +62,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
+    // Clear any saved credentials
+    localStorage.removeItem('savedCredentials');
+    localStorage.removeItem('rememberMe');
+    
     const { error } = await supabase.auth.signOut();
+    
+    if (error) {
+      console.error('Sign out error:', error);
+    } else {
+      // Force a page reload to ensure complete state reset
+      window.location.href = '/auth';
+    }
+    
     return { error };
   };
 
