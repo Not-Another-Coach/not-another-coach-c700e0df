@@ -44,10 +44,24 @@ const hooks = [
       },
       {
         name: 'useProfileByType',
-        file: 'useProfile.tsx',
-        description: 'Handles user profile data and updates',
-        returns: ['profile', 'loading', 'updateProfile', 'refreshProfile'],
-        usage: 'Profile management, user data display, profile updates'
+        file: 'useProfileByType.tsx',
+        description: 'Conditionally fetches trainer or client profile based on user type',
+        returns: ['profile', 'loading', 'updateProfile', 'userType'],
+        usage: 'Shared components that work with both trainer and client profiles'
+      },
+      {
+        name: 'useUserType',
+        file: 'useUserType.tsx',
+        description: 'Lightweight hook to get user type without loading full profile data',
+        returns: ['user_type', 'loading'],
+        usage: 'Type checking, conditional rendering, role-based navigation'
+      },
+      {
+        name: 'useUserTypeChecks',
+        file: 'useUserType.tsx',
+        description: 'Utility functions for user type checking',
+        returns: ['isTrainer', 'isClient', 'isAdmin', 'user_type'],
+        usage: 'Simple type checks, conditional logic without full profile data'
       },
       {
         name: 'useUserRoles',
