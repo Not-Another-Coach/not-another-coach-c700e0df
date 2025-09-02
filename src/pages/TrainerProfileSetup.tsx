@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useProfile } from "@/hooks/useProfile";
+import { useTrainerProfile } from "@/hooks/useTrainerProfile";
+import { useUserTypeChecks } from "@/hooks/useUserType";
 import { usePackageWaysOfWorking } from "@/hooks/usePackageWaysOfWorking";
 import { useInstagramConnection } from "@/hooks/useInstagramConnection";
 import { useToast } from "@/hooks/use-toast";
@@ -40,7 +41,8 @@ import { VerificationSection } from "@/components/trainer-setup/VerificationSect
 
 const TrainerProfileSetup = () => {
   const { user, loading } = useAuth();
-  const { profile, loading: profileLoading, isTrainer, updateProfile } = useProfile();
+  const { profile, loading: profileLoading, updateProfile } = useTrainerProfile();
+  const { isTrainer } = useUserTypeChecks();
   const { packageWorkflows, loading: waysOfWorkingLoading } = usePackageWaysOfWorking();
   const { isConnected: isInstagramConnected } = useInstagramConnection();
   const navigate = useNavigate();
@@ -58,63 +60,48 @@ const TrainerProfileSetup = () => {
   const initialFormData = useRef<typeof formData | null>(null);
 
   const [formData, setFormData] = useState({
-    // Basic Info
+    // Basic Info - these exist in TrainerProfile
     first_name: "",
     last_name: "",
     tagline: "",
     bio: "",
-    how_started: "",
-    philosophy: "",
-    specialization_description: "",
-    professional_milestones: [] as any[],
     profile_photo_url: "",
     
-    // Qualifications
+    // Qualifications - these exist in TrainerProfile
     qualifications: [] as string[],
     
-    // Expertise & Services
+    // Expertise & Services - these exist in TrainerProfile
     specializations: [] as string[],
     training_types: [] as string[],
     location: "",
-    delivery_format: "hybrid" as "in-person" | "online" | "hybrid",
+    delivery_format: "hybrid" as string,
     
-    // Client Fit Preferences
-    ideal_client_age_range: "",
-    ideal_client_fitness_level: "",
-    ideal_client_personality: "",
-    training_vibe: "",
-    max_clients: null as number | null,
-    
-    
-    // Rates & Discovery Calls
+    // Rates & Discovery Calls - these exist in TrainerProfile
     hourly_rate: null as number | null,
-    class_rate: null as number | null,
     package_options: [],
     free_discovery_call: false,
     calendar_link: "",
     
-    
-    // Communication Style
+    // Communication Style - this exists in TrainerProfile as string[]
     communication_style: "",
     video_checkins: false,
     messaging_support: false,
     weekly_programming_only: false,
     
-    // Testimonials & Case Studies
+    // Testimonials - this exists in TrainerProfile
     testimonials: [],
     
-    // Ways of Working
+    // Ways of Working - these exist in TrainerProfile
     ways_of_working_onboarding: [],
     ways_of_working_first_week: [],
-    ways_of_working_ongoing_structure: [],
-    ways_of_working_tracking_tools: [],
-    ways_of_working_client_expectations: [],
+    ways_of_working_ongoing: [],
+    ways_of_working_tracking: [],
+    ways_of_working_expectations: [],
     ways_of_working_what_i_bring: [],
-    ways_of_working_visibility: "public" as "public" | "post_match",
-    ways_of_working_completed: false,
     
-    // Profile Management
+    // Profile Management - this exists in TrainerProfile
     terms_agreed: false,
+    max_clients: null as number | null,
   });
 
   const totalSteps = 13;
@@ -158,10 +145,6 @@ const TrainerProfileSetup = () => {
         last_name: profile.last_name || "",
         tagline: profile.tagline || "",
         bio: profile.bio || "",
-        how_started: (profile as any).how_started || "",
-        philosophy: (profile as any).philosophy || "",
-        specialization_description: (profile as any).specialization_description || "",
-        professional_milestones: (profile as any).professional_milestones || [],
         profile_photo_url: profile.profile_photo_url || "",
         qualifications: profile.qualifications || [],
         specializations: profile.specializations || [],
@@ -170,32 +153,24 @@ const TrainerProfileSetup = () => {
         hourly_rate: profile.hourly_rate,
         terms_agreed: profile.terms_agreed || false,
         // Initialize ways of working data from profile
-        ways_of_working_onboarding: (profile as any).ways_of_working_onboarding || [],
-        ways_of_working_first_week: (profile as any).ways_of_working_first_week || [],
-        ways_of_working_ongoing_structure: (profile as any).ways_of_working_ongoing_structure || [],
-        ways_of_working_tracking_tools: (profile as any).ways_of_working_tracking_tools || [],
-        ways_of_working_client_expectations: (profile as any).ways_of_working_client_expectations || [],
-        ways_of_working_what_i_bring: (profile as any).ways_of_working_what_i_bring || [],
-        ways_of_working_visibility: (profile as any).ways_of_working_visibility || "public",
-        ways_of_working_completed: (profile as any).ways_of_working_completed || false,
-        // Initialize other missing fields
-        ideal_client_age_range: (profile as any).ideal_client_age_range || "",
-        ideal_client_fitness_level: (profile as any).ideal_client_fitness_level || "",
-        ideal_client_personality: (profile as any).ideal_client_personality || "",
-        training_vibe: (profile as any).training_vibe || "",
-        max_clients: (profile as any).max_clients,
-        
-        class_rate: (profile as any).class_rate,
-        package_options: (profile as any).package_options || [],
-        free_discovery_call: (profile as any).free_discovery_call || false,
-        calendar_link: (profile as any).calendar_link || "",
-        
-        communication_style: (profile as any).communication_style || "",
-        video_checkins: (profile as any).video_checkins || false,
-        messaging_support: (profile as any).messaging_support || false,
-        weekly_programming_only: (profile as any).weekly_programming_only || false,
-        testimonials: (profile as any).testimonials || [],
-        delivery_format: (profile as any).delivery_format || "hybrid",
+        ways_of_working_onboarding: profile.ways_of_working_onboarding || [],
+        ways_of_working_first_week: profile.ways_of_working_first_week || [],
+        ways_of_working_ongoing: profile.ways_of_working_ongoing || [],
+        ways_of_working_tracking: profile.ways_of_working_tracking || [],
+        ways_of_working_expectations: profile.ways_of_working_expectations || [],
+        ways_of_working_what_i_bring: profile.ways_of_working_what_i_bring || [],
+        ways_of_working_completed: false,
+        // Initialize other fields
+        max_clients: profile.max_clients,
+        package_options: profile.package_options || [],
+        free_discovery_call: profile.free_discovery_call || false,
+        calendar_link: profile.calendar_link || "",
+        communication_style: Array.isArray(profile.communication_style) ? profile.communication_style.join(", ") : profile.communication_style || "",
+        video_checkins: profile.video_checkins || false,
+        messaging_support: profile.messaging_support || false,
+        weekly_programming_only: profile.weekly_programming_only || false,
+        testimonials: profile.testimonials || [],
+        delivery_format: Array.isArray(profile.delivery_format) ? profile.delivery_format[0] || "hybrid" : profile.delivery_format || "hybrid",
       };
       
       setFormData(prev => ({ ...prev, ...initialData }));
@@ -385,50 +360,18 @@ const TrainerProfileSetup = () => {
     try {
       setIsLoading(true);
       
-      // Whitelist of valid columns that exist in the profiles table
-      const validProfileFields = [
-        'first_name', 'last_name', 'bio', 'how_started', 'philosophy', 
-        'specialization_description', 'professional_milestones', 'profile_photo_url', 'location',
-        'specializations', 'qualifications', 'tagline', 'hourly_rate', 'class_rate',
-        'training_types', 'terms_agreed', 'profile_setup_completed',
-        'user_type', 'is_verified', 'rating', 'total_ratings',
-        'fitness_goals', 'quiz_completed', 'quiz_answers', 'quiz_completed_at',
-        'verification_status', 'profile_published', 'before_after_photos',
-        'max_clients', 'package_options',
-        'free_discovery_call', 'testimonials', 'profile_setup_step',
-        'total_profile_setup_steps', 'package_inclusions',
-        'is_uk_based', 'works_bank_holidays', 'uploaded_certificates',
-        'special_credentials', 'internal_tags', 'admin_verification_notes',
-        'ideal_client_types', 'coaching_styles', 'languages', 'journey_progress',
-        'onboarding_step', 'total_onboarding_steps', 'year_certified',
-        'delivery_format', 'journey_stage', 'certifying_body', 'proof_upload_urls',
-        'ideal_client_age_range', 'ideal_client_fitness_level', 
-        'ideal_client_personality', 'training_vibe', 'calendar_link',
-         'communication_style', 'video_checkins',
-        'messaging_support', 'weekly_programming_only', 'ways_of_working_onboarding',
-        'ways_of_working_first_week', 'ways_of_working_ongoing_structure',
-        'ways_of_working_tracking_tools', 'ways_of_working_client_expectations',
-        'ways_of_working_what_i_bring', 'ways_of_working_visibility',
-        'ways_of_working_completed'
-      ];
+      // Convert form data to match TrainerProfile interface types
+      const saveData = {
+        ...formData,
+        // Convert delivery_format from string to array
+        delivery_format: [formData.delivery_format],
+        // Convert communication_style from string to array
+        communication_style: formData.communication_style.split(',').map(s => s.trim()).filter(s => s),
+      };
       
-      // Only include fields that exist in the database schema
-      const cleanedFormData = Object.fromEntries(
-        Object.entries(formData)
-          .filter(([key, value]) => 
-            validProfileFields.includes(key) && 
-            value !== undefined && 
-            value !== null &&
-            value !== "" // Filter out empty strings that could cause date parsing errors
-          )
-          .map(([key, value]) => {
-            return [key, value];
-          })
-      );
+      console.log('Saving trainer profile data:', saveData);
       
-      console.log('Cleaned form data:', cleanedFormData);
-      
-      const result = await updateProfile(cleanedFormData);
+      const result = await updateProfile(saveData);
       
       if (result && 'error' in result && result.error) {
         throw new Error(result.error.message || 'Failed to save profile');
@@ -528,7 +471,14 @@ const TrainerProfileSetup = () => {
             description: "Your profile is ready. Submit for verification to go live.",
           });
         } else {
-          await updateProfile({ ...formData, profile_setup_completed: true });
+          // Convert form data for profile completion
+          const completionData = {
+            ...formData,
+            delivery_format: [formData.delivery_format],
+            communication_style: formData.communication_style.split(',').map(s => s.trim()).filter(s => s),
+            profile_setup_completed: true
+          };
+          await updateProfile(completionData);
           toast({
             title: "Profile completed!",
             description: "Your trainer profile is now live and visible to clients.",

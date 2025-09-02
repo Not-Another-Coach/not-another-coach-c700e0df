@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useProfile } from "@/hooks/useProfile";
+import { useClientProfile } from "@/hooks/useClientProfile";
+import { useUserTypeChecks } from "@/hooks/useUserType";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,7 +22,8 @@ import { AvailabilitySection } from "@/components/client-survey/AvailabilitySect
 
 const ClientSurvey = () => {
   const { user, loading } = useAuth();
-  const { profile, loading: profileLoading, updateProfile } = useProfile();
+  const { profile, loading: profileLoading, updateProfile } = useClientProfile();
+  const { isClient } = useUserTypeChecks();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -36,13 +38,13 @@ const ClientSurvey = () => {
     secondary_goals: [] as string[],
     
     // Training location and format
-    training_location_preference: null as "in-person" | "online" | "hybrid" | null,
+    training_location_preference: null as string | null,
     open_to_virtual_coaching: false,
     
     // Training frequency and scheduling
-    preferred_training_frequency: null as number | null,
+    preferred_training_frequency: null as string | null,
     preferred_time_slots: [] as string[],
-    start_timeline: null as "urgent" | "next_month" | "flexible" | null,
+    start_timeline: null as string | null,
     
     // Coaching style preferences
     preferred_coaching_style: [] as string[],
@@ -50,22 +52,20 @@ const ClientSurvey = () => {
     
     // Client self-description
     client_personality_type: [] as string[],
-    experience_level: "beginner" as "beginner" | "intermediate" | "advanced",
+    experience_level: "beginner" as string,
     
     // Package and budget preferences
-    preferred_package_type: null as "ongoing" | "short_term" | "single_session" | null,
+    preferred_package_type: null as string | null,
     budget_range_min: null as number | null,
     budget_range_max: null as number | null,
-    budget_flexibility: "flexible" as "strict" | "flexible" | "negotiable",
+    budget_flexibility: "flexible" as string,
     
     // Waitlist and availability preferences
-    waitlist_preference: null as "asap" | "quality_over_speed" | null,
+    waitlist_preference: null as boolean | null,
     flexible_scheduling: false,
     
     // Survey completion tracking
     client_survey_completed: false,
-    client_survey_step: 1,
-    total_client_survey_steps: 8,
   });
 
   const totalSteps = 8;
@@ -84,18 +84,18 @@ const ClientSurvey = () => {
   // Redirect if not client or if survey is already completed
   useEffect(() => {
     if (!loading && !profileLoading && user && profile) {
-      if (profile.user_type !== 'client') {
+      if (!isClient()) {
         navigate('/');
         return;
       }
       
       // Only redirect if both survey completion flags are true to avoid loops
-      if ((profile as any).client_survey_completed && profile.quiz_completed) {
+      if (profile.client_survey_completed && profile.quiz_completed) {
         navigate('/client/dashboard');
         return;
       }
     }
-  }, [user, profile, loading, profileLoading, navigate]);
+  }, [user, profile, loading, profileLoading, navigate, isClient]);
 
   // Redirect to auth if not logged in
   useEffect(() => {
@@ -108,33 +108,29 @@ const ClientSurvey = () => {
   useEffect(() => {
     if (profile && profile.id && !hasInitialized.current) {
       hasInitialized.current = true;
-      const profileData = profile as any;
       setFormData(prev => ({
         ...prev,
-        primary_goals: profileData.primary_goals || [],
-        secondary_goals: profileData.secondary_goals || [],
-        training_location_preference: profileData.training_location_preference || null,
-        open_to_virtual_coaching: profileData.open_to_virtual_coaching ?? false,
-        preferred_training_frequency: profileData.preferred_training_frequency,
-        preferred_time_slots: profileData.preferred_time_slots || [],
-        start_timeline: profileData.start_timeline || null,
-        preferred_coaching_style: profileData.preferred_coaching_style || [],
-        motivation_factors: profileData.motivation_factors || [],
-        client_personality_type: profileData.client_personality_type || [],
-        experience_level: profileData.experience_level || "beginner",
-        preferred_package_type: profileData.preferred_package_type || null,
-        budget_range_min: profileData.budget_range_min,
-        budget_range_max: profileData.budget_range_max,
-        budget_flexibility: profileData.budget_flexibility || "flexible",
-        waitlist_preference: profileData.waitlist_preference || null,
-        flexible_scheduling: profileData.flexible_scheduling ?? false,
-        client_survey_step: profileData.client_survey_step || 1,
+        primary_goals: profile.primary_goals || [],
+        secondary_goals: profile.secondary_goals || [],
+        training_location_preference: profile.training_location_preference || null,
+        open_to_virtual_coaching: profile.open_to_virtual_coaching ?? false,
+        preferred_training_frequency: profile.preferred_training_frequency,
+        preferred_time_slots: profile.preferred_time_slots || [],
+        start_timeline: profile.start_timeline || null,
+        preferred_coaching_style: profile.preferred_coaching_style || [],
+        motivation_factors: profile.motivation_factors || [],
+        client_personality_type: profile.client_personality_type || [],
+        experience_level: profile.experience_level || "beginner",
+        preferred_package_type: profile.preferred_package_type || null,
+        budget_range_min: profile.budget_range_min,
+        budget_range_max: profile.budget_range_max,
+        budget_flexibility: profile.budget_flexibility || "flexible",
+        waitlist_preference: profile.waitlist_preference || null,
+        flexible_scheduling: profile.flexible_scheduling ?? false,
       }));
       
-      // Set current step from profile
-      if (profileData.client_survey_step) {
-        setCurrentStep(profileData.client_survey_step);
-      }
+      // Set current step to continue from where left off, or start from step 1
+      setCurrentStep(1);
     }
   }, [profile?.id]);
 
@@ -168,7 +164,7 @@ const ClientSurvey = () => {
         }
         break;
       case 3: // Scheduling
-        if (!formData.preferred_training_frequency || formData.preferred_training_frequency < 1) {
+        if (!formData.preferred_training_frequency) {
           newErrors.preferred_training_frequency = "Please select how often you want to train";
         }
         if (!formData.preferred_time_slots || formData.preferred_time_slots.length === 0) {
@@ -197,7 +193,7 @@ const ClientSurvey = () => {
         }
         break;
       case 8: // Availability
-        if (!formData.waitlist_preference) {
+        if (formData.waitlist_preference === null) {
           newErrors.start_timeline = "Please select how you'd prefer to handle trainer availability";
         }
         break;
@@ -214,7 +210,7 @@ const ClientSurvey = () => {
       case 2:
         return formData.training_location_preference ? 'completed' : 'not_started';
       case 3:
-        const hasFrequency = formData.preferred_training_frequency && formData.preferred_training_frequency > 0;
+        const hasFrequency = formData.preferred_training_frequency;
         const hasTimeSlots = formData.preferred_time_slots?.length > 0;
         return hasFrequency && hasTimeSlots ? 'completed' : (hasFrequency || hasTimeSlots ? 'partial' : 'not_started');
       case 4:
@@ -227,7 +223,7 @@ const ClientSurvey = () => {
         // Budget is mandatory - either min or max must be set
         return (formData.budget_range_min || formData.budget_range_max) ? 'completed' : 'not_started';
       case 8:
-        return formData.waitlist_preference ? 'completed' : 'not_started';
+        return formData.waitlist_preference !== null ? 'completed' : 'not_started';
       default:
         return 'not_started';
     }
@@ -237,13 +233,12 @@ const ClientSurvey = () => {
     try {
       setIsLoading(true);
       
-      // Update survey step
+      // Update survey completion without step tracking
       const dataToSave = {
         ...formData,
-        client_survey_step: currentStep,
       };
       
-      const result = await updateProfile(dataToSave as any);
+      const result = await updateProfile(dataToSave);
       
       if (result && 'error' in result && result.error) {
         throw new Error(result.error.message || 'Failed to save survey');
@@ -289,13 +284,11 @@ const ClientSurvey = () => {
         // Scroll to top when moving to next step
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
-        // Complete the survey - update both completion flags
         await updateProfile({ 
           ...formData, 
           client_survey_completed: true,
-          quiz_completed: true,
-          client_survey_step: totalSteps
-        } as any);
+          quiz_completed: true
+        });
         
         toast({
           title: "Survey completed!",

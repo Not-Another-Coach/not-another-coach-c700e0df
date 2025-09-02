@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useProfile } from "@/hooks/useProfile";
+import { useProfileByType } from "@/hooks/useProfileByType";
 import { usePaymentStatements } from "@/hooks/usePaymentStatements";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -22,7 +22,7 @@ import { useNavigate } from "react-router-dom";
 
 export const PaymentManagement = () => {
   const { user } = useAuth();
-  const { profile } = useProfile();
+  const { profile } = useProfileByType();
   const { packages, loading } = usePaymentStatements();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("statements");

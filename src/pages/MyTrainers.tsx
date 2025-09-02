@@ -10,7 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useDiscoveryCallData } from "@/hooks/useDiscoveryCallData";
 import { useWaitlist } from "@/hooks/useWaitlist";
 import { useDataSynchronization } from "@/hooks/useDataSynchronization";
-import { useProfile } from "@/hooks/useProfile";
+import { useProfileByType } from "@/hooks/useProfileByType";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -48,7 +48,7 @@ import { toast } from "sonner";
 export default function MyTrainers() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { profile } = useProfile();
+  const { profile } = useProfileByType();
   
   // Data synchronization hook
   const { 
