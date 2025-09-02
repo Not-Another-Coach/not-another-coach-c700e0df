@@ -224,7 +224,7 @@ export function ClientSurveyWidget({ profile }: ClientSurveyWidgetProps) {
       
       const result = await updateProfile(dataToSave as any);
       
-      if (result.error) {
+      if (result && 'error' in result && result.error) {
         throw new Error(result.error.message || 'Failed to save survey');
       }
       

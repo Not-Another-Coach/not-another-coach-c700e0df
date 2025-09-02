@@ -119,8 +119,8 @@ export function EditPreferencesSection({ profile }: EditPreferencesSectionProps)
   const handleSave = async () => {
     setIsLoading(true);
     try {
-      const { error } = await updateProfile(preferences as any);
-      if (error) {
+      const result = await updateProfile(preferences as any);
+      if (result && 'error' in result && result.error) {
         toast({
           title: "Error",
           description: "Failed to update preferences. Please try again.",

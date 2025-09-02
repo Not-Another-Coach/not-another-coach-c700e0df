@@ -430,7 +430,7 @@ const TrainerProfileSetup = () => {
       
       const result = await updateProfile(cleanedFormData);
       
-      if (result.error) {
+      if (result && 'error' in result && result.error) {
         throw new Error(result.error.message || 'Failed to save profile');
       }
       
