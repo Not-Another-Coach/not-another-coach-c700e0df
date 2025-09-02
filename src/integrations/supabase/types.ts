@@ -170,10 +170,38 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "admin_actions_log_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "v_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_actions_log_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "v_trainers"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "admin_actions_log_target_user_id_fkey"
             columns: ["target_user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_actions_log_target_user_id_fkey"
+            columns: ["target_user_id"]
+            isOneToOne: false
+            referencedRelation: "v_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_actions_log_target_user_id_fkey"
+            columns: ["target_user_id"]
+            isOneToOne: false
+            referencedRelation: "v_trainers"
             referencedColumns: ["id"]
           },
         ]
@@ -514,6 +542,124 @@ export type Database = {
             columns: ["ongoing_support_id"]
             isOneToOne: false
             referencedRelation: "onboarding_ongoing_support"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_profiles: {
+        Row: {
+          budget_flexibility: string | null
+          budget_range_max: number | null
+          budget_range_min: number | null
+          client_journey_stage: string | null
+          client_personality_type: string[] | null
+          client_status: string | null
+          client_survey_completed: boolean | null
+          client_survey_completed_at: string | null
+          created_at: string | null
+          experience_level: string | null
+          fitness_goals: string[] | null
+          flexible_scheduling: boolean | null
+          id: string
+          journey_progress: Json | null
+          motivation_factors: string[] | null
+          open_to_virtual_coaching: boolean | null
+          preferred_coaching_style: string[] | null
+          preferred_package_type: string | null
+          preferred_time_slots: string[] | null
+          preferred_training_frequency: string | null
+          primary_goals: string[] | null
+          quiz_answers: Json | null
+          quiz_completed: boolean | null
+          quiz_completed_at: string | null
+          secondary_goals: string[] | null
+          start_timeline: string | null
+          training_location_preference: string | null
+          updated_at: string | null
+          waitlist_preference: boolean | null
+        }
+        Insert: {
+          budget_flexibility?: string | null
+          budget_range_max?: number | null
+          budget_range_min?: number | null
+          client_journey_stage?: string | null
+          client_personality_type?: string[] | null
+          client_status?: string | null
+          client_survey_completed?: boolean | null
+          client_survey_completed_at?: string | null
+          created_at?: string | null
+          experience_level?: string | null
+          fitness_goals?: string[] | null
+          flexible_scheduling?: boolean | null
+          id: string
+          journey_progress?: Json | null
+          motivation_factors?: string[] | null
+          open_to_virtual_coaching?: boolean | null
+          preferred_coaching_style?: string[] | null
+          preferred_package_type?: string | null
+          preferred_time_slots?: string[] | null
+          preferred_training_frequency?: string | null
+          primary_goals?: string[] | null
+          quiz_answers?: Json | null
+          quiz_completed?: boolean | null
+          quiz_completed_at?: string | null
+          secondary_goals?: string[] | null
+          start_timeline?: string | null
+          training_location_preference?: string | null
+          updated_at?: string | null
+          waitlist_preference?: boolean | null
+        }
+        Update: {
+          budget_flexibility?: string | null
+          budget_range_max?: number | null
+          budget_range_min?: number | null
+          client_journey_stage?: string | null
+          client_personality_type?: string[] | null
+          client_status?: string | null
+          client_survey_completed?: boolean | null
+          client_survey_completed_at?: string | null
+          created_at?: string | null
+          experience_level?: string | null
+          fitness_goals?: string[] | null
+          flexible_scheduling?: boolean | null
+          id?: string
+          journey_progress?: Json | null
+          motivation_factors?: string[] | null
+          open_to_virtual_coaching?: boolean | null
+          preferred_coaching_style?: string[] | null
+          preferred_package_type?: string | null
+          preferred_time_slots?: string[] | null
+          preferred_training_frequency?: string | null
+          primary_goals?: string[] | null
+          quiz_answers?: Json | null
+          quiz_completed?: boolean | null
+          quiz_completed_at?: string | null
+          secondary_goals?: string[] | null
+          start_timeline?: string | null
+          training_location_preference?: string | null
+          updated_at?: string | null
+          waitlist_preference?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_profiles_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_profiles_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "v_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_profiles_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "v_trainers"
             referencedColumns: ["id"]
           },
         ]
@@ -1374,6 +1520,20 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "trainer_availability_settings_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: true
+            referencedRelation: "v_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_availability_settings_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: true
+            referencedRelation: "v_trainers"
+            referencedColumns: ["id"]
+          },
         ]
       }
       discovery_calls: {
@@ -1437,10 +1597,38 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "discovery_calls_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discovery_calls_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_trainers"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "discovery_calls_trainer_id_fkey"
             columns: ["trainer_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discovery_calls_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "v_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discovery_calls_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "v_trainers"
             referencedColumns: ["id"]
           },
         ]
@@ -1653,6 +1841,20 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "instagram_connections_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "v_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "instagram_connections_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "v_trainers"
+            referencedColumns: ["id"]
+          },
         ]
       }
       instagram_handle_revelations: {
@@ -1692,6 +1894,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "instagram_handle_revelations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "instagram_handle_revelations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "v_trainers"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "instagram_handle_revelations_connection_id_fkey"
             columns: ["connection_id"]
             isOneToOne: false
@@ -1703,6 +1919,20 @@ export type Database = {
             columns: ["trainer_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "instagram_handle_revelations_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "v_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "instagram_handle_revelations_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "v_trainers"
             referencedColumns: ["id"]
           },
         ]
@@ -1769,6 +1999,20 @@ export type Database = {
             columns: ["trainer_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "instagram_selected_media_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "v_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "instagram_selected_media_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "v_trainers"
             referencedColumns: ["id"]
           },
         ]
@@ -2041,6 +2285,20 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "login_history_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "login_history_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_trainers"
             referencedColumns: ["id"]
           },
         ]
@@ -3966,6 +4224,20 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "trainer_onboarding_activities_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "v_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_onboarding_activities_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "v_trainers"
+            referencedColumns: ["id"]
+          },
         ]
       }
       trainer_onboarding_templates: {
@@ -4044,6 +4316,157 @@ export type Database = {
             columns: ["created_from_template_id"]
             isOneToOne: false
             referencedRelation: "trainer_onboarding_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trainer_profiles: {
+        Row: {
+          admin_review_notes: string | null
+          admin_verification_notes: string | null
+          availability_schedule: Json | null
+          calendar_link: string | null
+          certifying_body: string | null
+          communication_style: string[] | null
+          created_at: string | null
+          delivery_format: string[] | null
+          discovery_call_price: number | null
+          free_discovery_call: boolean | null
+          hourly_rate: number | null
+          id: string
+          is_verified: boolean | null
+          max_clients: number | null
+          messaging_support: boolean | null
+          offers_discovery_call: boolean | null
+          package_options: Json | null
+          profile_setup_completed: boolean | null
+          qualifications: string[] | null
+          rating: number | null
+          specializations: string[] | null
+          terms_agreed: boolean | null
+          testimonials: Json | null
+          total_ratings: number | null
+          training_types: string[] | null
+          updated_at: string | null
+          uploaded_certificates: Json | null
+          verification_documents: Json | null
+          verification_requested_at: string | null
+          verification_status: string | null
+          video_checkins: boolean | null
+          ways_of_working_expectations: string[] | null
+          ways_of_working_first_week: string[] | null
+          ways_of_working_onboarding: string[] | null
+          ways_of_working_ongoing: string[] | null
+          ways_of_working_tracking: string[] | null
+          ways_of_working_what_i_bring: string[] | null
+          weekly_programming_only: boolean | null
+          works_bank_holidays: boolean | null
+          year_certified: number | null
+        }
+        Insert: {
+          admin_review_notes?: string | null
+          admin_verification_notes?: string | null
+          availability_schedule?: Json | null
+          calendar_link?: string | null
+          certifying_body?: string | null
+          communication_style?: string[] | null
+          created_at?: string | null
+          delivery_format?: string[] | null
+          discovery_call_price?: number | null
+          free_discovery_call?: boolean | null
+          hourly_rate?: number | null
+          id: string
+          is_verified?: boolean | null
+          max_clients?: number | null
+          messaging_support?: boolean | null
+          offers_discovery_call?: boolean | null
+          package_options?: Json | null
+          profile_setup_completed?: boolean | null
+          qualifications?: string[] | null
+          rating?: number | null
+          specializations?: string[] | null
+          terms_agreed?: boolean | null
+          testimonials?: Json | null
+          total_ratings?: number | null
+          training_types?: string[] | null
+          updated_at?: string | null
+          uploaded_certificates?: Json | null
+          verification_documents?: Json | null
+          verification_requested_at?: string | null
+          verification_status?: string | null
+          video_checkins?: boolean | null
+          ways_of_working_expectations?: string[] | null
+          ways_of_working_first_week?: string[] | null
+          ways_of_working_onboarding?: string[] | null
+          ways_of_working_ongoing?: string[] | null
+          ways_of_working_tracking?: string[] | null
+          ways_of_working_what_i_bring?: string[] | null
+          weekly_programming_only?: boolean | null
+          works_bank_holidays?: boolean | null
+          year_certified?: number | null
+        }
+        Update: {
+          admin_review_notes?: string | null
+          admin_verification_notes?: string | null
+          availability_schedule?: Json | null
+          calendar_link?: string | null
+          certifying_body?: string | null
+          communication_style?: string[] | null
+          created_at?: string | null
+          delivery_format?: string[] | null
+          discovery_call_price?: number | null
+          free_discovery_call?: boolean | null
+          hourly_rate?: number | null
+          id?: string
+          is_verified?: boolean | null
+          max_clients?: number | null
+          messaging_support?: boolean | null
+          offers_discovery_call?: boolean | null
+          package_options?: Json | null
+          profile_setup_completed?: boolean | null
+          qualifications?: string[] | null
+          rating?: number | null
+          specializations?: string[] | null
+          terms_agreed?: boolean | null
+          testimonials?: Json | null
+          total_ratings?: number | null
+          training_types?: string[] | null
+          updated_at?: string | null
+          uploaded_certificates?: Json | null
+          verification_documents?: Json | null
+          verification_requested_at?: string | null
+          verification_status?: string | null
+          video_checkins?: boolean | null
+          ways_of_working_expectations?: string[] | null
+          ways_of_working_first_week?: string[] | null
+          ways_of_working_onboarding?: string[] | null
+          ways_of_working_ongoing?: string[] | null
+          ways_of_working_tracking?: string[] | null
+          ways_of_working_what_i_bring?: string[] | null
+          weekly_programming_only?: boolean | null
+          works_bank_holidays?: boolean | null
+          year_certified?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainer_profiles_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_profiles_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "v_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_profiles_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "v_trainers"
             referencedColumns: ["id"]
           },
         ]
@@ -4183,10 +4606,38 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "trainer_verification_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "v_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_verification_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "v_trainers"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "trainer_verification_requests_trainer_id_fkey"
             columns: ["trainer_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_verification_requests_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "v_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_verification_requests_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "v_trainers"
             referencedColumns: ["id"]
           },
         ]
@@ -4225,6 +4676,20 @@ export type Database = {
             columns: ["trainer_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_visibility_settings_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "v_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_visibility_settings_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "v_trainers"
             referencedColumns: ["id"]
           },
         ]
@@ -4599,7 +5064,107 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      v_clients: {
+        Row: {
+          bio: string | null
+          budget_flexibility: string | null
+          budget_range_max: number | null
+          budget_range_min: number | null
+          client_journey_stage: string | null
+          client_personality_type: string[] | null
+          client_profile_created_at: string | null
+          client_profile_updated_at: string | null
+          client_status: string | null
+          client_survey_completed: boolean | null
+          client_survey_completed_at: string | null
+          experience_level: string | null
+          first_name: string | null
+          fitness_goals: string[] | null
+          flexible_scheduling: boolean | null
+          id: string | null
+          is_uk_based: boolean | null
+          journey_progress: Json | null
+          last_name: string | null
+          location: string | null
+          motivation_factors: string[] | null
+          open_to_virtual_coaching: boolean | null
+          preferred_coaching_style: string[] | null
+          preferred_package_type: string | null
+          preferred_time_slots: string[] | null
+          preferred_training_frequency: string | null
+          primary_goals: string[] | null
+          profile_created_at: string | null
+          profile_photo_url: string | null
+          profile_published: boolean | null
+          profile_updated_at: string | null
+          quiz_answers: Json | null
+          quiz_completed: boolean | null
+          quiz_completed_at: string | null
+          secondary_goals: string[] | null
+          start_timeline: string | null
+          tagline: string | null
+          training_location_preference: string | null
+          user_type: Database["public"]["Enums"]["user_type"] | null
+          waitlist_preference: boolean | null
+        }
+        Relationships: []
+      }
+      v_trainers: {
+        Row: {
+          admin_review_notes: string | null
+          admin_verification_notes: string | null
+          availability_schedule: Json | null
+          bio: string | null
+          calendar_link: string | null
+          certifying_body: string | null
+          communication_style: string[] | null
+          delivery_format: string[] | null
+          discovery_call_price: number | null
+          first_name: string | null
+          free_discovery_call: boolean | null
+          hourly_rate: number | null
+          id: string | null
+          is_uk_based: boolean | null
+          is_verified: boolean | null
+          last_name: string | null
+          location: string | null
+          max_clients: number | null
+          messaging_support: boolean | null
+          offers_discovery_call: boolean | null
+          package_options: Json | null
+          profile_created_at: string | null
+          profile_photo_url: string | null
+          profile_published: boolean | null
+          profile_setup_completed: boolean | null
+          profile_updated_at: string | null
+          qualifications: string[] | null
+          rating: number | null
+          specializations: string[] | null
+          tagline: string | null
+          terms_agreed: boolean | null
+          testimonials: Json | null
+          total_ratings: number | null
+          trainer_profile_created_at: string | null
+          trainer_profile_updated_at: string | null
+          training_types: string[] | null
+          uploaded_certificates: Json | null
+          user_type: Database["public"]["Enums"]["user_type"] | null
+          verification_documents: Json | null
+          verification_requested_at: string | null
+          verification_status: string | null
+          video_checkins: boolean | null
+          ways_of_working_expectations: string[] | null
+          ways_of_working_first_week: string[] | null
+          ways_of_working_onboarding: string[] | null
+          ways_of_working_ongoing: string[] | null
+          ways_of_working_tracking: string[] | null
+          ways_of_working_what_i_bring: string[] | null
+          weekly_programming_only: boolean | null
+          works_bank_holidays: boolean | null
+          year_certified: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       admin_cleanup_client_trainer_interactions: {
