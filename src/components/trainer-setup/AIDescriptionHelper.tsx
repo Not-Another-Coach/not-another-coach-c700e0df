@@ -59,28 +59,78 @@ export function AIDescriptionHelper({
   };
 
   const generateImprovedSuggestions = (text: string, fieldType: string, clientTypes: string[], coachingStyles: string[]): string[] => {
-    // Analyze the text and generate improvements
     const improvements = [];
-    const originalLength = text.length;
     
-    // Grammar and clarity improvements
-    improvements.push(enhanceTextClarity(text));
-    
-    // Professional tone enhancement
-    improvements.push(enhanceTextProfessionalism(text));
-    
-    // Impact and engagement improvement
-    improvements.push(enhanceTextImpact(text, fieldType));
-    
-    // Personalization based on selections
-    if (clientTypes.length > 0 || coachingStyles.length > 0) {
-      improvements.push(personalizeText(text, clientTypes, coachingStyles, fieldType));
+    // Create different improvement variations
+    const clarityImprovement = enhanceTextClarity(text);
+    if (clarityImprovement && clarityImprovement !== text) {
+      improvements.push(clarityImprovement);
     }
     
-    // Remove duplicates and original text
-    return improvements.filter((suggestion, index, arr) => 
-      suggestion !== text && arr.indexOf(suggestion) === index
-    ).slice(0, 4);
+    const professionalImprovement = enhanceTextProfessionalism(text);
+    if (professionalImprovement && professionalImprovement !== text) {
+      improvements.push(professionalImprovement);
+    }
+    
+    const impactImprovement = enhanceTextImpact(text, fieldType);
+    if (impactImprovement && impactImprovement !== text) {
+      improvements.push(impactImprovement);
+    }
+    
+    // Add personalization if selections are available
+    if (clientTypes.length > 0 || coachingStyles.length > 0) {
+      const personalizedImprovement = personalizeText(text, clientTypes, coachingStyles, fieldType);
+      if (personalizedImprovement && personalizedImprovement !== text) {
+        improvements.push(personalizedImprovement);
+      }
+    }
+    
+    // If no meaningful improvements were generated, create some alternative versions
+    if (improvements.length === 0) {
+      improvements.push(
+        ...createAlternativeVersions(text, fieldType)
+      );
+    }
+    
+    // Remove duplicates and ensure uniqueness
+    const uniqueImprovements = improvements.filter((suggestion, index, arr) => 
+      suggestion && suggestion !== text && arr.indexOf(suggestion) === index
+    );
+    
+    return uniqueImprovements.slice(0, 4);
+  };
+
+  const createAlternativeVersions = (text: string, fieldType: string): string[] => {
+    const alternatives = [];
+    
+    // Make it more concise
+    if (text.length > 50) {
+      const sentences = text.split(/[.!?]+/).filter(s => s.trim());
+      if (sentences.length > 1) {
+        alternatives.push(sentences[0].trim() + '.');
+      }
+    }
+    
+    // Make it more engaging
+    if (!text.toLowerCase().includes('help') && !text.toLowerCase().includes('support')) {
+      alternatives.push(`I help clients ${text.toLowerCase().replace(/^i\s+/i, '').replace(/^am\s+/i, 'achieve ')}`);
+    }
+    
+    // Add field-specific improvements
+    switch (fieldType) {
+      case 'tagline':
+        if (text.length > 20) {
+          alternatives.push(text.split(' ').slice(0, 8).join(' '));
+        }
+        break;
+      case 'bio':
+        if (!text.toLowerCase().includes('experience')) {
+          alternatives.push(`With proven experience, ${text.toLowerCase()}`);
+        }
+        break;
+    }
+    
+    return alternatives.filter(alt => alt && alt !== text);
   };
 
   const getFieldTemplates = (fieldType: string) => {
@@ -147,41 +197,93 @@ export function AIDescriptionHelper({
   };
 
   const enhanceTextClarity = (text: string): string => {
-    // Simple text clarity improvements
-    return text
+    if (!text || text.length < 10) return text;
+    
+    let enhanced = text
       .replace(/\s+/g, ' ')
       .replace(/([.!?])\s*([a-z])/g, (match, punct, letter) => punct + ' ' + letter.toUpperCase())
+      .replace(/\bi\s/gi, 'I ')
+      .replace(/\bim\b/gi, "I'm")
       .trim();
+    
+    // Ensure it ends with proper punctuation
+    if (enhanced && !enhanced.match(/[.!?]$/)) {
+      enhanced += '.';
+    }
+    
+    return enhanced;
   };
 
   const enhanceTextProfessionalism = (text: string): string => {
-    // Add more professional tone while keeping the essence
-    if (text.length < 50) return text + " I'm dedicated to helping you achieve lasting results.";
-    return text.replace(/\bi\s/gi, 'I ').replace(/\bim\b/gi, "I'm");
+    if (!text || text.length < 10) return text;
+    
+    let professional = text
+      .replace(/\bawesome\b/gi, 'excellent')
+      .replace(/\bgreat\b/gi, 'exceptional')
+      .replace(/\bokay\b/gi, 'effective')
+      .replace(/\bstuff\b/gi, 'methods')
+      .replace(/\bguys\b/gi, 'clients')
+      .replace(/\bthing\b/gi, 'approach');
+    
+    // Add professional closing if text is short
+    if (professional.length < 60 && !professional.toLowerCase().includes('dedicated') && !professional.toLowerCase().includes('committed')) {
+      professional += " I'm committed to delivering exceptional results.";
+    }
+    
+    return professional;
   };
 
   const enhanceTextImpact = (text: string, fieldType: string): string => {
-    // Add impact based on field type
-    const impactPhrases = {
-      tagline: ["proven results", "transformative approach", "personalized success"],
-      how_started: ["life-changing moment", "transformative experience", "defining journey"],
-      philosophy: ["core belief", "fundamental principle", "guiding philosophy"],
-      bio: ["proven track record", "comprehensive approach", "dedicated expertise"]
+    if (!text || text.length < 10) return text;
+    
+    // Add impactful words and phrases
+    let impactful = text
+      .replace(/\bhelp\b/gi, 'empower')
+      .replace(/\bwork with\b/gi, 'support')
+      .replace(/\bshow\b/gi, 'guide')
+      .replace(/\btrain\b/gi, 'transform');
+    
+    // Add field-specific impact
+    const impactEnhancements = {
+      tagline: "Transform your fitness journey",
+      how_started: "This pivotal moment shaped my approach to",
+      philosophy: "I firmly believe that",
+      bio: "My mission is to"
     };
     
-    const phrases = impactPhrases[fieldType as keyof typeof impactPhrases] || impactPhrases.bio;
-    const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
+    const enhancement = impactEnhancements[fieldType as keyof typeof impactEnhancements];
     
-    if (text.length > 100) return text;
-    return text + ` My ${randomPhrase} ensures every client gets the support they need.`;
+    // Only add enhancement if text is relatively short and doesn't already contain impactful language
+    if (impactful.length < 80 && enhancement && !impactful.toLowerCase().includes('transform') && !impactful.toLowerCase().includes('mission')) {
+      if (fieldType === 'tagline') {
+        impactful = `${enhancement}: ${impactful.toLowerCase()}`;
+      } else {
+        impactful = `${enhancement} ${impactful.toLowerCase()}`;
+      }
+    }
+    
+    return impactful;
   };
 
   const personalizeText = (text: string, clientTypes: string[], coachingStyles: string[], fieldType: string): string => {
+    if (!text || text.length < 10) return text;
+    
     const primaryClient = clientTypes[0]?.toLowerCase() || 'clients';
     const primaryStyle = getStyleDescription(coachingStyles[0] || '');
     
-    // Add personalization based on selections
-    return `${text} I specialize in working with ${primaryClient} using my ${primaryStyle} coaching approach.`;
+    // Create personalized versions based on field type
+    switch (fieldType) {
+      case 'tagline':
+        return `${primaryStyle} coaching for ${primaryClient}`;
+      case 'how_started':
+        return `${text} Working with ${primaryClient} taught me the value of ${primaryStyle} guidance.`;
+      case 'philosophy':
+        return `${text} This is especially important when working with ${primaryClient} through ${primaryStyle} methods.`;
+      case 'bio':
+        return `${text} I specialize in ${primaryStyle} coaching for ${primaryClient}.`;
+      default:
+        return `${text} I focus on ${primaryStyle} approaches for ${primaryClient}.`;
+    }
   };
 
   const getStyleDescription = (style: string): string => {
@@ -248,15 +350,15 @@ export function AIDescriptionHelper({
           </Button>
         </div>
 
-        {/* Show selected context */}
-        {(hasSelections || hasContent) && (
+        {/* Show selected context - only when relevant */}
+        {(hasSelections || (hasContent && isImproveMode && suggestions.length > 0)) && (
           <div className="space-y-2">
-            {hasContent && (
+            {hasContent && isImproveMode && suggestions.length > 0 && (
               <div className="space-y-1">
-                <p className="text-xs font-medium">Current content:</p>
+                <p className="text-xs font-medium">Original:</p>
                 <div className="bg-muted/50 p-2 rounded text-xs text-muted-foreground">
-                  {currentDescription.length > 100 
-                    ? currentDescription.substring(0, 100) + "..."
+                  {currentDescription.length > 80 
+                    ? currentDescription.substring(0, 80) + "..."
                     : currentDescription
                   }
                 </div>
