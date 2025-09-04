@@ -40,19 +40,51 @@ export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionP
     justification: ''
   });
 
-  const handleTrainingTypeDeliveryToggle = (trainingTypeName: string, deliveryFormat: string) => {
+  const handleTrainingTypeDeliveryToggle = async (trainingTypeName: string, deliveryFormat: string, trainingTypeId?: string) => {
     const currentDelivery = selectedTrainingTypeDelivery[trainingTypeName] || [];
-    const updated = currentDelivery.includes(deliveryFormat)
-      ? currentDelivery.filter(d => d !== deliveryFormat)
-      : [...currentDelivery, deliveryFormat];
+    const isDeliverySelected = currentDelivery.includes(deliveryFormat);
+    
+    let updated: string[];
+    let newTrainingTypes = formData.training_types || [];
+    
+    if (isDeliverySelected) {
+      // Remove delivery format
+      updated = currentDelivery.filter(d => d !== deliveryFormat);
+      
+      // If no delivery formats left, remove training type entirely
+      if (updated.length === 0) {
+        newTrainingTypes = newTrainingTypes.filter((t: string) => t !== trainingTypeName);
+      }
+    } else {
+      // Add delivery format
+      updated = [...currentDelivery, deliveryFormat];
+      
+      // Add training type if not already present
+      if (!newTrainingTypes.includes(trainingTypeName)) {
+        newTrainingTypes = [...newTrainingTypes, trainingTypeName];
+        
+        // Track usage analytics for new training type
+        if (trainingTypeId && user) {
+          await trackTrainingTypeUsage(trainingTypeId, user.id);
+        }
+      }
+    }
     
     const newDeliveryData = {
       ...selectedTrainingTypeDelivery,
       [trainingTypeName]: updated
     };
     
+    // Remove empty entries from delivery data
+    if (updated.length === 0) {
+      delete newDeliveryData[trainingTypeName];
+    }
+    
     setSelectedTrainingTypeDelivery(newDeliveryData);
-    updateFormData({ training_type_delivery: newDeliveryData });
+    updateFormData({ 
+      training_types: newTrainingTypes,
+      training_type_delivery: newDeliveryData 
+    });
   };
 
   const handleSpecialtyToggle = async (specialtyName: string, specialtyId?: string) => {
@@ -303,66 +335,58 @@ export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionP
             {trainingTypesLoading ? (
               <div>Loading training types...</div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {filteredTrainingTypes.map((trainingType) => {
-                  const isSelected = formData.training_types?.includes(trainingType.name) || false;
                   const selectedDeliveryFormats = selectedTrainingTypeDelivery[trainingType.name] || [];
+                  const hasAnyDeliverySelected = selectedDeliveryFormats.length > 0;
                   
                   return (
-                    <div key={trainingType.id} className="space-y-3">
-                      <button 
-                        onClick={() => handleTrainingTypeToggle(trainingType.name, trainingType.id)}
-                        className={`w-full p-4 rounded-lg border transition-colors text-left ${
-                          isSelected 
-                            ? 'border-primary bg-primary/10 text-primary' 
-                            : 'border-border hover:bg-muted/50'
-                        }`}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <span className={`text-sm block ${isSelected ? 'font-semibold' : 'font-medium'}`}>
-                              {trainingType.name}
-                            </span>
-                            {trainingType.description && (
-                              <span className="text-xs text-muted-foreground mt-1 block">{trainingType.description}</span>
+                    <div 
+                      key={trainingType.id} 
+                      className={`p-4 rounded-lg border transition-colors ${
+                        hasAnyDeliverySelected 
+                          ? 'border-primary bg-primary/5' 
+                          : 'border-border'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            {hasAnyDeliverySelected && (
+                              <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
                             )}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {isSelected ? 'Selected' : 'Click to select'}
+                            <div>
+                              <span className={`text-sm block ${hasAnyDeliverySelected ? 'font-semibold text-primary' : 'font-medium'}`}>
+                                {trainingType.name}
+                              </span>
+                              {trainingType.description && (
+                                <span className="text-xs text-muted-foreground mt-1 block">
+                                  {trainingType.description}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </button>
-                      
-                      {isSelected && (
-                        <div className="ml-4 p-4 bg-muted/30 rounded-lg">
-                          <div className="mb-2">
-                            <span className="text-sm font-medium">How do you deliver this training?</span>
-                          </div>
-                          <div className="flex flex-wrap gap-2">
-                            {trainingType.delivery_formats.map((format) => {
-                              const isDeliverySelected = selectedDeliveryFormats.includes(format);
-                              return (
-                                <button
-                                  key={format}
-                                  onClick={() => handleTrainingTypeDeliveryToggle(trainingType.name, format)}
-                                  className={`px-3 py-1 rounded-full text-xs transition-colors ${
-                                    isDeliverySelected
-                                      ? 'bg-primary text-primary-foreground'
-                                      : 'bg-background border border-border hover:bg-muted'
-                                  }`}
-                                >
-                                  {format.charAt(0).toUpperCase() + format.slice(1)}
-                                </button>
-                              );
-                            })}
-                          </div>
-                          {selectedDeliveryFormats.length === 0 && (
-                            <p className="text-xs text-muted-foreground mt-2">
-                              Select at least one delivery format
-                            </p>
-                          )}
+                        
+                        <div className="flex items-center gap-2">
+                          {trainingType.delivery_formats.map((format) => {
+                            const isDeliverySelected = selectedDeliveryFormats.includes(format);
+                            return (
+                              <button
+                                key={format}
+                                onClick={() => handleTrainingTypeDeliveryToggle(trainingType.name, format, trainingType.id)}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                                  isDeliverySelected
+                                    ? 'bg-primary text-primary-foreground shadow-sm'
+                                    : 'bg-background border border-border hover:bg-muted hover:border-muted-foreground/20'
+                                }`}
+                              >
+                                {format.charAt(0).toUpperCase() + format.slice(1)}
+                              </button>
+                            );
+                          })}
                         </div>
-                      )}
+                      </div>
                     </div>
                   );
                 })}
