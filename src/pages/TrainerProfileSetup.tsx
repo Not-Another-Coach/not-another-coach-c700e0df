@@ -6,6 +6,7 @@ import { useUserTypeChecks } from "@/hooks/useUserType";
 import { usePackageWaysOfWorking } from "@/hooks/usePackageWaysOfWorking";
 import { useInstagramConnection } from "@/hooks/useInstagramConnection";
 import { useTrainerVerification } from "@/hooks/useTrainerVerification";
+import { useDiscoveryCallSettings } from "@/hooks/useDiscoveryCallSettings";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -47,6 +48,7 @@ const TrainerProfileSetup = () => {
   const { packageWorkflows, loading: waysOfWorkingLoading } = usePackageWaysOfWorking();
   const { isConnected: isInstagramConnected } = useInstagramConnection();
   const { verificationRequest } = useTrainerVerification();
+  const { settings: discoverySettings } = useDiscoveryCallSettings();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
@@ -348,8 +350,8 @@ const TrainerProfileSetup = () => {
         return hasPackages ? 'completed' : 'not_started';
         
       case 6: // Discovery Calls
-        const hasDiscoveryCallConfig = formData.free_discovery_call && formData.calendar_link?.trim();
-        const hasPartialDiscoveryCall = formData.free_discovery_call || formData.calendar_link?.trim();
+        const hasDiscoveryCallConfig = discoverySettings?.offers_discovery_call && formData.calendar_link?.trim();
+        const hasPartialDiscoveryCall = discoverySettings?.offers_discovery_call || formData.calendar_link?.trim();
         return hasDiscoveryCallConfig ? 'completed' : (hasPartialDiscoveryCall ? 'partial' : 'not_started');
         
       case 7: // Ways of Working
