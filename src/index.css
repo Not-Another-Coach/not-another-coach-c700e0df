@@ -312,3 +312,27 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Responsive text truncation */
+  .truncate-mobile {
+    @apply truncate;
+  }
+  
+  @screen sm {
+    .truncate-mobile {
+      overflow: visible;
+      text-overflow: unset;
+      white-space: normal;
+    }
+  }
+}

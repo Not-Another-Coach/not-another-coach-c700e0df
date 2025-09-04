@@ -99,7 +99,7 @@ export const ProgressBreadcrumb = ({
 
         <Progress value={progress.percentage} className="h-3 mb-4" />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 mb-4">
           {progress.steps.map((step, index) => {
             // Check if step is partially completed
             const isPartial = step.metadata?.isPartial || false;
@@ -122,15 +122,16 @@ export const ProgressBreadcrumb = ({
                   isCompleted={step.completed}
                   isPartial={isPartial}
                   className={cn(
+                    "flex-shrink-0",
                     step.current && !step.completed && !isPartial ? "text-primary" : ""
                   )}
                 />
                 <span className={cn(
-                  "text-sm font-medium",
+                  "text-sm font-medium truncate flex-1",
                   step.current ? "font-bold" : ""
                 )}>{step.title}</span>
                 {step.current && (
-                  <div className="ml-auto">
+                  <div className="ml-auto flex-shrink-0">
                     <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
                   </div>
                 )}

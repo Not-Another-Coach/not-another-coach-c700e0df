@@ -38,14 +38,14 @@ export const ClientJourneyBreadcrumb = ({
           <Progress value={progress.percentage} className="h-2 mb-3" />
           
           {/* Breadcrumb Steps */}
-          <div className="flex items-center gap-1 mb-2 overflow-x-auto">
+          <div className="flex items-center gap-1 mb-2 overflow-x-auto scrollbar-hide">
             <TooltipProvider>
               {progress.steps.map((step, index) => (
                 <React.Fragment key={step.id}>
                   <Tooltip>
                     <TooltipTrigger asChild>
                        <div className={cn(
-                        "flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium transition-all whitespace-nowrap relative",
+                        "flex items-center gap-1 px-1.5 py-1 rounded-md text-xs font-medium transition-all whitespace-nowrap relative min-w-fit",
                         step.completed 
                           ? "bg-green-100 text-green-800 border border-green-200" 
                           : step.current
@@ -54,9 +54,9 @@ export const ClientJourneyBreadcrumb = ({
                             : "bg-primary/10 text-primary border border-primary/20 animate-pulse"
                           : "bg-muted/50 text-muted-foreground"
                        )}>
-                         <span className="text-sm">{step.icon}</span>
+                         <span className="text-sm flex-shrink-0">{step.icon}</span>
                          <span className={cn(
-                           "hidden sm:inline",
+                           "hidden sm:inline max-w-16 md:max-w-24 lg:max-w-none truncate",
                            step.current ? "font-bold" : ""
                          )}>{step.title}</span>
                          {step.current && (
@@ -117,7 +117,7 @@ export const ClientJourneyBreadcrumb = ({
         <Progress value={progress.percentage} className="h-3 mb-4" />
 
         {/* Detailed Breadcrumb Steps */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
           <TooltipProvider>
             {progress.steps.map((step, index) => (
               <Tooltip key={step.id}>
@@ -138,12 +138,12 @@ export const ClientJourneyBreadcrumb = ({
                      )}>
                        {step.icon}
                      </div>
-                     <div className="min-w-0">
+                     <div className="min-w-0 flex-1">
                        <div className={cn(
                          "font-medium text-sm truncate",
                          step.current ? "font-bold" : ""
                        )}>{step.title}</div>
-                       <div className="text-xs opacity-75">{step.description}</div>
+                       <div className="text-xs opacity-75 truncate">{step.description}</div>
                      </div>
                      {step.current && (
                        <div className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full animate-pulse"></div>

@@ -68,6 +68,10 @@ const TrainerProfileSetup = () => {
     tagline: "",
     bio: "",
     profile_photo_url: "",
+    how_started: "",
+    philosophy: "",
+    professional_milestones: [] as any[],
+    profile_image_position: { x: 50, y: 50, scale: 1 },
     
     // Qualifications - these exist in TrainerProfile
     qualifications: [] as string[],
@@ -153,6 +157,10 @@ const TrainerProfileSetup = () => {
         tagline: profile.tagline || "",
         bio: profile.bio || "",
         profile_photo_url: profile.profile_photo_url || "",
+        how_started: profile.how_started || "",
+        philosophy: profile.philosophy || "",
+        professional_milestones: profile.professional_milestones || [],
+        profile_image_position: profile.profile_image_position || { x: 50, y: 50, scale: 1 },
         qualifications: profile.qualifications || [],
         specializations: profile.specializations || [],
         training_types: profile.training_types || [],
