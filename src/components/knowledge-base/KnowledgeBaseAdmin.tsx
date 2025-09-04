@@ -17,6 +17,8 @@ import {
 import { KBArticleEditor } from './KBArticleEditor';
 import { KBCategoryManager } from './KBCategoryManager';
 import { AddCoachDeclineArticle } from './AddCoachDeclineArticle';
+import { AddBreadcrumbProgressArticle } from './AddBreadcrumbProgressArticle';
+import { AddVerificationSystemArticle } from './AddVerificationSystemArticle';
 import { ArticleStagingManager } from './ArticleStagingManager';
 import { format } from 'date-fns';
 
@@ -180,6 +182,8 @@ export const KnowledgeBaseAdmin: React.FC = () => {
           {/* Quick Actions */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <AddCoachDeclineArticle />
+            <AddBreadcrumbProgressArticle />
+            <AddVerificationSystemArticle />
           </div>
 
           {/* Articles List */}

@@ -682,5 +682,171 @@ export const architectureDiagrams: ArchitectureDiagram[] = [
       GOALS->>DB: Generate progress analytics
       GOALS-->>T: Display goal metrics
     `,
+  },
+  {
+    id: "trainer-breadcrumb-progress",
+    title: "Trainer Breadcrumb Progress System",
+    type: "flowchart",
+    description:
+      "Client journey tracking with breadcrumb navigation and progress indicators for trainer profile setup.",
+    mermaid: `graph TD
+      A[Client Journey Start] --> B[ClientJourneyBreadcrumb Component]
+      B --> C[ProgressBreadcrumb Component]
+      C --> D[Journey Step Calculation]
+      
+      D --> E{Current Step Detection}
+      E -->|Survey| F[Survey Completion Status]
+      E -->|Matching| G[Trainer Matching Status]
+      E -->|Selection| H[Coach Selection Status]
+      E -->|Onboarding| I[Onboarding Progress Status]
+      
+      F --> J[StepCompletionIcon]
+      G --> J
+      H --> J
+      I --> J
+      
+      J --> K[Visual Progress Indicator]
+      K --> L[Breadcrumb Navigation]
+      
+      subgraph Progress Tracking
+        M[("client_survey_responses")]
+        N[("trainer_matches")]
+        O[("coach_selection_requests")]
+        P[("client_onboarding_progress")]
+      end
+      
+      F --> M
+      G --> N
+      H --> O
+      I --> P
+      
+      subgraph UI Components
+        Q[Progress Dots]
+        R[Step Labels]
+        S[Completion Badges]
+        T[Navigation Links]
+      end
+      
+      K --> Q
+      L --> R
+      J --> S
+      L --> T
+      
+      subgraph Trainer Profile Setup Progress
+        U[BasicInfoSection]
+        V[ExpertiseSection]
+        W[VerificationSection]
+        X[PackageWaysOfWorkingSection]
+      end
+      
+      U --> Y[Profile Completion %]
+      V --> Y
+      W --> Y
+      X --> Y
+      
+      Y --> Z[TrainerOnboardingTracker]
+      Z --> AA[Progress Visualization]
+    `,
+  },
+  {
+    id: "verification-checks-system",
+    title: "Enhanced Trainer Verification System",
+    type: "flowchart", 
+    description:
+      "Comprehensive verification workflow with granular checks, document management, and automated notifications.",
+    mermaid: `graph TD
+      A[Trainer Verification Request] --> B[Document Upload]
+      B --> C[("trainer_verification_checks")]
+      C --> D[Individual Check Types]
+      
+      D --> E[ID Verification]
+      D --> F[Qualification Verification]
+      D --> G[Insurance Verification]
+      D --> H[Background Check]
+      D --> I[Professional References]
+      
+      subgraph Admin Review Process
+        J[EnhancedVerificationManagement]
+        K[VerificationAnalytics]
+        L[Audit Log]
+      end
+      
+      E --> J
+      F --> J
+      G --> J
+      H --> J
+      I --> J
+      
+      J --> M{Admin Decision}
+      M -->|Approve| N[Update Check Status: approved]
+      M -->|Reject| O[Update Check Status: rejected]
+      M -->|Request More Info| P[Update Check Status: pending]
+      
+      N --> Q[verify_trainer_status Trigger]
+      O --> Q
+      P --> Q
+      
+      Q --> R{All Checks Complete?}
+      R -->|Yes & All Approved| S[Set trainer.verification_status = 'verified']
+      R -->|Any Rejected| T[Set trainer.verification_status = 'rejected']
+      R -->|Pending| U[Set trainer.verification_status = 'under_review']
+      
+      S --> V[send-verification-emails Function]
+      T --> V
+      U --> V
+      
+      V --> W[Email Notifications]
+      W --> X[Trainer Status Email]
+      W --> Y[Admin Notification Email]
+      
+      subgraph Document Management
+        Z[Supabase Storage]
+        AA[File Upload Validation]
+        BB[Document Expiry Tracking]
+      end
+      
+      B --> Z
+      B --> AA
+      Z --> BB
+      
+      BB --> CC[process-verification-expiry Function]
+      CC --> DD[Expiry Reminder Emails]
+      CC --> EE[Auto-update Expired Status]
+      
+      subgraph Status Indicators
+        FF[VerificationStatusIndicator]
+        GG[VerificationBadge]
+        HH[VerificationBadgeIntegration]
+      end
+      
+      S --> FF
+      T --> FF
+      U --> FF
+      
+      FF --> GG
+      GG --> HH
+      
+      subgraph Analytics & Reporting
+        II[Verification Completion Rates]
+        JJ[Processing Time Metrics]
+        KK[Rejection Reason Analysis]
+        LL[Document Type Statistics]
+      end
+      
+      K --> II
+      K --> JJ
+      K --> KK
+      K --> LL
+      
+      subgraph Compliance Features
+        MM[Audit Trail Logging]
+        NN[GDPR Data Handling]
+        OO[Document Retention Policies]
+      end
+      
+      L --> MM
+      Z --> NN
+      BB --> OO
+    `,
   }
 ];
