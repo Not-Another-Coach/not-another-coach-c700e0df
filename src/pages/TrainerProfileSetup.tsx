@@ -151,8 +151,7 @@ const TrainerProfileSetup = () => {
   // Initialize form data from profile when available
   useEffect(() => {
     // Only initialize when we have a profile with an ID and haven't initialized yet
-    // Protect unsaved changes from being overwritten
-    if (profile && profile.id && !hasInitialized.current && !hasUnsavedChanges) {
+    if (profile && profile.id && !hasInitialized.current) {
       hasInitialized.current = true;
       const initialData = {
         first_name: profile.first_name || "",
@@ -196,7 +195,14 @@ const TrainerProfileSetup = () => {
       initialFormData.current = { ...initialData };
       setHasUnsavedChanges(false);
     }
-  }, [profile, hasUnsavedChanges]);
+  }, [profile]);
+
+  // Reset initialization when component unmounts to ensure fresh data loading on return
+  useEffect(() => {
+    return () => {
+      hasInitialized.current = false;
+    };
+  }, []);
 
   // Track changes to form data
   useEffect(() => {
