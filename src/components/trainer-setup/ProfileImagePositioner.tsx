@@ -123,14 +123,15 @@ export const ProfileImagePositioner = ({
                 ref={imageRef}
                 src={imageUrl}
                 alt="Profile preview"
-                className="absolute pointer-events-none select-none transition-transform duration-75 ease-out"
+                className="absolute pointer-events-none select-none"
                 style={{
                   width: `${currentPosition.scale * 100}%`,
                   height: `${currentPosition.scale * 100}%`,
                   left: `${currentPosition.x}%`,
                   top: `${currentPosition.y}%`,
                   transform: 'translate(-50%, -50%)',
-                  objectFit: 'cover'
+                  objectFit: 'cover',
+                  imageRendering: 'auto'
                 }}
                 draggable={false}
               />

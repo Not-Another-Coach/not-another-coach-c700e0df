@@ -158,14 +158,16 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
             >
               {formData.profile_photo_url ? (
                 <div className="space-y-4">
-                  <PositionedAvatar 
-                    src={formData.profile_photo_url} 
-                    alt="Profile"
-                    position={imagePosition}
-                    fallback={getInitials()}
-                    size="2xl"
-                    className="mx-auto"
-                  />
+                  <div className="text-center">
+                    <div className="w-32 h-32 mx-auto rounded-full bg-muted border overflow-hidden">
+                      <img 
+                        src={formData.profile_photo_url} 
+                        alt="Profile preview" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-2">Photo uploaded successfully</p>
+                  </div>
                   <div className="flex gap-2 justify-center flex-wrap">
                     <input
                       type="file"

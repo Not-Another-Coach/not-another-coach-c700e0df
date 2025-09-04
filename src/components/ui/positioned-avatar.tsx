@@ -30,17 +30,18 @@ export const PositionedAvatar = ({
   return (
     <Avatar className={cn(sizeClasses[size], className)}>
       {src && position ? (
-        <div className="w-full h-full rounded-full overflow-hidden relative">
+        <div className="w-full h-full rounded-full overflow-hidden relative bg-muted">
           <img
             src={src}
             alt={alt || 'Profile'}
-            className="absolute w-full h-full object-cover transition-transform duration-200"
+            className="absolute object-cover"
             style={{
               width: `${position.scale * 100}%`,
               height: `${position.scale * 100}%`,
               left: `${position.x}%`,
               top: `${position.y}%`,
-              transform: 'translate(-50%, -50%)'
+              transform: 'translate(-50%, -50%)',
+              imageRendering: 'auto'
             }}
           />
         </div>
