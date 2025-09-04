@@ -11,6 +11,7 @@ import { KnowledgeBaseAdmin } from '@/components/knowledge-base/KnowledgeBaseAdm
 import { VisibilitySettingsSection } from '@/components/trainer-setup/VisibilitySettingsSection';
 import { UserValidityChecker } from '@/components/admin/UserValidityChecker';
 import { VerificationManagement } from '@/components/admin/VerificationManagement';
+import { SpecialtyManagement } from '@/components/admin/SpecialtyManagement';
 import { QualificationManagement } from '@/components/admin/QualificationManagement';
 import { TemplateManagementTabs } from '@/components/coach/TemplateManagementTabs';
 import { ProfileDropdown } from '@/components/ProfileDropdown';
@@ -91,6 +92,13 @@ export const AdminDashboard = () => {
       color: 'from-emerald-500/10 to-emerald-600/10 border-emerald-200'
     },
     {
+      id: 'specialties',
+      title: 'Specialties & Training Types',
+      description: 'Manage specialties, categories, and training types',
+      icon: Settings,
+      color: 'from-violet-500/10 to-violet-600/10 border-violet-200'
+    },
+    {
       id: 'qualifications',
       title: 'Qualifications',
       description: 'Manage popular qualifications and review requests',
@@ -153,6 +161,8 @@ export const AdminDashboard = () => {
             </CardContent>
           </Card>
         );
+      case 'specialties':
+        return <SpecialtyManagement />;
       case 'qualifications':
         return <QualificationManagement />;
       case 'analytics':

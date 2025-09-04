@@ -1168,6 +1168,59 @@ export type Database = {
           },
         ]
       }
+      custom_specialty_requests: {
+        Row: {
+          admin_notes: string | null
+          category_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          justification: string | null
+          requested_name: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          trainer_id: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          justification?: string | null
+          requested_name: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          trainer_id: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          justification?: string | null
+          requested_name?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          trainer_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_specialty_requests_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "specialty_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_payments: {
         Row: {
           amount_currency: string
@@ -3989,6 +4042,207 @@ export type Database = {
           },
         ]
       }
+      specialties: {
+        Row: {
+          category_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          display_order: number
+          id: string
+          is_active: boolean
+          matching_keywords: string[] | null
+          name: string
+          requires_qualification: boolean
+          updated_at: string
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          matching_keywords?: string[] | null
+          name: string
+          requires_qualification?: boolean
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          matching_keywords?: string[] | null
+          name?: string
+          requires_qualification?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "specialties_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "specialty_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      specialty_categories: {
+        Row: {
+          color: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          display_order: number
+          icon: string | null
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          display_order?: number
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          display_order?: number
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      specialty_matching_rules: {
+        Row: {
+          client_goal_keywords: string[]
+          created_at: string
+          id: string
+          matching_score: number
+          popularity_weight: number | null
+          specialty_id: string
+          updated_at: string
+        }
+        Insert: {
+          client_goal_keywords: string[]
+          created_at?: string
+          id?: string
+          matching_score?: number
+          popularity_weight?: number | null
+          specialty_id: string
+          updated_at?: string
+        }
+        Update: {
+          client_goal_keywords?: string[]
+          created_at?: string
+          id?: string
+          matching_score?: number
+          popularity_weight?: number | null
+          specialty_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "specialty_matching_rules_specialty_id_fkey"
+            columns: ["specialty_id"]
+            isOneToOne: false
+            referencedRelation: "specialties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      specialty_qualification_links: {
+        Row: {
+          created_at: string
+          id: string
+          matching_weight: number | null
+          qualification_id: string
+          specialty_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          matching_weight?: number | null
+          qualification_id: string
+          specialty_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          matching_weight?: number | null
+          qualification_id?: string
+          specialty_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "specialty_qualification_links_qualification_id_fkey"
+            columns: ["qualification_id"]
+            isOneToOne: false
+            referencedRelation: "popular_qualifications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "specialty_qualification_links_specialty_id_fkey"
+            columns: ["specialty_id"]
+            isOneToOne: false
+            referencedRelation: "specialties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      specialty_usage_analytics: {
+        Row: {
+          client_matched_count: number | null
+          conversion_rate: number | null
+          id: string
+          selected_at: string
+          specialty_id: string
+          trainer_id: string
+        }
+        Insert: {
+          client_matched_count?: number | null
+          conversion_rate?: number | null
+          id?: string
+          selected_at?: string
+          specialty_id: string
+          trainer_id: string
+        }
+        Update: {
+          client_matched_count?: number | null
+          conversion_rate?: number | null
+          id?: string
+          selected_at?: string
+          specialty_id?: string
+          trainer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "specialty_usage_analytics_specialty_id_fkey"
+            columns: ["specialty_id"]
+            isOneToOne: false
+            referencedRelation: "specialties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       template_activities: {
         Row: {
           activity_id: string
@@ -5064,6 +5318,83 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      training_type_usage_analytics: {
+        Row: {
+          client_matched_count: number | null
+          conversion_rate: number | null
+          id: string
+          selected_at: string
+          trainer_id: string
+          training_type_id: string
+        }
+        Insert: {
+          client_matched_count?: number | null
+          conversion_rate?: number | null
+          id?: string
+          selected_at?: string
+          trainer_id: string
+          training_type_id: string
+        }
+        Update: {
+          client_matched_count?: number | null
+          conversion_rate?: number | null
+          id?: string
+          selected_at?: string
+          trainer_id?: string
+          training_type_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_type_usage_analytics_training_type_id_fkey"
+            columns: ["training_type_id"]
+            isOneToOne: false
+            referencedRelation: "training_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_types: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          delivery_formats: string[] | null
+          description: string | null
+          display_order: number
+          id: string
+          is_active: boolean
+          max_participants: number | null
+          min_participants: number | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          delivery_formats?: string[] | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          max_participants?: number | null
+          min_participants?: number | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          delivery_formats?: string[] | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          max_participants?: number | null
+          min_participants?: number | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       user_alert_interactions: {
         Row: {

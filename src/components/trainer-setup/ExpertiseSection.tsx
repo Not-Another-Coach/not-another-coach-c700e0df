@@ -6,78 +6,39 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
-import { MapPin, Monitor, Users, Globe, Target, Dumbbell, Sparkles } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { MapPin, Monitor, Users, Globe, Target, Dumbbell, Sparkles, Search, Plus, Send } from "lucide-react";
 import { SectionHeader } from './SectionHeader';
+import { useSpecialties, useSpecialtyCategories, useTrainingTypes, useCustomSpecialtyRequests, useSpecialtyAnalytics } from '@/hooks/useSpecialties';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from '@/hooks/use-toast';
 
 interface ExpertiseSectionProps {
   formData: any;
   updateFormData: (updates: any) => void;
 }
 
-const specialtyTags = [
-  "Weight Loss",
-  "Strength Training", 
-  "Pre/Postnatal",
-  "Menopause Support",
-  "CrossFit",
-  "Rehabilitation",
-  "Flexibility & Mobility",
-  "Mindfulness & Wellness",
-  "Nutrition Coaching",
-  "HIIT Training",
-  "Powerlifting",
-  "Olympic Lifting",
-  "Bodybuilding",
-  "Functional Movement",
-  "Sports Performance",
-  "Injury Prevention",
-  "Senior Fitness",
-  "Youth Training",
-  "Marathon Training",
-  "Yoga",
-  "Pilates",
-  "Dance Fitness",
-  "Boxing/Kickboxing",
-  "Swimming"
-];
-
-const trainingTypes = [
-  "1-on-1 Personal Training",
-  "Small Group Training (2-4 people)",
-  "Group Classes (5+ people)",
-  "Online Coaching",
-  "Hybrid Programs",
-  "Nutrition Consulting",
-  "Program Design",
-  "Form Checks",
-  "Workout Plans"
-];
-
-const languages = [
-  "English",
-  "Spanish", 
-  "French",
-  "German",
-  "Italian",
-  "Portuguese",
-  "Dutch",
-  "Polish",
-  "Russian",
-  "Mandarin",
-  "Cantonese",
-  "Japanese",
-  "Korean",
-  "Arabic",
-  "Hindi",
-  "Swedish",
-  "Norwegian",
-  "Danish"
-];
-
 export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionProps) {
+  const { user } = useAuth();
+  const { categories, loading: categoriesLoading } = useSpecialtyCategories();
+  const { specialties, loading: specialtiesLoading } = useSpecialties();
+  const { trainingTypes, loading: trainingTypesLoading } = useTrainingTypes();
+  const { createRequest } = useCustomSpecialtyRequests();
+  const { trackSpecialtyUsage, trackTrainingTypeUsage } = useSpecialtyAnalytics();
+
   const [deliveryFormat, setDeliveryFormat] = useState<'in-person' | 'online' | 'hybrid'>(
     formData.delivery_format || 'hybrid'
   );
+  const [specialtySearchTerm, setSpecialtySearchTerm] = useState('');
+  const [trainingTypeSearchTerm, setTrainingTypeSearchTerm] = useState('');
+  const [showCustomSpecialtyDialog, setShowCustomSpecialtyDialog] = useState(false);
+  const [customSpecialtyForm, setCustomSpecialtyForm] = useState({
+    name: '',
+    categoryId: '',
+    description: '',
+    justification: ''
+  });
 
   // Update form data when delivery format changes
   const handleDeliveryFormatChange = (format: 'in-person' | 'online' | 'hybrid') => {
@@ -90,57 +51,83 @@ export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionP
     }
   };
 
-  const handleSpecialtyToggle = (specialty: string) => {
+  const handleSpecialtyToggle = async (specialtyName: string, specialtyId?: string) => {
     const current = formData.specializations || [];
-    const updated = current.includes(specialty)
-      ? current.filter((s: string) => s !== specialty)
-      : [...current, specialty];
+    const updated = current.includes(specialtyName)
+      ? current.filter((s: string) => s !== specialtyName)
+      : [...current, specialtyName];
     updateFormData({ specializations: updated });
+
+    // Track usage analytics if adding
+    if (!current.includes(specialtyName) && specialtyId && user) {
+      await trackSpecialtyUsage(specialtyId, user.id);
+    }
   };
 
-  const handleTrainingTypeToggle = (type: string) => {
+  const handleTrainingTypeToggle = async (trainingTypeName: string, trainingTypeId?: string) => {
     const current = formData.training_types || [];
-    const updated = current.includes(type)
-      ? current.filter((t: string) => t !== type)
-      : [...current, type];
+    const updated = current.includes(trainingTypeName)
+      ? current.filter((t: string) => t !== trainingTypeName)
+      : [...current, trainingTypeName];
     updateFormData({ training_types: updated });
+
+    // Track usage analytics if adding
+    if (!current.includes(trainingTypeName) && trainingTypeId && user) {
+      await trackTrainingTypeUsage(trainingTypeId, user.id);
+    }
   };
 
-  const handleLanguageToggle = (language: string) => {
-    const current = formData.languages || [];
-    const updated = current.includes(language)
-      ? current.filter((l: string) => l !== language)
-      : [...current, language];
-    updateFormData({ languages: updated });
+  const handleRequestCustomSpecialty = async () => {
+    try {
+      await createRequest({
+        requested_name: customSpecialtyForm.name,
+        category_id: customSpecialtyForm.categoryId || undefined,
+        description: customSpecialtyForm.description || undefined,
+        justification: customSpecialtyForm.justification || undefined
+      });
+
+      setShowCustomSpecialtyDialog(false);
+      setCustomSpecialtyForm({
+        name: '',
+        categoryId: '',
+        description: '',
+        justification: ''
+      });
+
+      toast({
+        title: "Request Submitted",
+        description: "Your custom specialty request has been submitted for admin review."
+      });
+    } catch (error) {
+      console.error('Error submitting custom specialty request:', error);
+    }
   };
 
-  const removeSpecialty = (specialty: string) => {
-    const current = formData.specializations || [];
-    updateFormData({ specializations: current.filter((s: string) => s !== specialty) });
-  };
+  // Filter specialties and training types based on search
+  const filteredSpecialties = specialties.filter(specialty =>
+    specialty.name.toLowerCase().includes(specialtySearchTerm.toLowerCase()) ||
+    (specialty.matching_keywords && specialty.matching_keywords.some(keyword => 
+      keyword.toLowerCase().includes(specialtySearchTerm.toLowerCase())
+    ))
+  );
 
-  const removeTrainingType = (type: string) => {
-    const current = formData.training_types || [];
-    updateFormData({ training_types: current.filter((t: string) => t !== type) });
-  };
-
-  const removeLanguage = (language: string) => {
-    const current = formData.languages || [];
-    updateFormData({ languages: current.filter((l: string) => l !== language) });
-  };
+  const filteredTrainingTypes = trainingTypes.filter(type =>
+    type.name.toLowerCase().includes(trainingTypeSearchTerm.toLowerCase()) ||
+    (type.description && type.description.toLowerCase().includes(trainingTypeSearchTerm.toLowerCase()))
+  );
 
   const generateSpecializationDescription = () => {
-    const specialties = formData.specializations || [];
-    if (specialties.length === 0) return "Select specialties above to auto-generate";
+    const selectedSpecialties = formData.specializations || [];
+    if (selectedSpecialties.length === 0) return "Select specialties above to auto-generate";
     
-    const mainSpecialties = specialties.slice(0, 3);
-    let description = `I specialize in ${mainSpecialties.join(", ")}`;
+    const mainSpecialties = selectedSpecialties.slice(0, 3);
+    let description = `I specialise in ${mainSpecialties.join(", ")}`;
     
-    if (specialties.length > 3) {
-      description += ` and ${specialties.length - 3} other areas`;
+    if (selectedSpecialties.length > 3) {
+      description += ` and ${selectedSpecialties.length - 3} other areas`;
     }
     
-    description += ". My expertise allows me to create personalized programs that deliver real results for my clients.";
+    description += ". My expertise allows me to create personalised programs that deliver real results for my clients.";
     
     updateFormData({ specialization_description: description });
   };
@@ -152,97 +139,175 @@ export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionP
         title="Expertise & Services"
         description="Define your specialties, training types, and service areas"
       />
-      
-      {/* Selected Specialties */}
-      {formData.specializations && formData.specializations.length > 0 && (
-        <div className="space-y-2">
-          <Label>Selected Specialties</Label>
-          <div className="flex flex-wrap gap-2">
-            {formData.specializations.map((specialty: string) => (
-              <Badge
-                key={specialty}
-                variant="secondary"
-                className="flex items-center gap-2 px-3 py-1"
-              >
-                <span>{specialty}</span>
-                <button
-                  onClick={() => removeSpecialty(specialty)}
-                  className="ml-1 text-muted-foreground hover:text-foreground"
-                >
-                  ×
-                </button>
-              </Badge>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Specialties */}
       <div className="space-y-4">
-        <Label>Specialties *</Label>
-        <p className="text-sm text-muted-foreground">
-          Select the areas where you have expertise and enjoy coaching
-        </p>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-60 overflow-y-auto">
-          {specialtyTags.map((specialty) => (
-            <div key={specialty} className="flex items-center space-x-2">
-              <Checkbox
-                id={specialty}
-                checked={formData.specializations?.includes(specialty) || false}
-                onCheckedChange={() => handleSpecialtyToggle(specialty)}
-              />
-              <Label htmlFor={specialty} className="text-sm cursor-pointer leading-tight">
-                {specialty}
-              </Label>
-            </div>
-          ))}
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold">What do you specialise in?</h2>
         </div>
-      </div>
 
-      {/* Selected Training Types */}
-      {formData.training_types && formData.training_types.length > 0 && (
-        <div className="space-y-2">
-          <Label>Selected Training Types</Label>
-          <div className="flex flex-wrap gap-2">
-            {formData.training_types.map((type: string) => (
-              <Badge
-                key={type}
-                variant="secondary"
-                className="flex items-center gap-2 px-3 py-1"
-              >
-                <span>{type}</span>
-                <button
-                  onClick={() => removeTrainingType(type)}
-                  className="ml-1 text-muted-foreground hover:text-foreground"
-                >
-                  ×
-                </button>
-              </Badge>
-            ))}
-          </div>
-        </div>
-      )}
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input
+                  placeholder="Search specialties..."
+                  value={specialtySearchTerm}
+                  onChange={(e) => setSpecialtySearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Dialog open={showCustomSpecialtyDialog} onOpenChange={setShowCustomSpecialtyDialog}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Request New
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Request Custom Specialty</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="specialty-name">Specialty Name</Label>
+                      <Input
+                        id="specialty-name"
+                        value={customSpecialtyForm.name}
+                        onChange={(e) => setCustomSpecialtyForm({...customSpecialtyForm, name: e.target.value})}
+                        placeholder="e.g., Aquatic Therapy"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="category">Category</Label>
+                      <Select 
+                        value={customSpecialtyForm.categoryId} 
+                        onValueChange={(value) => setCustomSpecialtyForm({...customSpecialtyForm, categoryId: value})}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a category (optional)" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories.map((category) => (
+                            <SelectItem key={category.id} value={category.id}>
+                              {category.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="justification">Why do you need this specialty?</Label>
+                      <Textarea
+                        id="justification"
+                        value={customSpecialtyForm.justification}
+                        onChange={(e) => setCustomSpecialtyForm({...customSpecialtyForm, justification: e.target.value})}
+                        placeholder="Explain why this specialty should be added..."
+                      />
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <Button variant="outline" onClick={() => setShowCustomSpecialtyDialog(false)}>
+                        Cancel
+                      </Button>
+                      <Button 
+                        onClick={handleRequestCustomSpecialty}
+                        disabled={!customSpecialtyForm.name.trim()}
+                      >
+                        <Send className="w-4 h-4 mr-2" />
+                        Submit Request
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            {specialtiesLoading || categoriesLoading ? (
+              <div>Loading specialties...</div>
+            ) : (
+              <div className="space-y-6">
+                {categories.map((category) => {
+                  const categorySpecialties = filteredSpecialties.filter(s => s.category_id === category.id);
+                  if (categorySpecialties.length === 0) return null;
+
+                  return (
+                    <div key={category.id} className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Target className="w-5 h-5 text-muted-foreground" />
+                        <h3 className="font-semibold text-lg">{category.name}</h3>
+                        {category.description && (
+                          <span className="text-sm text-muted-foreground">— {category.description}</span>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        {categorySpecialties.map((specialty) => (
+                          <label key={specialty.id} className="flex items-center space-x-2 cursor-pointer p-3 rounded-lg border hover:bg-muted/50 transition-colors">
+                            <Checkbox
+                              checked={formData.specializations?.includes(specialty.name) || false}
+                              onCheckedChange={() => handleSpecialtyToggle(specialty.name, specialty.id)}
+                            />
+                            <span className="flex-1 text-sm font-medium">{specialty.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Training Types */}
       <div className="space-y-4">
         <Label>Training Types *</Label>
-        <p className="text-sm text-muted-foreground">
-          What types of training sessions do you offer?
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {trainingTypes.map((type) => (
-            <div key={type} className="flex items-center space-x-2">
-              <Checkbox
-                id={type}
-                checked={formData.training_types?.includes(type) || false}
-                onCheckedChange={() => handleTrainingTypeToggle(type)}
-              />
-              <Label htmlFor={type} className="text-sm cursor-pointer">
-                {type}
-              </Label>
+        
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input
+                  placeholder="Search training types..."
+                  value={trainingTypeSearchTerm}
+                  onChange={(e) => setTrainingTypeSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
             </div>
-          ))}
-        </div>
+
+            {trainingTypesLoading ? (
+              <div>Loading training types...</div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {filteredTrainingTypes.map((trainingType) => (
+                  <label key={trainingType.id} className="flex items-start space-x-2 cursor-pointer p-4 rounded-lg border hover:bg-muted/50 transition-colors">
+                    <Checkbox
+                      checked={formData.training_types?.includes(trainingType.name) || false}
+                      onCheckedChange={() => handleTrainingTypeToggle(trainingType.name, trainingType.id)}
+                      className="mt-1"
+                    />
+                    <div className="flex-1">
+                      <span className="text-sm font-medium block">{trainingType.name}</span>
+                      {trainingType.description && (
+                        <span className="text-xs text-muted-foreground mt-1 block">{trainingType.description}</span>
+                      )}
+                      <div className="flex gap-1 mt-2">
+                        {trainingType.delivery_formats.map((format) => (
+                          <Badge key={format} variant="secondary" className="text-xs capitalize">
+                            {format}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       {/* Delivery Format */}
@@ -284,7 +349,7 @@ export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionP
         </div>
       </div>
 
-      {/* Location (for in-person) */}
+      {/* Location */}
       {(deliveryFormat === 'in-person' || deliveryFormat === 'hybrid') && (
         <div className="space-y-2">
           <Label htmlFor="location">Location *</Label>
@@ -292,46 +357,19 @@ export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionP
             <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
               id="location"
-              value={formData.location}
+              value={formData.location || ''}
               onChange={(e) => updateFormData({ location: e.target.value })}
               placeholder="Enter city, postcode, or area you serve"
               className="pl-10"
             />
           </div>
-          <p className="text-xs text-muted-foreground">
-            This helps clients find trainers in their area
-          </p>
         </div>
       )}
 
-      {/* Selected Languages */}
-      {formData.languages && formData.languages.length > 0 && (
-        <div className="space-y-2">
-          <Label>Languages Spoken</Label>
-          <div className="flex flex-wrap gap-2">
-            {formData.languages.map((language: string) => (
-              <Badge
-                key={language}
-                variant="outline"
-                className="flex items-center gap-2 px-3 py-1"
-              >
-                <span>{language}</span>
-                <button
-                  onClick={() => removeLanguage(language)}
-                  className="ml-1 text-muted-foreground hover:text-foreground"
-                >
-                  ×
-                </button>
-              </Badge>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* What I specialize in */}
+      {/* Auto-generated description */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label htmlFor="specialization_description">What I specialize in</Label>
+          <Label htmlFor="specialization_description">What I specialise in</Label>
           <Button
             variant="outline"
             size="sm"
@@ -346,35 +384,10 @@ export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionP
           id="specialization_description"
           value={formData.specialization_description || ''}
           onChange={(e) => updateFormData({ specialization_description: e.target.value })}
-          placeholder="Describe what you specialize in and your unique approach..."
+          placeholder="Describe what you specialise in and your unique approach..."
           rows={4}
           className="resize-none"
         />
-        <p className="text-xs text-muted-foreground">
-          This will appear in your profile's story section. Select specialties above and use auto-generate for a starting point.
-        </p>
-      </div>
-
-      {/* Languages */}
-      <div className="space-y-4">
-        <Label>Languages Spoken (Optional)</Label>
-        <p className="text-sm text-muted-foreground">
-          Select languages you can coach in
-        </p>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-40 overflow-y-auto">
-          {languages.map((language) => (
-            <div key={language} className="flex items-center space-x-2">
-              <Checkbox
-                id={language}
-                checked={formData.languages?.includes(language) || false}
-                onCheckedChange={() => handleLanguageToggle(language)}
-              />
-              <Label htmlFor={language} className="text-sm cursor-pointer">
-                {language}
-              </Label>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );
