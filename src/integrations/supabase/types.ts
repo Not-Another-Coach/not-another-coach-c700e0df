@@ -4285,12 +4285,14 @@ export type Database = {
           discovery_call_price: number | null
           free_discovery_call: boolean | null
           hourly_rate: number | null
+          how_started: string | null
           id: string
           is_verified: boolean | null
           max_clients: number | null
           messaging_support: boolean | null
           offers_discovery_call: boolean | null
           package_options: Json | null
+          philosophy: string | null
           profile_setup_completed: boolean | null
           qualifications: string[] | null
           rating: number | null
@@ -4327,12 +4329,14 @@ export type Database = {
           discovery_call_price?: number | null
           free_discovery_call?: boolean | null
           hourly_rate?: number | null
+          how_started?: string | null
           id: string
           is_verified?: boolean | null
           max_clients?: number | null
           messaging_support?: boolean | null
           offers_discovery_call?: boolean | null
           package_options?: Json | null
+          philosophy?: string | null
           profile_setup_completed?: boolean | null
           qualifications?: string[] | null
           rating?: number | null
@@ -4369,12 +4373,14 @@ export type Database = {
           discovery_call_price?: number | null
           free_discovery_call?: boolean | null
           hourly_rate?: number | null
+          how_started?: string | null
           id?: string
           is_verified?: boolean | null
           max_clients?: number | null
           messaging_support?: boolean | null
           offers_discovery_call?: boolean | null
           package_options?: Json | null
+          philosophy?: string | null
           profile_setup_completed?: boolean | null
           qualifications?: string[] | null
           rating?: number | null

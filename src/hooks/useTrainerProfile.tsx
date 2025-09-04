@@ -52,6 +52,8 @@ interface TrainerProfile {
   ways_of_working_what_i_bring: string[] | null;
   profile_setup_completed: boolean | null;
   terms_agreed: boolean | null;
+  how_started: string | null;
+  philosophy: string | null;
 }
 
 export function useTrainerProfile() {
@@ -72,7 +74,13 @@ export function useTrainerProfile() {
       if (error) {
         console.error('Error fetching trainer profile:', error);
       } else {
-        setProfile(data as TrainerProfile);
+        // Ensure new fields exist with default values if not present in the view
+        const profileWithDefaults = {
+          ...data,
+          how_started: (data as any)?.how_started || null,
+          philosophy: (data as any)?.philosophy || null
+        } as TrainerProfile;
+        setProfile(profileWithDefaults);
       }
     } catch (error) {
       console.error('Error fetching trainer profile:', error);
@@ -111,7 +119,7 @@ export function useTrainerProfile() {
         'delivery_format', 'communication_style', 'video_checkins', 'messaging_support', 
         'weekly_programming_only', 'ways_of_working_onboarding', 'ways_of_working_first_week',
         'ways_of_working_ongoing', 'ways_of_working_tracking', 'ways_of_working_expectations',
-        'ways_of_working_what_i_bring', 'profile_setup_completed', 'terms_agreed'
+        'ways_of_working_what_i_bring', 'profile_setup_completed', 'terms_agreed', 'how_started', 'philosophy'
       ];
 
       Object.keys(updates).forEach(key => {
