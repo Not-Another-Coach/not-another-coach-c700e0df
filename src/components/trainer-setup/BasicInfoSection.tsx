@@ -5,9 +5,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Upload, Camera, Sparkles, User, Plus, X, Calendar } from "lucide-react";
+import { Upload, Camera, Sparkles, User, Plus, X, Calendar, Move } from "lucide-react";
 import { SectionHeader } from './SectionHeader';
 import { AIDescriptionHelper } from './AIDescriptionHelper';
+import { ProfileImagePositioner } from './ProfileImagePositioner';
 
 interface BasicInfoSectionProps {
   formData: any;
@@ -21,6 +22,7 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
   const [bioAIHelperOpen, setBioAIHelperOpen] = useState(false);
   const [howStartedAIHelperOpen, setHowStartedAIHelperOpen] = useState(false);
   const [philosophyAIHelperOpen, setPhilosophyAIHelperOpen] = useState(false);
+  const [imagePosition, setImagePosition] = useState({ x: 50, y: 50, scale: 1 });
 
   const handleFileUpload = async (file: File) => {
     try {
@@ -85,6 +87,11 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
     updateFormData({ professional_milestones: updated });
   };
 
+  const handlePositionChange = (position: { x: number; y: number; scale: number }) => {
+    setImagePosition(position);
+    updateFormData({ profile_image_position: position });
+  };
+
   return (
     <div className="space-y-6">
       <SectionHeader 
@@ -142,14 +149,18 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
             >
               {formData.profile_photo_url ? (
                 <div className="space-y-4">
-                  <div className="w-32 h-32 mx-auto rounded-full bg-muted border overflow-hidden">
+                  <div className="w-32 h-32 mx-auto rounded-full bg-muted border overflow-hidden relative">
                     <img 
                       src={formData.profile_photo_url} 
                       alt="Profile"
-                      className="w-full h-full object-cover"
+                      className="absolute w-full h-full object-cover"
+                      style={{
+                        transform: `translate(${(imagePosition.x - 50)}%, ${(imagePosition.y - 50)}%) scale(${imagePosition.scale})`,
+                        transformOrigin: 'center center'
+                      }}
                     />
                   </div>
-                  <div className="flex gap-2 justify-center">
+                  <div className="flex gap-2 justify-center flex-wrap">
                     <input
                       type="file"
                       accept="image/*"
@@ -163,10 +174,11 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
                         Change Photo
                       </label>
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => console.log("AI enhance coming soon")}>
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      AI Enhance
-                    </Button>
+                    <ProfileImagePositioner
+                      imageUrl={formData.profile_photo_url}
+                      onPositionChange={handlePositionChange}
+                      position={imagePosition}
+                    />
                   </div>
                 </div>
               ) : (
@@ -193,7 +205,7 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
                     </Button>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Square crop recommended • AI enhancement available
+                    Upload a square image for best results • Use Position Image to adjust framing
                   </p>
                 </div>
               )}
