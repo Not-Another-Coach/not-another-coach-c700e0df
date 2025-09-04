@@ -24,9 +24,9 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
   const [howStartedAIHelperOpen, setHowStartedAIHelperOpen] = useState(false);
   const [philosophyAIHelperOpen, setPhilosophyAIHelperOpen] = useState(false);
   const [taglineAIHelperOpen, setTaglineAIHelperOpen] = useState(false);
-  const [imagePosition, setImagePosition] = useState(
-    formData.profile_image_position || { x: 50, y: 50, scale: 1 }
-  );
+  
+  // Get current image position from formData or default
+  const imagePosition = formData.profile_image_position || { x: 50, y: 50, scale: 1 };
 
   const handleFileUpload = async (file: File) => {
     try {
@@ -80,7 +80,6 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
   };
 
   const handlePositionChange = (position: { x: number; y: number; scale: number }) => {
-    setImagePosition(position);
     updateFormData({ profile_image_position: position });
   };
 

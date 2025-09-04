@@ -70,24 +70,25 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
     const fetchAllTrainers = async () => {
       try {
         setLoading(true);
-      const { data, error } = await supabase
-        .from('v_trainers')
-        .select(`
-          id,
-          first_name,
-          last_name,
-          bio,
-          location,
-          specializations,
-          qualifications,
-          hourly_rate,
-          rating,
-          total_ratings,
-          is_verified,
-          profile_photo_url,
-          training_types,
-          testimonials
-        `)
+        const { data, error } = await supabase
+          .from('v_trainers')
+          .select(`
+            id,
+            first_name,
+            last_name,
+            bio,
+            location,
+            specializations,
+            qualifications,
+            hourly_rate,
+            rating,
+            total_ratings,
+            is_verified,
+            profile_photo_url,
+            profile_image_position,
+            training_types,
+            testimonials
+          `)
         .eq('profile_published', true)
         .order('created_at');
 
@@ -111,6 +112,12 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
             location: trainer.location || "Location TBD",
             hourlyRate: trainer.hourly_rate || 75,
             image: imageUrl,
+            profilePhotoUrl: trainer.profile_photo_url,
+            profileImagePosition: trainer.profile_image_position 
+              ? (typeof trainer.profile_image_position === 'string' 
+                  ? JSON.parse(trainer.profile_image_position)
+                  : trainer.profile_image_position) as { x: number; y: number; scale: number }
+              : { x: 50, y: 50, scale: 1 },
             certifications: trainer.qualifications || [],
             description: trainer.bio || "Professional fitness trainer dedicated to helping you achieve your goals.",
             availability: "Available",

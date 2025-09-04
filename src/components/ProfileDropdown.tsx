@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { PositionedAvatar } from '@/components/ui/positioned-avatar';
 import { Badge } from "@/components/ui/badge";
 import { User, Settings, LogOut, Key, Edit } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -24,6 +25,7 @@ interface ProfileDropdownProps {
     last_name: string | null;
     user_type: string;
     profile_photo_url?: string | null;
+    profile_image_position?: any;
     quiz_completed?: boolean;
     email?: string;
   };
@@ -108,30 +110,28 @@ export const ProfileDropdown = ({ profile }: ProfileDropdownProps) => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full" aria-label="Open user menu" title="Open user menu">
-          <Avatar className="h-10 w-10">
-            <AvatarImage 
-              src={profile.profile_photo_url || undefined} 
-              alt={getFullName()} 
-            />
-            <AvatarFallback className="bg-primary/10 text-primary font-medium">
-              {getInitials()}
-            </AvatarFallback>
-          </Avatar>
+          <PositionedAvatar 
+            src={profile.profile_photo_url || undefined}
+            alt={getFullName()}
+            fallback={getInitials()}
+            position={profile.profile_image_position || { x: 50, y: 50, scale: 1 }}
+            size="md"
+            className="h-10 w-10"
+          />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-64" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-2">
             <div className="flex items-center gap-2">
-              <Avatar className="h-8 w-8">
-                <AvatarImage 
-                  src={profile.profile_photo_url || undefined} 
-                  alt={getFullName()} 
-                />
-                <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                  {getInitials()}
-                </AvatarFallback>
-              </Avatar>
+              <PositionedAvatar 
+                src={profile.profile_photo_url || undefined}
+                alt={getFullName()}
+                fallback={getInitials()}
+                position={profile.profile_image_position || { x: 50, y: 50, scale: 1 }}
+                size="sm"
+                className="h-8 w-8"
+              />
               <div className="flex flex-col">
                 <p className="text-sm font-medium leading-none">
                   Welcome, {getFullName()}
