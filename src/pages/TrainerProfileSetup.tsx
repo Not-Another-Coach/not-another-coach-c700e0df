@@ -150,6 +150,7 @@ const TrainerProfileSetup = () => {
 
   // Initialize form data from profile - one time only
   useEffect(() => {
+    // Only initialize once, when we first get a profile with an ID
     if (profile && profile.id && !hasInitialized.current) {
       hasInitialized.current = true;
       const initialData = {
@@ -195,25 +196,12 @@ const TrainerProfileSetup = () => {
       initialFormData.current = { ...formData, ...initialData };
       setHasUnsavedChanges(false);
     }
-  }, [profile?.id]);
+  }, []); // Empty dependency array - we only want this to run once when component mounts
 
   // Track changes to form data
   useEffect(() => {
     if (initialFormData.current && hasInitialized.current) {
       const hasChanges = JSON.stringify(formData) !== JSON.stringify(initialFormData.current);
-      console.log('🔍 Change detection:', {
-        hasChanges,
-        currentFormData: {
-          ideal_client_types: formData.ideal_client_types,
-          coaching_style: formData.coaching_style,
-          ideal_client_personality: formData.ideal_client_personality
-        },
-        initialFormData: {
-          ideal_client_types: initialFormData.current?.ideal_client_types,
-          coaching_style: initialFormData.current?.coaching_style,
-          ideal_client_personality: initialFormData.current?.ideal_client_personality
-        }
-      });
       setHasUnsavedChanges(hasChanges);
     }
   }, [formData]);
