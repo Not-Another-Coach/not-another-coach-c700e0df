@@ -75,7 +75,7 @@ const TrainerProfileSetup = () => {
     
     // Qualifications - these exist in TrainerProfile
     qualifications: [] as string[],
-    uploaded_certificates: [] as any[],
+    certificates: [] as any[], // Use certificates to match QualificationsSection
     
     // Expertise & Services - these exist in TrainerProfile
     specializations: [] as string[],
@@ -163,7 +163,7 @@ const TrainerProfileSetup = () => {
         professional_milestones: profile.professional_milestones || [],
         profile_image_position: profile.profile_image_position || { x: 50, y: 50, scale: 1 },
         qualifications: profile.qualifications || [],
-        uploaded_certificates: profile.uploaded_certificates || [],
+        certificates: profile.uploaded_certificates || [], // Map uploaded_certificates to certificates
         specializations: profile.specializations || [],
         training_types: profile.training_types || [],
         location: profile.location || "",
@@ -424,6 +424,8 @@ const TrainerProfileSetup = () => {
         delivery_format: [formData.delivery_format],
         // Convert communication_style from string to array
         communication_style: formData.communication_style.split(',').map(s => s.trim()).filter(s => s),
+        // Map certificates back to uploaded_certificates for database storage
+        uploaded_certificates: formData.certificates || [],
       };
       
       console.log('Saving trainer profile data:', saveData);
@@ -956,27 +958,28 @@ const TrainerProfileSetup = () => {
       <ProfilePreviewModal
         isOpen={showPreviewModal}
         onClose={() => setShowPreviewModal(false)}
-        trainer={{
-          ...formData,
-          id: profile?.id,
-          name: `${formData.first_name} ${formData.last_name}`.trim(),
-          firstName: formData.first_name,
-          lastName: formData.last_name,
-          specialties: formData.specializations || [],
-          rating: 4.8,
-          reviews: 127,
-          experience: "Verified Professional",
-          location: formData.location || "Location TBD",
-          hourlyRate: formData.hourly_rate || 75,
-          image: formData.profile_photo_url || "/api/placeholder/150/150",
-          profilePhotoUrl: formData.profile_photo_url,
-          certifications: formData.qualifications || [],
-          description: formData.bio || "Professional fitness trainer dedicated to helping you achieve your goals.",
-          availability: "Available",
-          trainingType: formData.training_types || ["In-Person", "Online"],
-          offers_discovery_call: formData.free_discovery_call || false,
-          package_options: formData.package_options || []
-        }}
+          trainer={{
+            ...formData,
+            id: profile?.id,
+            name: `${formData.first_name} ${formData.last_name}`.trim(),
+            firstName: formData.first_name,
+            lastName: formData.last_name,
+            specialties: formData.specializations || [],
+            rating: 4.8,
+            reviews: 127,
+            experience: "Verified Professional",
+            location: formData.location || "Location TBD",
+            hourlyRate: formData.hourly_rate || 75,
+            image: formData.profile_photo_url || "/api/placeholder/150/150",
+            profilePhotoUrl: formData.profile_photo_url,
+            qualifications: formData.qualifications || [], // Include qualifications for profile views
+            certifications: formData.qualifications || [], // For backward compatibility with some views
+            description: formData.bio || "Professional fitness trainer dedicated to helping you achieve your goals.",
+            availability: "Available",
+            trainingType: formData.training_types || ["In-Person", "Online"],
+            offers_discovery_call: formData.free_discovery_call || false,
+            package_options: formData.package_options || []
+          }}
       />
     </div>
   );

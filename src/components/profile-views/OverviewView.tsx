@@ -106,19 +106,27 @@ export const OverviewView = ({ trainer, onMessage, onBookDiscovery }: OverviewVi
         </CardContent>
       </Card>
 
-      {/* Certifications */}
-      {trainer.certifications.length > 0 && (
+      {/* Qualifications & Certifications */}
+      {((trainer.qualifications && trainer.qualifications.length > 0) || trainer.certifications.length > 0) && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Award className="h-5 w-5" />
-              Certifications
+              Qualifications & Certifications
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {trainer.certifications.map((cert, index) => (
-                <div key={index} className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg">
+              {/* Display qualifications */}
+              {trainer.qualifications && trainer.qualifications.map((qualification, index) => (
+                <div key={`qual-${index}`} className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg">
+                  <Award className="h-4 w-4 text-accent" />
+                  <span className="text-sm font-medium">{qualification}</span>
+                </div>
+              ))}
+              {/* Display certifications */}
+              {trainer.certifications && trainer.certifications.map((cert, index) => (
+                <div key={`cert-${index}`} className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg">
                   <Award className="h-4 w-4 text-accent" />
                   <span className="text-sm font-medium">{cert}</span>
                 </div>
@@ -129,15 +137,15 @@ export const OverviewView = ({ trainer, onMessage, onBookDiscovery }: OverviewVi
       )}
 
       {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
         {onMessage && (
-          <Button onClick={onMessage} className="flex-1">
+          <Button onClick={onMessage} className="w-full sm:flex-1">
             <MessageCircle className="w-4 h-4 mr-2" />
             Send Message
           </Button>
         )}
         {onBookDiscovery && trainer.offers_discovery_call && (
-          <Button onClick={onBookDiscovery} variant="outline" className="flex-1">
+          <Button onClick={onBookDiscovery} variant="outline" className="w-full sm:flex-1">
             <Calendar className="w-4 h-4 mr-2" />
             Book Discovery Call
           </Button>

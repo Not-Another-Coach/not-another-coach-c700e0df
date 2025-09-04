@@ -34,6 +34,7 @@ export interface Trainer {
   profilePhotoUrl?: string;
   profileImagePosition?: { x: number; y: number; scale: number };
   certifications: string[];
+  qualifications?: string[]; // Add qualifications to Trainer interface
   description: string;
   availability: string;
   trainingType: string[];
