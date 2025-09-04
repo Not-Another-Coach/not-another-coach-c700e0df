@@ -7,7 +7,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { CheckCircle2, XCircle, Clock, AlertCircle, Eye, FileText, Shield, Award, User } from 'lucide-react';
+import { CheckCircle2, XCircle, Clock, AlertCircle, Eye, FileText, Shield, Award, User, BarChart3 } from 'lucide-react';
+import { VerificationAnalytics } from './VerificationAnalytics';
 import { useEnhancedTrainerVerification } from '@/hooks/useEnhancedTrainerVerification';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -148,6 +149,10 @@ export const EnhancedVerificationManagement = () => {
                 Pending Reviews ({getPendingChecksCount()})
               </TabsTrigger>
               <TabsTrigger value="all-trainers">All Trainers</TabsTrigger>
+              <TabsTrigger value="analytics">
+                <BarChart3 className="h-4 w-4 mr-1" />
+                Analytics
+              </TabsTrigger>
               <TabsTrigger value="audit-log">Audit Log</TabsTrigger>
             </TabsList>
 
@@ -227,6 +232,10 @@ export const EnhancedVerificationManagement = () => {
                   </Card>
                 ))}
               </div>
+            </TabsContent>
+
+            <TabsContent value="analytics" className="space-y-4">
+              <VerificationAnalytics />
             </TabsContent>
 
             <TabsContent value="audit-log" className="space-y-4">
