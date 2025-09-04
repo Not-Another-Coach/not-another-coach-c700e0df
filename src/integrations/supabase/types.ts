@@ -4657,6 +4657,8 @@ export type Database = {
           availability_schedule: Json | null
           calendar_link: string | null
           certifying_body: string | null
+          client_preferences: string[] | null
+          coaching_style: string[] | null
           communication_style: string[] | null
           created_at: string | null
           delivery_format: string[] | null
@@ -4665,6 +4667,8 @@ export type Database = {
           hourly_rate: number | null
           how_started: string | null
           id: string
+          ideal_client_personality: string | null
+          ideal_client_types: string[] | null
           is_verified: boolean | null
           max_clients: number | null
           messaging_support: boolean | null
@@ -4702,6 +4706,8 @@ export type Database = {
           availability_schedule?: Json | null
           calendar_link?: string | null
           certifying_body?: string | null
+          client_preferences?: string[] | null
+          coaching_style?: string[] | null
           communication_style?: string[] | null
           created_at?: string | null
           delivery_format?: string[] | null
@@ -4710,6 +4716,8 @@ export type Database = {
           hourly_rate?: number | null
           how_started?: string | null
           id: string
+          ideal_client_personality?: string | null
+          ideal_client_types?: string[] | null
           is_verified?: boolean | null
           max_clients?: number | null
           messaging_support?: boolean | null
@@ -4747,6 +4755,8 @@ export type Database = {
           availability_schedule?: Json | null
           calendar_link?: string | null
           certifying_body?: string | null
+          client_preferences?: string[] | null
+          coaching_style?: string[] | null
           communication_style?: string[] | null
           created_at?: string | null
           delivery_format?: string[] | null
@@ -4755,6 +4765,8 @@ export type Database = {
           hourly_rate?: number | null
           how_started?: string | null
           id?: string
+          ideal_client_personality?: string | null
+          ideal_client_types?: string[] | null
           is_verified?: boolean | null
           max_clients?: number | null
           messaging_support?: boolean | null

@@ -40,6 +40,10 @@ interface TrainerProfile {
   training_types: string[] | null;
   delivery_format: string[] | null;
   communication_style: string[] | null;
+  coaching_style: string[] | null;
+  client_preferences: string[] | null;
+  ideal_client_personality: string | null;
+  ideal_client_types: string[] | null;
   video_checkins: boolean | null;
   messaging_support: boolean | null;
   weekly_programming_only: boolean | null;
@@ -81,7 +85,11 @@ export function useTrainerProfile() {
           how_started: (data as any)?.how_started || null,
           philosophy: (data as any)?.philosophy || null,
           professional_milestones: (data as any)?.professional_milestones || null,
-          profile_image_position: (data as any)?.profile_image_position || null
+          profile_image_position: (data as any)?.profile_image_position || null,
+          coaching_style: (data as any)?.coaching_style || null,
+          client_preferences: (data as any)?.client_preferences || null,
+          ideal_client_personality: (data as any)?.ideal_client_personality || null,
+          ideal_client_types: (data as any)?.ideal_client_types || null
         } as TrainerProfile;
         setProfile(profileWithDefaults);
       }
@@ -119,7 +127,8 @@ export function useTrainerProfile() {
         'verification_requested_at', 'verification_documents', 'admin_verification_notes',
         'is_verified', 'rating', 'total_ratings', 'free_discovery_call', 
         'offers_discovery_call', 'discovery_call_price', 'calendar_link', 'testimonials', 'training_types',
-        'delivery_format', 'communication_style', 'video_checkins', 'messaging_support', 
+        'delivery_format', 'communication_style', 'coaching_style', 'client_preferences', 
+        'ideal_client_personality', 'ideal_client_types', 'video_checkins', 'messaging_support', 
         'weekly_programming_only', 'ways_of_working_onboarding', 'ways_of_working_first_week',
         'ways_of_working_ongoing', 'ways_of_working_tracking', 'ways_of_working_expectations',
         'ways_of_working_what_i_bring', 'profile_setup_completed', 'terms_agreed', 'how_started', 'philosophy', 
