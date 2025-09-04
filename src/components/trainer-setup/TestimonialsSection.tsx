@@ -255,6 +255,15 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
               className="resize-none"
             />
           </div>
+
+          {/* AI Helper for Achievement */}
+          <TestimonialAIHelper
+            clientQuote={newTestimonial.clientQuote || ""}
+            outcomeTags={newTestimonial.outcomeTags || []}
+            onSuggestionSelect={(suggestion) => 
+              setNewTestimonial({ ...newTestimonial, achievement: suggestion })
+            }
+          />
           
           <div className="space-y-2">
             <Label htmlFor="achievement">What did this client achieve? *</Label>
@@ -265,15 +274,6 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
               placeholder="e.g., Lost 15kg and gained confidence to wear a bikini again"
             />
           </div>
-
-          {/* AI Helper for Achievement */}
-          <TestimonialAIHelper
-            clientQuote={newTestimonial.clientQuote || ""}
-            outcomeTags={newTestimonial.outcomeTags || []}
-            onSuggestionSelect={(suggestion) => 
-              setNewTestimonial({ ...newTestimonial, achievement: suggestion })
-            }
-          />
 
           {/* Before/After Images Toggle */}
           <div className="space-y-4">
@@ -291,7 +291,7 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
             </div>
 
             {newTestimonial.showImages && (
-              <div>
+              <div className="space-y-3">
                 <Label className="text-sm font-medium mb-2 block">Client Before/After Images</Label>
                 <ImageUploadSection
                   onImageUpload={handleImageUpload}
@@ -300,6 +300,24 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
                     after: newTestimonial.afterImage
                   }}
                 />
+                {(newTestimonial.beforeImage || newTestimonial.afterImage) && (
+                  <div className="bg-green-50 border border-green-200 rounded-md p-3">
+                    <div className="flex items-center gap-2 text-green-700">
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="text-sm font-medium">Images uploaded successfully!</span>
+                    </div>
+                    <p className="text-xs text-green-600 mt-1">
+                      {newTestimonial.beforeImage && newTestimonial.afterImage 
+                        ? "Both before and after images are ready"
+                        : newTestimonial.beforeImage 
+                          ? "Before image uploaded" 
+                          : "After image uploaded"
+                      }
+                    </p>
+                  </div>
+                )}
               </div>
             )}
           </div>
