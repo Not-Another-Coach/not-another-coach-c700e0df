@@ -80,14 +80,6 @@ const coachingStyles = [
 export function ClientFitSection({ formData, updateFormData }: ClientFitSectionProps) {
   const [showAIHelper, setShowAIHelper] = useState(false);
   
-  // Debug effect to monitor form data changes
-  useEffect(() => {
-    console.log('ClientFitSection - formData changed:', {
-      ideal_client_types: formData.ideal_client_types,
-      coaching_style: formData.coaching_style
-    });
-  }, [formData.ideal_client_types, formData.coaching_style]);
-  
   // Initialize arrays if they don't exist (same pattern as other sections)
   useEffect(() => {
     if (!formData.ideal_client_types) {
