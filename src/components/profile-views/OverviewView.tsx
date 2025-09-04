@@ -77,8 +77,8 @@ export const OverviewView = ({ trainer, onMessage, onBookDiscovery }: OverviewVi
               </p>
             </div>
             
-            <div className="text-right">
-              <div className="text-3xl font-bold text-primary mb-1">
+            <div className="text-right min-w-0">
+              <div className="text-2xl font-bold text-primary mb-1 break-words">
                 {getTrainerDisplayPrice(trainer)}
               </div>
               <div className="text-sm text-muted-foreground">package pricing</div>
@@ -107,7 +107,7 @@ export const OverviewView = ({ trainer, onMessage, onBookDiscovery }: OverviewVi
       </Card>
 
       {/* Qualifications & Certifications */}
-      {((trainer.qualifications && trainer.qualifications.length > 0) || trainer.certifications.length > 0) && (
+      {trainer.certifications.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -117,15 +117,7 @@ export const OverviewView = ({ trainer, onMessage, onBookDiscovery }: OverviewVi
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {/* Display qualifications */}
-              {trainer.qualifications && trainer.qualifications.map((qualification, index) => (
-                <div key={`qual-${index}`} className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg">
-                  <Award className="h-4 w-4 text-accent" />
-                  <span className="text-sm font-medium">{qualification}</span>
-                </div>
-              ))}
-              {/* Display certifications */}
-              {trainer.certifications && trainer.certifications.map((cert, index) => (
+              {trainer.certifications.map((cert, index) => (
                 <div key={`cert-${index}`} className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg">
                   <Award className="h-4 w-4 text-accent" />
                   <span className="text-sm font-medium">{cert}</span>
