@@ -161,7 +161,7 @@ export function useTrainingTypes() {
   return { trainingTypes, loading, refetch: fetchTrainingTypes };
 }
 
-// Hook for custom specialty requests
+// Hook for custom specialty requests (admin use - all requests)
 export function useCustomSpecialtyRequests() {
   const [requests, setRequests] = useState<CustomSpecialtyRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -228,6 +228,43 @@ export function useCustomSpecialtyRequests() {
   };
 
   return { requests, loading, createRequest, refetch: fetchRequests };
+}
+
+// Hook for trainer's own custom specialty requests
+export function useTrainerCustomSpecialtyRequests() {
+  const [requests, setRequests] = useState<CustomSpecialtyRequest[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchRequests();
+  }, []);
+
+  const fetchRequests = async () => {
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user?.id) return;
+
+      const { data, error } = await supabase
+        .from('custom_specialty_requests')
+        .select('*')
+        .eq('trainer_id', userData.user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setRequests((data || []) as CustomSpecialtyRequest[]);
+    } catch (error) {
+      console.error('Error fetching trainer custom specialty requests:', error);
+      toast({
+        title: "Error", 
+        description: "Failed to load your specialty requests",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { requests, loading, refetch: fetchRequests };
 }
 
 // Hook to track specialty usage for analytics

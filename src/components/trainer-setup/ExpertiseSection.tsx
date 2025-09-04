@@ -8,9 +8,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, Monitor, Users, Globe, Target, Dumbbell, Sparkles, Search, Plus, Send } from "lucide-react";
+import { MapPin, Monitor, Users, Globe, Target, Dumbbell, Sparkles, Search, Plus, Send, CheckCircle, Clock, X } from "lucide-react";
 import { SectionHeader } from './SectionHeader';
-import { useSpecialties, useSpecialtyCategories, useTrainingTypes, useCustomSpecialtyRequests, useSpecialtyAnalytics } from '@/hooks/useSpecialties';
+import { useSpecialties, useSpecialtyCategories, useTrainingTypes, useCustomSpecialtyRequests, useTrainerCustomSpecialtyRequests, useSpecialtyAnalytics } from '@/hooks/useSpecialties';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 
@@ -25,6 +25,7 @@ export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionP
   const { specialties, loading: specialtiesLoading } = useSpecialties();
   const { trainingTypes, loading: trainingTypesLoading } = useTrainingTypes();
   const { createRequest } = useCustomSpecialtyRequests();
+  const { requests: customSpecialtyRequests = [] } = useTrainerCustomSpecialtyRequests();
   const { trackSpecialtyUsage, trackTrainingTypeUsage } = useSpecialtyAnalytics();
 
   const [selectedTrainingTypeDelivery, setSelectedTrainingTypeDelivery] = useState<{[key: string]: string[]}>(
@@ -269,6 +270,42 @@ export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionP
                 </DialogContent>
               </Dialog>
             </div>
+
+            {/* Display pending custom specialty requests */}
+            {customSpecialtyRequests.length > 0 && (
+              <div className="mb-4">
+                <h4 className="font-medium mb-3">Pending Specialty Requests:</h4>
+                <div className="flex flex-wrap gap-2">
+                  {customSpecialtyRequests.map((request) => (
+                    <Badge
+                      key={`custom-${request.id}`}
+                      variant={
+                        request.status === 'approved' ? 'default' :
+                        request.status === 'rejected' ? 'destructive' : 'secondary'
+                      }
+                      className="flex items-center gap-2 px-3 py-1"
+                    >
+                      <span>{request.requested_name}</span>
+                      {request.status === 'approved' && (
+                        <CheckCircle className="w-3 h-3 text-green-600" />
+                      )}
+                      {request.status === 'pending' && (
+                        <Clock className="w-3 h-3 text-amber-600" />
+                      )}
+                      {request.status === 'rejected' && (
+                        <X className="w-3 h-3 text-red-600" />
+                      )}
+                      <Badge 
+                        variant="outline" 
+                        className="text-xs ml-1 bg-background"
+                      >
+                        {request.status}
+                      </Badge>
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {specialtiesLoading || categoriesLoading ? (
               <div>Loading specialties...</div>
