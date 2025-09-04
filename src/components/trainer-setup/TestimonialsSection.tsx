@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { Upload, Plus, Trash2, Image, Quote, Star, Edit, X, Check } from "lucide-react";
-import { ImageUploadSection } from "./ImageUploadSection";
+import { EnhancedImageUpload } from "./EnhancedImageUpload";
 import { SectionHeader } from './SectionHeader';
 import { TestimonialAIHelper } from './TestimonialAIHelper';
 
@@ -214,38 +214,40 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
                     "{testimonial.clientQuote}"
                   </blockquote>
                   <p className="text-sm font-medium">Achievement: {testimonial.achievement}</p>
-                  {testimonial.showImages && (testimonial.beforeImage || testimonial.afterImage) && (
-                    <div className="flex gap-4">
-                      {testimonial.beforeImage && (
-                        <div className="text-center">
-                          <img 
-                            src={testimonial.beforeImage} 
-                            alt="Before"
-                            className="w-20 h-20 object-cover rounded border"
-                            onError={(e) => {
-                              console.error('Error loading before image:', testimonial.beforeImage);
-                              e.currentTarget.style.display = 'none';
-                            }}
-                          />
-                          <p className="text-xs text-muted-foreground mt-1">Before</p>
-                        </div>
-                      )}
-                      {testimonial.afterImage && (
-                        <div className="text-center">
-                          <img 
-                            src={testimonial.afterImage} 
-                            alt="After"
-                            className="w-20 h-20 object-cover rounded border"
-                            onError={(e) => {
-                              console.error('Error loading after image:', testimonial.afterImage);
-                              e.currentTarget.style.display = 'none';
-                            }}
-                          />
-                          <p className="text-xs text-muted-foreground mt-1">After</p>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                   {testimonial.showImages && (testimonial.beforeImage || testimonial.afterImage) && (
+                     <div className="flex gap-6 mt-4">
+                       {testimonial.beforeImage && (
+                         <div className="text-center">
+                           <img 
+                             src={testimonial.beforeImage} 
+                             alt="Before transformation"
+                             className="w-32 h-32 object-cover rounded-lg border-2 cursor-pointer hover:scale-105 transition-transform"
+                             onClick={() => window.open(testimonial.beforeImage, '_blank')}
+                             onError={(e) => {
+                               console.error('Error loading before image:', testimonial.beforeImage);
+                               e.currentTarget.style.display = 'none';
+                             }}
+                           />
+                           <p className="text-xs text-muted-foreground mt-2 font-medium">Before</p>
+                         </div>
+                       )}
+                       {testimonial.afterImage && (
+                         <div className="text-center">
+                           <img 
+                             src={testimonial.afterImage} 
+                             alt="After transformation"
+                             className="w-32 h-32 object-cover rounded-lg border-2 cursor-pointer hover:scale-105 transition-transform"
+                             onClick={() => window.open(testimonial.afterImage, '_blank')}
+                             onError={(e) => {
+                               console.error('Error loading after image:', testimonial.afterImage);
+                               e.currentTarget.style.display = 'none';
+                             }}
+                           />
+                           <p className="text-xs text-muted-foreground mt-2 font-medium">After</p>
+                         </div>
+                       )}
+                     </div>
+                   )}
                   <div className="flex items-center gap-4 text-xs text-muted-foreground">
                     <span>✅ Consent given</span>
                     {testimonial.showImages && <span>📸 Images included</span>}
@@ -258,7 +260,26 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
       )}
 
       {/* Add/Edit Testimonial */}
-      <Card>
+      <Card className={editingId ? "border-blue-200 bg-blue-50/50" : ""}>
+        {editingId && (
+          <div className="bg-blue-100 border-b border-blue-200 px-6 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-blue-700">
+                <Edit className="h-4 w-4" />
+                <span className="font-medium">Editing testimonial</span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={cancelEditing}
+                className="text-blue-600 hover:text-blue-700"
+              >
+                <X className="h-4 w-4" />
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )}
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             {editingId ? <Edit className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
@@ -363,9 +384,14 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
             </div>
 
             {newTestimonial.showImages && (
-              <div className="space-y-3">
-                <Label className="text-sm font-medium mb-2 block">Client Before/After Images</Label>
-                <ImageUploadSection
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Client Before/After Images</Label>
+                  <p className="text-xs text-muted-foreground mb-4">
+                    Visual transformations are powerful for showcasing your results. Images will be stored securely.
+                  </p>
+                </div>
+                <EnhancedImageUpload
                   onImageUpload={handleImageUpload}
                   existingImages={{
                     before: newTestimonial.beforeImage,
@@ -375,41 +401,16 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
                 {(newTestimonial.beforeImage || newTestimonial.afterImage) && (
                   <div className="bg-green-50 border border-green-200 rounded-md p-3">
                     <div className="flex items-center gap-2 text-green-700">
-                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-sm font-medium">Images uploaded successfully!</span>
+                      <Check className="h-4 w-4" />
+                      <span className="text-sm font-medium">Images ready!</span>
                     </div>
                     <p className="text-xs text-green-600 mt-1">
                       {newTestimonial.beforeImage && newTestimonial.afterImage 
-                        ? "Both before and after images are ready"
+                        ? "Both before and after images uploaded successfully"
                         : newTestimonial.beforeImage 
-                          ? "Before image uploaded" 
-                          : "After image uploaded"
-                      }
+                          ? "Before image uploaded - add an after image to complete the transformation" 
+                          : "After image uploaded - add a before image to show the transformation"}
                     </p>
-                    <div className="flex gap-4 mt-2">
-                      {newTestimonial.beforeImage && (
-                        <div className="text-center">
-                          <img 
-                            src={newTestimonial.beforeImage} 
-                            alt="Before preview"
-                            className="w-16 h-16 object-cover rounded border"
-                          />
-                          <p className="text-xs text-green-600 mt-1">Before</p>
-                        </div>
-                      )}
-                      {newTestimonial.afterImage && (
-                        <div className="text-center">
-                          <img 
-                            src={newTestimonial.afterImage} 
-                            alt="After preview"
-                            className="w-16 h-16 object-cover rounded border"
-                          />
-                          <p className="text-xs text-green-600 mt-1">After</p>
-                        </div>
-                      )}
-                    </div>
                   </div>
                 )}
               </div>
