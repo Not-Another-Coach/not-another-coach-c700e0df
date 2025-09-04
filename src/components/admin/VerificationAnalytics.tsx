@@ -114,13 +114,13 @@ export const VerificationAnalytics = () => {
           const existing = acc.find(item => item.date === date);
           
           if (existing) {
-            if (log.action === 'submit') existing.submissions++;
+            if (log.action === 'upload') existing.submissions++;
             if (log.action === 'verify') existing.approvals++;
             if (log.action === 'reject') existing.rejections++;
           } else {
             acc.push({
               date,
-              submissions: log.action === 'submit' ? 1 : 0,
+              submissions: log.action === 'upload' ? 1 : 0,
               approvals: log.action === 'verify' ? 1 : 0,
               rejections: log.action === 'reject' ? 1 : 0,
             });
