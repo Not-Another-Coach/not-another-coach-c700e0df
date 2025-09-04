@@ -27,8 +27,8 @@ export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionP
   const { createRequest } = useCustomSpecialtyRequests();
   const { trackSpecialtyUsage, trackTrainingTypeUsage } = useSpecialtyAnalytics();
 
-  const [deliveryFormat, setDeliveryFormat] = useState<'in-person' | 'online' | 'hybrid'>(
-    formData.delivery_format || 'hybrid'
+  const [selectedTrainingTypeDelivery, setSelectedTrainingTypeDelivery] = useState<{[key: string]: string[]}>(
+    formData.training_type_delivery || {}
   );
   const [specialtySearchTerm, setSpecialtySearchTerm] = useState('');
   const [trainingTypeSearchTerm, setTrainingTypeSearchTerm] = useState('');
@@ -40,15 +40,19 @@ export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionP
     justification: ''
   });
 
-  // Update form data when delivery format changes
-  const handleDeliveryFormatChange = (format: 'in-person' | 'online' | 'hybrid') => {
-    setDeliveryFormat(format);
-    updateFormData({ delivery_format: format });
+  const handleTrainingTypeDeliveryToggle = (trainingTypeName: string, deliveryFormat: string) => {
+    const currentDelivery = selectedTrainingTypeDelivery[trainingTypeName] || [];
+    const updated = currentDelivery.includes(deliveryFormat)
+      ? currentDelivery.filter(d => d !== deliveryFormat)
+      : [...currentDelivery, deliveryFormat];
     
-    // Clear location if switching to online-only
-    if (format === 'online') {
-      updateFormData({ location: 'Online Only' });
-    }
+    const newDeliveryData = {
+      ...selectedTrainingTypeDelivery,
+      [trainingTypeName]: updated
+    };
+    
+    setSelectedTrainingTypeDelivery(newDeliveryData);
+    updateFormData({ training_type_delivery: newDeliveryData });
   };
 
   const handleSpecialtyToggle = async (specialtyName: string, specialtyId?: string) => {
@@ -66,14 +70,25 @@ export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionP
 
   const handleTrainingTypeToggle = async (trainingTypeName: string, trainingTypeId?: string) => {
     const current = formData.training_types || [];
-    const updated = current.includes(trainingTypeName)
-      ? current.filter((t: string) => t !== trainingTypeName)
-      : [...current, trainingTypeName];
-    updateFormData({ training_types: updated });
-
-    // Track usage analytics if adding
-    if (!current.includes(trainingTypeName) && trainingTypeId && user) {
-      await trackTrainingTypeUsage(trainingTypeId, user.id);
+    const isCurrentlySelected = current.includes(trainingTypeName);
+    
+    if (isCurrentlySelected) {
+      // Remove training type and its delivery data
+      const updatedTypes = current.filter((t: string) => t !== trainingTypeName);
+      const updatedDelivery = { ...selectedTrainingTypeDelivery };
+      delete updatedDelivery[trainingTypeName];
+      
+      updateFormData({ training_types: updatedTypes, training_type_delivery: updatedDelivery });
+      setSelectedTrainingTypeDelivery(updatedDelivery);
+    } else {
+      // Add training type
+      const updatedTypes = [...current, trainingTypeName];
+      updateFormData({ training_types: updatedTypes });
+      
+      // Track usage analytics
+      if (trainingTypeId && user) {
+        await trackTrainingTypeUsage(trainingTypeId, user.id);
+      }
     }
   };
 
@@ -288,35 +303,67 @@ export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionP
             {trainingTypesLoading ? (
               <div>Loading training types...</div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="space-y-4">
                 {filteredTrainingTypes.map((trainingType) => {
                   const isSelected = formData.training_types?.includes(trainingType.name) || false;
+                  const selectedDeliveryFormats = selectedTrainingTypeDelivery[trainingType.name] || [];
+                  
                   return (
-                    <button 
-                      key={trainingType.id} 
-                      onClick={() => handleTrainingTypeToggle(trainingType.name, trainingType.id)}
-                      className={`p-4 rounded-lg border transition-colors text-left ${
-                        isSelected 
-                          ? 'border-primary bg-primary/10 text-primary' 
-                          : 'border-border hover:bg-muted/50'
-                      }`}
-                    >
-                      <div>
-                        <span className={`text-sm block ${isSelected ? 'font-semibold' : 'font-medium'}`}>
-                          {trainingType.name}
-                        </span>
-                        {trainingType.description && (
-                          <span className="text-xs text-muted-foreground mt-1 block">{trainingType.description}</span>
-                        )}
-                        <div className="flex gap-1 mt-2">
-                          {trainingType.delivery_formats.map((format) => (
-                            <Badge key={format} variant="secondary" className="text-xs capitalize">
-                              {format}
-                            </Badge>
-                          ))}
+                    <div key={trainingType.id} className="space-y-3">
+                      <button 
+                        onClick={() => handleTrainingTypeToggle(trainingType.name, trainingType.id)}
+                        className={`w-full p-4 rounded-lg border transition-colors text-left ${
+                          isSelected 
+                            ? 'border-primary bg-primary/10 text-primary' 
+                            : 'border-border hover:bg-muted/50'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <span className={`text-sm block ${isSelected ? 'font-semibold' : 'font-medium'}`}>
+                              {trainingType.name}
+                            </span>
+                            {trainingType.description && (
+                              <span className="text-xs text-muted-foreground mt-1 block">{trainingType.description}</span>
+                            )}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {isSelected ? 'Selected' : 'Click to select'}
+                          </div>
                         </div>
-                      </div>
-                    </button>
+                      </button>
+                      
+                      {isSelected && (
+                        <div className="ml-4 p-4 bg-muted/30 rounded-lg">
+                          <div className="mb-2">
+                            <span className="text-sm font-medium">How do you deliver this training?</span>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {trainingType.delivery_formats.map((format) => {
+                              const isDeliverySelected = selectedDeliveryFormats.includes(format);
+                              return (
+                                <button
+                                  key={format}
+                                  onClick={() => handleTrainingTypeDeliveryToggle(trainingType.name, format)}
+                                  className={`px-3 py-1 rounded-full text-xs transition-colors ${
+                                    isDeliverySelected
+                                      ? 'bg-primary text-primary-foreground'
+                                      : 'bg-background border border-border hover:bg-muted'
+                                  }`}
+                                >
+                                  {format.charAt(0).toUpperCase() + format.slice(1)}
+                                </button>
+                              );
+                            })}
+                          </div>
+                          {selectedDeliveryFormats.length === 0 && (
+                            <p className="text-xs text-muted-foreground mt-2">
+                              Select at least one delivery format
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   );
                 })}
               </div>
@@ -325,47 +372,8 @@ export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionP
         </Card>
       </div>
 
-      {/* Delivery Format */}
-      <div className="space-y-4">
-        <Label>Delivery Format *</Label>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className={`cursor-pointer transition-colors ${deliveryFormat === 'in-person' ? 'border-primary bg-primary/5' : ''}`}>
-            <CardContent 
-              className="p-4 text-center"
-              onClick={() => handleDeliveryFormatChange('in-person')}
-            >
-              <Users className="h-8 w-8 mx-auto mb-2 text-primary" />
-              <p className="font-medium">In-Person</p>
-              <p className="text-xs text-muted-foreground">Face-to-face training</p>
-            </CardContent>
-          </Card>
-          
-          <Card className={`cursor-pointer transition-colors ${deliveryFormat === 'online' ? 'border-primary bg-primary/5' : ''}`}>
-            <CardContent 
-              className="p-4 text-center"
-              onClick={() => handleDeliveryFormatChange('online')}
-            >
-              <Monitor className="h-8 w-8 mx-auto mb-2 text-primary" />
-              <p className="font-medium">Online</p>
-              <p className="text-xs text-muted-foreground">Virtual coaching</p>
-            </CardContent>
-          </Card>
-          
-          <Card className={`cursor-pointer transition-colors ${deliveryFormat === 'hybrid' ? 'border-primary bg-primary/5' : ''}`}>
-            <CardContent 
-              className="p-4 text-center"
-              onClick={() => handleDeliveryFormatChange('hybrid')}
-            >
-              <Globe className="h-8 w-8 mx-auto mb-2 text-primary" />
-              <p className="font-medium">Hybrid</p>
-              <p className="text-xs text-muted-foreground">Both options</p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
       {/* Location */}
-      {(deliveryFormat === 'in-person' || deliveryFormat === 'hybrid') && (
+      {Object.values(selectedTrainingTypeDelivery).some(formats => formats.includes('in-person')) && (
         <div className="space-y-2">
           <Label htmlFor="location">Location *</Label>
           <div className="relative">
