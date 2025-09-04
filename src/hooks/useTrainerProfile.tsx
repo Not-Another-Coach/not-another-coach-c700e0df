@@ -29,7 +29,6 @@ interface TrainerProfile {
   verification_requested_at: string | null;
   verification_documents: any;
   admin_verification_notes: string | null;
-  admin_review_notes: string | null;
   is_verified: boolean | null;
   rating: number | null;
   total_ratings: number | null;
@@ -110,20 +109,21 @@ export function useTrainerProfile() {
       const profileUpdates: any = {};
       const trainerUpdates: any = {};
 
-      // Shared profile fields
-      const sharedFields = ['first_name', 'last_name', 'bio', 'profile_photo_url', 'location', 'tagline', 'is_uk_based', 'profile_published', 'professional_milestones', 'profile_image_position'];
+      // Shared profile fields (only general profile info and profile_image_position)
+      const sharedFields = ['first_name', 'last_name', 'bio', 'profile_photo_url', 'location', 'tagline', 'is_uk_based', 'profile_published', 'profile_image_position'];
       
-      // Trainer-specific fields  
+      // Trainer-specific fields (all trainer-related fields including the moved ones)
       const trainerFields = [
         'specializations', 'qualifications', 'certifying_body', 'year_certified', 'uploaded_certificates',
         'hourly_rate', 'package_options', 'availability_schedule', 'max_clients', 'works_bank_holidays',
-        'verification_status', 'verification_requested_at', 'verification_documents', 'admin_verification_notes',
-        'admin_review_notes', 'is_verified', 'rating', 'total_ratings', 'free_discovery_call', 
+        'verification_requested_at', 'verification_documents', 'admin_verification_notes',
+        'is_verified', 'rating', 'total_ratings', 'free_discovery_call', 
         'offers_discovery_call', 'discovery_call_price', 'calendar_link', 'testimonials', 'training_types',
         'delivery_format', 'communication_style', 'video_checkins', 'messaging_support', 
         'weekly_programming_only', 'ways_of_working_onboarding', 'ways_of_working_first_week',
         'ways_of_working_ongoing', 'ways_of_working_tracking', 'ways_of_working_expectations',
-        'ways_of_working_what_i_bring', 'profile_setup_completed', 'terms_agreed', 'how_started', 'philosophy'
+        'ways_of_working_what_i_bring', 'profile_setup_completed', 'terms_agreed', 'how_started', 'philosophy', 
+        'professional_milestones'
       ];
 
       Object.keys(updates).forEach(key => {

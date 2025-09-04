@@ -3539,7 +3539,6 @@ export type Database = {
           force_password_reset: boolean | null
           free_discovery_call: boolean | null
           hourly_rate: number | null
-          how_started: string | null
           id: string
           ideal_client_age_range: string | null
           ideal_client_fitness_level: string | null
@@ -3564,7 +3563,6 @@ export type Database = {
           open_to_virtual_coaching: boolean | null
           package_inclusions: Json | null
           package_options: Json | null
-          philosophy: string | null
           phone: string | null
           preferred_coaching_style: string[] | null
           preferred_package_type: string | null
@@ -3573,7 +3571,6 @@ export type Database = {
           pricing_unlock_required: boolean | null
           primary_goals: string[] | null
           privacy_policy_version: string | null
-          professional_milestones: Json | null
           profile_blocks: Json | null
           profile_image_position: Json | null
           profile_photo_url: string | null
@@ -3662,7 +3659,6 @@ export type Database = {
           force_password_reset?: boolean | null
           free_discovery_call?: boolean | null
           hourly_rate?: number | null
-          how_started?: string | null
           id: string
           ideal_client_age_range?: string | null
           ideal_client_fitness_level?: string | null
@@ -3687,7 +3683,6 @@ export type Database = {
           open_to_virtual_coaching?: boolean | null
           package_inclusions?: Json | null
           package_options?: Json | null
-          philosophy?: string | null
           phone?: string | null
           preferred_coaching_style?: string[] | null
           preferred_package_type?: string | null
@@ -3696,7 +3691,6 @@ export type Database = {
           pricing_unlock_required?: boolean | null
           primary_goals?: string[] | null
           privacy_policy_version?: string | null
-          professional_milestones?: Json | null
           profile_blocks?: Json | null
           profile_image_position?: Json | null
           profile_photo_url?: string | null
@@ -3785,7 +3779,6 @@ export type Database = {
           force_password_reset?: boolean | null
           free_discovery_call?: boolean | null
           hourly_rate?: number | null
-          how_started?: string | null
           id?: string
           ideal_client_age_range?: string | null
           ideal_client_fitness_level?: string | null
@@ -3810,7 +3803,6 @@ export type Database = {
           open_to_virtual_coaching?: boolean | null
           package_inclusions?: Json | null
           package_options?: Json | null
-          philosophy?: string | null
           phone?: string | null
           preferred_coaching_style?: string[] | null
           preferred_package_type?: string | null
@@ -3819,7 +3811,6 @@ export type Database = {
           pricing_unlock_required?: boolean | null
           primary_goals?: string[] | null
           privacy_policy_version?: string | null
-          professional_milestones?: Json | null
           profile_blocks?: Json | null
           profile_image_position?: Json | null
           profile_photo_url?: string | null
@@ -4296,6 +4287,7 @@ export type Database = {
           offers_discovery_call: boolean | null
           package_options: Json | null
           philosophy: string | null
+          professional_milestones: Json | null
           profile_setup_completed: boolean | null
           qualifications: string[] | null
           rating: number | null
@@ -4340,6 +4332,7 @@ export type Database = {
           offers_discovery_call?: boolean | null
           package_options?: Json | null
           philosophy?: string | null
+          professional_milestones?: Json | null
           profile_setup_completed?: boolean | null
           qualifications?: string[] | null
           rating?: number | null
@@ -4384,6 +4377,7 @@ export type Database = {
           offers_discovery_call?: boolean | null
           package_options?: Json | null
           philosophy?: string | null
+          professional_milestones?: Json | null
           profile_setup_completed?: boolean | null
           qualifications?: string[] | null
           rating?: number | null
@@ -5072,32 +5066,50 @@ export type Database = {
       }
       v_trainers: {
         Row: {
-          admin_review_notes: string | null
           admin_verification_notes: string | null
           availability_schedule: Json | null
           bio: string | null
           calendar_link: string | null
           certifying_body: string | null
+          client_journey_stage: string | null
+          client_personality_type: string[] | null
+          client_status: string | null
+          client_survey_completed: boolean | null
+          client_survey_completed_at: string | null
           communication_style: string[] | null
+          consent_marketing: boolean | null
+          consent_service: boolean | null
+          consent_timestamp: string | null
+          consent_version: string | null
+          created_at: string | null
           delivery_format: string[] | null
           discovery_call_price: number | null
           first_name: string | null
           free_discovery_call: boolean | null
           hourly_rate: number | null
+          how_started: string | null
           id: string | null
           is_uk_based: boolean | null
           is_verified: boolean | null
           last_name: string | null
           location: string | null
+          marketing_unsubscribed_at: string | null
           max_clients: number | null
           messaging_support: boolean | null
           offers_discovery_call: boolean | null
           package_options: Json | null
-          profile_created_at: string | null
+          philosophy: string | null
+          preferred_coaching_style: string[] | null
+          preferred_package_type: string | null
+          preferred_time_slots: string[] | null
+          preferred_training_frequency: string | null
+          primary_goals: string[] | null
+          privacy_policy_version: string | null
+          professional_milestones: Json | null
+          profile_image_position: Json | null
           profile_photo_url: string | null
           profile_published: boolean | null
           profile_setup_completed: boolean | null
-          profile_updated_at: string | null
           qualifications: string[] | null
           rating: number | null
           specializations: string[] | null
@@ -5105,9 +5117,9 @@ export type Database = {
           terms_agreed: boolean | null
           testimonials: Json | null
           total_ratings: number | null
-          trainer_profile_created_at: string | null
-          trainer_profile_updated_at: string | null
+          training_location_preference: string | null
           training_types: string[] | null
+          updated_at: string | null
           uploaded_certificates: Json | null
           user_type: Database["public"]["Enums"]["user_type"] | null
           verification_documents: Json | null

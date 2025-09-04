@@ -72,7 +72,11 @@ export function useRealTrainers(refreshTrigger?: number) {
             hourlyRate: trainer.hourly_rate || 75,
             image: imageUrl,
             profilePhotoUrl: trainer.profile_photo_url,
-            profileImagePosition: trainer.profile_image_position,
+            profileImagePosition: trainer.profile_image_position 
+              ? (typeof trainer.profile_image_position === 'string' 
+                  ? JSON.parse(trainer.profile_image_position)
+                  : trainer.profile_image_position) as { x: number; y: number; scale: number }
+              : { x: 50, y: 50, scale: 1 },
             certifications: trainer.qualifications || [],
             description: trainer.bio || "Professional fitness trainer dedicated to helping you achieve your goals.",
             availability: "Available",
