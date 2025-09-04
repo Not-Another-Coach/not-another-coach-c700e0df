@@ -4512,42 +4512,328 @@ export type Database = {
         }
         Relationships: []
       }
+      trainer_verification_audit_log: {
+        Row: {
+          action: Database["public"]["Enums"]["verification_audit_action"]
+          actor: Database["public"]["Enums"]["verification_audit_actor"]
+          actor_id: string | null
+          check_id: string | null
+          created_at: string
+          id: string
+          metadata: Json | null
+          new_status:
+            | Database["public"]["Enums"]["verification_check_status"]
+            | null
+          previous_status:
+            | Database["public"]["Enums"]["verification_check_status"]
+            | null
+          reason: string | null
+          trainer_id: string
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["verification_audit_action"]
+          actor: Database["public"]["Enums"]["verification_audit_actor"]
+          actor_id?: string | null
+          check_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          new_status?:
+            | Database["public"]["Enums"]["verification_check_status"]
+            | null
+          previous_status?:
+            | Database["public"]["Enums"]["verification_check_status"]
+            | null
+          reason?: string | null
+          trainer_id: string
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["verification_audit_action"]
+          actor?: Database["public"]["Enums"]["verification_audit_actor"]
+          actor_id?: string | null
+          check_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          new_status?:
+            | Database["public"]["Enums"]["verification_check_status"]
+            | null
+          previous_status?:
+            | Database["public"]["Enums"]["verification_check_status"]
+            | null
+          reason?: string | null
+          trainer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainer_verification_audit_log_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_verification_audit_log_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "v_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_verification_audit_log_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "v_trainers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_verification_audit_log_check_id_fkey"
+            columns: ["check_id"]
+            isOneToOne: false
+            referencedRelation: "trainer_verification_checks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_verification_audit_log_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_verification_audit_log_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "v_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_verification_audit_log_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "v_trainers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trainer_verification_checks: {
+        Row: {
+          admin_notes: string | null
+          awarding_body: string | null
+          certificate_id: string | null
+          check_type: Database["public"]["Enums"]["verification_check_type"]
+          coverage_amount: number | null
+          created_at: string
+          evidence_file_url: string | null
+          evidence_metadata: Json | null
+          expiry_date: string | null
+          id: string
+          issue_date: string | null
+          level: number | null
+          member_id: string | null
+          policy_number: string | null
+          provider: string | null
+          rejection_reason: string | null
+          status: Database["public"]["Enums"]["verification_check_status"]
+          trainer_id: string
+          updated_at: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          awarding_body?: string | null
+          certificate_id?: string | null
+          check_type: Database["public"]["Enums"]["verification_check_type"]
+          coverage_amount?: number | null
+          created_at?: string
+          evidence_file_url?: string | null
+          evidence_metadata?: Json | null
+          expiry_date?: string | null
+          id?: string
+          issue_date?: string | null
+          level?: number | null
+          member_id?: string | null
+          policy_number?: string | null
+          provider?: string | null
+          rejection_reason?: string | null
+          status?: Database["public"]["Enums"]["verification_check_status"]
+          trainer_id: string
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          awarding_body?: string | null
+          certificate_id?: string | null
+          check_type?: Database["public"]["Enums"]["verification_check_type"]
+          coverage_amount?: number | null
+          created_at?: string
+          evidence_file_url?: string | null
+          evidence_metadata?: Json | null
+          expiry_date?: string | null
+          id?: string
+          issue_date?: string | null
+          level?: number | null
+          member_id?: string | null
+          policy_number?: string | null
+          provider?: string | null
+          rejection_reason?: string | null
+          status?: Database["public"]["Enums"]["verification_check_status"]
+          trainer_id?: string
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainer_verification_checks_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_verification_checks_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "v_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_verification_checks_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "v_trainers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_verification_checks_verified_by_fkey"
+            columns: ["verified_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_verification_checks_verified_by_fkey"
+            columns: ["verified_by"]
+            isOneToOne: false
+            referencedRelation: "v_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_verification_checks_verified_by_fkey"
+            columns: ["verified_by"]
+            isOneToOne: false
+            referencedRelation: "v_trainers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trainer_verification_overview: {
+        Row: {
+          created_at: string
+          display_preference: Database["public"]["Enums"]["verification_display_preference"]
+          id: string
+          last_computed_at: string | null
+          overall_status: Database["public"]["Enums"]["verification_overall_status"]
+          trainer_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_preference?: Database["public"]["Enums"]["verification_display_preference"]
+          id?: string
+          last_computed_at?: string | null
+          overall_status?: Database["public"]["Enums"]["verification_overall_status"]
+          trainer_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_preference?: Database["public"]["Enums"]["verification_display_preference"]
+          id?: string
+          last_computed_at?: string | null
+          overall_status?: Database["public"]["Enums"]["verification_overall_status"]
+          trainer_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainer_verification_overview_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_verification_overview_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: true
+            referencedRelation: "v_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_verification_overview_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: true
+            referencedRelation: "v_trainers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trainer_verification_requests: {
         Row: {
           admin_notes: string | null
+          certificate_number: string | null
           created_at: string
           documents_provided: Json
+          evidence_metadata: Json | null
+          expiry_date: string | null
           id: string
+          provider_name: string | null
           rejection_reason: string | null
           reviewed_at: string | null
           reviewed_by: string | null
           status: Database["public"]["Enums"]["verification_request_status"]
+          submission_notes: string | null
           submitted_at: string
           trainer_id: string
           updated_at: string
         }
         Insert: {
           admin_notes?: string | null
+          certificate_number?: string | null
           created_at?: string
           documents_provided?: Json
+          evidence_metadata?: Json | null
+          expiry_date?: string | null
           id?: string
+          provider_name?: string | null
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["verification_request_status"]
+          submission_notes?: string | null
           submitted_at?: string
           trainer_id: string
           updated_at?: string
         }
         Update: {
           admin_notes?: string | null
+          certificate_number?: string | null
           created_at?: string
           documents_provided?: Json
+          evidence_metadata?: Json | null
+          expiry_date?: string | null
           id?: string
+          provider_name?: string | null
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["verification_request_status"]
+          submission_notes?: string | null
           submitted_at?: string
           trainer_id?: string
           updated_at?: string
@@ -5172,6 +5458,10 @@ export type Database = {
         }
         Returns: number
       }
+      check_verification_expiry: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       client_has_sent_first_message: {
         Args: { client_uuid: string; conversation_uuid: string }
         Returns: boolean
@@ -5198,6 +5488,10 @@ export type Database = {
       complete_webhook_event: {
         Args: { p_event_id: string; p_result?: Json }
         Returns: undefined
+      }
+      compute_trainer_verification_status: {
+        Args: { p_trainer_id: string }
+        Returns: Database["public"]["Enums"]["verification_overall_status"]
       }
       create_coach_selection_request: {
         Args: {
@@ -5460,12 +5754,14 @@ export type Database = {
         Returns: undefined
       }
       update_trainer_verification_status: {
-        Args: {
-          p_admin_notes?: string
-          p_rejection_reason?: string
-          p_status: Database["public"]["Enums"]["verification_status_enum"]
-          p_trainer_id: string
-        }
+        Args:
+          | {
+              p_admin_notes?: string
+              p_rejection_reason?: string
+              p_status: Database["public"]["Enums"]["verification_status_enum"]
+              p_trainer_id: string
+            }
+          | { p_trainer_id: string }
         Returns: undefined
       }
       update_user_email_for_admin: {
@@ -5572,6 +5868,23 @@ export type Database = {
       onboarding_visibility: "client" | "trainer" | "shared"
       payout_frequency_enum: "weekly" | "monthly"
       user_type: "client" | "trainer" | "admin"
+      verification_audit_action:
+        | "upload"
+        | "verify"
+        | "reject"
+        | "delete"
+        | "toggle_preference"
+        | "expire"
+      verification_audit_actor: "admin" | "trainer" | "system"
+      verification_check_status: "pending" | "verified" | "rejected" | "expired"
+      verification_check_type:
+        | "cimspa_membership"
+        | "insurance_proof"
+        | "first_aid_certification"
+        | "qualifications"
+        | "identity_match"
+      verification_display_preference: "verified_allowed" | "hidden"
+      verification_overall_status: "verified" | "not_shown" | "expired"
       verification_request_status:
         | "pending"
         | "under_review"
@@ -5801,6 +6114,25 @@ export const Constants = {
       onboarding_visibility: ["client", "trainer", "shared"],
       payout_frequency_enum: ["weekly", "monthly"],
       user_type: ["client", "trainer", "admin"],
+      verification_audit_action: [
+        "upload",
+        "verify",
+        "reject",
+        "delete",
+        "toggle_preference",
+        "expire",
+      ],
+      verification_audit_actor: ["admin", "trainer", "system"],
+      verification_check_status: ["pending", "verified", "rejected", "expired"],
+      verification_check_type: [
+        "cimspa_membership",
+        "insurance_proof",
+        "first_aid_certification",
+        "qualifications",
+        "identity_match",
+      ],
+      verification_display_preference: ["verified_allowed", "hidden"],
+      verification_overall_status: ["verified", "not_shown", "expired"],
       verification_request_status: [
         "pending",
         "under_review",
