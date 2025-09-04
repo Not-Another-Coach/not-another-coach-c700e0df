@@ -158,13 +158,17 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
             {testimonials.map((testimonial) => (
               <Card key={testimonial.id}>
                 <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Quote className="h-4 w-4 text-primary" />
-                      <span className="font-medium">{testimonial.clientName}</span>
-                      {testimonial.outcomeTags?.map((tag) => (
-                        <Badge key={tag} variant="secondary">{tag}</Badge>
-                      ))}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                      <div className="flex items-center gap-2">
+                        <Quote className="h-4 w-4 text-primary" />
+                        <span className="font-medium">{testimonial.clientName}</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {testimonial.outcomeTags?.map((tag) => (
+                          <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>
+                        ))}
+                      </div>
                     </div>
                     <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
                       <Button
