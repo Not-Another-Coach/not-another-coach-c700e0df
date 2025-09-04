@@ -201,6 +201,19 @@ const TrainerProfileSetup = () => {
   useEffect(() => {
     if (initialFormData.current && hasInitialized.current) {
       const hasChanges = JSON.stringify(formData) !== JSON.stringify(initialFormData.current);
+      console.log('🔍 Change detection:', {
+        hasChanges,
+        currentFormData: {
+          ideal_client_types: formData.ideal_client_types,
+          coaching_style: formData.coaching_style,
+          ideal_client_personality: formData.ideal_client_personality
+        },
+        initialFormData: {
+          ideal_client_types: initialFormData.current?.ideal_client_types,
+          coaching_style: initialFormData.current?.coaching_style,
+          ideal_client_personality: initialFormData.current?.ideal_client_personality
+        }
+      });
       setHasUnsavedChanges(hasChanges);
     }
   }, [formData]);
