@@ -5,11 +5,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Upload, Camera, Sparkles, User, Plus, X, Calendar, Move } from "lucide-react";
+import { Upload, Camera, Sparkles, User, Plus, X, Calendar, GripVertical } from "lucide-react";
 import { SectionHeader } from './SectionHeader';
 import { AIDescriptionHelper } from './AIDescriptionHelper';
 import { ProfileImagePositioner } from './ProfileImagePositioner';
 import { PositionedAvatar } from '@/components/ui/positioned-avatar';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 interface BasicInfoSectionProps {
   formData: any;
@@ -77,6 +78,16 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
     const milestones = formData.professional_milestones || [];
     const updated = milestones.filter((_: any, i: number) => i !== index);
     updateFormData({ professional_milestones: updated });
+  };
+
+  const reorderMilestones = (result: any) => {
+    if (!result.destination) return;
+
+    const milestones = Array.from(formData.professional_milestones || []);
+    const [reorderedMilestone] = milestones.splice(result.source.index, 1);
+    milestones.splice(result.destination.index, 0, reorderedMilestone);
+
+    updateFormData({ professional_milestones: milestones });
   };
 
   const handlePositionChange = (position: { x: number; y: number; scale: number }) => {
@@ -417,37 +428,68 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
         </div>
         
         {formData.professional_milestones && formData.professional_milestones.length > 0 && (
-          <div className="space-y-3">
-            {formData.professional_milestones.map((milestone: any, index: number) => (
-              <Card key={index} className="p-4">
-                <div className="flex items-start gap-3">
-                  <Calendar className="h-4 w-4 mt-1 text-muted-foreground shrink-0" />
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-3 flex-1">
-                    <Input
-                      placeholder="Year"
-                      value={milestone.year}
-                      onChange={(e) => updateMilestone(index, 'year', e.target.value)}
-                      maxLength={4}
-                    />
-                    <Input
-                      placeholder="Achievement or milestone event..."
-                      value={milestone.event}
-                      onChange={(e) => updateMilestone(index, 'event', e.target.value)}
-                      className="md:col-span-3"
-                    />
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeMilestone(index)}
-                    className="text-muted-foreground hover:text-red-500"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+          <DragDropContext onDragEnd={reorderMilestones}>
+            <Droppable droppableId="milestones">
+              {(provided) => (
+                <div 
+                  className="space-y-3"
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                >
+                  {formData.professional_milestones.map((milestone: any, index: number) => (
+                    <Draggable 
+                      key={`milestone-${index}`} 
+                      draggableId={`milestone-${index}`} 
+                      index={index}
+                    >
+                      {(provided, snapshot) => (
+                        <Card 
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          className={`p-4 transition-shadow ${
+                            snapshot.isDragging ? 'shadow-lg' : ''
+                          }`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div 
+                              {...provided.dragHandleProps}
+                              className="flex items-center justify-center w-8 h-8 rounded hover:bg-muted cursor-grab active:cursor-grabbing"
+                            >
+                              <GripVertical className="h-4 w-4 text-muted-foreground" />
+                            </div>
+                            <Calendar className="h-4 w-4 mt-1 text-muted-foreground shrink-0" />
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 flex-1">
+                              <Input
+                                placeholder="Year"
+                                value={milestone.year}
+                                onChange={(e) => updateMilestone(index, 'year', e.target.value)}
+                                maxLength={4}
+                              />
+                              <Input
+                                placeholder="Achievement or milestone event..."
+                                value={milestone.event}
+                                onChange={(e) => updateMilestone(index, 'event', e.target.value)}
+                                className="md:col-span-3"
+                              />
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeMilestone(index)}
+                              className="text-muted-foreground hover:text-red-500"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </Card>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
                 </div>
-              </Card>
-            ))}
-          </div>
+              )}
+            </Droppable>
+          </DragDropContext>
         )}
         
         {(!formData.professional_milestones || formData.professional_milestones.length === 0) && (
