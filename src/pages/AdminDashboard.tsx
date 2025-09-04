@@ -90,6 +90,13 @@ export const AdminDashboard = () => {
       color: 'from-emerald-500/10 to-emerald-600/10 border-emerald-200'
     },
     {
+      id: 'qualifications',
+      title: 'Qualifications',
+      description: 'Manage popular qualifications and review requests',
+      icon: FileText,
+      color: 'from-teal-500/10 to-teal-600/10 border-teal-200'
+    },
+    {
       id: 'settings',
       title: 'Settings',
       description: 'System configuration and utilities',
@@ -145,6 +152,8 @@ export const AdminDashboard = () => {
             </CardContent>
           </Card>
         );
+      case 'qualifications':
+        return <QualificationManagement />;
       case 'analytics':
         return (
           <Card>

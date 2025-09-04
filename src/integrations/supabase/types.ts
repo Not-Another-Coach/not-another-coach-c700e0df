@@ -1112,6 +1112,62 @@ export type Database = {
           },
         ]
       }
+      custom_qualification_requests: {
+        Row: {
+          admin_notes: string | null
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          qualification_name: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          similar_existing_qualification_id: string | null
+          status: string
+          trainer_id: string
+          updated_at: string
+          usage_count: number | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          qualification_name: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          similar_existing_qualification_id?: string | null
+          status?: string
+          trainer_id: string
+          updated_at?: string
+          usage_count?: number | null
+        }
+        Update: {
+          admin_notes?: string | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          qualification_name?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          similar_existing_qualification_id?: string | null
+          status?: string
+          trainer_id?: string
+          updated_at?: string
+          usage_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_qualification_requests_similar_existing_qualificati_fkey"
+            columns: ["similar_existing_qualification_id"]
+            isOneToOne: false
+            referencedRelation: "popular_qualifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_payments: {
         Row: {
           amount_currency: string
@@ -3469,6 +3525,48 @@ export type Database = {
         }
         Relationships: []
       }
+      popular_qualifications: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          display_order: number
+          id: string
+          is_active: boolean
+          name: string
+          requires_verification: boolean
+          updated_at: string
+          verification_requirements: Json | null
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          requires_verification?: boolean
+          updated_at?: string
+          verification_requirements?: Json | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          requires_verification?: boolean
+          updated_at?: string
+          verification_requirements?: Json | null
+        }
+        Relationships: []
+      }
       profile_update_streaks: {
         Row: {
           created_at: string
@@ -3858,6 +3956,38 @@ export type Database = {
           year_certified?: number | null
         }
         Relationships: []
+      }
+      qualification_usage_stats: {
+        Row: {
+          id: string
+          qualification_id: string | null
+          qualification_type: string
+          selected_at: string
+          trainer_id: string
+        }
+        Insert: {
+          id?: string
+          qualification_id?: string | null
+          qualification_type?: string
+          selected_at?: string
+          trainer_id: string
+        }
+        Update: {
+          id?: string
+          qualification_id?: string | null
+          qualification_type?: string
+          selected_at?: string
+          trainer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qualification_usage_stats_qualification_id_fkey"
+            columns: ["qualification_id"]
+            isOneToOne: false
+            referencedRelation: "popular_qualifications"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       template_activities: {
         Row: {
