@@ -11,6 +11,7 @@ import { Upload, Plus, Trash2, Image, Quote, Star, Edit, X, Check, Save } from "
 import { EnhancedImageUpload } from "./EnhancedImageUpload";
 import { SectionHeader } from './SectionHeader';
 import { TestimonialAIHelper } from './TestimonialAIHelper';
+import { TestimonialEditModal } from './TestimonialEditModal';
 import { toast } from "@/hooks/use-toast";
 
 interface TestimonialsSectionProps {
@@ -61,7 +62,10 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
     consentGiven: false,
     showImages: false
   });
-  const [editingId, setEditingId] = useState<string | null>(null);
+  
+  // Modal state for editing
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
 
   // Sync testimonials from parent formData changes
   useEffect(() => {
@@ -111,79 +115,31 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
     updateFormData({ testimonials: updatedTestimonials });
   };
 
+  // Modal functions for editing
+  const openEditModal = (testimonial: Testimonial) => {
+    setEditingTestimonial(testimonial);
+    setEditModalOpen(true);
+  };
+
+  const closeEditModal = () => {
+    setEditModalOpen(false);
+    setEditingTestimonial(null);
+  };
+
+  const handleEditSave = (updatedTestimonial: Testimonial) => {
+    const updatedTestimonials = testimonials.map(t => 
+      t.id === updatedTestimonial.id ? updatedTestimonial : t
+    );
+    setTestimonials(updatedTestimonials);
+    updateFormData({ testimonials: updatedTestimonials });
+  };
+
+  // Image upload for new testimonials only
   const handleImageUpload = (imageUrl: string, type: 'before' | 'after') => {
-    if (editingId) {
-      const updatedTestimonials = testimonials.map(t => 
-        t.id === editingId
-          ? { ...t, [type === 'before' ? 'beforeImage' : 'afterImage']: imageUrl }
-          : t
-      );
-      setTestimonials(updatedTestimonials);
-      updateFormData({ testimonials: updatedTestimonials });
-    } else {
-      setNewTestimonial(prev => ({
-        ...prev,
-        [type === 'before' ? 'beforeImage' : 'afterImage']: imageUrl
-      }));
-    }
-  };
-
-  const startEditing = (testimonial: Testimonial) => {
-    setEditingId(testimonial.id);
-    setNewTestimonial({
-      clientName: testimonial.clientName,
-      clientQuote: testimonial.clientQuote,
-      achievement: testimonial.achievement,
-      outcomeTags: testimonial.outcomeTags || [],
-      consentGiven: testimonial.consentGiven,
-      showImages: testimonial.showImages,
-      beforeImage: testimonial.beforeImage,
-      afterImage: testimonial.afterImage
-    });
-  };
-
-  const cancelEditing = () => {
-    setEditingId(null);
-    setNewTestimonial({
-      clientName: "",
-      clientQuote: "",
-      achievement: "",
-      outcomeTags: [],
-      consentGiven: false,
-      showImages: false
-    });
-  };
-
-  const saveEdit = () => {
-    if (newTestimonial.clientName && newTestimonial.clientQuote && newTestimonial.achievement && editingId) {
-      const updatedTestimonials = testimonials.map(t => 
-        t.id === editingId
-          ? {
-              ...t,
-              clientName: newTestimonial.clientName || "",
-              clientQuote: newTestimonial.clientQuote || "",
-              achievement: newTestimonial.achievement || "",
-              outcomeTags: newTestimonial.outcomeTags || [],
-              consentGiven: newTestimonial.consentGiven || false,
-              showImages: newTestimonial.showImages || false,
-              beforeImage: newTestimonial.beforeImage,
-              afterImage: newTestimonial.afterImage
-            }
-          : t
-      );
-      setTestimonials(updatedTestimonials);
-      updateFormData({ testimonials: updatedTestimonials });
-      
-      console.log('Updated testimonial:', updatedTestimonials.find(t => t.id === editingId));
-      console.log('Updated testimonials array:', updatedTestimonials);
-      
-      toast({
-        title: "Testimonial updated!",
-        description: `Successfully updated testimonial from ${newTestimonial.clientName}`,
-      });
-      
-      cancelEditing();
-    }
+    setNewTestimonial(prev => ({
+      ...prev,
+      [type === 'before' ? 'beforeImage' : 'afterImage']: imageUrl
+    }));
   };
 
   return (
@@ -214,7 +170,7 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => startEditing(testimonial)}
+                        onClick={() => openEditModal(testimonial)}
                         className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 text-xs sm:text-sm w-full sm:w-auto"
                       >
                         <Edit className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1" />
@@ -296,31 +252,12 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
         </div>
       )}
 
-      {/* Add/Edit Testimonial */}
-      <Card className={editingId ? "border-blue-200 bg-blue-50/50" : ""}>
-        {editingId && (
-          <div className="bg-blue-100 border-b border-blue-200 px-6 py-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-blue-700">
-                <Edit className="h-4 w-4" />
-                <span className="font-medium">Editing testimonial</span>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={cancelEditing}
-                className="text-blue-600 hover:text-blue-700"
-              >
-                <X className="h-4 w-4" />
-                Cancel
-              </Button>
-            </div>
-          </div>
-        )}
+      {/* Add New Testimonial */}
+      <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            {editingId ? <Edit className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
-            {editingId ? "Edit Client Testimonial" : "Add Client Testimonial"}
+            <Plus className="h-5 w-5" />
+            Add Client Testimonial
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -505,36 +442,13 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
             </div>
           </div>
           
-          {editingId && (
-            <div className="flex gap-2 mb-4">
-              <Button
-                variant="outline" 
-                size="sm"
-                onClick={cancelEditing}
-                className="text-gray-600 hover:text-gray-700"
-              >
-                <X className="h-4 w-4 mr-2" />
-                Cancel Edit
-              </Button>
-            </div>
-          )}
-          
           <Button 
-            onClick={editingId ? saveEdit : addTestimonial}
+            onClick={addTestimonial}
             disabled={!newTestimonial.clientName || !newTestimonial.clientQuote || !newTestimonial.achievement || !newTestimonial.consentGiven}
             className="w-full"
           >
-            {editingId ? (
-              <>
-                <Check className="h-4 w-4 mr-2" />
-                Save Changes
-              </>
-            ) : (
-              <>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Testimonial
-              </>
-            )}
+            <Plus className="h-4 w-4 mr-2" />
+            Add Testimonial
           </Button>
         </CardContent>
       </Card>
@@ -552,6 +466,14 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
           </ul>
         </CardContent>
       </Card>
+
+      {/* Edit Modal */}
+      <TestimonialEditModal
+        testimonial={editingTestimonial}
+        isOpen={editModalOpen}
+        onClose={closeEditModal}
+        onSave={handleEditSave}
+      />
     </div>
   );
 }
