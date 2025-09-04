@@ -88,11 +88,11 @@ export function ClientFitSection({ formData, updateFormData }: ClientFitSectionP
   };
 
   const handleCoachingStyleToggle = (style: string) => {
-    const current = formData.coaching_styles || [];
+    const current = formData.coaching_style || [];
     const updated = current.includes(style)
       ? current.filter((s: string) => s !== style)
       : [...current, style];
-    updateFormData({ coaching_styles: updated });
+    updateFormData({ coaching_style: updated });
   };
 
   const removeClientType = (clientType: string) => {
@@ -101,8 +101,8 @@ export function ClientFitSection({ formData, updateFormData }: ClientFitSectionP
   };
 
   const removeCoachingStyle = (style: string) => {
-    const current = formData.coaching_styles || [];
-    updateFormData({ coaching_styles: current.filter((s: string) => s !== style) });
+    const current = formData.coaching_style || [];
+    updateFormData({ coaching_style: current.filter((s: string) => s !== style) });
   };
 
   return (
@@ -178,7 +178,7 @@ export function ClientFitSection({ formData, updateFormData }: ClientFitSectionP
         {showAIHelper && (
           <AIDescriptionHelper
             selectedClientTypes={formData.ideal_client_types || []}
-            selectedCoachingStyles={formData.coaching_styles || []}
+            selectedCoachingStyles={formData.coaching_style || []}
             currentDescription={formData.ideal_client_personality || ""}
             onSuggestionSelect={(suggestion) => {
               updateFormData({ ideal_client_personality: suggestion });
@@ -198,11 +198,11 @@ export function ClientFitSection({ formData, updateFormData }: ClientFitSectionP
       </div>
 
       {/* Selected Coaching Styles */}
-      {formData.coaching_styles && formData.coaching_styles.length > 0 && (
+      {formData.coaching_style && formData.coaching_style.length > 0 && (
         <div className="space-y-2">
           <Label>Selected Coaching Styles</Label>
           <div className="flex flex-wrap gap-2">
-            {formData.coaching_styles.map((style: string) => {
+            {formData.coaching_style.map((style: string) => {
               const styleObj = coachingStyles.find(s => s.id === style);
               return (
                 <Badge
@@ -235,7 +235,7 @@ export function ClientFitSection({ formData, updateFormData }: ClientFitSectionP
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {coachingStyles.map((style) => {
-            const isSelected = formData.coaching_styles?.includes(style.id);
+            const isSelected = formData.coaching_style?.includes(style.id);
             return (
               <Card 
                 key={style.id}
