@@ -4,7 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Users, Heart, Target, Zap, Sparkles } from "lucide-react";
 import { AIDescriptionHelper } from "./AIDescriptionHelper";
 import { SectionHeader } from './SectionHeader';
@@ -79,6 +79,25 @@ const coachingStyles = [
 
 export function ClientFitSection({ formData, updateFormData }: ClientFitSectionProps) {
   const [showAIHelper, setShowAIHelper] = useState(false);
+  
+  // Debug effect to monitor form data changes
+  useEffect(() => {
+    console.log('ClientFitSection - formData changed:', {
+      ideal_client_types: formData.ideal_client_types,
+      coaching_style: formData.coaching_style
+    });
+  }, [formData.ideal_client_types, formData.coaching_style]);
+  
+  // Initialize arrays if they don't exist (same pattern as other sections)
+  useEffect(() => {
+    if (!formData.ideal_client_types) {
+      updateFormData({ ideal_client_types: [] });
+    }
+    if (!formData.coaching_style) {
+      updateFormData({ coaching_style: [] });
+    }
+  }, [formData.ideal_client_types, formData.coaching_style, updateFormData]);
+  
   const handleClientTypeToggle = (clientType: string) => {
     const current = formData.ideal_client_types || [];
     const updated = current.includes(clientType)
