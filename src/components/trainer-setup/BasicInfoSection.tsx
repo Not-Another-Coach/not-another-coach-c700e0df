@@ -23,6 +23,7 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
   const [bioAIHelperOpen, setBioAIHelperOpen] = useState(false);
   const [howStartedAIHelperOpen, setHowStartedAIHelperOpen] = useState(false);
   const [philosophyAIHelperOpen, setPhilosophyAIHelperOpen] = useState(false);
+  const [taglineAIHelperOpen, setTaglineAIHelperOpen] = useState(false);
   const [imagePosition, setImagePosition] = useState(
     formData.profile_image_position || { x: 50, y: 50, scale: 1 }
   );
@@ -58,18 +59,6 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
     if (files[0]) {
       handleFileUpload(files[0]);
     }
-  };
-
-  const bioSuggestions = [
-    "Helping busy professionals transform their bodies and minds through sustainable fitness",
-    "Certified trainer specializing in strength building and confidence boosting for women",
-    "Former athlete turned coach, passionate about making fitness accessible and enjoyable",
-    "Evidence-based training with a focus on long-term health and movement quality"
-  ];
-
-  const handleBioSuggestion = (suggestion: string) => {
-    updateFormData({ bio: suggestion });
-    setBioAIHelperOpen(false);
   };
 
   const addMilestone = () => {
@@ -225,7 +214,31 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
 
       {/* Short Tagline */}
       <div className="space-y-2">
-        <Label htmlFor="tagline">Short Tagline *</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="tagline">Short Tagline *</Label>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setTaglineAIHelperOpen(!taglineAIHelperOpen)}
+          >
+            <Sparkles className="h-4 w-4 mr-2" />
+            AI Helper
+          </Button>
+        </div>
+        
+        {taglineAIHelperOpen && (
+          <AIDescriptionHelper
+            selectedClientTypes={formData.ideal_client_types || []}
+            selectedCoachingStyles={formData.coaching_styles || []}
+            currentDescription={formData.tagline || ''}
+            fieldType="tagline"
+            onSuggestionSelect={(suggestion) => {
+              updateFormData({ tagline: suggestion });
+              setTaglineAIHelperOpen(false);
+            }}
+          />
+        )}
+        
         <div className="relative">
           <Input
             id="tagline"
@@ -269,6 +282,7 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
             selectedClientTypes={formData.ideal_client_types || []}
             selectedCoachingStyles={formData.coaching_styles || []}
             currentDescription={formData.how_started || ''}
+            fieldType="how_started"
             onSuggestionSelect={(suggestion) => {
               updateFormData({ how_started: suggestion });
               setHowStartedAIHelperOpen(false);
@@ -314,6 +328,7 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
             selectedClientTypes={formData.ideal_client_types || []}
             selectedCoachingStyles={formData.coaching_styles || []}
             currentDescription={formData.philosophy || ''}
+            fieldType="philosophy"
             onSuggestionSelect={(suggestion) => {
               updateFormData({ philosophy: suggestion });
               setPhilosophyAIHelperOpen(false);
@@ -355,23 +370,16 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
         </div>
         
         {bioAIHelperOpen && (
-          <Card className="border-primary/20 bg-primary/5">
-            <CardContent className="p-4 space-y-3">
-              <p className="text-sm font-medium">Bio suggestions:</p>
-              <div className="space-y-2">
-                {bioSuggestions.map((suggestion, index) => (
-                  <Badge
-                    key={index}
-                    variant="outline"
-                    className="cursor-pointer hover:bg-primary hover:text-primary-foreground p-2 h-auto text-wrap leading-relaxed"
-                    onClick={() => handleBioSuggestion(suggestion)}
-                  >
-                    {suggestion}
-                  </Badge>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <AIDescriptionHelper
+            selectedClientTypes={formData.ideal_client_types || []}
+            selectedCoachingStyles={formData.coaching_styles || []}
+            currentDescription={formData.bio || ''}
+            fieldType="bio"
+            onSuggestionSelect={(suggestion) => {
+              updateFormData({ bio: suggestion });
+              setBioAIHelperOpen(false);
+            }}
+          />
         )}
         
         <Textarea
