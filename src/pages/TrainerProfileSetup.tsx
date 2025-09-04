@@ -85,7 +85,7 @@ const TrainerProfileSetup = () => {
     
     // Client Fit Preferences - these exist in TrainerProfile  
     ideal_client_types: [] as string[],
-    coaching_styles: [] as string[],
+    coaching_style: [] as string[],
     ideal_client_personality: "",
     
     // Rates & Discovery Calls - these exist in TrainerProfile
@@ -165,8 +165,9 @@ const TrainerProfileSetup = () => {
         qualifications: profile.qualifications || [],
         certificates: profile.uploaded_certificates || [], // Map uploaded_certificates to certificates
         specializations: profile.specializations || [],
-        training_types: profile.training_types || [],
-        location: profile.location || "",
+        ideal_client_types: profile.ideal_client_types || [],
+        coaching_style: profile.coaching_style || [],
+        ideal_client_personality: profile.ideal_client_personality || "",
         hourly_rate: profile.hourly_rate,
         terms_agreed: profile.terms_agreed || false,
         // Initialize ways of working data from profile
@@ -340,7 +341,7 @@ const TrainerProfileSetup = () => {
         
       case 4: // Client Fit - require both client types and coaching styles
         const hasClientTypes = formData.ideal_client_types?.length > 0;
-        const hasCoachingStyles = formData.coaching_styles?.length > 0;
+        const hasCoachingStyles = formData.coaching_style?.length > 0;
         const hasAllClientFit = hasClientTypes && hasCoachingStyles;
         const hasPartialClientFit = hasClientTypes || hasCoachingStyles;
         return hasAllClientFit ? 'completed' : (hasPartialClientFit ? 'partial' : 'not_started');

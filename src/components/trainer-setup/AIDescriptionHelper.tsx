@@ -351,46 +351,17 @@ export function AIDescriptionHelper({
         </div>
 
         {/* Show selected context - only when relevant */}
-        {(hasSelections || (hasContent && isImproveMode && suggestions.length > 0)) && (
+        {hasContent && isImproveMode && suggestions.length > 0 && (
           <div className="space-y-2">
-            {hasContent && isImproveMode && suggestions.length > 0 && (
-              <div className="space-y-1">
-                <p className="text-xs font-medium">Original:</p>
-                <div className="bg-muted/50 p-2 rounded text-xs text-muted-foreground">
-                  {currentDescription.length > 80 
-                    ? currentDescription.substring(0, 80) + "..."
-                    : currentDescription
-                  }
-                </div>
+            <div className="space-y-1">
+              <p className="text-xs font-medium">Original:</p>
+              <div className="bg-muted/50 p-2 rounded text-xs text-muted-foreground">
+                {currentDescription.length > 80 
+                  ? currentDescription.substring(0, 80) + "..."
+                  : currentDescription
+                }
               </div>
-            )}
-            {hasSelections && (
-              <div className="space-y-1">
-                <p className="text-xs font-medium">Based on your selections:</p>
-                <div className="flex flex-wrap gap-2">
-                  {selectedClientTypes.map(type => (
-                    <Badge key={type} variant="secondary" className="text-xs">
-                      {type}
-                    </Badge>
-                  ))}
-                  {selectedCoachingStyles.map(style => {
-                    const styleLabels: Record<string, string> = {
-                      'tough-love': 'Tough Love',
-                      'calm': 'Calm & Patient',
-                      'encouraging': 'Encouraging',
-                      'structured': 'Structured',
-                      'fun': 'Fun & Energetic',
-                      'holistic': 'Holistic'
-                    };
-                    return (
-                      <Badge key={style} variant="outline" className="text-xs">
-                        {styleLabels[style] || style}
-                      </Badge>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+            </div>
           </div>
         )}
 
