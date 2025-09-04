@@ -11,6 +11,7 @@ import { KnowledgeBaseAdmin } from '@/components/knowledge-base/KnowledgeBaseAdm
 import { VisibilitySettingsSection } from '@/components/trainer-setup/VisibilitySettingsSection';
 import { UserValidityChecker } from '@/components/admin/UserValidityChecker';
 import { VerificationManagement } from '@/components/admin/VerificationManagement';
+import { QualificationManagement } from '@/components/admin/QualificationManagement';
 import { TemplateManagementTabs } from '@/components/coach/TemplateManagementTabs';
 import { ProfileDropdown } from '@/components/ProfileDropdown';
 import { Settings, Users, Shield, BarChart3, Home, Eye, Upload, FileText, ExternalLink, CheckCircle, Trash2, Layout } from 'lucide-react';

@@ -22,8 +22,8 @@ import {
 
 interface QualificationsSectionProps {
   formData: {
-    qualifications: string[];
-    certificates: Array<{
+    qualifications?: string[];
+    certificates?: Array<{
       name: string;
       url: string;
       type: string;
