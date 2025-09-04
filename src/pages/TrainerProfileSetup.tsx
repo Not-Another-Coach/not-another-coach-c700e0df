@@ -75,6 +75,7 @@ const TrainerProfileSetup = () => {
     
     // Qualifications - these exist in TrainerProfile
     qualifications: [] as string[],
+    uploaded_certificates: [] as any[],
     
     // Expertise & Services - these exist in TrainerProfile
     specializations: [] as string[],
@@ -162,6 +163,7 @@ const TrainerProfileSetup = () => {
         professional_milestones: profile.professional_milestones || [],
         profile_image_position: profile.profile_image_position || { x: 50, y: 50, scale: 1 },
         qualifications: profile.qualifications || [],
+        uploaded_certificates: profile.uploaded_certificates || [],
         specializations: profile.specializations || [],
         training_types: profile.training_types || [],
         location: profile.location || "",

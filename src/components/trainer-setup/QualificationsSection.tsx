@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Upload, Search, Plus, CheckCircle, Clock, FileText } from "lucide-react";
+import { Upload, Search, Plus, CheckCircle, Clock, FileText, X } from "lucide-react";
 import { SectionHeader } from './SectionHeader';
+import { supabase } from "@/integrations/supabase/client";
 
 interface QualificationsSectionProps {
   formData: any;
@@ -66,17 +67,27 @@ export function QualificationsSection({ formData, updateFormData }: Qualificatio
   const handleFileUpload = async (files: File[]) => {
     try {
       const uploadPromises = files.map(async (file) => {
-        return new Promise<{ name: string; url: string; type: string }>((resolve) => {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            resolve({
-              name: file.name,
-              url: e.target?.result as string,
-              type: file.type
-            });
-          };
-          reader.readAsDataURL(file);
-        });
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        const filePath = `certificates/${fileName}`;
+
+        const { data, error } = await supabase.storage
+          .from('trainer-documents')
+          .upload(filePath, file);
+
+        if (error) throw error;
+
+        const { data: urlData } = supabase.storage
+          .from('trainer-documents')
+          .getPublicUrl(filePath);
+
+        return {
+          name: file.name,
+          url: urlData.publicUrl,
+          path: filePath,
+          type: file.type,
+          size: file.size
+        };
       });
 
       const uploadedFiles = await Promise.all(uploadPromises);
@@ -255,36 +266,51 @@ export function QualificationsSection({ formData, updateFormData }: Qualificatio
             <Label>Uploaded Certificates</Label>
             <div className="space-y-2">
               {formData.uploaded_certificates.map((file: any, index: number) => (
-                <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <FileText className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">{file.name}</span>
-                    <Badge variant="outline" className="text-xs">
-                      <Clock className="h-3 w-3 mr-1" />
-                      Pending Review
-                    </Badge>
+                <Card key={index} className="p-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-start gap-3 min-w-0 flex-1">
+                      <FileText className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <span className="text-sm font-medium block truncate">{file.name}</span>
+                        <Badge variant="outline" className="text-xs mt-1">
+                          <Clock className="h-3 w-3 mr-1" />
+                          Pending Review
+                        </Badge>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 justify-end flex-shrink-0">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => window.open(file.url, '_blank')}
+                        className="text-xs"
+                      >
+                        View
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={async () => {
+                          // Delete from storage if it has a path
+                          if (file.path) {
+                            try {
+                              await supabase.storage
+                                .from('trainer-documents')
+                                .remove([file.path]);
+                            } catch (error) {
+                              console.error('Error deleting file:', error);
+                            }
+                          }
+                          const updatedFiles = formData.uploaded_certificates.filter((_: any, i: number) => i !== index);
+                          updateFormData({ uploaded_certificates: updatedFiles });
+                        }}
+                        className="text-destructive hover:text-destructive text-xs"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => window.open(file.url, '_blank')}
-                    >
-                      View
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        const updatedFiles = formData.uploaded_certificates.filter((_: any, i: number) => i !== index);
-                        updateFormData({ uploaded_certificates: updatedFiles });
-                      }}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                </div>
+                </Card>
               ))}
             </div>
           </div>
