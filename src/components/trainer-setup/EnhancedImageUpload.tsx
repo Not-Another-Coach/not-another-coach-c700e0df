@@ -43,7 +43,7 @@ export const EnhancedImageUpload = ({ onImageUpload, existingImages }: EnhancedI
         // Create unique filename
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}_${type}.${fileExt}`;
-        const filePath = `client-photos/${fileName}`;
+        const filePath = fileName; // Remove bucket name duplication
 
         // Upload to Supabase storage
         const { data, error } = await supabase.storage
@@ -54,10 +54,12 @@ export const EnhancedImageUpload = ({ onImageUpload, existingImages }: EnhancedI
           throw error;
         }
 
-        // Get public URL (bucket is now public)
+        // Get permanent public URL (bucket is public)
         const { data: publicData } = supabase.storage
           .from('client-photos')
           .getPublicUrl(filePath);
+
+        console.log(`Successfully uploaded ${type} image:`, publicData.publicUrl);
 
         onImageUpload(publicData.publicUrl, type);
         

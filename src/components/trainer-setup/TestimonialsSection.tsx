@@ -248,7 +248,14 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
                              onClick={() => window.open(testimonial.beforeImage, '_blank')}
                              onError={(e) => {
                                console.error('Error loading before image:', testimonial.beforeImage);
-                               e.currentTarget.style.display = 'none';
+                               const target = e.currentTarget;
+                               target.style.backgroundColor = '#f3f4f6';
+                               target.style.display = 'flex';
+                               target.style.alignItems = 'center';
+                               target.style.justifyContent = 'center';
+                               target.style.color = '#6b7280';
+                               target.style.fontSize = '12px';
+                               target.innerHTML = 'Image unavailable';
                              }}
                            />
                            <p className="text-xs text-muted-foreground mt-2 font-medium">Before</p>
@@ -263,7 +270,14 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
                              onClick={() => window.open(testimonial.afterImage, '_blank')}
                              onError={(e) => {
                                console.error('Error loading after image:', testimonial.afterImage);
-                               e.currentTarget.style.display = 'none';
+                               const target = e.currentTarget;
+                               target.style.backgroundColor = '#f3f4f6';
+                               target.style.display = 'flex';
+                               target.style.alignItems = 'center';
+                               target.style.justifyContent = 'center';
+                               target.style.color = '#6b7280';
+                               target.style.fontSize = '12px';
+                               target.innerHTML = 'Image unavailable';
                              }}
                            />
                            <p className="text-xs text-muted-foreground mt-2 font-medium">After</p>
