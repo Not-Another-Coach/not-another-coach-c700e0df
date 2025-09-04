@@ -33,6 +33,7 @@ export function useRealTrainers(refreshTrigger?: number) {
             total_ratings,
             training_types,
             profile_photo_url,
+            profile_image_position,
             is_verified,
             package_options,
             testimonials
@@ -71,6 +72,7 @@ export function useRealTrainers(refreshTrigger?: number) {
             hourlyRate: trainer.hourly_rate || 75,
             image: imageUrl,
             profilePhotoUrl: trainer.profile_photo_url,
+            profileImagePosition: trainer.profile_image_position,
             certifications: trainer.qualifications || [],
             description: trainer.bio || "Professional fitness trainer dedicated to helping you achieve your goals.",
             availability: "Available",

@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { PositionedAvatar } from '@/components/ui/positioned-avatar';
 import { Star, MapPin, Clock, Award, Users, MessageCircle, Calendar, User } from 'lucide-react';
 import { Trainer } from '@/components/TrainerCard';
 import { getTrainerDisplayPrice } from '@/lib/priceUtils';
@@ -30,15 +30,14 @@ export const OverviewView = ({ trainer, onMessage, onBookDiscovery }: OverviewVi
         <CardContent className="p-6">
           <div className="flex items-start gap-6">
             <div className="relative">
-              <Avatar className="w-24 h-24 border-4 border-secondary/20">
-                <AvatarImage 
-                  src={trainer.image || undefined} 
-                  alt={trainer.name}
-                />
-                <AvatarFallback className="bg-muted text-muted-foreground text-xl">
-                  {trainer.name ? getInitials(trainer.name) : <User className="w-8 h-8" />}
-                </AvatarFallback>
-              </Avatar>
+              <PositionedAvatar 
+                src={trainer.image || undefined}
+                alt={trainer.name}
+                fallback={trainer.name ? getInitials(trainer.name) : 'PT'}
+                position={trainer.profileImagePosition}
+                size="2xl"
+                className="border-4 border-secondary/20"
+              />
               {trainer.certifications.length > 0 && (
                 <div className="absolute -bottom-1 -right-1 bg-success text-white rounded-full p-2">
                   <Award className="h-4 w-4" />
