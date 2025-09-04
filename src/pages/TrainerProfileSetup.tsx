@@ -288,47 +288,74 @@ const TrainerProfileSetup = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Weight distribution for each step (total: 100%)
+  const getStepWeight = (step: number): number => {
+    const weights = {
+      1: 15,  // Basic Info (most important)
+      2: 12,  // Qualifications (important credibility)
+      3: 12,  // Expertise & Services (core offering)
+      4: 10,  // Client Fit Preferences (matching algorithm)
+      5: 15,  // Rates & Packages (monetization, complex)
+      6: 8,   // Discovery Calls (valuable but optional)
+      7: 10,  // Ways of Working (client experience)
+      8: 5,   // Instagram Integration (optional, lower weight)
+      9: 3,   // Image Management (optional, cosmetic)
+      10: 3,  // Working Hours (optional)
+      11: 5,  // Terms & Notifications (compliance)
+      12: 2   // Verification (final step, external dependency)
+    };
+    return weights[step] || 0;
+  };
+
   const getStepCompletion = (step: number): 'completed' | 'partial' | 'not_started' => {
     switch (step) {
-      case 1:
-        const hasBasicInfo = formData.first_name && formData.last_name && formData.tagline && formData.bio;
-        return hasBasicInfo ? 'completed' : (formData.first_name || formData.last_name ? 'partial' : 'not_started');
-      case 2:
-        return formData.qualifications?.length > 0 ? 'completed' : 'not_started';
-      case 3:
+      case 1: // Basic Info - more stringent requirements
+        const hasAllBasicInfo = formData.first_name && formData.last_name && 
+          formData.tagline && formData.bio && formData.location;
+        const hasPartialBasicInfo = (formData.first_name || formData.last_name || 
+          formData.tagline || formData.bio) && 
+          Object.values(formData).filter(v => v && v.toString().trim()).length >= 3;
+        return hasAllBasicInfo ? 'completed' : (hasPartialBasicInfo ? 'partial' : 'not_started');
+        
+      case 2: // Qualifications - require 2-3 for completion
+        const qualCount = formData.qualifications?.length || 0;
+        if (qualCount >= 2) return 'completed';
+        if (qualCount >= 1) return 'partial';
+        return 'not_started';
+        
+      case 3: // Expertise - require both specializations and training types
         const hasExpertise = formData.specializations?.length > 0 && formData.training_types?.length > 0;
         const hasPartialExpertise = formData.specializations?.length > 0 || formData.training_types?.length > 0;
         return hasExpertise ? 'completed' : (hasPartialExpertise ? 'partial' : 'not_started');
-      case 4:
-        // Client Fit Preferences - check for ideal client types and coaching styles
+        
+      case 4: // Client Fit - require both client types and coaching styles
         const hasClientTypes = formData.ideal_client_types?.length > 0;
         const hasCoachingStyles = formData.coaching_styles?.length > 0;
         const hasAllClientFit = hasClientTypes && hasCoachingStyles;
         const hasPartialClientFit = hasClientTypes || hasCoachingStyles;
         return hasAllClientFit ? 'completed' : (hasPartialClientFit ? 'partial' : 'not_started');
-      case 5:
+        
+      case 5: // Rates & Packages - comprehensive requirements
         const hasPackages = formData.package_options && formData.package_options.length > 0;
-        const hasCommunicationStyle = formData.communication_style && formData.communication_style.trim().length >= 20;
+        const hasCommunicationStyle = formData.communication_style && formData.communication_style.trim().length >= 50;
         const hasCommunicationMethod = formData.video_checkins || formData.messaging_support || formData.weekly_programming_only;
         const hasAllRateRequirements = hasPackages && hasCommunicationStyle && hasCommunicationMethod;
-        const hasPartialRate = hasPackages || hasCommunicationStyle || hasCommunicationMethod;
+        const hasPartialRate = hasPackages || (hasCommunicationStyle && hasCommunicationMethod);
         return hasAllRateRequirements ? 'completed' : (hasPartialRate ? 'partial' : 'not_started');
-      case 6:
-        // Discovery Calls - check if discovery call is enabled and calendar link is provided
+        
+      case 6: // Discovery Calls
         const hasDiscoveryCallConfig = formData.free_discovery_call && formData.calendar_link?.trim();
         const hasPartialDiscoveryCall = formData.free_discovery_call || formData.calendar_link?.trim();
         return hasDiscoveryCallConfig ? 'completed' : (hasPartialDiscoveryCall ? 'partial' : 'not_started');
-      case 7:
-        // Ways of working is only completed if configured for ALL packages
+        
+      case 7: // Ways of Working
         const packages = formData.package_options || [];
         if (packages.length === 0) return 'not_started';
         
-        // Check if all packages have ways of working configured with at least some content
         const allPackagesConfigured = packages.every((pkg: any) => {
           const workflow = packageWorkflows.find(w => w.package_id === pkg.id);
           if (!workflow) return false;
           
-          // Check if at least one section has content
           const hasContent = (
             (workflow.onboarding_items?.length || 0) > 0 ||
             (workflow.first_week_items?.length || 0) > 0 ||
@@ -353,26 +380,24 @@ const TrainerProfileSetup = () => {
         });
         
         return allPackagesConfigured ? 'completed' : (anyPackageConfigured ? 'partial' : 'not_started');
-      case 8:
-        // Instagram integration - optional step, show status based on connection
+        
+      case 8: // Instagram Integration
         return isInstagramConnected ? 'completed' : 'not_started';
-      case 9:
-        // Image management - check if additional images have been uploaded (optional step)
-        return 'not_started'; // Optional step, always show as not started unless images are uploaded
-      case 10:
-        // Image management - check if additional images have been uploaded (optional step)
-        return 'not_started'; // Optional step, always show as not started unless images are uploaded
-      case 11:
-        // Working hours - check if availability has been configured (optional step)
-        return 'not_started'; // Optional step, always show as not started unless availability is set
-      case 12:
-        // T&Cs and Notifications - check if terms have been agreed
+        
+      case 9: // Image Management
+        return 'not_started'; // Optional step
+        
+      case 10: // Working Hours  
+        return 'not_started'; // Optional step
+        
+      case 11: // Terms & Notifications
         return formData.terms_agreed ? 'completed' : 'not_started';
-      case 13:
-        // Verification step - completion depends on actual verification status
+        
+      case 12: // Verification
         if (profile?.verification_status === 'verified') return 'completed';
         if (verificationRequest?.status === 'pending' || verificationRequest?.status === 'under_review') return 'partial';
         return 'not_started';
+        
       default:
         return 'not_started';
     }
@@ -581,13 +606,21 @@ const TrainerProfileSetup = () => {
   };
 
   const calculateOverallCompletion = () => {
-    let completedSteps = 0;
+    let totalWeightedCompletion = 0;
+    
     for (let i = 1; i <= totalSteps; i++) {
-      if (getStepCompletion(i) === 'completed') {
-        completedSteps++;
+      const stepWeight = getStepWeight(i);
+      const stepCompletion = getStepCompletion(i);
+      
+      if (stepCompletion === 'completed') {
+        totalWeightedCompletion += stepWeight;
+      } else if (stepCompletion === 'partial') {
+        totalWeightedCompletion += stepWeight * 0.5; // 50% weight for partial completion
       }
+      // 'not_started' contributes 0
     }
-    return Math.round((completedSteps / totalSteps) * 100);
+    
+    return Math.round(totalWeightedCompletion);
   };
 
   const isFullyComplete = () => {
