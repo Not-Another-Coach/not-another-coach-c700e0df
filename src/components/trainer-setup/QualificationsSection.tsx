@@ -289,45 +289,10 @@ export function QualificationsSection({ formData, updateFormData }: Qualificatio
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={async () => {
+                        onClick={() => {
                           console.log('Attempting to view file:', file.name, 'URL:', file.url);
-                          
-                          // Check if it's an image
-                          if (file.type && file.type.startsWith('image/')) {
-                            // For images, create a modal or use a data URL
-                            if (file.url.startsWith('data:')) {
-                              // It's a data URL, safe to open
-                              window.open(file.url, '_blank');
-                            } else {
-                              // It's a storage URL, try to fetch and display
-                              try {
-                                const response = await fetch(file.url);
-                                if (response.ok) {
-                                  window.open(file.url, '_blank');
-                                } else {
-                                  console.error('File not accessible:', response.status);
-                                  alert('Sorry, this file is not accessible. Please try re-uploading it.');
-                                }
-                              } catch (error) {
-                                console.error('Error accessing file:', error);
-                                alert('Sorry, there was an error accessing this file. Please try re-uploading it.');
-                              }
-                            }
-                          } else {
-                            // For PDFs and other documents
-                            if (file.url.startsWith('data:')) {
-                              window.open(file.url, '_blank');
-                            } else {
-                              // Try to create a download link for better mobile support
-                              const link = document.createElement('a');
-                              link.href = file.url;
-                              link.target = '_blank';
-                              link.download = file.name;
-                              document.body.appendChild(link);
-                              link.click();
-                              document.body.removeChild(link);
-                            }
-                          }
+                          // Since the bucket is now public, directly open the file
+                          window.open(file.url, '_blank');
                         }}
                         className="text-xs"
                       >
