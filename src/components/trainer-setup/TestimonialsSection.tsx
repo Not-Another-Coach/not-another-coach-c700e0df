@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { Upload, Plus, Trash2, Image, Quote, Star } from "lucide-react";
 import { ImageUploadSection } from "./ImageUploadSection";
 import { SectionHeader } from './SectionHeader';
+import { TestimonialAIHelper } from './TestimonialAIHelper';
 
 interface TestimonialsSectionProps {
   formData: any;
@@ -23,7 +24,7 @@ interface Testimonial {
   achievement: string;
   beforeImage?: string;
   afterImage?: string;
-  outcomeTag: string;
+  outcomeTags: string[];
   consentGiven: boolean;
   showImages: boolean;
 }
@@ -55,7 +56,7 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
     clientName: "",
     clientQuote: "",
     achievement: "",
-    outcomeTag: "",
+    outcomeTags: [],
     consentGiven: false,
     showImages: false
   });
@@ -67,7 +68,7 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
         clientName: newTestimonial.clientName || "",
         clientQuote: newTestimonial.clientQuote || "",
         achievement: newTestimonial.achievement || "",
-        outcomeTag: newTestimonial.outcomeTag || "",
+        outcomeTags: newTestimonial.outcomeTags || [],
         consentGiven: newTestimonial.consentGiven || false,
         showImages: newTestimonial.showImages || false,
         beforeImage: newTestimonial.beforeImage,
@@ -82,7 +83,7 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
         clientName: "",
         clientQuote: "",
         achievement: "",
-        outcomeTag: "",
+        outcomeTags: [],
         consentGiven: false,
         showImages: false
       });
@@ -122,9 +123,9 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
                     <div className="flex items-center gap-2">
                       <Quote className="h-4 w-4 text-primary" />
                       <span className="font-medium">{testimonial.clientName}</span>
-                      {testimonial.outcomeTag && (
-                        <Badge variant="secondary">{testimonial.outcomeTag}</Badge>
-                      )}
+                      {testimonial.outcomeTags?.map((tag) => (
+                        <Badge key={tag} variant="secondary">{tag}</Badge>
+                      ))}
                     </div>
                     <Button
                       variant="ghost"
@@ -205,18 +206,41 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="outcome_tag">Outcome Tag</Label>
-              <select
-                id="outcome_tag"
-                value={newTestimonial.outcomeTag || ""}
-                onChange={(e) => setNewTestimonial({ ...newTestimonial, outcomeTag: e.target.value })}
-                className="w-full h-10 px-3 py-2 border border-input bg-background rounded-md text-sm"
-              >
-                <option value="">Select outcome...</option>
-                {outcomeTags.map((tag) => (
-                  <option key={tag} value={tag}>{tag}</option>
-                ))}
-              </select>
+              <Label htmlFor="outcome_tags">Outcome Tags</Label>
+              <div className="border border-input bg-background rounded-md p-2 min-h-[40px]">
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {(newTestimonial.outcomeTags || []).map((tag) => (
+                    <Badge key={tag} variant="secondary" className="flex items-center gap-1">
+                      {tag}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updatedTags = (newTestimonial.outcomeTags || []).filter(t => t !== tag);
+                          setNewTestimonial({ ...newTestimonial, outcomeTags: updatedTags });
+                        }}
+                        className="text-xs hover:text-red-600"
+                      >
+                        ×
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+                <select
+                  value=""
+                  onChange={(e) => {
+                    if (e.target.value && !(newTestimonial.outcomeTags || []).includes(e.target.value)) {
+                      const updatedTags = [...(newTestimonial.outcomeTags || []), e.target.value];
+                      setNewTestimonial({ ...newTestimonial, outcomeTags: updatedTags });
+                    }
+                  }}
+                  className="w-full text-sm bg-transparent border-none outline-none"
+                >
+                  <option value="">Add outcome tag...</option>
+                  {outcomeTags.filter(tag => !(newTestimonial.outcomeTags || []).includes(tag)).map((tag) => (
+                    <option key={tag} value={tag}>{tag}</option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
           
@@ -241,6 +265,15 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
               placeholder="e.g., Lost 15kg and gained confidence to wear a bikini again"
             />
           </div>
+
+          {/* AI Helper for Achievement */}
+          <TestimonialAIHelper
+            clientQuote={newTestimonial.clientQuote || ""}
+            outcomeTags={newTestimonial.outcomeTags || []}
+            onSuggestionSelect={(suggestion) => 
+              setNewTestimonial({ ...newTestimonial, achievement: suggestion })
+            }
+          />
 
           {/* Before/After Images Toggle */}
           <div className="space-y-4">
