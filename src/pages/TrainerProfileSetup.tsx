@@ -169,6 +169,7 @@ const TrainerProfileSetup = () => {
         specializations: profile.specializations || [],
         training_types: profile.training_types || [],
         location: profile.location || "",
+        year_certified: profile.year_certified,
         ideal_client_types: profile.ideal_client_types || [],
         coaching_style: profile.coaching_style || [],
         ideal_client_personality: profile.ideal_client_personality || "",

@@ -27,9 +27,9 @@ export const OverviewView = ({ trainer, onMessage, onBookDiscovery }: OverviewVi
     <div className="space-y-6">
       {/* Hero Card */}
       <Card>
-        <CardContent className="p-6">
-          <div className="flex items-start gap-6">
-            <div className="relative">
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
+            <div className="relative mx-auto sm:mx-0">
               <PositionedAvatar 
                 src={trainer.image || undefined}
                 alt={trainer.name}
@@ -45,10 +45,10 @@ export const OverviewView = ({ trainer, onMessage, onBookDiscovery }: OverviewVi
               )}
             </div>
             
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold mb-2">{trainer.name}</h1>
+            <div className="flex-1 text-center sm:text-left">
+              <h1 className="text-2xl sm:text-3xl font-bold mb-2">{trainer.name}</h1>
               
-              <div className="flex items-center gap-4 mb-3">
+              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 mb-3">
                 <div className="flex items-center gap-1">
                   <Star className="h-5 w-5 fill-accent text-accent" />
                   <span className="font-semibold text-lg">{trainer.rating}</span>
@@ -57,31 +57,31 @@ export const OverviewView = ({ trainer, onMessage, onBookDiscovery }: OverviewVi
                 <Badge variant="secondary">{trainer.experience}</Badge>
               </div>
               
-              <div className="flex items-center gap-6 text-muted-foreground mb-4">
+              <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6 text-muted-foreground mb-4">
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
-                  <span>{trainer.location}</span>
+                  <span className="text-sm sm:text-base">{trainer.location}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4" />
-                  <span>{trainer.availability}</span>
+                  <span className="text-sm sm:text-base">{trainer.availability}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4" />
-                  <span>{trainer.trainingType.join(', ')}</span>
+                  <span className="text-sm sm:text-base">{trainer.trainingType.join(', ')}</span>
                 </div>
               </div>
               
-              <p className="text-muted-foreground leading-relaxed">
+              <p className="text-muted-foreground leading-relaxed text-sm sm:text-base">
                 {trainer.description}
               </p>
             </div>
             
-            <div className="text-right min-w-0">
-              <div className="text-2xl font-bold text-primary mb-1 break-words">
+            <div className="text-center sm:text-right min-w-0 w-full sm:w-auto">
+              <div className="text-xl sm:text-2xl font-bold text-primary mb-1 break-words">
                 {getTrainerDisplayPrice(trainer)}
               </div>
-              <div className="text-sm text-muted-foreground">package pricing</div>
+              <div className="text-xs sm:text-sm text-muted-foreground">package pricing</div>
             </div>
           </div>
         </CardContent>
@@ -116,11 +116,11 @@ export const OverviewView = ({ trainer, onMessage, onBookDiscovery }: OverviewVi
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3">
               {trainer.certifications.map((cert, index) => (
                 <div key={`cert-${index}`} className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg">
-                  <Award className="h-4 w-4 text-accent" />
-                  <span className="text-sm font-medium">{cert}</span>
+                  <Award className="h-4 w-4 text-accent flex-shrink-0" />
+                  <span className="text-sm font-medium break-words">{cert}</span>
                 </div>
               ))}
             </div>

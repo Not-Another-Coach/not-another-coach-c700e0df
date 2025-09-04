@@ -455,18 +455,18 @@ export const QualificationsSection: React.FC<QualificationsSectionProps> = ({
               isDragOver ? 'border-primary bg-primary/5' : 'border-muted-foreground/25'
             }`}
           >
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div
                 className="text-center"
                 onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
                 onDragLeave={() => setIsDragOver(false)}
                 onDrop={handleDrop}
               >
-                <Upload className="w-8 h-8 mx-auto text-muted-foreground mb-4" />
-                <p className="text-sm font-medium mb-2">
+                <Upload className="w-6 h-6 sm:w-8 sm:h-8 mx-auto text-muted-foreground mb-4" />
+                <p className="text-sm sm:text-base font-medium mb-2">
                   Drag & drop your certificates here
                 </p>
-                <p className="text-xs text-muted-foreground mb-4">
+                <p className="text-xs text-muted-foreground mb-4 px-2">
                   or click to browse • PDF, JPG, PNG accepted
                 </p>
                 <input

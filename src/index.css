@@ -300,6 +300,23 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+/* Custom scrollbar styles */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar { 
+  display: none;  /* Safari and Chrome */
+}
+
+/* Mobile responsive typography and spacing adjustments */
+@media (max-width: 640px) {
+  .trainer-card-mobile {
+    min-height: 280px;
+  }
+  
+  .profile-preview-mobile {
+    padding: 1rem;
   }
 }
 

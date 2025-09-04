@@ -240,64 +240,66 @@ const TrainerDashboard = () => {
 
         {/* Bottom Row - Navigation Menu */}
         <div className="px-4 pb-4">
-          <nav className="flex items-center gap-1">
+          <nav className="flex items-center gap-1 overflow-x-auto scrollbar-hide">
             <Button
               variant={activeView === 'dashboard' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setActiveView('dashboard')}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 flex-shrink-0"
             >
               <Home className="w-4 h-4" />
-              Dashboard
+              <span className="hidden sm:inline">Dashboard</span>
             </Button>
-            
-            {/* Remove the old dropdown since we now have separate tabs */}
             
             <Button
               variant={activeView === 'clients' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setActiveView('clients')}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 flex-shrink-0"
             >
               <Users className="w-4 h-4" />
-              Clients ({activeClientsCount})
+              <span className="hidden sm:inline">Clients ({activeClientsCount})</span>
+              <span className="sm:hidden">({activeClientsCount})</span>
             </Button>
             
             <Button
               variant={activeView === 'all-prospects' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setActiveView('all-prospects')}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 flex-shrink-0"
             >
               <UserSearch className="w-4 h-4" />
-              Prospects ({prospectsCount + (waitlistEntries?.length || 0)})
+              <span className="hidden sm:inline">Prospects ({prospectsCount + (waitlistEntries?.length || 0)})</span>
+              <span className="sm:hidden">({prospectsCount + (waitlistEntries?.length || 0)})</span>
             </Button>
             
           <Button 
             variant={activeView === 'templates' ? 'default' : 'ghost'}
             size="sm"
             onClick={() => setActiveView('templates')}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 flex-shrink-0"
           >
             <CheckCircle className="w-4 h-4" />
-            Template Management
+            <span className="hidden sm:inline">Template Management</span>
+            <span className="sm:hidden">Templates</span>
           </Button>
           
           <Button
             variant={activeView === 'goals' ? 'default' : 'ghost'}
             size="sm"
             onClick={() => setActiveView('goals')}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 flex-shrink-0"
           >
             <Goal className="w-4 h-4" />
-            Goals & Tasks
+            <span className="hidden sm:inline">Goals & Tasks</span>
+            <span className="sm:hidden">Goals</span>
           </Button>
           
           <Button
             variant={activeView === 'payments' ? 'default' : 'ghost'}
             size="sm"
             onClick={() => setActiveView('payments')}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 flex-shrink-0"
           >
             <CreditCard className="w-4 h-4" />
             Payment & Payouts
