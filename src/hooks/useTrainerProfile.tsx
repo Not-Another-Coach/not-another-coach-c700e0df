@@ -54,6 +54,8 @@ interface TrainerProfile {
   terms_agreed: boolean | null;
   how_started: string | null;
   philosophy: string | null;
+  professional_milestones: any[] | null;
+  profile_image_position: any | null;
 }
 
 export function useTrainerProfile() {
@@ -78,7 +80,9 @@ export function useTrainerProfile() {
         const profileWithDefaults = {
           ...data,
           how_started: (data as any)?.how_started || null,
-          philosophy: (data as any)?.philosophy || null
+          philosophy: (data as any)?.philosophy || null,
+          professional_milestones: (data as any)?.professional_milestones || null,
+          profile_image_position: (data as any)?.profile_image_position || null
         } as TrainerProfile;
         setProfile(profileWithDefaults);
       }
@@ -107,7 +111,7 @@ export function useTrainerProfile() {
       const trainerUpdates: any = {};
 
       // Shared profile fields
-      const sharedFields = ['first_name', 'last_name', 'bio', 'profile_photo_url', 'location', 'tagline', 'is_uk_based', 'profile_published'];
+      const sharedFields = ['first_name', 'last_name', 'bio', 'profile_photo_url', 'location', 'tagline', 'is_uk_based', 'profile_published', 'professional_milestones', 'profile_image_position'];
       
       // Trainer-specific fields  
       const trainerFields = [
