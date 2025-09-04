@@ -175,6 +175,7 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
                       imageUrl={formData.profile_photo_url}
                       onPositionChange={handlePositionChange}
                       position={imagePosition}
+                      previewSize="2xl"
                     />
                   </div>
                 </div>

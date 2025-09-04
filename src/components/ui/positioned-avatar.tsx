@@ -45,8 +45,9 @@ export const PositionedAvatar = ({
             }}
           />
         </div>
-      ) : null}
-      <AvatarFallback className="text-lg font-medium">{fallback}</AvatarFallback>
+      ) : (
+        <AvatarFallback className="text-lg font-medium">{fallback}</AvatarFallback>
+      )}
     </Avatar>
   );
 };

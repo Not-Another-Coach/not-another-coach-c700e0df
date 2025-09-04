@@ -8,12 +8,14 @@ interface ProfileImagePositionerProps {
   imageUrl: string;
   onPositionChange: (position: { x: number; y: number; scale: number }) => void;
   position?: { x: number; y: number; scale: number };
+  previewSize?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 }
 
 export const ProfileImagePositioner = ({ 
   imageUrl, 
   onPositionChange, 
-  position = { x: 50, y: 50, scale: 1 } 
+  position = { x: 50, y: 50, scale: 1 },
+  previewSize = '2xl'
 }: ProfileImagePositionerProps) => {
   const [currentPosition, setCurrentPosition] = useState(position);
   const [isDragging, setIsDragging] = useState(false);
@@ -21,6 +23,22 @@ export const ProfileImagePositioner = ({
   const [dragStart, setDragStart] = useState({ x: 0, y: 0, imgX: 0, imgY: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
+
+  // Map sizes to pixel values for consistent container sizing
+  const sizeMap = {
+    sm: 'w-8 h-8',
+    md: 'w-12 h-12', 
+    lg: 'w-16 h-16',
+    xl: 'w-24 h-24',
+    '2xl': 'w-32 h-32'
+  };
+  
+  // Use a larger preview container (3x the actual size) for better precision
+  const previewContainerSize = previewSize === 'sm' ? 'w-24 h-24' :
+                              previewSize === 'md' ? 'w-36 h-36' :
+                              previewSize === 'lg' ? 'w-48 h-48' :
+                              previewSize === 'xl' ? 'w-72 h-72' :
+                              'w-96 h-96';
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -114,7 +132,7 @@ export const ProfileImagePositioner = ({
           <div className="relative">
             <div 
               ref={containerRef}
-              className="w-64 h-64 mx-auto rounded-full border-4 border-primary/20 overflow-hidden bg-muted relative select-none"
+              className={`${previewContainerSize} mx-auto rounded-full border-4 border-primary/20 overflow-hidden bg-muted relative select-none`}
               onMouseDown={handleMouseDown}
               onWheel={handleWheel}
               style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
