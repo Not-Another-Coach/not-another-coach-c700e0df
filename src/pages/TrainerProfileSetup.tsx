@@ -151,8 +151,8 @@ const TrainerProfileSetup = () => {
   // Initialize form data from profile when available
   useEffect(() => {
     // Only initialize when we have a profile with an ID and haven't initialized yet
-    // Allow reinitialization when user returns to page to ensure saved data is loaded
-    if (profile && profile.id && !hasInitialized.current) {
+    // Protect unsaved changes during internal navigation, but allow reinitialization from external routes
+    if (profile && profile.id && !hasInitialized.current && !hasUnsavedChanges) {
       hasInitialized.current = true;
       const initialData = {
         first_name: profile.first_name || "",
@@ -195,15 +195,11 @@ const TrainerProfileSetup = () => {
         delivery_format: Array.isArray(profile.delivery_format) ? profile.delivery_format[0] || "hybrid" : profile.delivery_format || "hybrid",
       };
       
-      console.log('Initializing form data from profile:', initialData);
-      console.log('Profile ideal_client_types:', profile.ideal_client_types);
-      console.log('Profile coaching_style:', profile.coaching_style);
-      
       setFormData(prev => ({ ...prev, ...initialData }));
       initialFormData.current = { ...initialData };
       setHasUnsavedChanges(false);
     }
-  }, [profile]); // Remove hasUnsavedChanges dependency to allow reinitialization
+  }, [profile, hasUnsavedChanges]);
 
   // Track changes to form data
   useEffect(() => {
@@ -213,21 +209,9 @@ const TrainerProfileSetup = () => {
     }
   }, [formData]);
 
-  // Reset initialization when user navigates back to page
-  useEffect(() => {
-    // When the component mounts, reset initialization flag to allow fresh data loading
-    hasInitialized.current = false;
-  }, []);
-
-  // Handle tab navigation from URL parameters and reset initialization on route changes
+  // Handle tab navigation from URL parameters
   useEffect(() => {
     const tab = searchParams.get('tab');
-    
-    // Reset initialization when navigating between tabs to ensure fresh data
-    if (tab && hasInitialized.current) {
-      hasInitialized.current = false;
-    }
-    
     if (tab) {
       const tabMap: Record<string, number> = {
         'basic': 1,
