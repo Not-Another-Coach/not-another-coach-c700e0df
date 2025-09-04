@@ -38,7 +38,7 @@ import { InstagramIntegration } from "@/components/instagram/InstagramIntegratio
 import { ImageManagementSection } from "@/components/trainer-setup/ImageManagementSection";
 import { WorkingHoursAndAvailabilitySection } from "@/components/trainer-setup/WorkingHoursAndAvailabilitySection";
 import { TermsAndNotificationsSection } from "@/components/trainer-setup/TermsAndNotificationsSection";
-import { VerificationSection } from "@/components/trainer-setup/VerificationSection";
+import { EnhancedVerificationSection } from "@/components/trainer-setup/EnhancedVerificationSection";
 
 const TrainerProfileSetup = () => {
   const { user, loading } = useAuth();
@@ -665,7 +665,7 @@ const TrainerProfileSetup = () => {
       case 12:
         return <TermsAndNotificationsSection {...commonProps} />;
       case 13:
-        return <VerificationSection />;
+        return <EnhancedVerificationSection />;
       default:
         return null;
     }
