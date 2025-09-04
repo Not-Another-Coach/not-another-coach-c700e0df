@@ -146,24 +146,28 @@ export const ProfilePreviewModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-[90vw] max-w-4xl h-[90vh] max-h-[800px] overflow-hidden flex flex-col p-0">
-        <DialogHeader className="px-6 py-4 border-b flex-shrink-0">
-          <DialogTitle className="flex flex-col sm:flex-row sm:items-center gap-2">
-            <span>Profile Preview</span>
-            <Badge className={stageInfo.color}>
-              {stageInfo.label}
-            </Badge>
+      <DialogContent className="w-[95vw] sm:w-[90vw] max-w-4xl h-[95vh] sm:h-[90vh] max-h-[800px] overflow-hidden flex flex-col p-0 m-2 sm:m-4">
+        <DialogHeader className="px-4 sm:px-6 py-3 sm:py-4 border-b flex-shrink-0">
+          <DialogTitle className="flex flex-col gap-2 text-left">
+            <div className="flex items-center justify-between">
+              <span className="text-lg sm:text-xl">Profile Preview</span>
+            </div>
+            <div className="flex flex-col gap-1">
+              <Badge className={`${stageInfo.color} text-xs w-fit`}>
+                {stageInfo.label}
+              </Badge>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                {stageInfo.description}
+              </p>
+            </div>
           </DialogTitle>
-          <p className="text-sm text-muted-foreground">
-            {stageInfo.description}
-          </p>
         </DialogHeader>
         
         <div className="flex-1 overflow-hidden flex flex-col">
-          <div className="px-6 py-4 border-b flex-shrink-0">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
+          <div className="px-4 sm:px-6 py-3 sm:py-4 border-b flex-shrink-0">
+            <div className="flex flex-col gap-2 sm:gap-3 mb-3">
               <h3 className="text-sm font-medium text-muted-foreground">Preview Mode</h3>
-              <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+              <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded text-center sm:text-left w-fit">
                 This is how clients will see your profile
               </div>
             </div>
@@ -174,18 +178,18 @@ export const ProfilePreviewModal = ({
             />
           </div>
           
-          <div className="flex-1 overflow-y-auto px-6 py-4">
+          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-3 sm:py-4">
             {renderCurrentView()}
           </div>
 
-          <div className="px-6 py-4 border-t flex-shrink-0">
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Button onClick={handleMessage} className="flex-1" disabled>
+          <div className="px-4 sm:px-6 py-3 sm:py-4 border-t flex-shrink-0">
+            <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
+              <Button onClick={handleMessage} className="w-full sm:flex-1 text-sm" disabled>
                 <MessageCircle className="w-4 h-4 mr-2" />
                 Send Message (Preview)
               </Button>
               {trainer.offers_discovery_call && (
-                <Button onClick={handleBookDiscovery} variant="outline" className="flex-1" disabled>
+                <Button onClick={handleBookDiscovery} variant="outline" className="w-full sm:flex-1 text-sm" disabled>
                   <Calendar className="w-4 h-4 mr-2" />
                   Book Discovery Call (Preview)
                 </Button>
