@@ -846,18 +846,20 @@ const TrainerProfileSetup = () => {
 
         {/* Navigation */}
         <div className="flex justify-between mt-6">
-          <Button
-            variant="outline"
-            onClick={handlePrevious}
-            disabled={currentStep === 1}
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Previous
-          </Button>
+          {currentStep > 1 && (
+            <Button
+              variant="outline"
+              onClick={handlePrevious}
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Previous
+            </Button>
+          )}
           
-          <Button 
+           <Button 
             onClick={handleNext}
             disabled={isLoading}
+            className={currentStep === 1 ? "ml-auto" : ""}
           >
             {isLoading ? (
               <>
