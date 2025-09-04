@@ -148,10 +148,11 @@ const TrainerProfileSetup = () => {
     }
   }, [user, loading, navigate]);
 
-  // Initialize form data from profile - one time only
+  // Initialize form data from profile when available
   useEffect(() => {
-    // Only initialize once, when we first get a profile with an ID
-    if (profile && profile.id && !hasInitialized.current) {
+    // Only initialize when we have a profile with an ID and haven't initialized yet
+    // Also prevent overwriting if user has unsaved changes
+    if (profile && profile.id && !hasInitialized.current && !hasUnsavedChanges) {
       hasInitialized.current = true;
       const initialData = {
         first_name: profile.first_name || "",
@@ -166,6 +167,8 @@ const TrainerProfileSetup = () => {
         qualifications: profile.qualifications || [],
         certificates: profile.uploaded_certificates || [], // Map uploaded_certificates to certificates
         specializations: profile.specializations || [],
+        training_types: profile.training_types || [],
+        location: profile.location || "",
         ideal_client_types: profile.ideal_client_types || [],
         coaching_style: profile.coaching_style || [],
         ideal_client_personality: profile.ideal_client_personality || "",
@@ -178,7 +181,6 @@ const TrainerProfileSetup = () => {
         ways_of_working_tracking: profile.ways_of_working_tracking || [],
         ways_of_working_expectations: profile.ways_of_working_expectations || [],
         ways_of_working_what_i_bring: profile.ways_of_working_what_i_bring || [],
-        ways_of_working_completed: false,
         // Initialize other fields
         max_clients: profile.max_clients,
         package_options: profile.package_options || [],
@@ -196,7 +198,7 @@ const TrainerProfileSetup = () => {
       initialFormData.current = { ...formData, ...initialData };
       setHasUnsavedChanges(false);
     }
-  }, []); // Empty dependency array - we only want this to run once when component mounts
+  }, [profile, hasUnsavedChanges]); // Depend on profile but protect against overwriting unsaved changes
 
   // Track changes to form data
   useEffect(() => {
