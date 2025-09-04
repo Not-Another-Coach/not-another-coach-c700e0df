@@ -377,7 +377,7 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
   return (
     <div className="space-y-6">
       <SectionHeader 
-        icons={[DollarSign]}
+        icons={[currency === 'GBP' ? PoundSterling : currency === 'EUR' ? Euro : DollarSign]}
         title="Rates & Packages"
         description="Set your currency and create training packages for clients"
       />
@@ -474,10 +474,16 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
                             <CreditCard className="h-3 w-3 sm:h-4 sm:w-4" />
                             <span className="text-xs">{formatPaymentMode(pkg)}</span>
                           </div>
-                          <div className="flex items-center gap-1">
-                            <DollarSign className="h-3 w-3 sm:h-4 sm:w-4" />
-                            <span className="text-xs">Paid {pkg.payoutFrequency || 'monthly'}</span>
-                          </div>
+                           <div className="flex items-center gap-1">
+                             {pkg.currency === 'GBP' ? (
+                               <PoundSterling className="h-3 w-3 sm:h-4 sm:w-4" />
+                             ) : pkg.currency === 'EUR' ? (
+                               <Euro className="h-3 w-3 sm:h-4 sm:w-4" />
+                             ) : (
+                               <DollarSign className="h-3 w-3 sm:h-4 sm:w-4" />
+                             )}
+                             <span className="text-xs">Paid {pkg.payoutFrequency || 'monthly'}</span>
+                           </div>
                         </div>
                         
                         {pkg.isPromotion && pkg.promotionStartDate && pkg.promotionEndDate && (
