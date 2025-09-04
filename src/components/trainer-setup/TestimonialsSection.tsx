@@ -448,6 +448,36 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
                           ? "Before image uploaded - add an after image to complete the transformation" 
                           : "After image uploaded - add a before image to show the transformation"}
                     </p>
+                    
+                    {/* Preview of uploaded images */}
+                    <div className="flex gap-4 mt-3">
+                      {newTestimonial.beforeImage && (
+                        <div className="text-center">
+                          <img 
+                            src={newTestimonial.beforeImage} 
+                            alt="Before preview"
+                            className="w-20 h-20 object-cover rounded border-2 border-green-300"
+                            onError={(e) => {
+                              console.error('Error loading before image preview:', newTestimonial.beforeImage);
+                            }}
+                          />
+                          <p className="text-xs text-green-600 mt-1">Before</p>
+                        </div>
+                      )}
+                      {newTestimonial.afterImage && (
+                        <div className="text-center">
+                          <img 
+                            src={newTestimonial.afterImage} 
+                            alt="After preview"
+                            className="w-20 h-20 object-cover rounded border-2 border-green-300"
+                            onError={(e) => {
+                              console.error('Error loading after image preview:', newTestimonial.afterImage);
+                            }}
+                          />
+                          <p className="text-xs text-green-600 mt-1">After</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
