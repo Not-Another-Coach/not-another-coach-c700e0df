@@ -241,15 +241,22 @@ export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionP
                         )}
                       </div>
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                        {categorySpecialties.map((specialty) => (
-                          <label key={specialty.id} className="flex items-center space-x-2 cursor-pointer p-3 rounded-lg border hover:bg-muted/50 transition-colors">
-                            <Checkbox
-                              checked={formData.specializations?.includes(specialty.name) || false}
-                              onCheckedChange={() => handleSpecialtyToggle(specialty.name, specialty.id)}
-                            />
-                            <span className="flex-1 text-sm font-medium">{specialty.name}</span>
-                          </label>
-                        ))}
+                        {categorySpecialties.map((specialty) => {
+                          const isSelected = formData.specializations?.includes(specialty.name) || false;
+                          return (
+                            <button 
+                              key={specialty.id} 
+                              onClick={() => handleSpecialtyToggle(specialty.name, specialty.id)}
+                              className={`p-3 rounded-lg border transition-colors text-left ${
+                                isSelected 
+                                  ? 'border-primary bg-primary/10 text-primary font-medium' 
+                                  : 'border-border hover:bg-muted/50'
+                              }`}
+                            >
+                              <span className="text-sm">{specialty.name}</span>
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
                   );
@@ -282,28 +289,36 @@ export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionP
               <div>Loading training types...</div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {filteredTrainingTypes.map((trainingType) => (
-                  <label key={trainingType.id} className="flex items-start space-x-2 cursor-pointer p-4 rounded-lg border hover:bg-muted/50 transition-colors">
-                    <Checkbox
-                      checked={formData.training_types?.includes(trainingType.name) || false}
-                      onCheckedChange={() => handleTrainingTypeToggle(trainingType.name, trainingType.id)}
-                      className="mt-1"
-                    />
-                    <div className="flex-1">
-                      <span className="text-sm font-medium block">{trainingType.name}</span>
-                      {trainingType.description && (
-                        <span className="text-xs text-muted-foreground mt-1 block">{trainingType.description}</span>
-                      )}
-                      <div className="flex gap-1 mt-2">
-                        {trainingType.delivery_formats.map((format) => (
-                          <Badge key={format} variant="secondary" className="text-xs capitalize">
-                            {format}
-                          </Badge>
-                        ))}
+                {filteredTrainingTypes.map((trainingType) => {
+                  const isSelected = formData.training_types?.includes(trainingType.name) || false;
+                  return (
+                    <button 
+                      key={trainingType.id} 
+                      onClick={() => handleTrainingTypeToggle(trainingType.name, trainingType.id)}
+                      className={`p-4 rounded-lg border transition-colors text-left ${
+                        isSelected 
+                          ? 'border-primary bg-primary/10 text-primary' 
+                          : 'border-border hover:bg-muted/50'
+                      }`}
+                    >
+                      <div>
+                        <span className={`text-sm block ${isSelected ? 'font-semibold' : 'font-medium'}`}>
+                          {trainingType.name}
+                        </span>
+                        {trainingType.description && (
+                          <span className="text-xs text-muted-foreground mt-1 block">{trainingType.description}</span>
+                        )}
+                        <div className="flex gap-1 mt-2">
+                          {trainingType.delivery_formats.map((format) => (
+                            <Badge key={format} variant="secondary" className="text-xs capitalize">
+                              {format}
+                            </Badge>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  </label>
-                ))}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </CardContent>
