@@ -1,8 +1,9 @@
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { PackageWaysOfWorkingPreview } from "@/components/PackageWaysOfWorkingPreview";
+import { PositionedAvatar } from '@/components/ui/positioned-avatar';
 import { Star, MapPin, Clock, DollarSign, Calendar, MessageCircle } from "lucide-react";
 
 interface TrainerProfilePreviewProps {
@@ -31,13 +32,14 @@ export const TrainerProfilePreview = ({ formData }: TrainerProfilePreviewProps) 
           <div className="flex flex-col md:flex-row gap-6">
             {/* Avatar and Basic Info */}
             <div className="flex flex-col items-center md:items-start">
-              <Avatar className="h-24 w-24 mb-4">
-                <AvatarImage 
-                  src={formData.profile_photo_url} 
-                  alt={`${formData.first_name} ${formData.last_name}`} 
-                />
-                <AvatarFallback className="text-lg">{getInitials()}</AvatarFallback>
-              </Avatar>
+              <PositionedAvatar 
+                src={formData.profile_photo_url} 
+                alt={`${formData.first_name} ${formData.last_name}`} 
+                position={formData.profile_image_position}
+                fallback={getInitials()}
+                size="2xl"
+                className="mb-4"
+              />
               <div className="flex items-center gap-1 mb-2">
                 <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
                 <span className="font-medium">4.9</span>

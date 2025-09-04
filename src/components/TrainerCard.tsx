@@ -8,6 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Star, MapPin, Clock, Users, Award, Target, Dumbbell, Heart, X, MessageCircle, Calendar, ExternalLink, MoreVertical } from "lucide-react";
 import { MatchBadge } from "@/components/MatchBadge";
 import { MatchProgressIndicator } from "@/components/MatchProgressIndicator";
+import { PositionedAvatar } from "@/components/ui/positioned-avatar";
 import { useSavedTrainers } from "@/hooks/useSavedTrainers";
 import { useContentVisibility } from "@/hooks/useContentVisibility";
 import { useEngagementStage } from "@/hooks/useEngagementStage";
@@ -31,6 +32,7 @@ export interface Trainer {
   hourlyRate: number;
   image: string;
   profilePhotoUrl?: string;
+  profileImagePosition?: { x: number; y: number; scale: number };
   certifications: string[];
   description: string;
   availability: string;
@@ -344,10 +346,13 @@ export const TrainerCard = ({
         {/* Main content */}
         <div className="flex items-start gap-4 mb-4">
           <div className="relative">
-            <img 
-              src={trainer.image} 
+            <PositionedAvatar 
+              src={trainer.profilePhotoUrl || trainer.image}
               alt={trainer.name}
-              className="w-16 h-16 rounded-full object-cover border-2 border-secondary/20"
+              position={trainer.profileImagePosition}
+              fallback={trainer.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'PT'}
+              size="lg"
+              className="border-2 border-secondary/20"
             />
             <div className="absolute -bottom-1 -right-1 bg-success text-white rounded-full p-1">
               <Award className="h-3 w-3" />

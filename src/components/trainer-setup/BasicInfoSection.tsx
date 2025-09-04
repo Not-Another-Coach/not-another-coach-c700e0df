@@ -9,6 +9,7 @@ import { Upload, Camera, Sparkles, User, Plus, X, Calendar, Move } from "lucide-
 import { SectionHeader } from './SectionHeader';
 import { AIDescriptionHelper } from './AIDescriptionHelper';
 import { ProfileImagePositioner } from './ProfileImagePositioner';
+import { PositionedAvatar } from '@/components/ui/positioned-avatar';
 
 interface BasicInfoSectionProps {
   formData: any;
@@ -22,7 +23,9 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
   const [bioAIHelperOpen, setBioAIHelperOpen] = useState(false);
   const [howStartedAIHelperOpen, setHowStartedAIHelperOpen] = useState(false);
   const [philosophyAIHelperOpen, setPhilosophyAIHelperOpen] = useState(false);
-  const [imagePosition, setImagePosition] = useState({ x: 50, y: 50, scale: 1 });
+  const [imagePosition, setImagePosition] = useState(
+    formData.profile_image_position || { x: 50, y: 50, scale: 1 }
+  );
 
   const handleFileUpload = async (file: File) => {
     try {
@@ -92,6 +95,12 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
     updateFormData({ profile_image_position: position });
   };
 
+  const getInitials = () => {
+    const first = formData.first_name?.charAt(0) || '';
+    const last = formData.last_name?.charAt(0) || '';
+    return (first + last).toUpperCase() || 'PT';
+  };
+
   return (
     <div className="space-y-6">
       <SectionHeader 
@@ -149,17 +158,14 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
             >
               {formData.profile_photo_url ? (
                 <div className="space-y-4">
-                  <div className="w-32 h-32 mx-auto rounded-full bg-muted border overflow-hidden relative">
-                    <img 
-                      src={formData.profile_photo_url} 
-                      alt="Profile"
-                      className="absolute w-full h-full object-cover"
-                      style={{
-                        transform: `translate(${(imagePosition.x - 50)}%, ${(imagePosition.y - 50)}%) scale(${imagePosition.scale})`,
-                        transformOrigin: 'center center'
-                      }}
-                    />
-                  </div>
+                  <PositionedAvatar 
+                    src={formData.profile_photo_url} 
+                    alt="Profile"
+                    position={imagePosition}
+                    fallback={getInitials()}
+                    size="2xl"
+                    className="mx-auto"
+                  />
                   <div className="flex gap-2 justify-center flex-wrap">
                     <input
                       type="file"
