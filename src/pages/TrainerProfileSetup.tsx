@@ -76,6 +76,11 @@ const TrainerProfileSetup = () => {
     location: "",
     delivery_format: "hybrid" as string,
     
+    // Client Fit Preferences - these exist in TrainerProfile  
+    ideal_client_types: [] as string[],
+    coaching_styles: [] as string[],
+    ideal_client_personality: "",
+    
     // Rates & Discovery Calls - these exist in TrainerProfile
     hourly_rate: null as number | null,
     package_options: [],
@@ -293,7 +298,12 @@ const TrainerProfileSetup = () => {
         const hasPartialExpertise = formData.specializations?.length > 0 || formData.training_types?.length > 0;
         return hasExpertise ? 'completed' : (hasPartialExpertise ? 'partial' : 'not_started');
       case 4:
-        return 'completed'; // Optional step
+        // Client Fit Preferences - check for ideal client types and coaching styles
+        const hasClientTypes = formData.ideal_client_types?.length > 0;
+        const hasCoachingStyles = formData.coaching_styles?.length > 0;
+        const hasAllClientFit = hasClientTypes && hasCoachingStyles;
+        const hasPartialClientFit = hasClientTypes || hasCoachingStyles;
+        return hasAllClientFit ? 'completed' : (hasPartialClientFit ? 'partial' : 'not_started');
       case 5:
         const hasPackages = formData.package_options && formData.package_options.length > 0;
         const hasCommunicationStyle = formData.communication_style && formData.communication_style.trim().length >= 20;
@@ -302,7 +312,10 @@ const TrainerProfileSetup = () => {
         const hasPartialRate = hasPackages || hasCommunicationStyle || hasCommunicationMethod;
         return hasAllRateRequirements ? 'completed' : (hasPartialRate ? 'partial' : 'not_started');
       case 6:
-        return 'completed'; // Optional step
+        // Discovery Calls - check if discovery call is enabled and calendar link is provided
+        const hasDiscoveryCallConfig = formData.free_discovery_call && formData.calendar_link?.trim();
+        const hasPartialDiscoveryCall = formData.free_discovery_call || formData.calendar_link?.trim();
+        return hasDiscoveryCallConfig ? 'completed' : (hasPartialDiscoveryCall ? 'partial' : 'not_started');
       case 7:
         // Ways of working is only completed if configured for ALL packages
         const packages = formData.package_options || [];
@@ -342,10 +355,11 @@ const TrainerProfileSetup = () => {
         // Instagram integration - optional step, show status based on connection
         return isInstagramConnected ? 'completed' : 'not_started';
       case 9:
-        // Image management - optional step, always accessible
-        return 'completed';
+        // Image management - check if additional images have been uploaded (optional step)
+        return 'not_started'; // Optional step, always show as not started unless images are uploaded
       case 10:
-        return 'completed'; // Working hours step - always accessible
+        // Working hours - check if availability has been configured (optional step)
+        return 'not_started'; // Optional step, always show as not started unless availability is set
       case 11:
         return formData.terms_agreed ? 'completed' : 'not_started';
       case 12:
