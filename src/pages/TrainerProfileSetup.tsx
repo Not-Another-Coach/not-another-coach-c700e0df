@@ -429,11 +429,18 @@ const TrainerProfileSetup = () => {
         delivery_format: [formData.delivery_format],
         // Convert communication_style from string to array
         communication_style: formData.communication_style.split(',').map(s => s.trim()).filter(s => s),
+        // Ensure array fields are properly formatted
+        ideal_client_types: formData.ideal_client_types || [],
+        coaching_style: formData.coaching_style || [],
+        specializations: formData.specializations || [],
+        training_types: formData.training_types || [],
         // Map certificates back to uploaded_certificates for database storage
         uploaded_certificates: formData.certificates || [],
       };
       
       console.log('Saving trainer profile data:', saveData);
+      console.log('Client types being saved:', saveData.ideal_client_types);
+      console.log('Coaching styles being saved:', saveData.coaching_style);
       
       const result = await updateProfile(saveData);
       
