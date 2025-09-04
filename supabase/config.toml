@@ -71,6 +71,9 @@ verify_jwt = true
 [functions.instagram-refresh-token]
 verify_jwt = true
 
+[functions.complete-user-deletion]
+verify_jwt = true
+
 [edge-runtime]
 enabled = true
 port = 54329
