@@ -3575,6 +3575,7 @@ export type Database = {
           privacy_policy_version: string | null
           professional_milestones: Json | null
           profile_blocks: Json | null
+          profile_image_position: Json | null
           profile_photo_url: string | null
           profile_published: boolean | null
           profile_setup_completed: boolean | null
@@ -3697,6 +3698,7 @@ export type Database = {
           privacy_policy_version?: string | null
           professional_milestones?: Json | null
           profile_blocks?: Json | null
+          profile_image_position?: Json | null
           profile_photo_url?: string | null
           profile_published?: boolean | null
           profile_setup_completed?: boolean | null
@@ -3819,6 +3821,7 @@ export type Database = {
           privacy_policy_version?: string | null
           professional_milestones?: Json | null
           profile_blocks?: Json | null
+          profile_image_position?: Json | null
           profile_photo_url?: string | null
           profile_published?: boolean | null
           profile_setup_completed?: boolean | null
