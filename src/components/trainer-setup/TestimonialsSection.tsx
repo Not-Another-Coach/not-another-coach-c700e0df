@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -7,10 +7,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
-import { Upload, Plus, Trash2, Image, Quote, Star, Edit, X, Check } from "lucide-react";
+import { Upload, Plus, Trash2, Image, Quote, Star, Edit, X, Check, Save } from "lucide-react";
 import { EnhancedImageUpload } from "./EnhancedImageUpload";
 import { SectionHeader } from './SectionHeader';
 import { TestimonialAIHelper } from './TestimonialAIHelper';
+import { toast } from "@/hooks/use-toast";
 
 interface TestimonialsSectionProps {
   formData: any;
@@ -62,6 +63,11 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
   });
   const [editingId, setEditingId] = useState<string | null>(null);
 
+  // Sync testimonials from parent formData changes
+  useEffect(() => {
+    setTestimonials(formData.testimonials || []);
+  }, [formData.testimonials]);
+
   const addTestimonial = () => {
     if (newTestimonial.clientName && newTestimonial.clientQuote && newTestimonial.achievement) {
       const testimonial: Testimonial = {
@@ -79,6 +85,14 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
       const updatedTestimonials = [...testimonials, testimonial];
       setTestimonials(updatedTestimonials);
       updateFormData({ testimonials: updatedTestimonials });
+      
+      console.log('Added testimonial:', testimonial);
+      console.log('Updated testimonials array:', updatedTestimonials);
+      
+      toast({
+        title: "Testimonial added!",
+        description: `Successfully added testimonial from ${testimonial.clientName}${testimonial.showImages ? ' with images' : ''}`,
+      });
       
       setNewTestimonial({
         clientName: "",
@@ -159,6 +173,15 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
       );
       setTestimonials(updatedTestimonials);
       updateFormData({ testimonials: updatedTestimonials });
+      
+      console.log('Updated testimonial:', updatedTestimonials.find(t => t.id === editingId));
+      console.log('Updated testimonials array:', updatedTestimonials);
+      
+      toast({
+        title: "Testimonial updated!",
+        description: `Successfully updated testimonial from ${newTestimonial.clientName}`,
+      });
+      
       cancelEditing();
     }
   };

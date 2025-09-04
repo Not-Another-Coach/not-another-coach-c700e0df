@@ -54,12 +54,12 @@ export const EnhancedImageUpload = ({ onImageUpload, existingImages }: EnhancedI
           throw error;
         }
 
-        // Get signed URL for private access
-        const { data: signed } = await supabase.storage
+        // Get public URL (bucket is now public)
+        const { data: publicData } = supabase.storage
           .from('client-photos')
-          .createSignedUrl(filePath, 60 * 60 * 24 * 7); // 7 days
+          .getPublicUrl(filePath);
 
-        onImageUpload(signed?.signedUrl || '', type);
+        onImageUpload(publicData.publicUrl, type);
         
         toast({
           title: "Image uploaded successfully",

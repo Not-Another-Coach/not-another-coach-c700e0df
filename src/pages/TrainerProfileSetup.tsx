@@ -307,12 +307,13 @@ const TrainerProfileSetup = () => {
       4: 10,  // Client Fit Preferences (matching algorithm)
       5: 15,  // Rates & Packages (monetization, complex)
       6: 8,   // Discovery Calls (valuable but optional)
-      7: 10,  // Ways of Working (client experience)
-      8: 5,   // Instagram Integration (optional, lower weight)
-      9: 3,   // Image Management (optional, cosmetic)
-      10: 3,  // Working Hours (optional)
-      11: 5,  // Terms & Notifications (compliance)
-      12: 2   // Verification (final step, external dependency)
+      7: 8,   // Testimonials & Case Studies (social proof)
+      8: 10,  // Ways of Working (client experience)
+      9: 5,   // Instagram Integration (optional, lower weight)
+      10: 3,  // Image Management (optional, cosmetic)
+      11: 3,  // Working Hours (optional)
+      12: 5,  // Terms & Notifications (compliance)
+      13: 2   // Verification (final step, external dependency)
     };
     return weights[step] || 0;
   };
@@ -354,7 +355,11 @@ const TrainerProfileSetup = () => {
         const hasPartialDiscoveryCall = discoverySettings?.offers_discovery_call || formData.calendar_link?.trim();
         return hasDiscoveryCallConfig ? 'completed' : (hasPartialDiscoveryCall ? 'partial' : 'not_started');
         
-      case 7: // Ways of Working
+      case 7: // Testimonials & Case Studies
+        const hasTestimonials = formData.testimonials?.length > 0;
+        return hasTestimonials ? 'completed' : 'not_started';
+        
+      case 8: // Ways of Working
         const packages = formData.package_options || [];
         if (packages.length === 0) return 'not_started';
         
@@ -387,10 +392,6 @@ const TrainerProfileSetup = () => {
         
         return allPackagesConfigured ? 'completed' : (anyPackageConfigured ? 'partial' : 'not_started');
         
-      case 8: // Testimonials
-        const hasTestimonials = formData.testimonials?.length > 0;
-        return hasTestimonials ? 'completed' : 'not_started';
-        
       case 9: // Instagram Integration
         return isInstagramConnected ? 'completed' : 'not_started';
         
@@ -420,6 +421,8 @@ const TrainerProfileSetup = () => {
       // Convert form data to match TrainerProfile interface types
       const saveData = {
         ...formData,
+        // Explicitly include testimonials to ensure persistence
+        testimonials: formData.testimonials || [],
         // Convert delivery_format from string to array
         delivery_format: [formData.delivery_format],
         // Convert communication_style from string to array
@@ -434,6 +437,8 @@ const TrainerProfileSetup = () => {
       };
       
       console.log('Saving trainer profile data:', saveData);
+      console.log('Testimonials being saved:', saveData.testimonials);
+      console.log('Number of testimonials:', saveData.testimonials?.length || 0);
       console.log('Client types being saved:', saveData.ideal_client_types);
       console.log('Coaching styles being saved:', saveData.coaching_style);
       
