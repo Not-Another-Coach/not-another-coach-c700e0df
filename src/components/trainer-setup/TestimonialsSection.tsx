@@ -158,9 +158,9 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
             {testimonials.map((testimonial) => (
               <Card key={testimonial.id}>
                 <CardHeader className="pb-3">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                      <div className="flex items-center gap-2">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-2">
                         <Quote className="h-4 w-4 text-primary" />
                         <span className="font-medium">{testimonial.clientName}</span>
                       </div>
@@ -170,24 +170,22 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
                         ))}
                       </div>
                     </div>
-                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
+                    <div className="flex gap-2 flex-shrink-0">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => openEditModal(testimonial)}
-                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 text-xs sm:text-sm w-full sm:w-auto"
+                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                       >
-                        <Edit className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1" />
-                        <span className="hidden sm:inline">Edit</span>
+                        <Edit className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => removeTestimonial(testimonial.id)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50 text-xs sm:text-sm w-full sm:w-auto"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
                       >
-                        <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1" />
-                        <span className="hidden sm:inline">Delete</span>
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
