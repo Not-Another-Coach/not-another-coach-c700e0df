@@ -275,7 +275,7 @@ const TrainerProfileSetup = () => {
           newErrors.package_options = "At least one tiered pricing package is required";
         }
         break;
-      case 10:
+      case 12:
         if (!formData.terms_agreed) {
           newErrors.terms_agreed = "You must agree to the terms";
         }
@@ -358,11 +358,15 @@ const TrainerProfileSetup = () => {
         // Image management - check if additional images have been uploaded (optional step)
         return 'not_started'; // Optional step, always show as not started unless images are uploaded
       case 10:
+        // Image management - check if additional images have been uploaded (optional step)
+        return 'not_started'; // Optional step, always show as not started unless images are uploaded
+      case 11:
         // Working hours - check if availability has been configured (optional step)
         return 'not_started'; // Optional step, always show as not started unless availability is set
-      case 11:
-        return formData.terms_agreed ? 'completed' : 'not_started';
       case 12:
+        // T&Cs and Notifications - check if terms have been agreed
+        return formData.terms_agreed ? 'completed' : 'not_started';
+      case 13:
         // Verification step - always accessible but completion depends on verification status
         return 'completed'; // This is a read-only informational step
       default:
