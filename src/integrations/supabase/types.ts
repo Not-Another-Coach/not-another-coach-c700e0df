@@ -5434,6 +5434,16 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: Json
       }
+      admin_update_verification_check: {
+        Args: {
+          p_admin_notes?: string
+          p_check_type: Database["public"]["Enums"]["verification_check_type"]
+          p_rejection_reason?: string
+          p_status: Database["public"]["Enums"]["verification_check_status"]
+          p_trainer_id: string
+        }
+        Returns: string
+      }
       auto_end_expired_exclusive_periods: {
         Args: Record<PropertyKey, never>
         Returns: undefined
