@@ -309,9 +309,9 @@ const TrainerProfileSetup = () => {
 
   const getStepCompletion = (step: number): 'completed' | 'partial' | 'not_started' => {
     switch (step) {
-      case 1: // Basic Info - more stringent requirements
+      case 1: // Basic Info - check only fields that exist on this form
         const hasAllBasicInfo = formData.first_name && formData.last_name && 
-          formData.tagline && formData.bio && formData.location;
+          formData.tagline && formData.bio;
         const hasPartialBasicInfo = (formData.first_name || formData.last_name || 
           formData.tagline || formData.bio) && 
           Object.values(formData).filter(v => v && v.toString().trim()).length >= 3;
