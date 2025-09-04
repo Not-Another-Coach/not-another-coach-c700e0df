@@ -152,6 +152,11 @@ const TrainerProfileSetup = () => {
   useEffect(() => {
     // Only initialize when we have a profile with an ID and haven't initialized yet
     if (profile && profile.id && !hasInitialized.current) {
+      console.log('=== INITIALIZING PROFILE DATA ===');
+      console.log('Profile ideal_client_types:', profile.ideal_client_types);
+      console.log('Profile coaching_style:', profile.coaching_style);
+      console.log('Full profile object:', profile);
+      
       hasInitialized.current = true;
       const initialData = {
         first_name: profile.first_name || "",
@@ -190,6 +195,10 @@ const TrainerProfileSetup = () => {
         terms_agreed: profile.terms_agreed || false,
         max_clients: profile.max_clients || null,
       };
+      
+      console.log('=== INITIAL DATA BEING SET ===');
+      console.log('Initial ideal_client_types:', initialData.ideal_client_types);
+      console.log('Initial coaching_style:', initialData.coaching_style);
       
       setFormData(prev => ({ ...prev, ...initialData }));
       initialFormData.current = { ...initialData };
