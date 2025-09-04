@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Upload, Search, Plus, CheckCircle, Clock, FileText, X } from "lucide-react";
 import { SectionHeader } from './SectionHeader';
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 interface QualificationsSectionProps {
   formData: any;
@@ -38,6 +39,7 @@ const popularQualifications = [
 ];
 
 export function QualificationsSection({ formData, updateFormData }: QualificationsSectionProps) {
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [customQualification, setCustomQualification] = useState("");
   const [dragOver, setDragOver] = useState(false);
@@ -65,11 +67,16 @@ export function QualificationsSection({ formData, updateFormData }: Qualificatio
   };
 
   const handleFileUpload = async (files: File[]) => {
+    if (!user?.id) {
+      console.error("User not authenticated");
+      return;
+    }
+
     try {
       const uploadPromises = files.map(async (file) => {
         const fileExt = file.name.split('.').pop();
         const fileName = `${Math.random()}.${fileExt}`;
-        const filePath = `certificates/${fileName}`;
+        const filePath = `${user.id}/${fileName}`;
 
         const { data, error } = await supabase.storage
           .from('trainer-documents')
