@@ -139,7 +139,7 @@ export const Phase5MigrationArticle: React.FC = () => {
               <div className="space-y-1 text-xs">
                 <div><strong>Returns:</strong> TrainerProfile interface with specialized fields</div>
                 <div><strong>Usage:</strong> Trainer dashboard, profile setup, coach analytics</div>
-                <div><strong>Data:</strong> Training specializations, rates, availability, certifications</div>
+                <div><strong>Data:</strong> Training specialisations, rates, availability, certifications</div>
               </div>
             </div>
 
@@ -184,7 +184,7 @@ export const Phase5MigrationArticle: React.FC = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Database Optimization</CardTitle>
+          <CardTitle>Database Optimisation</CardTitle>
           <CardDescription>
             Specialized database views for optimal performance
           </CardDescription>
@@ -197,7 +197,7 @@ export const Phase5MigrationArticle: React.FC = () => {
                 Optimized view combining profiles table with trainer-specific data
               </p>
               <ul className="text-xs space-y-1">
-                <li>• Training specializations and certifications</li>
+                <li>• Training specialisations and certifications</li>
                 <li>• Rates, packages, and availability</li>
                 <li>• Profile photos and verification status</li>
                 <li>• Experience and qualifications</li>

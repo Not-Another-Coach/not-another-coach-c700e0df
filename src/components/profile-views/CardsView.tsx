@@ -86,7 +86,7 @@ export const CardsView = ({ trainer }: CardsViewProps) => {
                 >
                   <h4 className="font-medium mb-1">Features Summary</h4>
                   <p className="text-sm text-muted-foreground">
-                    Highlights your specializations, training types, and availability in organized feature cards.
+                    Highlights your specialisations, training types, and availability in organised feature cards.
                   </p>
                 </div>
                 

@@ -93,7 +93,7 @@ export const OverviewView = ({ trainer, onMessage, onBookDiscovery }: OverviewVi
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Award className="h-5 w-5" />
-            Specializations
+            Specialisations
           </CardTitle>
         </CardHeader>
         <CardContent>

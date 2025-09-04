@@ -25,7 +25,7 @@ export const TrainerCardViewSelector = ({
       id: 'features' as const,
       label: 'Features',
       icon: List,
-      description: 'Specializations'
+      description: 'Specialisations'
     },
     {
       id: 'transformations' as const,

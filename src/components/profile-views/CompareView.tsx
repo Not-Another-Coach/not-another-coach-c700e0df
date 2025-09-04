@@ -16,7 +16,7 @@ const comparisonCategories = [
   { key: 'experience', label: 'Experience', type: 'text' },
   { key: 'location', label: 'Location', type: 'text' },
   { key: 'hourlyRate', label: 'Package Price', type: 'price' },
-  { key: 'specialties', label: 'Specializations', type: 'array' },
+  { key: 'specialties', label: 'Specialisations', type: 'array' },
   { key: 'trainingType', label: 'Training Types', type: 'array' },
   { key: 'certifications', label: 'Certifications', type: 'count' },
   { key: 'reviews', label: 'Total Reviews', type: 'number' },

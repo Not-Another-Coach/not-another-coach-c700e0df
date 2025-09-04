@@ -51,7 +51,7 @@ const features = [
           'Filter persistence across sessions',
           'Reset and clear functionality'
         ],
-        features: ['Location filters', 'Price range', 'Specialization', 'Availability', 'Rating filters']
+        features: ['Location filters', 'Price range', 'Specialisation', 'Availability', 'Rating filters']
       }
     ]
   },
@@ -109,7 +109,7 @@ const features = [
         components: ['TrainerProfileSetup', 'BasicInfoSection', 'ExpertiseSection', 'RatesSection', 'QualificationsSection'],
         workflow: [
           'Step 1: Basic Information (name, bio, location)',
-          'Step 2: Expertise & Specializations',
+          'Step 2: Expertise & Specialisations',
           'Step 3: Rates & Package Options',
           'Step 4: Qualifications & Certifications',
           'Step 5: Profile Review & Publishing'
@@ -326,7 +326,7 @@ const features = [
           'Journey step completion tracking',
           'User behavior analysis',
           'Drop-off point identification',
-          'Optimization recommendations'
+          'Optimisation recommendations'
         ],
         features: ['Journey mapping', 'Behavior tracking', 'Drop-off analysis', 'Performance insights']
       }
