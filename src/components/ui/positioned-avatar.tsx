@@ -29,7 +29,7 @@ export const PositionedAvatar = ({
 }: PositionedAvatarProps) => {
   return (
     <Avatar className={cn(sizeClasses[size], className)}>
-      {src && position ? (
+      {src ? (
         <div className="w-full h-full rounded-full overflow-hidden relative bg-muted">
           <img
             src={src}
@@ -45,8 +45,6 @@ export const PositionedAvatar = ({
             }}
           />
         </div>
-      ) : src ? (
-        <AvatarImage src={src} alt={alt} />
       ) : null}
       <AvatarFallback className="text-lg font-medium">{fallback}</AvatarFallback>
     </Avatar>
