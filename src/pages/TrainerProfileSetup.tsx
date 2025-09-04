@@ -5,6 +5,7 @@ import { useTrainerProfile } from "@/hooks/useTrainerProfile";
 import { useUserTypeChecks } from "@/hooks/useUserType";
 import { usePackageWaysOfWorking } from "@/hooks/usePackageWaysOfWorking";
 import { useInstagramConnection } from "@/hooks/useInstagramConnection";
+import { useTrainerVerification } from "@/hooks/useTrainerVerification";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,6 +46,7 @@ const TrainerProfileSetup = () => {
   const { isTrainer } = useUserTypeChecks();
   const { packageWorkflows, loading: waysOfWorkingLoading } = usePackageWaysOfWorking();
   const { isConnected: isInstagramConnected } = useInstagramConnection();
+  const { verificationRequest } = useTrainerVerification();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
@@ -367,8 +369,10 @@ const TrainerProfileSetup = () => {
         // T&Cs and Notifications - check if terms have been agreed
         return formData.terms_agreed ? 'completed' : 'not_started';
       case 13:
-        // Verification step - always accessible but completion depends on verification status
-        return 'completed'; // This is a read-only informational step
+        // Verification step - completion depends on actual verification status
+        if (profile?.verification_status === 'verified') return 'completed';
+        if (verificationRequest?.status === 'pending' || verificationRequest?.status === 'under_review') return 'partial';
+        return 'not_started';
       default:
         return 'not_started';
     }
