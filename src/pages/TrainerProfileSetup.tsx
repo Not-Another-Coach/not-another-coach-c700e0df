@@ -387,19 +387,23 @@ const TrainerProfileSetup = () => {
         
         return allPackagesConfigured ? 'completed' : (anyPackageConfigured ? 'partial' : 'not_started');
         
-      case 8: // Instagram Integration
+      case 8: // Testimonials
+        const hasTestimonials = formData.testimonials?.length > 0;
+        return hasTestimonials ? 'completed' : 'not_started';
+        
+      case 9: // Instagram Integration
         return isInstagramConnected ? 'completed' : 'not_started';
         
-      case 9: // Image Management
-        return 'not_started'; // Optional step
-        
-      case 10: // Working Hours  
+      case 10: // Image Management
         return 'not_started'; // Optional step
         
       case 11: // Terms & Notifications
         return formData.terms_agreed ? 'completed' : 'not_started';
         
-      case 12: // Verification
+      case 12: // Working Hours  
+        return 'not_started'; // Optional step
+        
+      case 13: // Verification
         if (profile?.verification_status === 'verified') return 'completed';
         if (verificationRequest?.status === 'pending' || verificationRequest?.status === 'under_review') return 'partial';
         return 'not_started';

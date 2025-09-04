@@ -187,22 +187,24 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
                         <Badge key={tag} variant="secondary">{tag}</Badge>
                       ))}
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => startEditing(testimonial)}
-                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 text-xs sm:text-sm w-full sm:w-auto"
                       >
-                        <Edit className="h-4 w-4" />
+                        <Edit className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1" />
+                        <span className="hidden sm:inline">Edit</span>
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => removeTestimonial(testimonial.id)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 text-xs sm:text-sm w-full sm:w-auto"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1" />
+                        <span className="hidden sm:inline">Delete</span>
                       </Button>
                     </div>
                   </div>
@@ -386,6 +388,28 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
                           : "After image uploaded"
                       }
                     </p>
+                    <div className="flex gap-4 mt-2">
+                      {newTestimonial.beforeImage && (
+                        <div className="text-center">
+                          <img 
+                            src={newTestimonial.beforeImage} 
+                            alt="Before preview"
+                            className="w-16 h-16 object-cover rounded border"
+                          />
+                          <p className="text-xs text-green-600 mt-1">Before</p>
+                        </div>
+                      )}
+                      {newTestimonial.afterImage && (
+                        <div className="text-center">
+                          <img 
+                            src={newTestimonial.afterImage} 
+                            alt="After preview"
+                            className="w-16 h-16 object-cover rounded border"
+                          />
+                          <p className="text-xs text-green-600 mt-1">After</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
