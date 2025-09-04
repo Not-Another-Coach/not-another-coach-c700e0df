@@ -55,7 +55,7 @@ const validationRules: ValidationRules = {
     custom: (value) => Array.isArray(value) && value.length > 0,
     message: 'At least one ideal client type is required' 
   },
-  coaching_styles: { 
+  coaching_style: { 
     required: true, 
     custom: (value) => Array.isArray(value) && value.length > 0,
     message: 'At least one coaching style is required' 
@@ -80,7 +80,7 @@ const stepFieldMapping: Record<number, string[]> = {
   1: ['first_name', 'last_name', 'tagline', 'bio'],
   2: ['qualifications'],
   3: ['specializations', 'training_types', 'location'],
-  4: ['ideal_client_types', 'coaching_styles'],
+  4: ['ideal_client_types', 'coaching_style'], // Fixed: coaching_style (singular) matches database field
   5: ['package_options'],
   6: [], // Testimonials are optional
   7: ['terms_agreed']

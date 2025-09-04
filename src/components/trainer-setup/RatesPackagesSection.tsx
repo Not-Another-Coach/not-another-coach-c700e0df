@@ -46,7 +46,15 @@ interface TrainingPackage {
 }
 
 export function RatesPackagesSection({ formData, updateFormData, errors, clearFieldError }: RatesPackagesSectionProps) {
-  const [currency, setCurrency] = useState<'GBP' | 'USD' | 'EUR'>('GBP');
+  // Initialize currency from existing packages or default to GBP
+  const getInitialCurrency = (): 'GBP' | 'USD' | 'EUR' => {
+    if (formData.package_options && formData.package_options.length > 0) {
+      return formData.package_options[0].currency || 'GBP';
+    }
+    return 'GBP';
+  };
+  
+  const [currency, setCurrency] = useState<'GBP' | 'USD' | 'EUR'>(getInitialCurrency());
   const [packages, setPackages] = useState<TrainingPackage[]>(formData.package_options || []);
   const [editingPackage, setEditingPackage] = useState<TrainingPackage | null>(null);
   const [isCloning, setIsCloning] = useState(false);
@@ -231,6 +239,8 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
   const startEditPackage = (pkg: TrainingPackage) => {
     setEditingPackage(pkg);
     setIsCloning(false);
+    // Update currency to match the package being edited
+    setCurrency(pkg.currency as 'GBP' | 'USD' | 'EUR');
     setEditPackageData({
       name: pkg.name,
       sessions: pkg.sessions?.toString() || "",
@@ -381,33 +391,39 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
       {/* Currency Toggle */}
       <div className="space-y-2">
         <Label>Currency</Label>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           <Button
             variant={currency === 'GBP' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setCurrency('GBP')}
-            className="flex items-center gap-2"
+            className="flex items-center justify-center gap-2 w-full"
           >
             <PoundSterling className="h-4 w-4" />
-            British Pound (£)
+            <span className="hidden sm:inline">British Pound</span>
+            <span className="sm:hidden">GBP</span>
+            <span>(£)</span>
           </Button>
           <Button
             variant={currency === 'USD' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setCurrency('USD')}
-            className="flex items-center gap-2"
+            className="flex items-center justify-center gap-2 w-full"
           >
             <DollarSign className="h-4 w-4" />
-            US Dollar ($)
+            <span className="hidden sm:inline">US Dollar</span>
+            <span className="sm:hidden">USD</span>
+            <span>($)</span>
           </Button>
           <Button
             variant={currency === 'EUR' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setCurrency('EUR')}
-            className="flex items-center gap-2"
+            className="flex items-center justify-center gap-2 w-full"
           >
             <Euro className="h-4 w-4" />
-            Euro (€)
+            <span className="hidden sm:inline">Euro</span>
+            <span className="sm:hidden">EUR</span>
+            <span>(€)</span>
           </Button>
         </div>
       </div>
@@ -429,38 +445,38 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
           <div className="space-y-3">
             {packages.map((pkg) => (
               <Card key={pkg.id}>
-                <CardContent className="p-4">
-                   <div className="flex items-start justify-between">
-                     <div className="flex-1">
-                       <div className="flex items-center gap-2 mb-2">
-                         <h4 className="font-medium">{pkg.name}</h4>
+                 <CardContent className="p-3 sm:p-4">
+                   <div className="flex flex-col sm:flex-row items-start justify-between gap-3">
+                     <div className="flex-1 w-full">
+                       <div className="flex flex-wrap items-center gap-2 mb-2">
+                         <h4 className="font-medium text-sm sm:text-base">{pkg.name}</h4>
                          {pkg.isPromotion && (
-                           <Badge variant="default" className="bg-orange-500 text-white">
+                           <Badge variant="default" className="bg-orange-500 text-white text-xs">
                              <Sparkles className="h-3 w-3 mr-1" />
                              Promotion
                            </Badge>
                          )}
                          {pkg.sessions && (
-                           <Badge variant="outline">{pkg.sessions} sessions</Badge>
+                           <Badge variant="outline" className="text-xs">{pkg.sessions} sessions</Badge>
                          )}
-                         <Badge variant="secondary">
+                         <Badge variant="secondary" className="text-xs">
                            {pkg.currency === 'GBP' ? '£' : pkg.currency === 'USD' ? '$' : '€'}{pkg.price}
                          </Badge>
                        </div>
-                        <p className="text-sm text-muted-foreground mb-2">{pkg.description}</p>
+                        <p className="text-xs sm:text-sm text-muted-foreground mb-2">{pkg.description}</p>
                         
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
+                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-xs text-muted-foreground mb-2">
                           <div className="flex items-center gap-1">
-                            <CalendarIcon className="h-4 w-4" />
-                            {formatDuration(pkg)}
+                            <CalendarIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+                            <span className="text-xs">{formatDuration(pkg)}</span>
                           </div>
                           <div className="flex items-center gap-1">
-                            <CreditCard className="h-4 w-4" />
-                            {formatPaymentMode(pkg)}
+                            <CreditCard className="h-3 w-3 sm:h-4 sm:w-4" />
+                            <span className="text-xs">{formatPaymentMode(pkg)}</span>
                           </div>
                           <div className="flex items-center gap-1">
-                            <DollarSign className="h-4 w-4" />
-                            Paid {pkg.payoutFrequency || 'monthly'}
+                            <DollarSign className="h-3 w-3 sm:h-4 sm:w-4" />
+                            <span className="text-xs">Paid {pkg.payoutFrequency || 'monthly'}</span>
                           </div>
                         </div>
                         
@@ -470,33 +486,34 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
                           </p>
                         )}
                      </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1 sm:gap-2 w-full sm:w-auto justify-end">
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => startCloneProcess(pkg)}
-                          className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                          className="text-green-600 hover:text-green-700 hover:bg-green-50 h-8 w-8 p-0"
                         >
-                          <Plus className="h-4 w-4" />
+                          <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
                         </Button>
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => startEditPackage(pkg)}
+                          className="h-8 w-8 p-0"
                         >
-                          <Edit className="h-4 w-4" />
+                          <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
                         </Button>
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => removePackage(pkg.id)}
-                          className="text-destructive hover:text-destructive"
+                          className="text-destructive hover:text-destructive h-8 w-8 p-0"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                         </Button>
                       </div>
                    </div>
-                </CardContent>
+                 </CardContent>
               </Card>
             ))}
           </div>
@@ -507,93 +524,99 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
         <CardHeader>
           <CardTitle>Add Training Package</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="package-name">Package Name *</Label>
-              <Input
-                id="package-name"
-                value={newPackage.name}
-                onChange={(e) => setNewPackage(prev => ({...prev, name: e.target.value}))}
-                placeholder="e.g., Transformation Package"
-              />
-            </div>
-            <div>
-              <Label htmlFor="package-sessions">Number of Sessions</Label>
-              <Input
-                id="package-sessions"
-                type="number"
-                value={newPackage.sessions}
-                onChange={(e) => setNewPackage(prev => ({...prev, sessions: e.target.value}))}
-                placeholder="e.g., 12"
-              />
-            </div>
-          </div>
-          
-          <div>
-            <Label htmlFor="package-description">Package Description *</Label>
-            <Textarea
-              id="package-description"
-              value={newPackage.description}
-              onChange={(e) => setNewPackage(prev => ({...prev, description: e.target.value}))}
-              placeholder="Describe what's included in this package..."
-              rows={3}
-            />
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="package-price">Package Price ({currency === 'GBP' ? '£' : currency === 'USD' ? '$' : '€'}) *</Label>
-              <Input
-                id="package-price"
-                type="number"
-                step="0.01"
-                value={newPackage.price}
-                onChange={(e) => setNewPackage(prev => ({...prev, price: e.target.value}))}
-                placeholder="e.g., 400"
-              />
-            </div>
-            <div>
-              <Label htmlFor="payout-frequency">Payout Frequency</Label>
-              <Select 
-                value={newPackage.payoutFrequency} 
-                onValueChange={(value: 'weekly' | 'monthly') => 
-                  setNewPackage(prev => ({...prev, payoutFrequency: value}))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="weekly">Weekly</SelectItem>
-                  <SelectItem value="monthly">Monthly</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+         <CardContent className="space-y-4 p-3 sm:p-6">
+           <div className="grid grid-cols-1 gap-4">
+             <div>
+               <Label htmlFor="package-name">Package Name *</Label>
+               <Input
+                 id="package-name"
+                 value={newPackage.name}
+                 onChange={(e) => setNewPackage(prev => ({...prev, name: e.target.value}))}
+                 placeholder="e.g., Transformation Package"
+                 className="text-sm"
+               />
+             </div>
+             <div>
+               <Label htmlFor="package-sessions">Number of Sessions</Label>
+               <Input
+                 id="package-sessions"
+                 type="number"
+                 value={newPackage.sessions}
+                 onChange={(e) => setNewPackage(prev => ({...prev, sessions: e.target.value}))}
+                 placeholder="e.g., 12"
+                 className="text-sm"
+               />
+             </div>
+           </div>
+           
+           <div>
+             <Label htmlFor="package-description">Package Description *</Label>
+             <Textarea
+               id="package-description"
+               value={newPackage.description}
+               onChange={(e) => setNewPackage(prev => ({...prev, description: e.target.value}))}
+               placeholder="Describe what's included in this package..."
+               rows={3}
+               className="text-sm resize-none"
+             />
+           </div>
+           
+           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+             <div>
+               <Label htmlFor="package-price">Price ({currency === 'GBP' ? '£' : currency === 'USD' ? '$' : '€'}) *</Label>
+               <Input
+                 id="package-price"
+                 type="number"
+                 step="0.01"
+                 value={newPackage.price}
+                 onChange={(e) => setNewPackage(prev => ({...prev, price: e.target.value}))}
+                 placeholder="e.g., 400"
+                 className="text-sm"
+               />
+             </div>
+             <div>
+               <Label htmlFor="payout-frequency">Payout Frequency</Label>
+               <Select 
+                 value={newPackage.payoutFrequency} 
+                 onValueChange={(value: 'weekly' | 'monthly') => 
+                   setNewPackage(prev => ({...prev, payoutFrequency: value}))
+                 }
+               >
+                 <SelectTrigger className="bg-background">
+                   <SelectValue />
+                 </SelectTrigger>
+                 <SelectContent className="bg-background border z-50">
+                   <SelectItem value="weekly">Weekly</SelectItem>
+                   <SelectItem value="monthly">Monthly</SelectItem>
+                 </SelectContent>
+               </Select>
+             </div>
+           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">  
-            <div>
-              <Label htmlFor="duration-weeks">Duration (Weeks)</Label>
-              <Input
-                id="duration-weeks"
-                type="number"
-                value={newPackage.durationWeeks}
-                onChange={(e) => setNewPackage(prev => ({...prev, durationWeeks: e.target.value}))}
-                placeholder="e.g., 12"
-              />
-            </div>
-            <div>
-              <Label htmlFor="duration-months">Duration (Months)</Label>
-              <Input
-                id="duration-months"
-                type="number"
-                value={newPackage.durationMonths}
-                onChange={(e) => setNewPackage(prev => ({...prev, durationMonths: e.target.value}))}
-                placeholder="e.g., 3"
-              />
-            </div>
-          </div>
+           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">  
+             <div>
+               <Label htmlFor="duration-weeks">Duration (Weeks)</Label>
+               <Input
+                 id="duration-weeks"
+                 type="number"
+                 value={newPackage.durationWeeks}
+                 onChange={(e) => setNewPackage(prev => ({...prev, durationWeeks: e.target.value}))}
+                 placeholder="e.g., 12"
+                 className="text-sm"
+               />
+             </div>
+             <div>
+               <Label htmlFor="duration-months">Duration (Months)</Label>
+               <Input
+                 id="duration-months"
+                 type="number"
+                 value={newPackage.durationMonths}
+                 onChange={(e) => setNewPackage(prev => ({...prev, durationMonths: e.target.value}))}
+                 placeholder="e.g., 3"
+                 className="text-sm"
+               />
+             </div>
+           </div>
 
           <div className="space-y-4">
             <div>
@@ -674,61 +697,65 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
                   Set a promotional period for this package to create urgency
                 </p>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Promotion Start Date</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !newPackage.promotionStartDate && "text-muted-foreground"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {newPackage.promotionStartDate ? format(newPackage.promotionStartDate, "PPP") : "Pick start date"}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={newPackage.promotionStartDate}
-                          onSelect={(date) => setNewPackage(prev => ({...prev, promotionStartDate: date}))}
-                          initialFocus
-                          className={cn("p-3 pointer-events-auto")}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label>Promotion End Date</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !newPackage.promotionEndDate && "text-muted-foreground"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {newPackage.promotionEndDate ? format(newPackage.promotionEndDate, "PPP") : "Pick end date"}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={newPackage.promotionEndDate}
-                          onSelect={(date) => setNewPackage(prev => ({...prev, promotionEndDate: date}))}
-                          initialFocus
-                          className={cn("p-3 pointer-events-auto")}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                </div>
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                   <div className="space-y-2">
+                     <Label>Promotion Start Date</Label>
+                     <Popover>
+                       <PopoverTrigger asChild>
+                         <Button
+                           variant="outline"
+                           className={cn(
+                             "w-full justify-start text-left font-normal text-sm",
+                             !newPackage.promotionStartDate && "text-muted-foreground"
+                           )}
+                         >
+                           <CalendarIcon className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                           <span className="truncate">
+                             {newPackage.promotionStartDate ? format(newPackage.promotionStartDate, "MMM dd, yyyy") : "Start date"}
+                           </span>
+                         </Button>
+                       </PopoverTrigger>
+                       <PopoverContent className="w-auto p-0 bg-background border z-50" align="start">
+                         <Calendar
+                           mode="single"
+                           selected={newPackage.promotionStartDate}
+                           onSelect={(date) => setNewPackage(prev => ({...prev, promotionStartDate: date}))}
+                           initialFocus
+                           className="p-3"
+                         />
+                       </PopoverContent>
+                     </Popover>
+                   </div>
+                   
+                   <div className="space-y-2">
+                     <Label>Promotion End Date</Label>
+                     <Popover>
+                       <PopoverTrigger asChild>
+                         <Button
+                           variant="outline"
+                           className={cn(
+                             "w-full justify-start text-left font-normal text-sm",
+                             !newPackage.promotionEndDate && "text-muted-foreground"
+                           )}
+                         >
+                           <CalendarIcon className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                           <span className="truncate">
+                             {newPackage.promotionEndDate ? format(newPackage.promotionEndDate, "MMM dd, yyyy") : "End date"}
+                           </span>
+                         </Button>
+                       </PopoverTrigger>
+                       <PopoverContent className="w-auto p-0 bg-background border z-50" align="start">
+                         <Calendar
+                           mode="single"
+                           selected={newPackage.promotionEndDate}
+                           onSelect={(date) => setNewPackage(prev => ({...prev, promotionEndDate: date}))}
+                           initialFocus
+                           className="p-3"
+                         />
+                       </PopoverContent>
+                     </Popover>
+                   </div>
+                 </div>
                 
                 {newPackage.promotionStartDate && newPackage.promotionEndDate && (
                   <div className="bg-orange-50 border border-orange-200 rounded p-2">
@@ -790,12 +817,12 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
         setEditingPackage(null);
         setIsCloning(false);
       }}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-lg sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{isCloning ? "Complete Cloned Package" : "Edit Package"}</DialogTitle>
+            <DialogTitle className="text-lg sm:text-xl">{isCloning ? "Complete Cloned Package" : "Edit Package"}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 max-h-[60vh] overflow-y-auto">
-            <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-4 p-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="edit-name">Package Name *</Label>
                 <Input
@@ -803,6 +830,7 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
                   value={editPackageData.name}
                   onChange={(e) => setEditPackageData(prev => ({...prev, name: e.target.value}))}
                   placeholder="e.g., Personal Training Package"
+                  className="text-sm"
                 />
               </div>
               <div>
@@ -813,6 +841,7 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
                   value={editPackageData.sessions}
                   onChange={(e) => setEditPackageData(prev => ({...prev, sessions: e.target.value}))}
                   placeholder="e.g., 12"
+                  className="text-sm"
                 />
               </div>
             </div>
@@ -825,12 +854,13 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
                 onChange={(e) => setEditPackageData(prev => ({...prev, description: e.target.value}))}
                 placeholder="Describe what's included in this package"
                 rows={3}
+                className="text-sm resize-none"
               />
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="edit-price">Package Price ({currency === 'GBP' ? '£' : currency === 'USD' ? '$' : '€'}) *</Label>
+                <Label htmlFor="edit-price">Price ({currency === 'GBP' ? '£' : currency === 'USD' ? '$' : '€'}) *</Label>
                 <Input
                   id="edit-price"
                   type="number"
@@ -838,6 +868,7 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
                   value={editPackageData.price}
                   onChange={(e) => setEditPackageData(prev => ({...prev, price: e.target.value}))}
                   placeholder="e.g., 800"
+                  className="text-sm"
                 />
               </div>
               <div>
@@ -848,10 +879,10 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
                     setEditPackageData(prev => ({...prev, payoutFrequency: value}))
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-background">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-background border z-50">
                     <SelectItem value="weekly">Weekly</SelectItem>
                     <SelectItem value="monthly">Monthly</SelectItem>
                   </SelectContent>
@@ -859,7 +890,7 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="edit-durationWeeks">Duration (Weeks)</Label>
                 <Input
@@ -868,6 +899,7 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
                   value={editPackageData.durationWeeks}
                   onChange={(e) => setEditPackageData(prev => ({...prev, durationWeeks: e.target.value}))}
                   placeholder="e.g., 12"
+                  className="text-sm"
                 />
               </div>
               <div>
@@ -878,6 +910,7 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
                   value={editPackageData.durationMonths}
                   onChange={(e) => setEditPackageData(prev => ({...prev, durationMonths: e.target.value}))}
                   placeholder="e.g., 3"
+                  className="text-sm"
                 />
               </div>
             </div>
