@@ -5835,6 +5835,7 @@ export type Database = {
           client_status: string | null
           client_survey_completed: boolean | null
           client_survey_completed_at: string | null
+          coaching_style: string[] | null
           communication_style: string[] | null
           consent_marketing: boolean | null
           consent_service: boolean | null
@@ -5848,6 +5849,7 @@ export type Database = {
           hourly_rate: number | null
           how_started: string | null
           id: string | null
+          ideal_client_types: string[] | null
           is_uk_based: boolean | null
           is_verified: boolean | null
           last_name: string | null
