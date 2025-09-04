@@ -291,17 +291,15 @@ export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionP
                         {categorySpecialties.map((specialty) => {
                           const isSelected = formData.specializations?.includes(specialty.name) || false;
                           return (
-                            <button 
-                              key={specialty.id} 
+                            <Button
+                              key={specialty.id}
+                              variant={isSelected ? "default" : "outline"}
+                              size="sm"
                               onClick={() => handleSpecialtyToggle(specialty.name, specialty.id)}
-                              className={`p-3 rounded-lg border transition-colors text-left ${
-                                isSelected 
-                                  ? 'border-primary bg-primary/10 text-primary font-medium' 
-                                  : 'border-border hover:bg-muted/50'
-                              }`}
+                              className="justify-start text-left h-auto py-3 px-3 whitespace-normal"
                             >
-                              <span className="text-sm">{specialty.name}</span>
-                            </button>
+                              {specialty.name}
+                            </Button>
                           );
                         })}
                       </div>
@@ -372,17 +370,15 @@ export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionP
                           {trainingType.delivery_formats.map((format) => {
                             const isDeliverySelected = selectedDeliveryFormats.includes(format);
                             return (
-                              <button
+                              <Button
                                 key={format}
+                                variant={isDeliverySelected ? "default" : "outline"}
+                                size="sm"
                                 onClick={() => handleTrainingTypeDeliveryToggle(trainingType.name, format, trainingType.id)}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                                  isDeliverySelected
-                                    ? 'bg-primary text-primary-foreground shadow-sm'
-                                    : 'bg-background border border-border hover:bg-muted hover:border-muted-foreground/20'
-                                }`}
+                                className="h-8 px-3 text-xs"
                               >
                                 {format.charAt(0).toUpperCase() + format.slice(1)}
-                              </button>
+                              </Button>
                             );
                           })}
                         </div>

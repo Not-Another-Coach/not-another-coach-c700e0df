@@ -245,7 +245,7 @@ export const QualificationsSection: React.FC<QualificationsSectionProps> = ({
                 return (
                   <Badge
                     key={qualification}
-                    variant="secondary"
+                    variant="outline"
                     className="flex items-center gap-2 px-3 py-1"
                   >
                     <span>{qualification}</span>

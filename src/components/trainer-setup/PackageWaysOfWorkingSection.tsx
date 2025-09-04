@@ -357,19 +357,21 @@ export function PackageWaysOfWorkingSection({ formData }: PackageWaysOfWorkingSe
               {sectionSuggestions.map((suggestion, index) => {
                 const isAdded = items.some((item: WaysOfWorkingItem) => item.text === suggestion);
                 return (
-                  <Badge
+                  <Button
                     key={index}
-                    variant={isAdded ? "secondary" : "outline"}
-                    className={`cursor-pointer transition-colors ${
+                    variant={isAdded ? "default" : "outline"}
+                    size="sm"
+                    className={`transition-colors ${
                       isAdded 
                         ? "opacity-50 cursor-not-allowed" 
-                        : "hover:bg-primary hover:text-primary-foreground"
+                        : ""
                     }`}
                     onClick={() => !isAdded && addSuggestion(section, suggestion)}
+                    disabled={isAdded}
                   >
                     {suggestion}
                     {isAdded && <span className="ml-1">✓</span>}
-                  </Badge>
+                  </Button>
                 );
               })}
             </div>

@@ -268,7 +268,7 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
                       <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
                         <Button
                           size="sm"
-                          variant={image.is_selected_for_display ? "default" : "secondary"}
+                          variant={image.is_selected_for_display ? "default" : "outline"}
                           onClick={() => toggleImageSelection(image.id, 'uploaded')}
                         >
                           {image.is_selected_for_display ? (
@@ -347,7 +347,7 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
                           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
                             <Button
                               size="sm"
-                              variant={selection.is_selected_for_display ? "default" : "secondary"}
+                              variant={selection.is_selected_for_display ? "default" : "outline"}
                               onClick={() => toggleImageSelection(selection.id, 'instagram')}
                             >
                               {selection.is_selected_for_display ? (
