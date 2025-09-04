@@ -12,6 +12,7 @@ import { VisibilitySettingsSection } from '@/components/trainer-setup/Visibility
 import { UserValidityChecker } from '@/components/admin/UserValidityChecker';
 import { VerificationManagement } from '@/components/admin/VerificationManagement';
 import { SpecialtyManagement } from '@/components/admin/SpecialtyManagement';
+import { SpecialtyAnalyticsDashboard } from '@/components/admin/SpecialtyAnalyticsDashboard';
 import { QualificationManagement } from '@/components/admin/QualificationManagement';
 import { TemplateManagementTabs } from '@/components/coach/TemplateManagementTabs';
 import { ProfileDropdown } from '@/components/ProfileDropdown';
@@ -166,18 +167,7 @@ export const AdminDashboard = () => {
       case 'qualifications':
         return <QualificationManagement />;
       case 'analytics':
-        return (
-          <Card>
-            <CardHeader>
-              <CardTitle>System Analytics</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Analytics dashboard coming soon...
-              </p>
-            </CardContent>
-          </Card>
-        );
+        return <SpecialtyAnalyticsDashboard />;
       case 'settings':
         return (
           <div className="space-y-6">
