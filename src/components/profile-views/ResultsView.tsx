@@ -11,7 +11,8 @@ interface Testimonial {
   achievement: string;
   beforeImage?: string;
   afterImage?: string;
-  outcomeTag: string;
+  outcomeTags?: string[];
+  outcomeTag?: string; // Legacy support
   consentGiven: boolean;
   showImages: boolean;
 }
@@ -25,18 +26,28 @@ const processTestimonialsData = (testimonials: Testimonial[] = []) => {
   const transformationsWithImages = testimonials.filter(t => t.showImages && t.beforeImage && t.afterImage);
   const allTransformations = testimonials.filter(t => t.achievement);
   
-  // Count outcome tags for specialized outcomes
+  // Count outcome tags for specialized outcomes (support both old and new formats)
   const outcomeStats = testimonials.reduce((acc, testimonial) => {
-    if (testimonial.outcomeTag) {
-      acc[testimonial.outcomeTag] = (acc[testimonial.outcomeTag] || 0) + 1;
-    }
+    // Handle both new array format and old single tag format
+    const tags = testimonial.outcomeTags || (testimonial.outcomeTag ? [testimonial.outcomeTag] : []);
+    tags.forEach(tag => {
+      if (tag && tag.trim()) {
+        acc[tag] = (acc[tag] || 0) + 1;
+      }
+    });
     return acc;
   }, {} as Record<string, number>);
 
-  // Calculate basic stats
+  // Calculate basic stats - handle both old and new formats
   const totalClients = testimonials.length;
-  const weightLossClients = testimonials.filter(t => t.outcomeTag.toLowerCase().includes('lost')).length;
-  const strengthClients = testimonials.filter(t => t.outcomeTag.toLowerCase().includes('strength') || t.outcomeTag.toLowerCase().includes('muscle')).length;
+  const weightLossClients = testimonials.filter(t => {
+    const tags = t.outcomeTags || (t.outcomeTag ? [t.outcomeTag] : []);
+    return tags.some(tag => tag?.toLowerCase().includes('lost'));
+  }).length;
+  const strengthClients = testimonials.filter(t => {
+    const tags = t.outcomeTags || (t.outcomeTag ? [t.outcomeTag] : []);
+    return tags.some(tag => tag?.toLowerCase().includes('strength') || tag?.toLowerCase().includes('muscle'));
+  }).length;
 
   return {
     beforeAfterImages: transformationsWithImages.map(t => ({
@@ -45,7 +56,7 @@ const processTestimonialsData = (testimonials: Testimonial[] = []) => {
       before: t.beforeImage!,
       after: t.afterImage!,
       achievement: t.achievement,
-      outcomeTag: t.outcomeTag
+      outcomeTags: t.outcomeTags || (t.outcomeTag ? [t.outcomeTag] : [])
     })),
     stats: {
       clientsTransformed: totalClients,
@@ -128,10 +139,14 @@ export const ResultsView = ({ trainer }: ResultsViewProps) => {
                       <Users className="h-4 w-4" />
                       <span className="font-medium">{transformation.clientName}</span>
                     </div>
-                    {transformation.outcomeTag && (
-                      <Badge variant="secondary" className="text-xs">
-                        {transformation.outcomeTag}
-                      </Badge>
+                    {transformation.outcomeTags && transformation.outcomeTags.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {transformation.outcomeTags.map(tag => (
+                          <Badge key={tag} variant="secondary" className="text-xs">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
                     )}
                   </div>
                   
@@ -190,11 +205,13 @@ export const ResultsView = ({ trainer }: ResultsViewProps) => {
               <div key={testimonial.id} className="border-l-4 border-primary pl-4 py-2">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="font-medium text-sm">{testimonial.clientName}</span>
-                  {testimonial.outcomeTag && (
-                    <Badge variant="outline" className="text-xs">
-                      {testimonial.outcomeTag}
-                    </Badge>
-                  )}
+                  <div className="flex flex-wrap gap-1">
+                    {(testimonial.outcomeTags || (testimonial.outcomeTag ? [testimonial.outcomeTag] : [])).map((tag) => (
+                      <Badge key={tag} variant="outline" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
                 <p className="text-sm text-muted-foreground">
                   <strong>Achievement:</strong> {testimonial.achievement}

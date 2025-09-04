@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
-import { Upload, Plus, Trash2, Image, Quote, Star } from "lucide-react";
+import { Upload, Plus, Trash2, Image, Quote, Star, Edit, X, Check } from "lucide-react";
 import { ImageUploadSection } from "./ImageUploadSection";
 import { SectionHeader } from './SectionHeader';
 import { TestimonialAIHelper } from './TestimonialAIHelper';
@@ -60,6 +60,7 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
     consentGiven: false,
     showImages: false
   });
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const addTestimonial = () => {
     if (newTestimonial.clientName && newTestimonial.clientQuote && newTestimonial.achievement) {
@@ -97,10 +98,69 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
   };
 
   const handleImageUpload = (imageUrl: string, type: 'before' | 'after') => {
-    setNewTestimonial(prev => ({
-      ...prev,
-      [type === 'before' ? 'beforeImage' : 'afterImage']: imageUrl
-    }));
+    if (editingId) {
+      const updatedTestimonials = testimonials.map(t => 
+        t.id === editingId
+          ? { ...t, [type === 'before' ? 'beforeImage' : 'afterImage']: imageUrl }
+          : t
+      );
+      setTestimonials(updatedTestimonials);
+      updateFormData({ testimonials: updatedTestimonials });
+    } else {
+      setNewTestimonial(prev => ({
+        ...prev,
+        [type === 'before' ? 'beforeImage' : 'afterImage']: imageUrl
+      }));
+    }
+  };
+
+  const startEditing = (testimonial: Testimonial) => {
+    setEditingId(testimonial.id);
+    setNewTestimonial({
+      clientName: testimonial.clientName,
+      clientQuote: testimonial.clientQuote,
+      achievement: testimonial.achievement,
+      outcomeTags: testimonial.outcomeTags || [],
+      consentGiven: testimonial.consentGiven,
+      showImages: testimonial.showImages,
+      beforeImage: testimonial.beforeImage,
+      afterImage: testimonial.afterImage
+    });
+  };
+
+  const cancelEditing = () => {
+    setEditingId(null);
+    setNewTestimonial({
+      clientName: "",
+      clientQuote: "",
+      achievement: "",
+      outcomeTags: [],
+      consentGiven: false,
+      showImages: false
+    });
+  };
+
+  const saveEdit = () => {
+    if (newTestimonial.clientName && newTestimonial.clientQuote && newTestimonial.achievement && editingId) {
+      const updatedTestimonials = testimonials.map(t => 
+        t.id === editingId
+          ? {
+              ...t,
+              clientName: newTestimonial.clientName || "",
+              clientQuote: newTestimonial.clientQuote || "",
+              achievement: newTestimonial.achievement || "",
+              outcomeTags: newTestimonial.outcomeTags || [],
+              consentGiven: newTestimonial.consentGiven || false,
+              showImages: newTestimonial.showImages || false,
+              beforeImage: newTestimonial.beforeImage,
+              afterImage: newTestimonial.afterImage
+            }
+          : t
+      );
+      setTestimonials(updatedTestimonials);
+      updateFormData({ testimonials: updatedTestimonials });
+      cancelEditing();
+    }
   };
 
   return (
@@ -127,14 +187,24 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
                         <Badge key={tag} variant="secondary">{tag}</Badge>
                       ))}
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeTestimonial(testimonial.id)}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => startEditing(testimonial)}
+                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeTestimonial(testimonial.id)}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -185,12 +255,12 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
         </div>
       )}
 
-      {/* Add New Testimonial */}
+      {/* Add/Edit Testimonial */}
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <Plus className="h-5 w-5" />
-            Add Client Testimonial
+            {editingId ? <Edit className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
+            {editingId ? "Edit Client Testimonial" : "Add Client Testimonial"}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -343,13 +413,36 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
             </div>
           </div>
           
+          {editingId && (
+            <div className="flex gap-2 mb-4">
+              <Button
+                variant="outline" 
+                size="sm"
+                onClick={cancelEditing}
+                className="text-gray-600 hover:text-gray-700"
+              >
+                <X className="h-4 w-4 mr-2" />
+                Cancel Edit
+              </Button>
+            </div>
+          )}
+          
           <Button 
-            onClick={addTestimonial}
+            onClick={editingId ? saveEdit : addTestimonial}
             disabled={!newTestimonial.clientName || !newTestimonial.clientQuote || !newTestimonial.achievement || !newTestimonial.consentGiven}
             className="w-full"
           >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Testimonial
+            {editingId ? (
+              <>
+                <Check className="h-4 w-4 mr-2" />
+                Save Changes
+              </>
+            ) : (
+              <>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Testimonial
+              </>
+            )}
           </Button>
         </CardContent>
       </Card>
