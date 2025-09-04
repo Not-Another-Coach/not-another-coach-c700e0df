@@ -161,42 +161,6 @@ export function ClientFitSection({ formData, updateFormData }: ClientFitSectionP
         </div>
       </div>
 
-      {/* Custom Ideal Client Description */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="ideal_client_personality">Describe Your Ideal Client (Optional)</Label>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowAIHelper(!showAIHelper)}
-          >
-            <Sparkles className="h-4 w-4 mr-2" />
-            AI Helper
-          </Button>
-        </div>
-
-        {showAIHelper && (
-          <AIDescriptionHelper
-            selectedClientTypes={formData.ideal_client_types || []}
-            selectedCoachingStyles={formData.coaching_style || []}
-            currentDescription={formData.ideal_client_personality || ""}
-            onSuggestionSelect={(suggestion) => {
-              updateFormData({ ideal_client_personality: suggestion });
-              setShowAIHelper(false);
-            }}
-          />
-        )}
-        
-        <Textarea
-          id="ideal_client_personality"
-          value={formData.ideal_client_personality}
-          onChange={(e) => updateFormData({ ideal_client_personality: e.target.value })}
-          placeholder="e.g., Motivated beginners who are committed to consistency and open to lifestyle changes..."
-          rows={3}
-          className="resize-none"
-        />
-      </div>
-
       {/* Selected Coaching Styles */}
       {formData.coaching_style && formData.coaching_style.length > 0 && (
         <div className="space-y-2">
@@ -257,6 +221,42 @@ export function ClientFitSection({ formData, updateFormData }: ClientFitSectionP
             );
           })}
         </div>
+      </div>
+
+      {/* Custom Ideal Client Description */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="ideal_client_personality">Describe Your Ideal Client (Optional)</Label>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowAIHelper(!showAIHelper)}
+          >
+            <Sparkles className="h-4 w-4 mr-2" />
+            AI Helper
+          </Button>
+        </div>
+
+        {showAIHelper && (
+          <AIDescriptionHelper
+            selectedClientTypes={formData.ideal_client_types || []}
+            selectedCoachingStyles={formData.coaching_style || []}
+            currentDescription={formData.ideal_client_personality || ""}
+            onSuggestionSelect={(suggestion) => {
+              updateFormData({ ideal_client_personality: suggestion });
+              setShowAIHelper(false);
+            }}
+          />
+        )}
+        
+        <Textarea
+          id="ideal_client_personality"
+          value={formData.ideal_client_personality}
+          onChange={(e) => updateFormData({ ideal_client_personality: e.target.value })}
+          placeholder="e.g., Motivated beginners who are committed to consistency and open to lifestyle changes..."
+          rows={3}
+          className="resize-none"
+        />
       </div>
 
       {/* Max Clients */}

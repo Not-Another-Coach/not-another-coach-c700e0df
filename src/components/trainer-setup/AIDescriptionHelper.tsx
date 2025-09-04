@@ -30,13 +30,13 @@ export function AIDescriptionHelper({
     setTimeout(() => {
       const baseSuggestions = currentDescription.trim()
         ? generateImprovedSuggestions(currentDescription, fieldType, selectedClientTypes, selectedCoachingStyles)
-        : generatePersonalizedSuggestions(selectedClientTypes, selectedCoachingStyles, fieldType);
+        : generatePersonalisedSuggestions(selectedClientTypes, selectedCoachingStyles, fieldType);
       setSuggestions(baseSuggestions);
       setIsGenerating(false);
     }, 1500);
   };
 
-  const generatePersonalizedSuggestions = (clientTypes: string[], coachingStyles: string[], fieldType: string): string[] => {
+  const generatePersonalisedSuggestions = (clientTypes: string[], coachingStyles: string[], fieldType: string): string[] => {
     const suggestions = [];
     
     const fieldTemplates = getFieldTemplates(fieldType);
@@ -45,7 +45,7 @@ export function AIDescriptionHelper({
     
     // Generate suggestions based on selections and field type
     if (clientTypes.length > 0 || coachingStyles.length > 0) {
-      fieldTemplates.personalized.forEach(template => {
+      fieldTemplates.personalised.forEach(template => {
         const suggestion = template
           .replace('{CLIENT_TYPE}', primaryClient)
           .replace('{COACHING_STYLE}', primaryStyle);
@@ -77,11 +77,11 @@ export function AIDescriptionHelper({
       improvements.push(impactImprovement);
     }
     
-    // Add personalization if selections are available
+    // Add personalisation if selections are available
     if (clientTypes.length > 0 || coachingStyles.length > 0) {
-      const personalizedImprovement = personalizeText(text, clientTypes, coachingStyles, fieldType);
-      if (personalizedImprovement && personalizedImprovement !== text) {
-        improvements.push(personalizedImprovement);
+      const personalisedImprovement = personaliseText(text, clientTypes, coachingStyles, fieldType);
+      if (personalisedImprovement && personalisedImprovement !== text) {
+        improvements.push(personalisedImprovement);
       }
     }
     
@@ -136,38 +136,38 @@ export function AIDescriptionHelper({
   const getFieldTemplates = (fieldType: string) => {
     const templates = {
       tagline: {
-        personalized: [
+        personalised: [
           "Empowering {CLIENT_TYPE} through {COACHING_STYLE} fitness coaching",
           "Transforming {CLIENT_TYPE} with {COACHING_STYLE} training methods",
           "Your {COACHING_STYLE} trainer for {CLIENT_TYPE} success",
           "Helping {CLIENT_TYPE} thrive with {COACHING_STYLE} approach"
         ],
         fallback: [
-          "Transforming lives through personalized fitness coaching",
+          "Transforming lives through personalised fitness coaching",
           "Your partner in fitness, strength, and confidence",
           "Making fitness achievable, sustainable, and enjoyable",
           "Empowering you to become your strongest self"
         ]
       },
       how_started: {
-        personalized: [
-          "My journey began when I realized how much {CLIENT_TYPE} needed {COACHING_STYLE} support in their fitness journey.",
+        personalised: [
+          "My journey began when I realised how much {CLIENT_TYPE} needed {COACHING_STYLE} support in their fitness journey.",
           "After years of working with {CLIENT_TYPE}, I discovered the power of {COACHING_STYLE} coaching to create lasting change.",
           "It started with my passion for helping {CLIENT_TYPE} overcome their fitness challenges through {COACHING_STYLE} methods.",
           "My story began when I saw firsthand how {COACHING_STYLE} training could transform the lives of {CLIENT_TYPE}."
         ],
         fallback: [
           "My fitness journey started with my own transformation - from struggling with consistency to finding my passion for helping others.",
-          "It began when I realized that fitness isn't just about physical strength, but about building confidence and resilience.",
+          "It began when I realised that fitness isn't just about physical strength, but about building confidence and resilience.",
           "My path to becoming a trainer started when I discovered how much I loved helping people overcome their fitness challenges.",
           "After my own fitness transformation, I knew I wanted to help others experience that same life-changing journey."
         ]
       },
       philosophy: {
-        personalized: [
+        personalised: [
           "I believe every {CLIENT_TYPE} deserves {COACHING_STYLE} guidance that meets them where they are and helps them grow.",
-          "My philosophy centers on providing {CLIENT_TYPE} with {COACHING_STYLE} support that creates sustainable, lasting change.",
-          "I'm committed to helping {CLIENT_TYPE} through {COACHING_STYLE} methods that honor their unique needs and goals.",
+          "My philosophy centres on providing {CLIENT_TYPE} with {COACHING_STYLE} support that creates sustainable, lasting change.",
+          "I'm committed to helping {CLIENT_TYPE} through {COACHING_STYLE} methods that honour their unique needs and goals.",
           "My approach with {CLIENT_TYPE} is rooted in {COACHING_STYLE} principles that build both strength and confidence."
         ],
         fallback: [
@@ -178,14 +178,14 @@ export function AIDescriptionHelper({
         ]
       },
       bio: {
-        personalized: [
-          "I specialize in helping {CLIENT_TYPE} achieve their fitness goals through {COACHING_STYLE} approach.",
+        personalised: [
+          "I specialise in helping {CLIENT_TYPE} achieve their fitness goals through {COACHING_STYLE} approach.",
           "As a trainer focused on {CLIENT_TYPE}, I bring a {COACHING_STYLE} methodology to every session.",
           "I'm passionate about working with {CLIENT_TYPE} using {COACHING_STYLE} techniques that deliver real results.",
           "My expertise lies in supporting {CLIENT_TYPE} through {COACHING_STYLE} training methods."
         ],
         fallback: [
-          "I'm a dedicated personal trainer committed to helping clients achieve sustainable fitness results through personalized training programs.",
+          "I'm a dedicated personal trainer committed to helping clients achieve sustainable fitness results through personalised training programmes.",
           "With years of experience in fitness coaching, I focus on creating positive, supportive environments where clients can thrive.",
           "I believe in making fitness accessible and enjoyable for everyone, regardless of their starting point or goals.",
           "My approach combines evidence-based training methods with genuine care for each client's individual journey."
@@ -265,13 +265,13 @@ export function AIDescriptionHelper({
     return impactful;
   };
 
-  const personalizeText = (text: string, clientTypes: string[], coachingStyles: string[], fieldType: string): string => {
+  const personaliseText = (text: string, clientTypes: string[], coachingStyles: string[], fieldType: string): string => {
     if (!text || text.length < 10) return text;
     
     const primaryClient = clientTypes[0]?.toLowerCase() || 'clients';
     const primaryStyle = getStyleDescription(coachingStyles[0] || '');
     
-    // Create personalized versions based on field type
+    // Create personalised versions based on field type
     switch (fieldType) {
       case 'tagline':
         return `${primaryStyle} coaching for ${primaryClient}`;
@@ -280,7 +280,7 @@ export function AIDescriptionHelper({
       case 'philosophy':
         return `${text} This is especially important when working with ${primaryClient} through ${primaryStyle} methods.`;
       case 'bio':
-        return `${text} I specialize in ${primaryStyle} coaching for ${primaryClient}.`;
+        return `${text} I specialise in ${primaryStyle} coaching for ${primaryClient}.`;
       default:
         return `${text} I focus on ${primaryStyle} approaches for ${primaryClient}.`;
     }
@@ -295,7 +295,7 @@ export function AIDescriptionHelper({
       'fun': 'energetic and engaging',
       'holistic': 'mind-body focused'
     };
-    return styleMap[style] || 'personalized';
+    return styleMap[style] || 'personalised';
   };
 
   const hasSelections = selectedClientTypes.length > 0 || selectedCoachingStyles.length > 0;
@@ -325,7 +325,7 @@ export function AIDescriptionHelper({
               {isImproveMode 
                 ? `Improve your existing ${getFieldLabel(fieldType).toLowerCase()} with AI-powered suggestions`
                 : hasSelections 
-                  ? `Generate personalized ${getFieldLabel(fieldType).toLowerCase()} based on your selections`
+                  ? `Generate personalised ${getFieldLabel(fieldType).toLowerCase()} based on your selections`
                   : `Generate ${getFieldLabel(fieldType).toLowerCase()} suggestions`
               }
             </p>
