@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Star, MapPin, Clock, Award, Users, MessageCircle, Calendar } from 'lucide-react';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Star, MapPin, Clock, Award, Users, MessageCircle, Calendar, User } from 'lucide-react';
 import { Trainer } from '@/components/TrainerCard';
 import { getTrainerDisplayPrice } from '@/lib/priceUtils';
 
@@ -12,6 +13,16 @@ interface OverviewViewProps {
 }
 
 export const OverviewView = ({ trainer, onMessage, onBookDiscovery }: OverviewViewProps) => {
+  // Generate initials from trainer name
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word.charAt(0))
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   return (
     <div className="space-y-6">
       {/* Hero Card */}
@@ -19,11 +30,15 @@ export const OverviewView = ({ trainer, onMessage, onBookDiscovery }: OverviewVi
         <CardContent className="p-6">
           <div className="flex items-start gap-6">
             <div className="relative">
-              <img
-                src={trainer.image}
-                alt={trainer.name}
-                className="w-24 h-24 rounded-full object-cover border-4 border-secondary/20"
-              />
+              <Avatar className="w-24 h-24 border-4 border-secondary/20">
+                <AvatarImage 
+                  src={trainer.image || undefined} 
+                  alt={trainer.name}
+                />
+                <AvatarFallback className="bg-muted text-muted-foreground text-xl">
+                  {trainer.name ? getInitials(trainer.name) : <User className="w-8 h-8" />}
+                </AvatarFallback>
+              </Avatar>
               {trainer.certifications.length > 0 && (
                 <div className="absolute -bottom-1 -right-1 bg-success text-white rounded-full p-2">
                   <Award className="h-4 w-4" />
