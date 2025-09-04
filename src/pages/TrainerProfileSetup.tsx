@@ -770,7 +770,7 @@ const TrainerProfileSetup = () => {
             </div>
             
             {/* Step indicators */}
-            <div className="flex justify-between mt-4">
+            <div className="flex justify-between mt-4 gap-1 overflow-x-auto scrollbar-hide pb-2">
               {stepTitles.map((title, index) => {
                 const stepNumber = index + 1;
                 const completion = getStepCompletion(stepNumber);
@@ -802,23 +802,23 @@ const TrainerProfileSetup = () => {
                 return (
                   <div
                     key={stepNumber}
-                    className={`flex flex-col items-center text-xs cursor-pointer ${statusColor}`}
+                    className={`flex flex-col items-center text-xs cursor-pointer transition-all hover:scale-105 min-w-fit ${statusColor}`}
                     onClick={() => setCurrentStep(stepNumber)}
                   >
                     <div
-                      className={`w-8 h-8 rounded-full border-2 flex items-center justify-center mb-1 ${borderColor} ${
+                      className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center mb-1 ${borderColor} ${
                         completion === 'completed' || completion === 'partial' || isCurrent 
                           ? `${bgColor} text-white`
                           : 'bg-transparent'
                       }`}
                     >
                       {showIcon ? (
-                        isPartial ? <AlertCircle className="h-4 w-4" /> : <CheckCircle className="h-4 w-4" />
+                        isPartial ? <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4" /> : <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4" />
                       ) : (
-                        stepNumber
+                        <span className="text-xs sm:text-sm font-medium">{stepNumber}</span>
                       )}
                     </div>
-                    <span className="text-center max-w-20 leading-tight">
+                    <span className="text-center max-w-12 sm:max-w-16 md:max-w-20 leading-tight text-xs sm:text-xs truncate">
                       {title}
                     </span>
                   </div>
@@ -834,7 +834,7 @@ const TrainerProfileSetup = () => {
         <div className="bg-card border-b p-4">
           <div className="max-w-4xl mx-auto">
             {/* Clickable step indicators */}
-            <div className="flex justify-between">
+            <div className="flex justify-between gap-1 overflow-x-auto scrollbar-hide pb-2">
               {stepTitles.map((title, index) => {
                 const stepNumber = index + 1;
                 const completion = getStepCompletion(stepNumber);
@@ -843,21 +843,25 @@ const TrainerProfileSetup = () => {
                 return (
                   <div
                     key={stepNumber}
-                    className={`flex flex-col items-center text-xs cursor-pointer transition-all hover:scale-105 ${
+                    className={`flex flex-col items-center text-xs cursor-pointer transition-all hover:scale-105 min-w-fit ${
                       isCurrent ? 'text-primary' : 'text-green-600'
                     }`}
                     onClick={() => setCurrentStep(stepNumber)}
                   >
                     <div
-                      className={`w-8 h-8 rounded-full border-2 flex items-center justify-center mb-1 ${
+                      className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center mb-1 ${
                         isCurrent 
                           ? 'border-primary bg-primary text-white' 
                           : 'border-green-600 bg-green-600 text-white'
                       }`}
                     >
-                      {isCurrent ? stepNumber : <CheckCircle className="h-4 w-4" />}
+                      {isCurrent ? (
+                        <span className="text-xs sm:text-sm font-medium">{stepNumber}</span>
+                      ) : (
+                        <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                      )}
                     </div>
-                    <span className={`text-center max-w-20 leading-tight ${isCurrent ? 'font-bold' : ''}`}>
+                    <span className={`text-center max-w-12 sm:max-w-16 md:max-w-20 leading-tight text-xs truncate ${isCurrent ? 'font-bold' : ''}`}>
                       {title}
                     </span>
                   </div>
