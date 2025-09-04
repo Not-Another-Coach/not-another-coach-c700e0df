@@ -284,16 +284,6 @@ const TrainerProfileSetup = () => {
         if (!formData.package_options || formData.package_options.length === 0) {
           newErrors.package_options = "At least one package is required";
         }
-        if (!formData.communication_style || formData.communication_style.trim().length < 20) {
-          newErrors.communication_style = "Please describe how you work best with clients (minimum 20 characters)";
-        }
-        const hasCommunicationMethod = formData.video_checkins || formData.messaging_support || formData.weekly_programming_only;
-        if (!hasCommunicationMethod) {
-          newErrors.communication_methods = "Please select at least one communication method you offer";
-        }
-        if (!formData.package_options || formData.package_options.length === 0) {
-          newErrors.package_options = "At least one tiered pricing package is required";
-        }
         break;
       case 12:
         if (!formData.terms_agreed) {
@@ -353,13 +343,9 @@ const TrainerProfileSetup = () => {
         const hasPartialClientFit = hasClientTypes || hasCoachingStyles;
         return hasAllClientFit ? 'completed' : (hasPartialClientFit ? 'partial' : 'not_started');
         
-      case 5: // Rates & Packages - comprehensive requirements
+      case 5: // Rates & Packages - only require packages
         const hasPackages = formData.package_options && formData.package_options.length > 0;
-        const hasCommunicationStyle = formData.communication_style && formData.communication_style.trim().length >= 50;
-        const hasCommunicationMethod = formData.video_checkins || formData.messaging_support || formData.weekly_programming_only;
-        const hasAllRateRequirements = hasPackages && hasCommunicationStyle && hasCommunicationMethod;
-        const hasPartialRate = hasPackages || (hasCommunicationStyle && hasCommunicationMethod);
-        return hasAllRateRequirements ? 'completed' : (hasPartialRate ? 'partial' : 'not_started');
+        return hasPackages ? 'completed' : 'not_started';
         
       case 6: // Discovery Calls
         const hasDiscoveryCallConfig = formData.free_discovery_call && formData.calendar_link?.trim();
