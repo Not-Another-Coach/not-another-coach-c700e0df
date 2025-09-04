@@ -150,56 +150,58 @@ const TrainerProfileSetup = () => {
 
   // Initialize form data from profile when available
   useEffect(() => {
-    // Only initialize when we have a profile with an ID and haven't initialized yet
-    // Protect unsaved changes during internal navigation, but allow reinitialization from external routes
-    if (profile && profile.id && !hasInitialized.current && !hasUnsavedChanges) {
-      hasInitialized.current = true;
+    // Only initialize when we have a profile with an ID
+    // Remove hasUnsavedChanges condition to allow reinitialization when returning from dashboard
+    if (profile && profile.id) {
       const initialData = {
         first_name: profile.first_name || "",
         last_name: profile.last_name || "",
         tagline: profile.tagline || "",
         bio: profile.bio || "",
-        profile_photo_url: profile.profile_photo_url || "",
         how_started: profile.how_started || "",
         philosophy: profile.philosophy || "",
         professional_milestones: profile.professional_milestones || [],
+        profile_photo_url: profile.profile_photo_url || "",
         profile_image_position: profile.profile_image_position || { x: 50, y: 50, scale: 1 },
-        qualifications: profile.qualifications || [],
-        certificates: profile.uploaded_certificates || [], // Map uploaded_certificates to certificates
-        specializations: profile.specializations || [],
-        training_types: profile.training_types || [],
+        qualifications: Array.isArray(profile.qualifications) ? profile.qualifications : [],
+        certificates: profile.uploaded_certificates || [],
+        specializations: Array.isArray(profile.specializations) ? profile.specializations : [],
+        training_types: Array.isArray(profile.training_types) ? profile.training_types : [],
         location: profile.location || "",
-        year_certified: profile.year_certified,
-        ideal_client_types: profile.ideal_client_types || [],
-        coaching_style: profile.coaching_style || [],
+        delivery_format: Array.isArray(profile.delivery_format) ? profile.delivery_format[0] || "hybrid" : profile.delivery_format || "hybrid",
+        ideal_client_types: Array.isArray(profile.ideal_client_types) ? profile.ideal_client_types : [],
+        coaching_style: Array.isArray(profile.coaching_style) ? profile.coaching_style : [],
         ideal_client_personality: profile.ideal_client_personality || "",
-        hourly_rate: profile.hourly_rate,
-        terms_agreed: profile.terms_agreed || false,
-        // Initialize ways of working data from profile
+        hourly_rate: profile.hourly_rate || null,
+        package_options: profile.package_options || [],
+        free_discovery_call: profile.free_discovery_call || false,
+        calendar_link: profile.calendar_link || "",
+        communication_style: Array.isArray(profile.communication_style) ? profile.communication_style.join(', ') : profile.communication_style || "",
+        video_checkins: profile.video_checkins || false,
+        messaging_support: profile.messaging_support || false,
+        weekly_programming_only: profile.weekly_programming_only || false,
+        testimonials: profile.testimonials || [],
         ways_of_working_onboarding: profile.ways_of_working_onboarding || [],
         ways_of_working_first_week: profile.ways_of_working_first_week || [],
         ways_of_working_ongoing: profile.ways_of_working_ongoing || [],
         ways_of_working_tracking: profile.ways_of_working_tracking || [],
         ways_of_working_expectations: profile.ways_of_working_expectations || [],
         ways_of_working_what_i_bring: profile.ways_of_working_what_i_bring || [],
-        // Initialize other fields
-        max_clients: profile.max_clients,
-        package_options: profile.package_options || [],
-        free_discovery_call: profile.free_discovery_call || false,
-        calendar_link: profile.calendar_link || "",
-        communication_style: Array.isArray(profile.communication_style) ? profile.communication_style.join(", ") : profile.communication_style || "",
-        video_checkins: profile.video_checkins || false,
-        messaging_support: profile.messaging_support || false,
-        weekly_programming_only: profile.weekly_programming_only || false,
-        testimonials: profile.testimonials || [],
-        delivery_format: Array.isArray(profile.delivery_format) ? profile.delivery_format[0] || "hybrid" : profile.delivery_format || "hybrid",
+        terms_agreed: profile.terms_agreed || false,
+        max_clients: profile.max_clients || null,
       };
       
       setFormData(prev => ({ ...prev, ...initialData }));
       initialFormData.current = { ...initialData };
       setHasUnsavedChanges(false);
+      hasInitialized.current = true;
     }
-  }, [profile, hasUnsavedChanges]);
+  }, [profile]);
+
+  // Reset initialization when component mounts to ensure fresh data loading from external navigation
+  useEffect(() => {
+    hasInitialized.current = false;
+  }, []); // Empty dependency array means this runs only on mount
 
   // Track changes to form data
   useEffect(() => {
