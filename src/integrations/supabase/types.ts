@@ -183,27 +183,6 @@ export type Database = {
             referencedRelation: "v_trainers"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "admin_actions_log_target_user_id_fkey"
-            columns: ["target_user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "admin_actions_log_target_user_id_fkey"
-            columns: ["target_user_id"]
-            isOneToOne: false
-            referencedRelation: "v_clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "admin_actions_log_target_user_id_fkey"
-            columns: ["target_user_id"]
-            isOneToOne: false
-            referencedRelation: "v_trainers"
-            referencedColumns: ["id"]
-          },
         ]
       }
       alerts: {
