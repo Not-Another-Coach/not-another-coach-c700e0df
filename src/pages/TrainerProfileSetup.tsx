@@ -692,69 +692,70 @@ const TrainerProfileSetup = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="flex justify-between items-center p-4 border-b bg-card">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleBackToDashboard}
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Dashboard
-          </Button>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold">
-              {isFullyComplete() ? 'Profile Management' : 'Profile Setup'}
-            </h1>
-            {/* Verification Badge */}
-            {(() => {
-              const verificationStatus = (profile as any)?.verification_status || 'pending';
-              if (verificationStatus === 'verified') {
-                return (
-                  <div className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
-                    <Shield className="h-3 w-3" />
-                    <Check className="h-3 w-3" />
-                    Verified
-                  </div>
-                );
-              } else if (verificationStatus === 'under_review') {
-                return (
-                  <div className="flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
-                    <Shield className="h-3 w-3" />
-                    Under Review
-                  </div>
-                );
-              } else if (verificationStatus === 'pending') {
-                return (
-                  <div className="flex items-center gap-1 px-2 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-medium">
-                    <Shield className="h-3 w-3" />
-                    Pending
-                  </div>
-                );
-              } else if (verificationStatus === 'rejected') {
-                return (
-                  <div className="flex items-center gap-1 px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">
-                    <Shield className="h-3 w-3" />
-                    Rejected
-                  </div>
-                );
-              }
-              return null;
-            })()}
+      <div className="p-4 border-b bg-card">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+          <div className="flex items-center gap-4 min-w-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleBackToDashboard}
+              className="flex-shrink-0"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Dashboard
+            </Button>
+            <div className="flex items-center gap-2 min-w-0">
+              <h1 className="text-lg sm:text-xl font-bold truncate">
+                {isFullyComplete() ? 'Profile Management' : 'Profile Setup'}
+              </h1>
+              {/* Verification Badge */}
+              {(() => {
+                const verificationStatus = (profile as any)?.verification_status || 'pending';
+                if (verificationStatus === 'verified') {
+                  return (
+                    <div className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium whitespace-nowrap">
+                      <Shield className="h-3 w-3" />
+                      <Check className="h-3 w-3" />
+                      Verified
+                    </div>
+                  );
+                } else if (verificationStatus === 'under_review') {
+                  return (
+                    <div className="flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium whitespace-nowrap">
+                      <Shield className="h-3 w-3" />
+                      Under Review
+                    </div>
+                  );
+                } else if (verificationStatus === 'pending') {
+                  return (
+                    <div className="flex items-center gap-1 px-2 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-medium whitespace-nowrap">
+                      <Shield className="h-3 w-3" />
+                      Pending
+                    </div>
+                  );
+                } else if (verificationStatus === 'rejected') {
+                  return (
+                    <div className="flex items-center gap-1 px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium whitespace-nowrap">
+                      <Shield className="h-3 w-3" />
+                      Rejected
+                    </div>
+                  );
+                }
+                return null;
+              })()}
+            </div>
           </div>
-          <div>
-            {/* Remove step indicator since each tab now has its own header */}
+          <div className="flex items-center gap-2 justify-end sm:justify-start">
+            <Button variant="outline" size="sm" onClick={() => handleSave()} className="flex-1 sm:flex-none">
+              <Save className="h-4 w-4 mr-2" />
+              <span className="hidden xs:inline">{profile?.profile_setup_completed ? 'Update' : 'Save Draft'}</span>
+              <span className="xs:hidden">Save</span>
+            </Button>
+            <Button variant="outline" size="sm" onClick={handlePreview} className="flex-1 sm:flex-none">
+              <Eye className="h-4 w-4 mr-2" />
+              Preview
+            </Button>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => handleSave()}>
-            <Save className="h-4 w-4 mr-2" />
-            {profile?.profile_setup_completed ? 'Update' : 'Save Draft'}
-          </Button>
-          <Button variant="outline" size="sm" onClick={handlePreview}>
-            <Eye className="h-4 w-4 mr-2" />
-            Preview
-          </Button>
         </div>
       </div>
 

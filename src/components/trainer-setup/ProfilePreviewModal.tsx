@@ -146,10 +146,10 @@ export const ProfilePreviewModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-3">
-            Profile Preview
+      <DialogContent className="w-[90vw] max-w-4xl h-[90vh] max-h-[800px] overflow-hidden flex flex-col p-0">
+        <DialogHeader className="px-6 py-4 border-b flex-shrink-0">
+          <DialogTitle className="flex flex-col sm:flex-row sm:items-center gap-2">
+            <span>Profile Preview</span>
             <Badge className={stageInfo.color}>
               {stageInfo.label}
             </Badge>
@@ -159,9 +159,9 @@ export const ProfilePreviewModal = ({
           </p>
         </DialogHeader>
         
-        <div className="space-y-4">
-          <div className="border-b pb-4">
-            <div className="flex items-center justify-between mb-2">
+        <div className="flex-1 overflow-hidden flex flex-col">
+          <div className="px-6 py-4 border-b flex-shrink-0">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
               <h3 className="text-sm font-medium text-muted-foreground">Preview Mode</h3>
               <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
                 This is how clients will see your profile
@@ -174,11 +174,11 @@ export const ProfilePreviewModal = ({
             />
           </div>
           
-          <div className="max-h-[60vh] overflow-y-auto">
+          <div className="flex-1 overflow-y-auto px-6 py-4">
             {renderCurrentView()}
           </div>
 
-          <div className="pt-4 border-t">
+          <div className="px-6 py-4 border-t flex-shrink-0">
             <div className="flex flex-col sm:flex-row gap-3">
               <Button onClick={handleMessage} className="flex-1" disabled>
                 <MessageCircle className="w-4 h-4 mr-2" />
