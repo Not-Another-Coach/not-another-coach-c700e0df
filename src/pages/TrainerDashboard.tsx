@@ -138,8 +138,10 @@ const TrainerDashboard = () => {
       switch (step) {
         case 1: // Basic Info
           const hasAllBasicInfo = profile.first_name && profile.last_name && 
-            profile.tagline && profile.bio;
-          return hasAllBasicInfo ? 'completed' : 'partial';
+            profile.tagline && profile.bio && profile.location;
+          const hasPartialBasicInfo = (profile.first_name || profile.last_name || 
+            profile.tagline || profile.bio || profile.location);
+          return hasAllBasicInfo ? 'completed' : (hasPartialBasicInfo ? 'partial' : 'not_started');
           
         case 2: // Qualifications
           const qualCount = profile.qualifications?.length || 0;
@@ -163,12 +165,47 @@ const TrainerDashboard = () => {
           const hasPackages = (profile as any).package_options && (profile as any).package_options.length > 0;
           return hasPackages ? 'completed' : 'not_started';
           
+        case 6: // Discovery Calls - check calendar_link or discovery call settings
+          const hasCalendarLink = (profile as any).calendar_link?.trim();
+          return hasCalendarLink ? 'partial' : 'not_started';
+          
+        case 7: // Testimonials
+          const hasTestimonials = (profile as any).testimonials?.length > 0;
+          return hasTestimonials ? 'completed' : 'not_started';
+          
+        case 8: // Ways of Working
+          const hasWowSetup = (profile as any).wow_setup_completed === true;
+          const hasWowActivities = (profile as any).wow_activities && 
+            Object.values((profile as any).wow_activities).some((arr: any) => Array.isArray(arr) && arr.length > 0);
+          if (hasWowSetup) return 'completed';
+          if (hasWowActivities) return 'partial';
+          return 'not_started';
+          
+        case 9: // Instagram Integration
+          return 'not_started'; // Would need instagram connection status
+          
+        case 10: // Image Management
+          const hasProfilePhoto = profile.profile_photo_url;
+          return hasProfilePhoto ? 'partial' : 'not_started';
+          
+        case 11: // Working Hours & Availability
+          return 'partial'; // Assume some availability is set
+          
         case 12: // Terms & Notifications
           return profile.terms_agreed ? 'completed' : 'not_started';
           
+        case 13: // Professional Documents
+          const hasProfDocs = (profile as any).uploaded_certificates?.length > 0;
+          return hasProfDocs ? 'partial' : 'not_started';
+          
+        case 14: // Verification
+          const verificationStatus = (profile as any).verification_status;
+          if (verificationStatus === 'verified') return 'completed';
+          if (verificationStatus === 'pending' || verificationStatus === 'under_review') return 'partial';
+          return 'not_started';
+          
         default:
-          // For other steps (discovery calls, testimonials, etc.), assume partial completion
-          return 'partial';
+          return 'not_started';
       }
     };
 
