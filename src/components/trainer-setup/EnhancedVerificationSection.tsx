@@ -54,8 +54,6 @@ const StatusConfig = {
 };
 
 export const EnhancedVerificationSection = () => {
-  console.log('🔍 COMPONENT START - EnhancedVerificationSection rendering');
-  
   const {
     loading,
     overview,
@@ -66,8 +64,6 @@ export const EnhancedVerificationSection = () => {
     getCheckByType,
     getVerificationBadgeStatus,
   } = useEnhancedTrainerVerification();
-
-  console.log('🔍 HOOK DATA:', { loading, checksCount: checks?.length, overview: !!overview });
 
   const [formData, setFormData] = useState<Record<string, VerificationCheckFormData>>({});
   const [uploading, setUploading] = useState<string | null>(null);
@@ -235,11 +231,6 @@ export const EnhancedVerificationSection = () => {
       {/* Verification Checks */}
       {Object.entries(CheckTypeConfig).map(([checkType, config]) => {
         const existingCheck = getCheckByType(checkType as any);
-        console.log(`Rendering check ${checkType}:`, {
-          existingCheck: existingCheck ? { id: existingCheck.id, status: existingCheck.status, check_type: existingCheck.check_type } : null,
-          checksArray: checks.filter(c => c.check_type === checkType)
-        });
-        
         const statusConfig = existingCheck ? StatusConfig[existingCheck.status] : null;
         const IconComponent = config.icon;
 
@@ -336,11 +327,6 @@ export const EnhancedVerificationSection = () => {
 
               {/* Form for new submission or resubmission - only show if no check exists or check was rejected/expired */}
               {(() => {
-                console.log(`Form render logic for ${checkType}:`, {
-                  existingCheck: existingCheck ? { id: existingCheck.id, status: existingCheck.status } : null,
-                  shouldShowForm: !existingCheck || existingCheck.status === 'rejected' || existingCheck.status === 'expired'
-                });
-                
                 return (!existingCheck || existingCheck.status === 'rejected' || existingCheck.status === 'expired');
               })() && (
                 <div className="space-y-4">

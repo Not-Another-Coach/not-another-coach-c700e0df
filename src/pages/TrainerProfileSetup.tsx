@@ -749,7 +749,7 @@ const TrainerProfileSetup = () => {
       case 13:
         return <ProfessionalDocumentsSection />;
       case 14:
-        return <VerificationOverviewSection />;
+        return <EnhancedVerificationSection />;
       default:
         return null;
     }
