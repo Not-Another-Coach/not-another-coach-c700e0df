@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -100,12 +101,13 @@ export function SimplifiedWaysOfWorkingSection({
       missing.push('At least one activity selected');
     }
     
-    console.log('[WoW Requirements Debug] Activities check:', {
-      hasActivities,
-      wow_activities: formData.wow_activities
-    });
-    console.log('[WoW Requirements Debug] Missing requirements:', missing);
-    console.log('[WoW Requirements Debug] Prerequisites met:', missing.length === 0);
+    // Force console log on every render
+    console.log('=== WoW Requirements Check ===');
+    console.log('Has activities:', hasActivities);
+    console.log('Activities object:', formData.wow_activities);
+    console.log('Missing requirements:', missing);
+    console.log('Prerequisites met:', missing.length === 0);
+    console.log('Form data keys:', Object.keys(formData));
     
     return missing;
   };
@@ -445,14 +447,17 @@ export function SimplifiedWaysOfWorkingSection({
                         }
                       }}
                     />
-                    <label
-                      htmlFor="wow_setup_completed"
-                      className={`text-sm font-medium leading-none cursor-pointer ${
-                        !prerequisitesMet ? 'opacity-50 cursor-not-allowed' : ''
-                      }`}
-                    >
-                      Ways of Working setup completed
-                    </label>
+                     <label
+                       htmlFor="wow_setup_completed"
+                       className={`text-sm font-medium leading-none cursor-pointer ${
+                         !prerequisitesMet ? 'opacity-50 cursor-not-allowed' : ''
+                       }`}
+                     >
+                       Ways of Working setup completed
+                     </label>
+                     <Badge variant={prerequisitesMet ? "default" : "secondary"} className="text-xs ml-2">
+                       {prerequisitesMet ? "✓ Ready" : `Need: ${getMissingRequirements().join(", ")}`}
+                     </Badge>
                     {!prerequisitesMet && (
                       <Info className="h-4 w-4 text-muted-foreground ml-1" />
                     )}
