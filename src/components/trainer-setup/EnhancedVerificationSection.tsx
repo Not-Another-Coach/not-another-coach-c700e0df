@@ -70,14 +70,18 @@ export const EnhancedVerificationSection = () => {
 
   // Debug logging
   React.useEffect(() => {
-    console.log('EnhancedVerificationSection rendering with checks:', checks);
-    console.log('Check types found:', checks.map(c => ({ type: c.check_type, status: c.status })));
+    console.log('=== ENHANCED VERIFICATION SECTION DEBUG ===');
+    console.log('Checks loaded:', checks?.length || 0, 'Loading:', loading);
+    console.log('Raw checks data:', checks);
     
-    // Test getCheckByType for each config key
-    Object.keys(CheckTypeConfig).forEach(checkType => {
-      const found = getCheckByType(checkType as any);
-      console.log(`getCheckByType('${checkType}'):`, found ? { id: found.id, status: found.status } : 'NOT FOUND');
-    });
+    if (checks && checks.length > 0) {
+      console.log('Testing getCheckByType for each config type:');
+      Object.keys(CheckTypeConfig).forEach(checkType => {
+        const found = getCheckByType(checkType as any);
+        console.log(`  ${checkType}:`, found ? { id: found.id, status: found.status, check_type: found.check_type } : 'NOT FOUND');
+      });
+    }
+    console.log('=== END DEBUG ===');
   }, [checks, getCheckByType]);
 
   const handleInputChange = (checkType: string, field: string, value: any) => {
