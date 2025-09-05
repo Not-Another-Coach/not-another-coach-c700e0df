@@ -102,7 +102,7 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
   const { getPackageWorkflow, savePackageWorkflow, cleanupOrphanedWorkflows, refetch } = usePackageWaysOfWorking();
   const { toast } = useToast();
   
-  // Clean up orphaned workflows when component mounts
+  // Clean up orphaned workflows ONLY on component mount (not on packages changes)
   useEffect(() => {
     const performCleanup = async () => {
       if (user?.id && packages.length > 0) {
@@ -118,10 +118,11 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
       }
     };
     
-    // Add a delay to allow copy operations to complete
-    const timeoutId = setTimeout(performCleanup, 500);
-    return () => clearTimeout(timeoutId);
-  }, [user?.id, packages.length, cleanupOrphanedWorkflows]);
+    // Only run cleanup once on mount when packages are first loaded
+    if (packages.length > 0) {
+      performCleanup();
+    }
+  }, [user?.id]); // Removed packages.length dependency to prevent cleanup on every change
 
   const addPackage = async () => {
     if (newPackage.name && newPackage.price && newPackage.description) {
@@ -375,6 +376,9 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
         });
         return;
       }
+
+      // Add a small delay to ensure database transaction is committed
+      await new Promise(resolve => setTimeout(resolve, 200));
 
       console.log(`[Copy WoW] Verifying successful copy for package ${targetPackageId}`);
       const { data: verifyData } = await supabase
