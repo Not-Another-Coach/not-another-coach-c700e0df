@@ -103,14 +103,6 @@ export function useActivityAlerts() {
           // For trainers, show alerts targeted to them
           if (isTrainer()) {
             console.log(`🔍 Processing alerts for trainer ${user.id}, isTrainer: true`);
-            // Show alerts where user is the creator (coach) or specifically targeted
-            if (alert.created_by === user.id) return true;
-            
-            // Type-safe checking of target_audience
-            const targetAudience = alert.target_audience as any;
-            if (targetAudience?.coaches && Array.isArray(targetAudience.coaches)) {
-              return targetAudience.coaches.includes(user.id);
-            }
             
             // For discovery call alerts, only show if trainer_id in metadata matches current user
             const discoveryCallTypes = ['discovery_call_booked', 'discovery_call_cancelled', 'discovery_call_rescheduled'];
@@ -121,7 +113,16 @@ export function useActivityAlerts() {
               return isRelevantToTrainer;
             }
             
-            // Show general trainer alerts (non-discovery call types)
+            // Show alerts where user is the creator (coach) or specifically targeted
+            if (alert.created_by === user.id) return true;
+            
+            // Type-safe checking of target_audience
+            const targetAudience = alert.target_audience as any;
+            if (targetAudience?.coaches && Array.isArray(targetAudience.coaches)) {
+              return targetAudience.coaches.includes(user.id);
+            }
+            
+            // Show general trainer alerts (non-discovery call types only)
             if (targetAudience?.trainers) return true;
           }
           
