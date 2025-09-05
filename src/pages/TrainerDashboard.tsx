@@ -827,7 +827,7 @@ const TrainerDashboard = () => {
                     </div>
                   </div>
                   <Button 
-                    onClick={() => navigate('/trainer/profile-setup?tab=rates-packages')}
+                    onClick={() => navigate('/trainer/profile-setup?tab=rates')}
                     className="flex items-center gap-2"
                   >
                     Manage Packages
