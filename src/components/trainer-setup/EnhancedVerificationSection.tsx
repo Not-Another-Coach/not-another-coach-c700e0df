@@ -54,6 +54,8 @@ const StatusConfig = {
 };
 
 export const EnhancedVerificationSection = () => {
+  console.log('🔍 COMPONENT START - EnhancedVerificationSection rendering');
+  
   const {
     loading,
     overview,
@@ -64,6 +66,8 @@ export const EnhancedVerificationSection = () => {
     getCheckByType,
     getVerificationBadgeStatus,
   } = useEnhancedTrainerVerification();
+
+  console.log('🔍 HOOK DATA:', { loading, checksCount: checks?.length, overview: !!overview });
 
   const [formData, setFormData] = useState<Record<string, VerificationCheckFormData>>({});
   const [uploading, setUploading] = useState<string | null>(null);
