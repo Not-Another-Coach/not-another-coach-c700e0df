@@ -346,8 +346,8 @@ const TrainerDashboard = () => {
               className="flex-shrink-0"
             >
               <Settings className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">Profile Management</span>
-              <span className="sm:hidden">Profile</span>
+              <span className="hidden sm:inline">Profile Settings</span>
+              <span className="sm:hidden">Settings</span>
             </Button>
             {profile && (
               <ProfileDropdown 
@@ -534,38 +534,38 @@ const TrainerDashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid md:grid-cols-4 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                   <Button 
                     className="h-12 justify-start gap-3" 
                     variant="default"
                     onClick={() => navigate('/trainer/profile-setup?tab=testimonials')}
                   >
-                    <Plus className="h-4 w-4" />
-                    Add Testimonial
+                    <Plus className="h-4 w-4 flex-shrink-0" />
+                    <span className="truncate">Add Testimonial</span>
                   </Button>
                   <Button 
                     className="h-12 justify-start gap-3" 
                     variant="default"
                     onClick={() => setActiveView('payments')}
                   >
-                    <Coins className="h-4 w-4" />
-                    Payment Statements
+                    <Coins className="h-4 w-4 flex-shrink-0" />
+                    <span className="truncate">Payment Statements</span>
                   </Button>
                   <Button 
                     className="h-12 justify-start gap-3" 
                     variant="default"
                     onClick={() => navigate('/trainer/profile-setup?tab=rates')}
                   >
-                    <Package className="h-4 w-4" />
-                    Add New Package
+                    <Package className="h-4 w-4 flex-shrink-0" />
+                    <span className="truncate">Add New Package</span>
                   </Button>
                   <Button 
                     className="h-12 justify-start gap-3" 
                     variant="default"
                     onClick={() => navigate('/trainer/profile-setup?tab=working-hours')}
                   >
-                    <Settings className="h-4 w-4" />
-                    Manage Availability
+                    <Settings className="h-4 w-4 flex-shrink-0" />
+                    <span className="truncate">Manage Availability</span>
                   </Button>
                 </div>
               </CardContent>

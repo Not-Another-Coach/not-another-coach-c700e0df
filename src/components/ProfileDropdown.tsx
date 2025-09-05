@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -8,8 +7,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PositionedAvatar } from '@/components/ui/positioned-avatar';
 import { Badge } from "@/components/ui/badge";
 import { User, Settings, LogOut, Key, Edit } from "lucide-react";
@@ -17,7 +14,6 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { ProfileViewEdit } from "@/components/dashboard/ProfileViewEdit";
 
 interface ProfileDropdownProps {
   profile: {
@@ -34,7 +30,6 @@ interface ProfileDropdownProps {
 export const ProfileDropdown = ({ profile }: ProfileDropdownProps) => {
   const navigate = useNavigate();
   const { signOut } = useAuth();
-  const [showProfileModal, setShowProfileModal] = useState(false);
   
   const getInitials = () => {
     const first = profile.first_name?.charAt(0) || '';
@@ -155,10 +150,10 @@ export const ProfileDropdown = ({ profile }: ProfileDropdownProps) => {
         
         <DropdownMenuItem 
           className="cursor-pointer"
-          onClick={() => setShowProfileModal(true)}
+          onClick={() => navigate(`/trainer/${profile.first_name?.toLowerCase() || 'profile'}`)}
         >
           <User className="mr-2 h-4 w-4" />
-          <span>View Profile</span>
+          <span>View Public Profile</span>
         </DropdownMenuItem>
         
         {profile.user_type === 'client' && (
@@ -176,8 +171,8 @@ export const ProfileDropdown = ({ profile }: ProfileDropdownProps) => {
             className="cursor-pointer"
             onClick={() => navigate('/trainer/profile-setup')}
           >
-            <Edit className="mr-2 h-4 w-4" />
-            <span>Change Profile</span>
+            <Settings className="mr-2 h-4 w-4" />
+            <span>Edit Profile</span>
           </DropdownMenuItem>
         )}
         
@@ -203,16 +198,6 @@ export const ProfileDropdown = ({ profile }: ProfileDropdownProps) => {
           <span>Sign Out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
-
-      {/* Profile Edit Modal */}
-      <Dialog open={showProfileModal} onOpenChange={setShowProfileModal}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Profile Settings</DialogTitle>
-          </DialogHeader>
-          <ProfileViewEdit profile={profile} />
-        </DialogContent>
-      </Dialog>
     </DropdownMenu>
   );
 };
