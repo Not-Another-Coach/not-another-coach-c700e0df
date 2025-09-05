@@ -122,13 +122,13 @@ export const useProfessionalDocumentsState = () => {
     return checkTypes.every(checkType => {
       const existingCheck = checks.find(check => check.check_type === checkType);
       const isNotApplicableSet = notApplicable[checkType];
-      const anyFieldFilled = isAnyFieldFilled(checkType);
+      const hasValidDraft = existingCheck && (existingCheck as any)?.draft_status === 'draft';
       
-      // Ready if: already submitted/verified, marked not applicable, or has complete data
+      // Ready if: already submitted/verified, marked not applicable, or has saved draft
       return existingCheck?.status === 'verified' || 
              existingCheck?.status === 'pending' || 
              isNotApplicableSet ||
-             (existingCheck && anyFieldFilled);
+             hasValidDraft;
     });
   };
 

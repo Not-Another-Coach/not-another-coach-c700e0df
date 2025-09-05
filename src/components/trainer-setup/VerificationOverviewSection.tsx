@@ -295,27 +295,27 @@ export const VerificationOverviewSection = () => {
 
                 return (
                   <div key={checkType} className="flex items-center justify-between p-3 border border-border rounded-lg">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 flex-1">
                       <typeConfig.icon className="h-5 w-5 text-muted-foreground" />
                       <div className="flex-1">
                         <p className="font-medium">{typeConfig.title}</p>
                         <p className="text-xs text-muted-foreground">{typeConfig.description}</p>
                       </div>
-                      <div className="text-right">
-                        <p className={`text-sm font-medium ${getStatusColor(check?.status || 'not_started', (check as any)?.draft_status)}`}>
-                          {getDisplayStatus(check)}
+                    </div>
+                    <div className="text-right flex-shrink-0 ml-4">
+                      <p className={`text-sm font-medium ${getStatusColor(check?.status || 'not_started', (check as any)?.draft_status)}`}>
+                        {getDisplayStatus(check)}
+                      </p>
+                      {(check as any)?.submitted_at && (
+                        <p className="text-xs text-muted-foreground">
+                          Submitted: {format(new Date((check as any).submitted_at), 'MMM d, yyyy')}
                         </p>
-                        {(check as any)?.submitted_at && (
-                          <p className="text-xs text-muted-foreground">
-                            Submitted: {format(new Date((check as any).submitted_at), 'MMM d, yyyy')}
-                          </p>
-                        )}
-                        {(check as any)?.draft_status === 'draft' && check?.updated_at && (
-                          <p className="text-xs text-muted-foreground">
-                            Saved: {format(new Date(check.updated_at), 'MMM d, yyyy')}
-                          </p>
-                        )}
-                      </div>
+                      )}
+                      {(check as any)?.draft_status === 'draft' && check?.updated_at && (
+                        <p className="text-xs text-muted-foreground">
+                          Saved: {format(new Date(check.updated_at), 'MMM d, yyyy')}
+                        </p>
+                      )}
                     </div>
                   </div>
                 );
