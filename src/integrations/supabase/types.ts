@@ -3766,9 +3766,12 @@ export type Database = {
           ways_of_working_what_i_bring: Json | null
           weekly_programming_only: boolean | null
           works_bank_holidays: boolean | null
+          wow_activities: Json | null
+          wow_activity_assignments: Json | null
           wow_client_expectations: string | null
           wow_how_i_work: string | null
           wow_package_applicability: Json | null
+          wow_setup_completed: boolean | null
           wow_visibility: string | null
           wow_what_i_provide: string | null
           year_certified: number | null
@@ -3891,9 +3894,12 @@ export type Database = {
           ways_of_working_what_i_bring?: Json | null
           weekly_programming_only?: boolean | null
           works_bank_holidays?: boolean | null
+          wow_activities?: Json | null
+          wow_activity_assignments?: Json | null
           wow_client_expectations?: string | null
           wow_how_i_work?: string | null
           wow_package_applicability?: Json | null
+          wow_setup_completed?: boolean | null
           wow_visibility?: string | null
           wow_what_i_provide?: string | null
           year_certified?: number | null
@@ -4016,9 +4022,12 @@ export type Database = {
           ways_of_working_what_i_bring?: Json | null
           weekly_programming_only?: boolean | null
           works_bank_holidays?: boolean | null
+          wow_activities?: Json | null
+          wow_activity_assignments?: Json | null
           wow_client_expectations?: string | null
           wow_how_i_work?: string | null
           wow_package_applicability?: Json | null
+          wow_setup_completed?: boolean | null
           wow_visibility?: string | null
           wow_what_i_provide?: string | null
           year_certified?: number | null
