@@ -14,6 +14,7 @@ import { SectionHeader } from './SectionHeader';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { usePackageWaysOfWorking } from "@/hooks/usePackageWaysOfWorking";
+import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -47,6 +48,7 @@ interface TrainingPackage {
 }
 
 export function RatesPackagesSection({ formData, updateFormData, errors, clearFieldError }: RatesPackagesSectionProps) {
+  const { user } = useAuth();
   // Initialize currency from existing packages or default to GBP
   const getInitialCurrency = (): 'GBP' | 'USD' | 'EUR' => {
     if (formData.package_options && formData.package_options.length > 0) {
@@ -206,48 +208,78 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
         return;
       }
 
-      // Clone the ways of working by saving the source workflow data with the new package details
-      // Note: We need to get the full workflow data including activity IDs from the database
-      const { data: fullSourceWorkflow, error: fetchError } = await supabase
+      // Try to get data from package_ways_of_working table first
+      let { data: fullSourceWorkflow, error: fetchError } = await supabase
         .from('package_ways_of_working')
         .select('*')
         .eq('package_id', sourceWorkflow.id)
         .maybeSingle();
 
-      // Only throw error if it's not a "no rows" error
-      if (fetchError) {
+      if (fetchError && fetchError.code !== 'PGRST116') {
         console.error('Error fetching full workflow data:', fetchError);
         throw fetchError;
       }
 
-      await savePackageWorkflow(targetPackageId, targetPackageName, {
-        onboarding_items: sourceWorkflow.onboarding_items || [],
-        first_week_items: sourceWorkflow.first_week_items || [],
-        ongoing_structure_items: sourceWorkflow.ongoing_structure_items || [],
-        tracking_tools_items: sourceWorkflow.tracking_tools_items || [],
-        client_expectations_items: sourceWorkflow.client_expectations_items || [],
-        what_i_bring_items: sourceWorkflow.what_i_bring_items || [],
-        visibility: sourceWorkflow.visibility,
-      });
+      // If no package-specific data found, try to get from trainer profile
+      if (!fullSourceWorkflow) {
+        const { data: trainerProfile } = await supabase
+          .from('profiles')
+          .select('wow_activities, wow_activity_assignments, wow_visibility')
+          .eq('id', user?.id)
+          .single();
 
-      // Also copy the activity IDs if they exist
-      if (fullSourceWorkflow) {
-        const { error: updateError } = await supabase
-          .from('package_ways_of_working')
-          .update({
-            onboarding_activity_ids: fullSourceWorkflow.onboarding_activity_ids || [],
-            first_week_activity_ids: fullSourceWorkflow.first_week_activity_ids || [],
-            ongoing_structure_activity_ids: fullSourceWorkflow.ongoing_structure_activity_ids || [],
-            tracking_tools_activity_ids: fullSourceWorkflow.tracking_tools_activity_ids || [],
-            client_expectations_activity_ids: fullSourceWorkflow.client_expectations_activity_ids || [],
-            what_i_bring_activity_ids: fullSourceWorkflow.what_i_bring_activity_ids || []
-          })
-          .eq('package_id', targetPackageId);
+        if (trainerProfile?.wow_activities && typeof trainerProfile.wow_activities === 'object') {
+          // Convert profile data to package format
+          const activities = trainerProfile.wow_activities as any;
+          
+          const convertActivitiesToItems = (activityArray: any): { id: string; text: string; }[] => {
+            if (!Array.isArray(activityArray)) return [];
+            return activityArray.map((activity: any) => ({
+              id: activity.id || crypto.randomUUID(),
+              text: activity.name || activity.text || ''
+            }));
+          };
 
-        if (updateError) {
-          console.error('Error copying activity IDs:', updateError);
+          const convertedWorkflow = {
+            onboarding_items: convertActivitiesToItems(activities.wow_how_i_work || []),
+            first_week_items: convertActivitiesToItems(activities.wow_what_i_provide || []),
+            client_expectations_items: convertActivitiesToItems(activities.wow_client_expectations || []),
+            ongoing_structure_items: [] as { id: string; text: string; }[],
+            tracking_tools_items: [] as { id: string; text: string; }[],
+            what_i_bring_items: [] as { id: string; text: string; }[],
+            visibility: (typeof trainerProfile.wow_visibility === 'string' ? trainerProfile.wow_visibility : 'public') as 'public' | 'post_match'
+          };
+
+          await savePackageWorkflow(targetPackageId, targetPackageName, convertedWorkflow);
+
+          toast({
+            title: "Ways of working copied",
+            description: "The ways of working have been copied from your profile to the new package",
+          });
+          return;
         }
       }
+
+      if (!fullSourceWorkflow) {
+        toast({
+          title: "No ways of working to copy",
+          description: "The source package doesn't have any ways of working configured.",
+          variant: "default",
+        });
+        return;
+      }
+
+      await savePackageWorkflow(targetPackageId, targetPackageName, {
+        onboarding_items: (fullSourceWorkflow.onboarding_items as { id: string; text: string; }[]) || [],
+        first_week_items: (fullSourceWorkflow.first_week_items as { id: string; text: string; }[]) || [],
+        ongoing_structure_items: (fullSourceWorkflow.ongoing_structure_items as { id: string; text: string; }[]) || [],
+        tracking_tools_items: (fullSourceWorkflow.tracking_tools_items as { id: string; text: string; }[]) || [],
+        client_expectations_items: (fullSourceWorkflow.client_expectations_items as { id: string; text: string; }[]) || [],
+        what_i_bring_items: (fullSourceWorkflow.what_i_bring_items as { id: string; text: string; }[]) || [],
+        visibility: (fullSourceWorkflow.visibility as 'public' | 'post_match') || 'public',
+      });
+
+      // Remove the problematic activity ID copying code since the main data is already copied
       
       toast({
         title: "Ways of working copied",

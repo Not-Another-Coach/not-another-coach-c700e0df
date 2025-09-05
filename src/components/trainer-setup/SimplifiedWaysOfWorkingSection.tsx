@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, Settings, Info } from "lucide-react";
 import { useTrainerActivities } from "@/hooks/useTrainerActivities";
 import { useProfileStepValidation } from "@/hooks/useProfileStepValidation";
+import { usePackageWaysOfWorking } from "@/hooks/usePackageWaysOfWorking";
 import { SectionHeader } from "./SectionHeader";
 import { EnhancedActivityPickerDialog } from "./EnhancedActivityPickerDialog";
 import { ActivityWithAssignment } from "./ActivityWithAssignment";
@@ -40,6 +41,7 @@ export function SimplifiedWaysOfWorkingSection({
 }: SimplifiedWaysOfWorkingSectionProps) {
   const { getSuggestionsBySection } = useTrainerActivities();
   const { checkWaysOfWorkingPrerequisites } = useProfileStepValidation();
+  const { savePackageWorkflow } = usePackageWaysOfWorking();
   const [activePickerSection, setActivePickerSection] = useState<string | null>(null);
   
   // Check if prerequisites are met for enabling the completion checkbox
@@ -133,6 +135,9 @@ export function SimplifiedWaysOfWorkingSection({
       updateFormData({ wow_activities: newActivitiesData });
       updateSummaryText(sectionKey, newActivities);
       clearFieldError(sectionKey);
+      
+      // Sync to package table after a short delay to allow form update to complete
+      setTimeout(() => syncToPackageTable(), 100);
     }
   };
 
@@ -151,6 +156,9 @@ export function SimplifiedWaysOfWorkingSection({
     
     updateFormData({ wow_activities: newActivitiesData });
     updateSummaryText(sectionKey, newActivities);
+    
+    // Sync to package table after removal
+    setTimeout(() => syncToPackageTable(), 100);
   };
 
   // Update summary text based on selected activities
@@ -172,6 +180,47 @@ export function SimplifiedWaysOfWorkingSection({
     );
     newAssignments.push(assignment);
     updateFormData({ wow_activity_assignments: newAssignments });
+    
+    // Sync to package_ways_of_working table
+    syncToPackageTable();
+  };
+
+  // Sync data to package_ways_of_working table
+  const syncToPackageTable = async () => {
+    const packages = formData.package_options || [];
+    const activitiesData = getActivitiesData();
+    const assignments = getAssignmentsData();
+    
+    // For each package, create/update package ways of working
+    for (const pkg of packages) {
+      if (!pkg.id || !pkg.name) continue;
+      
+      try {
+        // Map activities by section to the package format
+        const packageData = {
+          onboarding_items: activitiesData.wow_how_i_work?.map((activity: SelectedActivity) => ({
+            id: activity.id || crypto.randomUUID(),
+            text: activity.name
+          })) || [],
+          first_week_items: activitiesData.wow_what_i_provide?.map((activity: SelectedActivity) => ({
+            id: activity.id || crypto.randomUUID(),
+            text: activity.name
+          })) || [],
+          client_expectations_items: activitiesData.wow_client_expectations?.map((activity: SelectedActivity) => ({
+            id: activity.id || crypto.randomUUID(),
+            text: activity.name
+          })) || [],
+          ongoing_structure_items: [],
+          tracking_tools_items: [],
+          what_i_bring_items: [],
+          visibility: (formData.wow_visibility || 'public') as 'public' | 'post_match'
+        };
+        
+        await savePackageWorkflow(pkg.id, pkg.name, packageData);
+      } catch (error) {
+        console.error('Error syncing package ways of working:', error);
+      }
+    }
   };
 
   // Get assignment for a specific activity

@@ -188,9 +188,16 @@ export const useProfileStepValidation = () => {
       return 'completed'; // Steps with no required fields are considered completed
     }
 
-    // Step 8 (Ways of Working) - checkbox controlled completion
+    // Step 8 (Ways of Working) - check both completion flag and activities
     if (step === 8) {
-      return formData.wow_setup_completed === true ? 'completed' : 'not_started';
+      const hasActivities = formData.wow_activities && typeof formData.wow_activities === 'object' &&
+        ['wow_how_i_work', 'wow_what_i_provide', 'wow_client_expectations'].some(section => 
+          Array.isArray(formData.wow_activities[section]) && formData.wow_activities[section].length > 0
+        );
+      
+      if (formData.wow_setup_completed === true) return 'completed';
+      if (hasActivities) return 'partial';
+      return 'not_started';
     }
 
     let completedFields = 0;
