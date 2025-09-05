@@ -130,6 +130,7 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
   };
 
   if (loading) {
+    console.log('ImageManagementSection: Loading state');
     return (
       <div className="space-y-6">
       <SectionHeader
@@ -176,8 +177,10 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
                 <span>Grid: {getGridLabel(recommendedGridSize)}</span>
                 <TooltipProvider>
                   <Tooltip>
-                    <TooltipTrigger>
-                      <Info className="h-3 w-3" />
+                    <TooltipTrigger asChild>
+                      <button className="inline-flex items-center justify-center">
+                        <Info className="h-3 w-3 hover:text-foreground transition-colors" />
+                      </button>
                     </TooltipTrigger>
                     <TooltipContent className="max-w-xs">
                       <div className="space-y-1 text-xs">
