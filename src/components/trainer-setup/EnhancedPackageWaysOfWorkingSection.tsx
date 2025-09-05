@@ -77,7 +77,10 @@ export function EnhancedPackageWaysOfWorkingSection({ formData }: PackageWaysOfW
     
     // Check if item already exists
     if (currentItems.some(item => item.text.toLowerCase() === newItem.text.toLowerCase())) {
-      toast.error("This item already exists in the list");
+      toast.error("This item already exists in the list", {
+        position: "top-center",
+        duration: 2000,
+      });
       return;
     }
 
@@ -90,10 +93,16 @@ export function EnhancedPackageWaysOfWorkingSection({ formData }: PackageWaysOfW
       });
       
       setNewItems(prev => ({ ...prev, [section]: '' }));
-      toast.success("Item added successfully");
+      toast.success("Item added", {
+        position: "top-center",
+        duration: 1500,
+      });
     } catch (error) {
       console.error('Error adding item:', error);
-      toast.error("Failed to add item");
+      toast.error("Failed to add item", {
+        position: "top-center",
+        duration: 2000,
+      });
     }
   };
 
@@ -112,10 +121,16 @@ export function EnhancedPackageWaysOfWorkingSection({ formData }: PackageWaysOfW
         [`${section}_items`]: updatedItems
       });
       
-      toast.success("Item removed successfully");
+      toast.success("Item removed", {
+        position: "top-center",
+        duration: 1500,
+      });
     } catch (error) {
       console.error('Error removing item:', error);
-      toast.error("Failed to remove item");
+      toast.error("Failed to remove item", {
+        position: "top-center",
+        duration: 2000,
+      });
     }
   };
 
@@ -130,7 +145,10 @@ export function EnhancedPackageWaysOfWorkingSection({ formData }: PackageWaysOfW
     
     // Check if suggestion already exists
     if (currentItems.some(item => item.text.toLowerCase() === suggestion.trim().toLowerCase())) {
-      toast.error("This item already exists in the list");
+      toast.error("This item already exists in the list", {
+        position: "top-center",
+        duration: 2000,
+      });
       return;
     }
 
@@ -143,10 +161,16 @@ export function EnhancedPackageWaysOfWorkingSection({ formData }: PackageWaysOfW
         [`${section}_items`]: updatedItems
       });
       
-      toast.success("Suggestion added successfully");
+      toast.success("Added suggestion", {
+        position: "top-center",
+        duration: 1500,
+      });
     } catch (error) {
       console.error('Error adding suggestion:', error);
-      toast.error("Failed to add suggestion");
+      toast.error("Failed to add suggestion", {
+        position: "top-center",
+        duration: 2000,
+      });
     }
   };
 
@@ -166,7 +190,10 @@ export function EnhancedPackageWaysOfWorkingSection({ formData }: PackageWaysOfW
     
     // Check if item already exists
     if (currentItems.some(item => item.text.toLowerCase() === activityName.trim().toLowerCase())) {
-      toast.error("This item already exists in the list");
+      toast.error("This item already exists in the list", {
+        position: "top-center",
+        duration: 2000,
+      });
       return;
     }
 
@@ -179,10 +206,16 @@ export function EnhancedPackageWaysOfWorkingSection({ formData }: PackageWaysOfW
       });
       
       setShowActivityPicker(null);
-      toast.success("Activity added successfully");
+      toast.success("Activity added", {
+        position: "top-center",
+        duration: 1500,
+      });
     } catch (error) {
       console.error('Error adding activity:', error);
-      toast.error("Failed to add activity");
+      toast.error("Failed to add activity", {
+        position: "top-center",
+        duration: 2000,
+      });
     }
   };
 
@@ -195,7 +228,10 @@ export function EnhancedPackageWaysOfWorkingSection({ formData }: PackageWaysOfW
 
     const items = (workflow[`${section}_items` as keyof typeof workflow] as WaysOfWorkingItem[]) || [];
     if (items.length === 0) {
-      toast.error("No items to sync in this section");
+      toast.error("No items to sync in this section", {
+        position: "top-center",
+        duration: 2000,
+      });
       return;
     }
 
@@ -218,10 +254,16 @@ export function EnhancedPackageWaysOfWorkingSection({ formData }: PackageWaysOfW
         visibility
       });
 
-      toast.success(`Visibility updated to ${visibility === 'public' ? 'public' : 'post-match only'}`);
+      toast.success(`Visibility updated to ${visibility === 'public' ? 'public' : 'post-match only'}`, {
+        position: "top-center",
+        duration: 1500,
+      });
     } catch (error) {
       console.error('Error updating visibility:', error);
-      toast.error("Failed to update visibility");
+      toast.error("Failed to update visibility", {
+        position: "top-center",
+        duration: 2000,
+      });
     }
   };
 
@@ -237,7 +279,10 @@ export function EnhancedPackageWaysOfWorkingSection({ formData }: PackageWaysOfW
     
     await savePackageWorkflow(targetPackageId, targetPackageName, clonedWorkflow);
     
-    toast.success(`Cloned settings from ${sourceWorkflow.package_name}`);
+    toast.success(`Cloned settings from ${sourceWorkflow.package_name}`, {
+      position: "top-center",
+      duration: 2000,
+    });
   };
 
   const renderSection = (section: string) => {
@@ -294,22 +339,24 @@ export function EnhancedPackageWaysOfWorkingSection({ formData }: PackageWaysOfW
         <div className="grid gap-2">
           {currentItems.map((item, index) => (
             <div key={item.id} className="flex items-center gap-2 p-3 border rounded-lg bg-card">
-              <div className="flex items-center gap-2 flex-1">
+              <div className="flex items-center gap-2 flex-1 min-w-0">
                 {(item as any).activityId && (
-                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <CheckCircle className="h-4 w-4 text-success flex-shrink-0" />
                 )}
-                <span className="flex-1">{item.text}</span>
-                {(item as any).activityId && (
-                  <Badge variant="secondary" className="text-xs">
-                    Activity
-                  </Badge>
-                )}
+                <span className="flex-1 min-w-0 truncate">{item.text}</span>
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  {(item as any).activityId && (
+                    <Badge variant="secondary" className="text-xs px-2 py-0.5">
+                      Activity
+                    </Badge>
+                  )}
+                </div>
               </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => removeItem(section, item.id)}
-                className="text-destructive hover:text-destructive"
+                className="text-destructive hover:text-destructive flex-shrink-0"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -472,9 +519,24 @@ export function EnhancedPackageWaysOfWorkingSection({ formData }: PackageWaysOfW
       {activePackageId && (
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="getting-started">Getting Started</TabsTrigger>
-            <TabsTrigger value="ongoing-support">Ongoing Support</TabsTrigger>
-            <TabsTrigger value="expectations">Expectations</TabsTrigger>
+            <TabsTrigger 
+              value="getting-started"
+              className="data-[state=active]:bg-accent data-[state=active]:text-accent-foreground data-[state=active]:shadow-sm"
+            >
+              Getting Started
+            </TabsTrigger>
+            <TabsTrigger 
+              value="ongoing-support"
+              className="data-[state=active]:bg-accent data-[state=active]:text-accent-foreground data-[state=active]:shadow-sm"
+            >
+              Ongoing Support
+            </TabsTrigger>
+            <TabsTrigger 
+              value="expectations"
+              className="data-[state=active]:bg-accent data-[state=active]:text-accent-foreground data-[state=active]:shadow-sm"
+            >
+              Expectations
+            </TabsTrigger>
           </TabsList>
           
           <TabsContent value="getting-started" className="space-y-4">

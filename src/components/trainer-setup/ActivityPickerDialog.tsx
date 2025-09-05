@@ -44,7 +44,10 @@ export function ActivityPickerDialog({
       await createActivity(customActivityName.trim(), category);
       onSelectActivity(customActivityName.trim());
       setCustomActivityName("");
-      onOpenChange(false);
+      // Delayed close to reduce UI jumping
+      setTimeout(() => {
+        onOpenChange(false);
+      }, 100);
     } catch (error) {
       console.error('Failed to create custom activity:', error);
     }
@@ -52,7 +55,10 @@ export function ActivityPickerDialog({
 
   const handleSelectActivity = (activity: any) => {
     onSelectActivity(activity.activity_name, activity.id);
-    onOpenChange(false);
+    // Don't close the dialog immediately to reduce UI jumping
+    setTimeout(() => {
+      onOpenChange(false);
+    }, 100);
   };
 
   return (
