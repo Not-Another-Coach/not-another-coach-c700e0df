@@ -290,7 +290,9 @@ export const useEnhancedTrainerVerification = () => {
 
   // Get verification check by type
   const getCheckByType = useCallback((type: VerificationCheck['check_type']) => {
-    return checks.find(check => check.check_type === type);
+    const check = checks.find(check => check.check_type === type);
+    console.log(`Getting check for type ${type}:`, check);
+    return check;
   }, [checks]);
 
   // Get overall verification badge status
