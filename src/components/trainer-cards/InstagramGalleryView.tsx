@@ -23,6 +23,15 @@ const getGridClasses = (gridSize: number): string => {
   }
 };
 
+// Auto-selection logic matching useTrainerImages
+const getRecommendedGridSizeForCount = (count: number) => {
+  if (count <= 3) return 1;
+  if (count <= 5) return 4;
+  if (count <= 8) return 6;
+  if (count <= 11) return 9;
+  return 12;
+};
+
 interface InstagramGalleryViewProps {
   trainer: Trainer;
   children?: React.ReactNode; // For CTA buttons and interactive elements
@@ -39,18 +48,6 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
 
       try {
         setLoading(true);
-        
-        // Fetch trainer image preferences to get grid size
-        const { data: preferences, error: preferencesError } = await supabase
-          .from('trainer_image_preferences')
-          .select('max_images_per_view')
-          .eq('trainer_id', trainer.id)
-          .maybeSingle();
-
-        if (preferencesError) console.error('Error fetching preferences:', preferencesError);
-        
-        const maxImages = preferences?.max_images_per_view || 6;
-        setGridSize(maxImages);
         
         // Fetch uploaded images
         const { data: uploadedImages, error: uploadedError } = await supabase
@@ -72,6 +69,11 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
 
         if (instagramError) throw instagramError;
 
+        // Count selected images and auto-calculate grid size
+        const totalSelectedImages = (uploadedImages?.length || 0) + (instagramImages?.length || 0);
+        const autoGridSize = getRecommendedGridSizeForCount(totalSelectedImages);
+        setGridSize(autoGridSize);
+        
         // Combine and format images
         const allImages = [
           ...(uploadedImages || []).map(img => ({
@@ -90,10 +92,12 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
           }))
         ].sort((a, b) => a.displayOrder - b.displayOrder);
 
-        setDisplayImages(allImages.slice(0, maxImages));
+        // Use auto-calculated grid size instead of stored preference
+        setDisplayImages(allImages.slice(0, autoGridSize));
       } catch (error) {
         console.error('Error fetching trainer images:', error);
-        // Fallback to trainer profile image
+        // Fallback to trainer profile image with hero layout
+        setGridSize(1);
         setDisplayImages([{ 
           id: 'fallback', 
           type: 'profile', 
