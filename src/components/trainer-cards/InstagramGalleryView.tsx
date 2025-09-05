@@ -6,20 +6,32 @@ import { getTrainerDisplayPrice } from "@/lib/priceUtils";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 
-const getGridClasses = (gridSize: number): string => {
-  switch (gridSize) {
+const getGridClasses = (actualImageCount: number): string => {
+  // Use actual image count to determine the best grid layout
+  switch (actualImageCount) {
     case 1:
       return "grid-cols-1";
+    case 2:
+      return "grid-cols-2";
+    case 3:
+      return "grid-cols-3";
     case 4:
       return "grid-cols-2 grid-rows-2";
+    case 5:
+      return "grid-cols-3 grid-rows-2"; // 3x2 with 5 images
     case 6:
       return "grid-cols-3 grid-rows-2";
+    case 7:
+    case 8:
+      return "grid-cols-4 grid-rows-2"; // 4x2 for 7-8 images
     case 9:
       return "grid-cols-3 grid-rows-3";
+    case 10:
+    case 11:
     case 12:
       return "grid-cols-4 grid-rows-3";
     default:
-      return "grid-cols-3 grid-rows-2";
+      return actualImageCount <= 3 ? "grid-cols-3" : "grid-cols-4 grid-rows-3";
   }
 };
 
@@ -92,8 +104,20 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
           }))
         ].sort((a, b) => a.displayOrder - b.displayOrder);
 
-        // Use auto-calculated grid size instead of stored preference
-        setDisplayImages(allImages.slice(0, autoGridSize));
+        // Apply grid size slicing and log for debugging
+        const slicedImages = allImages.slice(0, autoGridSize);
+        console.log(`InstagramGalleryView Debug:`, {
+          totalSelectedImages,
+          autoGridSize,
+          allImagesLength: allImages.length,
+          slicedImagesLength: slicedImages.length,
+          allImages: allImages.map(img => ({
+            id: img.id,
+            type: img.type,
+            url: img.url.substring(0, 50) + '...'
+          }))
+        });
+        setDisplayImages(slicedImages);
       } catch (error) {
         console.error('Error fetching trainer images:', error);
         // Fallback to trainer profile image with hero layout
@@ -173,7 +197,7 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
         {/* Gallery Grid */}
         <div className="relative">
           {displayImages.length > 0 ? (
-            <div className={`grid gap-1 aspect-square ${getGridClasses(gridSize)}`}>
+            <div className={`grid gap-1 aspect-square ${getGridClasses(displayImages.length)}`}>
               {displayImages.map((image, index) => (
                 <div key={image.id} className="relative overflow-hidden bg-muted">
                   <img
@@ -197,16 +221,6 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
                 </div>
               ))}
               
-              {/* Fill remaining slots with trainer image if needed */}
-              {displayImages.length < gridSize && Array.from({ length: gridSize - displayImages.length }).map((_, index) => (
-                <div key={`filler-${index}`} className="relative overflow-hidden bg-muted/50">
-                  <img
-                    src={trainer.image}
-                    alt={trainer.name}
-                    className="w-full h-full object-cover opacity-60"
-                  />
-                </div>
-              ))}
             </div>
           ) : loading ? (
             <div className="aspect-square relative flex items-center justify-center bg-muted">
