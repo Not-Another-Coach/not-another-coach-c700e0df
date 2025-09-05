@@ -179,7 +179,9 @@ export const useEnhancedTrainerVerification = () => {
     checkType: string,
     checkData: any
   ) => {
-    if (!user) return;
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
 
     try {
       // Prepare the data for submission
@@ -219,11 +221,21 @@ export const useEnhancedTrainerVerification = () => {
         .upsert(submitData, {
           onConflict: 'trainer_id,check_type'
         })
-        .select();
+        .select()
+        .single();
 
       if (error) {
-        console.error('Database error:', error);
-        throw error;
+        console.error('Database error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        throw new Error(`Database error: ${error.message}`);
+      }
+
+      if (!data) {
+        throw new Error('No data returned from database after upsert');
       }
 
       console.log('Verification check saved successfully:', data);
@@ -236,6 +248,12 @@ export const useEnhancedTrainerVerification = () => {
       toast.success('Verification check submitted successfully!');
     } catch (error) {
       console.error('Error submitting verification:', error);
+      // Show the actual error to help debug
+      if (error instanceof Error) {
+        toast.error(`Submission failed: ${error.message}`);
+      } else {
+        toast.error('Submission failed: Unknown error');
+      }
       throw error;
     }
   }, [user, fetchVerificationData, uploadDocument]);
