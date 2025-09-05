@@ -68,6 +68,12 @@ export const EnhancedVerificationSection = () => {
   const [formData, setFormData] = useState<Record<string, VerificationCheckFormData>>({});
   const [uploading, setUploading] = useState<string | null>(null);
 
+  // Debug logging
+  React.useEffect(() => {
+    console.log('EnhancedVerificationSection checks:', checks);
+    console.log('Check types found:', checks.map(c => ({ type: c.check_type, status: c.status })));
+  }, [checks]);
+
   const handleInputChange = (checkType: string, field: string, value: any) => {
     setFormData(prev => ({
       ...prev,
