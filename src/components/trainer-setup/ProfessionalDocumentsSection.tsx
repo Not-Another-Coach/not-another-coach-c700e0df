@@ -108,17 +108,16 @@ export const ProfessionalDocumentsSection = () => {
 
       {Object.entries(CheckTypeConfig).map(([checkType, config]) => {
         const check = checks.find(c => c.check_type === checkType);
-        const status = check?.status;
-        const draftStatus = check?.draft_status || 'draft';
+        let finalDisplayStatus = check?.status as any;
+        const draftStatus = (check as any)?.draft_status || 'draft';
         const isNotApplicable = notApplicable[checkType];
         const hasFilledFields = isAnyFieldFilled(checkType);
         const canSave = hasFilledFields || isNotApplicable;
-        const isSubmitted = draftStatus === 'submitted' && status !== 'rejected';
+        const isSubmitted = draftStatus === 'submitted' && finalDisplayStatus !== 'rejected';
 
-        // Determine display status
-        let displayStatus = status;
+        // Handle draft state
         if (draftStatus === 'draft' && hasFilledFields) {
-          displayStatus = 'draft';
+          finalDisplayStatus = 'draft' as any;
         }
 
         return (
@@ -132,20 +131,20 @@ export const ProfessionalDocumentsSection = () => {
                 </div>
               </div>
               
-              {displayStatus && (
+              {finalDisplayStatus && (
                 <Badge 
-                  variant={displayStatus === 'draft' ? 'secondary' : (StatusConfig[displayStatus]?.variant || 'secondary')} 
+                  variant={finalDisplayStatus === 'draft' ? 'secondary' : (StatusConfig[finalDisplayStatus as keyof typeof StatusConfig]?.variant || 'secondary')} 
                   className="flex-shrink-0"
                 >
-                  {displayStatus === 'draft' ? (
+                  {finalDisplayStatus === 'draft' ? (
                     <>
                       <Edit className="h-3 w-3 mr-1" />
                       Draft
                     </>
-                  ) : StatusConfig[displayStatus] ? (
+                  ) : StatusConfig[finalDisplayStatus as keyof typeof StatusConfig] ? (
                     <>
-                      <StatusConfig[displayStatus].icon className="h-3 w-3 mr-1" />
-                      {StatusConfig[displayStatus].label}
+                      {React.createElement(StatusConfig[finalDisplayStatus as keyof typeof StatusConfig].icon, { className: "h-3 w-3 mr-1" })}
+                      {StatusConfig[finalDisplayStatus as keyof typeof StatusConfig].label}
                     </>
                   ) : null}
                 </Badge>
@@ -202,7 +201,7 @@ export const ProfessionalDocumentsSection = () => {
             )}
 
             {/* Form for editing (only if not submitted or rejected) */}
-            {!isNotApplicable && (!isSubmitted || status === 'rejected') && (
+            {!isNotApplicable && (!isSubmitted || finalDisplayStatus === 'rejected') && (
               <div className="space-y-4">
                 {config.requiredFields.map((field) => {
                   const fieldKey = field as keyof DocumentFormData;

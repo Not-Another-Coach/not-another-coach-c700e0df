@@ -146,26 +146,26 @@ export const useEnhancedTrainerVerification = () => {
 
   // Submit verification check
   const submitVerificationCheck = useCallback(async (
-    checkType: VerificationCheckType,
+    checkType: string,
     checkData: any
   ) => {
     if (!user) return;
 
     try {
-      // Upload file if provided
-      let fileUrl: string | undefined;
-      if (checkData.file) {
-        fileUrl = await uploadDocument(checkType, checkData.file);
-        if (!fileUrl) {
-          throw new Error('Failed to upload document');
+        // Upload file if provided
+        let fileUrl: string | undefined;
+        if (checkData.file) {
+          fileUrl = await uploadDocument(checkType as any, checkData.file);
+          if (!fileUrl) {
+            throw new Error('Failed to upload document');
+          }
         }
-      }
 
-      const { data, error } = await supabase
-        .from('trainer_verification_checks')
-        .upsert({
-          trainer_id: user.id,
-          check_type: checkType,
+        const { data, error } = await supabase
+          .from('trainer_verification_checks')
+          .upsert({
+            trainer_id: user.id,
+            check_type: checkType as any,
           provider: checkData.provider,
           member_id: checkData.member_id,
           certificate_id: checkData.certificate_id,
@@ -189,7 +189,7 @@ export const useEnhancedTrainerVerification = () => {
         throw error;
       }
 
-      console.log('Verification check saved:', result);
+      console.log('Verification check saved:', data);
 
       // Refresh data
       await fetchVerificationData();

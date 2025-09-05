@@ -59,7 +59,7 @@ export const VerificationOverviewSection = () => {
   const handleDisplayPreferenceToggle = async () => {
     setIsUpdatingPreference(true);
     try {
-      const newPreference = overview?.display_preference === 'visible' ? 'hidden' : 'visible';
+      const newPreference = overview?.display_preference === 'verified_allowed' ? 'hidden' : 'verified_allowed';
       await updateDisplayPreference(newPreference);
       
       toast({
@@ -95,7 +95,7 @@ export const VerificationOverviewSection = () => {
       
       for (const checkType of checkTypes) {
         const check = checks.find(c => c.check_type === checkType);
-        if (check && check.draft_status === 'draft') {
+        if (check && (check as any).draft_status === 'draft') {
           await submitVerificationCheck(checkType as any, {});
         }
       }
@@ -216,7 +216,7 @@ export const VerificationOverviewSection = () => {
               </p>
             </div>
             <Button
-              variant={overview?.display_preference === 'visible' ? 'default' : 'outline'}
+              variant={overview?.display_preference === 'verified_allowed' ? 'default' : 'outline'}
               size="sm"
               onClick={handleDisplayPreferenceToggle}
               disabled={isUpdatingPreference || loading}
@@ -224,7 +224,7 @@ export const VerificationOverviewSection = () => {
             >
               {isUpdatingPreference ? (
                 <RefreshCw className="h-4 w-4 animate-spin" />
-              ) : overview?.display_preference === 'visible' ? (
+              ) : overview?.display_preference === 'verified_allowed' ? (
                 <>
                   <Eye className="h-4 w-4 mr-2" />
                   Visible
@@ -302,15 +302,15 @@ export const VerificationOverviewSection = () => {
                         <p className="text-xs text-muted-foreground">{typeConfig.description}</p>
                       </div>
                       <div className="text-right">
-                        <p className={`text-sm font-medium ${getStatusColor(check?.status || 'not_started', check?.draft_status)}`}>
+                        <p className={`text-sm font-medium ${getStatusColor(check?.status || 'not_started', (check as any)?.draft_status)}`}>
                           {getDisplayStatus(check)}
                         </p>
-                        {check?.submitted_at && (
+                        {(check as any)?.submitted_at && (
                           <p className="text-xs text-muted-foreground">
-                            Submitted: {format(new Date(check.submitted_at), 'MMM d, yyyy')}
+                            Submitted: {format(new Date((check as any).submitted_at), 'MMM d, yyyy')}
                           </p>
                         )}
-                        {check?.draft_status === 'draft' && check?.updated_at && (
+                        {(check as any)?.draft_status === 'draft' && check?.updated_at && (
                           <p className="text-xs text-muted-foreground">
                             Saved: {format(new Date(check.updated_at), 'MMM d, yyyy')}
                           </p>
