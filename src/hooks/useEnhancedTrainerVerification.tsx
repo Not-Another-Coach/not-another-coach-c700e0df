@@ -144,61 +144,6 @@ export const useEnhancedTrainerVerification = () => {
     }
   }, [user]);
 
-  // Submit verification check
-  const submitVerificationCheck = useCallback(async (
-    checkType: string,
-    checkData: any
-  ) => {
-    if (!user) return;
-
-    try {
-        // Upload file if provided
-        let fileUrl: string | undefined;
-        if (checkData.file) {
-          fileUrl = await uploadDocument(checkType as any, checkData.file);
-          if (!fileUrl) {
-            throw new Error('Failed to upload document');
-          }
-        }
-
-        const { data, error } = await supabase
-          .from('trainer_verification_checks')
-          .upsert({
-            trainer_id: user.id,
-            check_type: checkType as any,
-          provider: checkData.provider,
-          member_id: checkData.member_id,
-          certificate_id: checkData.certificate_id,
-          policy_number: checkData.policy_number,
-          coverage_amount: checkData.coverage_amount,
-          issue_date: checkData.issue_date,
-          expiry_date: checkData.expiry_date,
-          evidence_file_url: fileUrl,
-          verification_data: checkData,
-          status: 'pending',
-          draft_status: 'submitted',
-          submitted_at: new Date().toISOString()
-        }, {
-          onConflict: 'trainer_id,check_type'
-        });
-
-      if (error) throw error;
-
-      if (error) {
-        console.error('Database error:', error);
-        throw error;
-      }
-
-      console.log('Verification check saved:', data);
-
-      // Refresh data
-      await fetchVerificationData();
-    } catch (error) {
-      console.error('Error submitting verification:', error);
-      throw error;
-    }
-  }, [user, fetchVerificationData]);
-
   // Upload document to storage
   const uploadDocument = useCallback(async (
     checkType: VerificationCheck['check_type'],
@@ -224,6 +169,70 @@ export const useEnhancedTrainerVerification = () => {
       return null;
     }
   }, [user]);
+
+  // Submit verification check
+  const submitVerificationCheck = useCallback(async (
+    checkType: string,
+    checkData: any
+  ) => {
+    if (!user) return;
+
+    try {
+      // Prepare the data for submission
+      const submitData: any = {
+        trainer_id: user.id,
+        check_type: checkType as any,
+        status: 'pending'
+      };
+
+      // Add optional fields only if they have values
+      if (checkData.provider) submitData.provider = checkData.provider;
+      if (checkData.member_id) submitData.member_id = checkData.member_id;
+      if (checkData.certificate_id) submitData.certificate_id = checkData.certificate_id;
+      if (checkData.policy_number) submitData.policy_number = checkData.policy_number;
+      if (checkData.coverage_amount) submitData.coverage_amount = checkData.coverage_amount;
+      if (checkData.issue_date) submitData.issue_date = checkData.issue_date;
+      if (checkData.expiry_date) submitData.expiry_date = checkData.expiry_date;
+      
+      // Upload file if provided
+      if (checkData.file) {
+        const fileUrl = await uploadDocument(checkType as any, checkData.file);
+        if (!fileUrl) {
+          throw new Error('Failed to upload document');
+        }
+        submitData.evidence_file_url = fileUrl;
+        submitData.evidence_metadata = {
+          filename: checkData.file.name,
+          size: checkData.file.size,
+          type: checkData.file.type,
+        };
+      }
+
+      console.log('Submitting verification check with data:', submitData);
+
+      const { data, error } = await supabase
+        .from('trainer_verification_checks')
+        .upsert(submitData, {
+          onConflict: 'trainer_id,check_type'
+        })
+        .select();
+
+      if (error) {
+        console.error('Database error:', error);
+        throw error;
+      }
+
+      console.log('Verification check saved successfully:', data);
+
+      // Refresh data to update UI
+      await fetchVerificationData();
+      
+      toast.success('Verification check submitted successfully!');
+    } catch (error) {
+      console.error('Error submitting verification:', error);
+      throw error;
+    }
+  }, [user, fetchVerificationData, uploadDocument]);
 
   // Admin function to update verification check status
   const adminUpdateCheck = useCallback(async (

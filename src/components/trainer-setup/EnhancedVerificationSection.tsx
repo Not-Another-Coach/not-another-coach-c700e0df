@@ -146,7 +146,7 @@ export const EnhancedVerificationSection = () => {
         [checkType]: {},
       }));
       
-      toast.success(`${CheckTypeConfig[checkType].title} submitted successfully`);
+      // Success toast is now handled in the hook
     } catch (error) {
       console.error('Error submitting verification check:', error);
       toast.error(`Failed to submit ${CheckTypeConfig[checkType].title}`);
@@ -393,12 +393,12 @@ export const EnhancedVerificationSection = () => {
                     {uploading === checkType ? (
                       <>
                         <Upload className="h-4 w-4 mr-2 animate-spin" />
-                        Uploading...
+                        Submitting...
                       </>
                     ) : (
                       <>
                         <Upload className="h-4 w-4 mr-2" />
-                        Submit {config.title}
+                        Submit for Review
                       </>
                     )}
                   </Button>
