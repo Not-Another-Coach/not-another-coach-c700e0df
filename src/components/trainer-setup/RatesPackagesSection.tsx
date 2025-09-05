@@ -102,7 +102,7 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
   const { getPackageWorkflow, savePackageWorkflow } = usePackageWaysOfWorking();
   const { toast } = useToast();
 
-  const addPackage = () => {
+  const addPackage = async () => {
     if (newPackage.name && newPackage.price && newPackage.description) {
       const trainingPackage: TrainingPackage = {
         id: Date.now().toString(),
@@ -128,6 +128,14 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
       const updatedPackages = [...packages, trainingPackage];
       setPackages(updatedPackages);
       updateFormData({ package_options: updatedPackages });
+      
+      // Immediately save to database to ensure sync with Ways of Working
+      if (user?.id) {
+        await supabase
+          .from('trainer_profiles')
+          .update({ package_options: updatedPackages as any })
+          .eq('id', user.id);
+      }
       
       setNewPackage({
         name: "",
@@ -295,10 +303,18 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
     }
   };
 
-  const removePackage = (id: string) => {
+  const removePackage = async (id: string) => {
     const updatedPackages = packages.filter(pkg => pkg.id !== id);
     setPackages(updatedPackages);
     updateFormData({ package_options: updatedPackages });
+    
+    // Immediately save to database to ensure sync with Ways of Working
+    if (user?.id) {
+      await supabase
+        .from('trainer_profiles')
+        .update({ package_options: updatedPackages as any })
+        .eq('id', user.id);
+    }
   };
 
   const startEditPackage = (pkg: TrainingPackage) => {
@@ -322,7 +338,7 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
     });
   };
 
-  const saveEditedPackage = () => {
+  const saveEditedPackage = async () => {
     if (editingPackage && editPackageData.name && editPackageData.description && editPackageData.price) {
       const updatedPackage: TrainingPackage = {
         ...editingPackage,
@@ -375,6 +391,14 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
       
       setPackages(updatedPackages);
       updateFormData({ package_options: updatedPackages });
+      
+      // Immediately save to database to ensure sync with Ways of Working
+      if (user?.id) {
+        await supabase
+          .from('trainer_profiles')
+          .update({ package_options: updatedPackages as any })
+          .eq('id', user.id);
+      }
       
       // Close the modal and reset the editing state
       setEditingPackage(null);

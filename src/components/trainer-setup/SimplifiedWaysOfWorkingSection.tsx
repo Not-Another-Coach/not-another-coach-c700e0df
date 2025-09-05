@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { SectionHeader } from "./SectionHeader";
 import { EnhancedActivityPickerDialog } from "./EnhancedActivityPickerDialog";
 import { ActivityWithAssignment } from "./ActivityWithAssignment";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { supabase } from "@/integrations/supabase/client";
 
 interface SelectedActivity {
   id?: string;
@@ -43,6 +44,34 @@ export function SimplifiedWaysOfWorkingSection({
   const { checkWaysOfWorkingPrerequisites } = useProfileStepValidation();
   const { savePackageWorkflow } = usePackageWaysOfWorking();
   const [activePickerSection, setActivePickerSection] = useState<string | null>(null);
+  
+  // Get packages from formData with fallback to fetch from database
+  const [availablePackages, setAvailablePackages] = useState(formData.package_options || []);
+  
+  useEffect(() => {
+    const fetchPackagesIfNeeded = async () => {
+      if (!formData.package_options || formData.package_options.length === 0) {
+        try {
+          const { data: trainerData } = await supabase
+            .from('trainer_profiles')
+            .select('package_options')
+            .eq('id', formData.id || '')
+            .single();
+          
+          if (trainerData?.package_options) {
+            setAvailablePackages(trainerData.package_options);
+            updateFormData({ package_options: trainerData.package_options });
+          }
+        } catch (error) {
+          console.error('Error fetching packages:', error);
+        }
+      } else {
+        setAvailablePackages(formData.package_options);
+      }
+    };
+    
+    fetchPackagesIfNeeded();
+  }, [formData.package_options, formData.id]);
   
   // Check if prerequisites are met for enabling the completion checkbox
   const prerequisitesMet = useMemo(() => {
@@ -385,6 +414,12 @@ export function SimplifiedWaysOfWorkingSection({
               <SelectItem value="post_match">Post-match only</SelectItem>
             </SelectContent>
           </Select>
+          
+          {availablePackages.length === 0 && (
+            <p className="text-sm text-muted-foreground mt-4 p-3 bg-secondary/50 rounded-md">
+              No packages found. Please create packages in the Rates & Packages section first to enable package-specific Ways of Working assignment.
+            </p>
+          )}
         </CardContent>
       </Card>
 
