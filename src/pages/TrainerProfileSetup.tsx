@@ -431,19 +431,7 @@ const TrainerProfileSetup = () => {
         return formData.terms_agreed ? 'completed' : 'not_started';
         
       case 13: // Professional Documents
-        // Check if all professional documents are verified
-        const professionalDocs = [
-          getCheckByType('cimspa_membership'),
-          getCheckByType('insurance_proof'),
-          getCheckByType('first_aid_certification')
-        ];
-        
-        const verifiedDocs = professionalDocs.filter(check => check?.status === 'verified');
-        const pendingDocs = professionalDocs.filter(check => check?.status === 'pending');
-        
-        if (verifiedDocs.length === 3) return 'completed';
-        if (pendingDocs.length > 0 || verifiedDocs.length > 0) return 'partial';
-        return 'not_started';
+        return getValidationStepCompletion(formData, 6);
         
       case 14: // Verification Overview
         if (profile?.verification_status === 'verified') return 'completed';

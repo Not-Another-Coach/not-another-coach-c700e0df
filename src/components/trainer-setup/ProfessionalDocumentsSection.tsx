@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, CheckCircle2, Clock, Upload, FileText, Shield, Award } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { AlertCircle, CheckCircle2, Clock, Upload, FileText, Shield, Award, X } from 'lucide-react';
 import { useEnhancedTrainerVerification } from '@/hooks/useEnhancedTrainerVerification';
 import { SectionHeader } from './SectionHeader';
 import { toast } from 'sonner';
@@ -18,6 +19,7 @@ interface VerificationCheckFormData {
   issue_date?: string;
   expiry_date?: string;
   file?: File;
+  not_applicable?: boolean;
 }
 
 const CheckTypeConfig = {
@@ -61,6 +63,7 @@ export const ProfessionalDocumentsSection = () => {
 
   const [formData, setFormData] = useState<Record<string, VerificationCheckFormData>>({});
   const [uploading, setUploading] = useState<string | null>(null);
+  const [notApplicable, setNotApplicable] = useState<Record<string, boolean>>({});
 
   const handleInputChange = (checkType: string, field: string, value: any) => {
     setFormData(prev => ({
@@ -82,9 +85,84 @@ export const ProfessionalDocumentsSection = () => {
     }));
   };
 
+  const handleNotApplicableChange = (checkType: string, isNotApplicable: boolean) => {
+    setNotApplicable(prev => ({
+      ...prev,
+      [checkType]: isNotApplicable,
+    }));
+    
+    // Clear form data when marking as not applicable
+    if (isNotApplicable) {
+      setFormData(prev => ({
+        ...prev,
+        [checkType]: { not_applicable: true },
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [checkType]: { not_applicable: false },
+      }));
+    }
+  };
+
+  const isAnyFieldFilled = (checkType: string): boolean => {
+    const data = formData[checkType];
+    if (!data) return false;
+    
+    const fieldsToCheck = ['provider', 'member_id', 'certificate_id', 'policy_number', 'coverage_amount', 'issue_date', 'expiry_date', 'file'];
+    return fieldsToCheck.some(field => {
+      const value = data[field as keyof VerificationCheckFormData];
+      return value !== undefined && value !== '' && value !== null;
+    });
+  };
+
+  const validateRequiredFields = (checkType: keyof typeof CheckTypeConfig): string | null => {
+    const data = formData[checkType];
+    if (!data || notApplicable[checkType]) return null;
+
+    // If any field is filled, all required fields become mandatory
+    if (!isAnyFieldFilled(checkType)) return null;
+
+    const config = CheckTypeConfig[checkType];
+    const missingFields: string[] = [];
+
+    config.fields.forEach(field => {
+      const value = data[field as keyof VerificationCheckFormData];
+      if (!value || value === '') {
+        const fieldLabels: Record<string, string> = {
+          provider: 'Provider',
+          member_id: 'Member ID',
+          certificate_id: 'Certificate ID',
+          policy_number: 'Policy Number',
+          coverage_amount: 'Coverage Amount',
+          issue_date: 'Issue Date',
+          expiry_date: 'Expiry Date',
+          file: 'Document File',
+        };
+        missingFields.push(fieldLabels[field] || field);
+      }
+    });
+
+    return missingFields.length > 0 ? `Missing required fields: ${missingFields.join(', ')}` : null;
+  };
+
   const handleSubmitCheck = async (checkType: keyof typeof CheckTypeConfig) => {
     const data = formData[checkType];
+    
+    // Handle not applicable submissions
+    if (notApplicable[checkType]) {
+      toast.success(`${CheckTypeConfig[checkType].title} marked as not applicable`);
+      return;
+    }
+
     if (!data) return;
+
+    // Validate required fields
+    const validationError = validateRequiredFields(checkType);
+    if (validationError) {
+      toast.error(validationError);
+      return;
+    }
 
     // Validate expiry date is in the future
     if (data.expiry_date) {
@@ -162,26 +240,61 @@ export const ProfessionalDocumentsSection = () => {
         const existingCheck = getCheckByType(checkType as any);
         const statusConfig = existingCheck ? StatusConfig[existingCheck.status] : null;
         const IconComponent = config.icon;
+        const isNotApplicableSet = notApplicable[checkType];
+        const anyFieldFilled = isAnyFieldFilled(checkType);
 
         return (
-          <Card key={checkType}>
+          <Card key={checkType} className={`transition-colors ${
+            anyFieldFilled && !existingCheck?.status ? 'border-amber-200 bg-amber-50/30' : ''
+          }`}>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <IconComponent className="h-5 w-5" />
                   {config.title}
-                  {config.required && <span className="text-red-500">*</span>}
+                  {config.required && !isNotApplicableSet && (
+                    <span className={`text-red-500 ${anyFieldFilled ? 'font-bold' : ''}`}>
+                      {anyFieldFilled ? '*' : ''}
+                    </span>
+                  )}
                 </div>
-                {statusConfig && (
-                  <Badge className={statusConfig.color}>
-                    <statusConfig.icon className="h-3 w-3 mr-1" />
-                    {statusConfig.label}
-                  </Badge>
-                )}
+                <div className="flex items-center gap-2">
+                  {isNotApplicableSet && (
+                    <Badge variant="secondary">
+                      <X className="h-3 w-3 mr-1" />
+                      Not Applicable
+                    </Badge>
+                  )}
+                  {statusConfig && (
+                    <Badge className={statusConfig.color}>
+                      <statusConfig.icon className="h-3 w-3 mr-1" />
+                      {statusConfig.label}
+                    </Badge>
+                  )}
+                </div>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">{config.description}</p>
+
+              {/* Not Applicable Toggle */}
+              {!existingCheck && (
+                <div className="flex items-center justify-between p-3 bg-muted/20 rounded-lg">
+                  <div>
+                    <Label htmlFor={`${checkType}-not-applicable`} className="font-medium">
+                      Not Applicable
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      Check this if you don't have this type of document
+                    </p>
+                  </div>
+                  <Switch
+                    id={`${checkType}-not-applicable`}
+                    checked={isNotApplicableSet}
+                    onCheckedChange={(checked) => handleNotApplicableChange(checkType, checked)}
+                  />
+                </div>
+              )}
 
               {/* Show existing check details if verified or under review */}
               {existingCheck && (
@@ -221,91 +334,112 @@ export const ProfessionalDocumentsSection = () => {
               )}
 
               {/* Form for new submission or resubmission */}
-              {(!existingCheck || existingCheck.status === 'rejected' || existingCheck.status === 'expired') && (
+              {(!existingCheck || existingCheck.status === 'rejected' || existingCheck.status === 'expired') && !isNotApplicableSet && (
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {config.fields.includes('provider') && (
                       <div>
-                        <Label htmlFor={`${checkType}-provider`}>Provider</Label>
+                        <Label htmlFor={`${checkType}-provider`} className={anyFieldFilled ? 'text-red-600 font-medium' : ''}>
+                          Provider {anyFieldFilled && '*'}
+                        </Label>
                         <Input
                           id={`${checkType}-provider`}
                           value={formData[checkType]?.provider || ''}
                           onChange={(e) => handleInputChange(checkType, 'provider', e.target.value)}
                           placeholder="Insurance company / Certification provider"
+                          className={anyFieldFilled && !formData[checkType]?.provider ? 'border-red-300' : ''}
                         />
                       </div>
                     )}
 
                     {config.fields.includes('member_id') && (
                       <div>
-                        <Label htmlFor={`${checkType}-member_id`}>Member ID</Label>
+                        <Label htmlFor={`${checkType}-member_id`} className={anyFieldFilled ? 'text-red-600 font-medium' : ''}>
+                          Member ID {anyFieldFilled && '*'}
+                        </Label>
                         <Input
                           id={`${checkType}-member_id`}
                           value={formData[checkType]?.member_id || ''}
                           onChange={(e) => handleInputChange(checkType, 'member_id', e.target.value)}
                           placeholder="Your CIMSPA member ID"
+                          className={anyFieldFilled && !formData[checkType]?.member_id ? 'border-red-300' : ''}
                         />
                       </div>
                     )}
 
                     {config.fields.includes('certificate_id') && (
                       <div>
-                        <Label htmlFor={`${checkType}-certificate_id`}>Certificate ID</Label>
+                        <Label htmlFor={`${checkType}-certificate_id`} className={anyFieldFilled ? 'text-red-600 font-medium' : ''}>
+                          Certificate ID {anyFieldFilled && '*'}
+                        </Label>
                         <Input
                           id={`${checkType}-certificate_id`}
                           value={formData[checkType]?.certificate_id || ''}
                           onChange={(e) => handleInputChange(checkType, 'certificate_id', e.target.value)}
                           placeholder="Certificate number"
+                          className={anyFieldFilled && !formData[checkType]?.certificate_id ? 'border-red-300' : ''}
                         />
                       </div>
                     )}
 
                     {config.fields.includes('policy_number') && (
                       <div>
-                        <Label htmlFor={`${checkType}-policy_number`}>Policy Number</Label>
+                        <Label htmlFor={`${checkType}-policy_number`} className={anyFieldFilled ? 'text-red-600 font-medium' : ''}>
+                          Policy Number {anyFieldFilled && '*'}
+                        </Label>
                         <Input
                           id={`${checkType}-policy_number`}
                           value={formData[checkType]?.policy_number || ''}
                           onChange={(e) => handleInputChange(checkType, 'policy_number', e.target.value)}
                           placeholder="Insurance policy number"
+                          className={anyFieldFilled && !formData[checkType]?.policy_number ? 'border-red-300' : ''}
                         />
                       </div>
                     )}
 
                     {config.fields.includes('coverage_amount') && (
                       <div>
-                        <Label htmlFor={`${checkType}-coverage`}>Coverage Amount (£)</Label>
+                        <Label htmlFor={`${checkType}-coverage`} className={anyFieldFilled ? 'text-red-600 font-medium' : ''}>
+                          Coverage Amount (£) {anyFieldFilled && '*'}
+                        </Label>
                         <Input
                           id={`${checkType}-coverage`}
                           type="number"
                           value={formData[checkType]?.coverage_amount || ''}
                           onChange={(e) => handleInputChange(checkType, 'coverage_amount', parseInt(e.target.value))}
                           placeholder="1000000"
+                          className={anyFieldFilled && !formData[checkType]?.coverage_amount ? 'border-red-300' : ''}
                         />
                       </div>
                     )}
 
                     {config.fields.includes('issue_date') && (
                       <div>
-                        <Label htmlFor={`${checkType}-issue_date`}>Issue Date</Label>
+                        <Label htmlFor={`${checkType}-issue_date`} className={anyFieldFilled ? 'text-red-600 font-medium' : ''}>
+                          Issue Date {anyFieldFilled && '*'}
+                        </Label>
                         <Input
                           id={`${checkType}-issue_date`}
                           type="date"
                           value={formData[checkType]?.issue_date || ''}
                           onChange={(e) => handleInputChange(checkType, 'issue_date', e.target.value)}
+                          className={anyFieldFilled && !formData[checkType]?.issue_date ? 'border-red-300' : ''}
                         />
                       </div>
                     )}
 
                     {config.fields.includes('expiry_date') && (
                       <div>
-                        <Label htmlFor={`${checkType}-expiry_date`}>Expiry Date</Label>
+                        <Label htmlFor={`${checkType}-expiry_date`} className={anyFieldFilled ? 'text-red-600 font-medium' : ''}>
+                          Expiry Date {anyFieldFilled && '*'}
+                        </Label>
                         <Input
                           id={`${checkType}-expiry_date`}
                           type="date"
                           value={formData[checkType]?.expiry_date || ''}
                           min={new Date().toISOString().split('T')[0]}
                           onChange={(e) => handleInputChange(checkType, 'expiry_date', e.target.value)}
+                          className={anyFieldFilled && !formData[checkType]?.expiry_date ? 'border-red-300' : ''}
                         />
                         <p className="text-xs text-muted-foreground mt-1">
                           Must be a future date
@@ -316,16 +450,29 @@ export const ProfessionalDocumentsSection = () => {
 
                   {config.fields.includes('file') && (
                     <div>
-                      <Label htmlFor={`${checkType}-file`}>Upload Document</Label>
+                      <Label htmlFor={`${checkType}-file`} className={anyFieldFilled ? 'text-red-600 font-medium' : ''}>
+                        Upload Document {anyFieldFilled && '*'}
+                      </Label>
                       <Input
                         id={`${checkType}-file`}
                         type="file"
                         accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
                         onChange={(e) => handleFileChange(checkType, e.target.files?.[0] || null)}
-                        className="cursor-pointer"
+                        className={`cursor-pointer ${anyFieldFilled && !formData[checkType]?.file ? 'border-red-300' : ''}`}
                       />
                       <p className="text-xs text-muted-foreground mt-1">
                         Accepted formats: PDF, JPG, PNG, DOC, DOCX (Max 10MB)
+                      </p>
+                    </div>
+                  )}
+
+                  {anyFieldFilled && (
+                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                      <p className="text-sm text-amber-800 font-medium">
+                        ⚠️ All fields are now required
+                      </p>
+                      <p className="text-xs text-amber-700 mt-1">
+                        Since you've started filling this document, all fields marked with * are now mandatory to submit.
                       </p>
                     </div>
                   )}
@@ -334,6 +481,7 @@ export const ProfessionalDocumentsSection = () => {
                     onClick={() => handleSubmitCheck(checkType as any)}
                     disabled={uploading === checkType || loading}
                     className="w-full"
+                    variant={anyFieldFilled && validateRequiredFields(checkType as any) ? "destructive" : "default"}
                   >
                     {uploading === checkType ? (
                       <>
@@ -343,7 +491,7 @@ export const ProfessionalDocumentsSection = () => {
                     ) : (
                       <>
                         <Upload className="h-4 w-4 mr-2" />
-                        Submit {config.title}
+                        {isNotApplicableSet ? 'Mark as Not Applicable' : `Submit ${config.title}`}
                       </>
                     )}
                   </Button>

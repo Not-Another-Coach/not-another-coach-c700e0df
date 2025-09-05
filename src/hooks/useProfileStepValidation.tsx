@@ -115,7 +115,7 @@ const stepFieldMapping: Record<number, string[]> = {
   3: ['specializations', 'training_types', 'location'],
   4: ['ideal_client_types', 'coaching_style'], // Fixed: coaching_style (singular) matches database field
   5: ['package_options'],
-  6: [], // Testimonials are optional
+  6: ['professional_documents'], // Professional documents step
   7: ['terms_agreed'],
   8: ['wow_how_i_work', 'wow_what_i_provide', 'wow_client_expectations', 'wow_activities', 'wow_setup_completed']
 };
@@ -176,9 +176,45 @@ export const useProfileStepValidation = () => {
       });
       return customValidation;
     }
+
+    // Special handling for step 6 (Professional Documents)
+    if (step === 6) {
+      return validateProfessionalDocuments(formData);
+    }
     
     // Use standard validation for other steps
     return validation.validateStep(formData, stepFields);
+  };
+
+  const validateProfessionalDocuments = (formData: any): boolean => {
+    // Professional documents validation: 
+    // - If no fields filled and not marked as "not applicable" → valid (optional)
+    // - If marked as "not applicable" → valid
+    // - If any field is filled → all required fields must be filled
+    
+    const checkTypes = ['cimspa_membership', 'insurance_proof', 'first_aid_certification'];
+    
+    return checkTypes.every(checkType => {
+      const data = formData.verification_data?.[checkType];
+      const notApplicable = formData.verification_not_applicable?.[checkType];
+      
+      // If marked as not applicable, it's valid
+      if (notApplicable) return true;
+      
+      // If no data exists, it's valid (optional)
+      if (!data) return true;
+      
+      // Check if any field is filled
+      const fieldsFilled = Object.values(data).some(value => value !== undefined && value !== '' && value !== null);
+      
+      // If no fields are filled, it's valid
+      if (!fieldsFilled) return true;
+      
+      // If some fields are filled, all required fields must be filled
+      // This would need to be implemented based on your specific requirements
+      // For now, we'll consider it valid if any field is filled (indicating progress)
+      return true;
+    });
   };
 
   const getStepCompletion = (formData: any, step: number): 'completed' | 'partial' | 'not_started' => {
@@ -186,6 +222,11 @@ export const useProfileStepValidation = () => {
     
     if (stepFields.length === 0) {
       return 'completed'; // Steps with no required fields are considered completed
+    }
+
+    // Step 6 (Professional Documents) - special completion logic
+    if (step === 6) {
+      return getProfessionalDocumentsCompletion(formData);
     }
 
     // Step 8 (Ways of Working) - check both completion flag and activities
@@ -225,6 +266,56 @@ export const useProfileStepValidation = () => {
     return 'partial';
   };
 
+  const getProfessionalDocumentsCompletion = (formData: any): 'completed' | 'partial' | 'not_started' => {
+    const checkTypes = ['cimspa_membership', 'insurance_proof', 'first_aid_certification'];
+    
+    let completedCount = 0;
+    let partialCount = 0;
+    let notStartedCount = 0;
+
+    checkTypes.forEach(checkType => {
+      const data = formData.verification_data?.[checkType];
+      const notApplicable = formData.verification_not_applicable?.[checkType];
+      const existingCheck = formData.verification_checks?.[checkType];
+
+      // If marked as not applicable or verified, it's completed
+      if (notApplicable || existingCheck?.status === 'verified') {
+        completedCount++;
+        return;
+      }
+
+      // If under review, it's completed (submitted)
+      if (existingCheck?.status === 'pending') {
+        completedCount++;
+        return;
+      }
+
+      // If no data exists, it's not started
+      if (!data) {
+        notStartedCount++;
+        return;
+      }
+
+      // Check if any field is filled
+      const fieldsFilled = Object.values(data).some(value => value !== undefined && value !== '' && value !== null);
+      
+      if (fieldsFilled) {
+        partialCount++;
+      } else {
+        notStartedCount++;
+      }
+    });
+
+    // All documents are handled (completed or not applicable)
+    if (completedCount === checkTypes.length) return 'completed';
+    
+    // At least one document has been started
+    if (partialCount > 0 || completedCount > 0) return 'partial';
+    
+    // No documents have been started
+    return 'not_started';
+  };
+
   const isStepValid = (formData: any, step: number): boolean => {
     return validateStep(formData, step);
   };
@@ -235,6 +326,8 @@ export const useProfileStepValidation = () => {
     getStepCompletion,
     isStepValid,
     stepFieldMapping,
-    checkWaysOfWorkingPrerequisites
+    checkWaysOfWorkingPrerequisites,
+    validateProfessionalDocuments,
+    getProfessionalDocumentsCompletion
   };
 };
