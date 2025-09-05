@@ -99,7 +99,7 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
     installmentCount: "",
   });
 
-  const { getPackageWorkflow, savePackageWorkflow, cleanupOrphanedWorkflows } = usePackageWaysOfWorking();
+  const { getPackageWorkflow, savePackageWorkflow, cleanupOrphanedWorkflows, refetch } = usePackageWaysOfWorking();
   const { toast } = useToast();
   
   // Clean up orphaned workflows when component mounts
@@ -426,12 +426,15 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
         
         // Handle ways of working copying if needed
         if (cloneWaysOfWorkingData && cloneWaysOfWorkingData.targetPackageId === updatedPackage.id) {
-          copyPackageWaysOfWorking(
+          await copyPackageWaysOfWorking(
             cloneWaysOfWorkingData.sourcePackageId,
             cloneWaysOfWorkingData.targetPackageId,
             updatedPackage.name
           );
           setCloneWaysOfWorkingData(null);
+          
+          // Refresh the Ways of Working data to show the new package
+          await refetch();
         }
       } else {
         // Update existing package
