@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Upload, Instagram, Image, Trash2, Check, X, Settings, Eye, EyeOff, Camera, AlertTriangle, CheckCircle } from 'lucide-react';
 import { useTrainerImages } from '@/hooks/useTrainerImages';
 import { useInstagramIntegration } from '@/hooks/useInstagramIntegration';
+import { useInstagramConnection } from '@/hooks/useInstagramConnection';
 import { toast } from '@/hooks/use-toast';
 import { SectionHeader } from './SectionHeader';
 
@@ -46,6 +47,8 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
     fetchInstagramMedia,
     disconnectInstagram
   } = useInstagramIntegration();
+
+  const { isConnected } = useInstagramConnection();
 
   const [activeTab, setActiveTab] = useState<'upload' | 'instagram' | 'settings'>('upload');
   const [dragActive, setDragActive] = useState(false);
@@ -277,12 +280,17 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {uploadedImages.map((image) => (
                     <div key={image.id} className="relative group">
-                      <div className="aspect-square rounded-lg overflow-hidden bg-muted">
+                      <div className="aspect-square rounded-lg overflow-hidden bg-muted relative">
                         <img
                           src={getImageUrl(image.file_path)}
                           alt={image.file_name}
-                          className="w-full h-full object-cover"
+                          className={`w-full h-full object-cover ${!image.is_selected_for_display ? 'opacity-50' : ''}`}
                         />
+                        {!image.is_selected_for_display && (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="w-full h-0.5 bg-red-500 transform rotate-12"></div>
+                          </div>
+                        )}
                       </div>
                       
                       {/* Overlay */}
@@ -291,11 +299,12 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
                           size="sm"
                           variant={image.is_selected_for_display ? "default" : "outline"}
                           onClick={() => toggleImageSelection(image.id, 'uploaded')}
+                          className="flex items-center justify-center w-8 h-8 p-0"
                         >
                           {image.is_selected_for_display ? (
-                            <><EyeOff className="h-3 w-3 mr-1" /> Hide</>
+                            <EyeOff className="h-4 w-4" />
                           ) : (
-                            <><Eye className="h-3 w-3 mr-1" /> Show</>
+                            <Eye className="h-4 w-4" />
                           )}
                         </Button>
                         <Button
@@ -356,12 +365,17 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                       {instagramSelections.map((selection) => (
                         <div key={selection.id} className="relative group">
-                          <div className="aspect-square rounded-lg overflow-hidden bg-muted">
+                          <div className="aspect-square rounded-lg overflow-hidden bg-muted relative">
                             <img
                               src={selection.thumbnail_url || selection.media_url}
                               alt={selection.caption || 'Instagram post'}
-                              className="w-full h-full object-cover"
+                              className={`w-full h-full object-cover ${!selection.is_selected_for_display ? 'opacity-50' : ''}`}
                             />
+                            {!selection.is_selected_for_display && (
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="w-full h-0.5 bg-red-500 transform rotate-12"></div>
+                              </div>
+                            )}
                           </div>
                           
                           {/* Overlay */}
@@ -370,11 +384,12 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
                               size="sm"
                               variant={selection.is_selected_for_display ? "default" : "outline"}
                               onClick={() => toggleImageSelection(selection.id, 'instagram')}
+                              className="flex items-center justify-center w-8 h-8 p-0"
                             >
                               {selection.is_selected_for_display ? (
-                                <><EyeOff className="h-3 w-3 mr-1" /> Hide</>
+                                <EyeOff className="h-4 w-4" />
                               ) : (
-                                <><Eye className="h-3 w-3 mr-1" /> Show</>
+                                <Eye className="h-4 w-4" />
                               )}
                             </Button>
                           </div>
@@ -507,15 +522,21 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
 
               <div className="flex items-center justify-between">
                 <div>
-                  <Label htmlFor="auto-sync">Auto-sync Instagram</Label>
+                  <Label htmlFor="auto-sync" className={!isConnected ? 'text-muted-foreground' : ''}>
+                    Auto-sync Instagram
+                  </Label>
                   <p className="text-sm text-muted-foreground">
-                    Automatically sync new Instagram posts
+                    {isConnected 
+                      ? 'Automatically sync new Instagram posts' 
+                      : 'Connect Instagram first to enable auto-sync'
+                    }
                   </p>
                 </div>
                 <Switch
                   id="auto-sync"
                   checked={imagePreferences?.auto_sync_instagram || false}
                   onCheckedChange={(checked) => updateImagePreferences({ auto_sync_instagram: checked })}
+                  disabled={!isConnected}
                 />
               </div>
 
@@ -541,33 +562,6 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Preview</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-sm text-muted-foreground mb-4">
-                This is how your selected images will appear on your profile cards:
-              </div>
-              <div className="grid grid-cols-3 gap-2 max-w-sm">
-                {getSelectedImagesForDisplay().slice(0, imagePreferences?.max_images_per_view || 6).map((image, index) => (
-                  <div key={image.id} className="aspect-square rounded bg-muted overflow-hidden">
-                    <img
-                      src={image.url}
-                      alt={image.type === 'uploaded' ? image.fileName : image.caption}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ))}
-                {selectedImagesCount === 0 && (
-                  <div className="col-span-3 text-center py-8 text-muted-foreground">
-                    <Image className="h-8 w-8 mx-auto mb-2" />
-                    <p className="text-sm">No images selected</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
         </div>
       )}
     </div>
