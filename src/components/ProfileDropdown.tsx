@@ -29,7 +29,7 @@ interface ProfileDropdownProps {
 
 export const ProfileDropdown = ({ profile }: ProfileDropdownProps) => {
   const navigate = useNavigate();
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   
   const getInitials = () => {
     const first = profile.first_name?.charAt(0) || '';
@@ -150,7 +150,7 @@ export const ProfileDropdown = ({ profile }: ProfileDropdownProps) => {
         
         <DropdownMenuItem 
           className="cursor-pointer"
-          onClick={() => navigate(`/trainer/${profile.first_name?.toLowerCase() || 'profile'}`)}
+          onClick={() => navigate(`/trainer/${user?.id || profile.first_name?.toLowerCase() || 'profile'}`)}
         >
           <User className="mr-2 h-4 w-4" />
           <span>View Public Profile</span>

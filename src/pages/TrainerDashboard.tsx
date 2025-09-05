@@ -455,7 +455,7 @@ const TrainerDashboard = () => {
                 className="flex items-center gap-2 flex-shrink-0"
               >
                 <Home className="w-4 h-4" />
-                <span className="hidden sm:inline">Dashboard</span>
+                <span className="hidden md:inline">Dashboard</span>
               </Button>
               
               <Button
@@ -465,8 +465,8 @@ const TrainerDashboard = () => {
                 className="flex items-center gap-2 flex-shrink-0"
               >
                 <Users className="w-4 h-4" />
-                <span className="hidden sm:inline">Clients ({activeClientsCount})</span>
-                <span className="sm:hidden">({activeClientsCount})</span>
+                <span className="hidden lg:inline">Clients ({activeClientsCount})</span>
+                <span className="lg:hidden hidden md:inline">Clients</span>
               </Button>
               
               <Button
@@ -476,8 +476,8 @@ const TrainerDashboard = () => {
               className="flex items-center gap-2 flex-shrink-0"
             >
               <UserSearch className="w-4 h-4" />
-              <span className="hidden sm:inline">Prospects ({prospectsCount + (waitlistEntries?.length || 0)})</span>
-              <span className="sm:hidden">({prospectsCount + (waitlistEntries?.length || 0)})</span>
+              <span className="hidden lg:inline">Prospects ({prospectsCount + (waitlistEntries?.length || 0)})</span>
+              <span className="lg:hidden hidden md:inline">Prospects</span>
             </Button>
             
           <Button 
@@ -487,8 +487,8 @@ const TrainerDashboard = () => {
             className="flex items-center gap-2 flex-shrink-0"
           >
             <CheckCircle className="w-4 h-4" />
-            <span className="hidden sm:inline">Template Management</span>
-            <span className="sm:hidden">Templates</span>
+            <span className="hidden lg:inline">Templates</span>
+            <span className="lg:hidden hidden md:inline">Templates</span>
           </Button>
           
           <Button
@@ -498,8 +498,8 @@ const TrainerDashboard = () => {
             className="flex items-center gap-2 flex-shrink-0"
           >
             <Goal className="w-4 h-4" />
-            <span className="hidden sm:inline">Goals & Tasks</span>
-            <span className="sm:hidden">Goals</span>
+            <span className="hidden lg:inline">Goals & Tasks</span>
+            <span className="lg:hidden hidden md:inline">Goals</span>
           </Button>
           
               <Button
@@ -510,7 +510,7 @@ const TrainerDashboard = () => {
               >
                 <CreditCard className="w-4 h-4" />
                 <span className="hidden lg:inline">Payment & Payouts</span>
-                <span className="lg:hidden">Payments</span>
+                <span className="lg:hidden hidden md:inline">Payments</span>
               </Button>
             </nav>
           )}
