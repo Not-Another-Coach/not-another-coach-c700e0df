@@ -235,12 +235,18 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
             activeTab === 'instagram' 
               ? 'border-primary text-primary' 
               : 'border-transparent text-muted-foreground hover:text-foreground'
-          }`}
-          onClick={() => setActiveTab('instagram')}
+          } ${!isConnected ? 'opacity-50 cursor-not-allowed' : ''}`}
+          onClick={() => isConnected && setActiveTab('instagram')}
+          disabled={!isConnected}
         >
           <Instagram className="h-4 w-4" />
           Instagram Sync
-          {instagramSelections.some(sel => sel.is_selected_for_display) && (
+          {!isConnected && (
+            <Badge variant="secondary" className="text-xs ml-1">
+              Tab 9 Required
+            </Badge>
+          )}
+          {isConnected && instagramSelections.some(sel => sel.is_selected_for_display) && (
             <CheckCircle className="h-3 w-3 text-green-500" />
           )}
         </button>

@@ -171,63 +171,8 @@ export const EnhancedVerificationSection = () => {
     }
   };
 
-  const calculateProgress = () => {
-    const requiredChecks = Object.keys(CheckTypeConfig);
-    const completedChecks = requiredChecks.filter(type => {
-      const check = getCheckByType(type as any);
-      return check?.status === 'verified';
-    });
-    return (completedChecks.length / requiredChecks.length) * 100;
-  };
-
-  const badgeStatus = getVerificationBadgeStatus();
-
   return (
     <div className="space-y-6">
-      {/* Overview Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Shield className="h-5 w-5" />
-            Trainer Verification
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Progress */}
-          <div>
-            <div className="flex justify-between text-sm mb-2">
-              <span>Verification Progress</span>
-              <span>{Math.round(calculateProgress())}% Complete</span>
-            </div>
-            <Progress value={calculateProgress()} className="h-2" />
-          </div>
-
-          {/* Badge Toggle */}
-          <div className="flex items-center justify-between p-4 border border-border rounded-lg bg-muted/20">
-            <div>
-              <h4 className="font-medium">Public Verification Badge</h4>
-              <p className="text-sm text-muted-foreground">
-                Show "Verified Coach" badge on your public profile when all checks pass
-              </p>
-            </div>
-            <Switch
-              checked={overview?.display_preference === 'verified_allowed'}
-              onCheckedChange={(checked) =>
-                updateDisplayPreference(checked ? 'verified_allowed' : 'hidden')
-              }
-            />
-          </div>
-
-          {/* Current Status */}
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">Current Status:</span>
-            <Badge variant={badgeStatus === 'verified' ? 'default' : 'secondary'}>
-              {badgeStatus === 'verified' ? 'Verified Coach' : 'Not Displayed'}
-            </Badge>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Verification Checks */}
       {Object.entries(CheckTypeConfig).map(([checkType, config]) => {
         const existingCheck = getCheckByType(checkType as any);
