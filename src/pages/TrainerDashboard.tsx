@@ -172,11 +172,28 @@ const TrainerDashboard = () => {
       }
     };
 
+    console.log('🔍 Dashboard - Profile data for completion calculation:', {
+      first_name: profile.first_name,
+      last_name: profile.last_name,
+      tagline: profile.tagline,
+      bio: profile.bio,
+      training_types: profile.training_types?.length,
+      specializations: profile.specializations?.length,
+      qualifications: profile.qualifications?.length,
+      ideal_client_types: (profile as any).ideal_client_types?.length,
+      coaching_style: (profile as any).coaching_style?.length,
+      package_options: (profile as any).package_options?.length,
+      terms_agreed: profile.terms_agreed
+    });
+
     let totalWeightedCompletion = 0;
+    const stepDetails: any = {};
     
     for (let i = 1; i <= 14; i++) {
       const stepWeight = getStepWeight(i);
       const stepCompletion = getStepCompletion(i);
+      
+      stepDetails[`step${i}`] = { weight: stepWeight, completion: stepCompletion };
       
       if (stepCompletion === 'completed') {
         totalWeightedCompletion += stepWeight;
@@ -186,7 +203,13 @@ const TrainerDashboard = () => {
       // 'not_started' contributes 0
     }
     
-    return Math.min(Math.round(totalWeightedCompletion), 100); // Ensure max 100%
+    const finalPercentage = Math.min(Math.round(totalWeightedCompletion), 100);
+    
+    console.log('🔍 Dashboard - Step completions:', stepDetails);
+    console.log('🔍 Dashboard - Total weighted completion:', totalWeightedCompletion);
+    console.log('🔍 Dashboard - Final percentage:', finalPercentage);
+    
+    return finalPercentage; // Ensure max 100%
   };
 
 

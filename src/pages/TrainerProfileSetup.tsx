@@ -702,10 +702,13 @@ const TrainerProfileSetup = () => {
 
   const calculateOverallCompletion = () => {
     let totalWeightedCompletion = 0;
+    const stepDetails: any = {};
     
     for (let i = 1; i <= totalSteps; i++) {
       const stepWeight = getStepWeight(i);
       const stepCompletion = getStepCompletion(i);
+      
+      stepDetails[`step${i}`] = { weight: stepWeight, completion: stepCompletion };
       
       if (stepCompletion === 'completed') {
         totalWeightedCompletion += stepWeight;
@@ -715,7 +718,13 @@ const TrainerProfileSetup = () => {
       // 'not_started' contributes 0
     }
     
-    return Math.round(totalWeightedCompletion);
+    const finalPercentage = Math.min(Math.round(totalWeightedCompletion), 100);
+    
+    console.log('🔍 Profile Setup - Step completions:', stepDetails);
+    console.log('🔍 Profile Setup - Total weighted completion:', totalWeightedCompletion);
+    console.log('🔍 Profile Setup - Final percentage:', finalPercentage);
+    
+    return finalPercentage;
   };
 
   const isFullyComplete = () => {
