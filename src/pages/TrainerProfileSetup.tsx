@@ -407,8 +407,9 @@ const TrainerProfileSetup = () => {
       case 11: // Working Hours & New Client Availability
         if (!availabilitySettings) return 'not_started';
         
+        // Any valid availability status is considered configured (accepting, waitlist, or unavailable)
         const hasAvailabilityStatus = availabilitySettings.availability_status && 
-          availabilitySettings.availability_status !== 'accepting'; // Default status doesn't count as configured
+          ['accepting', 'waitlist', 'unavailable'].includes(availabilitySettings.availability_status);
         
         const hasWorkingHours = availabilitySettings.availability_schedule && 
           Object.values(availabilitySettings.availability_schedule).some(day => 
