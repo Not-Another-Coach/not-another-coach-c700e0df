@@ -242,6 +242,20 @@ export const useTrainerImages = () => {
         );
       }
 
+      // Auto-adjust grid size and handle excess images
+      setTimeout(async () => {
+        const newSelectedCount = getSelectedImagesCount();
+        const newRecommendedGridSize = getRecommendedGridSizeForCount(newSelectedCount);
+        
+        // Update grid size preference
+        await updateImagePreferences({ max_images_per_view: newRecommendedGridSize });
+        
+        // Handle excess images by deselecting them
+        if (newSelectedCount > newRecommendedGridSize) {
+          await handleExcessImages(newRecommendedGridSize);
+        }
+      }, 100);
+
       toast({
         title: "Success",
         description: "Image selection updated!",
@@ -338,28 +352,77 @@ export const useTrainerImages = () => {
 
   const getGridCapacity = (gridSize: number) => gridSize;
 
-  const getCompatibleGridSizes = () => {
-    const selectedCount = getSelectedImagesCount();
-    const gridOptions = [
-      { value: 1, label: '1 image (Hero)', capacity: 1 },
-      { value: 4, label: '4 images (2×2)', capacity: 4 },
-      { value: 6, label: '6 images (3×2)', capacity: 6 },
-      { value: 9, label: '9 images (3×3)', capacity: 9 },
-      { value: 12, label: '12 images (4×3)', capacity: 12 }
-    ];
-    
-    // Show all grid sizes - let the user choose and handle empty spaces in onValueChange
-    return gridOptions;
+  const getRecommendedGridSizeForCount = (count: number) => {
+    if (count <= 3) return 1;
+    if (count <= 5) return 4;
+    if (count <= 8) return 6;
+    if (count <= 11) return 9;
+    return 12;
   };
 
   const getRecommendedGridSize = () => {
     const selectedCount = getSelectedImagesCount();
-    if (selectedCount === 0) return 6;
-    if (selectedCount === 1) return 1;
-    if (selectedCount <= 4) return 4;
-    if (selectedCount <= 6) return 6;
-    if (selectedCount <= 9) return 9;
-    return 12;
+    return getRecommendedGridSizeForCount(selectedCount);
+  };
+
+  const getGridLabel = (gridSize: number) => {
+    const labels = {
+      1: '1 image (Hero)',
+      4: '4 images (2×2)',
+      6: '6 images (3×2)',
+      9: '9 images (3×3)',
+      12: '12 images (4×3)'
+    };
+    return labels[gridSize as keyof typeof labels] || `${gridSize} images`;
+  };
+
+  const handleExcessImages = async (maxImages: number) => {
+    const selectedImages = getSelectedImagesForDisplay();
+    const excessCount = selectedImages.length - maxImages;
+    
+    if (excessCount <= 0) return;
+
+    // Deselect excess images (starting from the end)
+    const imagesToDeselect = selectedImages.slice(maxImages);
+    
+    for (const image of imagesToDeselect) {
+      if (image.type === 'uploaded') {
+        const { error } = await supabase
+          .from('trainer_uploaded_images')
+          .update({ is_selected_for_display: false })
+          .eq('id', image.id);
+        
+        if (!error) {
+          setUploadedImages(prev => 
+            prev.map(img => 
+              img.id === image.id 
+                ? { ...img, is_selected_for_display: false }
+                : img
+            )
+          );
+        }
+      } else {
+        const { error } = await supabase
+          .from('trainer_instagram_selections')
+          .update({ is_selected_for_display: false })
+          .eq('id', image.id);
+        
+        if (!error) {
+          setInstagramSelections(prev => 
+            prev.map(sel => 
+              sel.id === image.id 
+                ? { ...sel, is_selected_for_display: false }
+                : sel
+            )
+          );
+        }
+      }
+    }
+
+    toast({
+      title: "Auto-adjusted",
+      description: `Automatically deselected ${excessCount} excess image${excessCount > 1 ? 's' : ''} to fit ${getGridLabel(maxImages)} layout`,
+    });
   };
 
   const isGridSizeValid = () => {
@@ -370,46 +433,16 @@ export const useTrainerImages = () => {
 
   const getValidationStatus = () => {
     const selectedCount = getSelectedImagesCount();
-    const currentGridSize = imagePreferences?.max_images_per_view || 6;
     
     if (selectedCount === 0) {
       return { status: 'incomplete', message: 'No images selected for display' };
     }
     
-    if (selectedCount > currentGridSize) {
-      return { 
-        status: 'error', 
-        message: `${selectedCount} images selected but grid only shows ${currentGridSize}` 
-      };
-    }
-    
-    if (selectedCount < currentGridSize) {
-      return { 
-        status: 'warning', 
-        message: `${selectedCount} images selected, ${currentGridSize - selectedCount} more needed to fill grid` 
-      };
-    }
-    
-    return { status: 'complete', message: `Perfect! ${selectedCount} images selected` };
-  };
-
-  const autoAdjustToGridSize = async (targetGridSize: number) => {
-    const selectedImages = getSelectedImagesForDisplay();
-    const excessCount = selectedImages.length - targetGridSize;
-    
-    if (excessCount <= 0) return;
-
-    // Deselect excess images (starting from the end)
-    const imagesToDeselect = selectedImages.slice(targetGridSize);
-    
-    for (const image of imagesToDeselect) {
-      await toggleImageSelection(image.id, image.type);
-    }
-
-    toast({
-      title: "Auto-adjusted",
-      description: `Deselected ${excessCount} excess images to fit ${targetGridSize}-image grid`,
-    });
+    const recommendedGridSize = getRecommendedGridSize();
+    return { 
+      status: 'complete', 
+      message: `${selectedCount} image${selectedCount > 1 ? 's' : ''} selected - Auto-using ${getGridLabel(recommendedGridSize)} layout` 
+    };
   };
 
   return {
@@ -427,11 +460,8 @@ export const useTrainerImages = () => {
     getSelectedImagesForDisplay,
     // Validation helpers
     getSelectedImagesCount,
-    getGridCapacity,
-    getCompatibleGridSizes,
     getRecommendedGridSize,
-    isGridSizeValid,
     getValidationStatus,
-    autoAdjustToGridSize
+    getGridLabel
   };
 };

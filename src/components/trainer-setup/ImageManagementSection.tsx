@@ -32,11 +32,9 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
     getImageUrl,
     getSelectedImagesForDisplay,
     getSelectedImagesCount,
-    getCompatibleGridSizes,
     getRecommendedGridSize,
-    isGridSizeValid,
     getValidationStatus,
-    autoAdjustToGridSize
+    getGridLabel
   } = useTrainerImages();
 
   const { 
@@ -105,7 +103,6 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
 
   const selectedImagesCount = getSelectedImagesCount();
   const validationStatus = getValidationStatus();
-  const compatibleGridSizes = getCompatibleGridSizes();
   const recommendedGridSize = getRecommendedGridSize();
   
   const handleConnectInstagram = () => {
@@ -170,7 +167,7 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
               </div>
             </div>
             <div className="text-xs text-muted-foreground">
-              Max: {imagePreferences?.max_images_per_view || 6} per view
+              Auto-selected: {getGridLabel(recommendedGridSize)}
             </div>
           </div>
         </CardContent>
@@ -216,9 +213,6 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
         >
           <Settings className="h-4 w-4" />
           Settings
-          {validationStatus.status === 'error' && (
-            <AlertTriangle className="h-3 w-3 text-red-500" />
-          )}
           {validationStatus.status === 'complete' && (
             <CheckCircle className="h-3 w-3 text-green-500" />
           )}
@@ -431,93 +425,60 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
               <CardTitle className="text-lg">Display Settings</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Validation Status */}
-              {!isGridSizeValid() && (
-                <div className={`p-3 rounded-lg border flex items-start gap-3 ${
-                  validationStatus.status === 'error' 
-                    ? 'bg-red-50 border-red-200 text-red-800' 
-                    : 'bg-yellow-50 border-yellow-200 text-yellow-800'
-                }`}>
-                  <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{validationStatus.message}</p>
-                    {validationStatus.status === 'error' && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="mt-2"
-                        onClick={() => autoAdjustToGridSize(imagePreferences?.max_images_per_view || 6)}
-                      >
-                        Auto-adjust to grid size
-                      </Button>
-                    )}
+              {/* Current Status */}
+              <div className={`p-3 rounded-lg border flex items-start gap-3 ${
+                validationStatus.status === 'complete' 
+                  ? 'bg-green-50 border-green-200 text-green-800' 
+                  : 'bg-blue-50 border-blue-200 text-blue-800'
+              }`}>
+                <CheckCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium">{validationStatus.message}</p>
+                  <p className="text-xs mt-1 opacity-75">
+                    Grid size is automatically selected based on your image count
+                  </p>
+                </div>
+              </div>
+
+              {/* Auto Grid Size Display */}
+              <div>
+                <Label>Auto-Selected Gallery Layout</Label>
+                <div className="mt-2 p-3 bg-muted rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">{getGridLabel(recommendedGridSize)}</span>
+                    <Badge variant="secondary">Auto-selected</Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Based on {selectedImagesCount} selected image{selectedImagesCount !== 1 ? 's' : ''}
+                  </p>
+                </div>
+              </div>
+
+              {/* Grid Size Rules */}
+              <div>
+                <Label>Auto-Selection Rules</Label>
+                <div className="mt-2 space-y-2 text-xs text-muted-foreground">
+                  <div className="flex justify-between">
+                    <span>1-3 images</span>
+                    <span>→ Hero layout (1 image)</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>4-5 images</span>
+                    <span>→ 2×2 grid (4 images max)</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>6-8 images</span>
+                    <span>→ 3×2 grid (6 images max)</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>9-11 images</span>
+                    <span>→ 3×3 grid (9 images max)</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>12+ images</span>
+                    <span>→ 4×3 grid (12 images max)</span>
                   </div>
                 </div>
-              )}
-
-              <div>
-                <Label htmlFor="max-images">Gallery Grid Size</Label>
-                <Select
-                  value={(imagePreferences?.max_images_per_view || 6).toString()}
-                  onValueChange={(value) => {
-                    const newGridSize = parseInt(value);
-                    const currentCount = selectedImagesCount;
-                    
-                    if (currentCount > newGridSize) {
-                      // Show confirmation for auto-adjustment
-                      const confirmed = window.confirm(
-                        `You have ${currentCount} images selected but the new grid only shows ${newGridSize}. Would you like to automatically deselect the excess images?`
-                      );
-                      
-                      if (confirmed) {
-                        autoAdjustToGridSize(newGridSize);
-                      }
-                    }
-                    
-                    updateImagePreferences({ max_images_per_view: newGridSize });
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {compatibleGridSizes.map((option) => (
-                      <SelectItem key={option.value} value={option.value.toString()}>
-                        {option.label}
-                        {option.value === recommendedGridSize && selectedImagesCount > 0 && (
-                          <span className="text-green-600 ml-2">(Recommended)</span>
-                        )}
-                      </SelectItem>
-                    ))}
-                    {/* Show disabled options for context */}
-                    {selectedImagesCount > 0 && [1, 4, 6, 9, 12]
-                      .filter(size => size < selectedImagesCount)
-                      .map((size) => {
-                        const labels = {
-                          1: '1 image (Hero)',
-                          4: '4 images (2×2)',
-                          6: '6 images (3×2)',
-                          9: '9 images (3×3)',
-                          12: '12 images (4×3)'
-                        };
-                        return (
-                          <SelectItem key={size} value={size.toString()} disabled>
-                            {labels[size as keyof typeof labels]} (Too small for {selectedImagesCount} images)
-                          </SelectItem>
-                        );
-                      })
-                    }
-                  </SelectContent>
-                </Select>
-                {selectedImagesCount === 0 ? (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Select images first, then choose a compatible grid size
-                  </p>
-                ) : (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    You have {selectedImagesCount} images selected. Grid will display {imagePreferences?.max_images_per_view || 6} images.
-                  </p>
-                )}
               </div>
 
               <div className="flex items-center justify-between">
@@ -525,17 +486,16 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
                   <Label htmlFor="auto-sync" className={!isConnected ? 'text-muted-foreground' : ''}>
                     Auto-sync Instagram
                   </Label>
-                  <p className="text-sm text-muted-foreground">
-                    {isConnected 
-                      ? 'Automatically sync new Instagram posts' 
-                      : 'Connect Instagram first to enable auto-sync'
-                    }
+                  <p className="text-xs text-muted-foreground">
+                    {isConnected ? 'Automatically sync new Instagram posts' : 'Connect Instagram to enable auto-sync'}
                   </p>
                 </div>
                 <Switch
                   id="auto-sync"
                   checked={imagePreferences?.auto_sync_instagram || false}
-                  onCheckedChange={(checked) => updateImagePreferences({ auto_sync_instagram: checked })}
+                  onCheckedChange={(checked) => 
+                    updateImagePreferences({ auto_sync_instagram: checked })
+                  }
                   disabled={!isConnected}
                 />
               </div>
