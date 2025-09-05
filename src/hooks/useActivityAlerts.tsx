@@ -110,7 +110,17 @@ export function useActivityAlerts() {
             if (targetAudience?.coaches && Array.isArray(targetAudience.coaches)) {
               return targetAudience.coaches.includes(user.id);
             }
-            // Show general trainer alerts
+            
+            // For discovery call alerts, only show if trainer_id in metadata matches current user
+            const discoveryCallTypes = ['discovery_call_booked', 'discovery_call_cancelled', 'discovery_call_rescheduled'];
+            if (discoveryCallTypes.includes(alert.alert_type)) {
+              const metadata = alert.metadata as any;
+              const isRelevantToTrainer = metadata?.trainer_id === user.id;
+              console.log(`🔍 Discovery call alert ${alert.alert_type} for trainer ${metadata?.trainer_id}, current user ${user.id}, relevant: ${isRelevantToTrainer}`);
+              return isRelevantToTrainer;
+            }
+            
+            // Show general trainer alerts (non-discovery call types)
             if (targetAudience?.trainers) return true;
           }
           
