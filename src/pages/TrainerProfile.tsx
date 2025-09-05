@@ -18,8 +18,11 @@ import { useAuth } from '@/hooks/useAuth';
 export const TrainerProfile = () => {
   const { trainerId } = useParams<{ trainerId: string }>();
   const navigate = useNavigate();
-  const { trainers, loading } = useRealTrainers();
   const { user } = useAuth();
+  const { trainers, loading } = useRealTrainers(
+    undefined, 
+    user?.id ? { userId: user.id } : undefined
+  );
   const [isMessagingOpen, setIsMessagingOpen] = useState(false);
   const [currentView, setCurrentView] = useState<ProfileViewMode>('overview');
   const isMobile = useIsMobile();

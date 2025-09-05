@@ -9,7 +9,7 @@ import trainerEmma from "@/assets/trainer-emma.jpg";
 // Fallback images for trainers
 const trainerImages = [trainerAlex, trainerSarah, trainerMike, trainerEmma];
 
-export function useRealTrainers(refreshTrigger?: number) {
+export function useRealTrainers(refreshTrigger?: number, includeOwnUnpublished?: { userId: string }) {
   const [trainers, setTrainers] = useState<Trainer[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -18,7 +18,7 @@ export function useRealTrainers(refreshTrigger?: number) {
       console.log('🔄 Fetching trainers data...');
       setLoading(true);
       try {
-        const { data, error } = await supabase
+        let query = supabase
           .from('v_trainers')
           .select(`
             id,
@@ -37,9 +37,16 @@ export function useRealTrainers(refreshTrigger?: number) {
             is_verified,
             package_options,
             testimonials
-          `)
-          .eq('profile_published', true)
-          .order('created_at');
+          `);
+
+        // If we need to include own unpublished profile, use OR condition
+        if (includeOwnUnpublished?.userId) {
+          query = query.or(`profile_published.eq.true,id.eq.${includeOwnUnpublished.userId}`);
+        } else {
+          query = query.eq('profile_published', true);
+        }
+        
+        const { data, error } = await query.order('created_at');
 
         if (error) {
           console.error('Error fetching trainers in useRealTrainers:', error);
@@ -97,7 +104,7 @@ export function useRealTrainers(refreshTrigger?: number) {
     };
 
     fetchTrainers();
-  }, [refreshTrigger]);
+  }, [refreshTrigger, includeOwnUnpublished]);
 
   return { trainers, loading };
 }
