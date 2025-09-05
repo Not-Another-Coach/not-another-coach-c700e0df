@@ -6,6 +6,7 @@ import { useUserTypeChecks } from "@/hooks/useUserType";
 import { usePackageWaysOfWorking } from "@/hooks/usePackageWaysOfWorking";
 import { useInstagramConnection } from "@/hooks/useInstagramConnection";
 import { useTrainerVerification } from "@/hooks/useTrainerVerification";
+import { useEnhancedTrainerVerification } from "@/hooks/useEnhancedTrainerVerification";
 import { useDiscoveryCallSettings } from "@/hooks/useDiscoveryCallSettings";
 import { useCoachAvailability } from "@/hooks/useCoachAvailability";
 import { useToast } from "@/hooks/use-toast";
@@ -26,7 +27,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ProfilePreviewModal } from "@/components/trainer-setup/ProfilePreviewModal";
-import { CardsView } from "@/components/profile-views/CardsView";
+import { ScrollableBreadcrumb } from "@/components/ui/scrollable-breadcrumb";
 
 // Import form sections
 import { BasicInfoSection } from "@/components/trainer-setup/BasicInfoSection";
@@ -42,6 +43,8 @@ import { ImageManagementSection } from "@/components/trainer-setup/ImageManageme
 import { WorkingHoursAndAvailabilitySection } from "@/components/trainer-setup/WorkingHoursAndAvailabilitySection";
 import { TermsAndNotificationsSection } from "@/components/trainer-setup/TermsAndNotificationsSection";
 import { EnhancedVerificationSection } from "@/components/trainer-setup/EnhancedVerificationSection";
+import { ProfessionalDocumentsSection } from "@/components/trainer-setup/ProfessionalDocumentsSection";
+import { VerificationOverviewSection } from "@/components/trainer-setup/VerificationOverviewSection";
 
 const TrainerProfileSetup = () => {
   const { user, loading } = useAuth();
@@ -50,6 +53,7 @@ const TrainerProfileSetup = () => {
   const { packageWorkflows, loading: waysOfWorkingLoading } = usePackageWaysOfWorking();
   const { isConnected: isInstagramConnected } = useInstagramConnection();
   const { verificationRequest } = useTrainerVerification();
+  const { getCheckByType } = useEnhancedTrainerVerification();
   const { settings: discoverySettings } = useDiscoveryCallSettings();
   const { settings: availabilitySettings } = useCoachAvailability();
   const { getStepCompletion: getValidationStepCompletion } = useProfileStepValidation();
@@ -135,7 +139,7 @@ const TrainerProfileSetup = () => {
     max_clients: null as number | null,
   });
 
-  const totalSteps = 13;
+  const totalSteps = 14;
 
   const stepTitles = [
     "Basic Info",
@@ -150,6 +154,7 @@ const TrainerProfileSetup = () => {
     "Image Management",
     "Working Hours & New Client Availability",
     "T&Cs and Notifications",
+    "Professional Documents",
     "Verification"
   ];
 
@@ -342,7 +347,8 @@ const TrainerProfileSetup = () => {
       10: 3,  // Image Management (optional, cosmetic)
       11: 3,  // Working Hours (optional)
       12: 5,  // Terms & Notifications (compliance)
-      13: 2   // Verification (final step, external dependency)
+      13: 8,  // Professional Documents (important for credibility)
+      14: 2   // Verification (final step, external dependency)
     };
     return weights[step] || 0;
   };
@@ -424,7 +430,22 @@ const TrainerProfileSetup = () => {
       case 12: // Terms & Notifications
         return formData.terms_agreed ? 'completed' : 'not_started';
         
-      case 13: // Verification
+      case 13: // Professional Documents
+        // Check if all professional documents are verified
+        const professionalDocs = [
+          getCheckByType('cimspa_membership'),
+          getCheckByType('insurance_proof'),
+          getCheckByType('first_aid_certification')
+        ];
+        
+        const verifiedDocs = professionalDocs.filter(check => check?.status === 'verified');
+        const pendingDocs = professionalDocs.filter(check => check?.status === 'pending');
+        
+        if (verifiedDocs.length === 3) return 'completed';
+        if (pendingDocs.length > 0 || verifiedDocs.length > 0) return 'partial';
+        return 'not_started';
+        
+      case 14: // Verification Overview
         if (profile?.verification_status === 'verified') return 'completed';
         if (verificationRequest?.status === 'pending' || verificationRequest?.status === 'under_review') return 'partial';
         return 'not_started';
@@ -570,8 +591,8 @@ const TrainerProfileSetup = () => {
       if (currentStep < totalSteps) {
         setCurrentStep(currentStep + 1);
       } else {
-        // Step 10 is verification - don't complete profile, just show final message
-        if (currentStep === 10) {
+        // Step 14 is verification - don't complete profile, just show final message
+        if (currentStep === 14) {
           toast({
             title: "Profile Setup Complete!",
             description: "Your profile is ready. Submit for verification to go live.",
@@ -724,7 +745,9 @@ const TrainerProfileSetup = () => {
       case 12:
         return <TermsAndNotificationsSection {...commonProps} />;
       case 13:
-        return <EnhancedVerificationSection />;
+        return <ProfessionalDocumentsSection />;
+      case 14:
+        return <VerificationOverviewSection />;
       default:
         return null;
     }
@@ -822,8 +845,72 @@ const TrainerProfileSetup = () => {
             </div>
             
             {/* Step indicators */}
-            <div className="flex justify-between mt-4 gap-1 overflow-x-auto scrollbar-hide pb-2">
-              {stepTitles.map((title, index) => {
+            <ScrollableBreadcrumb currentStep={currentStep}>
+              <div className="flex justify-between gap-1 min-w-max">
+                {stepTitles.map((title, index) => {
+                  const stepNumber = index + 1;
+                  const completion = getStepCompletion(stepNumber);
+                  const isCurrent = stepNumber === currentStep;
+                  
+                  let statusColor = 'text-muted-foreground';
+                  let borderColor = 'border-muted-foreground';
+                  let bgColor = 'bg-transparent';
+                  let showIcon = false;
+                  let isPartial = false;
+
+                  if (completion === 'completed') {
+                    statusColor = 'text-green-600';
+                    borderColor = 'border-green-600';
+                    bgColor = 'bg-green-600';
+                    showIcon = true;
+                  } else if (completion === 'partial') {
+                    statusColor = 'text-amber-600';
+                    borderColor = 'border-amber-600';
+                    bgColor = 'bg-amber-600';
+                    showIcon = true;
+                    isPartial = true;
+                  } else if (isCurrent) {
+                    statusColor = 'text-primary';
+                    borderColor = 'border-primary';
+                  }
+
+                  return (
+                    <div
+                      key={stepNumber}
+                      data-step={stepNumber}
+                      className="flex flex-col items-center gap-1 min-w-0 flex-shrink-0"
+                    >
+                      <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-medium ${borderColor} ${bgColor} ${statusColor}`}>
+                        {showIcon ? (
+                          isPartial ? (
+                            <AlertCircle className="w-3 h-3 text-white" />
+                          ) : (
+                            <Check className="w-3 h-3 text-white" />
+                          )
+                        ) : (
+                          stepNumber
+                        )}
+                      </div>
+                      <div className={`text-xs leading-tight text-center max-w-16 ${statusColor}`}>
+                        {title}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </ScrollableBreadcrumb>
+          </div>
+        </div>
+      )}
+
+      {/* Complete Profile Status */}
+      {isFullyComplete() && (
+        <div className="bg-card border-b p-4">
+          <div className="max-w-4xl mx-auto">
+            {/* Clickable step indicators */}
+            <ScrollableBreadcrumb currentStep={currentStep}>
+              <div className="flex justify-between gap-1 min-w-max">
+                {stepTitles.map((title, index) => {
                 const stepNumber = index + 1;
                 const completion = getStepCompletion(stepNumber);
                 const isCurrent = stepNumber === currentStep;
