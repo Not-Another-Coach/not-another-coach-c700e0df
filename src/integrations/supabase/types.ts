@@ -5044,6 +5044,7 @@ export type Database = {
           check_type: Database["public"]["Enums"]["verification_check_type"]
           coverage_amount: number | null
           created_at: string
+          draft_status: string | null
           evidence_file_url: string | null
           evidence_metadata: Json | null
           expiry_date: string | null
@@ -5055,6 +5056,7 @@ export type Database = {
           provider: string | null
           rejection_reason: string | null
           status: Database["public"]["Enums"]["verification_check_status"]
+          submitted_at: string | null
           trainer_id: string
           updated_at: string
           verified_at: string | null
@@ -5067,6 +5069,7 @@ export type Database = {
           check_type: Database["public"]["Enums"]["verification_check_type"]
           coverage_amount?: number | null
           created_at?: string
+          draft_status?: string | null
           evidence_file_url?: string | null
           evidence_metadata?: Json | null
           expiry_date?: string | null
@@ -5078,6 +5081,7 @@ export type Database = {
           provider?: string | null
           rejection_reason?: string | null
           status?: Database["public"]["Enums"]["verification_check_status"]
+          submitted_at?: string | null
           trainer_id: string
           updated_at?: string
           verified_at?: string | null
@@ -5090,6 +5094,7 @@ export type Database = {
           check_type?: Database["public"]["Enums"]["verification_check_type"]
           coverage_amount?: number | null
           created_at?: string
+          draft_status?: string | null
           evidence_file_url?: string | null
           evidence_metadata?: Json | null
           expiry_date?: string | null
@@ -5101,6 +5106,7 @@ export type Database = {
           provider?: string | null
           rejection_reason?: string | null
           status?: Database["public"]["Enums"]["verification_check_status"]
+          submitted_at?: string | null
           trainer_id?: string
           updated_at?: string
           verified_at?: string | null

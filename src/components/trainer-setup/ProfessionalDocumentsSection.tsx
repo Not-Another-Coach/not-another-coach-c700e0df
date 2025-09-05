@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { AlertCircle, CheckCircle2, Clock, Upload, FileText, Shield, Award, X } from 'lucide-react';
-import { useEnhancedTrainerVerification } from '@/hooks/useEnhancedTrainerVerification';
-import { SectionHeader } from './SectionHeader';
-import { toast } from 'sonner';
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Loader2, Shield, FileText, Heart, CheckCircle, Clock, XCircle, AlertTriangle, Save, Edit } from "lucide-react";
+import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
+import { useProfessionalDocumentsState } from "@/hooks/useProfessionalDocumentsState";
+import { useEnhancedTrainerVerification } from "@/hooks/useEnhancedTrainerVerification";
 
-interface VerificationCheckFormData {
+interface DocumentFormData {
   provider?: string;
   member_id?: string;
   certificate_id?: string;
@@ -25,501 +26,280 @@ interface VerificationCheckFormData {
 const CheckTypeConfig = {
   cimspa_membership: {
     title: 'CIMSPA Membership',
-    icon: Award,
+    icon: Heart,
     description: 'Provide your current CIMSPA membership details',
-    fields: ['member_id', 'expiry_date', 'file'],
-    required: true,
+    requiredFields: ['member_id', 'expiry_date', 'file'],
+    isMandatory: true,
   },
   insurance_proof: {
     title: 'Professional Insurance',
     icon: Shield,
     description: 'Upload your professional indemnity insurance certificate',
-    fields: ['provider', 'policy_number', 'coverage_amount', 'expiry_date', 'file'],
-    required: true,
+    requiredFields: ['provider', 'policy_number', 'coverage_amount', 'expiry_date', 'file'],
+    isMandatory: true,
   },
   first_aid_certification: {
     title: 'First Aid Certification',
     icon: FileText,
     description: 'Upload your current first aid certification',
-    fields: ['provider', 'certificate_id', 'issue_date', 'expiry_date', 'file'],
-    required: true,
+    requiredFields: ['provider', 'certificate_id', 'issue_date', 'expiry_date', 'file'],
+    isMandatory: true,
   },
 };
 
 const StatusConfig = {
-  pending: { icon: Clock, color: 'bg-amber-100 text-amber-800 border-amber-200', label: 'Under Review' },
-  verified: { icon: CheckCircle2, color: 'bg-emerald-100 text-emerald-800 border-emerald-200', label: 'Verified' },
-  rejected: { icon: AlertCircle, color: 'bg-red-100 text-red-800 border-red-200', label: 'Rejected' },
-  expired: { icon: AlertCircle, color: 'bg-gray-100 text-gray-800 border-gray-200', label: 'Expired' },
+  pending: { icon: Clock, variant: 'secondary' as const, label: 'Under Review' },
+  verified: { icon: CheckCircle, variant: 'default' as const, label: 'Verified' },
+  rejected: { icon: XCircle, variant: 'destructive' as const, label: 'Rejected' },
+  expired: { icon: AlertTriangle, variant: 'outline' as const, label: 'Expired' },
 };
 
 export const ProfessionalDocumentsSection = () => {
   const {
-    loading,
-    submitVerificationCheck,
-    uploadDocument,
-    getCheckByType,
-  } = useEnhancedTrainerVerification();
+    formData,
+    notApplicable,
+    savingStatus,
+    updateFormData,
+    updateNotApplicable,
+    isAnyFieldFilled,
+    saveDraft
+  } = useProfessionalDocumentsState();
 
-  const [formData, setFormData] = useState<Record<string, VerificationCheckFormData>>({});
-  const [uploading, setUploading] = useState<string | null>(null);
-  const [notApplicable, setNotApplicable] = useState<Record<string, boolean>>({});
+  const { 
+    checks, 
+    uploadDocument 
+  } = useEnhancedTrainerVerification();
+  
+  const [uploadingFiles, setUploadingFiles] = useState<Record<string, boolean>>({});
+  const { toast } = useToast();
 
   const handleInputChange = (checkType: string, field: string, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      [checkType]: {
-        ...prev[checkType],
-        [field]: value,
-      },
-    }));
+    updateFormData(checkType, field, value);
   };
 
-  const handleFileChange = (checkType: string, file: File | null) => {
-    setFormData(prev => ({
-      ...prev,
-      [checkType]: {
-        ...prev[checkType],
-        file: file || undefined,
-      },
-    }));
+  const handleFileChange = (checkType: string, field: string, file: File | null) => {
+    updateFormData(checkType, field, file);
   };
 
   const handleNotApplicableChange = (checkType: string, isNotApplicable: boolean) => {
-    setNotApplicable(prev => ({
-      ...prev,
-      [checkType]: isNotApplicable,
-    }));
-    
-    // Clear form data when marking as not applicable
-    if (isNotApplicable) {
-      setFormData(prev => ({
-        ...prev,
-        [checkType]: { not_applicable: true },
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [checkType]: { not_applicable: false },
-      }));
-    }
+    updateNotApplicable(checkType, isNotApplicable);
   };
 
-  const isAnyFieldFilled = (checkType: string): boolean => {
+  const handleSaveDraft = async (checkType: string) => {
     const data = formData[checkType];
-    if (!data) return false;
+    if (!data && !notApplicable[checkType]) return;
+
+    await saveDraft(checkType);
     
-    const fieldsToCheck = ['provider', 'member_id', 'certificate_id', 'policy_number', 'coverage_amount', 'issue_date', 'expiry_date', 'file'];
-    return fieldsToCheck.some(field => {
-      const value = data[field as keyof VerificationCheckFormData];
-      return value !== undefined && value !== '' && value !== null;
+    toast({
+      title: "Draft Saved",
+      description: `Your ${CheckTypeConfig[checkType as keyof typeof CheckTypeConfig].title} draft has been saved.`,
     });
-  };
-
-  const validateRequiredFields = (checkType: keyof typeof CheckTypeConfig): string | null => {
-    const data = formData[checkType];
-    if (!data || notApplicable[checkType]) return null;
-
-    // If any field is filled, all required fields become mandatory
-    if (!isAnyFieldFilled(checkType)) return null;
-
-    const config = CheckTypeConfig[checkType];
-    const missingFields: string[] = [];
-
-    config.fields.forEach(field => {
-      const value = data[field as keyof VerificationCheckFormData];
-      if (!value || value === '') {
-        const fieldLabels: Record<string, string> = {
-          provider: 'Provider',
-          member_id: 'Member ID',
-          certificate_id: 'Certificate ID',
-          policy_number: 'Policy Number',
-          coverage_amount: 'Coverage Amount',
-          issue_date: 'Issue Date',
-          expiry_date: 'Expiry Date',
-          file: 'Document File',
-        };
-        missingFields.push(fieldLabels[field] || field);
-      }
-    });
-
-    return missingFields.length > 0 ? `Missing required fields: ${missingFields.join(', ')}` : null;
-  };
-
-  const handleSubmitCheck = async (checkType: keyof typeof CheckTypeConfig) => {
-    const data = formData[checkType];
-    
-    // Handle not applicable submissions
-    if (notApplicable[checkType]) {
-      toast.success(`${CheckTypeConfig[checkType].title} marked as not applicable`);
-      return;
-    }
-
-    if (!data) return;
-
-    // Validate required fields
-    const validationError = validateRequiredFields(checkType);
-    if (validationError) {
-      toast.error(validationError);
-      return;
-    }
-
-    // Validate expiry date is in the future
-    if (data.expiry_date) {
-      const expiryDate = new Date(data.expiry_date);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0); // Reset time to compare dates only
-      
-      if (expiryDate <= today) {
-        toast.error('Expiry date must be in the future');
-        return;
-      }
-    }
-
-    setUploading(checkType);
-
-    try {
-      let evidence_file_url: string | undefined;
-
-      // Upload file if provided
-      if (data.file) {
-        const uploadPath = await uploadDocument(checkType, data.file);
-        if (!uploadPath) {
-          toast.error('Failed to upload document');
-          return;
-        }
-        evidence_file_url = uploadPath;
-      }
-
-      // Submit verification check with proper data mapping
-      const submitData = {
-        provider: data.provider,
-        member_id: data.member_id,
-        certificate_id: data.certificate_id,
-        policy_number: data.policy_number,
-        coverage_amount: data.coverage_amount ? Number(data.coverage_amount) : undefined,
-        issue_date: data.issue_date,
-        expiry_date: data.expiry_date,
-        evidence_file_url,
-        evidence_metadata: data.file ? {
-          filename: data.file.name,
-          size: data.file.size,
-          type: data.file.type,
-        } : undefined,
-      };
-
-      console.log('Submitting verification check:', { checkType, submitData });
-      
-      await submitVerificationCheck(checkType, submitData);
-
-      // Clear form data
-      setFormData(prev => ({
-        ...prev,
-        [checkType]: {},
-      }));
-      
-      toast.success(`${CheckTypeConfig[checkType].title} submitted successfully`);
-    } catch (error) {
-      console.error('Error submitting verification check:', error);
-      toast.error(`Failed to submit ${CheckTypeConfig[checkType].title}`);
-    } finally {
-      setUploading(null);
-    }
   };
 
   return (
     <div className="space-y-6">
-      <SectionHeader 
-        icons={[FileText, Shield]}
-        title="Professional Documents"
-        description="Upload your professional certifications, insurance, and qualifications"
-      />
+      <div className="space-y-4">
+        <h2 className="text-2xl font-bold">Professional Documents</h2>
+        <p className="text-muted-foreground">
+          Save your professional certifications as drafts and submit them all for review when ready.
+        </p>
+      </div>
 
-      {/* Verification Checks */}
       {Object.entries(CheckTypeConfig).map(([checkType, config]) => {
-        const existingCheck = getCheckByType(checkType as any);
-        const statusConfig = existingCheck ? StatusConfig[existingCheck.status] : null;
-        const IconComponent = config.icon;
-        const isNotApplicableSet = notApplicable[checkType];
-        const anyFieldFilled = isAnyFieldFilled(checkType);
+        const check = checks.find(c => c.check_type === checkType);
+        const status = check?.status;
+        const draftStatus = check?.draft_status || 'draft';
+        const isNotApplicable = notApplicable[checkType];
+        const hasFilledFields = isAnyFieldFilled(checkType);
+        const canSave = hasFilledFields || isNotApplicable;
+        const isSubmitted = draftStatus === 'submitted' && status !== 'rejected';
+
+        // Determine display status
+        let displayStatus = status;
+        if (draftStatus === 'draft' && hasFilledFields) {
+          displayStatus = 'draft';
+        }
 
         return (
-          <Card key={checkType} className={`transition-colors ${
-            anyFieldFilled && !existingCheck?.status ? 'border-amber-200 bg-amber-50/30' : ''
-          }`}>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <IconComponent className="h-5 w-5" />
-                  {config.title}
-                  {config.required && !isNotApplicableSet && (
-                    <span className={`text-red-500 ${anyFieldFilled ? 'font-bold' : ''}`}>
-                      {anyFieldFilled ? '*' : ''}
-                    </span>
-                  )}
+          <Card key={checkType} className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <config.icon className="h-6 w-6 text-primary" />
+                <div>
+                  <h3 className="font-semibold text-lg">{config.title}</h3>
+                  <p className="text-sm text-muted-foreground">{config.description}</p>
                 </div>
-                <div className="flex items-center gap-2">
-                  {isNotApplicableSet && (
-                    <Badge variant="secondary">
-                      <X className="h-3 w-3 mr-1" />
-                      Not Applicable
-                    </Badge>
-                  )}
-                  {statusConfig && (
-                    <Badge className={statusConfig.color}>
-                      <statusConfig.icon className="h-3 w-3 mr-1" />
-                      {statusConfig.label}
-                    </Badge>
-                  )}
-                </div>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground">{config.description}</p>
+              </div>
+              
+              {displayStatus && (
+                <Badge 
+                  variant={displayStatus === 'draft' ? 'secondary' : (StatusConfig[displayStatus]?.variant || 'secondary')} 
+                  className="flex-shrink-0"
+                >
+                  {displayStatus === 'draft' ? (
+                    <>
+                      <Edit className="h-3 w-3 mr-1" />
+                      Draft
+                    </>
+                  ) : StatusConfig[displayStatus] ? (
+                    <>
+                      <StatusConfig[displayStatus].icon className="h-3 w-3 mr-1" />
+                      {StatusConfig[displayStatus].label}
+                    </>
+                  ) : null}
+                </Badge>
+              )}
+            </div>
 
-              {/* Not Applicable Toggle */}
-              {!existingCheck && (
-                <div className="flex items-center justify-between p-3 bg-muted/20 rounded-lg">
-                  <div>
-                    <Label htmlFor={`${checkType}-not-applicable`} className="font-medium">
-                      Not Applicable
-                    </Label>
-                    <p className="text-xs text-muted-foreground">
-                      Check this if you don't have this type of document
-                    </p>
-                  </div>
+            {/* Submission lock notice */}
+            {isSubmitted && (
+              <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                <p className="text-sm text-amber-800 font-medium">
+                  This document has been submitted for admin review and cannot be edited.
+                </p>
+              </div>
+            )}
+
+            {/* Not Applicable Toggle */}
+            {!isSubmitted && (
+              <div className="mb-4">
+                <div className="flex items-center space-x-2">
                   <Switch
-                    id={`${checkType}-not-applicable`}
-                    checked={isNotApplicableSet}
-                    onCheckedChange={(checked) => handleNotApplicableChange(checkType, checked)}
+                    id={`not-applicable-${checkType}`}
+                    checked={isNotApplicable}
+                    onCheckedChange={(checked) => updateNotApplicable(checkType, checked)}
                   />
+                  <Label htmlFor={`not-applicable-${checkType}`} className="text-sm">
+                    Not applicable to my training services
+                  </Label>
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* Show existing check details if verified or under review */}
-              {existingCheck && (
-                <div className="p-4 bg-muted/30 rounded-lg space-y-2">
-                  <h4 className="font-medium">Submitted Information</h4>
-                  {existingCheck.provider && (
-                    <p className="text-sm"><strong>Provider:</strong> {existingCheck.provider}</p>
-                  )}
-                  {existingCheck.member_id && (
-                    <p className="text-sm"><strong>Member ID:</strong> {existingCheck.member_id}</p>
-                  )}
-                  {existingCheck.certificate_id && (
-                    <p className="text-sm"><strong>Certificate ID:</strong> {existingCheck.certificate_id}</p>
-                  )}
-                  {existingCheck.policy_number && (
-                    <p className="text-sm"><strong>Policy Number:</strong> {existingCheck.policy_number}</p>
-                  )}
-                  {existingCheck.coverage_amount && (
-                    <p className="text-sm"><strong>Coverage:</strong> £{existingCheck.coverage_amount.toLocaleString()}</p>
-                  )}
-                  {existingCheck.expiry_date && (
-                    <p className="text-sm"><strong>Expiry Date:</strong> {new Date(existingCheck.expiry_date).toLocaleDateString()}</p>
-                  )}
-                  {existingCheck.rejection_reason && (
-                    <div className="p-3 bg-red-50 border border-red-200 rounded">
-                      <p className="text-sm font-medium text-red-800">Rejection Reason:</p>
-                      <p className="text-sm text-red-700">{existingCheck.rejection_reason}</p>
-                    </div>
-                  )}
-                  {existingCheck.admin_notes && (
-                    <div className="p-3 bg-blue-50 border border-blue-200 rounded">
-                      <p className="text-sm font-medium text-blue-800">Admin Notes:</p>
-                      <p className="text-sm text-blue-700">{existingCheck.admin_notes}</p>
-                    </div>
-                  )}
-                </div>
-              )}
+            {/* Show existing information if available */}
+            {check && !isNotApplicable && (
+              <div className="mb-4 p-4 bg-muted/50 rounded-lg">
+                <h4 className="font-medium mb-2">
+                  {draftStatus === 'draft' ? 'Current Draft:' : 'Submitted Information:'}
+                </h4>
+                {check.provider && <p className="text-sm"><strong>Provider:</strong> {check.provider}</p>}
+                {check.member_id && <p className="text-sm"><strong>Member ID:</strong> {check.member_id}</p>}
+                {check.certificate_id && <p className="text-sm"><strong>Certificate ID:</strong> {check.certificate_id}</p>}
+                {check.policy_number && <p className="text-sm"><strong>Policy Number:</strong> {check.policy_number}</p>}
+                {check.coverage_amount && <p className="text-sm"><strong>Coverage:</strong> £{check.coverage_amount}</p>}
+                {check.issue_date && <p className="text-sm"><strong>Issue Date:</strong> {format(new Date(check.issue_date), 'PPP')}</p>}
+                {check.expiry_date && <p className="text-sm"><strong>Expiry Date:</strong> {format(new Date(check.expiry_date), 'PPP')}</p>}
+                {check.evidence_file_url && (
+                  <p className="text-sm">
+                    <strong>Document:</strong> 
+                    <a href={check.evidence_file_url} target="_blank" className="text-primary hover:underline ml-1">
+                      View uploaded document
+                    </a>
+                  </p>
+                )}
+              </div>
+            )}
 
-              {/* Form for new submission or resubmission */}
-              {(!existingCheck || existingCheck.status === 'rejected' || existingCheck.status === 'expired') && !isNotApplicableSet && (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {config.fields.includes('provider') && (
-                      <div>
-                        <Label htmlFor={`${checkType}-provider`} className={anyFieldFilled ? 'text-red-600 font-medium' : ''}>
-                          Provider {anyFieldFilled && '*'}
+            {/* Form for editing (only if not submitted or rejected) */}
+            {!isNotApplicable && (!isSubmitted || status === 'rejected') && (
+              <div className="space-y-4">
+                {config.requiredFields.map((field) => {
+                  const fieldKey = field as keyof DocumentFormData;
+                  const isRequired = hasFilledFields; // Make required only if any field is filled
+                  
+                  if (field === 'file') {
+                    return (
+                      <div key={field}>
+                        <Label htmlFor={`${checkType}-${field}`} className="text-sm font-medium">
+                          Upload Evidence {isRequired && <span className="text-destructive">*</span>}
                         </Label>
-                        <Input
-                          id={`${checkType}-provider`}
-                          value={formData[checkType]?.provider || ''}
-                          onChange={(e) => handleInputChange(checkType, 'provider', e.target.value)}
-                          placeholder="Insurance company / Certification provider"
-                          className={anyFieldFilled && !formData[checkType]?.provider ? 'border-red-300' : ''}
-                        />
+                        <div className="mt-1">
+                          <Input
+                            id={`${checkType}-${field}`}
+                            type="file"
+                            accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                            onChange={(e) => handleFileChange(checkType, field, e.target.files?.[0] || null)}
+                            className="cursor-pointer"
+                          />
+                        </div>
                       </div>
-                    )}
+                    );
+                  }
 
-                    {config.fields.includes('member_id') && (
-                      <div>
-                        <Label htmlFor={`${checkType}-member_id`} className={anyFieldFilled ? 'text-red-600 font-medium' : ''}>
-                          Member ID {anyFieldFilled && '*'}
-                        </Label>
-                        <Input
-                          id={`${checkType}-member_id`}
-                          value={formData[checkType]?.member_id || ''}
-                          onChange={(e) => handleInputChange(checkType, 'member_id', e.target.value)}
-                          placeholder="Your CIMSPA member ID"
-                          className={anyFieldFilled && !formData[checkType]?.member_id ? 'border-red-300' : ''}
-                        />
-                      </div>
-                    )}
-
-                    {config.fields.includes('certificate_id') && (
-                      <div>
-                        <Label htmlFor={`${checkType}-certificate_id`} className={anyFieldFilled ? 'text-red-600 font-medium' : ''}>
-                          Certificate ID {anyFieldFilled && '*'}
-                        </Label>
-                        <Input
-                          id={`${checkType}-certificate_id`}
-                          value={formData[checkType]?.certificate_id || ''}
-                          onChange={(e) => handleInputChange(checkType, 'certificate_id', e.target.value)}
-                          placeholder="Certificate number"
-                          className={anyFieldFilled && !formData[checkType]?.certificate_id ? 'border-red-300' : ''}
-                        />
-                      </div>
-                    )}
-
-                    {config.fields.includes('policy_number') && (
-                      <div>
-                        <Label htmlFor={`${checkType}-policy_number`} className={anyFieldFilled ? 'text-red-600 font-medium' : ''}>
-                          Policy Number {anyFieldFilled && '*'}
-                        </Label>
-                        <Input
-                          id={`${checkType}-policy_number`}
-                          value={formData[checkType]?.policy_number || ''}
-                          onChange={(e) => handleInputChange(checkType, 'policy_number', e.target.value)}
-                          placeholder="Insurance policy number"
-                          className={anyFieldFilled && !formData[checkType]?.policy_number ? 'border-red-300' : ''}
-                        />
-                      </div>
-                    )}
-
-                    {config.fields.includes('coverage_amount') && (
-                      <div>
-                        <Label htmlFor={`${checkType}-coverage`} className={anyFieldFilled ? 'text-red-600 font-medium' : ''}>
-                          Coverage Amount (£) {anyFieldFilled && '*'}
-                        </Label>
-                        <Input
-                          id={`${checkType}-coverage`}
-                          type="number"
-                          value={formData[checkType]?.coverage_amount || ''}
-                          onChange={(e) => handleInputChange(checkType, 'coverage_amount', parseInt(e.target.value))}
-                          placeholder="1000000"
-                          className={anyFieldFilled && !formData[checkType]?.coverage_amount ? 'border-red-300' : ''}
-                        />
-                      </div>
-                    )}
-
-                    {config.fields.includes('issue_date') && (
-                      <div>
-                        <Label htmlFor={`${checkType}-issue_date`} className={anyFieldFilled ? 'text-red-600 font-medium' : ''}>
-                          Issue Date {anyFieldFilled && '*'}
-                        </Label>
-                        <Input
-                          id={`${checkType}-issue_date`}
-                          type="date"
-                          value={formData[checkType]?.issue_date || ''}
-                          onChange={(e) => handleInputChange(checkType, 'issue_date', e.target.value)}
-                          className={anyFieldFilled && !formData[checkType]?.issue_date ? 'border-red-300' : ''}
-                        />
-                      </div>
-                    )}
-
-                    {config.fields.includes('expiry_date') && (
-                      <div>
-                        <Label htmlFor={`${checkType}-expiry_date`} className={anyFieldFilled ? 'text-red-600 font-medium' : ''}>
-                          Expiry Date {anyFieldFilled && '*'}
-                        </Label>
-                        <Input
-                          id={`${checkType}-expiry_date`}
-                          type="date"
-                          value={formData[checkType]?.expiry_date || ''}
-                          min={new Date().toISOString().split('T')[0]}
-                          onChange={(e) => handleInputChange(checkType, 'expiry_date', e.target.value)}
-                          className={anyFieldFilled && !formData[checkType]?.expiry_date ? 'border-red-300' : ''}
-                        />
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Must be a future date
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  {config.fields.includes('file') && (
-                    <div>
-                      <Label htmlFor={`${checkType}-file`} className={anyFieldFilled ? 'text-red-600 font-medium' : ''}>
-                        Upload Document {anyFieldFilled && '*'}
+                  return (
+                    <div key={field}>
+                      <Label htmlFor={`${checkType}-${field}`} className="text-sm font-medium">
+                        {field.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase())}
+                        {isRequired && <span className="text-destructive">*</span>}
                       </Label>
-                      <Input
-                        id={`${checkType}-file`}
-                        type="file"
-                        accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                        onChange={(e) => handleFileChange(checkType, e.target.files?.[0] || null)}
-                        className={`cursor-pointer ${anyFieldFilled && !formData[checkType]?.file ? 'border-red-300' : ''}`}
-                      />
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Accepted formats: PDF, JPG, PNG, DOC, DOCX (Max 10MB)
-                      </p>
+                      <div className="mt-1">
+                        {field.includes('date') ? (
+                          <Input
+                            id={`${checkType}-${field}`}
+                            type="date"
+                            value={formData[checkType]?.[fieldKey] as string || ''}
+                            onChange={(e) => handleInputChange(checkType, field, e.target.value)}
+                          />
+                        ) : field === 'coverage_amount' ? (
+                          <Input
+                            id={`${checkType}-${field}`}
+                            type="number"
+                            placeholder="Enter amount"
+                            value={formData[checkType]?.[fieldKey] as number || ''}
+                            onChange={(e) => handleInputChange(checkType, field, parseFloat(e.target.value) || undefined)}
+                          />
+                        ) : (
+                          <Input
+                            id={`${checkType}-${field}`}
+                            type="text"
+                            placeholder={`Enter ${field.replace('_', ' ')}`}
+                            value={formData[checkType]?.[fieldKey] as string || ''}
+                            onChange={(e) => handleInputChange(checkType, field, e.target.value)}
+                          />
+                        )}
+                      </div>
                     </div>
-                  )}
+                  );
+                })}
 
-                  {anyFieldFilled && (
-                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                      <p className="text-sm text-amber-800 font-medium">
-                        ⚠️ All fields are now required
-                      </p>
-                      <p className="text-xs text-amber-700 mt-1">
-                        Since you've started filling this document, all fields marked with * are now mandatory to submit.
-                      </p>
-                    </div>
+                <Button
+                  onClick={() => handleSaveDraft(checkType)}
+                  disabled={!canSave || savingStatus[checkType]}
+                  className="w-full"
+                  variant="outline"
+                >
+                  {savingStatus[checkType] ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Save Draft
+                    </>
                   )}
-
-                  <Button
-                    onClick={() => handleSubmitCheck(checkType as any)}
-                    disabled={uploading === checkType || loading}
-                    className="w-full"
-                    variant={anyFieldFilled && validateRequiredFields(checkType as any) ? "destructive" : "default"}
-                  >
-                    {uploading === checkType ? (
-                      <>
-                        <Upload className="h-4 w-4 mr-2 animate-spin" />
-                        Uploading...
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="h-4 w-4 mr-2" />
-                        {isNotApplicableSet ? 'Mark as Not Applicable' : `Submit ${config.title}`}
-                      </>
-                    )}
-                  </Button>
-                </div>
-              )}
-            </CardContent>
+                </Button>
+              </div>
+            )}
           </Card>
         );
       })}
 
       {/* Information Card */}
-      <Card>
-        <CardContent className="p-6">
-          <h4 className="font-medium mb-2">Required Documentation</h4>
-          <ul className="text-sm text-muted-foreground space-y-1">
-            <li>• CIMSPA Membership: Current membership with valid expiry date</li>
-            <li>• Professional Insurance: Public liability and indemnity insurance</li>
-            <li>• First Aid Certification: Current first aid certification from recognized provider</li>
+      <Card className="bg-blue-50 border-blue-200">
+        <div className="p-6">
+          <h4 className="font-medium mb-2 text-blue-900">Document Upload Guidelines</h4>
+          <ul className="text-sm text-blue-800 space-y-1">
+            <li>• Save your documents as drafts as you work on them</li>
+            <li>• All fields become mandatory once you start filling any field</li>
+            <li>• Use the verification overview to submit all documents for admin review</li>
+            <li>• Accepted formats: PDF, JPG, PNG, DOC, DOCX (max 10MB per file)</li>
+            <li>• Ensure all documents are current and clearly readable</li>
+            <li>• Processing time: 2-5 business days after submission</li>
           </ul>
-
-          <h4 className="font-medium mt-4 mb-2">Upload Guidelines</h4>
-          <ul className="text-sm text-muted-foreground space-y-1">
-            <li>• Documents must be clear and legible</li>
-            <li>• All expiry dates must be in the future</li>
-            <li>• Accepted formats: PDF, JPG, PNG, DOC, DOCX</li>
-            <li>• Maximum file size: 10MB per document</li>
-          </ul>
-        </CardContent>
+        </div>
       </Card>
     </div>
   );

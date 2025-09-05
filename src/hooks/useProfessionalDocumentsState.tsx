@@ -14,9 +14,10 @@ interface DocumentFormData {
 }
 
 export const useProfessionalDocumentsState = () => {
-  const { checks } = useEnhancedTrainerVerification();
+  const { checks, submitVerificationCheck } = useEnhancedTrainerVerification();
   const [formData, setFormData] = useState<Record<string, DocumentFormData>>({});
   const [notApplicable, setNotApplicable] = useState<Record<string, boolean>>({});
+  const [savingStatus, setSavingStatus] = useState<Record<string, boolean>>({});
 
   // Create form state that can be accessed by validation
   const getDocumentsState = () => {
@@ -71,6 +72,21 @@ export const useProfessionalDocumentsState = () => {
     });
   };
 
+  const saveDraft = async (checkType: string) => {
+    if (!formData[checkType]) return;
+    
+    setSavingStatus(prev => ({ ...prev, [checkType]: true }));
+    
+    try {
+      // Save as draft by submitting with draft_status
+      await submitVerificationCheck(checkType as any, formData[checkType]);
+    } catch (error) {
+      console.error('Error saving draft:', error);
+    } finally {
+      setSavingStatus(prev => ({ ...prev, [checkType]: false }));
+    }
+  };
+
   const getCompletionStatus = () => {
     const checkTypes = ['cimspa_membership', 'insurance_proof', 'first_aid_certification'];
     
@@ -82,10 +98,15 @@ export const useProfessionalDocumentsState = () => {
       const isNotApplicableSet = notApplicable[checkType];
       const anyFieldFilled = isAnyFieldFilled(checkType);
 
-      // Completed if verified, pending, or marked as not applicable
-      if (existingCheck?.status === 'verified' || existingCheck?.status === 'pending' || isNotApplicableSet) {
+      // Check if document is ready for submission (has data or is not applicable)
+      const isReadyForSubmission = existingCheck?.status === 'verified' || 
+                                  existingCheck?.status === 'pending' || 
+                                  isNotApplicableSet ||
+                                  (existingCheck && anyFieldFilled);
+
+      if (isReadyForSubmission) {
         completedCount++;
-      } else if (anyFieldFilled) {
+      } else if (anyFieldFilled || existingCheck) {
         partialCount++;
       }
     });
@@ -95,13 +116,32 @@ export const useProfessionalDocumentsState = () => {
     return 'not_started';
   };
 
+  const canSubmitForReview = () => {
+    const checkTypes = ['cimspa_membership', 'insurance_proof', 'first_aid_certification'];
+    
+    return checkTypes.every(checkType => {
+      const existingCheck = checks.find(check => check.check_type === checkType);
+      const isNotApplicableSet = notApplicable[checkType];
+      const anyFieldFilled = isAnyFieldFilled(checkType);
+      
+      // Ready if: already submitted/verified, marked not applicable, or has complete data
+      return existingCheck?.status === 'verified' || 
+             existingCheck?.status === 'pending' || 
+             isNotApplicableSet ||
+             (existingCheck && anyFieldFilled);
+    });
+  };
+
   return {
     formData,
     notApplicable,
+    savingStatus,
     getDocumentsState,
     updateFormData,
     updateNotApplicable,
     isAnyFieldFilled,
-    getCompletionStatus
+    getCompletionStatus,
+    saveDraft,
+    canSubmitForReview
   };
 };

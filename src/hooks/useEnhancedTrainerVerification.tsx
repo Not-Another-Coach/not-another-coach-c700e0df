@@ -146,37 +146,43 @@ export const useEnhancedTrainerVerification = () => {
 
   // Submit verification check
   const submitVerificationCheck = useCallback(async (
-    checkType: VerificationCheck['check_type'],
-    data: Partial<VerificationCheck>
+    checkType: VerificationCheckType,
+    checkData: any
   ) => {
     if (!user) return;
 
     try {
-      const checkData = {
-        trainer_id: user.id,
-        check_type: checkType,
-        status: 'pending' as const,
-        provider: data.provider || null,
-        awarding_body: data.awarding_body || null,
-        member_id: data.member_id || null,
-        certificate_id: data.certificate_id || null,
-        policy_number: data.policy_number || null,
-        level: data.level || null,
-        coverage_amount: data.coverage_amount || null,
-        issue_date: data.issue_date || null,
-        expiry_date: data.expiry_date || null,
-        evidence_file_url: data.evidence_file_url || null,
-        evidence_metadata: data.evidence_metadata || null,
-      };
+      // Upload file if provided
+      let fileUrl: string | undefined;
+      if (checkData.file) {
+        fileUrl = await uploadDocument(checkType, checkData.file);
+        if (!fileUrl) {
+          throw new Error('Failed to upload document');
+        }
+      }
 
-      console.log('Upserting verification check:', checkData);
-
-      const { data: result, error } = await supabase
+      const { data, error } = await supabase
         .from('trainer_verification_checks')
-        .upsert(checkData, { 
+        .upsert({
+          trainer_id: user.id,
+          check_type: checkType,
+          provider: checkData.provider,
+          member_id: checkData.member_id,
+          certificate_id: checkData.certificate_id,
+          policy_number: checkData.policy_number,
+          coverage_amount: checkData.coverage_amount,
+          issue_date: checkData.issue_date,
+          expiry_date: checkData.expiry_date,
+          evidence_file_url: fileUrl,
+          verification_data: checkData,
+          status: 'pending',
+          draft_status: 'submitted',
+          submitted_at: new Date().toISOString()
+        }, {
           onConflict: 'trainer_id,check_type'
-        })
-        .select();
+        });
+
+      if (error) throw error;
 
       if (error) {
         console.error('Database error:', error);

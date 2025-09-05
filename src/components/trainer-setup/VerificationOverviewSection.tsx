@@ -1,140 +1,340 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Progress } from '@/components/ui/progress';
-import { Shield, CheckCircle2 } from 'lucide-react';
-import { useEnhancedTrainerVerification } from '@/hooks/useEnhancedTrainerVerification';
-import { SectionHeader } from './SectionHeader';
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useEnhancedTrainerVerification } from "@/hooks/useEnhancedTrainerVerification";
+import { useProfessionalDocumentsState } from "@/hooks/useProfessionalDocumentsState";
+import { 
+  Shield, 
+  CheckCircle, 
+  Clock, 
+  XCircle, 
+  AlertTriangle, 
+  FileText, 
+  Heart, 
+  Eye, 
+  EyeOff,
+  RefreshCw,
+  Send
+} from "lucide-react";
+import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
 const CheckTypeConfig = {
-  cimspa_membership: 'CIMSPA Membership',
-  insurance_proof: 'Professional Insurance', 
-  first_aid_certification: 'First Aid Certification',
+  cimspa_membership: {
+    title: 'CIMSPA Membership',
+    icon: Heart,
+    description: 'Professional membership verification',
+  },
+  insurance_proof: {
+    title: 'Professional Insurance',
+    icon: Shield,
+    description: 'Indemnity insurance coverage',
+  },
+  first_aid_certification: {
+    title: 'First Aid Certification',
+    icon: FileText,
+    description: 'Current first aid qualification',
+  },
 };
 
 export const VerificationOverviewSection = () => {
-  const {
-    loading,
-    overview,
-    updateDisplayPreference,
-    getCheckByType,
-    getVerificationBadgeStatus,
+  const { 
+    overview, 
+    checks, 
+    loading, 
+    updateDisplayPreference, 
+    fetchVerificationData,
+    submitVerificationCheck
   } = useEnhancedTrainerVerification();
+  
+  const { canSubmitForReview } = useProfessionalDocumentsState();
+  
+  const [isUpdatingPreference, setIsUpdatingPreference] = useState(false);
+  const [isSubmittingForReview, setIsSubmittingForReview] = useState(false);
+  const { toast } = useToast();
 
-  const calculateProgress = () => {
-    const requiredChecks = Object.keys(CheckTypeConfig);
-    const completedChecks = requiredChecks.filter(type => {
-      const check = getCheckByType(type as any);
-      return check?.status === 'verified';
-    });
-    return (completedChecks.length / requiredChecks.length) * 100;
+  const handleDisplayPreferenceToggle = async () => {
+    setIsUpdatingPreference(true);
+    try {
+      const newPreference = overview?.display_preference === 'visible' ? 'hidden' : 'visible';
+      await updateDisplayPreference(newPreference);
+      
+      toast({
+        title: "Display Preference Updated",
+        description: `Verification badge is now ${newPreference}.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Update Failed",
+        description: "Failed to update display preference.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUpdatingPreference(false);
+    }
   };
 
-  const badgeStatus = getVerificationBadgeStatus();
+  const handleRefresh = async () => {
+    await fetchVerificationData();
+    toast({
+      title: "Verification Data Refreshed",
+      description: "Your verification status has been updated.",
+    });
+  };
+
+  const handleSubmitAllForReview = async () => {
+    if (!canSubmitForReview()) return;
+    
+    setIsSubmittingForReview(true);
+    try {
+      // Submit all draft documents for review
+      const checkTypes = ['cimspa_membership', 'insurance_proof', 'first_aid_certification'];
+      
+      for (const checkType of checkTypes) {
+        const check = checks.find(c => c.check_type === checkType);
+        if (check && check.draft_status === 'draft') {
+          await submitVerificationCheck(checkType as any, {});
+        }
+      }
+      
+      await fetchVerificationData();
+      
+      toast({
+        title: "Documents Submitted",
+        description: "All your documents have been submitted for admin review. You will receive an update once they have been reviewed.",
+      });
+    } catch (error) {
+      toast({
+        title: "Submission Failed",
+        description: "There was an error submitting your documents. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmittingForReview(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5" />
+            Verification Overview
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center py-8">
+            <RefreshCw className="h-6 w-6 animate-spin" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      <SectionHeader 
-        icons={[Shield, CheckCircle2]}
-        title="Profile Verification"
-        description="Complete your profile verification to build trust with potential clients"
-      />
+      <div className="space-y-4">
+        <h2 className="text-2xl font-bold">Verification Overview</h2>
+        <p className="text-muted-foreground">
+          Review your verification status and submit documents for admin review.
+        </p>
+      </div>
 
-      {/* Overview Card */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
             Verification Status
           </CardTitle>
+          <CardDescription>
+            Manage your professional verification documents and display preferences
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Progress */}
-          <div>
-            <div className="flex justify-between text-sm mb-2">
-              <span>Verification Progress</span>
-              <span>{Math.round(calculateProgress())}% Complete</span>
-            </div>
-            <Progress value={calculateProgress()} className="h-2" />
-          </div>
-
-          {/* Document Status Summary */}
-          <div className="space-y-2">
-            <h4 className="font-medium">Required Documents</h4>
-            {Object.entries(CheckTypeConfig).map(([checkType, title]) => {
-              const check = getCheckByType(checkType as any);
-              const status = check?.status;
-              
-              let statusColor = 'bg-gray-100 text-gray-800';
-              let statusLabel = 'Not Submitted';
-              
-              if (status === 'pending') {
-                statusColor = 'bg-amber-100 text-amber-800';
-                statusLabel = 'Under Review';
-              } else if (status === 'verified') {
-                statusColor = 'bg-emerald-100 text-emerald-800';
-                statusLabel = 'Verified';
-              } else if (status === 'rejected') {
-                statusColor = 'bg-red-100 text-red-800';
-                statusLabel = 'Rejected';
-              }
-
-              return (
-                <div key={checkType} className="flex items-center justify-between p-3 border border-border rounded-lg">
-                  <span className="text-sm font-medium">{title}</span>
-                  <Badge className={statusColor}>
-                    {statusLabel}
-                  </Badge>
+        
+        <CardContent className="space-y-6">
+          {/* Submit All Documents Section */}
+          {canSubmitForReview() && (
+            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <h4 className="font-medium text-green-900">Ready for Review</h4>
+                  <p className="text-sm text-green-700">
+                    All required documents are complete and ready to submit for admin review.
+                  </p>
                 </div>
-              );
-            })}
-          </div>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button className="bg-green-600 hover:bg-green-700">
+                      <Send className="h-4 w-4 mr-2" />
+                      Submit for Review
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Submit Documents for Admin Review</DialogTitle>
+                      <DialogDescription>
+                        Are you sure you want to submit all your professional documents for admin review? 
+                        Once submitted, you won't be able to edit them until the review is complete.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => {}}>Cancel</Button>
+                      <Button 
+                        onClick={handleSubmitAllForReview}
+                        disabled={isSubmittingForReview}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        {isSubmittingForReview ? (
+                          <>
+                            <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                            Submitting...
+                          </>
+                        ) : (
+                          <>
+                            <Send className="h-4 w-4 mr-2" />
+                            Submit All Documents
+                          </>
+                        )}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </div>
+          )}
 
-          {/* Badge Toggle */}
-          <div className="flex items-center justify-between p-4 border border-border rounded-lg bg-muted/20">
-            <div>
-              <h4 className="font-medium">Public Verification Badge</h4>
+          {/* Display Preference Toggle */}
+          <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+            <div className="space-y-1">
+              <h4 className="font-medium">Verification Badge Display</h4>
               <p className="text-sm text-muted-foreground">
-                Show "Verified Coach" badge on your public profile when all checks pass
+                Control whether your verification status is visible to potential clients
               </p>
             </div>
-            <Switch
-              checked={overview?.display_preference === 'verified_allowed'}
-              onCheckedChange={(checked) =>
-                updateDisplayPreference(checked ? 'verified_allowed' : 'hidden')
-              }
-            />
+            <Button
+              variant={overview?.display_preference === 'visible' ? 'default' : 'outline'}
+              size="sm"
+              onClick={handleDisplayPreferenceToggle}
+              disabled={isUpdatingPreference || loading}
+              className="min-w-[100px]"
+            >
+              {isUpdatingPreference ? (
+                <RefreshCw className="h-4 w-4 animate-spin" />
+              ) : overview?.display_preference === 'visible' ? (
+                <>
+                  <Eye className="h-4 w-4 mr-2" />
+                  Visible
+                </>
+              ) : (
+                <>
+                  <EyeOff className="h-4 w-4 mr-2" />
+                  Hidden
+                </>
+              )}
+            </Button>
           </div>
 
-          {/* Current Status */}
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">Current Badge Status:</span>
-            <Badge variant={badgeStatus === 'verified' ? 'default' : 'secondary'}>
-              {badgeStatus === 'verified' ? 'Verified Coach' : 'Not Displayed'}
+          <Separator />
+
+          {/* Documents Status List */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h4 className="font-medium">Document Status</h4>
+              <Button variant="ghost" size="sm" onClick={handleRefresh}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh
+              </Button>
+            </div>
+
+            <div className="space-y-3">
+              {Object.entries(CheckTypeConfig).map(([checkType, typeConfig]) => {
+                const check = checks.find(c => c.check_type === checkType);
+                
+                const getStatusColor = (status: string, draftStatus?: string) => {
+                  if (draftStatus === 'draft') {
+                    return 'text-blue-600';
+                  }
+                  switch (status) {
+                    case 'verified':
+                      return 'text-green-600';
+                    case 'pending':
+                      return 'text-amber-600';
+                    case 'rejected':
+                      return 'text-red-600';
+                    case 'expired':
+                      return 'text-orange-600';
+                    default:
+                      return 'text-muted-foreground';
+                  }
+                };
+
+                const getDisplayStatus = (check: any) => {
+                  if (!check) return 'Not Started';
+                  
+                  if (check.draft_status === 'draft') {
+                    return 'Draft Saved';
+                  }
+                  
+                  switch (check.status) {
+                    case 'verified':
+                      return 'Verified';
+                    case 'pending':
+                      return 'Under Review';
+                    case 'rejected':
+                      return 'Rejected';
+                    case 'expired':
+                      return 'Expired';
+                    default:
+                      return 'Not Started';
+                  }
+                };
+
+                return (
+                  <div key={checkType} className="flex items-center justify-between p-3 border border-border rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <typeConfig.icon className="h-5 w-5 text-muted-foreground" />
+                      <div className="flex-1">
+                        <p className="font-medium">{typeConfig.title}</p>
+                        <p className="text-xs text-muted-foreground">{typeConfig.description}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className={`text-sm font-medium ${getStatusColor(check?.status || 'not_started', check?.draft_status)}`}>
+                          {getDisplayStatus(check)}
+                        </p>
+                        {check?.submitted_at && (
+                          <p className="text-xs text-muted-foreground">
+                            Submitted: {format(new Date(check.submitted_at), 'MMM d, yyyy')}
+                          </p>
+                        )}
+                        {check?.draft_status === 'draft' && check?.updated_at && (
+                          <p className="text-xs text-muted-foreground">
+                            Saved: {format(new Date(check.updated_at), 'MMM d, yyyy')}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Overall Status */}
+          <Separator />
+          
+          <div className="text-center p-4 bg-muted/30 rounded-lg">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <Shield className="h-5 w-5" />
+              <span className="font-medium">Overall Verification Status</span>
+            </div>
+            <Badge variant={overview?.overall_status === 'verified' ? 'default' : 'secondary'} className="text-sm">
+              {overview?.overall_status === 'verified' ? 'Verified Trainer' : 'Pending Verification'}
             </Badge>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Information Card */}
-      <Card>
-        <CardContent className="p-6">
-          <h4 className="font-medium mb-2">Verification Benefits</h4>
-          <ul className="text-sm text-muted-foreground space-y-1">
-            <li>• Display "Verified Coach" badge on your profile</li>
-            <li>• Increased client trust and credibility</li>
-            <li>• Higher visibility in search results</li>
-            <li>• Access to premium features</li>
-          </ul>
-
-          <h4 className="font-medium mt-4 mb-2">Verification Process</h4>
-          <ol className="text-sm text-muted-foreground space-y-1">
-            <li>1. Submit required documentation in the previous step</li>
-            <li>2. Admin review (2-5 business days)</li>
-            <li>3. Receive verification status notification</li>
-            <li>4. Badge appears on profile (if enabled)</li>
-          </ol>
         </CardContent>
       </Card>
     </div>
