@@ -346,7 +346,7 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
       console.log(`[Copy WoW] Copying data to package ${targetPackageId}`);
       
       // Copy the ways of working data
-      await savePackageWorkflow(targetPackageId, targetPackageName, {
+      const savedData = await savePackageWorkflow(targetPackageId, targetPackageName, {
         onboarding_items: (fullSourceWorkflow.onboarding_items as { id: string; text: string; }[]) || [],
         first_week_items: (fullSourceWorkflow.first_week_items as { id: string; text: string; }[]) || [],
         ongoing_structure_items: (fullSourceWorkflow.ongoing_structure_items as { id: string; text: string; }[]) || [],
@@ -362,6 +362,20 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
         client_expectations_activity_ids: fullSourceWorkflow.client_expectations_activity_ids || [],
         what_i_bring_activity_ids: fullSourceWorkflow.what_i_bring_activity_ids || [],
       });
+
+      // Check if the save operation succeeded
+      if (!savedData) {
+        console.warn(`[Copy WoW] Save operation returned no data for package ${targetPackageId}`);
+        toast({
+          title: "Copy failed",
+          description: "Failed to save the copied ways of working data.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Add a small delay to ensure database transaction is committed
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       // Verify the copy was successful
       console.log(`[Copy WoW] Verifying successful copy for package ${targetPackageId}`);
