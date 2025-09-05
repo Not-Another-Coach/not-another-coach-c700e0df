@@ -1,14 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Settings } from "lucide-react";
+import { Plus, Settings, Info } from "lucide-react";
 import { useTrainerActivities } from "@/hooks/useTrainerActivities";
+import { useProfileStepValidation } from "@/hooks/useProfileStepValidation";
 import { SectionHeader } from "./SectionHeader";
 import { EnhancedActivityPickerDialog } from "./EnhancedActivityPickerDialog";
 import { ActivityWithAssignment } from "./ActivityWithAssignment";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface SelectedActivity {
   id?: string;
@@ -37,7 +39,41 @@ export function SimplifiedWaysOfWorkingSection({
   clearFieldError,
 }: SimplifiedWaysOfWorkingSectionProps) {
   const { getSuggestionsBySection } = useTrainerActivities();
+  const { checkWaysOfWorkingPrerequisites } = useProfileStepValidation();
   const [activePickerSection, setActivePickerSection] = useState<string | null>(null);
+  
+  // Check if prerequisites are met for enabling the completion checkbox
+  const prerequisitesMet = useMemo(() => {
+    return checkWaysOfWorkingPrerequisites(formData);
+  }, [formData, checkWaysOfWorkingPrerequisites]);
+  
+  // Get missing requirements for tooltip
+  const getMissingRequirements = (): string[] => {
+    const missing: string[] = [];
+    const textFields = [
+      { key: 'wow_how_i_work', label: 'How I Work' },
+      { key: 'wow_what_i_provide', label: 'What I Provide' },
+      { key: 'wow_client_expectations', label: 'Client Expectations' }
+    ];
+    
+    textFields.forEach(field => {
+      if (!formData[field.key] || formData[field.key].length < 20) {
+        missing.push(`${field.label} description (min 20 characters)`);
+      }
+    });
+    
+    const activities = formData.wow_activities;
+    const hasActivities = activities && typeof activities === 'object' &&
+      ['wow_how_i_work', 'wow_what_i_provide', 'wow_client_expectations'].some(section => 
+        Array.isArray(activities[section]) && activities[section].length > 0
+      );
+    
+    if (!hasActivities) {
+      missing.push('At least one activity selected');
+    }
+    
+    return missing;
+  };
 
   // Section configuration - using actual database categories
   const sections = [
@@ -307,18 +343,53 @@ export function SimplifiedWaysOfWorkingSection({
       <Card>
         <CardContent className="p-6">
           <div className="flex items-center space-x-2">
-            <Checkbox
-              id="wow_setup_completed"
-              checked={formData.wow_setup_completed || false}
-              onCheckedChange={(checked) => updateFormData({ wow_setup_completed: checked })}
-            />
-            <label
-              htmlFor="wow_setup_completed"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-            >
-              Ways of Working setup completed
-            </label>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="wow_setup_completed"
+                      checked={formData.wow_setup_completed || false}
+                      disabled={!prerequisitesMet}
+                      onCheckedChange={(checked) => {
+                        if (prerequisitesMet) {
+                          updateFormData({ wow_setup_completed: checked });
+                        }
+                      }}
+                    />
+                    <label
+                      htmlFor="wow_setup_completed"
+                      className={`text-sm font-medium leading-none cursor-pointer ${
+                        !prerequisitesMet ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                    >
+                      Ways of Working setup completed
+                    </label>
+                    {!prerequisitesMet && (
+                      <Info className="h-4 w-4 text-muted-foreground ml-1" />
+                    )}
+                  </div>
+                </TooltipTrigger>
+                {!prerequisitesMet && (
+                  <TooltipContent>
+                    <div className="max-w-sm">
+                      <p className="mb-2 font-medium">Complete the following to enable:</p>
+                      <ul className="list-disc list-inside space-y-1 text-xs">
+                        {getMissingRequirements().map((requirement, index) => (
+                          <li key={index}>{requirement}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
           </div>
+          {!prerequisitesMet && (
+            <p className="text-sm text-muted-foreground mt-2">
+              Complete all required fields above to mark this section as finished.
+            </p>
+          )}
         </CardContent>
       </Card>
 

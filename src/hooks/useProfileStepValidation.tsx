@@ -73,6 +73,39 @@ const validationRules: ValidationRules = {
     required: true, 
     custom: (value) => value === true,
     message: 'You must agree to the terms and conditions' 
+  },
+  
+  // Step 8: Ways of Working
+  wow_how_i_work: {
+    required: true,
+    minLength: 20,
+    message: 'How I Work description is required (minimum 20 characters)'
+  },
+  wow_what_i_provide: {
+    required: true,
+    minLength: 20,
+    message: 'What I Provide description is required (minimum 20 characters)'
+  },
+  wow_client_expectations: {
+    required: true,
+    minLength: 20,
+    message: 'Client Expectations description is required (minimum 20 characters)'
+  },
+  wow_activities: {
+    required: true,
+    custom: (value) => {
+      if (!value || typeof value !== 'object') return false;
+      const sections = ['wow_how_i_work', 'wow_what_i_provide', 'wow_client_expectations'];
+      return sections.some(section => 
+        Array.isArray(value[section]) && value[section].length > 0
+      );
+    },
+    message: 'At least one activity must be selected across all Ways of Working sections'
+  },
+  wow_setup_completed: {
+    required: true,
+    custom: (value) => value === true,
+    message: 'Ways of Working setup must be completed'
   }
 };
 
@@ -83,7 +116,8 @@ const stepFieldMapping: Record<number, string[]> = {
   4: ['ideal_client_types', 'coaching_style'], // Fixed: coaching_style (singular) matches database field
   5: ['package_options'],
   6: [], // Testimonials are optional
-  7: ['terms_agreed']
+  7: ['terms_agreed'],
+  8: ['wow_how_i_work', 'wow_what_i_provide', 'wow_client_expectations', 'wow_activities', 'wow_setup_completed']
 };
 
 // Additional fields to ensure they're saved (not validated but tracked for completeness)
@@ -99,6 +133,24 @@ const additionalFormFields = [
   'testimonials',
   'before_after_photos'
 ];
+
+// Helper function to check if Ways of Working prerequisites are met
+const checkWaysOfWorkingPrerequisites = (formData: any): boolean => {
+  // Check if all required text fields have minimum content
+  const textFields = ['wow_how_i_work', 'wow_what_i_provide', 'wow_client_expectations'];
+  const textFieldsValid = textFields.every(field => 
+    formData[field] && formData[field].length >= 20
+  );
+  
+  // Check if at least one activity is selected across all sections
+  const activities = formData.wow_activities;
+  const activitiesValid = activities && typeof activities === 'object' &&
+    ['wow_how_i_work', 'wow_what_i_provide', 'wow_client_expectations'].some(section => 
+      Array.isArray(activities[section]) && activities[section].length > 0
+    );
+  
+  return textFieldsValid && activitiesValid;
+};
 
 export const useProfileStepValidation = () => {
   const validation = useFormValidation(validationRules);
@@ -136,6 +188,11 @@ export const useProfileStepValidation = () => {
       return 'completed'; // Steps with no required fields are considered completed
     }
 
+    // Step 8 (Ways of Working) - checkbox controlled completion
+    if (step === 8) {
+      return formData.wow_setup_completed === true ? 'completed' : 'not_started';
+    }
+
     let completedFields = 0;
     let totalFields = stepFields.length;
 
@@ -170,6 +227,7 @@ export const useProfileStepValidation = () => {
     validateStep,
     getStepCompletion,
     isStepValid,
-    stepFieldMapping
+    stepFieldMapping,
+    checkWaysOfWorkingPrerequisites
   };
 };
