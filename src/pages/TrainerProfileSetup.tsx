@@ -7,6 +7,7 @@ import { usePackageWaysOfWorking } from "@/hooks/usePackageWaysOfWorking";
 import { useInstagramConnection } from "@/hooks/useInstagramConnection";
 import { useTrainerVerification } from "@/hooks/useTrainerVerification";
 import { useDiscoveryCallSettings } from "@/hooks/useDiscoveryCallSettings";
+import { useCoachAvailability } from "@/hooks/useCoachAvailability";
 import { useToast } from "@/hooks/use-toast";
 import { useProfileStepValidation } from "@/hooks/useProfileStepValidation";
 import { Button } from "@/components/ui/button";
@@ -50,6 +51,7 @@ const TrainerProfileSetup = () => {
   const { isConnected: isInstagramConnected } = useInstagramConnection();
   const { verificationRequest } = useTrainerVerification();
   const { settings: discoverySettings } = useDiscoveryCallSettings();
+  const { settings: availabilitySettings } = useCoachAvailability();
   const { getStepCompletion: getValidationStepCompletion } = useProfileStepValidation();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -403,7 +405,20 @@ const TrainerProfileSetup = () => {
         return 'not_started'; // Optional step
         
       case 11: // Working Hours & New Client Availability
-        return 'not_started'; // Optional step
+        if (!availabilitySettings) return 'not_started';
+        
+        const hasAvailabilityStatus = availabilitySettings.availability_status && 
+          availabilitySettings.availability_status !== 'accepting'; // Default status doesn't count as configured
+        
+        const hasWorkingHours = availabilitySettings.availability_schedule && 
+          Object.values(availabilitySettings.availability_schedule).some(day => 
+            day.enabled && day.slots && day.slots.length > 0
+          );
+        
+        const hasFullConfiguration = hasAvailabilityStatus && hasWorkingHours;
+        const hasPartialConfiguration = hasAvailabilityStatus || hasWorkingHours;
+        
+        return hasFullConfiguration ? 'completed' : (hasPartialConfiguration ? 'partial' : 'not_started');
         
       case 12: // Terms & Notifications
         return formData.terms_agreed ? 'completed' : 'not_started';
