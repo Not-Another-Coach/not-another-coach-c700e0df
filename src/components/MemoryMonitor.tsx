@@ -15,7 +15,7 @@ interface MemoryStats {
 export function MemoryMonitor() {
   const [memoryStats, setMemoryStats] = useState<MemoryStats | null>(null);
   const [showWarning, setShowWarning] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(true);
 
   useEffect(() => {
     const updateMemoryStats = () => {
@@ -69,22 +69,15 @@ export function MemoryMonitor() {
   if (isMinimized) {
     return (
       <div className="fixed bottom-4 right-4 z-50">
-        <Card className="bg-background/95 backdrop-blur border-2">
-          <CardContent className="p-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsMinimized(false)}
-              className="flex items-center gap-2"
-            >
-              <Activity className="h-4 w-4" />
-              <span className="text-xs font-mono">
-                {memoryStats.usedJSMemory}MB ({memoryUsagePercent.toFixed(1)}%)
-              </span>
-              <ChevronUp className="h-3 w-3" />
-            </Button>
-          </CardContent>
-        </Card>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setIsMinimized(false)}
+          className="h-8 w-8 p-0 rounded-full bg-background/80 backdrop-blur border hover:bg-background/95 shadow-sm"
+          title={`Memory: ${memoryStats.usedJSMemory}MB (${memoryUsagePercent.toFixed(1)}%)`}
+        >
+          <Activity className={`h-4 w-4 ${memoryUsagePercent > 70 ? 'text-destructive' : 'text-muted-foreground'}`} />
+        </Button>
       </div>
     );
   }
