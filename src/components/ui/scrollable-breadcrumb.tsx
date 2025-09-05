@@ -101,7 +101,7 @@ export const ScrollableBreadcrumb: React.FC<ScrollableBreadcrumbProps> = ({
             <Button
               variant="ghost"
               size="sm"
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-background/80 backdrop-blur-sm shadow-sm"
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-background/80 backdrop-blur-sm shadow-sm pointer-events-auto"
               onClick={() => scroll('left')}
               aria-label="Scroll left"
             >
@@ -113,7 +113,7 @@ export const ScrollableBreadcrumb: React.FC<ScrollableBreadcrumbProps> = ({
             <Button
               variant="ghost"
               size="sm"
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-background/80 backdrop-blur-sm shadow-sm"
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-background/80 backdrop-blur-sm shadow-sm pointer-events-auto"
               onClick={() => scroll('right')}
               aria-label="Scroll right"
             >
@@ -126,7 +126,7 @@ export const ScrollableBreadcrumb: React.FC<ScrollableBreadcrumbProps> = ({
       <div
         ref={scrollContainerRef}
         className={cn(
-          "overflow-x-auto scrollbar-hide pb-2",
+          "overflow-x-auto scrollbar-hide pb-2 relative z-0",
           showControls && "px-8"
         )}
         style={{

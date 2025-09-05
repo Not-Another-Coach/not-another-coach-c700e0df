@@ -938,12 +938,13 @@ const TrainerProfileSetup = () => {
                   bgColor = 'bg-primary';
                 }
                 
-                return (
-                  <div
-                    key={stepNumber}
-                    className={`flex flex-col items-center text-xs cursor-pointer transition-all hover:scale-105 min-w-fit ${statusColor}`}
-                    onClick={() => setCurrentStep(stepNumber)}
-                  >
+                 return (
+                   <div
+                     key={stepNumber}
+                     data-step={stepNumber}
+                     className={`flex flex-col items-center text-xs cursor-pointer transition-all hover:scale-105 min-w-fit ${statusColor}`}
+                     onClick={() => setCurrentStep(stepNumber)}
+                   >
                     <div
                       className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center mb-1 ${borderColor} ${
                         completion === 'completed' || completion === 'partial' || isCurrent 
