@@ -223,71 +223,118 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
 
   const copyPackageWaysOfWorking = async (sourcePackageId: string, targetPackageId: string, targetPackageName: string) => {
     try {
-      // Check if the source package has ways of working configured
-      const sourceWorkflow = getPackageWorkflow(sourcePackageId);
+      console.log(`[Copy WoW] Starting copy from package ${sourcePackageId} to ${targetPackageId}`);
       
-      if (!sourceWorkflow) {
-        toast({
-          title: "No ways of working to copy",
-          description: "The source package doesn't have any ways of working configured.",
-          variant: "default",
-        });
-        return;
+      // Show progress to user
+      toast({
+        title: "Copying ways of working...",
+        description: "Please wait while we copy the ways of working data.",
+      });
+
+      // Validate input parameters
+      if (!sourcePackageId || !targetPackageId || !targetPackageName) {
+        throw new Error('Missing required parameters for copying ways of working');
       }
 
-      // Try to get data from package_ways_of_working table first
+      // Try to get data directly from database first (not relying on stale state)
       let { data: fullSourceWorkflow, error: fetchError } = await supabase
         .from('package_ways_of_working')
         .select('*')
-        .eq('package_id', sourceWorkflow.id)
+        .eq('package_id', sourcePackageId)
+        .eq('trainer_id', user?.id)
         .maybeSingle();
+
+      console.log(`[Copy WoW] Direct DB query result:`, { fullSourceWorkflow, fetchError });
 
       if (fetchError && fetchError.code !== 'PGRST116') {
         console.error('Error fetching full workflow data:', fetchError);
         throw fetchError;
       }
 
-      // If no package-specific data found, try to get from trainer profile
+      // If no package-specific data found, check state as fallback
       if (!fullSourceWorkflow) {
-        const { data: trainerProfile } = await supabase
-          .from('profiles')
-          .select('wow_activities, wow_activity_assignments, wow_visibility')
-          .eq('id', user?.id)
-          .single();
+        console.log(`[Copy WoW] No DB data found, checking state for package ${sourcePackageId}`);
+        const sourceWorkflow = getPackageWorkflow(sourcePackageId);
+        
+        if (!sourceWorkflow) {
+          console.log(`[Copy WoW] No state data found either, trying profile data`);
+          // Try to get from trainer profile as final fallback
 
-        if (trainerProfile?.wow_activities && typeof trainerProfile.wow_activities === 'object') {
-          // Convert profile data to package format
-          const activities = trainerProfile.wow_activities as any;
+          const { data: trainerProfile } = await supabase
+            .from('profiles')
+            .select('wow_activities, wow_activity_assignments, wow_visibility')
+            .eq('id', user?.id)
+            .single();
+
+          if (trainerProfile?.wow_activities && typeof trainerProfile.wow_activities === 'object') {
+            console.log(`[Copy WoW] Using profile data as source`);
+            // Convert profile data to package format
+            const activities = trainerProfile.wow_activities as any;
+            
+            const convertActivitiesToItems = (activityArray: any): { id: string; text: string; }[] => {
+              if (!Array.isArray(activityArray)) return [];
+              return activityArray.map((activity: any) => ({
+                id: activity.id || crypto.randomUUID(),
+                text: activity.name || activity.text || ''
+              }));
+            };
+
+            const convertedWorkflow = {
+              onboarding_items: convertActivitiesToItems(activities.wow_how_i_work || []),
+              first_week_items: convertActivitiesToItems(activities.wow_what_i_provide || []),
+              client_expectations_items: convertActivitiesToItems(activities.wow_client_expectations || []),
+              ongoing_structure_items: [] as { id: string; text: string; }[],
+              tracking_tools_items: [] as { id: string; text: string; }[],
+              what_i_bring_items: [] as { id: string; text: string; }[],
+              visibility: (typeof trainerProfile.wow_visibility === 'string' ? trainerProfile.wow_visibility : 'public') as 'public' | 'post_match',
+              // Include required activity ID fields
+              onboarding_activity_ids: [],
+              first_week_activity_ids: [],
+              ongoing_structure_activity_ids: [],
+              tracking_tools_activity_ids: [],
+              client_expectations_activity_ids: [],
+              what_i_bring_activity_ids: [],
+            };
+
+            await savePackageWorkflow(targetPackageId, targetPackageName, convertedWorkflow);
+            console.log(`[Copy WoW] Successfully copied from profile to package ${targetPackageId}`);
+
+            toast({
+              title: "Ways of working copied",
+              description: "The ways of working have been copied from your profile to the new package",
+            });
+            return;
+          }
+        } else {
+          // We have state data but no DB data, use the state data with proper validation
+          console.log(`[Copy WoW] Using state data for package ${sourcePackageId}`);
           
-          const convertActivitiesToItems = (activityArray: any): { id: string; text: string; }[] => {
-            if (!Array.isArray(activityArray)) return [];
-            return activityArray.map((activity: any) => ({
-              id: activity.id || crypto.randomUUID(),
-              text: activity.name || activity.text || ''
-            }));
-          };
+          // Validate that state data has actual content
+          const hasContent = sourceWorkflow.onboarding_items?.length || 
+                           sourceWorkflow.first_week_items?.length ||
+                           sourceWorkflow.ongoing_structure_items?.length ||
+                           sourceWorkflow.tracking_tools_items?.length ||
+                           sourceWorkflow.client_expectations_items?.length ||
+                           sourceWorkflow.what_i_bring_items?.length;
 
-          const convertedWorkflow = {
-            onboarding_items: convertActivitiesToItems(activities.wow_how_i_work || []),
-            first_week_items: convertActivitiesToItems(activities.wow_what_i_provide || []),
-            client_expectations_items: convertActivitiesToItems(activities.wow_client_expectations || []),
-            ongoing_structure_items: [] as { id: string; text: string; }[],
-            tracking_tools_items: [] as { id: string; text: string; }[],
-            what_i_bring_items: [] as { id: string; text: string; }[],
-            visibility: (typeof trainerProfile.wow_visibility === 'string' ? trainerProfile.wow_visibility : 'public') as 'public' | 'post_match'
-          };
+          if (!hasContent) {
+            console.log(`[Copy WoW] State data exists but is empty for package ${sourcePackageId}`);
+            toast({
+              title: "No content to copy",
+              description: "The source package has ways of working configured but no actual content to copy.",
+              variant: "default",
+            });
+            return;
+          }
 
-          await savePackageWorkflow(targetPackageId, targetPackageName, convertedWorkflow);
-
-          toast({
-            title: "Ways of working copied",
-            description: "The ways of working have been copied from your profile to the new package",
-          });
-          return;
+          // Copy from state data
+          fullSourceWorkflow = sourceWorkflow;
         }
       }
 
+      // Final check - if we still don't have source data, fail gracefully
       if (!fullSourceWorkflow) {
+        console.log(`[Copy WoW] No source data found for package ${sourcePackageId}`);
         toast({
           title: "No ways of working to copy",
           description: "The source package doesn't have any ways of working configured.",
@@ -296,6 +343,9 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
         return;
       }
 
+      console.log(`[Copy WoW] Copying data to package ${targetPackageId}`);
+      
+      // Copy the ways of working data
       await savePackageWorkflow(targetPackageId, targetPackageName, {
         onboarding_items: (fullSourceWorkflow.onboarding_items as { id: string; text: string; }[]) || [],
         first_week_items: (fullSourceWorkflow.first_week_items as { id: string; text: string; }[]) || [],
@@ -304,19 +354,43 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
         client_expectations_items: (fullSourceWorkflow.client_expectations_items as { id: string; text: string; }[]) || [],
         what_i_bring_items: (fullSourceWorkflow.what_i_bring_items as { id: string; text: string; }[]) || [],
         visibility: (fullSourceWorkflow.visibility as 'public' | 'post_match') || 'public',
+        // Copy activity IDs if they exist, otherwise use empty arrays
+        onboarding_activity_ids: fullSourceWorkflow.onboarding_activity_ids || [],
+        first_week_activity_ids: fullSourceWorkflow.first_week_activity_ids || [],
+        ongoing_structure_activity_ids: fullSourceWorkflow.ongoing_structure_activity_ids || [],
+        tracking_tools_activity_ids: fullSourceWorkflow.tracking_tools_activity_ids || [],
+        client_expectations_activity_ids: fullSourceWorkflow.client_expectations_activity_ids || [],
+        what_i_bring_activity_ids: fullSourceWorkflow.what_i_bring_activity_ids || [],
       });
 
-      // Remove the problematic activity ID copying code since the main data is already copied
-      
-      toast({
-        title: "Ways of working copied",
-        description: "The ways of working have been copied to your new package",
-      });
+      // Verify the copy was successful
+      console.log(`[Copy WoW] Verifying successful copy for package ${targetPackageId}`);
+      const { data: verifyData } = await supabase
+        .from('package_ways_of_working')
+        .select('id')
+        .eq('package_id', targetPackageId)
+        .eq('trainer_id', user?.id)
+        .maybeSingle();
+
+      if (verifyData) {
+        console.log(`[Copy WoW] Copy verification successful for package ${targetPackageId}`);
+        toast({
+          title: "Ways of working copied successfully",
+          description: `The ways of working have been copied to "${targetPackageName}"`,
+        });
+      } else {
+        console.warn(`[Copy WoW] Copy verification failed for package ${targetPackageId}`);
+        toast({
+          title: "Copy completed with warnings",
+          description: "The copy process completed but verification failed. Please check the Ways of Working tab.",
+          variant: "default",
+        });
+      }
     } catch (error) {
-      console.error('Error copying ways of working:', error);
+      console.error('[Copy WoW] Error copying ways of working:', error);
       toast({
         title: "Error copying ways of working",
-        description: "There was an issue copying the ways of working. You can set them up manually in the Ways of Working tab.",
+        description: `Failed to copy ways of working: ${error instanceof Error ? error.message : 'Unknown error'}. You can set them up manually in the Ways of Working tab.`,
         variant: "destructive",
       });
     }

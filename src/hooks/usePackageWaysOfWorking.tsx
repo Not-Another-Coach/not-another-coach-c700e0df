@@ -16,6 +16,13 @@ export interface PackageWaysOfWorking {
   visibility: 'public' | 'post_match';
   created_at: string;
   updated_at: string;
+  // Activity ID fields for database compatibility - required by database
+  onboarding_activity_ids: any;
+  first_week_activity_ids: any;
+  ongoing_structure_activity_ids: any;
+  tracking_tools_activity_ids: any;
+  client_expectations_activity_ids: any;
+  what_i_bring_activity_ids: any;
 }
 
 export function usePackageWaysOfWorking() {
@@ -82,6 +89,13 @@ export function usePackageWaysOfWorking() {
         client_expectations_items: workflowData.client_expectations_items || existingWorkflow?.client_expectations_items || [],
         what_i_bring_items: workflowData.what_i_bring_items || existingWorkflow?.what_i_bring_items || [],
         visibility: workflowData.visibility || existingWorkflow?.visibility || 'public',
+        // Include required activity ID fields
+        onboarding_activity_ids: [],
+        first_week_activity_ids: [],
+        ongoing_structure_activity_ids: [],
+        tracking_tools_activity_ids: [],
+        client_expectations_activity_ids: [],
+        what_i_bring_activity_ids: [],
       };
 
       // Use upsert to handle both insert and update cases
