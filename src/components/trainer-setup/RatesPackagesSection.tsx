@@ -8,7 +8,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Trash2, Plus, DollarSign, PoundSterling, Euro, Calendar as CalendarIcon, Sparkles, Edit, CreditCard } from "lucide-react";
 import { SectionHeader } from './SectionHeader';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -62,13 +61,6 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
   const [packages, setPackages] = useState<TrainingPackage[]>(formData.package_options || []);
   const [editingPackage, setEditingPackage] = useState<TrainingPackage | null>(null);
   const [isCloning, setIsCloning] = useState(false);
-  const [showCloneConfirmation, setShowCloneConfirmation] = useState(false);
-  const [packageToClone, setPackageToClone] = useState<TrainingPackage | null>(null);
-  const [cloneWaysOfWorkingData, setCloneWaysOfWorkingData] = useState<{
-    sourcePackageId: string;
-    targetPackageId: string;
-    targetPackageName: string;
-  } | null>(null);
   const [editPackageData, setEditPackageData] = useState({
     name: "",
     sessions: "",
@@ -179,12 +171,7 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
     }
   };
 
-  const startCloneProcess = (pkg: TrainingPackage) => {
-    setPackageToClone(pkg);
-    setShowCloneConfirmation(true);
-  };
-
-  const clonePackage = async (pkg: TrainingPackage, copyWaysOfWorking: boolean = false) => {
+  const clonePackage = (pkg: TrainingPackage) => {
     const clonedPackage: TrainingPackage = {
       id: Date.now().toString(),
       name: `${pkg.name} (Copy)`,
@@ -192,7 +179,7 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
       price: pkg.price,
       currency: pkg.currency,
       description: pkg.description,
-      inclusions: pkg.inclusions || [], // Fix: Copy inclusions from original package
+      inclusions: pkg.inclusions || [], // Copy inclusions from original package
       isPromotion: pkg.isPromotion,
       promotionStartDate: pkg.promotionStartDate,
       promotionEndDate: pkg.promotionEndDate,
@@ -225,6 +212,7 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
       customerPaymentModes: pkg.customerPaymentModes || ['upfront'],
       installmentCount: pkg.installmentCount?.toString() || "",
     });
+  };
 
     // Store the cloning info for later use when package is saved
     if (copyWaysOfWorking) {
@@ -520,19 +508,6 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
           title: "Package cloned",
           description: "Package has been duplicated successfully",
         });
-        
-        // Handle ways of working copying if needed
-        if (cloneWaysOfWorkingData && cloneWaysOfWorkingData.targetPackageId === updatedPackage.id) {
-          await copyPackageWaysOfWorking(
-            cloneWaysOfWorkingData.sourcePackageId,
-            cloneWaysOfWorkingData.targetPackageId,
-            updatedPackage.name
-          );
-          setCloneWaysOfWorkingData(null);
-          
-          // Refresh the Ways of Working data to show the new package
-          await refetch();
-        }
       } else {
         // Update existing package
         updatedPackages = packages.map(pkg => 
@@ -742,7 +717,7 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => startCloneProcess(pkg)}
+                          onClick={() => clonePackage(pkg)}
                           className="text-green-600 hover:text-green-700 hover:bg-green-50 h-8 w-8 p-0"
                         >
                           <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -1031,38 +1006,6 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
         </CardContent>
       </Card>
       </div>
-
-      {/* Clone Confirmation Dialog */}
-      <AlertDialog open={showCloneConfirmation} onOpenChange={setShowCloneConfirmation}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Clone Package</AlertDialogTitle>
-            <AlertDialogDescription>
-              Do you want to copy the "Ways of Working" from "{packageToClone?.name}" to the new package?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => {
-              if (packageToClone) {
-                clonePackage(packageToClone, false);
-              }
-              setShowCloneConfirmation(false);
-              setPackageToClone(null);
-            }}>
-              Clone Package Only
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={() => {
-              if (packageToClone) {
-                clonePackage(packageToClone, true);
-              }
-              setShowCloneConfirmation(false);
-              setPackageToClone(null);
-            }}>
-              Clone Package + Ways of Working
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
       {/* Edit Package Dialog */}
       <Dialog open={!!editingPackage} onOpenChange={() => {

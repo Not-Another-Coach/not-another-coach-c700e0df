@@ -90,24 +90,33 @@ export function SimplifiedWaysOfWorkingSection({
   const getMissingRequirements = (): string[] => {
     const missing: string[] = [];
     
-    // Only check for activities - remove text field requirements
+    // Check for minimum 2 activities per section
     const activities = formData.wow_activities;
-    const hasActivities = activities && typeof activities === 'object' &&
-      ['wow_how_i_work', 'wow_what_i_provide', 'wow_client_expectations'].some(section => 
-        Array.isArray(activities[section]) && activities[section].length > 0
-      );
-    
-    if (!hasActivities) {
-      missing.push('At least one activity selected');
+    if (activities && typeof activities === 'object') {
+      const sections = [
+        { key: 'wow_how_i_work', label: 'How I Work' },
+        { key: 'wow_what_i_provide', label: 'What I Provide' },
+        { key: 'wow_client_expectations', label: 'Client Expectations' }
+      ];
+      
+      sections.forEach(section => {
+        const sectionActivities = activities[section.key];
+        const activityCount = Array.isArray(sectionActivities) ? sectionActivities.length : 0;
+        if (activityCount < 2) {
+          missing.push(`${section.label}: Need ${2 - activityCount} more activity(ies)`);
+        }
+      });
+    } else {
+      missing.push('How I Work: Need 2 activities');
+      missing.push('What I Provide: Need 2 activities');
+      missing.push('Client Expectations: Need 2 activities');
     }
     
     // Force console log on every render
-    console.log('=== WoW Requirements Check ===');
-    console.log('Has activities:', hasActivities);
+    console.log('=== WoW Requirements Check (2 per section) ===');
     console.log('Activities object:', formData.wow_activities);
     console.log('Missing requirements:', missing);
     console.log('Prerequisites met:', missing.length === 0);
-    console.log('Form data keys:', Object.keys(formData));
     
     return missing;
   };
