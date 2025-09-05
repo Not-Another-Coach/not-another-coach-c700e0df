@@ -106,6 +106,58 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
     };
 
     fetchTrainerImages();
+    
+    // Set up real-time subscription for preference changes
+    const preferencesSubscription = supabase
+      .channel('trainer_image_preferences_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'trainer_image_preferences',
+          filter: `trainer_id=eq.${trainer.id}`
+        },
+        () => {
+          // Refetch when preferences change
+          fetchTrainerImages();
+        }
+      )
+      .subscribe();
+
+    // Set up real-time subscription for image selection changes
+    const imagesSubscription = supabase
+      .channel('trainer_images_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'trainer_uploaded_images',
+          filter: `trainer_id=eq.${trainer.id}`
+        },
+        () => {
+          fetchTrainerImages();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'trainer_instagram_selections',
+          filter: `trainer_id=eq.${trainer.id}`
+        },
+        () => {
+          fetchTrainerImages();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      preferencesSubscription.unsubscribe();
+      imagesSubscription.unsubscribe();
+    };
   }, [trainer.id, trainer.image]);
 
   return (
