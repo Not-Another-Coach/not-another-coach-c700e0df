@@ -1,15 +1,14 @@
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, X, Settings } from "lucide-react";
+import { Plus, Settings } from "lucide-react";
 import { useTrainerActivities } from "@/hooks/useTrainerActivities";
 import { SectionHeader } from "./SectionHeader";
 import { EnhancedActivityPickerDialog } from "./EnhancedActivityPickerDialog";
-import { PackageAssignmentMatrix } from "./PackageAssignmentMatrix";
+import { ActivityWithAssignment } from "./ActivityWithAssignment";
 
 interface SelectedActivity {
   id?: string;
@@ -39,7 +38,6 @@ export function SimplifiedWaysOfWorkingSection({
 }: SimplifiedWaysOfWorkingSectionProps) {
   const { getSuggestionsBySection } = useTrainerActivities();
   const [activePickerSection, setActivePickerSection] = useState<string | null>(null);
-  const [showPackageAssignment, setShowPackageAssignment] = useState(false);
 
   // Section configuration - using actual database categories
   const sections = [
@@ -140,6 +138,16 @@ export function SimplifiedWaysOfWorkingSection({
     updateFormData({ wow_activity_assignments: newAssignments });
   };
 
+  // Get assignment for a specific activity
+  const getAssignment = (activityName: string): ActivityPackageAssignment => {
+    const assignments = getAssignmentsData();
+    return assignments.find((a: ActivityPackageAssignment) => a.activityName === activityName) || {
+      activityName,
+      assignedTo: 'all',
+      packageIds: []
+    };
+  };
+
   // Get all selected activities across all sections
   const getAllSelectedActivities = (): SelectedActivity[] => {
     const activitiesData = getActivitiesData();
@@ -194,24 +202,20 @@ export function SimplifiedWaysOfWorkingSection({
               <p className="text-sm text-muted-foreground">{section.description}</p>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Selected Activities */}
+              {/* Selected Activities with Package Assignment */}
               {sectionActivities.length > 0 && (
                 <div className="space-y-2">
                   <p className="text-sm font-medium">Selected Activities:</p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="space-y-2">
                     {sectionActivities.map((activity: SelectedActivity, index: number) => (
-                      <Badge
+                      <ActivityWithAssignment
                         key={index}
-                        variant="secondary"
-                        className="text-sm flex items-center gap-1"
-                      >
-                        {activity.name}
-                        {activity.isCustom && <span className="text-xs opacity-70">(Custom)</span>}
-                        <X
-                          className="h-3 w-3 cursor-pointer hover:text-destructive"
-                          onClick={() => handleActivityRemove(section.key, activity.name)}
-                        />
-                      </Badge>
+                        activity={activity}
+                        assignment={getAssignment(activity.name)}
+                        packageOptions={formData.package_options || []}
+                        onAssignmentChange={(assignment) => handleAssignmentChange(activity.name, assignment)}
+                        onRemove={() => handleActivityRemove(section.key, activity.name)}
+                      />
                     ))}
                   </div>
                 </div>
@@ -243,30 +247,36 @@ export function SimplifiedWaysOfWorkingSection({
         );
       })}
 
-      {/* Package Assignment Section */}
+      {/* Assignment Summary */}
       {getAllSelectedActivities().length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold">Package Assignment</h3>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowPackageAssignment(!showPackageAssignment)}
-            >
-              <Settings className="h-4 w-4 mr-1" />
-              {showPackageAssignment ? 'Hide' : 'Configure'} Assignments
-            </Button>
-          </div>
-          
-          {showPackageAssignment && (
-            <PackageAssignmentMatrix
-              selectedActivities={getAllSelectedActivities()}
-              packageOptions={formData.package_options || []}
-              assignments={getAssignmentsData()}
-              onAssignmentChange={handleAssignmentChange}
-            />
-          )}
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              Assignment Summary
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Review how your activities are assigned across packages
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2 text-sm">
+              {sections.map(section => {
+                const activities = getActivitiesData()[section.key] || [];
+                if (activities.length === 0) return null;
+                
+                return (
+                  <div key={section.key}>
+                    <span className="font-medium">{section.title}:</span>
+                    <span className="ml-2 text-muted-foreground">
+                      {activities.length} {activities.length === 1 ? 'activity' : 'activities'}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Visibility Setting */}
