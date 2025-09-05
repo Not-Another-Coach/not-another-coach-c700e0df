@@ -12,6 +12,8 @@ import { useActivitySynchronization } from "@/hooks/useActivitySynchronization";
 import { useToast } from "@/hooks/use-toast";
 import { SectionHeader } from "./SectionHeader";
 import { useTrainerActivities } from "@/hooks/useTrainerActivities";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PackageWaysOfWorkingSectionProps {
   formData: any;
@@ -25,7 +27,13 @@ interface WaysOfWorkingItem {
   id: string;
 }
 
-export function PackageWaysOfWorkingSection({ formData }: PackageWaysOfWorkingSectionProps) {
+export function PackageWaysOfWorkingSection({ 
+  formData, 
+  updateFormData, 
+  errors, 
+  clearFieldError 
+}: PackageWaysOfWorkingSectionProps) {
+  const { user } = useAuth();
   const { packageWorkflows, loading, savePackageWorkflow, getPackageWorkflow } = usePackageWaysOfWorking();
   const { syncWaysOfWorkingToActivities, loading: syncLoading } = useActivitySynchronization();
   const { toast } = useToast();
@@ -43,13 +51,49 @@ export function PackageWaysOfWorkingSection({ formData }: PackageWaysOfWorkingSe
   // Get packages from formData
   const packages = formData.package_options || [];
   
+  // Initialize packages from database if formData is empty
+  useEffect(() => {
+    const initializePackages = async () => {
+      if (packages.length === 0 && user?.id) {
+        console.log('[WoW Debug] No packages in formData, fetching from database...');
+        try {
+          const { data: trainerProfile } = await supabase
+            .from('trainer_profiles')
+            .select('package_options')
+            .eq('id', user.id)
+            .single();
+
+          if (trainerProfile?.package_options && Array.isArray(trainerProfile.package_options)) {
+            console.log('[WoW Debug] Found packages in database:', trainerProfile.package_options.length);
+            updateFormData({ package_options: trainerProfile.package_options });
+          }
+        } catch (error) {
+          console.error('[WoW Debug] Error fetching packages from database:', error);
+        }
+      }
+    };
+
+    initializePackages();
+  }, [packages.length, user?.id, updateFormData]);
+  
+  // Debug logging to track package availability
+  useEffect(() => {
+    console.log('[WoW Debug] Packages available:', packages.map((p: any) => ({ id: p.id, name: p.name })));
+    console.log('[WoW Debug] Active package ID:', activePackageId);
+    console.log('[WoW Debug] Form data package_options:', formData.package_options);
+  }, [packages, activePackageId, formData.package_options]);
+  
   // Set default active package and switch to newly created packages
   useEffect(() => {
     if (packages.length > 0) {
       // If no active package or the active package no longer exists, set to first package
       if (!activePackageId || !packages.find((pkg: any) => pkg.id === activePackageId)) {
-        setActivePackageId(packages[packages.length - 1].id); // Show the newest package (last in array)
+        const newActiveId = packages[packages.length - 1].id; // Show the newest package (last in array)
+        console.log('[WoW Debug] Setting active package to:', newActiveId, packages[packages.length - 1].name);
+        setActivePackageId(newActiveId);
       }
+    } else {
+      console.log('[WoW Debug] No packages available in formData');
     }
   }, [packages, activePackageId]);
 
@@ -60,8 +104,12 @@ export function PackageWaysOfWorkingSection({ formData }: PackageWaysOfWorkingSe
         const currentPackage = packages.find((pkg: any) => pkg.id === activePackageId);
         const existingWorkflow = getPackageWorkflow(activePackageId);
         
+        console.log('[WoW Debug] Current package:', currentPackage?.name);
+        console.log('[WoW Debug] Existing workflow:', existingWorkflow ? 'Found' : 'Not found');
+        
         if (currentPackage && !existingWorkflow) {
           try {
+            console.log('[WoW Debug] Creating workflow for package:', currentPackage.name);
             await savePackageWorkflow(activePackageId, currentPackage.name, {
               visibility: 'public'
             });

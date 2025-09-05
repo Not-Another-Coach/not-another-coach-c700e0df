@@ -535,6 +535,8 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
       setPackages(updatedPackages);
       updateFormData({ package_options: updatedPackages });
       
+      console.log('[Package Debug] Updated packages in formData:', updatedPackages.map(p => ({ id: p.id, name: p.name })));
+      
       // Immediately save to database to ensure sync with Ways of Working
       if (user?.id) {
         await supabase
