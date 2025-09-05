@@ -88,22 +88,61 @@ export function WorkingHoursSection({ formData, updateFormData }: WorkingHoursSe
     const newDaysOff = { ...daysOff, [day]: isDayOff };
     setDaysOff(newDaysOff);
     
-    // If marking as day off, clear time slots
-    if (isDayOff) {
-      const newAvailability = { ...availability, [day]: [] };
-      setAvailability(newAvailability);
-    }
-    
     // Update coach availability settings
     if (settings) {
       const newSchedule = { ...settings.availability_schedule };
-      newSchedule[day] = {
-        enabled: false,
-        slots: []
-      };
+      
+      if (isDayOff) {
+        // If marking as day off, clear time slots and disable
+        const newAvailability = { ...availability, [day]: [] };
+        setAvailability(newAvailability);
+        
+        newSchedule[day] = {
+          enabled: false,
+          slots: []
+        };
+      } else {
+        // If unmarking day off, enable the day but keep existing slots
+        const currentSlots = availability[day] || [];
+        newSchedule[day] = {
+          enabled: currentSlots.length > 0,
+          slots: currentSlots.map(slot => ({
+            start: slot.startTime,
+            end: slot.endTime
+          }))
+        };
+      }
       
       await updateSettings({ availability_schedule: newSchedule });
     }
+  };
+
+  // Helper function to check if two time slots overlap
+  const doSlotsOverlap = (slot1: { startTime: string; endTime: string }, slot2: { startTime: string; endTime: string }) => {
+    const start1 = parseTime(slot1.startTime);
+    const end1 = parseTime(slot1.endTime);
+    const start2 = parseTime(slot2.startTime);
+    const end2 = parseTime(slot2.endTime);
+    
+    return start1 < end2 && start2 < end1;
+  };
+
+  // Helper function to parse time string to minutes
+  const parseTime = (timeStr: string) => {
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    return hours * 60 + minutes;
+  };
+
+  // Validate time slots for overlaps
+  const validateTimeSlots = (day: string, newSlots: TimeSlot[]) => {
+    for (let i = 0; i < newSlots.length; i++) {
+      for (let j = i + 1; j < newSlots.length; j++) {
+        if (doSlotsOverlap(newSlots[i], newSlots[j])) {
+          return false;
+        }
+      }
+    }
+    return true;
   };
 
   const addTimeSlot = (day: string) => {
@@ -115,7 +154,19 @@ export function WorkingHoursSection({ formData, updateFormData }: WorkingHoursSe
     };
     
     const currentSlots = availability[day] || [];
-    updateDayAvailability(day, [...currentSlots, newSlot]);
+    const newSlots = [...currentSlots, newSlot];
+    
+    // Validate for overlaps
+    if (!validateTimeSlots(day, newSlots)) {
+      toast({
+        title: "Time Slot Conflict",
+        description: "This time slot overlaps with an existing slot. Please choose different times.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    updateDayAvailability(day, newSlots);
   };
 
   const removeTimeSlot = (day: string, slotIndex: number) => {
@@ -129,6 +180,28 @@ export function WorkingHoursSection({ formData, updateFormData }: WorkingHoursSe
     const newSlots = currentSlots.map((slot, index) => 
       index === slotIndex ? { ...slot, [field]: value } : slot
     );
+    
+    // Validate for overlaps
+    if (!validateTimeSlots(day, newSlots)) {
+      toast({
+        title: "Time Slot Conflict",
+        description: "This time change creates an overlap with another slot. Please choose different times.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Validate that start time is before end time
+    const updatedSlot = newSlots[slotIndex];
+    if (parseTime(updatedSlot.startTime) >= parseTime(updatedSlot.endTime)) {
+      toast({
+        title: "Invalid Time Range",
+        description: "Start time must be before end time.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     updateDayAvailability(day, newSlots);
   };
 
