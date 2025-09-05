@@ -2,6 +2,20 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
+// Add interfaces for activity-centric types
+interface SelectedActivity {
+  id?: string;
+  name: string;
+  category: string;
+  isCustom: boolean;
+}
+
+interface ActivityPackageAssignment {
+  activityName: string;
+  assignedTo: 'all' | 'specific';
+  packageIds: string[];
+}
+
 interface TrainerProfile {
   id: string;
   user_type: 'trainer';
@@ -60,11 +74,16 @@ interface TrainerProfile {
   professional_milestones: any[] | null;
   profile_image_position: any | null;
   
-  // New simplified Ways of Working fields
+  // New activity-centric Ways of Working fields
   wow_how_i_work: string | null;
   wow_what_i_provide: string | null;
   wow_client_expectations: string | null;
-  wow_package_applicability: any | null;
+  wow_activities: {
+    wow_how_i_work: SelectedActivity[];
+    wow_what_i_provide: SelectedActivity[];
+    wow_client_expectations: SelectedActivity[];
+  } | null;
+  wow_activity_assignments: ActivityPackageAssignment[] | null;
   wow_visibility: string | null;
 }
 
@@ -97,11 +116,12 @@ export function useTrainerProfile() {
           client_preferences: (data as any)?.client_preferences || null,
           ideal_client_personality: (data as any)?.ideal_client_personality || null,
           ideal_client_types: (data as any)?.ideal_client_types || null,
-          // New simplified Ways of Working fields
+          // New activity-centric Ways of Working fields
           wow_how_i_work: (data as any)?.wow_how_i_work || null,
           wow_what_i_provide: (data as any)?.wow_what_i_provide || null,
           wow_client_expectations: (data as any)?.wow_client_expectations || null,
-          wow_package_applicability: (data as any)?.wow_package_applicability || null,
+          wow_activities: (data as any)?.wow_activities || null,
+          wow_activity_assignments: (data as any)?.wow_activity_assignments || null,
           wow_visibility: (data as any)?.wow_visibility || null,
         } as TrainerProfile;
         setProfile(profileWithDefaults);
@@ -131,7 +151,7 @@ export function useTrainerProfile() {
       const trainerUpdates: any = {};
 
       // Shared profile fields (general profile info, profile_image_position, and new WoW fields)
-      const sharedFields = ['first_name', 'last_name', 'bio', 'profile_photo_url', 'location', 'tagline', 'is_uk_based', 'profile_published', 'profile_image_position', 'wow_how_i_work', 'wow_what_i_provide', 'wow_client_expectations', 'wow_package_applicability', 'wow_visibility'];
+      const sharedFields = ['first_name', 'last_name', 'bio', 'profile_photo_url', 'location', 'tagline', 'is_uk_based', 'profile_published', 'profile_image_position', 'wow_how_i_work', 'wow_what_i_provide', 'wow_client_expectations', 'wow_activities', 'wow_activity_assignments', 'wow_visibility'];
       
       // Trainer-specific fields (all trainer-related fields including the moved ones)
       const trainerFields = [

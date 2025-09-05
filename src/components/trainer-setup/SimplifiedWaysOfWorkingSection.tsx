@@ -26,7 +26,7 @@ interface ActivityPackageAssignment {
 
 interface SimplifiedWaysOfWorkingSectionProps {
   formData: any;
-  updateFormData: (field: string, value: any) => void;
+  updateFormData: (updates: Partial<any>) => void;
   errors: Record<string, string>;
   clearFieldError: (field: string) => void;
 }
@@ -96,7 +96,7 @@ export function SimplifiedWaysOfWorkingSection({
         [sectionKey]: newActivities
       };
       
-      updateFormData('wow_activities', newActivitiesData);
+      updateFormData({ wow_activities: newActivitiesData });
       updateSummaryText(sectionKey, newActivities);
       clearFieldError(sectionKey);
     }
@@ -115,19 +115,19 @@ export function SimplifiedWaysOfWorkingSection({
       [sectionKey]: newActivities
     };
     
-    updateFormData('wow_activities', newActivitiesData);
+    updateFormData({ wow_activities: newActivitiesData });
     updateSummaryText(sectionKey, newActivities);
   };
 
   // Update summary text based on selected activities
   const updateSummaryText = (sectionKey: string, activities: SelectedActivity[]) => {
     if (activities.length === 0) {
-      updateFormData(sectionKey, "");
+      updateFormData({ [sectionKey]: "" });
       return;
     }
     
     const summary = activities.map(activity => `• ${activity.name}`).join('\n');
-    updateFormData(sectionKey, summary);
+    updateFormData({ [sectionKey]: summary });
   };
 
   // Handle package assignment changes
@@ -137,7 +137,7 @@ export function SimplifiedWaysOfWorkingSection({
       a.activityName !== activityName
     );
     newAssignments.push(assignment);
-    updateFormData('wow_activity_assignments', newAssignments);
+    updateFormData({ wow_activity_assignments: newAssignments });
   };
 
   // Get all selected activities across all sections
@@ -153,6 +153,7 @@ export function SimplifiedWaysOfWorkingSection({
   return (
     <div className="space-y-6">
       <SectionHeader 
+        icons={[Settings]}
         title="Ways of Working" 
         description="Select activities for each section to define your working style"
       />
@@ -221,7 +222,7 @@ export function SimplifiedWaysOfWorkingSection({
                 placeholder={section.placeholder}
                 value={formData[section.key] || ""}
                 onChange={(e) => {
-                  updateFormData(section.key, e.target.value);
+                  updateFormData({ [section.key]: e.target.value });
                   clearFieldError(section.key);
                 }}
                 className={`min-h-[120px] ${errors[section.key] ? 'border-destructive' : ''}`}
@@ -279,7 +280,7 @@ export function SimplifiedWaysOfWorkingSection({
         <CardContent>
           <Select
             value={formData.wow_visibility || "public"}
-            onValueChange={(value) => updateFormData('wow_visibility', value)}
+            onValueChange={(value) => updateFormData({ wow_visibility: value })}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select visibility" />
@@ -299,7 +300,7 @@ export function SimplifiedWaysOfWorkingSection({
             <Checkbox
               id="wow_setup_completed"
               checked={formData.wow_setup_completed || false}
-              onCheckedChange={(checked) => updateFormData('wow_setup_completed', checked)}
+              onCheckedChange={(checked) => updateFormData({ wow_setup_completed: checked })}
             />
             <label
               htmlFor="wow_setup_completed"
