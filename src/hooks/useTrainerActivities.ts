@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useWaysOfWorkingCategories } from "@/hooks/useWaysOfWorkingCategories";
 
 export type TrainerActivity = {
   id: string;
@@ -13,20 +14,13 @@ export type TrainerActivity = {
   default_sla_days?: number | null;
 };
 
-const SECTION_TO_CATEGORY: Record<string, string> = {
-  onboarding: "Onboarding",
-  first_week: "First Week",
-  ongoing_structure: "Ongoing Structure",
-  tracking_tools: "Tracking Tools",
-  client_expectations: "Client Expectations",
-  what_i_bring: "What I Bring",
-};
 
 export function useTrainerActivities() {
   const [activities, setActivities] = useState<TrainerActivity[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
+  const { getSectionToCategory } = useWaysOfWorkingCategories();
 
   const fetchAll = async () => {
     setLoading(true);
@@ -155,7 +149,8 @@ export function useTrainerActivities() {
   };
 
   const getSuggestionsBySection = (sectionKey: string): string[] => {
-    const category = SECTION_TO_CATEGORY[sectionKey];
+    const sectionToCategory = getSectionToCategory();
+    const category = sectionToCategory[sectionKey];
     if (!category) return [];
     const names = activities
       .filter((a) => a.category === category)

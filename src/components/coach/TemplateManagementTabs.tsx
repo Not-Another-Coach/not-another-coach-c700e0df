@@ -25,6 +25,7 @@ import { EnhancedActivity } from '@/hooks/useEnhancedActivities';
 import { TemplateBuilder } from '@/components/onboarding/TemplateBuilder';
 import { useTemplateBuilder } from '@/hooks/useTemplateBuilder';
 import { TemplateAssignmentView } from '@/components/coach/TemplateAssignmentView';
+import { CategoryMappingManagement } from "@/components/admin/CategoryMappingManagement";
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { useTrainerProfile } from '@/hooks/useTrainerProfile';
 
@@ -365,7 +366,7 @@ export function TemplateManagementTabs() {
   return (
     <Tabs defaultValue="templates" className="space-y-4">
       <div className="flex flex-col space-y-4">
-        <TabsList className="grid grid-cols-4 w-full max-w-md">
+        <TabsList className="grid grid-cols-5 w-full max-w-lg">
           <TabsTrigger value="templates" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
             Templates
@@ -377,6 +378,10 @@ export function TemplateManagementTabs() {
           <TabsTrigger value="activities" className="flex items-center gap-2">
             <User className="h-4 w-4" />
             Activities
+          </TabsTrigger>
+          <TabsTrigger value="categories" className="flex items-center gap-2">
+            <Settings className="h-4 w-4" />
+            Categories
           </TabsTrigger>
           <TabsTrigger value="advanced" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
@@ -664,6 +669,23 @@ export function TemplateManagementTabs() {
 
       <TabsContent value="assignment" className="space-y-4">
         <TemplateAssignmentView onCreateTemplate={() => setShowCreateDialog(true)} />
+      </TabsContent>
+
+      <TabsContent value="categories" className="space-y-4">
+        {isAdmin ? (
+          <CategoryMappingManagement />
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle>Category Mappings</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center p-8 text-muted-foreground">
+                <p>Only administrators can manage category mappings.</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </TabsContent>
 
       <TabsContent value="advanced" className="space-y-4">

@@ -5839,6 +5839,39 @@ export type Database = {
           },
         ]
       }
+      ways_of_working_categories: {
+        Row: {
+          activity_category: string
+          created_at: string
+          created_by: string | null
+          display_order: number
+          id: string
+          section_key: string
+          section_name: string
+          updated_at: string
+        }
+        Insert: {
+          activity_category: string
+          created_at?: string
+          created_by?: string | null
+          display_order?: number
+          id?: string
+          section_key: string
+          section_name: string
+          updated_at?: string
+        }
+        Update: {
+          activity_category?: string
+          created_at?: string
+          created_by?: string | null
+          display_order?: number
+          id?: string
+          section_key?: string
+          section_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       webhook_events: {
         Row: {
           correlation_id: string
