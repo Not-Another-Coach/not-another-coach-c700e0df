@@ -212,8 +212,9 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
         .from('package_ways_of_working')
         .select('*')
         .eq('package_id', sourceWorkflow.id)
-        .single();
+        .maybeSingle();
 
+      // Only throw error if it's not a "no rows" error
       if (fetchError) {
         console.error('Error fetching full workflow data:', fetchError);
         throw fetchError;

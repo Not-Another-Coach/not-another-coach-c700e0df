@@ -111,8 +111,8 @@ export function EnhancedActivityPickerDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh]">
-        <DialogHeader>
+      <DialogContent className="max-w-5xl max-h-[95vh] overflow-hidden">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <Activity className="h-5 w-5" />
             {title}
@@ -122,10 +122,10 @@ export function EnhancedActivityPickerDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="flex flex-col h-full min-h-0 space-y-4">
           {/* Currently Selected Activities */}
           {selectedActivities.length > 0 && (
-            <div className="p-4 border rounded-lg bg-muted/30">
+            <div className="p-4 border rounded-lg bg-muted/30 flex-shrink-0">
               <h4 className="font-medium mb-2">Currently Selected ({selectedActivities.length})</h4>
               <div className="flex flex-wrap gap-2">
                 {selectedActivities.map((activity, index) => (
@@ -150,7 +150,7 @@ export function EnhancedActivityPickerDialog({
           </div>
 
           {/* Create Custom Activity */}
-          <div className="p-4 border rounded-lg bg-accent/30">
+          <div className="p-4 border rounded-lg bg-accent/30 flex-shrink-0">
             <h4 className="font-medium mb-2">Create New Activity</h4>
             <div className="flex gap-2">
               <Input
@@ -173,7 +173,7 @@ export function EnhancedActivityPickerDialog({
             )}
           </div>
 
-          <ScrollArea className="h-[500px]">
+          <ScrollArea className="flex-1 min-h-0">
             <div className="space-y-4">
               {loading && (
                 <div className="text-center py-8 text-muted-foreground">
