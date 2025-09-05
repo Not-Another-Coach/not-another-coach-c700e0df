@@ -214,16 +214,6 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
     });
   };
 
-    // Store the cloning info for later use when package is saved
-    if (copyWaysOfWorking) {
-      setCloneWaysOfWorkingData({
-        sourcePackageId: pkg.id,
-        targetPackageId: clonedPackage.id,
-        targetPackageName: clonedPackage.name
-      });
-    }
-  };
-
   const copyPackageWaysOfWorking = async (sourcePackageId: string, targetPackageId: string, targetPackageName: string) => {
     try {
       // Show progress to user
