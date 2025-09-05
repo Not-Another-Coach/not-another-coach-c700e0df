@@ -5,28 +5,14 @@ import { CheckCircle, Target, TrendingUp, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const WeeklyExecutionCard = () => {
-  // Mock data - this will connect to the Goals system once database is set up
-  const currentWeekScore = 75;
-  const todaysTasks = [
-    {
-      id: '1',
-      title: 'Send 10 outreach messages',
-      type: 'outreach',
-      status: 'done'
-    },
-    {
-      id: '2',
-      title: 'Follow up with 3 prospects',
-      type: 'check_in',
-      status: 'in_progress'
-    },
-    {
-      id: '3',
-      title: 'Update client progress notes',
-      type: 'admin',
-      status: 'to_do'
-    }
-  ];
+  // Empty data - ready for database integration
+  const currentWeekScore = 0;
+  const todaysTasks: Array<{
+    id: string;
+    title: string;
+    type: string;
+    status: 'done' | 'in_progress' | 'to_do';
+  }> = [];
 
   const completedTasks = todaysTasks.filter(task => task.status === 'done').length;
   const totalTasks = todaysTasks.length;
