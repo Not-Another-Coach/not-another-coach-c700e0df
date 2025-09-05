@@ -96,6 +96,7 @@ export function useTrainerProfile() {
     if (!user) return;
 
     try {
+      console.log('Fetching profile for user:', user.email, user.id);
       const { data, error } = await supabase
         .from('v_trainers')
         .select('*')
@@ -105,6 +106,7 @@ export function useTrainerProfile() {
       if (error) {
         console.error('Error fetching trainer profile:', error);
       } else {
+        console.log('Fetched trainer profile data:', data);
         // Ensure new fields exist with default values if not present in the view
         const profileWithDefaults = {
           ...data,
