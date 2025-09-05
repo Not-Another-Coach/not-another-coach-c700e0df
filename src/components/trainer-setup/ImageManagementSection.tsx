@@ -459,7 +459,7 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
                 <Label htmlFor="max-images">Gallery Grid Size</Label>
                 <Select
                   value={(imagePreferences?.max_images_per_view || 6).toString()}
-                  onValueChange={async (value) => {
+                  onValueChange={(value) => {
                     const newGridSize = parseInt(value);
                     const currentCount = selectedImagesCount;
                     
@@ -470,7 +470,7 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
                       );
                       
                       if (confirmed) {
-                        await autoAdjustToGridSize(newGridSize);
+                        autoAdjustToGridSize(newGridSize);
                       }
                     }
                     

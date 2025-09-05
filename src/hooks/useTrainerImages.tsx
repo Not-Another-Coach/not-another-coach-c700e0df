@@ -348,8 +348,8 @@ export const useTrainerImages = () => {
       { value: 12, label: '12 images (4×3)', capacity: 12 }
     ];
     
-    // Only show grid sizes that can be filled with selected images (no empty spaces)
-    return gridOptions.filter(option => selectedCount === 0 || option.capacity <= selectedCount || option.capacity === selectedCount);
+    // Show all grid sizes - let the user choose and handle empty spaces in onValueChange
+    return gridOptions;
   };
 
   const getRecommendedGridSize = () => {
