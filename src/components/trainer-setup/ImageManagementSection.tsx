@@ -6,7 +6,8 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Upload, Instagram, Image, Trash2, Check, X, Settings, Eye, EyeOff, Camera, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Upload, Instagram, Image, Trash2, Check, X, Eye, EyeOff, Camera, CheckCircle, Info } from 'lucide-react';
 import { useTrainerImages } from '@/hooks/useTrainerImages';
 import { useInstagramIntegration } from '@/hooks/useInstagramIntegration';
 import { useInstagramConnection } from '@/hooks/useInstagramConnection';
@@ -48,7 +49,7 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
 
   const { isConnected } = useInstagramConnection();
 
-  const [activeTab, setActiveTab] = useState<'upload' | 'instagram' | 'settings'>('upload');
+  const [activeTab, setActiveTab] = useState<'upload' | 'instagram'>('upload');
   const [dragActive, setDragActive] = useState(false);
 
   const handleFileUpload = async (files: FileList | null) => {
@@ -171,8 +172,40 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
                   </Badge>
                 </div>
               </div>
-              <div className="text-xs text-muted-foreground">
-                Grid: {getGridLabel(recommendedGridSize)}
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span>Grid: {getGridLabel(recommendedGridSize)}</span>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Info className="h-3 w-3" />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      <div className="space-y-1 text-xs">
+                        <div className="font-medium mb-2">Auto-Selection Rules:</div>
+                        <div className="flex justify-between">
+                          <span>1-3 images</span>
+                          <span>→ Hero layout (1 image)</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>4-5 images</span>
+                          <span>→ 2×2 grid (4 images max)</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>6-8 images</span>
+                          <span>→ 3×2 grid (6 images max)</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>9-11 images</span>
+                          <span>→ 3×3 grid (9 images max)</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>12+ images</span>
+                          <span>→ 4×3 grid (12 images max)</span>
+                        </div>
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
             </div>
         </CardContent>
@@ -205,20 +238,6 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
           <Instagram className="h-4 w-4" />
           Instagram Sync
           {instagramSelections.some(sel => sel.is_selected_for_display) && (
-            <CheckCircle className="h-3 w-3 text-green-500" />
-          )}
-        </button>
-        <button
-          className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors flex items-center gap-2 ${
-            activeTab === 'settings' 
-              ? 'border-primary text-primary' 
-              : 'border-transparent text-muted-foreground hover:text-foreground'
-          }`}
-          onClick={() => setActiveTab('settings')}
-        >
-          <Settings className="h-4 w-4" />
-          Settings
-          {validationStatus.status === 'complete' && (
             <CheckCircle className="h-3 w-3 text-green-500" />
           )}
         </button>
@@ -265,6 +284,25 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
                 <p className="text-xs text-muted-foreground mt-2">
                   Supports: JPG, PNG, WebP (max 5MB each)
                 </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Validation Status */}
+          <Card>
+            <CardContent className="p-4">
+              <div className={`p-3 rounded-lg border flex items-start gap-3 ${
+                validationStatus.status === 'complete' 
+                  ? 'bg-green-50 border-green-200 text-green-800' 
+                  : 'bg-blue-50 border-blue-200 text-blue-800'
+              }`}>
+                <CheckCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium">{validationStatus.message}</p>
+                  <p className="text-xs mt-1 opacity-75">
+                    Grid size is automatically selected based on your image count
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -412,121 +450,59 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
                   ) : (
                     <div className="text-center py-8 text-muted-foreground">
                       <Instagram className="h-8 w-8 mx-auto mb-2" />
-                      <p>No Instagram posts synced yet</p>
+                     <p>No Instagram posts synced yet</p>
                     </div>
                   )}
                 </CardContent>
               </Card>
+
+              {/* Instagram Settings */}
+              {connection && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Instagram Settings</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="auto-sync">Auto-sync Instagram</Label>
+                        <p className="text-xs text-muted-foreground">
+                          Automatically sync new Instagram posts
+                        </p>
+                      </div>
+                      <Switch
+                        id="auto-sync"
+                        checked={imagePreferences?.auto_sync_instagram || false}
+                        onCheckedChange={(checked) => 
+                          updateImagePreferences({ auto_sync_instagram: checked })
+                        }
+                      />
+                    </div>
+
+                    {imagePreferences?.auto_sync_instagram && (
+                      <div>
+                        <Label htmlFor="sync-frequency">Sync frequency</Label>
+                        <Select
+                          value={imagePreferences?.instagram_sync_frequency || 'weekly'}
+                          onValueChange={(value) => updateImagePreferences({ instagram_sync_frequency: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="daily">Daily</SelectItem>
+                            <SelectItem value="weekly">Weekly</SelectItem>
+                            <SelectItem value="monthly">Monthly</SelectItem>
+                            <SelectItem value="manual">Manual only</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
             </>
           )}
-        </div>
-      )}
-
-      {/* Settings Tab */}
-      {activeTab === 'settings' && (
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Display Settings</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Current Status */}
-              <div className={`p-3 rounded-lg border flex items-start gap-3 ${
-                validationStatus.status === 'complete' 
-                  ? 'bg-green-50 border-green-200 text-green-800' 
-                  : 'bg-blue-50 border-blue-200 text-blue-800'
-              }`}>
-                <CheckCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                <div className="flex-1">
-                  <p className="text-sm font-medium">{validationStatus.message}</p>
-                  <p className="text-xs mt-1 opacity-75">
-                    Grid size is automatically selected based on your image count
-                  </p>
-                </div>
-              </div>
-
-              {/* Auto Grid Size Display */}
-              <div>
-                <Label>Auto-Selected Gallery Layout</Label>
-                <div className="mt-2 p-3 bg-muted rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">{getGridLabel(recommendedGridSize)}</span>
-                    <Badge variant="secondary">Auto-selected</Badge>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Based on {selectedImagesCount} selected image{selectedImagesCount !== 1 ? 's' : ''}
-                  </p>
-                </div>
-              </div>
-
-              {/* Grid Size Rules */}
-              <div>
-                <Label>Auto-Selection Rules</Label>
-                <div className="mt-2 space-y-2 text-xs text-muted-foreground">
-                  <div className="flex justify-between">
-                    <span>1-3 images</span>
-                    <span>→ Hero layout (1 image)</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>4-5 images</span>
-                    <span>→ 2×2 grid (4 images max)</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>6-8 images</span>
-                    <span>→ 3×2 grid (6 images max)</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>9-11 images</span>
-                    <span>→ 3×3 grid (9 images max)</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>12+ images</span>
-                    <span>→ 4×3 grid (12 images max)</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="auto-sync" className={!isConnected ? 'text-muted-foreground' : ''}>
-                    Auto-sync Instagram
-                  </Label>
-                  <p className="text-xs text-muted-foreground">
-                    {isConnected ? 'Automatically sync new Instagram posts' : 'Connect Instagram to enable auto-sync'}
-                  </p>
-                </div>
-                <Switch
-                  id="auto-sync"
-                  checked={imagePreferences?.auto_sync_instagram || false}
-                  onCheckedChange={(checked) => 
-                    updateImagePreferences({ auto_sync_instagram: checked })
-                  }
-                  disabled={!isConnected}
-                />
-              </div>
-
-              {imagePreferences?.auto_sync_instagram && (
-                <div>
-                  <Label htmlFor="sync-frequency">Sync frequency</Label>
-                  <Select
-                    value={imagePreferences?.instagram_sync_frequency || 'weekly'}
-                    onValueChange={(value) => updateImagePreferences({ instagram_sync_frequency: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="daily">Daily</SelectItem>
-                      <SelectItem value="weekly">Weekly</SelectItem>
-                      <SelectItem value="monthly">Monthly</SelectItem>
-                      <SelectItem value="manual">Manual only</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
         </div>
       )}
     </div>
