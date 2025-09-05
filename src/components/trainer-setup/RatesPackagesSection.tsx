@@ -17,6 +17,7 @@ import { usePackageWaysOfWorking } from "@/hooks/usePackageWaysOfWorking";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 interface RatesPackagesSectionProps {
   formData: any;
@@ -206,15 +207,46 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
       }
 
       // Clone the ways of working by saving the source workflow data with the new package details
+      // Note: We need to get the full workflow data including activity IDs from the database
+      const { data: fullSourceWorkflow, error: fetchError } = await supabase
+        .from('package_ways_of_working')
+        .select('*')
+        .eq('package_id', sourceWorkflow.id)
+        .single();
+
+      if (fetchError) {
+        console.error('Error fetching full workflow data:', fetchError);
+        throw fetchError;
+      }
+
       await savePackageWorkflow(targetPackageId, targetPackageName, {
-        onboarding_items: sourceWorkflow.onboarding_items,
-        first_week_items: sourceWorkflow.first_week_items,
-        ongoing_structure_items: sourceWorkflow.ongoing_structure_items,
-        tracking_tools_items: sourceWorkflow.tracking_tools_items,
-        client_expectations_items: sourceWorkflow.client_expectations_items,
-        what_i_bring_items: sourceWorkflow.what_i_bring_items,
+        onboarding_items: sourceWorkflow.onboarding_items || [],
+        first_week_items: sourceWorkflow.first_week_items || [],
+        ongoing_structure_items: sourceWorkflow.ongoing_structure_items || [],
+        tracking_tools_items: sourceWorkflow.tracking_tools_items || [],
+        client_expectations_items: sourceWorkflow.client_expectations_items || [],
+        what_i_bring_items: sourceWorkflow.what_i_bring_items || [],
         visibility: sourceWorkflow.visibility,
       });
+
+      // Also copy the activity IDs if they exist
+      if (fullSourceWorkflow) {
+        const { error: updateError } = await supabase
+          .from('package_ways_of_working')
+          .update({
+            onboarding_activity_ids: fullSourceWorkflow.onboarding_activity_ids || [],
+            first_week_activity_ids: fullSourceWorkflow.first_week_activity_ids || [],
+            ongoing_structure_activity_ids: fullSourceWorkflow.ongoing_structure_activity_ids || [],
+            tracking_tools_activity_ids: fullSourceWorkflow.tracking_tools_activity_ids || [],
+            client_expectations_activity_ids: fullSourceWorkflow.client_expectations_activity_ids || [],
+            what_i_bring_activity_ids: fullSourceWorkflow.what_i_bring_activity_ids || []
+          })
+          .eq('package_id', targetPackageId);
+
+        if (updateError) {
+          console.error('Error copying activity IDs:', updateError);
+        }
+      }
       
       toast({
         title: "Ways of working copied",
