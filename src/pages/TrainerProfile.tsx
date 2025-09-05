@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -19,10 +19,13 @@ export const TrainerProfile = () => {
   const { trainerId } = useParams<{ trainerId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { trainers, loading } = useRealTrainers(
-    undefined, 
-    user?.id ? { userId: user.id } : undefined
+  
+  const includeOwnUnpublished = useMemo(() => 
+    user?.id ? { userId: user.id } : undefined, 
+    [user?.id]
   );
+  
+  const { trainers, loading } = useRealTrainers(undefined, includeOwnUnpublished);
   const [isMessagingOpen, setIsMessagingOpen] = useState(false);
   const [currentView, setCurrentView] = useState<ProfileViewMode>('overview');
   const isMobile = useIsMobile();
