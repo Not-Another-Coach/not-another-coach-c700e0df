@@ -70,9 +70,15 @@ export const EnhancedVerificationSection = () => {
 
   // Debug logging
   React.useEffect(() => {
-    console.log('EnhancedVerificationSection checks:', checks);
+    console.log('EnhancedVerificationSection rendering with checks:', checks);
     console.log('Check types found:', checks.map(c => ({ type: c.check_type, status: c.status })));
-  }, [checks]);
+    
+    // Test getCheckByType for each config key
+    Object.keys(CheckTypeConfig).forEach(checkType => {
+      const found = getCheckByType(checkType as any);
+      console.log(`getCheckByType('${checkType}'):`, found ? { id: found.id, status: found.status } : 'NOT FOUND');
+    });
+  }, [checks, getCheckByType]);
 
   const handleInputChange = (checkType: string, field: string, value: any) => {
     setFormData(prev => ({
