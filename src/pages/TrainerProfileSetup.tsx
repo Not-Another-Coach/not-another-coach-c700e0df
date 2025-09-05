@@ -126,6 +126,7 @@ const TrainerProfileSetup = () => {
     },
     wow_activity_assignments: [],
     wow_visibility: "public",
+    wow_setup_completed: false,
     
     // Profile Management - this exists in TrainerProfile
     terms_agreed: false,
@@ -214,6 +215,7 @@ const TrainerProfileSetup = () => {
         },
         wow_activity_assignments: profile.wow_activity_assignments || [],
         wow_visibility: profile.wow_visibility || "public",
+        wow_setup_completed: profile.wow_setup_completed || false,
         terms_agreed: profile.terms_agreed || false,
         max_clients: profile.max_clients || null,
       };
@@ -429,6 +431,18 @@ const TrainerProfileSetup = () => {
         training_types: formData.training_types || [],
         // Map certificates back to uploaded_certificates for database storage
         uploaded_certificates: formData.certificates || [],
+        // Explicitly include Ways of Working fields to ensure persistence
+        wow_how_i_work: formData.wow_how_i_work || "",
+        wow_what_i_provide: formData.wow_what_i_provide || "",
+        wow_client_expectations: formData.wow_client_expectations || "",
+        wow_activities: formData.wow_activities || {
+          wow_how_i_work: [],
+          wow_what_i_provide: [],
+          wow_client_expectations: []
+        },
+        wow_activity_assignments: formData.wow_activity_assignments || [],
+        wow_visibility: formData.wow_visibility || "public",
+        wow_setup_completed: formData.wow_setup_completed || false,
       };
       
       console.log('Saving trainer profile data:', saveData);
@@ -436,6 +450,9 @@ const TrainerProfileSetup = () => {
       console.log('Number of testimonials:', saveData.testimonials?.length || 0);
       console.log('Client types being saved:', saveData.ideal_client_types);
       console.log('Coaching styles being saved:', saveData.coaching_style);
+      console.log('Ways of Working activities being saved:', saveData.wow_activities);
+      console.log('Ways of Working assignments being saved:', saveData.wow_activity_assignments);
+      console.log('WoW setup completed:', saveData.wow_setup_completed);
       
       const result = await updateProfile(saveData);
       

@@ -85,6 +85,7 @@ interface TrainerProfile {
   } | null;
   wow_activity_assignments: ActivityPackageAssignment[] | null;
   wow_visibility: string | null;
+  wow_setup_completed: boolean | null;
 }
 
 export function useTrainerProfile() {
@@ -123,6 +124,7 @@ export function useTrainerProfile() {
           wow_activities: (data as any)?.wow_activities || null,
           wow_activity_assignments: (data as any)?.wow_activity_assignments || null,
           wow_visibility: (data as any)?.wow_visibility || null,
+          wow_setup_completed: (data as any)?.wow_setup_completed || null,
         } as TrainerProfile;
         setProfile(profileWithDefaults);
       }
@@ -151,7 +153,7 @@ export function useTrainerProfile() {
       const trainerUpdates: any = {};
 
       // Shared profile fields (general profile info, profile_image_position, and new WoW fields)
-      const sharedFields = ['first_name', 'last_name', 'bio', 'profile_photo_url', 'location', 'tagline', 'is_uk_based', 'profile_published', 'profile_image_position', 'wow_how_i_work', 'wow_what_i_provide', 'wow_client_expectations', 'wow_activities', 'wow_activity_assignments', 'wow_visibility'];
+      const sharedFields = ['first_name', 'last_name', 'bio', 'profile_photo_url', 'location', 'tagline', 'is_uk_based', 'profile_published', 'profile_image_position', 'wow_how_i_work', 'wow_what_i_provide', 'wow_client_expectations', 'wow_activities', 'wow_activity_assignments', 'wow_visibility', 'wow_setup_completed'];
       
       // Trainer-specific fields (all trainer-related fields including the moved ones)
       const trainerFields = [
