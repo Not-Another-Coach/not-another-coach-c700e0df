@@ -102,6 +102,7 @@ export function useActivityAlerts() {
           
           // For trainers, show alerts targeted to them
           if (isTrainer()) {
+            console.log(`🔍 Processing alerts for trainer ${user.id}, isTrainer: true`);
             // Show alerts where user is the creator (coach) or specifically targeted
             if (alert.created_by === user.id) return true;
             

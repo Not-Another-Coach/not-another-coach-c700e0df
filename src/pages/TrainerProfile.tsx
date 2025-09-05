@@ -48,7 +48,7 @@ export const TrainerProfile = () => {
               <p className="text-muted-foreground mb-4">
                 The trainer you're looking for doesn't exist or may have been removed.
               </p>
-              <Button onClick={() => navigate(-1)}>
+              <Button onClick={() => navigate('/trainer/dashboard')}>
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Go Back
               </Button>
