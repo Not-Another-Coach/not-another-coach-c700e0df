@@ -521,19 +521,19 @@ export function EnhancedPackageWaysOfWorkingSection({ formData }: PackageWaysOfW
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger 
               value="getting-started"
-              className="data-[state=active]:bg-accent data-[state=active]:text-accent-foreground data-[state=active]:shadow-sm"
+              className="data-[state=active]:bg-warning data-[state=active]:text-warning-foreground data-[state=active]:shadow-sm data-[state=active]:font-medium"
             >
               Getting Started
             </TabsTrigger>
             <TabsTrigger 
               value="ongoing-support"
-              className="data-[state=active]:bg-accent data-[state=active]:text-accent-foreground data-[state=active]:shadow-sm"
+              className="data-[state=active]:bg-warning data-[state=active]:text-warning-foreground data-[state=active]:shadow-sm data-[state=active]:font-medium"
             >
               Ongoing Support
             </TabsTrigger>
             <TabsTrigger 
               value="expectations"
-              className="data-[state=active]:bg-accent data-[state=active]:text-accent-foreground data-[state=active]:shadow-sm"
+              className="data-[state=active]:bg-warning data-[state=active]:text-warning-foreground data-[state=active]:shadow-sm data-[state=active]:font-medium"
             >
               Expectations
             </TabsTrigger>

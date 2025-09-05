@@ -75,32 +75,23 @@ export function usePackageWaysOfWorking() {
         trainer_id: user.id,
         package_id: packageId,
         package_name: packageName,
-        onboarding_items: workflowData.onboarding_items || [],
-        first_week_items: workflowData.first_week_items || [],
-        ongoing_structure_items: workflowData.ongoing_structure_items || [],
-        tracking_tools_items: workflowData.tracking_tools_items || [],
-        client_expectations_items: workflowData.client_expectations_items || [],
-        what_i_bring_items: workflowData.what_i_bring_items || [],
-        visibility: workflowData.visibility || 'public',
+        onboarding_items: workflowData.onboarding_items || existingWorkflow?.onboarding_items || [],
+        first_week_items: workflowData.first_week_items || existingWorkflow?.first_week_items || [],
+        ongoing_structure_items: workflowData.ongoing_structure_items || existingWorkflow?.ongoing_structure_items || [],
+        tracking_tools_items: workflowData.tracking_tools_items || existingWorkflow?.tracking_tools_items || [],
+        client_expectations_items: workflowData.client_expectations_items || existingWorkflow?.client_expectations_items || [],
+        what_i_bring_items: workflowData.what_i_bring_items || existingWorkflow?.what_i_bring_items || [],
+        visibility: workflowData.visibility || existingWorkflow?.visibility || 'public',
       };
 
-      let result;
-      if (existingWorkflow) {
-        // Update existing workflow
-        result = await supabase
-          .from('package_ways_of_working')
-          .update(dataToSave)
-          .eq('id', existingWorkflow.id)
-          .select()
-          .single();
-      } else {
-        // Create new workflow
-        result = await supabase
-          .from('package_ways_of_working')
-          .insert(dataToSave)
-          .select()
-          .single();
-      }
+      // Use upsert to handle both insert and update cases
+      const result = await supabase
+        .from('package_ways_of_working')
+        .upsert(dataToSave, { 
+          onConflict: 'trainer_id,package_id'
+        })
+        .select()
+        .single();
 
       if (result.error) throw result.error;
 
