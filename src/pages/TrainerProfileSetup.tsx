@@ -477,6 +477,8 @@ const TrainerProfileSetup = () => {
       // Convert form data to match TrainerProfile interface types
       const saveData = {
         ...formData,
+        // Store the current completion percentage for dashboard consistency
+        profile_completion_percentage: calculateOverallCompletion(),
         // Explicitly include testimonials to ensure persistence
         testimonials: formData.testimonials || [],
         // Convert delivery_format from string to array

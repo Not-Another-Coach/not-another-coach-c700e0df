@@ -113,6 +113,14 @@ const TrainerDashboard = () => {
   const calculateProfileCompletion = () => {
     if (!profile) return 0;
     
+    // Use stored completion percentage if available (from profile setup)
+    if ((profile as any).profile_completion_percentage !== undefined) {
+      console.log('🔍 Dashboard - Using stored completion percentage:', (profile as any).profile_completion_percentage);
+      return (profile as any).profile_completion_percentage;
+    }
+    
+    console.log('🔍 Dashboard - Calculating completion from profile data (fallback)');
+    
     // Use the same weighted system as profile setup to ensure consistency
     const getStepWeight = (step: number): number => {
       const weights = {
@@ -229,7 +237,11 @@ const TrainerDashboard = () => {
       ideal_client_types: (profile as any).ideal_client_types?.length,
       coaching_style: (profile as any).coaching_style?.length,
       package_options: (profile as any).package_options?.length,
-      terms_agreed: profile.terms_agreed
+      terms_agreed: profile.terms_agreed,
+      calendar_link: (profile as any).calendar_link ? 'exists' : 'missing',
+      testimonials: (profile as any).testimonials?.length,
+      wow_setup_completed: (profile as any).wow_setup_completed,
+      verification_status: (profile as any).verification_status
     });
 
     let totalWeightedCompletion = 0;
