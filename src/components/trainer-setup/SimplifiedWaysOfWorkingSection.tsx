@@ -94,6 +94,13 @@ export function SimplifiedWaysOfWorkingSection({
       { key: 'wow_client_expectations', label: 'Client Expectations' }
     ];
     
+    console.log('[WoW Requirements Debug] Current form data fields:', {
+      wow_how_i_work: formData.wow_how_i_work?.length || 0,
+      wow_what_i_provide: formData.wow_what_i_provide?.length || 0,
+      wow_client_expectations: formData.wow_client_expectations?.length || 0,
+      wow_activities: formData.wow_activities
+    });
+    
     textFields.forEach(field => {
       if (!formData[field.key] || formData[field.key].length < 20) {
         missing.push(`${field.label} description (min 20 characters)`);
@@ -109,6 +116,9 @@ export function SimplifiedWaysOfWorkingSection({
     if (!hasActivities) {
       missing.push('At least one activity selected');
     }
+    
+    console.log('[WoW Requirements Debug] Missing requirements:', missing);
+    console.log('[WoW Requirements Debug] Prerequisites met:', missing.length === 0);
     
     return missing;
   };

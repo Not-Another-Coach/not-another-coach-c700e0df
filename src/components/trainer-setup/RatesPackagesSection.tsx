@@ -34,6 +34,7 @@ interface TrainingPackage {
   price: number;
   currency: string;
   description: string;
+  inclusions?: string[]; // Add inclusions field
   isPromotion?: boolean;
   promotionStartDate?: Date;
   promotionEndDate?: Date;
@@ -191,10 +192,21 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
       price: pkg.price,
       currency: pkg.currency,
       description: pkg.description,
+      inclusions: pkg.inclusions || [], // Fix: Copy inclusions from original package
       isPromotion: pkg.isPromotion,
       promotionStartDate: pkg.promotionStartDate,
       promotionEndDate: pkg.promotionEndDate,
+      durationWeeks: pkg.durationWeeks,
+      durationMonths: pkg.durationMonths,
+      payoutFrequency: pkg.payoutFrequency || "monthly",
+      customerPaymentModes: pkg.customerPaymentModes || ['upfront'],
+      installmentCount: pkg.installmentCount,
+      upfrontAmount: pkg.upfrontAmount,
+      installmentAmount: pkg.installmentAmount,
     };
+    
+    console.log('[Clone Debug] Original package inclusions:', pkg.inclusions);
+    console.log('[Clone Debug] Cloned package inclusions:', clonedPackage.inclusions);
     
     // Set up for immediate editing
     setEditingPackage(clonedPackage);
