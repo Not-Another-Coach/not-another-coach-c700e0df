@@ -92,6 +92,18 @@ export const EnhancedVerificationSection = () => {
     const data = formData[checkType];
     if (!data) return;
 
+    // Validate expiry date is in the future
+    if (data.expiry_date) {
+      const expiryDate = new Date(data.expiry_date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Reset time to compare dates only
+      
+      if (expiryDate <= today) {
+        toast.error('Expiry date must be in the future');
+        return;
+      }
+    }
+
     setUploading(checkType);
 
     try {
@@ -107,13 +119,13 @@ export const EnhancedVerificationSection = () => {
         evidence_file_url = uploadPath;
       }
 
-      // Submit verification check
-      await submitVerificationCheck(checkType, {
+      // Submit verification check with proper data mapping
+      const submitData = {
         provider: data.provider,
         member_id: data.member_id,
         certificate_id: data.certificate_id,
         policy_number: data.policy_number,
-        coverage_amount: data.coverage_amount,
+        coverage_amount: data.coverage_amount ? Number(data.coverage_amount) : undefined,
         issue_date: data.issue_date,
         expiry_date: data.expiry_date,
         evidence_file_url,
@@ -122,13 +134,22 @@ export const EnhancedVerificationSection = () => {
           size: data.file.size,
           type: data.file.type,
         } : undefined,
-      });
+      };
+
+      console.log('Submitting verification check:', { checkType, submitData });
+      
+      await submitVerificationCheck(checkType, submitData);
 
       // Clear form data
       setFormData(prev => ({
         ...prev,
         [checkType]: {},
       }));
+      
+      toast.success(`${CheckTypeConfig[checkType].title} submitted successfully`);
+    } catch (error) {
+      console.error('Error submitting verification check:', error);
+      toast.error(`Failed to submit ${CheckTypeConfig[checkType].title}`);
     } finally {
       setUploading(null);
     }
@@ -338,8 +359,12 @@ export const EnhancedVerificationSection = () => {
                           id={`${checkType}-expiry_date`}
                           type="date"
                           value={formData[checkType]?.expiry_date || ''}
+                          min={new Date().toISOString().split('T')[0]}
                           onChange={(e) => handleInputChange(checkType, 'expiry_date', e.target.value)}
                         />
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Must be a future date
+                        </p>
                       </div>
                     )}
                   </div>

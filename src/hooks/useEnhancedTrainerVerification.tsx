@@ -156,21 +156,40 @@ export const useEnhancedTrainerVerification = () => {
         trainer_id: user.id,
         check_type: checkType,
         status: 'pending' as const,
-        ...data,
+        provider: data.provider || null,
+        awarding_body: data.awarding_body || null,
+        member_id: data.member_id || null,
+        certificate_id: data.certificate_id || null,
+        policy_number: data.policy_number || null,
+        level: data.level || null,
+        coverage_amount: data.coverage_amount || null,
+        issue_date: data.issue_date || null,
+        expiry_date: data.expiry_date || null,
+        evidence_file_url: data.evidence_file_url || null,
+        evidence_metadata: data.evidence_metadata || null,
       };
 
-      const { error } = await supabase
-        .from('trainer_verification_checks')
-        .upsert(checkData);
+      console.log('Upserting verification check:', checkData);
 
-      if (error) throw error;
+      const { data: result, error } = await supabase
+        .from('trainer_verification_checks')
+        .upsert(checkData, { 
+          onConflict: 'trainer_id,check_type'
+        })
+        .select();
+
+      if (error) {
+        console.error('Database error:', error);
+        throw error;
+      }
+
+      console.log('Verification check saved:', result);
 
       // Refresh data
       await fetchVerificationData();
-      toast.success('Verification documents submitted successfully');
     } catch (error) {
       console.error('Error submitting verification:', error);
-      toast.error('Failed to submit verification');
+      throw error;
     }
   }, [user, fetchVerificationData]);
 
