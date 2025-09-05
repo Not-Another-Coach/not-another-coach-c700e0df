@@ -48,6 +48,13 @@ export function SimplifiedWaysOfWorkingSection({
   // Get packages from formData with fallback to fetch from database
   const [availablePackages, setAvailablePackages] = useState(formData.package_options || []);
   
+  // Keep packages in sync with formData changes (including deletions)
+  useEffect(() => {
+    if (formData.package_options) {
+      setAvailablePackages(formData.package_options);
+    }
+  }, [formData.package_options]);
+  
   useEffect(() => {
     const fetchPackagesIfNeeded = async () => {
       if (!formData.package_options || formData.package_options.length === 0) {

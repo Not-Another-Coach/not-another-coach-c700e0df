@@ -126,6 +126,66 @@ export function usePackageWaysOfWorking() {
     }
   };
 
+  // Clean up orphaned package workflows
+  const cleanupOrphanedWorkflows = async (validPackageIds: string[]) => {
+    if (!user?.id) throw new Error('No user authenticated');
+
+    try {
+      // Find orphaned workflows (ones that don't have a corresponding package)
+      const { data: orphanedWorkflows, error: fetchError } = await supabase
+        .from('package_ways_of_working')
+        .select('package_id')
+        .eq('trainer_id', user.id)
+        .not('package_id', 'in', `(${validPackageIds.join(',')})`);
+
+      if (fetchError) throw fetchError;
+
+      if (orphanedWorkflows && orphanedWorkflows.length > 0) {
+        // Delete orphaned workflows
+        const { error: deleteError } = await supabase
+          .from('package_ways_of_working')
+          .delete()
+          .eq('trainer_id', user.id)
+          .not('package_id', 'in', `(${validPackageIds.join(',')})`);
+
+        if (deleteError) throw deleteError;
+
+        // Refresh the workflows
+        await fetchPackageWorkflows();
+        
+        return orphanedWorkflows.length;
+      }
+      
+      return 0;
+    } catch (err) {
+      console.error('Error cleaning up orphaned workflows:', err);
+      throw err;
+    }
+  };
+
+  // Bulk delete multiple package workflows
+  const bulkDeletePackageWorkflows = async (packageIds: string[]) => {
+    if (!user?.id) throw new Error('No user authenticated');
+
+    try {
+      const { error } = await supabase
+        .from('package_ways_of_working')
+        .delete()
+        .eq('trainer_id', user.id)
+        .in('package_id', packageIds);
+
+      if (error) throw error;
+
+      // Refresh the workflows
+      await fetchPackageWorkflows();
+      
+      return packageIds.length;
+    } catch (err) {
+      console.error('Error bulk deleting package workflows:', err);
+      throw err;
+    }
+  };
+
   // Initialize data
   useEffect(() => {
     if (user?.id) {
@@ -140,6 +200,8 @@ export function usePackageWaysOfWorking() {
     getPackageWorkflow,
     savePackageWorkflow,
     deletePackageWorkflow,
+    cleanupOrphanedWorkflows,
+    bulkDeletePackageWorkflows,
     refetch: fetchPackageWorkflows
   };
 }

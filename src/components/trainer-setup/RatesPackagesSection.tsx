@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -99,8 +99,27 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
     installmentCount: "",
   });
 
-  const { getPackageWorkflow, savePackageWorkflow } = usePackageWaysOfWorking();
+  const { getPackageWorkflow, savePackageWorkflow, cleanupOrphanedWorkflows } = usePackageWaysOfWorking();
   const { toast } = useToast();
+  
+  // Clean up orphaned workflows when component mounts
+  useEffect(() => {
+    const performCleanup = async () => {
+      if (user?.id && packages.length > 0) {
+        try {
+          const validPackageIds = packages.map(pkg => pkg.id);
+          const cleanedCount = await cleanupOrphanedWorkflows(validPackageIds);
+          if (cleanedCount > 0) {
+            console.log(`Cleaned up ${cleanedCount} orphaned Ways of Working records`);
+          }
+        } catch (error) {
+          console.error('Error during cleanup:', error);
+        }
+      }
+    };
+    
+    performCleanup();
+  }, [user?.id, packages.length, cleanupOrphanedWorkflows]);
 
   const addPackage = async () => {
     if (newPackage.name && newPackage.price && newPackage.description) {
@@ -304,16 +323,52 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
   };
 
   const removePackage = async (id: string) => {
-    const updatedPackages = packages.filter(pkg => pkg.id !== id);
-    setPackages(updatedPackages);
-    updateFormData({ package_options: updatedPackages });
+    const packageToDelete = packages.find(pkg => pkg.id === id);
     
-    // Immediately save to database to ensure sync with Ways of Working
-    if (user?.id) {
-      await supabase
-        .from('trainer_profiles')
-        .update({ package_options: updatedPackages as any })
-        .eq('id', user.id);
+    try {
+      const updatedPackages = packages.filter(pkg => pkg.id !== id);
+      setPackages(updatedPackages);
+      updateFormData({ package_options: updatedPackages });
+      
+      // Delete from both profile and package_ways_of_working table
+      if (user?.id) {
+        // Update the profile
+        await supabase
+          .from('trainer_profiles')
+          .update({ package_options: updatedPackages as any })
+          .eq('id', user.id);
+        
+        // Delete associated Ways of Working data
+        const { error: deleteError } = await supabase
+          .from('package_ways_of_working')
+          .delete()
+          .eq('trainer_id', user.id)
+          .eq('package_id', id);
+        
+        if (deleteError) {
+          console.error('Error deleting Ways of Working data:', deleteError);
+          toast({
+            title: "Warning",
+            description: "Package deleted but some associated data may remain. Please refresh the page.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Package deleted",
+            description: `${packageToDelete?.name || 'Package'} and all associated data removed successfully.`,
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error removing package:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete package. Please try again.",
+        variant: "destructive",
+      });
+      // Revert the local state on error
+      setPackages(packages);
+      updateFormData({ package_options: packages });
     }
   };
 
