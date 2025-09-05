@@ -116,7 +116,7 @@ export const VisibilitySettingsSection = () => {
     return <IconComponent className={`w-4 h-4 ${config.color}`} />;
   };
 
-  if (!profile || profile.user_type !== 'trainer') {
+  if (!profile) {
     return null;
   }
 

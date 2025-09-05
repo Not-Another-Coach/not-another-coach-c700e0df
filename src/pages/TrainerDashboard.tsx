@@ -101,12 +101,7 @@ const TrainerDashboard = () => {
     }
   }, [availabilitySettings?.availability_status]);
 
-  // Redirect if not trainer
-  useEffect(() => {
-    if (!loading && !profileLoading && user && profile && profile.user_type !== 'trainer') {
-      navigate('/');
-    }
-  }, [user, profile, loading, profileLoading, navigate]);
+  // User is already in trainer dashboard, no need to check user_type
 
   // Redirect to auth if not logged in
   useEffect(() => {
@@ -234,7 +229,10 @@ const TrainerDashboard = () => {
             </Button>
             {profile && (
               <ProfileDropdown 
-                profile={profile}
+                profile={{
+                  ...profile,
+                  user_type: 'trainer'
+                }}
               />
             )}
           </div>

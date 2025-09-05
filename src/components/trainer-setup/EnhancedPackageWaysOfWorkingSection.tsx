@@ -26,7 +26,7 @@ interface WaysOfWorkingItem {
   activityId?: string;
 }
 
-export function EnhancedPackageWaysOfWorkingSection({ formData }: PackageWaysOfWorkingSectionProps) {
+export function EnhancedPackageWaysOfWorkingSection({ formData, updateFormData }: PackageWaysOfWorkingSectionProps) {
   const [activePackageId, setActivePackageId] = useState<string>('');
   const [activeTab, setActiveTab] = useState<string>('getting-started');
   const [newItems, setNewItems] = useState<Record<string, string>>({});
@@ -271,6 +271,7 @@ export function EnhancedPackageWaysOfWorkingSection({ formData }: PackageWaysOfW
     const sourceWorkflow = getPackageWorkflow(sourcePackageId);
     if (!sourceWorkflow) return;
 
+    // Clone the workflow data
     const clonedWorkflow = {
       ...sourceWorkflow,
       package_id: targetPackageId,
@@ -279,9 +280,50 @@ export function EnhancedPackageWaysOfWorkingSection({ formData }: PackageWaysOfW
     
     await savePackageWorkflow(targetPackageId, targetPackageName, clonedWorkflow);
     
-    toast.success(`Cloned settings from ${sourceWorkflow.package_name}`, {
+    // Update activity assignments to include the new target package
+    const currentFormData = updateFormData ? formData : {};
+    const currentAssignments = currentFormData.wow_activity_assignments || [];
+    
+    // Find activities used in the cloned workflow and update their assignments
+    const clonedSections = ['onboarding_items', 'first_week_items', 'ongoing_structure_items', 'tracking_tools_items', 'client_expectations_items', 'what_i_bring_items'];
+    
+    clonedSections.forEach(section => {
+      const items = clonedWorkflow[section] || [];
+      items.forEach((item: any) => {
+        if (item.activityId) {
+          // Find existing assignment for this activity
+          const existingAssignmentIndex = currentAssignments.findIndex((a: any) => a.activityId === item.activityId);
+          
+          if (existingAssignmentIndex >= 0) {
+            // Update existing assignment to include new package
+            const updatedAssignment = { ...currentAssignments[existingAssignmentIndex] };
+            if (!updatedAssignment.packageIds.includes(targetPackageId)) {
+              updatedAssignment.packageIds.push(targetPackageId);
+              updatedAssignment.assignedTo = updatedAssignment.packageIds.length === (currentFormData.package_options?.length || 0) ? 'all' : 'specific';
+            }
+            currentAssignments[existingAssignmentIndex] = updatedAssignment;
+          } else {
+            // Create new assignment for this activity
+            const newAssignment = {
+              activityId: item.activityId,
+              activityName: item.text,
+              assignedTo: 'specific',
+              packageIds: [targetPackageId]
+            };
+            currentAssignments.push(newAssignment);
+          }
+        }
+      });
+    });
+    
+    // Update form data with new assignments
+    if (updateFormData) {
+      updateFormData({ wow_activity_assignments: currentAssignments });
+    }
+    
+    toast.success(`Cloned settings from ${sourceWorkflow.package_name} and updated activity assignments`, {
       position: "top-center",
-      duration: 2000,
+      duration: 2500,
     });
   };
 

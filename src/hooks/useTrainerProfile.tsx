@@ -18,7 +18,6 @@ interface ActivityPackageAssignment {
 
 interface TrainerProfile {
   id: string;
-  user_type: 'trainer';
   first_name: string | null;
   last_name: string | null;
   bio: string | null;

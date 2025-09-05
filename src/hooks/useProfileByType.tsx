@@ -94,7 +94,7 @@ export function useProfileByType() {
     return {
       profile: trainerProfile ? {
         id: trainerProfile.id,
-        user_type: trainerProfile.user_type,
+        user_type: 'trainer' as const, // Always trainer for this hook
         first_name: trainerProfile.first_name,
         last_name: trainerProfile.last_name,
         profile_photo_url: trainerProfile.profile_photo_url,

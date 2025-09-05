@@ -386,8 +386,15 @@ const TrainerProfileSetup = () => {
         const hasTestimonials = formData.testimonials?.length > 0;
         return hasTestimonials ? 'completed' : 'not_started';
         
-      case 8: // Ways of Working - Use new validation logic
-        return getValidationStepCompletion(formData, 8);
+      case 8: // Ways of Working - check both completion checkbox and activities
+        const validationCompletion = getValidationStepCompletion(formData, 8);
+        const hasSetupCompleted = formData.wow_setup_completed === true;
+        const hasActivities = formData.wow_activities && 
+          Object.values(formData.wow_activities).some((arr: any) => Array.isArray(arr) && arr.length > 0);
+        
+        // If they have activities assigned, show as partial even if not marked complete
+        if (hasActivities && !hasSetupCompleted) return 'partial';
+        return hasSetupCompleted ? 'completed' : validationCompletion;
         
       case 9: // Instagram Integration
         return isInstagramConnected ? 'completed' : 'not_started';
