@@ -338,20 +338,20 @@ const TrainerProfileSetup = () => {
   // Weight distribution for each step (total: 100%)
   const getStepWeight = (step: number): number => {
     const weights = {
-      1: 15,  // Basic Info (most important)
-      2: 12,  // Qualifications (important credibility)
-      3: 12,  // Expertise & Services (core offering)
-      4: 10,  // Client Fit Preferences (matching algorithm)
-      5: 15,  // Rates & Packages (monetization, complex)
-      6: 8,   // Discovery Calls (valuable but optional)
-      7: 8,   // Testimonials & Case Studies (social proof)
-      8: 10,  // Ways of Working (client experience)
-      9: 5,   // Instagram Integration (optional, lower weight)
+      1: 13,  // Basic Info (most important)
+      2: 10,  // Qualifications (important credibility)
+      3: 10,  // Expertise & Services (core offering)
+      4: 9,   // Client Fit Preferences (matching algorithm)
+      5: 13,  // Rates & Packages (monetization, complex)
+      6: 7,   // Discovery Calls (valuable but optional)
+      7: 7,   // Testimonials & Case Studies (social proof)
+      8: 9,   // Ways of Working (client experience)
+      9: 4,   // Instagram Integration (optional, lower weight)
       10: 3,  // Image Management (optional, cosmetic)
       11: 3,  // Working Hours (optional)
-      12: 5,  // Terms & Notifications (compliance)
-      13: 8,  // Professional Documents (important for credibility)
-      14: 2   // Verification (final step, external dependency)
+      12: 4,  // Terms & Notifications (compliance)
+      13: 7,  // Professional Documents (important for credibility)
+      14: 1   // Verification (final step, external dependency)
     };
     return weights[step] || 0;
   };

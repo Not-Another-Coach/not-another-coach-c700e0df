@@ -113,27 +113,80 @@ const TrainerDashboard = () => {
   const calculateProfileCompletion = () => {
     if (!profile) return 0;
     
-    const requiredFields = [
-      profile.first_name,
-      profile.last_name,
-      profile.tagline,
-      profile.location,
-      profile.bio,
-      profile.training_types?.length,
-      profile.specializations?.length,
-      profile.qualifications?.length,
-      (profile as any).ideal_client_types?.length,
-      (profile as any).coaching_styles?.length,
-      profile.terms_agreed,
-      (profile as any).package_options && (profile as any).package_options.length > 0
-    ];
+    // Use the same weighted system as profile setup to ensure consistency
+    const getStepWeight = (step: number): number => {
+      const weights = {
+        1: 13,  // Basic Info (most important)
+        2: 10,  // Qualifications (important credibility)
+        3: 10,  // Expertise & Services (core offering)
+        4: 9,   // Client Fit Preferences (matching algorithm)
+        5: 13,  // Rates & Packages (monetization, complex)
+        6: 7,   // Discovery Calls (valuable but optional)
+        7: 7,   // Testimonials & Case Studies (social proof)
+        8: 9,   // Ways of Working (client experience)
+        9: 4,   // Instagram Integration (optional, lower weight)
+        10: 3,  // Image Management (optional, cosmetic)
+        11: 3,  // Working Hours (optional)
+        12: 4,  // Terms & Notifications (compliance)
+        13: 7,  // Professional Documents (important for credibility)
+        14: 1   // Verification (final step, external dependency)
+      };
+      return weights[step] || 0;
+    };
+
+    const getStepCompletion = (step: number): 'completed' | 'partial' | 'not_started' => {
+      switch (step) {
+        case 1: // Basic Info
+          const hasAllBasicInfo = profile.first_name && profile.last_name && 
+            profile.tagline && profile.bio;
+          return hasAllBasicInfo ? 'completed' : 'partial';
+          
+        case 2: // Qualifications
+          const qualCount = profile.qualifications?.length || 0;
+          if (qualCount >= 2) return 'completed';
+          if (qualCount >= 1) return 'partial';
+          return 'not_started';
+          
+        case 3: // Expertise
+          const hasExpertise = profile.specializations?.length > 0 && profile.training_types?.length > 0;
+          const hasPartialExpertise = profile.specializations?.length > 0 || profile.training_types?.length > 0;
+          return hasExpertise ? 'completed' : (hasPartialExpertise ? 'partial' : 'not_started');
+          
+        case 4: // Client Fit
+          const hasClientTypes = (profile as any).ideal_client_types?.length > 0;
+          const hasCoachingStyles = (profile as any).coaching_style?.length > 0;
+          const hasAllClientFit = hasClientTypes && hasCoachingStyles;
+          const hasPartialClientFit = hasClientTypes || hasCoachingStyles;
+          return hasAllClientFit ? 'completed' : (hasPartialClientFit ? 'partial' : 'not_started');
+          
+        case 5: // Rates & Packages
+          const hasPackages = (profile as any).package_options && (profile as any).package_options.length > 0;
+          return hasPackages ? 'completed' : 'not_started';
+          
+        case 12: // Terms & Notifications
+          return profile.terms_agreed ? 'completed' : 'not_started';
+          
+        default:
+          // For other steps (discovery calls, testimonials, etc.), assume partial completion
+          return 'partial';
+      }
+    };
+
+    let totalWeightedCompletion = 0;
     
-    const completedFields = requiredFields.filter(field => {
-      if (typeof field === 'boolean') return field;
-      return field !== null && field !== undefined && field !== '' && field !== 0;
-    }).length;
+    for (let i = 1; i <= 14; i++) {
+      const stepWeight = getStepWeight(i);
+      const stepCompletion = getStepCompletion(i);
+      
+      if (stepCompletion === 'completed') {
+        totalWeightedCompletion += stepWeight;
+      } else if (stepCompletion === 'partial') {
+        totalWeightedCompletion += stepWeight * 0.5; // 50% weight for partial completion
+      }
+      // 'not_started' contributes 0
+    }
     
-    return Math.round((completedFields / requiredFields.length) * 100);
+    return Math.min(Math.round(totalWeightedCompletion), 100); // Ensure max 100%
   };
 
 
