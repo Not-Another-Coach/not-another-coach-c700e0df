@@ -9,6 +9,8 @@ import { useTrainerVerification } from "@/hooks/useTrainerVerification";
 import { useEnhancedTrainerVerification } from "@/hooks/useEnhancedTrainerVerification";
 import { useDiscoveryCallSettings } from "@/hooks/useDiscoveryCallSettings";
 import { useCoachAvailability } from "@/hooks/useCoachAvailability";
+import { useTrainerImages } from "@/hooks/useTrainerImages";
+import { useProfessionalDocumentsState } from "@/hooks/useProfessionalDocumentsState";
 import { useToast } from "@/hooks/use-toast";
 import { useProfileStepValidation } from "@/hooks/useProfileStepValidation";
 import { Button } from "@/components/ui/button";
@@ -57,6 +59,8 @@ const TrainerProfileSetup = () => {
   const { settings: discoverySettings } = useDiscoveryCallSettings();
   const { settings: availabilitySettings } = useCoachAvailability();
   const { getStepCompletion: getValidationStepCompletion } = useProfileStepValidation();
+  const { getSelectedImagesCount, imagePreferences, getValidationStatus } = useTrainerImages();
+  const { getCompletionStatus: getProfDocumentsStatus } = useProfessionalDocumentsState();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
@@ -408,7 +412,17 @@ const TrainerProfileSetup = () => {
         return isInstagramConnected ? 'completed' : 'not_started';
         
       case 10: // Image Management
-        return 'not_started'; // Optional step
+        const selectedCount = getSelectedImagesCount();
+        const gridSize = imagePreferences?.max_images_per_view;
+        const validationStatus = getValidationStatus();
+        
+        if (validationStatus.status === 'complete' && selectedCount > 0 && gridSize) {
+          return 'completed';
+        }
+        if (selectedCount > 0 || gridSize) {
+          return 'partial';
+        }
+        return 'not_started';
         
       case 11: // Working Hours & New Client Availability
         if (!availabilitySettings) return 'not_started';
@@ -431,7 +445,7 @@ const TrainerProfileSetup = () => {
         return formData.terms_agreed ? 'completed' : 'not_started';
         
       case 13: // Professional Documents
-        return getValidationStepCompletion(formData, 6);
+        return getProfDocumentsStatus();
         
       case 14: // Verification Overview
         if (profile?.verification_status === 'verified') return 'completed';

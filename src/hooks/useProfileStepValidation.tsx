@@ -115,9 +115,11 @@ const stepFieldMapping: Record<number, string[]> = {
   3: ['specializations', 'training_types', 'location'],
   4: ['ideal_client_types', 'coaching_style'], // Fixed: coaching_style (singular) matches database field
   5: ['package_options'],
-  6: ['professional_documents'], // Professional documents step
+  6: [], // Discovery calls - handled separately
   7: ['terms_agreed'],
-  8: ['wow_how_i_work', 'wow_what_i_provide', 'wow_client_expectations', 'wow_activities', 'wow_setup_completed']
+  8: ['wow_how_i_work', 'wow_what_i_provide', 'wow_client_expectations', 'wow_activities', 'wow_setup_completed'],
+  10: ['image_management'], // Image Management - handled separately
+  13: ['professional_documents'] // Professional documents - handled separately
 };
 
 // Additional fields to ensure they're saved (not validated but tracked for completeness)
@@ -177,8 +179,13 @@ export const useProfileStepValidation = () => {
       return customValidation;
     }
 
-    // Special handling for step 6 (Professional Documents)
-    if (step === 6) {
+    // Special handling for step 10 (Image Management) - always valid as it's optional
+    if (step === 10) {
+      return true;
+    }
+    
+    // Special handling for step 13 (Professional Documents)
+    if (step === 13) {
       return validateProfessionalDocuments(formData);
     }
     
@@ -224,8 +231,13 @@ export const useProfileStepValidation = () => {
       return 'completed'; // Steps with no required fields are considered completed
     }
 
-    // Step 6 (Professional Documents) - special completion logic
-    if (step === 6) {
+    // Step 10 (Image Management) - handled separately in TrainerProfileSetup
+    if (step === 10) {
+      return 'not_started'; // This will be overridden by TrainerProfileSetup logic
+    }
+    
+    // Step 13 (Professional Documents) - special completion logic
+    if (step === 13) {
       return getProfessionalDocumentsCompletion(formData);
     }
 
