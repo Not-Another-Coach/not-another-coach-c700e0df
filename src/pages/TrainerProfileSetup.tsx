@@ -878,7 +878,8 @@ const TrainerProfileSetup = () => {
                     <div
                       key={stepNumber}
                       data-step={stepNumber}
-                      className="flex flex-col items-center gap-1 min-w-0 flex-shrink-0"
+                      onClick={() => setCurrentStep(stepNumber)}
+                      className="flex flex-col items-center gap-1 min-w-0 flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
                     >
                       <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-medium ${borderColor} ${bgColor} ${statusColor}`}>
                         {showIcon ? (
