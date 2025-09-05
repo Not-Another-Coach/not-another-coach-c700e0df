@@ -962,8 +962,9 @@ const TrainerProfileSetup = () => {
                     </span>
                   </div>
                 );
-              })}
-            </div>
+                })}
+              </div>
+            </ScrollableBreadcrumb>
           </div>
         </div>
       )}
