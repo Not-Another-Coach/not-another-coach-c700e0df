@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Trash2, Plus, Copy, ArrowRight, Activity, Zap, CheckCircle, Eye, EyeOff, Package, Workflow } from "lucide-react";
 import { SectionHeader } from "./SectionHeader";
 import { usePackageWaysOfWorking } from "@/hooks/usePackageWaysOfWorking";
-import { useActivitySynchronization } from "@/hooks/useActivitySynchronization";
+
 import { ActivityPickerDialog } from "./ActivityPickerDialog";
 import { toast } from "sonner";
 
@@ -32,7 +32,7 @@ export function EnhancedPackageWaysOfWorkingSection({ formData, updateFormData }
   const [newItems, setNewItems] = useState<Record<string, string>>({});
   const [showActivityPicker, setShowActivityPicker] = useState<{ section: string; category: string } | null>(null);
   const { packageWorkflows, loading, savePackageWorkflow, getPackageWorkflow } = usePackageWaysOfWorking();
-  const { syncWaysOfWorkingToActivities, loading: syncLoading } = useActivitySynchronization();
+  
 
   // Get packages from formData
   const packages = formData.package_options || [];
@@ -219,28 +219,6 @@ export function EnhancedPackageWaysOfWorkingSection({ formData, updateFormData }
     }
   };
 
-  // Sync section to activities
-  const syncSectionToActivities = async (section: string) => {
-    if (!activePackageId) return;
-
-    const workflow = getPackageWorkflow(activePackageId);
-    if (!workflow) return;
-
-    const items = (workflow[`${section}_items` as keyof typeof workflow] as WaysOfWorkingItem[]) || [];
-    if (items.length === 0) {
-      toast.error("No items to sync in this section", {
-        position: "top-center",
-        duration: 2000,
-      });
-      return;
-    }
-
-    try {
-      await syncWaysOfWorkingToActivities(activePackageId, section, items);
-    } catch (error) {
-      console.error('Error syncing to activities:', error);
-    }
-  };
 
   const updateVisibility = async (visibility: 'public' | 'post_match') => {
     if (!activePackageId) return;
@@ -361,22 +339,6 @@ export function EnhancedPackageWaysOfWorkingSection({ formData, updateFormData }
 
     return (
       <div className="space-y-4">
-        {/* Section Header with Sync Button */}
-        <div className="flex items-center justify-between">
-          <h4 className="font-medium">Items ({currentItems.length})</h4>
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => syncSectionToActivities(section)}
-              disabled={currentItems.length === 0 || syncLoading}
-              className="text-xs"
-            >
-              <Zap className="h-3 w-3 mr-1" />
-              Sync to Activities
-            </Button>
-          </div>
-        </div>
 
         <div className="grid gap-2">
           {currentItems.map((item, index) => (

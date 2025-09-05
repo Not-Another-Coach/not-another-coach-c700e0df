@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, X, Eye, EyeOff, Info, Package, AlertCircle, Settings, Workflow, Activity, Zap } from "lucide-react";
 import { usePackageWaysOfWorking, PackageWaysOfWorking } from "@/hooks/usePackageWaysOfWorking";
-import { useActivitySynchronization } from "@/hooks/useActivitySynchronization";
+
 import { useToast } from "@/hooks/use-toast";
 import { SectionHeader } from "./SectionHeader";
 import { useTrainerActivities } from "@/hooks/useTrainerActivities";
@@ -35,7 +35,7 @@ export function PackageWaysOfWorkingSection({
 }: PackageWaysOfWorkingSectionProps) {
   const { user } = useAuth();
   const { packageWorkflows, loading, savePackageWorkflow, getPackageWorkflow } = usePackageWaysOfWorking();
-  const { syncWaysOfWorkingToActivities, loading: syncLoading } = useActivitySynchronization();
+  
   const { toast } = useToast();
   const [activePackageId, setActivePackageId] = useState<string>("");
   const [activeTab, setActiveTab] = useState<string>("onboarding");
@@ -197,12 +197,6 @@ export function PackageWaysOfWorkingSection({
         [`${section}_items`]: [...existingItems, newItem]
       });
 
-      // Sync to activities
-      await syncWaysOfWorkingToActivities(
-        activePackageId, 
-        section, 
-        [...existingItems, newItem]
-      );
 
       setNewItems(prev => ({ ...prev, [section]: "" }));
 
@@ -231,12 +225,6 @@ export function PackageWaysOfWorkingSection({
         [`${section}_items`]: updatedItems
       });
 
-      // Sync to activities
-      await syncWaysOfWorkingToActivities(
-        activePackageId, 
-        section, 
-        updatedItems
-      );
 
       toast({
         title: "Item removed",
@@ -267,12 +255,6 @@ export function PackageWaysOfWorkingSection({
         [`${section}_items`]: [...existingItems, newItem]
       });
 
-      // Sync to activities
-      await syncWaysOfWorkingToActivities(
-        activePackageId, 
-        section, 
-        [...existingItems, newItem]
-      );
 
       toast({
         title: "Suggestion added",
@@ -287,26 +269,6 @@ export function PackageWaysOfWorkingSection({
     }
   };
 
-  const syncSectionToActivities = async (section: string) => {
-    if (!activePackageId) return;
-    
-    const items = currentWorkflow?.[`${section}_items` as keyof PackageWaysOfWorking] as WaysOfWorkingItem[] || [];
-
-    try {
-      await syncWaysOfWorkingToActivities(activePackageId, section, items);
-      
-      toast({
-        title: "Synced to activities",
-        description: `${items.length} items synced to your activities library`,
-      });
-    } catch (error) {
-      toast({
-        title: "Sync failed",
-        description: "Failed to sync section to activities. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
 
   const updateVisibility = async (visibility: 'public' | 'post_match') => {
     if (!activePackageId || !currentPackage) return;
@@ -367,18 +329,6 @@ export function PackageWaysOfWorkingSection({
                 {sectionDescriptions[section as keyof typeof sectionDescriptions]}
               </p>
             </div>
-            {items.length > 0 && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => syncSectionToActivities(section)}
-                disabled={syncLoading}
-                className="flex items-center gap-2"
-              >
-                <Zap className="h-4 w-4" />
-                Sync to Activities
-              </Button>
-            )}
           </div>
         </CardHeader>
         <CardContent className="space-y-4">

@@ -233,6 +233,137 @@ export type Database = {
         }
         Relationships: []
       }
+      billing_invoice: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          currency: string
+          description: string | null
+          download_url: string | null
+          id: string
+          invoice_type: string
+          period_end: string | null
+          period_start: string | null
+          status: string
+          trainer_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          currency?: string
+          description?: string | null
+          download_url?: string | null
+          id?: string
+          invoice_type?: string
+          period_end?: string | null
+          period_start?: string | null
+          status?: string
+          trainer_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          currency?: string
+          description?: string | null
+          download_url?: string | null
+          id?: string
+          invoice_type?: string
+          period_end?: string | null
+          period_start?: string | null
+          status?: string
+          trainer_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_invoice_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_invoice_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "v_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_invoice_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "v_trainers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      billing_payment_method: {
+        Row: {
+          brand: string | null
+          created_at: string
+          exp_month: number | null
+          exp_year: number | null
+          id: string
+          is_active: boolean
+          is_default: boolean
+          last4: string | null
+          method_type: string
+          trainer_id: string
+          updated_at: string
+        }
+        Insert: {
+          brand?: string | null
+          created_at?: string
+          exp_month?: number | null
+          exp_year?: number | null
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          last4?: string | null
+          method_type?: string
+          trainer_id: string
+          updated_at?: string
+        }
+        Update: {
+          brand?: string | null
+          created_at?: string
+          exp_month?: number | null
+          exp_year?: number | null
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          last4?: string | null
+          method_type?: string
+          trainer_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_payment_method_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_payment_method_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "v_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_payment_method_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "v_trainers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_commitment_acknowledgments: {
         Row: {
           acknowledged_at: string | null
@@ -2391,6 +2522,61 @@ export type Database = {
           },
         ]
       }
+      membership_commission_config: {
+        Row: {
+          created_at: string
+          created_by: string
+          effective_from: string
+          fee_type: string
+          fee_value_flat_cents: number | null
+          fee_value_percent: number | null
+          id: string
+          trainer_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          effective_from?: string
+          fee_type?: string
+          fee_value_flat_cents?: number | null
+          fee_value_percent?: number | null
+          id?: string
+          trainer_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          effective_from?: string
+          fee_type?: string
+          fee_value_flat_cents?: number | null
+          fee_value_percent?: number | null
+          id?: string
+          trainer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "membership_commission_config_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "membership_commission_config_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "v_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "membership_commission_config_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "v_trainers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       message_publish_ledger: {
         Row: {
           consent_snapshot: Json
@@ -4461,6 +4647,64 @@ export type Database = {
         }
         Relationships: []
       }
+      trainer_membership: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          monthly_price_cents: number
+          plan_type: string
+          proration_mode: string
+          renewal_date: string
+          trainer_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          monthly_price_cents?: number
+          plan_type?: string
+          proration_mode?: string
+          renewal_date?: string
+          trainer_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          monthly_price_cents?: number
+          plan_type?: string
+          proration_mode?: string
+          renewal_date?: string
+          trainer_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainer_membership_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_membership_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: true
+            referencedRelation: "v_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_membership_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: true
+            referencedRelation: "v_trainers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trainer_membership_settings: {
         Row: {
           created_at: string
@@ -5952,6 +6196,10 @@ export type Database = {
         Args: { p_trainer_id: string; p_week_start: string }
         Returns: number
       }
+      calculate_package_commission: {
+        Args: { p_package_price_cents: number; p_trainer_id: string }
+        Returns: number
+      }
       can_send_marketing_message: {
         Args: { p_user_id: string }
         Returns: boolean
@@ -6081,6 +6329,21 @@ export type Database = {
           id: string
           last_name: string
           user_type: string
+        }[]
+      }
+      get_trainer_membership_details: {
+        Args: { p_trainer_id: string }
+        Returns: {
+          fee_preview_text: string
+          fee_type: string
+          fee_value_flat_cents: number
+          fee_value_percent: number
+          is_active: boolean
+          membership_id: string
+          monthly_price_cents: number
+          plan_type: string
+          proration_mode: string
+          renewal_date: string
         }[]
       }
       get_trainer_streak_count: {
