@@ -541,7 +541,7 @@ const TrainerDashboard = () => {
                     onClick={() => navigate('/trainer/profile-setup?tab=testimonials')}
                   >
                     <Plus className="h-4 w-4 flex-shrink-0" />
-                    <span className="truncate">Add Testimonial</span>
+                    <span className="truncate">Manage Testimonials</span>
                   </Button>
                   <Button 
                     className="h-12 justify-start gap-3" 
@@ -557,7 +557,7 @@ const TrainerDashboard = () => {
                     onClick={() => navigate('/trainer/profile-setup?tab=rates')}
                   >
                     <Package className="h-4 w-4 flex-shrink-0" />
-                    <span className="truncate">Add New Package</span>
+                    <span className="truncate">Manage Packages</span>
                   </Button>
                   <Button 
                     className="h-12 justify-start gap-3" 

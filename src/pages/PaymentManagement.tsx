@@ -135,7 +135,7 @@ export const PaymentManagement = () => {
                 </div>
               </div>
               <Button 
-                onClick={() => navigate('/trainer/profile-setup?tab=rates')}
+                onClick={() => navigate('/trainer/profile-setup?tab=rates-packages')}
                 className="flex items-center gap-2"
               >
                 Manage Packages
@@ -192,7 +192,7 @@ export const PaymentManagement = () => {
                     <p className="text-muted-foreground mb-4">
                       Set up your first package to start viewing payment statements
                     </p>
-                    <Button onClick={() => navigate('/trainer/profile-setup?tab=rates')}>
+                    <Button onClick={() => navigate('/trainer/profile-setup?tab=rates-packages')}>
                       Configure Packages
                     </Button>
                   </div>
