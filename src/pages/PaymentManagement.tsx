@@ -139,7 +139,7 @@ export const PaymentManagement = () => {
                 className="flex items-center gap-2"
               >
                 Manage Packages
-                <ExternalLink className="h-4 w-4" />
+                <Package className="h-4 w-4" />
               </Button>
             </div>
           </CardContent>

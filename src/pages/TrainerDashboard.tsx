@@ -826,13 +826,13 @@ const TrainerDashboard = () => {
                       </p>
                     </div>
                   </div>
-                  <Button 
-                    onClick={() => navigate('/trainer/profile-setup?tab=rates')}
-                    className="flex items-center gap-2"
-                  >
-                    Manage Packages
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
+                <Button 
+                  onClick={() => navigate('/trainer/profile-setup?tab=rates')}
+                  className="flex items-center gap-2"
+                >
+                  Manage Packages
+                  <Package className="h-4 w-4" />
+                </Button>
                 </div>
               </CardContent>
             </Card>
