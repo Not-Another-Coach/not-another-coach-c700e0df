@@ -116,7 +116,7 @@ export function useActivityAlerts() {
             if (discoveryCallTypes.includes(alert.alert_type)) {
               const metadata = alert.metadata as any;
               const isRelevantToTrainer = metadata?.trainer_id === user.id;
-              console.log(`🔍 Discovery call alert ${alert.alert_type} for trainer ${metadata?.trainer_id}, current user ${user.id}, relevant: ${isRelevantToTrainer}`);
+              console.log(`🔍 Discovery call alert ${alert.alert_type} for trainer ${metadata?.trainer_id}, current user ${user.id}, relevant: ${isRelevantToTrainer}`, alert);
               return isRelevantToTrainer;
             }
             
