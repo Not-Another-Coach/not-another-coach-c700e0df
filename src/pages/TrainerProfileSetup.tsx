@@ -46,7 +46,6 @@ import { WorkingHoursAndAvailabilitySection } from "@/components/trainer-setup/W
 import { TermsAndNotificationsSection } from "@/components/trainer-setup/TermsAndNotificationsSection";
 import { EnhancedVerificationSection } from "@/components/trainer-setup/EnhancedVerificationSection";
 import { ProfessionalDocumentsSection } from "@/components/trainer-setup/ProfessionalDocumentsSection";
-import { VerificationOverviewSection } from "@/components/trainer-setup/VerificationOverviewSection";
 
 const TrainerProfileSetup = () => {
   const { user, loading } = useAuth();
