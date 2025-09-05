@@ -118,7 +118,9 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
       }
     };
     
-    performCleanup();
+    // Add a delay to allow copy operations to complete
+    const timeoutId = setTimeout(performCleanup, 500);
+    return () => clearTimeout(timeoutId);
   }, [user?.id, packages.length, cleanupOrphanedWorkflows]);
 
   const addPackage = async () => {
@@ -374,10 +376,6 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
         return;
       }
 
-      // Add a small delay to ensure database transaction is committed
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      // Verify the copy was successful
       console.log(`[Copy WoW] Verifying successful copy for package ${targetPackageId}`);
       const { data: verifyData } = await supabase
         .from('package_ways_of_working')
