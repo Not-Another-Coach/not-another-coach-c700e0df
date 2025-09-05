@@ -43,10 +43,13 @@ export function PackageWaysOfWorkingSection({ formData }: PackageWaysOfWorkingSe
   // Get packages from formData
   const packages = formData.package_options || [];
   
-  // Set default active package and create workflow if needed
+  // Set default active package and switch to newly created packages
   useEffect(() => {
-    if (packages.length > 0 && !activePackageId) {
-      setActivePackageId(packages[0].id);
+    if (packages.length > 0) {
+      // If no active package or the active package no longer exists, set to first package
+      if (!activePackageId || !packages.find((pkg: any) => pkg.id === activePackageId)) {
+        setActivePackageId(packages[packages.length - 1].id); // Show the newest package (last in array)
+      }
     }
   }, [packages, activePackageId]);
 

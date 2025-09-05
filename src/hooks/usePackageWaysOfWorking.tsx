@@ -200,7 +200,7 @@ export function usePackageWaysOfWorking() {
     }
   };
 
-  // Initialize data
+  // Initialize data and refetch when user changes
   useEffect(() => {
     if (user?.id) {
       fetchPackageWorkflows();

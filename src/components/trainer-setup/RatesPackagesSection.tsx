@@ -226,9 +226,6 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
 
   const copyPackageWaysOfWorking = async (sourcePackageId: string, targetPackageId: string, targetPackageName: string) => {
     try {
-      console.log(`[Copy WoW] Starting copy from package ${sourcePackageId} to ${targetPackageId}`);
-      console.log(`[Copy WoW] Available packages:`, packages.map(p => ({ id: p.id, name: p.name })));
-      
       // Show progress to user
       toast({
         title: "Copying ways of working...",
@@ -241,21 +238,12 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
       }
 
       // Try to get data directly from database first (not relying on stale state)
-      console.log(`[Copy WoW] Querying database for source package ${sourcePackageId} with trainer ${user?.id}`);
       let { data: fullSourceWorkflow, error: fetchError } = await supabase
         .from('package_ways_of_working')
         .select('*')
         .eq('package_id', sourcePackageId)
         .eq('trainer_id', user?.id)
         .maybeSingle();
-
-      console.log(`[Copy WoW] Direct DB query result:`, { 
-        fullSourceWorkflow: fullSourceWorkflow ? 'Found data' : 'No data', 
-        fetchError,
-        hasOnboardingItems: (fullSourceWorkflow?.onboarding_items as any[])?.length || 0,
-        hasFirstWeekItems: (fullSourceWorkflow?.first_week_items as any[])?.length || 0,
-        hasClientExpectations: (fullSourceWorkflow?.client_expectations_items as any[])?.length || 0
-      });
 
       if (fetchError && fetchError.code !== 'PGRST116') {
         console.error('Error fetching full workflow data:', fetchError);
@@ -264,7 +252,6 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
 
       // If no package-specific data found, check state as fallback
       if (!fullSourceWorkflow) {
-        console.log(`[Copy WoW] No DB data found, checking state for package ${sourcePackageId}`);
         const sourceWorkflow = getPackageWorkflow(sourcePackageId);
         
         if (!sourceWorkflow) {
