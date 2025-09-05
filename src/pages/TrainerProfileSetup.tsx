@@ -34,7 +34,7 @@ import { ClientFitSection } from "@/components/trainer-setup/ClientFitSection";
 import { RatesPackagesSection } from "@/components/trainer-setup/RatesPackagesSection";
 import { DiscoveryCallSection } from "@/components/trainer-setup/DiscoveryCallSection";
 import { TestimonialsSection } from "@/components/trainer-setup/TestimonialsSection";
-import { PackageWaysOfWorkingSection } from "@/components/trainer-setup/PackageWaysOfWorkingSection";
+import { SimplifiedWaysOfWorkingSection } from "@/components/trainer-setup/SimplifiedWaysOfWorkingSection";
 import { InstagramIntegration } from "@/components/instagram/InstagramIntegration";
 import { ImageManagementSection } from "@/components/trainer-setup/ImageManagementSection";
 import { WorkingHoursAndAvailabilitySection } from "@/components/trainer-setup/WorkingHoursAndAvailabilitySection";
@@ -105,13 +105,20 @@ const TrainerProfileSetup = () => {
     // Testimonials - this exists in TrainerProfile
     testimonials: [],
     
-    // Ways of Working - these exist in TrainerProfile
+    // Ways of Working - legacy fields still supported
     ways_of_working_onboarding: [],
     ways_of_working_first_week: [],
     ways_of_working_ongoing: [],
     ways_of_working_tracking: [],
     ways_of_working_expectations: [],
     ways_of_working_what_i_bring: [],
+    
+    // New simplified Ways of Working fields
+    wow_how_i_work: "",
+    wow_what_i_provide: "",
+    wow_client_expectations: "",
+    wow_package_applicability: { apply_to: "all", package_ids: [] },
+    wow_visibility: "public",
     
     // Profile Management - this exists in TrainerProfile
     terms_agreed: false,
@@ -189,6 +196,12 @@ const TrainerProfileSetup = () => {
         ways_of_working_tracking: profile.ways_of_working_tracking || [],
         ways_of_working_expectations: profile.ways_of_working_expectations || [],
         ways_of_working_what_i_bring: profile.ways_of_working_what_i_bring || [],
+        // New simplified Ways of Working fields
+        wow_how_i_work: profile.wow_how_i_work || "",
+        wow_what_i_provide: profile.wow_what_i_provide || "",
+        wow_client_expectations: profile.wow_client_expectations || "",
+        wow_package_applicability: profile.wow_package_applicability || { apply_to: "all", package_ids: [] },
+        wow_visibility: profile.wow_visibility || "public",
         terms_agreed: profile.terms_agreed || false,
         max_clients: profile.max_clients || null,
       };
@@ -359,38 +372,11 @@ const TrainerProfileSetup = () => {
         const hasTestimonials = formData.testimonials?.length > 0;
         return hasTestimonials ? 'completed' : 'not_started';
         
-      case 8: // Ways of Working
-        const packages = formData.package_options || [];
-        if (packages.length === 0) return 'not_started';
-        
-        const allPackagesConfigured = packages.every((pkg: any) => {
-          const workflow = packageWorkflows.find(w => w.package_id === pkg.id);
-          if (!workflow) return false;
-          
-          const hasContent = (
-            (workflow.onboarding_items?.length || 0) > 0 ||
-            (workflow.first_week_items?.length || 0) > 0 ||
-            (workflow.ongoing_structure_items?.length || 0) > 0 ||
-            (workflow.tracking_tools_items?.length || 0) > 0 ||
-            (workflow.client_expectations_items?.length || 0) > 0 ||
-            (workflow.what_i_bring_items?.length || 0) > 0
-          );
-          return hasContent;
-        });
-        
-        const anyPackageConfigured = packages.some((pkg: any) => {
-          const workflow = packageWorkflows.find(w => w.package_id === pkg.id);
-          return workflow && (
-            (workflow.onboarding_items?.length || 0) > 0 ||
-            (workflow.first_week_items?.length || 0) > 0 ||
-            (workflow.ongoing_structure_items?.length || 0) > 0 ||
-            (workflow.tracking_tools_items?.length || 0) > 0 ||
-            (workflow.client_expectations_items?.length || 0) > 0 ||
-            (workflow.what_i_bring_items?.length || 0) > 0
-          );
-        });
-        
-        return allPackagesConfigured ? 'completed' : (anyPackageConfigured ? 'partial' : 'not_started');
+      case 8: // Ways of Working - Updated for simplified version
+        const hasSimplifiedWoW = formData.wow_how_i_work?.trim() || 
+                                 formData.wow_what_i_provide?.trim() || 
+                                 formData.wow_client_expectations?.trim();
+        return hasSimplifiedWoW ? 'completed' : 'not_started';
         
       case 9: // Instagram Integration
         return isInstagramConnected ? 'completed' : 'not_started';
@@ -676,7 +662,7 @@ const TrainerProfileSetup = () => {
       case 7:
         return <TestimonialsSection {...commonProps} />;
       case 8:
-        return <PackageWaysOfWorkingSection {...commonProps} />;
+        return <SimplifiedWaysOfWorkingSection {...commonProps} />;
       case 9:
         return <InstagramIntegration />;
       case 10:

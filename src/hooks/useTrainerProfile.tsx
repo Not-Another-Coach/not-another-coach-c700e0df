@@ -59,6 +59,13 @@ interface TrainerProfile {
   philosophy: string | null;
   professional_milestones: any[] | null;
   profile_image_position: any | null;
+  
+  // New simplified Ways of Working fields
+  wow_how_i_work: string | null;
+  wow_what_i_provide: string | null;
+  wow_client_expectations: string | null;
+  wow_package_applicability: any | null;
+  wow_visibility: string | null;
 }
 
 export function useTrainerProfile() {
@@ -89,7 +96,13 @@ export function useTrainerProfile() {
           coaching_style: (data as any)?.coaching_style || null,
           client_preferences: (data as any)?.client_preferences || null,
           ideal_client_personality: (data as any)?.ideal_client_personality || null,
-          ideal_client_types: (data as any)?.ideal_client_types || null
+          ideal_client_types: (data as any)?.ideal_client_types || null,
+          // New simplified Ways of Working fields
+          wow_how_i_work: (data as any)?.wow_how_i_work || null,
+          wow_what_i_provide: (data as any)?.wow_what_i_provide || null,
+          wow_client_expectations: (data as any)?.wow_client_expectations || null,
+          wow_package_applicability: (data as any)?.wow_package_applicability || null,
+          wow_visibility: (data as any)?.wow_visibility || null,
         } as TrainerProfile;
         setProfile(profileWithDefaults);
       }
@@ -117,8 +130,8 @@ export function useTrainerProfile() {
       const profileUpdates: any = {};
       const trainerUpdates: any = {};
 
-      // Shared profile fields (only general profile info and profile_image_position)
-      const sharedFields = ['first_name', 'last_name', 'bio', 'profile_photo_url', 'location', 'tagline', 'is_uk_based', 'profile_published', 'profile_image_position'];
+      // Shared profile fields (general profile info, profile_image_position, and new WoW fields)
+      const sharedFields = ['first_name', 'last_name', 'bio', 'profile_photo_url', 'location', 'tagline', 'is_uk_based', 'profile_published', 'profile_image_position', 'wow_how_i_work', 'wow_what_i_provide', 'wow_client_expectations', 'wow_package_applicability', 'wow_visibility'];
       
       // Trainer-specific fields (all trainer-related fields including the moved ones)
       const trainerFields = [
