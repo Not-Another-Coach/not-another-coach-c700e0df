@@ -20,7 +20,7 @@ interface EnhancedActivityPickerDialogProps {
   onOpenChange: (open: boolean) => void;
   onSelectActivity: (activity: SelectedActivity) => void;
   selectedActivities: SelectedActivity[];
-  categoryFilter?: string;
+  categoryFilter?: string[];
   title?: string;
   sectionKey: string;
 }
@@ -52,7 +52,7 @@ export function EnhancedActivityPickerDialog({
 
   const filteredActivities = activities.filter(activity => {
     const matchesSearch = activity.activity_name.toLowerCase().includes(search.toLowerCase());
-    const matchesCategory = !categoryFilter || activity.category === categoryFilter;
+    const matchesCategory = !categoryFilter || categoryFilter.length === 0 || categoryFilter.includes(activity.category);
     const notAlreadySelected = !selectedActivityNames.includes(activity.activity_name.toLowerCase());
     return matchesSearch && matchesCategory && notAlreadySelected;
   });
@@ -79,7 +79,7 @@ export function EnhancedActivityPickerDialog({
     }
 
     try {
-      const category = categoryFilter || 'general';
+      const category = (categoryFilter && categoryFilter.length > 0) ? categoryFilter[0] : 'general';
       await createActivity(customActivityName.trim(), category);
       
       const newActivity: SelectedActivity = {

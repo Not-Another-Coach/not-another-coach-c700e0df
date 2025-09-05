@@ -41,7 +41,7 @@ export function SimplifiedWaysOfWorkingSection({
   const [activePickerSection, setActivePickerSection] = useState<string | null>(null);
   const [showPackageAssignment, setShowPackageAssignment] = useState(false);
 
-  // Section configuration
+  // Section configuration - using actual database categories
   const sections = [
     {
       key: "wow_how_i_work",
@@ -55,7 +55,7 @@ export function SimplifiedWaysOfWorkingSection({
       title: "What I Provide",
       description: "Detail the services and support you offer to clients",
       placeholder: "Activities selected above will appear here as a summary...",
-      suggestionCategories: ["services", "deliverables", "support"]
+      suggestionCategories: ["services", "support", "tracking"]
     },
     {
       key: "wow_client_expectations",
@@ -322,7 +322,7 @@ export function SimplifiedWaysOfWorkingSection({
             handleActivitySelect(activePickerSection, activity);
           }
         }}
-        categoryFilter={activePickerSection ? sections.find(s => s.key === activePickerSection)?.suggestionCategories[0] : undefined}
+        categoryFilter={activePickerSection ? sections.find(s => s.key === activePickerSection)?.suggestionCategories : undefined}
         title={activePickerSection ? `Add Activities - ${sections.find(s => s.key === activePickerSection)?.title}` : "Select Activities"}
         sectionKey={activePickerSection || ""}
       />
