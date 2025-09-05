@@ -4,9 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
-import { Bell, Eye, CheckCircle, FileText } from "lucide-react";
-import { TrainerProfilePreview } from "@/components/TrainerProfilePreview";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Bell, CheckCircle, FileText } from "lucide-react";
 import { SectionHeader } from "./SectionHeader";
 
 interface TermsAndNotificationsSectionProps {
@@ -71,40 +69,6 @@ export function TermsAndNotificationsSection({ formData, updateFormData }: Terms
         </CardContent>
       </Card>
 
-      {/* Profile Preview */}
-      <Card className="border-muted bg-muted/20">
-        <CardContent className="p-6 space-y-4">
-          <div className="flex items-center gap-2 mb-4">
-            <Eye className="w-5 h-5 text-primary" />
-            <Label className="text-lg font-semibold">View Profile</Label>
-          </div>
-          <Card className="border-blue-200 bg-blue-50">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3 mb-3">
-                <Eye className="h-5 w-5 text-blue-600" />
-                <p className="font-medium text-blue-900">Preview Your Profile</p>
-              </div>
-              <p className="text-sm text-blue-700 mb-3">
-                See how your profile appears to potential clients before going live.
-              </p>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="outline" size="sm" className="border-blue-300 text-blue-700 hover:bg-blue-100">
-                    <Eye className="h-4 w-4 mr-2" />
-                    Preview Profile
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>Profile Preview</DialogTitle>
-                  </DialogHeader>
-                  <TrainerProfilePreview formData={formData} />
-                </DialogContent>
-              </Dialog>
-            </CardContent>
-          </Card>
-        </CardContent>
-      </Card>
 
       {/* Final Agreement */}
       <Card className="border-muted bg-muted/20">
