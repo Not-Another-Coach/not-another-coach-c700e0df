@@ -8,6 +8,7 @@ import { useInstagramConnection } from "@/hooks/useInstagramConnection";
 import { useTrainerVerification } from "@/hooks/useTrainerVerification";
 import { useDiscoveryCallSettings } from "@/hooks/useDiscoveryCallSettings";
 import { useToast } from "@/hooks/use-toast";
+import { useProfileStepValidation } from "@/hooks/useProfileStepValidation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -49,6 +50,7 @@ const TrainerProfileSetup = () => {
   const { isConnected: isInstagramConnected } = useInstagramConnection();
   const { verificationRequest } = useTrainerVerification();
   const { settings: discoverySettings } = useDiscoveryCallSettings();
+  const { getStepCompletion: getValidationStepCompletion } = useProfileStepValidation();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
@@ -382,11 +384,8 @@ const TrainerProfileSetup = () => {
         const hasTestimonials = formData.testimonials?.length > 0;
         return hasTestimonials ? 'completed' : 'not_started';
         
-      case 8: // Ways of Working - Updated for simplified version
-        const hasSimplifiedWoW = formData.wow_how_i_work?.trim() || 
-                                 formData.wow_what_i_provide?.trim() || 
-                                 formData.wow_client_expectations?.trim();
-        return hasSimplifiedWoW ? 'completed' : 'not_started';
+      case 8: // Ways of Working - Use new validation logic
+        return getValidationStepCompletion(formData, 8);
         
       case 9: // Instagram Integration
         return isInstagramConnected ? 'completed' : 'not_started';
@@ -394,11 +393,11 @@ const TrainerProfileSetup = () => {
       case 10: // Image Management
         return 'not_started'; // Optional step
         
-      case 11: // Terms & Notifications
-        return formData.terms_agreed ? 'completed' : 'not_started';
-        
-      case 12: // Working Hours  
+      case 11: // Working Hours & New Client Availability
         return 'not_started'; // Optional step
+        
+      case 12: // Terms & Notifications
+        return formData.terms_agreed ? 'completed' : 'not_started';
         
       case 13: // Verification
         if (profile?.verification_status === 'verified') return 'completed';
