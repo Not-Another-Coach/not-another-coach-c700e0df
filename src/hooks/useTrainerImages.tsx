@@ -330,6 +330,87 @@ export const useTrainerImages = () => {
     fetchTrainerImages();
   }, [user?.id]);
 
+  // Validation helpers
+  const getSelectedImagesCount = () => {
+    return uploadedImages.filter(img => img.is_selected_for_display).length +
+           instagramSelections.filter(sel => sel.is_selected_for_display).length;
+  };
+
+  const getGridCapacity = (gridSize: number) => gridSize;
+
+  const getCompatibleGridSizes = () => {
+    const selectedCount = getSelectedImagesCount();
+    const gridOptions = [
+      { value: 1, label: '1 image (Hero)', capacity: 1 },
+      { value: 4, label: '4 images (2×2)', capacity: 4 },
+      { value: 6, label: '6 images (3×2)', capacity: 6 },
+      { value: 9, label: '9 images (3×3)', capacity: 9 },
+      { value: 12, label: '12 images (4×3)', capacity: 12 }
+    ];
+    
+    return gridOptions.filter(option => option.capacity >= selectedCount);
+  };
+
+  const getRecommendedGridSize = () => {
+    const selectedCount = getSelectedImagesCount();
+    if (selectedCount === 0) return 6;
+    if (selectedCount === 1) return 1;
+    if (selectedCount <= 4) return 4;
+    if (selectedCount <= 6) return 6;
+    if (selectedCount <= 9) return 9;
+    return 12;
+  };
+
+  const isGridSizeValid = () => {
+    const selectedCount = getSelectedImagesCount();
+    const currentGridSize = imagePreferences?.max_images_per_view || 6;
+    return selectedCount <= currentGridSize;
+  };
+
+  const getValidationStatus = () => {
+    const selectedCount = getSelectedImagesCount();
+    const currentGridSize = imagePreferences?.max_images_per_view || 6;
+    
+    if (selectedCount === 0) {
+      return { status: 'incomplete', message: 'No images selected for display' };
+    }
+    
+    if (selectedCount > currentGridSize) {
+      return { 
+        status: 'error', 
+        message: `${selectedCount} images selected but grid only shows ${currentGridSize}` 
+      };
+    }
+    
+    if (selectedCount < currentGridSize) {
+      return { 
+        status: 'warning', 
+        message: `${selectedCount} images selected, ${currentGridSize - selectedCount} more needed to fill grid` 
+      };
+    }
+    
+    return { status: 'complete', message: `Perfect! ${selectedCount} images selected` };
+  };
+
+  const autoAdjustToGridSize = async (targetGridSize: number) => {
+    const selectedImages = getSelectedImagesForDisplay();
+    const excessCount = selectedImages.length - targetGridSize;
+    
+    if (excessCount <= 0) return;
+
+    // Deselect excess images (starting from the end)
+    const imagesToDeselect = selectedImages.slice(targetGridSize);
+    
+    for (const image of imagesToDeselect) {
+      await toggleImageSelection(image.id, image.type);
+    }
+
+    toast({
+      title: "Auto-adjusted",
+      description: `Deselected ${excessCount} excess images to fit ${targetGridSize}-image grid`,
+    });
+  };
+
   return {
     uploadedImages,
     instagramSelections,
@@ -342,6 +423,14 @@ export const useTrainerImages = () => {
     toggleImageSelection,
     updateImagePreferences,
     getImageUrl,
-    getSelectedImagesForDisplay
+    getSelectedImagesForDisplay,
+    // Validation helpers
+    getSelectedImagesCount,
+    getGridCapacity,
+    getCompatibleGridSizes,
+    getRecommendedGridSize,
+    isGridSizeValid,
+    getValidationStatus,
+    autoAdjustToGridSize
   };
 };

@@ -6,7 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Upload, Instagram, Image, Trash2, Check, X, Settings, Eye, EyeOff, Camera } from 'lucide-react';
+import { Upload, Instagram, Image, Trash2, Check, X, Settings, Eye, EyeOff, Camera, AlertTriangle, CheckCircle } from 'lucide-react';
 import { useTrainerImages } from '@/hooks/useTrainerImages';
 import { useInstagramIntegration } from '@/hooks/useInstagramIntegration';
 import { toast } from '@/hooks/use-toast';
@@ -29,7 +29,13 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
     toggleImageSelection,
     updateImagePreferences,
     getImageUrl,
-    getSelectedImagesForDisplay
+    getSelectedImagesForDisplay,
+    getSelectedImagesCount,
+    getCompatibleGridSizes,
+    getRecommendedGridSize,
+    isGridSizeValid,
+    getValidationStatus,
+    autoAdjustToGridSize
   } = useTrainerImages();
 
   const { 
@@ -94,7 +100,10 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
     }
   };
 
-  const selectedImagesCount = getSelectedImagesForDisplay().length;
+  const selectedImagesCount = getSelectedImagesCount();
+  const validationStatus = getValidationStatus();
+  const compatibleGridSizes = getCompatibleGridSizes();
+  const recommendedGridSize = getRecommendedGridSize();
   
   const handleConnectInstagram = () => {
     const redirectUri = `${window.location.origin}/trainer/profile-setup?tab=images&instagram=callback`;
@@ -167,37 +176,49 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
       {/* Tab Navigation */}
       <div className="flex border-b">
         <button
-          className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+          className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors flex items-center gap-2 ${
             activeTab === 'upload' 
               ? 'border-primary text-primary' 
               : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
           onClick={() => setActiveTab('upload')}
         >
-          <Upload className="h-4 w-4 inline mr-2" />
+          <Upload className="h-4 w-4" />
           Upload Images
+          {uploadedImages.some(img => img.is_selected_for_display) && (
+            <CheckCircle className="h-3 w-3 text-green-500" />
+          )}
         </button>
         <button
-          className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+          className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors flex items-center gap-2 ${
             activeTab === 'instagram' 
               ? 'border-primary text-primary' 
               : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
           onClick={() => setActiveTab('instagram')}
         >
-          <Instagram className="h-4 w-4 inline mr-2" />
+          <Instagram className="h-4 w-4" />
           Instagram Sync
+          {instagramSelections.some(sel => sel.is_selected_for_display) && (
+            <CheckCircle className="h-3 w-3 text-green-500" />
+          )}
         </button>
         <button
-          className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+          className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors flex items-center gap-2 ${
             activeTab === 'settings' 
               ? 'border-primary text-primary' 
               : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
           onClick={() => setActiveTab('settings')}
         >
-          <Settings className="h-4 w-4 inline mr-2" />
+          <Settings className="h-4 w-4" />
           Settings
+          {validationStatus.status === 'error' && (
+            <AlertTriangle className="h-3 w-3 text-red-500" />
+          )}
+          {validationStatus.status === 'complete' && (
+            <CheckCircle className="h-3 w-3 text-green-500" />
+          )}
         </button>
       </div>
 
@@ -395,26 +416,93 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
               <CardTitle className="text-lg">Display Settings</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Validation Status */}
+              {!isGridSizeValid() && (
+                <div className={`p-3 rounded-lg border flex items-start gap-3 ${
+                  validationStatus.status === 'error' 
+                    ? 'bg-red-50 border-red-200 text-red-800' 
+                    : 'bg-yellow-50 border-yellow-200 text-yellow-800'
+                }`}>
+                  <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{validationStatus.message}</p>
+                    {validationStatus.status === 'error' && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="mt-2"
+                        onClick={() => autoAdjustToGridSize(imagePreferences?.max_images_per_view || 6)}
+                      >
+                        Auto-adjust to grid size
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              )}
+
               <div>
                 <Label htmlFor="max-images">Gallery Grid Size</Label>
                 <Select
                   value={(imagePreferences?.max_images_per_view || 6).toString()}
-                  onValueChange={(value) => updateImagePreferences({ max_images_per_view: parseInt(value) })}
+                  onValueChange={async (value) => {
+                    const newGridSize = parseInt(value);
+                    const currentCount = selectedImagesCount;
+                    
+                    if (currentCount > newGridSize) {
+                      // Show confirmation for auto-adjustment
+                      const confirmed = window.confirm(
+                        `You have ${currentCount} images selected but the new grid only shows ${newGridSize}. Would you like to automatically deselect the excess images?`
+                      );
+                      
+                      if (confirmed) {
+                        await autoAdjustToGridSize(newGridSize);
+                      }
+                    }
+                    
+                    updateImagePreferences({ max_images_per_view: newGridSize });
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="1">1 image (Hero)</SelectItem>
-                    <SelectItem value="4">4 images (2×2)</SelectItem>
-                    <SelectItem value="6">6 images (3×2)</SelectItem>
-                    <SelectItem value="9">9 images (3×3)</SelectItem>
-                    <SelectItem value="12">12 images (4×3)</SelectItem>
+                    {compatibleGridSizes.map((option) => (
+                      <SelectItem key={option.value} value={option.value.toString()}>
+                        {option.label}
+                        {option.value === recommendedGridSize && selectedImagesCount > 0 && (
+                          <span className="text-green-600 ml-2">(Recommended)</span>
+                        )}
+                      </SelectItem>
+                    ))}
+                    {/* Show disabled options for context */}
+                    {selectedImagesCount > 0 && [1, 4, 6, 9, 12]
+                      .filter(size => size < selectedImagesCount)
+                      .map((size) => {
+                        const labels = {
+                          1: '1 image (Hero)',
+                          4: '4 images (2×2)',
+                          6: '6 images (3×2)',
+                          9: '9 images (3×3)',
+                          12: '12 images (4×3)'
+                        };
+                        return (
+                          <SelectItem key={size} value={size.toString()} disabled>
+                            {labels[size as keyof typeof labels]} (Too small for {selectedImagesCount} images)
+                          </SelectItem>
+                        );
+                      })
+                    }
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Select exactly {imagePreferences?.max_images_per_view || 6} images to fill your gallery grid
-                </p>
+                {selectedImagesCount === 0 ? (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Select images first, then choose a compatible grid size
+                  </p>
+                ) : (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    You have {selectedImagesCount} images selected. Grid will display {imagePreferences?.max_images_per_view || 6} images.
+                  </p>
+                )}
               </div>
 
               <div className="flex items-center justify-between">
