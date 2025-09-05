@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Activity, X } from "lucide-react";
+import { Search, Plus, Activity } from "lucide-react";
 import { useTrainerActivities } from "@/hooks/useTrainerActivities";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -36,7 +36,17 @@ export function EnhancedActivityPickerDialog({
 }: EnhancedActivityPickerDialogProps) {
   const [search, setSearch] = useState("");
   const [customActivityName, setCustomActivityName] = useState("");
-  const { activities, loading, createActivity } = useTrainerActivities();
+  const { activities, loading, createActivity, refresh } = useTrainerActivities();
+
+  // Fetch activities when dialog opens
+  React.useEffect(() => {
+    if (open) {
+      console.log("Dialog opened, activities count:", activities.length);
+      if (activities.length === 0) {
+        refresh();
+      }
+    }
+  }, [open, refresh, activities.length]);
 
   const selectedActivityNames = selectedActivities.map(a => a.name.toLowerCase());
 
@@ -46,6 +56,16 @@ export function EnhancedActivityPickerDialog({
     const notAlreadySelected = !selectedActivityNames.includes(activity.activity_name.toLowerCase());
     return matchesSearch && matchesCategory && notAlreadySelected;
   });
+
+  React.useEffect(() => {
+    console.log("Activity filtering:");
+    console.log("- Total activities:", activities.length);
+    console.log("- Category filter:", categoryFilter);
+    console.log("- Search:", search);
+    console.log("- Selected activities:", selectedActivities.length);
+    console.log("- Filtered activities:", filteredActivities.length);
+    console.log("- System activities in filtered:", filteredActivities.filter(a => a.is_system).length);
+  }, [activities, categoryFilter, search, selectedActivities, filteredActivities]);
 
   const systemActivities = filteredActivities.filter(a => a.is_system);
   const customActivities = filteredActivities.filter(a => !a.is_system);
@@ -70,6 +90,9 @@ export function EnhancedActivityPickerDialog({
       
       onSelectActivity(newActivity);
       setCustomActivityName("");
+      
+      // Refresh activities to get the newly created one
+      refresh();
     } catch (error) {
       console.error('Failed to create custom activity:', error);
     }
@@ -94,6 +117,9 @@ export function EnhancedActivityPickerDialog({
             <Activity className="h-5 w-5" />
             {title}
           </DialogTitle>
+          <DialogDescription>
+            Choose from suggested activities or create your own custom activities for {sectionKey}.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -149,8 +175,22 @@ export function EnhancedActivityPickerDialog({
 
           <ScrollArea className="h-[400px]">
             <div className="space-y-4">
+              {loading && (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p>Loading activities...</p>
+                </div>
+              )}
+
+              {!loading && filteredActivities.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Activity className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>No activities found</p>
+                  <p className="text-sm">Try adjusting your search or create a new activity</p>
+                </div>
+              )}
+
               {/* System Activities */}
-              {systemActivities.length > 0 && (
+              {!loading && systemActivities.length > 0 && (
                 <div>
                   <h4 className="font-medium mb-2 flex items-center gap-2">
                     Suggested Activities
@@ -186,12 +226,12 @@ export function EnhancedActivityPickerDialog({
                 </div>
               )}
 
-              {systemActivities.length > 0 && customActivities.length > 0 && (
+              {!loading && systemActivities.length > 0 && customActivities.length > 0 && (
                 <Separator />
               )}
 
               {/* Custom Activities */}
-              {customActivities.length > 0 && (
+              {!loading && customActivities.length > 0 && (
                 <div>
                   <h4 className="font-medium mb-2 flex items-center gap-2">
                     Your Custom Activities
@@ -229,14 +269,6 @@ export function EnhancedActivityPickerDialog({
                       </div>
                     ))}
                   </div>
-                </div>
-              )}
-
-              {filteredActivities.length === 0 && !loading && (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Activity className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No more activities available</p>
-                  <p className="text-sm">Create a new custom activity above</p>
                 </div>
               )}
             </div>
