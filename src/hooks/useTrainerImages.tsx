@@ -242,18 +242,13 @@ export const useTrainerImages = () => {
         );
       }
 
-      // Auto-adjust grid size and handle excess images
+      // Auto-adjust grid size preference (but don't deselect images)
       setTimeout(async () => {
         const newSelectedCount = getSelectedImagesCount();
         const newRecommendedGridSize = getRecommendedGridSizeForCount(newSelectedCount);
         
-        // Update grid size preference
+        // Update grid size preference for display
         await updateImagePreferences({ max_images_per_view: newRecommendedGridSize });
-        
-        // Handle excess images by deselecting them
-        if (newSelectedCount > newRecommendedGridSize) {
-          await handleExcessImages(newRecommendedGridSize);
-        }
       }, 100);
 
       toast({
@@ -336,8 +331,14 @@ export const useTrainerImages = () => {
         caption: sel.caption
       }));
 
-    return [...selectedUploaded, ...selectedInstagram]
+    const allSelected = [...selectedUploaded, ...selectedInstagram]
       .sort((a, b) => a.displayOrder - b.displayOrder);
+
+    // Apply display-time slicing based on current grid size
+    const selectedCount = allSelected.length;
+    const gridSize = getRecommendedGridSizeForCount(selectedCount);
+    
+    return allSelected.slice(0, gridSize);
   };
 
   useEffect(() => {
@@ -439,9 +440,18 @@ export const useTrainerImages = () => {
     }
     
     const recommendedGridSize = getRecommendedGridSize();
+    const willDisplay = Math.min(selectedCount, recommendedGridSize);
+    
+    if (selectedCount > recommendedGridSize) {
+      return { 
+        status: 'complete', 
+        message: `${selectedCount} images selected - Will display first ${willDisplay} in ${getGridLabel(recommendedGridSize)} layout`
+      };
+    }
+    
     return { 
       status: 'complete', 
-      message: `${selectedCount} image${selectedCount > 1 ? 's' : ''} selected - Auto-using ${getGridLabel(recommendedGridSize)} layout` 
+      message: `${selectedCount} image${selectedCount > 1 ? 's' : ''} selected - Using ${getGridLabel(recommendedGridSize)} layout` 
     };
   };
 

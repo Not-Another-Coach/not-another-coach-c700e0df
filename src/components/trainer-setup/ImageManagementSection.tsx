@@ -152,24 +152,29 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
       {/* Summary Card */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="text-sm">
-                <span className="font-medium">{selectedImagesCount}</span> images selected for display
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="text-sm">
+                  <span className="font-medium">{selectedImagesCount}</span> images selected
+                  {selectedImagesCount > recommendedGridSize && (
+                    <span className="text-muted-foreground ml-1">
+                      (showing {recommendedGridSize})
+                    </span>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <Badge variant="secondary">
+                    {uploadedImages.filter(img => img.is_selected_for_display).length} Uploaded
+                  </Badge>
+                  <Badge variant="secondary">
+                    {instagramSelections.filter(sel => sel.is_selected_for_display).length} Instagram
+                  </Badge>
+                </div>
               </div>
-              <div className="flex gap-2">
-                <Badge variant="secondary">
-                  {uploadedImages.filter(img => img.is_selected_for_display).length} Uploaded
-                </Badge>
-                <Badge variant="secondary">
-                  {instagramSelections.filter(sel => sel.is_selected_for_display).length} Instagram
-                </Badge>
+              <div className="text-xs text-muted-foreground">
+                Grid: {getGridLabel(recommendedGridSize)}
               </div>
             </div>
-            <div className="text-xs text-muted-foreground">
-              Auto-selected: {getGridLabel(recommendedGridSize)}
-            </div>
-          </div>
         </CardContent>
       </Card>
 
