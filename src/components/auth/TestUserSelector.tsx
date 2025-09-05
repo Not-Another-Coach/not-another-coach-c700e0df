@@ -13,8 +13,19 @@ interface TestUserSelectorProps {
 }
 
 export const TestUserSelector: React.FC<TestUserSelectorProps> = ({ onUserSelect, onAutoLogin }) => {
-  const { testUsers, loading, refreshTestUsers } = useTestUsers();
   const [isOpen, setIsOpen] = useState(false);
+  const [shouldLoad, setShouldLoad] = useState(false);
+  
+  // Only load test users when the component is opened
+  const { testUsers, loading, refreshTestUsers } = useTestUsers(shouldLoad);
+
+  // Enable loading when user first opens the selector
+  const handleToggle = (open: boolean) => {
+    setIsOpen(open);
+    if (open && !shouldLoad) {
+      setShouldLoad(true);
+    }
+  };
 
   const handleUserClick = (user: TestUser) => {
     if (user.email && user.password) {
@@ -52,7 +63,7 @@ export const TestUserSelector: React.FC<TestUserSelectorProps> = ({ onUserSelect
 
   return (
     <Card className="w-full">
-      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <Collapsible open={isOpen} onOpenChange={handleToggle}>
         <CollapsibleTrigger asChild>
           <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
             <div className="flex items-center justify-between">
@@ -66,7 +77,8 @@ export const TestUserSelector: React.FC<TestUserSelectorProps> = ({ onUserSelect
                 </CardDescription>
               </div>
               <div className="flex items-center gap-2">
-                <Badge variant="outline">{testUsers.length} users</Badge>
+                {shouldLoad && <Badge variant="outline">{testUsers.length} users</Badge>}
+                {!shouldLoad && <Badge variant="outline">Click to load</Badge>}
                 {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               </div>
             </div>
@@ -75,98 +87,108 @@ export const TestUserSelector: React.FC<TestUserSelectorProps> = ({ onUserSelect
         
         <CollapsibleContent>
           <CardContent className="pt-0">
-            <div className="flex justify-between items-center mb-4">
-              <p className="text-sm text-muted-foreground">
-                Click any user to automatically log in with their credentials
-              </p>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={refreshTestUsers}
-                disabled={loading}
-                className="flex items-center gap-2"
-              >
-                <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
-                Refresh
-              </Button>
-            </div>
-            
-            <ScrollArea className="h-64">
-              <div className="space-y-2">
-                {testUsers.map((user) => (
-                  <div
-                    key={user.id}
-                    className="p-3 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors hover:border-primary/50"
-                    onClick={() => handleUserClick(user)}
+            {shouldLoad ? (
+              <>
+                <div className="flex justify-between items-center mb-4">
+                  <p className="text-sm text-muted-foreground">
+                    Click any user to automatically log in with their credentials
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={refreshTestUsers}
+                    disabled={loading}
+                    className="flex items-center gap-2"
                   >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                          <User className="h-4 w-4 text-primary" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-sm">
-                            {user.first_name && user.last_name 
-                              ? `${user.first_name} ${user.last_name}`
-                              : 'Test User'
-                            }
-                          </p>
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <Mail className="h-3 w-3" />
-                            {user.displayEmail || user.email}
+                    <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
+                    Refresh
+                  </Button>
+                </div>
+            
+                <ScrollArea className="h-64">
+                  <div className="space-y-2">
+                    {testUsers.map((user) => (
+                      <div
+                        key={user.id}
+                        className="p-3 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors hover:border-primary/50"
+                        onClick={() => handleUserClick(user)}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                              <User className="h-4 w-4 text-primary" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-sm">
+                                {user.first_name && user.last_name 
+                                  ? `${user.first_name} ${user.last_name}`
+                                  : 'Test User'
+                                }
+                              </p>
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <Mail className="h-3 w-3" />
+                                {user.displayEmail || user.email}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-end gap-1">
+                            <Badge variant={getUserTypeColor(user.user_type)} className="text-xs">
+                              {user.user_type}
+                            </Badge>
+                            {user.roles.map(role => (
+                              <Badge key={role} variant={getRoleColor(role)} className="text-xs">
+                                {role}
+                              </Badge>
+                            ))}
                           </div>
                         </div>
+                        
+                        {user.password ? (
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Key className="h-3 w-3" />
+                            <span className="font-mono">●●●●●●●●●●</span>
+                            <span className="ml-1">Try: {user.password}</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Key className="h-3 w-3" />
+                            <span className="italic">Password not available</span>
+                          </div>
+                        )}
                       </div>
-                      <div className="flex flex-col items-end gap-1">
-                        <Badge variant={getUserTypeColor(user.user_type)} className="text-xs">
-                          {user.user_type}
-                        </Badge>
-                        {user.roles.map(role => (
-                          <Badge key={role} variant={getRoleColor(role)} className="text-xs">
-                            {role}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
+                    ))}
                     
-                    {user.password ? (
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Key className="h-3 w-3" />
-                        <span className="font-mono">●●●●●●●●●●</span>
-                        <span className="ml-1">Try: {user.password}</span>
+                    {testUsers.length === 0 && !loading && (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <User className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                        <p>No users available</p>
+                        <p className="text-xs">Users will appear here once they sign up</p>
                       </div>
-                    ) : (
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Key className="h-3 w-3" />
-                        <span className="italic">Password not available</span>
+                    )}
+                    
+                    {loading && (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <RefreshCw className="h-8 w-8 mx-auto mb-2 animate-spin" />
+                        <p>Loading users...</p>
                       </div>
                     )}
                   </div>
-                ))}
+                </ScrollArea>
                 
-                {testUsers.length === 0 && !loading && (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <User className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <p>No users available</p>
-                    <p className="text-xs">Users will appear here once they sign up</p>
-                  </div>
-                )}
-                
-                {loading && (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <RefreshCw className="h-8 w-8 mx-auto mb-2 animate-spin" />
-                    <p>Loading users...</p>
-                  </div>
-                )}
+                <div className="mt-4 p-3 bg-muted/50 rounded-lg">
+                  <p className="text-xs text-muted-foreground">
+                    <strong>Development Mode:</strong> All users use the standard password: Password123!
+                    Click any user to automatically log in with their credentials.
+                  </p>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <User className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p className="font-medium">Development User Selector</p>
+                <p className="text-sm">Click to expand and load available test users</p>
               </div>
-            </ScrollArea>
-            
-            <div className="mt-4 p-3 bg-muted/50 rounded-lg">
-              <p className="text-xs text-muted-foreground">
-                <strong>Development Mode:</strong> All users use the standard password: Password123!
-                Click any user to automatically log in with their credentials.
-              </p>
-            </div>
+            )}
           </CardContent>
         </CollapsibleContent>
       </Collapsible>

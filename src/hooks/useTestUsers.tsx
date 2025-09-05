@@ -12,24 +12,37 @@ export interface TestUser {
   password?: string; // For test users only
 }
 
-export const useTestUsers = () => {
+export const useTestUsers = (shouldLoad: boolean = true) => {
   const [testUsers, setTestUsers] = useState<TestUser[]>([]);
   const [loading, setLoading] = useState(false);
 
   const fetchTestUsers = async () => {
     setLoading(true);
     try {
+      console.log('TestUsers: Starting fetch...');
+      
+      // Add a timeout wrapper for all operations
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('TestUsers fetch timeout')), 5000)
+      );
+      
       // If not authenticated, return demo users immediately
-      const { data: { session } } = await supabase.auth.getSession();
+      const sessionPromise = supabase.auth.getSession();
+      const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]) as any;
+      
       if (!session) {
+        console.log('TestUsers: No session, using default users');
         setTestUsers(getDefaultTestUsers());
         return;
       }
-      // First fetch profiles
-      const { data: profiles, error: profilesError } = await supabase
+      console.log('TestUsers: Fetching profiles...');
+      // First fetch profiles with timeout
+      const profilesPromise = supabase
         .from('profiles')
         .select('id, first_name, last_name, user_type')
         .order('created_at', { ascending: false });
+        
+      const { data: profiles, error: profilesError } = await Promise.race([profilesPromise, timeoutPromise]) as any;
 
       if (profilesError) {
         console.error('Error fetching profiles:', profilesError);
@@ -37,52 +50,69 @@ export const useTestUsers = () => {
         setLoading(false);
         return;
       }
+      
+      console.log('TestUsers: Profiles fetched:', profiles?.length);
 
-      // Fetch user roles separately
-      const { data: userRoles, error: rolesError } = await supabase
+      console.log('TestUsers: Fetching user roles...');
+      // Fetch user roles separately with timeout
+      const rolesPromise = supabase
         .from('user_roles')
         .select('user_id, role');
+        
+      const { data: userRoles, error: rolesError } = await Promise.race([rolesPromise, timeoutPromise]) as any;
 
       if (rolesError) {
         console.error('Error fetching roles:', rolesError);
       }
+      
+      console.log('TestUsers: User roles fetched:', userRoles?.length);
 
+      console.log('TestUsers: Attempting to fetch emails...');
       // Try to get emails for users (development function allows all authenticated users)
       let userEmails: any[] = [];
       let emailError: any = null;
       
-      // First try the new admin-only RPC that combines profiles + emails
-      const { data: adminUserList, error: adminListError } = await supabase
-        .rpc('list_users_minimal_admin', {});
-        
-      if (adminListError) {
-        console.log('Admin list function failed (not admin or error):', adminListError);
-        // Fallback to development function for email only
-        const { data: devEmails, error: devEmailError } = await supabase
-          .rpc('get_user_emails_for_development', {});
+      try {
+        // First try the new admin-only RPC that combines profiles + emails
+        console.log('TestUsers: Trying admin list function...');
+        const adminPromise = supabase.rpc('list_users_minimal_admin', {});
+        const { data: adminUserList, error: adminListError } = await Promise.race([adminPromise, timeoutPromise]) as any;
           
-        if (devEmailError) {
-          console.error('Development email fetch failed:', devEmailError);
-          emailError = devEmailError;
+        if (adminListError) {
+          console.log('Admin list function failed (not admin or error):', adminListError);
+          // Fallback to development function for email only
+          console.log('TestUsers: Trying development email function...');
+          const devPromise = supabase.rpc('get_user_emails_for_development', {});
+          const { data: devEmails, error: devEmailError } = await Promise.race([devPromise, timeoutPromise]) as any;
+            
+          if (devEmailError) {
+            console.error('Development email fetch failed:', devEmailError);
+            emailError = devEmailError;
+          } else {
+            userEmails = devEmails || [];
+            console.log('TestUsers: Development emails fetched:', userEmails.length);
+          }
         } else {
-          userEmails = devEmails || [];
+          console.log('TestUsers: Admin list success:', adminUserList?.length);
+          // Admin RPC succeeded - use it directly
+          const combinedUsersFromAdmin = adminUserList.map((user: any) => ({
+            id: user.id,
+            email: user.email,
+            displayEmail: user.email,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            user_type: user.user_type,
+            roles: user.roles || [],
+            password: getTestPassword(user.email)
+          }));
+          
+          setTestUsers(combinedUsersFromAdmin);
+          setLoading(false);
+          return;
         }
-      } else {
-        // Admin RPC succeeded - use it directly
-        const combinedUsersFromAdmin = adminUserList.map((user: any) => ({
-          id: user.id,
-          email: user.email,
-          displayEmail: user.email,
-          first_name: user.first_name,
-          last_name: user.last_name,
-          user_type: user.user_type,
-          roles: user.roles || [],
-          password: getTestPassword(user.email)
-        }));
-        
-        setTestUsers(combinedUsersFromAdmin);
-        setLoading(false);
-        return;
+      } catch (rpcError) {
+        console.error('RPC functions timed out or failed:', rpcError);
+        emailError = rpcError;
       }
 
       let combinedUsers: TestUser[];
@@ -116,9 +146,11 @@ export const useTestUsers = () => {
       setTestUsers(combinedUsers);
     } catch (error) {
       console.error('Error in fetchTestUsers:', error);
+      console.log('TestUsers: Falling back to default users due to error');
       setTestUsers(getDefaultTestUsers());
     } finally {
       setLoading(false);
+      console.log('TestUsers: Fetch complete');
     }
   };
 
@@ -163,8 +195,19 @@ export const useTestUsers = () => {
   };
 
   useEffect(() => {
-    fetchTestUsers();
-  }, []);
+    if (!shouldLoad) {
+      // If we shouldn't load, set default test users immediately
+      setTestUsers(getDefaultTestUsers());
+      return;
+    }
+    
+    // Add a small delay to prevent blocking the initial page load
+    const timer = setTimeout(() => {
+      fetchTestUsers();
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, [shouldLoad]);
 
   return {
     testUsers,
