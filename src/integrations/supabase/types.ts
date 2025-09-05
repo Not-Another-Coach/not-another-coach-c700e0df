@@ -5854,17 +5854,9 @@ export type Database = {
           bio: string | null
           calendar_link: string | null
           certifying_body: string | null
-          client_journey_stage: string | null
-          client_personality_type: string[] | null
-          client_status: string | null
-          client_survey_completed: boolean | null
-          client_survey_completed_at: string | null
+          client_preferences: string[] | null
           coaching_style: string[] | null
           communication_style: string[] | null
-          consent_marketing: boolean | null
-          consent_service: boolean | null
-          consent_timestamp: string | null
-          consent_version: string | null
           created_at: string | null
           delivery_format: string[] | null
           discovery_call_price: number | null
@@ -5873,23 +5865,17 @@ export type Database = {
           hourly_rate: number | null
           how_started: string | null
           id: string | null
+          ideal_client_personality: string | null
           ideal_client_types: string[] | null
           is_uk_based: boolean | null
           is_verified: boolean | null
           last_name: string | null
           location: string | null
-          marketing_unsubscribed_at: string | null
           max_clients: number | null
           messaging_support: boolean | null
           offers_discovery_call: boolean | null
           package_options: Json | null
           philosophy: string | null
-          preferred_coaching_style: string[] | null
-          preferred_package_type: string | null
-          preferred_time_slots: string[] | null
-          preferred_training_frequency: string | null
-          primary_goals: string[] | null
-          privacy_policy_version: string | null
           professional_milestones: Json | null
           profile_image_position: Json | null
           profile_photo_url: string | null
@@ -5902,11 +5888,9 @@ export type Database = {
           terms_agreed: boolean | null
           testimonials: Json | null
           total_ratings: number | null
-          training_location_preference: string | null
           training_types: string[] | null
           updated_at: string | null
           uploaded_certificates: Json | null
-          user_type: Database["public"]["Enums"]["user_type"] | null
           verification_documents: Json | null
           verification_requested_at: string | null
           verification_status: string | null
@@ -5919,6 +5903,13 @@ export type Database = {
           ways_of_working_what_i_bring: string[] | null
           weekly_programming_only: boolean | null
           works_bank_holidays: boolean | null
+          wow_activities: Json | null
+          wow_activity_assignments: Json | null
+          wow_client_expectations: string | null
+          wow_how_i_work: string | null
+          wow_setup_completed: boolean | null
+          wow_visibility: string | null
+          wow_what_i_provide: string | null
           year_certified: number | null
         }
         Relationships: []
