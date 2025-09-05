@@ -1,238 +1,330 @@
-import { useState } from "react";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Eye, EyeOff, Info, Settings, Workflow } from "lucide-react";
-import { SectionHeader } from "./SectionHeader";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Plus, X, Settings } from "lucide-react";
 import { useTrainerActivities } from "@/hooks/useTrainerActivities";
+import { SectionHeader } from "./SectionHeader";
+import { EnhancedActivityPickerDialog } from "./EnhancedActivityPickerDialog";
+import { PackageAssignmentMatrix } from "./PackageAssignmentMatrix";
+
+interface SelectedActivity {
+  id?: string;
+  name: string;
+  category: string;
+  isCustom: boolean;
+}
+
+interface ActivityPackageAssignment {
+  activityName: string;
+  assignedTo: 'all' | 'specific';
+  packageIds: string[];
+}
 
 interface SimplifiedWaysOfWorkingSectionProps {
   formData: any;
-  updateFormData: (updates: any) => void;
-  errors?: { [key: string]: string };
-  clearFieldError?: (field: string) => void;
+  updateFormData: (field: string, value: any) => void;
+  errors: Record<string, string>;
+  clearFieldError: (field: string) => void;
 }
 
-export function SimplifiedWaysOfWorkingSection({ 
-  formData, 
-  updateFormData, 
-  errors = {}, 
-  clearFieldError 
+export function SimplifiedWaysOfWorkingSection({
+  formData,
+  updateFormData,
+  errors,
+  clearFieldError,
 }: SimplifiedWaysOfWorkingSectionProps) {
   const { getSuggestionsBySection } = useTrainerActivities();
+  const [activePickerSection, setActivePickerSection] = useState<string | null>(null);
+  const [showPackageAssignment, setShowPackageAssignment] = useState(false);
 
+  // Section configuration
   const sections = [
     {
-      key: 'wow_how_i_work',
-      title: 'How I Work',
-      description: 'Describe your coaching approach and working style',
-      placeholder: 'E.g., I provide personalized workout plans with weekly check-ins and am available via WhatsApp for quick questions...',
-      suggestionCategories: ['onboarding', 'ongoing_structure']
+      key: "wow_how_i_work",
+      title: "How I Work",
+      description: "Describe your coaching approach and methodology",
+      placeholder: "Activities selected above will appear here as a summary...",
+      suggestionCategories: ["coaching_style", "methodology", "approach"]
     },
     {
-      key: 'wow_what_i_provide',
-      title: 'What I Provide',
-      description: 'What clients can expect to receive from you',
-      placeholder: 'E.g., Custom nutrition plan, weekly workout videos, progress tracking app, monthly body composition analysis...',
-      suggestionCategories: ['what_i_bring', 'tracking_tools']
+      key: "wow_what_i_provide", 
+      title: "What I Provide",
+      description: "Detail the services and support you offer to clients",
+      placeholder: "Activities selected above will appear here as a summary...",
+      suggestionCategories: ["services", "deliverables", "support"]
     },
     {
-      key: 'wow_client_expectations',
-      title: 'Client Expectations',
-      description: 'What you need from clients for successful outcomes',
-      placeholder: 'E.g., Commitment to attend all sessions, complete food diary, send weekly progress photos, communicate openly about challenges...',
-      suggestionCategories: ['client_expectations', 'first_week']
+      key: "wow_client_expectations",
+      title: "Client Expectations", 
+      description: "Set clear expectations for client commitment and behavior",
+      placeholder: "Activities selected above will appear here as a summary...",
+      suggestionCategories: ["expectations", "requirements", "commitment"]
     }
   ];
 
-  const getAllSuggestionsForSection = (suggestionCategories: string[]) => {
-    const allSuggestions: string[] = [];
-    suggestionCategories.forEach(category => {
-      const suggestions = getSuggestionsBySection(category);
-      allSuggestions.push(...suggestions);
-    });
-    return [...new Set(allSuggestions)]; // Remove duplicates
+  // Get current activities data
+  const getActivitiesData = () => {
+    return formData.wow_activities || {
+      wow_how_i_work: [],
+      wow_what_i_provide: [],
+      wow_client_expectations: []
+    };
   };
 
-  const addSuggestionToField = (fieldKey: string, suggestion: string) => {
-    const currentValue = formData[fieldKey] || '';
-    const newValue = currentValue 
-      ? `${currentValue}\n• ${suggestion}`
-      : `• ${suggestion}`;
+  // Get current assignments data
+  const getAssignmentsData = () => {
+    return formData.wow_activity_assignments || [];
+  };
+
+  // Handle activity selection
+  const handleActivitySelect = (sectionKey: string, activity: SelectedActivity) => {
+    const activitiesData = getActivitiesData();
+    const currentActivities = activitiesData[sectionKey] || [];
     
-    updateFormData({ [fieldKey]: newValue });
-    if (clearFieldError) clearFieldError(fieldKey);
+    const isDuplicate = currentActivities.some((existing: SelectedActivity) => 
+      existing.name.toLowerCase() === activity.name.toLowerCase()
+    );
+    
+    if (!isDuplicate) {
+      const newActivities = [...currentActivities, activity];
+      const newActivitiesData = {
+        ...activitiesData,
+        [sectionKey]: newActivities
+      };
+      
+      updateFormData('wow_activities', newActivitiesData);
+      updateSummaryText(sectionKey, newActivities);
+      clearFieldError(sectionKey);
+    }
+  };
+
+  // Handle activity removal
+  const handleActivityRemove = (sectionKey: string, activityName: string) => {
+    const activitiesData = getActivitiesData();
+    const currentActivities = activitiesData[sectionKey] || [];
+    const newActivities = currentActivities.filter((activity: SelectedActivity) => 
+      activity.name !== activityName
+    );
+    
+    const newActivitiesData = {
+      ...activitiesData,
+      [sectionKey]: newActivities
+    };
+    
+    updateFormData('wow_activities', newActivitiesData);
+    updateSummaryText(sectionKey, newActivities);
+  };
+
+  // Update summary text based on selected activities
+  const updateSummaryText = (sectionKey: string, activities: SelectedActivity[]) => {
+    if (activities.length === 0) {
+      updateFormData(sectionKey, "");
+      return;
+    }
+    
+    const summary = activities.map(activity => `• ${activity.name}`).join('\n');
+    updateFormData(sectionKey, summary);
+  };
+
+  // Handle package assignment changes
+  const handleAssignmentChange = (activityName: string, assignment: ActivityPackageAssignment) => {
+    const currentAssignments = getAssignmentsData();
+    const newAssignments = currentAssignments.filter((a: ActivityPackageAssignment) => 
+      a.activityName !== activityName
+    );
+    newAssignments.push(assignment);
+    updateFormData('wow_activity_assignments', newAssignments);
+  };
+
+  // Get all selected activities across all sections
+  const getAllSelectedActivities = (): SelectedActivity[] => {
+    const activitiesData = getActivitiesData();
+    return [
+      ...(activitiesData.wow_how_i_work || []),
+      ...(activitiesData.wow_what_i_provide || []),
+      ...(activitiesData.wow_client_expectations || [])
+    ];
   };
 
   return (
     <div className="space-y-6">
       <SectionHeader 
-        icons={[Settings, Workflow]}
-        title="Ways of Working"
-        description="Define your approach in three simple sections to set clear expectations"
+        title="Ways of Working" 
+        description="Select activities for each section to define your working style"
       />
       
-      {/* Section Introduction */}
-      <Card className="border-primary/20 bg-primary/5">
-        <CardContent className="p-4">
-          <div className="flex items-start gap-3">
-            <Info className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-            <div className="space-y-2">
-              <h3 className="font-medium text-primary">Simplified Setup</h3>
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-start space-x-4">
+            <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0" />
+            <div>
               <p className="text-sm text-muted-foreground">
-                Complete these three sections to help clients understand your process and build trust. Use the suggestions below each section for inspiration.
+                Select from suggested activities or create custom ones for each section. 
+                Then configure which packages each activity applies to.
               </p>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Three Main Sections */}
-      <div className="space-y-6">
-        {sections.map((section) => {
-          const suggestions = getAllSuggestionsForSection(section.suggestionCategories);
-          
-          return (
-            <Card key={section.key}>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">{section.title}</CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  {section.description}
-                </p>
-              </CardHeader>
-              <CardContent className="space-y-4">
+      {/* Ways of Working Sections */}
+      {sections.map((section) => {
+        const activitiesData = getActivitiesData();
+        const sectionActivities = activitiesData[section.key] || [];
+        
+        return (
+          <Card key={section.key}>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center justify-between">
+                {section.title}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setActivePickerSection(section.key)}
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Add Activities
+                </Button>
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">{section.description}</p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Selected Activities */}
+              {sectionActivities.length > 0 && (
                 <div className="space-y-2">
-                  <Label htmlFor={section.key} className="text-sm font-medium">
-                    {section.title}
-                  </Label>
-                  <Textarea
-                    id={section.key}
-                    placeholder={section.placeholder}
-                    value={formData[section.key] || ''}
-                    onChange={(e) => {
-                      updateFormData({ [section.key]: e.target.value });
-                      if (clearFieldError) clearFieldError(section.key);
-                    }}
-                    className="min-h-[120px] resize-y"
-                    rows={6}
-                  />
-                  {errors[section.key] && (
-                    <p className="text-sm text-destructive">{errors[section.key]}</p>
-                  )}
-                </div>
-
-                {/* Suggestions */}
-                {suggestions.length > 0 && (
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium">Quick suggestions:</Label>
-                    <div className="flex flex-wrap gap-2">
-                      {suggestions.map((suggestion, index) => (
-                        <Badge
-                          key={index}
-                          variant="outline"
-                          className="cursor-pointer transition-colors hover:bg-primary hover:text-primary-foreground"
-                          onClick={() => addSuggestionToField(section.key, suggestion)}
-                        >
-                          <Plus className="h-3 w-3 mr-1" />
-                          {suggestion}
-                        </Badge>
-                      ))}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Click suggestions to add them to your description
-                    </p>
+                  <p className="text-sm font-medium">Selected Activities:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {sectionActivities.map((activity: SelectedActivity, index: number) => (
+                      <Badge
+                        key={index}
+                        variant="secondary"
+                        className="text-sm flex items-center gap-1"
+                      >
+                        {activity.name}
+                        {activity.isCustom && <span className="text-xs opacity-70">(Custom)</span>}
+                        <X
+                          className="h-3 w-3 cursor-pointer hover:text-destructive"
+                          onClick={() => handleActivityRemove(section.key, activity.name)}
+                        />
+                      </Badge>
+                    ))}
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+                </div>
+              )}
+              
+              {/* Auto-generated Summary */}
+              <Textarea
+                placeholder={section.placeholder}
+                value={formData[section.key] || ""}
+                onChange={(e) => {
+                  updateFormData(section.key, e.target.value);
+                  clearFieldError(section.key);
+                }}
+                className={`min-h-[120px] ${errors[section.key] ? 'border-destructive' : ''}`}
+                disabled={sectionActivities.length > 0}
+              />
+              
+              {sectionActivities.length === 0 && (
+                <p className="text-sm text-muted-foreground">
+                  No activities selected. Click "Add Activities" to get started.
+                </p>
+              )}
+              
+              {errors[section.key] && (
+                <p className="text-sm text-destructive">{errors[section.key]}</p>
+              )}
+            </CardContent>
+          </Card>
+        );
+      })}
 
-      {/* Package Applicability */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="space-y-3">
-            <Label className="text-sm font-medium">Apply To Packages</Label>
-            <Select
-              value={formData.wow_package_applicability?.apply_to || "all"}
-              onValueChange={(value) => {
-                const newApplicability = {
-                  apply_to: value,
-                  package_ids: value === "all" ? [] : formData.wow_package_applicability?.package_ids || []
-                };
-                updateFormData({ wow_package_applicability: newApplicability });
-              }}
+      {/* Package Assignment Section */}
+      {getAllSelectedActivities().length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Package Assignment</h3>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowPackageAssignment(!showPackageAssignment)}
             >
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Packages</SelectItem>
-                <SelectItem value="specific">Specific Packages Only</SelectItem>
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground">
-              Choose whether these ways of working apply to all your packages or specific ones
-            </p>
+              <Settings className="h-4 w-4 mr-1" />
+              {showPackageAssignment ? 'Hide' : 'Configure'} Assignments
+            </Button>
           </div>
-        </CardContent>
-      </Card>
+          
+          {showPackageAssignment && (
+            <PackageAssignmentMatrix
+              selectedActivities={getAllSelectedActivities()}
+              packageOptions={formData.package_options || []}
+              assignments={getAssignmentsData()}
+              onAssignmentChange={handleAssignmentChange}
+            />
+          )}
+        </div>
+      )}
 
       {/* Visibility Setting */}
       <Card>
-        <CardContent className="p-4">
-          <div className="space-y-3">
-            <Label className="text-sm font-medium">Visibility Setting</Label>
-            <Select
-              value={formData.wow_visibility || "public"}
-              onValueChange={(value) => updateFormData({ wow_visibility: value })}
+        <CardHeader>
+          <CardTitle className="text-lg">Visibility</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Control when clients can see this information
+          </p>
+        </CardHeader>
+        <CardContent>
+          <Select
+            value={formData.wow_visibility || "public"}
+            onValueChange={(value) => updateFormData('wow_visibility', value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select visibility" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="public">Public (visible during matching)</SelectItem>
+              <SelectItem value="post_match">Post-match only</SelectItem>
+            </SelectContent>
+          </Select>
+        </CardContent>
+      </Card>
+
+      {/* Completion Checkbox */}
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="wow_setup_completed"
+              checked={formData.wow_setup_completed || false}
+              onCheckedChange={(checked) => updateFormData('wow_setup_completed', checked)}
+            />
+            <label
+              htmlFor="wow_setup_completed"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
             >
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="public">
-                  <div className="flex items-center gap-2">
-                    <Eye className="h-4 w-4" />
-                    <span>Public - Visible on my profile</span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="post_match">
-                  <div className="flex items-center gap-2">
-                    <EyeOff className="h-4 w-4" />
-                    <span>Post-Match Only - Visible after matching</span>
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground">
-              Choose when clients can see your working style details
-            </p>
+              Ways of Working setup completed
+            </label>
           </div>
         </CardContent>
       </Card>
 
-      {/* Completion Status */}
-      <Card className="border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="ways_of_working_completed"
-              checked={formData.ways_of_working_completed || false}
-              onChange={(e) => updateFormData({ ways_of_working_completed: e.target.checked })}
-              className="rounded border-green-300"
-            />
-            <Label htmlFor="ways_of_working_completed" className="text-sm">
-              I've completed setting up my ways of working
-            </Label>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Activity Picker Dialog */}
+      <EnhancedActivityPickerDialog
+        open={activePickerSection !== null}
+        onOpenChange={(open) => !open && setActivePickerSection(null)}
+        selectedActivities={activePickerSection ? (getActivitiesData()[activePickerSection] || []) : []}
+        onSelectActivity={(activity) => {
+          if (activePickerSection) {
+            handleActivitySelect(activePickerSection, activity);
+          }
+        }}
+        categoryFilter={activePickerSection ? sections.find(s => s.key === activePickerSection)?.suggestionCategories[0] : undefined}
+        title={activePickerSection ? `Add Activities - ${sections.find(s => s.key === activePickerSection)?.title}` : "Select Activities"}
+        sectionKey={activePickerSection || ""}
+      />
     </div>
   );
 }

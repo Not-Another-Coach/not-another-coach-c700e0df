@@ -113,11 +113,16 @@ const TrainerProfileSetup = () => {
     ways_of_working_expectations: [],
     ways_of_working_what_i_bring: [],
     
-    // New simplified Ways of Working fields
+    // New activity-centric Ways of Working fields
     wow_how_i_work: "",
     wow_what_i_provide: "",
     wow_client_expectations: "",
-    wow_package_applicability: { apply_to: "all", package_ids: [] },
+    wow_activities: {
+      wow_how_i_work: [],
+      wow_what_i_provide: [],
+      wow_client_expectations: []
+    },
+    wow_activity_assignments: [],
     wow_visibility: "public",
     
     // Profile Management - this exists in TrainerProfile
@@ -196,11 +201,16 @@ const TrainerProfileSetup = () => {
         ways_of_working_tracking: profile.ways_of_working_tracking || [],
         ways_of_working_expectations: profile.ways_of_working_expectations || [],
         ways_of_working_what_i_bring: profile.ways_of_working_what_i_bring || [],
-        // New simplified Ways of Working fields
+        // New activity-centric Ways of Working fields
         wow_how_i_work: profile.wow_how_i_work || "",
         wow_what_i_provide: profile.wow_what_i_provide || "",
         wow_client_expectations: profile.wow_client_expectations || "",
-        wow_package_applicability: profile.wow_package_applicability || { apply_to: "all", package_ids: [] },
+        wow_activities: profile.wow_activities || {
+          wow_how_i_work: [],
+          wow_what_i_provide: [],
+          wow_client_expectations: []
+        },
+        wow_activity_assignments: profile.wow_activity_assignments || [],
         wow_visibility: profile.wow_visibility || "public",
         terms_agreed: profile.terms_agreed || false,
         max_clients: profile.max_clients || null,
