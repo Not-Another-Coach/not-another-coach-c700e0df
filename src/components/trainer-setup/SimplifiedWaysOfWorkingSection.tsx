@@ -102,8 +102,9 @@ export function SimplifiedWaysOfWorkingSection({
     });
     
     textFields.forEach(field => {
-      if (!formData[field.key] || formData[field.key].length < 20) {
-        missing.push(`${field.label} description (min 20 characters)`);
+      const currentLength = formData[field.key]?.length || 0;
+      if (currentLength < 20) {
+        missing.push(`${field.label} description (${currentLength}/20 characters)`);
       }
     });
     
