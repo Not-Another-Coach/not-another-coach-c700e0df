@@ -241,11 +241,6 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
         >
           <Instagram className="h-4 w-4" />
           Instagram Sync
-          {!isConnected && (
-            <Badge variant="secondary" className="text-xs ml-1">
-              Tab 9 Required
-            </Badge>
-          )}
           {isConnected && instagramSelections.some(sel => sel.is_selected_for_display) && (
             <CheckCircle className="h-3 w-3 text-green-500" />
           )}

@@ -446,9 +446,23 @@ const TrainerProfileSetup = () => {
       case 13: // Professional Documents
         return getProfDocumentsStatus();
         
-      case 14: // Verification Overview
-        if (profile?.verification_status === 'verified') return 'completed';
-        if (verificationRequest?.status === 'pending' || verificationRequest?.status === 'under_review') return 'partial';
+      case 14: // Verification
+        // Check verification checks using enhanced verification system
+        const checkTypes = ['cimspa_membership', 'insurance_proof', 'first_aid_certification'];
+        const verificationChecks = checkTypes.map(type => getCheckByType(type as any)).filter(Boolean);
+        
+        if (verificationChecks.length === 0) return 'not_started';
+        
+        const verifiedCount = verificationChecks.filter(check => check?.status === 'verified').length;
+        const pendingCount = verificationChecks.filter(check => check?.status === 'pending').length;
+        const submittedCount = verificationChecks.filter(check => check?.status === 'pending' || check?.status === 'verified').length;
+        
+        // All checks verified = completed (green)
+        if (verifiedCount === checkTypes.length) return 'completed';
+        
+        // Any checks submitted/pending = partial (orange)
+        if (submittedCount > 0) return 'partial';
+        
         return 'not_started';
         
       default:
