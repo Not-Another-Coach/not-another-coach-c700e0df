@@ -241,7 +241,12 @@ export const EnhancedVerificationSection = () => {
               {/* Show existing check details if verified or under review */}
               {existingCheck && (
                 <div className="p-4 bg-muted/30 rounded-lg space-y-2">
-                  <h4 className="font-medium">Submitted Information</h4>
+                  <h4 className="font-medium">
+                    Submitted Information 
+                    <span className="text-xs text-muted-foreground ml-2">
+                      (Status: {existingCheck.status})
+                    </span>
+                  </h4>
                   {existingCheck.provider && (
                     <p className="text-sm"><strong>Provider:</strong> {existingCheck.provider}</p>
                   )}
@@ -275,9 +280,43 @@ export const EnhancedVerificationSection = () => {
                 </div>
               )}
 
-              {/* Form for new submission or resubmission */}
+              {/* Status message for pending/verified checks */}
+              {existingCheck && (existingCheck.status === 'pending' || existingCheck.status === 'verified') && (
+                <div className={`p-4 rounded-lg border ${
+                  existingCheck.status === 'verified' 
+                    ? 'bg-green-50 border-green-200 text-green-800' 
+                    : 'bg-blue-50 border-blue-200 text-blue-800'
+                }`}>
+                  <div className="flex items-center gap-2">
+                    {existingCheck.status === 'verified' ? (
+                      <CheckCircle2 className="h-4 w-4" />
+                    ) : (
+                      <Clock className="h-4 w-4" />
+                    )}
+                    <p className="font-medium">
+                      {existingCheck.status === 'verified' 
+                        ? 'Verification Complete' 
+                        : 'Submitted for Review'
+                      }
+                    </p>
+                  </div>
+                  <p className="text-sm mt-1">
+                    {existingCheck.status === 'verified' 
+                      ? 'Your verification has been approved and is now active.'
+                      : 'Your verification request has been submitted and is being reviewed by our admin team. You will be notified once the review is complete.'
+                    }
+                  </p>
+                </div>
+              )}
+
+              {/* Form for new submission or resubmission - only show if no check exists or check was rejected/expired */}
               {(!existingCheck || existingCheck.status === 'rejected' || existingCheck.status === 'expired') && (
                 <div className="space-y-4">
+                  <div className="text-sm text-muted-foreground mb-4">
+                    {existingCheck?.status === 'rejected' && "Please update your information and resubmit."}
+                    {existingCheck?.status === 'expired' && "Your verification has expired. Please submit updated information."}
+                    {!existingCheck && "Complete the form below to submit for verification."}
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {config.fields.includes('provider') && (
                       <div>

@@ -85,6 +85,8 @@ export const useEnhancedTrainerVerification = () => {
     setLoading(true);
 
     try {
+      console.log('Fetching verification data for trainer:', targetTrainerId);
+      
       // Fetch overview
       const { data: overviewData } = await supabase
         .from('trainer_verification_overview')
@@ -92,6 +94,7 @@ export const useEnhancedTrainerVerification = () => {
         .eq('trainer_id', targetTrainerId)
         .single();
 
+      console.log('Overview data:', overviewData);
       setOverview(overviewData);
 
       // Fetch checks
@@ -101,6 +104,7 @@ export const useEnhancedTrainerVerification = () => {
         .eq('trainer_id', targetTrainerId)
         .order('check_type');
 
+      console.log('Checks data:', checksData);
       setChecks(checksData || []);
 
       // Fetch audit log (only if admin or own data)
@@ -226,6 +230,8 @@ export const useEnhancedTrainerVerification = () => {
 
       // Refresh data to update UI
       await fetchVerificationData();
+      
+      console.log('Data refreshed after submission');
       
       toast.success('Verification check submitted successfully!');
     } catch (error) {
