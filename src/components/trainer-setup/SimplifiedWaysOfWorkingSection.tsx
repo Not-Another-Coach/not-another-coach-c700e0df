@@ -88,26 +88,8 @@ export function SimplifiedWaysOfWorkingSection({
   // Get missing requirements for tooltip
   const getMissingRequirements = (): string[] => {
     const missing: string[] = [];
-    const textFields = [
-      { key: 'wow_how_i_work', label: 'How I Work' },
-      { key: 'wow_what_i_provide', label: 'What I Provide' },
-      { key: 'wow_client_expectations', label: 'Client Expectations' }
-    ];
     
-    console.log('[WoW Requirements Debug] Current form data fields:', {
-      wow_how_i_work: formData.wow_how_i_work?.length || 0,
-      wow_what_i_provide: formData.wow_what_i_provide?.length || 0,
-      wow_client_expectations: formData.wow_client_expectations?.length || 0,
-      wow_activities: formData.wow_activities
-    });
-    
-    textFields.forEach(field => {
-      const currentLength = formData[field.key]?.length || 0;
-      if (currentLength < 20) {
-        missing.push(`${field.label} description (${currentLength}/20 characters)`);
-      }
-    });
-    
+    // Only check for activities - remove text field requirements
     const activities = formData.wow_activities;
     const hasActivities = activities && typeof activities === 'object' &&
       ['wow_how_i_work', 'wow_what_i_provide', 'wow_client_expectations'].some(section => 
@@ -118,6 +100,10 @@ export function SimplifiedWaysOfWorkingSection({
       missing.push('At least one activity selected');
     }
     
+    console.log('[WoW Requirements Debug] Activities check:', {
+      hasActivities,
+      wow_activities: formData.wow_activities
+    });
     console.log('[WoW Requirements Debug] Missing requirements:', missing);
     console.log('[WoW Requirements Debug] Prerequisites met:', missing.length === 0);
     

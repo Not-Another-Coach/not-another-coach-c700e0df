@@ -75,13 +75,13 @@ export function PackageWaysOfWorkingSection({
 
     initializePackages();
   }, [packages.length, user?.id, updateFormData]);
-  
+
   // Debug logging to track package availability
   useEffect(() => {
     console.log('[WoW Debug] Packages available:', packages.map((p: any) => ({ id: p.id, name: p.name })));
     console.log('[WoW Debug] Active package ID:', activePackageId);
-    console.log('[WoW Debug] Form data package_options:', formData.package_options);
-  }, [packages, activePackageId, formData.package_options]);
+    console.log('[WoW Debug] All package workflows:', packageWorkflows);
+  }, [packages, activePackageId, packageWorkflows]);
   
   // Set default active package and switch to newly created packages
   useEffect(() => {
@@ -97,22 +97,59 @@ export function PackageWaysOfWorkingSection({
     }
   }, [packages, activePackageId]);
 
+  // Get current package workflow
+  const currentWorkflow = activePackageId ? getPackageWorkflow(activePackageId) : null;
+  const currentPackage = packages.find((pkg: any) => pkg.id === activePackageId);
+
   // Create workflow when package is selected if it doesn't exist
   useEffect(() => {
     const createWorkflowIfNeeded = async () => {
       if (activePackageId && packages.length > 0) {
-        const currentPackage = packages.find((pkg: any) => pkg.id === activePackageId);
+        const packageForWorkflow = packages.find((pkg: any) => pkg.id === activePackageId);
         const existingWorkflow = getPackageWorkflow(activePackageId);
         
-        console.log('[WoW Debug] Current package:', currentPackage?.name);
+        console.log('[WoW Debug] Current package:', packageForWorkflow?.name);
         console.log('[WoW Debug] Existing workflow:', existingWorkflow ? 'Found' : 'Not found');
+        console.log('[WoW Debug] Current workflow content:', existingWorkflow);
         
-        if (currentPackage && !existingWorkflow) {
+        if (packageForWorkflow && !existingWorkflow) {
           try {
-            console.log('[WoW Debug] Creating workflow for package:', currentPackage.name);
-            await savePackageWorkflow(activePackageId, currentPackage.name, {
-              visibility: 'public'
-            });
+            console.log('[WoW Debug] Creating workflow for package:', packageForWorkflow.name);
+            
+            // Pre-populate with activities from general Ways of Working if available
+            const initialWorkflow: any = {
+              visibility: 'public',
+              onboarding_items: [],
+              first_week_items: [],
+              ongoing_structure_items: [],
+              tracking_tools_items: [],
+              client_expectations_items: [],
+              what_i_bring_items: []
+            };
+
+            // Check if we should copy from general WoW activities
+            if (formData.wow_activities && typeof formData.wow_activities === 'object') {
+              const activities = formData.wow_activities;
+              
+              // Map general activities to package-specific sections
+              if (activities.wow_what_i_provide && Array.isArray(activities.wow_what_i_provide)) {
+                initialWorkflow.what_i_bring_items = activities.wow_what_i_provide.map((activity: any) => ({
+                  id: activity.id || crypto.randomUUID(),
+                  text: activity.name || activity.text || ''
+                }));
+                console.log('[WoW Debug] Pre-populated what_i_bring with:', initialWorkflow.what_i_bring_items);
+              }
+              
+              if (activities.wow_client_expectations && Array.isArray(activities.wow_client_expectations)) {
+                initialWorkflow.client_expectations_items = activities.wow_client_expectations.map((activity: any) => ({
+                  id: activity.id || crypto.randomUUID(),
+                  text: activity.name || activity.text || ''
+                }));
+                console.log('[WoW Debug] Pre-populated client_expectations with:', initialWorkflow.client_expectations_items);
+              }
+            }
+            
+            await savePackageWorkflow(activePackageId, packageForWorkflow.name, initialWorkflow);
           } catch (error) {
             console.error('Error creating workflow:', error);
           }
@@ -121,7 +158,7 @@ export function PackageWaysOfWorkingSection({
     };
 
     createWorkflowIfNeeded();
-  }, [activePackageId, packages, getPackageWorkflow, savePackageWorkflow]);
+  }, [activePackageId, packages, getPackageWorkflow, savePackageWorkflow, formData.wow_activities]);
 
   const { getSuggestionsBySection } = useTrainerActivities();
 
@@ -143,45 +180,36 @@ export function PackageWaysOfWorkingSection({
     what_i_bring: "Your unique value and approach for this package"
   };
 
-  // Get current package workflow
-  const currentWorkflow = activePackageId ? getPackageWorkflow(activePackageId) : null;
-  const currentPackage = packages.find((pkg: any) => pkg.id === activePackageId);
-
   const addItem = async (section: string) => {
-    const text = newItems[section]?.trim();
-    if (!text || !activePackageId || !currentPackage) return;
+    const text = newItems[section];
+    if (!text.trim() || !activePackageId || !currentPackage) return;
 
+    const newItem: WaysOfWorkingItem = {
+      id: crypto.randomUUID(),
+      text: text.trim()
+    };
+
+    const existingItems = currentWorkflow?.[`${section}_items` as keyof PackageWaysOfWorking] as WaysOfWorkingItem[] || [];
+    
     try {
-      const currentItems = currentWorkflow?.[`${section}_items` as keyof PackageWaysOfWorking] as WaysOfWorkingItem[] || [];
-      const newItem: WaysOfWorkingItem = {
-        id: Date.now().toString(),
-        text: text
-      };
-
-      const updatedItems = [...currentItems, newItem];
-      
       await savePackageWorkflow(activePackageId, currentPackage.name, {
         ...currentWorkflow,
-        [`${section}_items`]: updatedItems
+        [`${section}_items`]: [...existingItems, newItem]
       });
 
-      // Automatically sync the new item to activities
-      try {
-        await syncWaysOfWorkingToActivities(activePackageId, section, [newItem]);
-        
-        toast({
-          title: "Item added & synced",
-          description: `Added to ${sectionTitles[section as keyof typeof sectionTitles]} and synced to activities`,
-        });
-      } catch (syncError) {
-        // Still show success for adding item, but warn about sync failure
-        toast({
-          title: "Item added",
-          description: `Added to ${sectionTitles[section as keyof typeof sectionTitles]} (sync to activities failed)`,
-        });
-      }
+      // Sync to activities
+      await syncWaysOfWorkingToActivities(
+        activePackageId, 
+        section, 
+        [...existingItems, newItem]
+      );
 
       setNewItems(prev => ({ ...prev, [section]: "" }));
+
+      toast({
+        title: "Item added",
+        description: "Successfully added to ways of working",
+      });
     } catch (error) {
       toast({
         title: "Error",
@@ -194,18 +222,25 @@ export function PackageWaysOfWorkingSection({
   const removeItem = async (section: string, itemId: string) => {
     if (!activePackageId || !currentPackage) return;
 
+    const existingItems = currentWorkflow?.[`${section}_items` as keyof PackageWaysOfWorking] as WaysOfWorkingItem[] || [];
+    const updatedItems = existingItems.filter(item => item.id !== itemId);
+
     try {
-      const currentItems = currentWorkflow?.[`${section}_items` as keyof PackageWaysOfWorking] as WaysOfWorkingItem[] || [];
-      const updatedItems = currentItems.filter((item: WaysOfWorkingItem) => item.id !== itemId);
-      
       await savePackageWorkflow(activePackageId, currentPackage.name, {
         ...currentWorkflow,
         [`${section}_items`]: updatedItems
       });
 
+      // Sync to activities
+      await syncWaysOfWorkingToActivities(
+        activePackageId, 
+        section, 
+        updatedItems
+      );
+
       toast({
         title: "Item removed",
-        description: `Removed from ${sectionTitles[section as keyof typeof sectionTitles]}`,
+        description: "Successfully removed from ways of working",
       });
     } catch (error) {
       toast({
@@ -219,26 +254,30 @@ export function PackageWaysOfWorkingSection({
   const addSuggestion = async (section: string, suggestion: string) => {
     if (!activePackageId || !currentPackage) return;
 
-    try {
-      const currentItems = currentWorkflow?.[`${section}_items` as keyof PackageWaysOfWorking] as WaysOfWorkingItem[] || [];
-      const newItem: WaysOfWorkingItem = {
-        id: Date.now().toString(),
-        text: suggestion
-      };
+    const newItem: WaysOfWorkingItem = {
+      id: crypto.randomUUID(),
+      text: suggestion
+    };
 
-      const updatedItems = [...currentItems, newItem];
-      
+    const existingItems = currentWorkflow?.[`${section}_items` as keyof PackageWaysOfWorking] as WaysOfWorkingItem[] || [];
+    
+    try {
       await savePackageWorkflow(activePackageId, currentPackage.name, {
         ...currentWorkflow,
-        [`${section}_items`]: updatedItems
+        [`${section}_items`]: [...existingItems, newItem]
       });
 
-      // Automatically sync the suggestion to activities
-      try {
-        await syncWaysOfWorkingToActivities(activePackageId, section, [newItem]);
-      } catch (syncError) {
-        console.error('Failed to sync suggestion to activities:', syncError);
-      }
+      // Sync to activities
+      await syncWaysOfWorkingToActivities(
+        activePackageId, 
+        section, 
+        [...existingItems, newItem]
+      );
+
+      toast({
+        title: "Suggestion added",
+        description: "Added to your ways of working",
+      });
     } catch (error) {
       toast({
         title: "Error",
@@ -249,24 +288,16 @@ export function PackageWaysOfWorkingSection({
   };
 
   const syncSectionToActivities = async (section: string) => {
-    if (!activePackageId || !currentWorkflow) return;
+    if (!activePackageId) return;
+    
+    const items = currentWorkflow?.[`${section}_items` as keyof PackageWaysOfWorking] as WaysOfWorkingItem[] || [];
 
     try {
-      const items = currentWorkflow[`${section}_items` as keyof PackageWaysOfWorking] as WaysOfWorkingItem[] || [];
-      
-      if (items.length === 0) {
-        toast({
-          title: "No items to sync",
-          description: `No items found in ${sectionTitles[section as keyof typeof sectionTitles]}`,
-        });
-        return;
-      }
-
       await syncWaysOfWorkingToActivities(activePackageId, section, items);
       
       toast({
-        title: "Section synced",
-        description: `${items.length} items from ${sectionTitles[section as keyof typeof sectionTitles]} synced to activities`,
+        title: "Synced to activities",
+        description: `${items.length} items synced to your activities library`,
       });
     } catch (error) {
       toast({
@@ -378,70 +409,63 @@ export function PackageWaysOfWorkingSection({
               </div>
             </div>
           )}
-
+          
           {/* Add new item */}
-          <div className="space-y-2">
+          <div className="space-y-3">
             <Label className="text-sm font-medium">Add new item:</Label>
             <div className="flex gap-2">
               <Textarea
-                placeholder={`Describe your ${sectionTitles[section as keyof typeof sectionTitles].toLowerCase()}...`}
+                placeholder={`Describe what you do for ${sectionTitles[section as keyof typeof sectionTitles].toLowerCase()}...`}
                 value={newItems[section] || ""}
                 onChange={(e) => setNewItems(prev => ({ ...prev, [section]: e.target.value }))}
-                className="min-h-[60px] resize-none"
-                rows={2}
+                className="min-h-[80px]"
               />
               <Button
                 onClick={() => addItem(section)}
-                disabled={!newItems[section]?.trim()}
-                size="sm"
+                disabled={!newItems[section]?.trim() || loading}
                 className="shrink-0"
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="h-4 w-4 mr-2" />
+                Add
               </Button>
             </div>
           </div>
 
           {/* Suggestions */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Quick suggestions:</Label>
-            <div className="flex flex-wrap gap-2">
-              {sectionSuggestions.map((suggestion, index) => {
-                const isAdded = items.some((item: WaysOfWorkingItem) => item.text === suggestion);
-                return (
+          {sectionSuggestions && sectionSuggestions.length > 0 && (
+            <div className="space-y-2">
+              <Label className="text-sm font-medium flex items-center gap-2">
+                <Info className="h-4 w-4" />
+                Suggestions:
+              </Label>
+              <div className="space-y-2">
+                {sectionSuggestions.slice(0, 3).map((suggestion, index) => (
                   <Button
                     key={index}
-                    variant={isAdded ? "default" : "outline"}
+                    variant="outline"
                     size="sm"
-                    className={`transition-colors ${
-                      isAdded 
-                        ? "opacity-50 cursor-not-allowed" 
-                        : ""
-                    }`}
-                    onClick={() => !isAdded && addSuggestion(section, suggestion)}
-                    disabled={isAdded}
+                    onClick={() => addSuggestion(section, suggestion)}
+                    className="h-auto p-2 justify-start text-left whitespace-normal"
+                    disabled={loading}
                   >
-                    {suggestion}
-                    {isAdded && <span className="ml-1">✓</span>}
+                    <Plus className="h-3 w-3 mr-2 shrink-0" />
+                    <span className="text-xs">{suggestion}</span>
                   </Button>
-                );
-              })}
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </CardContent>
       </Card>
     );
   };
 
-  if (loading) {
+  if (loading && packages.length === 0) {
     return (
-      <div className="space-y-6">
-        <SectionHeader 
-          icons={[Package, Workflow]}
-          title="Package Ways of Working"
-          description="Define how you work with clients for each of your packages"
-        />
-        <div className="flex items-center justify-center p-8">
-          <div className="text-sm text-muted-foreground">Loading package workflows...</div>
+      <div className="flex items-center justify-center p-8">
+        <div className="text-center">
+          <Settings className="h-8 w-8 animate-spin mx-auto mb-2 text-muted-foreground" />
+          <p className="text-sm text-muted-foreground">Loading packages...</p>
         </div>
       </div>
     );
@@ -451,18 +475,21 @@ export function PackageWaysOfWorkingSection({
     return (
       <div className="space-y-6">
         <SectionHeader 
-          icons={[Package, Workflow]}
-          title="Package Ways of Working"
+          icons={[Workflow]}
+          title="Package-Specific Ways of Working"
           description="Define how you work with clients for each of your packages"
         />
-        <Card className="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950">
+        
+        <Card className="border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950">
           <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <AlertCircle className="h-5 w-5 text-amber-600" />
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5" />
               <div>
-                <h3 className="font-medium text-amber-800 dark:text-amber-200">No packages configured</h3>
-                <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
-                  You need to set up your packages in the "Rates & Discovery Calls" section before configuring ways of working.
+                <h3 className="font-medium text-yellow-800 dark:text-yellow-200 mb-1">
+                  No packages configured
+                </h3>
+                <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                  You need to create packages in the "Rates & Packages" section first before you can configure package-specific ways of working.
                 </p>
               </div>
             </div>
@@ -475,8 +502,8 @@ export function PackageWaysOfWorkingSection({
   return (
     <div className="space-y-6">
       <SectionHeader 
-        icons={[Package, Workflow]}
-        title="Package Ways of Working"
+        icons={[Workflow]}
+        title="Package-Specific Ways of Working"
         description="Define how you work with clients for each of your packages"
       />
       
@@ -516,9 +543,9 @@ export function PackageWaysOfWorkingSection({
                     if (sourcePackages.length > 0) {
                       // For simplicity, clone from the first available package with workflow
                       const sourcePackage = sourcePackages[0];
-                      const currentPackage = packages.find((pkg: any) => pkg.id === activePackageId);
-                      if (currentPackage) {
-                        clonePackageWorkflow(sourcePackage.id, activePackageId, currentPackage.name);
+                      const packageForCloning = packages.find((pkg: any) => pkg.id === activePackageId);
+                      if (packageForCloning) {
+                        clonePackageWorkflow(sourcePackage.id, activePackageId, packageForCloning.name);
                       }
                     }
                   }}
@@ -528,74 +555,79 @@ export function PackageWaysOfWorkingSection({
                   <Plus className="h-4 w-4" />
                   Clone from another package
                 </Button>
-                {packages.filter((pkg: any) => pkg.id !== activePackageId && getPackageWorkflow(pkg.id)).length === 0 && (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Configure ways of working for other packages first to enable cloning
-                  </p>
-                )}
               </div>
             )}
           </div>
         </CardContent>
       </Card>
 
-      {/* Package Workflow Configuration */}
+      {/* Workflow Configuration */}
       {activePackageId && currentPackage && (
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="onboarding">Getting Started</TabsTrigger>
-            <TabsTrigger value="ongoing">Ongoing Support</TabsTrigger>
-            <TabsTrigger value="expectations">Expectations</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="onboarding" className="space-y-4">
-            {renderSection("onboarding")}
-            {renderSection("first_week")}
-          </TabsContent>
-          
-          <TabsContent value="ongoing" className="space-y-4">
-            {renderSection("ongoing_structure")}
-            {renderSection("tracking_tools")}
-            {renderSection("what_i_bring")}
-          </TabsContent>
-          
-          <TabsContent value="expectations" className="space-y-4">
-            {renderSection("client_expectations")}
-            
-            {/* Visibility Setting */}
-            <Card>
-              <CardContent className="p-4">
-                <div className="space-y-3">
-                  <Label className="text-sm font-medium">
-                    When should clients see these details?
-                  </Label>
-                  <Select
-                    value={currentWorkflow?.visibility || "public"}
-                    onValueChange={(value: 'public' | 'post_match') => updateVisibility(value)}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="public">
-                        <div className="flex items-center gap-2">
-                          <Eye className="h-4 w-4" />
-                          <span>Show on my profile</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="post_match">
-                        <div className="flex items-center gap-2">
-                          <EyeOff className="h-4 w-4" />
-                          <span>Show only after matching</span>
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+        <>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6">
+              <TabsTrigger value="onboarding" className="text-xs">Getting Started</TabsTrigger>
+              <TabsTrigger value="first_week" className="text-xs">First Week</TabsTrigger>
+              <TabsTrigger value="ongoing_structure" className="text-xs">Ongoing</TabsTrigger>
+              <TabsTrigger value="tracking_tools" className="text-xs">Tracking</TabsTrigger>
+              <TabsTrigger value="client_expectations" className="text-xs">Expectations</TabsTrigger>
+              <TabsTrigger value="what_i_bring" className="text-xs">What I Bring</TabsTrigger>
+            </TabsList>
+
+            {Object.keys(sectionTitles).map(section => (
+              <TabsContent key={section} value={section}>
+                {renderSection(section)}
+              </TabsContent>
+            ))}
+          </Tabs>
+
+          {/* Visibility Settings */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                {currentWorkflow?.visibility === 'public' ? (
+                  <Eye className="h-4 w-4 text-green-600" />
+                ) : (
+                  <EyeOff className="h-4 w-4 text-orange-600" />
+                )}
+                <CardTitle className="text-sm">Package Visibility</CardTitle>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Control when clients can see this package's ways of working
+              </p>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <Select 
+                value={currentWorkflow?.visibility || 'public'} 
+                onValueChange={updateVisibility}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="public">
+                    <div className="flex items-center gap-2">
+                      <Eye className="h-4 w-4 text-green-600" />
+                      <div>
+                        <div className="font-medium">Public</div>
+                        <div className="text-xs text-muted-foreground">Visible during matching process</div>
+                      </div>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="post_match">
+                    <div className="flex items-center gap-2">
+                      <EyeOff className="h-4 w-4 text-orange-600" />
+                      <div>
+                        <div className="font-medium">Post-match only</div>
+                        <div className="text-xs text-muted-foreground">Only visible after client selects you</div>
+                      </div>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </CardContent>
+          </Card>
+        </>
       )}
     </div>
   );
