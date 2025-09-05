@@ -45,7 +45,7 @@ import {
   Eye,
   Heart,
   Plus,
-  DollarSign,
+  Coins,
   Package,
   Target,
   FileText,
@@ -62,7 +62,9 @@ import {
   UserSearch,
   Goal,
   Calendar,
-  ExternalLink
+  ExternalLink,
+  Menu,
+  X
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -70,6 +72,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 import { PaymentStatementView } from "@/components/payment-statements/PaymentStatementView";
 import { MembershipSettings } from "@/components/payment-statements/MembershipSettings";
@@ -83,6 +86,7 @@ const TrainerDashboard = () => {
   const { waitlistEntries } = useWaitlist();
   const { settings: availabilitySettings, loading: availabilityLoading } = useCoachAvailability();
   const { packages, loading: packagesLoading } = usePaymentStatements();
+  const isMobile = useIsMobile();
   
   console.log('🔥 TrainerDashboard: Payment packages:', packages?.length || 0, 'loading:', packagesLoading);
   const navigate = useNavigate();
@@ -90,6 +94,7 @@ const TrainerDashboard = () => {
   const [prospectsCount, setProspectsCount] = useState(0);
   const [activeClientsCount, setActiveClientsCount] = useState(0);
   const [activeView, setActiveView] = useState('dashboard');
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   // Remove unused state
   // const [showProspectsDropdown, setShowProspectsDropdown] = useState(false);
 
@@ -279,9 +284,6 @@ const TrainerDashboard = () => {
     );
   }
 
-  const profileCompletion = calculateProfileCompletion();
-  const isProfileComplete = profileCompletion === 100;
-
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -293,20 +295,6 @@ const TrainerDashboard = () => {
             
             {/* Status indicators */}
             <div className="flex flex-wrap items-center gap-2 text-sm">
-              {/* Profile Status */}
-              <div className="flex items-center gap-2 flex-shrink-0">
-                {isProfileComplete ? (
-                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                ) : (
-                  <div className="w-3 h-3 bg-amber-500 rounded-full animate-pulse"></div>
-                )}
-                <span className="font-medium">
-                  {isProfileComplete ? 'Profile Complete' : `${profileCompletion}% Complete`}
-                </span>
-              </div>
-              
-              <Separator orientation="vertical" className="h-4 hidden sm:inline" />
-              
               {/* Availability Status */}
               <div className="flex items-center gap-2 flex-shrink-0">
                 {availabilityStatus === 'accepting' && (
@@ -329,10 +317,10 @@ const TrainerDashboard = () => {
                 )}
               </div>
                
-              <Separator orientation="vertical" className="h-4 hidden sm:inline" />
+              <Separator orientation="vertical" className="h-4 hidden md:inline" />
               
               {/* Next Billing */}
-              <div className="flex items-center gap-2 flex-shrink-0 hidden sm:flex">
+              <div className="flex items-center gap-2 flex-shrink-0 hidden md:flex">
                 <CreditCard className="w-3 h-3 text-muted-foreground" />
                 <span className="text-muted-foreground">Next Billing: Sep 1</span>
               </div>
@@ -374,29 +362,114 @@ const TrainerDashboard = () => {
 
         {/* Bottom Row - Navigation Menu */}
         <div className="px-4 pb-4">
-          <nav className="flex items-center gap-1 overflow-x-auto scrollbar-hide">
-            <Button
-              variant={activeView === 'dashboard' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setActiveView('dashboard')}
-              className="flex items-center gap-2 flex-shrink-0"
-            >
-              <Home className="w-4 h-4" />
-              <span className="hidden sm:inline">Dashboard</span>
-            </Button>
-            
-            <Button
-              variant={activeView === 'clients' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setActiveView('clients')}
-              className="flex items-center gap-2 flex-shrink-0"
-            >
-              <Users className="w-4 h-4" />
-              <span className="hidden sm:inline">Clients ({activeClientsCount})</span>
-              <span className="sm:hidden">({activeClientsCount})</span>
-            </Button>
-            
-            <Button
+          {isMobile ? (
+            <div className="relative">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowMobileMenu(!showMobileMenu)}
+                className="flex items-center gap-2 w-full justify-between"
+              >
+                <span className="flex items-center gap-2">
+                  {activeView === 'dashboard' && <Home className="w-4 h-4" />}
+                  {activeView === 'clients' && <Users className="w-4 h-4" />}
+                  {activeView === 'all-prospects' && <UserSearch className="w-4 h-4" />}
+                  {activeView === 'templates' && <CheckCircle className="w-4 h-4" />}
+                  {activeView === 'goals' && <Goal className="w-4 h-4" />}
+                  {activeView === 'payments' && <CreditCard className="w-4 h-4" />}
+                  {activeView === 'dashboard' && 'Dashboard'}
+                  {activeView === 'clients' && `Clients (${activeClientsCount})`}
+                  {activeView === 'all-prospects' && `Prospects (${prospectsCount + (waitlistEntries?.length || 0)})`}
+                  {activeView === 'templates' && 'Templates'}
+                  {activeView === 'goals' && 'Goals'}
+                  {activeView === 'payments' && 'Payments'}
+                </span>
+                {showMobileMenu ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+              </Button>
+              
+              {showMobileMenu && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-background border rounded-lg shadow-lg z-50">
+                  <Button
+                    variant={activeView === 'dashboard' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => {setActiveView('dashboard'); setShowMobileMenu(false);}}
+                    className="flex items-center gap-2 w-full justify-start"
+                  >
+                    <Home className="w-4 h-4" />
+                    Dashboard
+                  </Button>
+                  <Button
+                    variant={activeView === 'clients' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => {setActiveView('clients'); setShowMobileMenu(false);}}
+                    className="flex items-center gap-2 w-full justify-start"
+                  >
+                    <Users className="w-4 h-4" />
+                    Clients ({activeClientsCount})
+                  </Button>
+                  <Button
+                    variant={activeView === 'all-prospects' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => {setActiveView('all-prospects'); setShowMobileMenu(false);}}
+                    className="flex items-center gap-2 w-full justify-start"
+                  >
+                    <UserSearch className="w-4 h-4" />
+                    Prospects ({prospectsCount + (waitlistEntries?.length || 0)})
+                  </Button>
+                  <Button
+                    variant={activeView === 'templates' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => {setActiveView('templates'); setShowMobileMenu(false);}}
+                    className="flex items-center gap-2 w-full justify-start"
+                  >
+                    <CheckCircle className="w-4 h-4" />
+                    Templates
+                  </Button>
+                  <Button
+                    variant={activeView === 'goals' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => {setActiveView('goals'); setShowMobileMenu(false);}}
+                    className="flex items-center gap-2 w-full justify-start"
+                  >
+                    <Goal className="w-4 h-4" />
+                    Goals
+                  </Button>
+                  <Button
+                    variant={activeView === 'payments' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => {setActiveView('payments'); setShowMobileMenu(false);}}
+                    className="flex items-center gap-2 w-full justify-start"
+                  >
+                    <CreditCard className="w-4 h-4" />
+                    Payments
+                  </Button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <nav className="flex items-center gap-1 overflow-x-auto scrollbar-hide">
+              <Button
+                variant={activeView === 'dashboard' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setActiveView('dashboard')}
+                className="flex items-center gap-2 flex-shrink-0"
+              >
+                <Home className="w-4 h-4" />
+                <span className="hidden sm:inline">Dashboard</span>
+              </Button>
+              
+              <Button
+                variant={activeView === 'clients' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setActiveView('clients')}
+                className="flex items-center gap-2 flex-shrink-0"
+              >
+                <Users className="w-4 h-4" />
+                <span className="hidden sm:inline">Clients ({activeClientsCount})</span>
+                <span className="sm:hidden">({activeClientsCount})</span>
+              </Button>
+              
+              <Button
               variant={activeView === 'all-prospects' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setActiveView('all-prospects')}
@@ -429,16 +502,18 @@ const TrainerDashboard = () => {
             <span className="sm:hidden">Goals</span>
           </Button>
           
-          <Button
-            variant={activeView === 'payments' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setActiveView('payments')}
-            className="flex items-center gap-2 flex-shrink-0"
-          >
-            <CreditCard className="w-4 h-4" />
-            Payment & Payouts
-          </Button>
-          </nav>
+              <Button
+                variant={activeView === 'payments' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setActiveView('payments')}
+                className="flex items-center gap-2 flex-shrink-0"
+              >
+                <CreditCard className="w-4 h-4" />
+                <span className="hidden lg:inline">Payment & Payouts</span>
+                <span className="lg:hidden">Payments</span>
+              </Button>
+            </nav>
+          )}
         </div>
       </div>
 
@@ -473,7 +548,7 @@ const TrainerDashboard = () => {
                     variant="default"
                     onClick={() => setActiveView('payments')}
                   >
-                    <DollarSign className="h-4 w-4" />
+                    <Coins className="h-4 w-4" />
                     Payment Statements
                   </Button>
                   <Button 
@@ -505,17 +580,21 @@ const TrainerDashboard = () => {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                   <div className="text-center p-4 rounded-lg bg-blue-50 border border-blue-200">
                     <div className="text-3xl font-bold text-blue-600 mb-2">
-                      {analyticsLoading ? '...' : analytics?.total_views || 256}
+                      {analyticsLoading ? '...' : analytics?.total_views || '--'}
                     </div>
                     <p className="text-sm font-medium text-blue-800">Profile Views</p>
-                    <p className="text-xs text-blue-600 mt-1">+12 this week</p>
+                    <p className="text-xs text-blue-600 mt-1">
+                      {analytics?.total_views ? '+12 this week' : 'No data yet'}
+                    </p>
                   </div>
                   <div className="text-center p-4 rounded-lg bg-red-50 border border-red-200">
                     <div className="text-3xl font-bold text-red-600 mb-2">
-                      {analyticsLoading ? '...' : analytics?.total_likes || 42}
+                      {analyticsLoading ? '...' : analytics?.total_likes || '--'}
                     </div>
                     <p className="text-sm font-medium text-red-800">Likes</p>
-                    <p className="text-xs text-red-600 mt-1">+5 this week</p>
+                    <p className="text-xs text-red-600 mt-1">
+                      {analytics?.total_likes ? '+5 this week' : 'No data yet'}
+                    </p>
                   </div>
                   <div className="text-center p-4 rounded-lg bg-yellow-50 border border-yellow-200">
                     <div className="text-3xl font-bold text-yellow-600 mb-2">
@@ -526,10 +605,13 @@ const TrainerDashboard = () => {
                   </div>
                   <div className="text-center p-4 rounded-lg bg-green-50 border border-green-200">
                     <div className="text-3xl font-bold text-green-600 mb-2">
-                      {analyticsLoading ? '...' : `${analytics?.conversion_rate?.toFixed(1) || 7.2}%`}
+                      {analyticsLoading ? '...' : 
+                        analytics?.conversion_rate ? `${analytics.conversion_rate.toFixed(1)}%` : '--'}
                     </div>
                     <p className="text-sm font-medium text-green-800">Conversion Rate</p>
-                    <p className="text-xs text-green-600 mt-1">+1.3% this week</p>
+                    <p className="text-xs text-green-600 mt-1">
+                      {analytics?.conversion_rate ? '+1.3% this week' : 'No data yet'}
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -694,7 +776,7 @@ const TrainerDashboard = () => {
                     </div>
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Monthly Revenue</p>
-                      <p className="text-2xl font-bold">£2,450</p>
+                      <p className="text-2xl font-bold">--</p>
                     </div>
                   </div>
                 </CardContent>
@@ -704,11 +786,11 @@ const TrainerDashboard = () => {
                 <CardContent className="p-6">
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-lg bg-orange-50">
-                      <DollarSign className="h-5 w-5 text-orange-600" />
+                      <Coins className="h-5 w-5 text-orange-600" />
                     </div>
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Pending Payouts</p>
-                      <p className="text-2xl font-bold">£520</p>
+                      <p className="text-2xl font-bold">--</p>
                     </div>
                   </div>
                 </CardContent>
@@ -722,7 +804,7 @@ const TrainerDashboard = () => {
                     </div>
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Next Payout</p>
-                      <p className="text-2xl font-bold">Sep 1</p>
+                      <p className="text-2xl font-bold">--</p>
                     </div>
                   </div>
                 </CardContent>
