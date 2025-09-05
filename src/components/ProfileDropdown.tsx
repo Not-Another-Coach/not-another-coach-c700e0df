@@ -150,7 +150,7 @@ export const ProfileDropdown = ({ profile }: ProfileDropdownProps) => {
         
         <DropdownMenuItem 
           className="cursor-pointer"
-          onClick={() => navigate(`/trainer/${user?.id || profile.first_name?.toLowerCase() || 'profile'}`)}
+          onClick={() => navigate(`/trainer/${user?.id || profile.first_name?.toLowerCase() || 'profile'}?from=dropdown`)}
         >
           <User className="mr-2 h-4 w-4" />
           <span>View Public Profile</span>

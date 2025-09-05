@@ -16,7 +16,7 @@ import { useProfileStepValidation } from "@/hooks/useProfileStepValidation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, Save, Eye, CheckCircle, AlertCircle, Shield, Check } from "lucide-react";
+import { ArrowLeft, ArrowRight, Save, Eye, ExternalLink, CheckCircle, AlertCircle, Shield, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   AlertDialog,
@@ -853,6 +853,18 @@ const TrainerProfileSetup = () => {
               <Eye className="h-4 w-4 mr-2" />
               Preview
             </Button>
+            {profile?.profile_published && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => navigate(`/trainer/${profile?.id}?from=profile-setup`)}
+                className="flex-1 sm:flex-none"
+              >
+                <ExternalLink className="h-4 w-4 mr-2" />
+                <span className="hidden xs:inline">View Live</span>
+                <span className="xs:hidden">Live</span>
+              </Button>
+            )}
           </div>
         </div>
       </div>

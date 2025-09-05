@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -19,6 +19,8 @@ export const TrainerProfile = () => {
   const { trainerId } = useParams<{ trainerId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const fromSource = searchParams.get('from');
   
   const includeOwnUnpublished = useMemo(() => 
     user?.id ? { userId: user.id } : undefined, 
@@ -29,6 +31,24 @@ export const TrainerProfile = () => {
   const [isMessagingOpen, setIsMessagingOpen] = useState(false);
   const [currentView, setCurrentView] = useState<ProfileViewMode>('overview');
   const isMobile = useIsMobile();
+
+  const handleBackNavigation = () => {
+    // Handle context-aware navigation based on where user came from
+    if (fromSource === 'dropdown') {
+      // Came from "View Public Profile" in dropdown - go to dashboard
+      if (user?.id === trainerId) {
+        navigate('/trainer/dashboard');
+      } else {
+        navigate(-1); // For viewing other trainer's profile
+      }
+    } else if (fromSource === 'profile-setup') {
+      // Came from profile settings - go back to profile setup
+      navigate('/trainer/profile-setup');
+    } else {
+      // Default: use browser history
+      navigate(-1);
+    }
+  };
 
   const trainer = trainers.find(t => t.id === trainerId);
   const isOwnProfile = user?.id === trainerId;
@@ -121,7 +141,7 @@ export const TrainerProfile = () => {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => navigate(-1)}
+          onClick={handleBackNavigation}
           className="flex items-center gap-2"
         >
           <ArrowLeft className="w-4 h-4" />
