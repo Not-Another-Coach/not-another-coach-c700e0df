@@ -39,13 +39,11 @@ export function WorkingHoursSection({ formData, updateFormData }: WorkingHoursSe
   
   // Initialize availability state from coach availability settings
   const [availability, setAvailability] = useState<Record<string, TimeSlot[]>>({});
-  const [daysOff, setDaysOff] = useState<Record<string, boolean>>({});
 
   // Initialize availability from coach availability settings
   useEffect(() => {
     if (settings?.availability_schedule) {
       const grouped: Record<string, TimeSlot[]> = {};
-      const dayOffStatus: Record<string, boolean> = {};
       
       Object.entries(settings.availability_schedule).forEach(([day, daySchedule]) => {
         grouped[day] = daySchedule.slots.map((slot, index) => ({
@@ -54,12 +52,9 @@ export function WorkingHoursSection({ formData, updateFormData }: WorkingHoursSe
           startTime: slot.start,
           endTime: slot.end
         }));
-        // If a day is explicitly disabled and has no slots, it's a day off
-        dayOffStatus[day] = daySchedule.enabled === false && daySchedule.slots.length === 0;
       });
       
       setAvailability(grouped);
-      setDaysOff(dayOffStatus);
     }
   }, [settings?.availability_schedule]);
 
@@ -70,11 +65,10 @@ export function WorkingHoursSection({ formData, updateFormData }: WorkingHoursSe
     // Update coach availability settings
     if (settings) {
       const newSchedule = { ...settings.availability_schedule };
-      const isDayOff = daysOff[day] || false;
       
       newSchedule[day] = {
-        enabled: !isDayOff && slots.length > 0,
-        slots: isDayOff ? [] : slots.map(slot => ({
+        enabled: slots.length > 0,
+        slots: slots.map(slot => ({
           start: slot.startTime,
           end: slot.endTime
         }))
@@ -84,38 +78,6 @@ export function WorkingHoursSection({ formData, updateFormData }: WorkingHoursSe
     }
   };
 
-  const toggleDayOff = async (day: string, isDayOff: boolean) => {
-    const newDaysOff = { ...daysOff, [day]: isDayOff };
-    setDaysOff(newDaysOff);
-    
-    // Update coach availability settings
-    if (settings) {
-      const newSchedule = { ...settings.availability_schedule };
-      
-      if (isDayOff) {
-        // If marking as day off, clear time slots and disable
-        const newAvailability = { ...availability, [day]: [] };
-        setAvailability(newAvailability);
-        
-        newSchedule[day] = {
-          enabled: false,
-          slots: []
-        };
-      } else {
-        // If unmarking day off, enable the day but keep existing slots
-        const currentSlots = availability[day] || [];
-        newSchedule[day] = {
-          enabled: currentSlots.length > 0,
-          slots: currentSlots.map(slot => ({
-            start: slot.startTime,
-            end: slot.endTime
-          }))
-        };
-      }
-      
-      await updateSettings({ availability_schedule: newSchedule });
-    }
-  };
 
   // Helper function to check if two time slots overlap
   const doSlotsOverlap = (slot1: { startTime: string; endTime: string }, slot2: { startTime: string; endTime: string }) => {
@@ -331,59 +293,33 @@ export function WorkingHoursSection({ formData, updateFormData }: WorkingHoursSe
             {daysOfWeek.map((day) => {
               const daySlots = availability[day] || [];
               const dayName = day.charAt(0).toUpperCase() + day.slice(1);
-              const isDayOff = daysOff[day] || false;
               
               return (
-                <div key={day} className={`border rounded-lg p-4 ${isDayOff ? 'bg-muted/50' : ''}`}>
+                <div key={day} className="border rounded-lg p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-2">
-                        <Checkbox
-                          id={`dayoff-${day}`}
-                          checked={isDayOff}
-                          onCheckedChange={(checked) => toggleDayOff(day, !!checked)}
-                          disabled={saving}
-                        />
-                        <Label 
-                          htmlFor={`dayoff-${day}`} 
-                          className="text-sm text-muted-foreground cursor-pointer"
-                        >
-                          Day off
-                        </Label>
-                      </div>
-                      <h4 className={`font-medium ${isDayOff ? 'text-muted-foreground line-through' : ''}`}>
+                      <h4 className="font-medium">
                         {dayName}
                       </h4>
-                      {!isDayOff && daySlots.length > 0 && (
+                      {daySlots.length > 0 && (
                         <Badge variant="secondary" className="text-xs">
                           {daySlots.length} slot{daySlots.length !== 1 ? 's' : ''}
                         </Badge>
                       )}
-                      {isDayOff && (
-                        <Badge variant="outline" className="text-xs">
-                          Not working
-                        </Badge>
-                      )}
                     </div>
-                    {!isDayOff && (
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={() => addTimeSlot(day)}
-                        disabled={saving}
-                      >
-                        <Plus className="w-4 h-4 mr-1" />
-                        Add Slot
-                      </Button>
-                    )}
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => addTimeSlot(day)}
+                      disabled={saving}
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      Add Slot
+                    </Button>
                   </div>
                   
-                  {isDayOff ? (
-                    <p className="text-sm text-muted-foreground italic">
-                      This day is marked as a day off
-                    </p>
-                  ) : daySlots.length === 0 ? (
+                  {daySlots.length === 0 ? (
                     <p className="text-sm text-muted-foreground">
                       No availability set for this day
                     </p>
