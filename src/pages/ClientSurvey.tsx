@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, Save, CheckCircle, AlertCircle, Target, MapPin, Calendar, Users, User, Package, DollarSign, Clock } from "lucide-react";
+import { ArrowLeft, ArrowRight, Save, CheckCircle, AlertCircle, Target, MapPin, Calendar, Users, User, Heart, Package, DollarSign, Clock } from "lucide-react";
 
 // Import survey sections
 import { GoalsSection } from "@/components/client-survey/GoalsSection";
@@ -16,6 +16,7 @@ import { TrainingLocationSection } from "@/components/client-survey/TrainingLoca
 import { SchedulingSection } from "@/components/client-survey/SchedulingSection";
 import { CoachingStyleSection } from "@/components/client-survey/CoachingStyleSection";
 import { PersonalitySection } from "@/components/client-survey/PersonalitySection";
+import { LifestyleHealthSection } from "@/components/client-survey/LifestyleHealthSection";
 import { PackagePreferencesSection } from "@/components/client-survey/PackagePreferencesSection";
 import { BudgetSection } from "@/components/client-survey/BudgetSection";
 import { AvailabilitySection } from "@/components/client-survey/AvailabilitySection";
@@ -54,6 +55,15 @@ const ClientSurvey = () => {
     client_personality_type: [] as string[],
     experience_level: "beginner" as string,
     
+    // Lifestyle and health
+    location: null as string | null,
+    fitness_equipment_access: null as string | null,
+    lifestyle_description: [] as string[],
+    lifestyle_other: null as string | null,
+    health_conditions: null as string | null,
+    has_specific_event: null as string | null,
+    specific_event_details: null as string | null,
+    
     // Package and budget preferences
     preferred_package_type: null as string | null,
     budget_range_min: null as number | null,
@@ -68,7 +78,7 @@ const ClientSurvey = () => {
     client_survey_completed: false,
   });
 
-  const totalSteps = 8;
+  const totalSteps = 9;
 
   const stepTitles = [
     "Your Goals",
@@ -76,6 +86,7 @@ const ClientSurvey = () => {
     "Scheduling Preferences", 
     "Coaching Style",
     "About You",
+    "Lifestyle & Health",
     "Package Preferences",
     "Budget Range",
     "Availability & Start Date"
@@ -87,6 +98,7 @@ const ClientSurvey = () => {
     Calendar,      // Scheduling Preferences
     Users,         // Coaching Style
     User,          // About You
+    Heart,         // Lifestyle & Health
     Package,       // Package Preferences
     DollarSign,    // Budget Range
     Clock          // Availability & Start Date
@@ -132,6 +144,13 @@ const ClientSurvey = () => {
         motivation_factors: profile.motivation_factors || [],
         client_personality_type: profile.client_personality_type || [],
         experience_level: profile.experience_level || "beginner",
+        location: (profile as any).location || null,
+        fitness_equipment_access: (profile as any).fitness_equipment_access || null,
+        lifestyle_description: (profile as any).lifestyle_description || [],
+        lifestyle_other: (profile as any).lifestyle_other || null,
+        health_conditions: (profile as any).health_conditions || null,
+        has_specific_event: (profile as any).has_specific_event || null,
+        specific_event_details: (profile as any).specific_event_details || null,
         preferred_package_type: profile.preferred_package_type || null,
         budget_range_min: profile.budget_range_min,
         budget_range_max: profile.budget_range_max,
@@ -192,18 +211,32 @@ const ClientSurvey = () => {
           newErrors.client_personality_type = "Please select at least one that describes you";
         }
         break;
-      case 6: // Package Preferences
+      case 6: // Lifestyle & Health
+        if (!formData.location || formData.location.trim() === "") {
+          newErrors.location = "Please tell us where you're based";
+        }
+        if (!formData.fitness_equipment_access) {
+          newErrors.fitness_equipment_access = "Please select your equipment access";
+        }
+        if (!formData.lifestyle_description || formData.lifestyle_description.length === 0) {
+          newErrors.lifestyle_description = "Please select at least one lifestyle option";
+        }
+        if (!formData.has_specific_event) {
+          newErrors.has_specific_event = "Please let us know about any specific events or dates";
+        }
+        break;
+      case 7: // Package Preferences
         if (!formData.preferred_package_type) {
           newErrors.preferred_package_type = "Please select your package preference";
         }
         break;
-      case 7: // Budget
+      case 8: // Budget
         // Budget is now mandatory - either quick range or custom range required
         if (!formData.budget_range_min && !formData.budget_range_max) {
           newErrors.budget_range = "Please select a budget range or set custom min/max values";
         }
         break;
-      case 8: // Availability
+      case 9: // Availability
         if (formData.waitlist_preference === null) {
           newErrors.waitlist_preference = "Please select how you'd prefer to handle trainer availability";
         }
@@ -228,12 +261,22 @@ const ClientSurvey = () => {
         return formData.preferred_coaching_style?.length > 0 ? 'completed' : 'not_started';
       case 5:
         return formData.client_personality_type?.length > 0 ? 'completed' : 'not_started';
-      case 6:
-        return formData.preferred_package_type ? 'completed' : 'not_started';
+      case 6: // Lifestyle & Health
+        const hasLocation = formData.location && formData.location.trim() !== "";
+        const hasEquipment = formData.fitness_equipment_access;
+        const hasLifestyle = formData.lifestyle_description?.length > 0;
+        const hasEventChoice = formData.has_specific_event;
+        
+        const lifestyleCompletedFields = [hasLocation, hasEquipment, hasLifestyle, hasEventChoice].filter(Boolean).length;
+        if (lifestyleCompletedFields === 4) return 'completed';
+        if (lifestyleCompletedFields > 0) return 'partial';
+        return 'not_started';
       case 7:
+        return formData.preferred_package_type ? 'completed' : 'not_started';
+      case 8:
         // Budget is mandatory - either min or max must be set
         return (formData.budget_range_min || formData.budget_range_max) ? 'completed' : 'not_started';
-      case 8:
+      case 9:
         return formData.waitlist_preference !== null ? 'completed' : 'not_started';
       default:
         return 'not_started';
@@ -365,10 +408,12 @@ const ClientSurvey = () => {
       case 5:
         return <PersonalitySection {...commonProps} />;
       case 6:
-        return <PackagePreferencesSection {...commonProps} />;
+        return <LifestyleHealthSection {...commonProps} />;
       case 7:
-        return <BudgetSection {...commonProps} />;
+        return <PackagePreferencesSection {...commonProps} />;
       case 8:
+        return <BudgetSection {...commonProps} />;
+      case 9:
         return <AvailabilitySection {...commonProps} />;
       default:
         return null;
