@@ -9,6 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useTrainerOnboarding, OnboardingTemplate, ClientOnboardingData } from '@/hooks/useTrainerOnboarding';
@@ -371,52 +373,79 @@ export function TemplateManagementTabs() {
     : ['templates', 'assignment', 'activities', 'advanced']; // Trainers see these tabs
 
   return (
-    <Tabs defaultValue={visibleTabs[0]} className="space-y-4">
-      <div className="flex flex-col space-y-4">
-        <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-3' : 'grid-cols-2 sm:grid-cols-4'}`}>
-          {visibleTabs.includes('templates') && (
-            <TabsTrigger value="templates" className="flex items-center gap-1 text-xs sm:text-sm">
-              <Settings className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Templates</span>
-              <span className="sm:hidden">Tmpl</span>
-            </TabsTrigger>
-          )}
-          {visibleTabs.includes('assignment') && (
-            <TabsTrigger value="assignment" className="flex items-center gap-1 text-xs sm:text-sm">
-              <Users className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Assignment</span>
-              <span className="sm:hidden">Assign</span>
-            </TabsTrigger>
-          )}
-          {visibleTabs.includes('activities') && (
-            <TabsTrigger value="activities" className="flex items-center gap-1 text-xs sm:text-sm">
-              <User className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Activities</span>
-              <span className="sm:hidden">Act</span>
-            </TabsTrigger>
-          )}
-          {visibleTabs.includes('categories') && (
-            <TabsTrigger value="categories" className="flex items-center gap-1 text-xs sm:text-sm">
-              <Settings className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Categories</span>
-              <span className="sm:hidden">Cat</span>
-            </TabsTrigger>
-          )}
-          {visibleTabs.includes('sections') && (
-            <TabsTrigger value="sections" className="flex items-center gap-1 text-xs sm:text-sm">
-              <Settings className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Template Sections</span>
-              <span className="sm:hidden">Sect</span>
-            </TabsTrigger>
-          )}
-          {visibleTabs.includes('advanced') && (
-            <TabsTrigger value="advanced" className="flex items-center gap-1 text-xs sm:text-sm">
-              <Settings className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Advanced</span>
-              <span className="sm:hidden">Adv</span>
-            </TabsTrigger>
-          )}
-        </TabsList>
+    <TooltipProvider>
+      <Tabs defaultValue={visibleTabs[0]} className="space-y-4">
+        <div className="flex flex-col space-y-4">
+          <ScrollArea className="w-full">
+            <TabsList className="inline-flex h-10 items-center justify-start rounded-md bg-muted p-1 text-muted-foreground min-w-max">
+              {visibleTabs.includes('templates') && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <TabsTrigger value="templates" className="flex items-center gap-1 px-2 sm:px-3 py-1.5 text-xs sm:text-sm whitespace-nowrap">
+                      <Settings className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                      <span className="hidden xs:inline sm:inline">Templates</span>
+                    </TabsTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent>Templates</TooltipContent>
+                </Tooltip>
+              )}
+              {visibleTabs.includes('assignment') && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <TabsTrigger value="assignment" className="flex items-center gap-1 px-2 sm:px-3 py-1.5 text-xs sm:text-sm whitespace-nowrap">
+                      <Users className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                      <span className="hidden xs:inline sm:inline">Assignment</span>
+                    </TabsTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent>Assignment</TooltipContent>
+                </Tooltip>
+              )}
+              {visibleTabs.includes('activities') && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <TabsTrigger value="activities" className="flex items-center gap-1 px-2 sm:px-3 py-1.5 text-xs sm:text-sm whitespace-nowrap">
+                      <User className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                      <span className="hidden xs:inline sm:inline">Activities</span>
+                    </TabsTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent>Activities</TooltipContent>
+                </Tooltip>
+              )}
+              {visibleTabs.includes('categories') && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <TabsTrigger value="categories" className="flex items-center gap-1 px-2 sm:px-3 py-1.5 text-xs sm:text-sm whitespace-nowrap">
+                      <Settings className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                      <span className="hidden xs:inline sm:inline">Categories</span>
+                    </TabsTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent>Categories</TooltipContent>
+                </Tooltip>
+              )}
+              {visibleTabs.includes('sections') && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <TabsTrigger value="sections" className="flex items-center gap-1 px-2 sm:px-3 py-1.5 text-xs sm:text-sm whitespace-nowrap">
+                      <Settings className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                      <span className="hidden xs:inline sm:inline">Sections</span>
+                    </TabsTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent>Template Sections</TooltipContent>
+                </Tooltip>
+              )}
+              {visibleTabs.includes('advanced') && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <TabsTrigger value="advanced" className="flex items-center gap-1 px-2 sm:px-3 py-1.5 text-xs sm:text-sm whitespace-nowrap">
+                      <Settings className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                      <span className="hidden xs:inline sm:inline">Advanced</span>
+                    </TabsTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent>Advanced</TooltipContent>
+                </Tooltip>
+              )}
+            </TabsList>
+          </ScrollArea>
 
       <TabsContent value="activities" className="space-y-4">
         {/* Header with Create Button */}
@@ -753,5 +782,6 @@ export function TemplateManagementTabs() {
       </TabsContent>
       </div>
     </Tabs>
+    </TooltipProvider>
   );
 }
