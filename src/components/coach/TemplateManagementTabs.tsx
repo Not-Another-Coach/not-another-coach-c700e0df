@@ -373,41 +373,47 @@ export function TemplateManagementTabs() {
   return (
     <Tabs defaultValue={visibleTabs[0]} className="space-y-4">
       <div className="flex flex-col space-y-4">
-        <TabsList className={`grid w-full max-w-2xl ${isAdmin ? 'grid-cols-3' : 'grid-cols-4'}`}>
+        <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-3' : 'grid-cols-2 sm:grid-cols-4'}`}>
           {visibleTabs.includes('templates') && (
-            <TabsTrigger value="templates" className="flex items-center gap-2">
-              <Settings className="h-4 w-4" />
-              Templates
+            <TabsTrigger value="templates" className="flex items-center gap-1 text-xs sm:text-sm">
+              <Settings className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Templates</span>
+              <span className="sm:hidden">Tmpl</span>
             </TabsTrigger>
           )}
           {visibleTabs.includes('assignment') && (
-            <TabsTrigger value="assignment" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Assignment
+            <TabsTrigger value="assignment" className="flex items-center gap-1 text-xs sm:text-sm">
+              <Users className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Assignment</span>
+              <span className="sm:hidden">Assign</span>
             </TabsTrigger>
           )}
           {visibleTabs.includes('activities') && (
-            <TabsTrigger value="activities" className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              Activities
+            <TabsTrigger value="activities" className="flex items-center gap-1 text-xs sm:text-sm">
+              <User className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Activities</span>
+              <span className="sm:hidden">Act</span>
             </TabsTrigger>
           )}
           {visibleTabs.includes('categories') && (
-            <TabsTrigger value="categories" className="flex items-center gap-2">
-              <Settings className="h-4 w-4" />
-              Categories
+            <TabsTrigger value="categories" className="flex items-center gap-1 text-xs sm:text-sm">
+              <Settings className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Categories</span>
+              <span className="sm:hidden">Cat</span>
             </TabsTrigger>
           )}
           {visibleTabs.includes('sections') && (
-            <TabsTrigger value="sections" className="flex items-center gap-2">
-              <Settings className="h-4 w-4" />
-              Template Sections
+            <TabsTrigger value="sections" className="flex items-center gap-1 text-xs sm:text-sm">
+              <Settings className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Template Sections</span>
+              <span className="sm:hidden">Sect</span>
             </TabsTrigger>
           )}
           {visibleTabs.includes('advanced') && (
-            <TabsTrigger value="advanced" className="flex items-center gap-2">
-              <Settings className="h-4 w-4" />
-              Advanced
+            <TabsTrigger value="advanced" className="flex items-center gap-1 text-xs sm:text-sm">
+              <Settings className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Advanced</span>
+              <span className="sm:hidden">Adv</span>
             </TabsTrigger>
           )}
         </TabsList>
