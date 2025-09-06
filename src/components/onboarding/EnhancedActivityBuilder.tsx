@@ -97,11 +97,16 @@ export const EnhancedActivityBuilder = ({
 
   // Update form data whenever activity prop changes
   useEffect(() => {
+    // Initialize with first available category if none selected and not editing
+    const defaultCategory = !activity?.ways_of_working_category && waysOfWorkingCategories.length > 0 
+      ? waysOfWorkingCategories[0] 
+      : (activity?.ways_of_working_category || '');
+      
     setFormData({
       activity_name: activity?.activity_name || '',
       description: activity?.description || '',
       category: activity?.category || (systemActivityCategories[0] || 'general'),
-      ways_of_working_category: activity?.ways_of_working_category || '',
+      ways_of_working_category: defaultCategory,
       activity_type: activity?.activity_type || 'task',
       completion_method: activity?.completion_method || 'client',
       requires_file_upload: activity?.requires_file_upload || false,
@@ -119,23 +124,33 @@ export const EnhancedActivityBuilder = ({
         max_file_size_mb: 10
       }
     });
-  }, [activity, isOpen, systemActivityCategories]);
+  }, [activity, isOpen, systemActivityCategories, waysOfWorkingCategories]);
 
   const handleSave = () => {
     if (!formData.activity_name?.trim()) return;
+    if (!formData.ways_of_working_category?.trim()) {
+      console.error('Ways of Working Category is required');
+      return;
+    }
     
-    // Clean up ways_of_working_category if empty
     const dataToSave = {
       ...formData,
-      ways_of_working_category: formData.ways_of_working_category || null
+      // Ensure ways_of_working_category is preserved
+      ways_of_working_category: formData.ways_of_working_category
     };
     
+    console.log('Saving activity with data:', dataToSave);
     onSave(dataToSave);
     onClose();
   };
 
   const updateFormData = (field: keyof EnhancedActivity, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    console.log(`Updating ${field} to:`, value);
+    setFormData(prev => {
+      const newData = { ...prev, [field]: value };
+      console.log('New form data:', newData);
+      return newData;
+    });
   };
 
   const handleConfigChange = (config: any) => {
@@ -255,14 +270,13 @@ export const EnhancedActivityBuilder = ({
 
               {/* Ways of Working Category */}
               <div className="space-y-2">
-                <Label htmlFor="ways-of-working-category">Ways of Working Category (Optional)</Label>
+                <Label htmlFor="ways-of-working-category">Ways of Working Category *</Label>
                 <Select
-                  value={formData.ways_of_working_category || 'none'}
+                  value={formData.ways_of_working_category || ''}
                   onValueChange={(value) => {
                     console.log('Selected ways of working category:', value);
-                    const newValue = value === 'none' ? null : value;
-                    console.log('Setting ways_of_working_category to:', newValue);
-                    updateFormData('ways_of_working_category', newValue);
+                    console.log('Current formData before update:', formData);
+                    updateFormData('ways_of_working_category', value);
                   }}
                   disabled={categoriesLoading}
                 >
@@ -270,9 +284,6 @@ export const EnhancedActivityBuilder = ({
                     <SelectValue placeholder={categoriesLoading ? "Loading categories..." : "Select ways of working category"} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">
-                      <span className="text-muted-foreground">None - Don't map to profile section</span>
-                    </SelectItem>
                     {waysOfWorkingCategories.map(category => {
                       const info = getWaysOfWorkingCategoryInfo(category);
                       return (
@@ -354,12 +365,12 @@ export const EnhancedActivityBuilder = ({
                     </div>
                   </div>
                 ) : (
-                  <div className="mt-2 p-3 border rounded-lg bg-muted/10 border-muted">
+                  <div className="mt-2 p-3 border rounded-lg bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800">
                     <div className="flex items-start gap-2">
-                      <Info className="w-4 h-4 mt-0.5 text-muted-foreground" />
-                      <div className="text-sm text-muted-foreground">
-                        <div className="font-medium">No Ways of Working Mapping</div>
-                        <div>This activity won't appear in trainer profile sections, but will be available for template building.</div>
+                      <AlertTriangle className="w-4 h-4 mt-0.5 text-amber-600" />
+                      <div className="text-sm text-amber-800 dark:text-amber-200">
+                        <div className="font-medium">Ways of Working Category Required</div>
+                        <div>Please select a category to map this activity to a profile section.</div>
                       </div>
                     </div>
                   </div>
