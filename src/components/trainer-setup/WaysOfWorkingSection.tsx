@@ -98,6 +98,7 @@ export default function WaysOfWorkingSection({ formData, updateFormData, errors 
     
     // Get activity suggestions directly by profile section
     const sectionSuggestions = getSuggestionsByProfileSection(section).sort();
+    console.log(`Section ${section} suggestions:`, sectionSuggestions);
 
     return (
       <Card key={section} className="space-y-4">
