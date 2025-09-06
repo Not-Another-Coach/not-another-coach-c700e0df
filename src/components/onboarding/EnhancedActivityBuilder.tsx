@@ -66,7 +66,29 @@ export const EnhancedActivityBuilder = ({
   // Get trainer profile data
   const { profile: trainerProfile } = useTrainerProfile();
   
+  // Extract categories from profile text content
+  const extractCategoriesFromText = (text: string | null): string[] => {
+    if (!text) return [];
+    // Look for category-like patterns in the text
+    const matches = text.match(/(?:^|\n)[-•*]\s*([^:\n]+)/gm) || [];
+    return matches.map(match => match.replace(/^[-•*\s]+/, '').trim()).filter(Boolean);
+  };
+  
   // Get all ways of working categories from multiple sources
+  const profileCategories = [
+    // From array fields (if they exist)
+    ...(trainerProfile?.ways_of_working_onboarding || []),
+    ...(trainerProfile?.ways_of_working_first_week || []),
+    ...(trainerProfile?.ways_of_working_ongoing || []),
+    ...(trainerProfile?.ways_of_working_tracking || []),
+    ...(trainerProfile?.ways_of_working_expectations || []),
+    ...(trainerProfile?.ways_of_working_what_i_bring || []),
+    // From text fields (extract categories)
+    ...extractCategoriesFromText(trainerProfile?.wow_how_i_work),
+    ...extractCategoriesFromText(trainerProfile?.wow_what_i_provide),
+    ...extractCategoriesFromText(trainerProfile?.wow_client_expectations)
+  ];
+  
   const allWaysOfWorkingCategories = [
     // Categories from database (mapped)
     ...categories.map(c => c.activity_category),
@@ -74,13 +96,8 @@ export const EnhancedActivityBuilder = ({
     ...systemActivities
       .filter(a => a.ways_of_working_category)
       .map(a => a.ways_of_working_category),
-    // Categories from trainer profile sections
-    ...(trainerProfile?.ways_of_working_onboarding || []),
-    ...(trainerProfile?.ways_of_working_first_week || []),
-    ...(trainerProfile?.ways_of_working_ongoing || []),
-    ...(trainerProfile?.ways_of_working_tracking || []),
-    ...(trainerProfile?.ways_of_working_expectations || []),
-    ...(trainerProfile?.ways_of_working_what_i_bring || [])
+    // Categories from trainer profile
+    ...profileCategories
   ];
   
   const waysOfWorkingCategories = [...new Set(allWaysOfWorkingCategories)]
@@ -91,13 +108,21 @@ export const EnhancedActivityBuilder = ({
   console.log('Ways of Working Debug:', {
     mappedCategories: categories.map(c => c.activity_category),
     systemActivities: systemActivities.filter(a => a.ways_of_working_category).map(a => a.ways_of_working_category),
-    trainerProfileCategories: {
-      onboarding: trainerProfile?.ways_of_working_onboarding,
-      firstWeek: trainerProfile?.ways_of_working_first_week,
-      ongoing: trainerProfile?.ways_of_working_ongoing,
-      tracking: trainerProfile?.ways_of_working_tracking,
-      expectations: trainerProfile?.ways_of_working_expectations,
-      whatIBring: trainerProfile?.ways_of_working_what_i_bring
+    trainerProfileData: {
+      arrays: {
+        onboarding: trainerProfile?.ways_of_working_onboarding,
+        firstWeek: trainerProfile?.ways_of_working_first_week,
+        ongoing: trainerProfile?.ways_of_working_ongoing,
+        tracking: trainerProfile?.ways_of_working_tracking,
+        expectations: trainerProfile?.ways_of_working_expectations,
+        whatIBring: trainerProfile?.ways_of_working_what_i_bring
+      },
+      textFields: {
+        howIWork: trainerProfile?.wow_how_i_work,
+        whatIProvide: trainerProfile?.wow_what_i_provide,
+        clientExpectations: trainerProfile?.wow_client_expectations
+      },
+      extractedFromText: profileCategories
     },
     finalCategories: waysOfWorkingCategories
   });
