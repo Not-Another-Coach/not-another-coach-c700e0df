@@ -36,7 +36,7 @@ export default function ClientDashboard() {
   const { profile, loading: profileLoading } = useClientProfile();
   
   const { isAdmin } = useUserRoles();
-  const { progress: journeyProgress, loading: journeyLoading } = useClientJourneyProgress();
+  const { progress: journeyProgress, loading: journeyLoading, refetch: refetchJourney } = useClientJourneyProgress();
   const { engagements } = useTrainerEngagement();
   const navigate = useNavigate();
   const location = useLocation();
@@ -103,15 +103,21 @@ export default function ClientDashboard() {
     setDismissedFeedbackPrompts(prev => [...prev, callId]);
   };
 
-  // Redirect clients to client survey if not completed (check both flags)
+  // Redirect clients to client survey if not completed
   useEffect(() => {
     if (!loading && !profileLoading && user && profile && profile.user_type === 'client') {
       const surveyCompleted = profile.quiz_completed && profile.client_survey_completed;
       if (!surveyCompleted) {
         navigate('/client-survey');
+        return;
+      }
+      
+      // If survey is complete but they're still on profile_setup stage, trigger journey update
+      if (surveyCompleted && journeyProgress?.stage === 'preferences_identified') {
+        refetchJourney();
       }
     }
-  }, [user, profile, loading, profileLoading, navigate]);
+  }, [user, profile, loading, profileLoading, navigate, journeyProgress]);
 
   if (loading || profileLoading) {
     return (
@@ -144,6 +150,21 @@ export default function ClientDashboard() {
           {/* Tab Content */}
           {activeTab === "summary" && !isActiveClient && (
             <div className="space-y-6">
+              {/* Journey-based content rendering */}
+              {journeyProgress?.stage === 'exploring_coaches' && (
+                <div className="mb-6">
+                  <div className="bg-secondary/50 rounded-lg p-4 mb-4">
+                    <h3 className="text-lg font-semibold mb-2">Ready to Explore Coaches!</h3>
+                    <p className="text-muted-foreground mb-3">
+                      Great job completing your fitness preferences! Now let's find the perfect trainer for you.
+                    </p>
+                    <Button onClick={() => navigate('/discovery')} className="w-full sm:w-auto">
+                      Start Exploring Trainers
+                    </Button>
+                  </div>
+                </div>
+              )}
+
               {/* Waitlist Exclusive Access */}
               <WaitlistExclusiveAccessWidget />
               

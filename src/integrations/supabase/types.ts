@@ -6400,7 +6400,7 @@ export type Database = {
       }
       get_client_journey_stage: {
         Args: { p_client_id: string }
-        Returns: Database["public"]["Enums"]["engagement_stage"]
+        Returns: string
       }
       get_client_status: {
         Args: { p_client_id: string }

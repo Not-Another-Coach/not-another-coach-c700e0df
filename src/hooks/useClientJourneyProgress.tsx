@@ -87,84 +87,62 @@ export const useClientJourneyProgress = () => {
     }
 
     try {
-      // Use the new consolidated function to get client journey stage
-      const { data: journeyStage, error: journeyError } = await supabase
+      // Use new RPC function to get accurate journey stage
+      const { data: journeyStage, error: rpcError } = await supabase
         .rpc('get_client_journey_stage', { p_client_id: user.id });
 
-      if (journeyError) {
-        console.error('Error fetching journey stage:', journeyError);
-        return;
+      let currentStage: ClientJourneyStage = 'preferences_identified';
+      
+      if (rpcError) {
+        console.error('Error fetching journey stage:', rpcError);
+        // Fallback: check client profile directly
+        const { data: profile } = await supabase
+          .from('v_clients')
+          .select('client_survey_completed')
+          .eq('id', user.id)
+          .maybeSingle();
+        
+        if (profile?.client_survey_completed) {
+          currentStage = 'exploring_coaches';
+        }
+      } else {
+        // Map RPC result to our stage types
+        const stageMap: Record<string, ClientJourneyStage> = {
+          'profile_setup': 'preferences_identified',
+          'exploring_coaches': 'exploring_coaches', 
+          'browsing': 'preferences_identified',
+          'liked': 'exploring_coaches',
+          'shortlisted': 'exploring_coaches',
+          'discovery_in_progress': 'getting_to_know_your_coach',
+          'discovery_call_booked': 'getting_to_know_your_coach',
+          'discovery_completed': 'coach_chosen',
+          'waitlist': 'coach_chosen',
+          'active_client': 'on_your_journey'
+        };
+        currentStage = stageMap[journeyStage] || 'preferences_identified';
       }
 
-      // Get user profile for survey completion check
-      const { data: profile, error: profileError } = await supabase
-        .from('v_clients')
-        .select('client_survey_completed')
-        .eq('id', user.id)
-        .single();
-
-      if (profileError) throw profileError;
-
-      // If survey not complete, don't show journey tracker yet
-      if (!profile?.client_survey_completed) {
+      // Check if survey is not completed - should not show journey yet
+      if (currentStage === 'preferences_identified' && journeyStage === 'profile_setup') {
         setProgress(null);
         setLoading(false);
         return;
       }
 
-      // Map database stage to local ClientJourneyStage enum
-      let currentStage: ClientJourneyStage;
-      switch (journeyStage) {
-        case 'browsing':
-          currentStage = 'preferences_identified';
-          break;
-        case 'exploring_coaches':
-        case 'liked':
-        case 'shortlisted':
-          currentStage = 'exploring_coaches';
-          break;
-        case 'getting_to_know_your_coach':
-        case 'discovery_scheduled':
-        case 'discovery_in_progress':
-          currentStage = 'getting_to_know_your_coach';
-          break;
-        case 'discovery_completed':
-        case 'agreed':
-        case 'payment_pending':
-        case 'coach_chosen':
-          currentStage = 'coach_chosen';
-          break;
-        case 'onboarding_in_progress':
-          currentStage = 'onboarding_in_progress';
-          break;
-        case 'active_client':
-          currentStage = 'on_your_journey';
-          break;
-        case 'goal_achieved':
-          currentStage = 'goal_achieved';
-          break;
-        default:
-          currentStage = 'preferences_identified';
-      }
-
-      // Get engagement data to check for progress indicators
-      const { data: engagements, error: engagementError } = await supabase
+      // Get engagement data for more detailed progress
+      const { data: engagements } = await supabase
         .from('client_trainer_engagement')
         .select('stage, trainer_id, liked_at, matched_at, discovery_completed_at, became_client_at')
         .eq('client_id', user.id);
 
-      if (engagementError) throw engagementError;
-
       // Get discovery calls to check for booked calls
-      const { data: discoveryCalls, error: discoveryError } = await supabase
+      const { data: discoveryCalls } = await supabase
         .from('discovery_calls')
         .select('id, status')
         .eq('client_id', user.id);
 
-      if (discoveryError) throw discoveryError;
-
       // Get onboarding progress to check completion
-      const { data: onboardingProgress, error: onboardingError } = await supabase
+      const { data: onboardingProgress } = await supabase
         .from('client_onboarding_progress')
         .select(`
           *,
@@ -176,10 +154,6 @@ export const useClientJourneyProgress = () => {
         .eq('client_id', user.id)
         .eq('client_template_assignments.status', 'active');
 
-      if (onboardingError) {
-        console.error('Error fetching onboarding progress:', onboardingError);
-      }
-
       // Calculate onboarding completion percentage
       const totalOnboardingSteps = onboardingProgress?.length || 0;
       const completedOnboardingSteps = onboardingProgress?.filter(step => step.status === 'completed').length || 0;
@@ -190,11 +164,14 @@ export const useClientJourneyProgress = () => {
         currentStage = 'on_your_journey';
         
         // Update the engagement to mark as active_client
-        await supabase.rpc('update_engagement_stage', {
-          client_uuid: user.id,
-          trainer_uuid: engagements?.[0]?.trainer_id || user.id,
-          new_stage: 'active_client'
-        });
+        const primaryTrainer = engagements?.[0]?.trainer_id;
+        if (primaryTrainer) {
+          await supabase.rpc('update_engagement_stage', {
+            client_uuid: user.id,
+            trainer_uuid: primaryTrainer,
+            new_stage: 'active_client'
+          });
+        }
       }
 
       const currentStageIndex = getStageIndex(currentStage);
@@ -210,17 +187,16 @@ export const useClientJourneyProgress = () => {
         let hasData = false;
         const hasLikedCoaches = engagements?.some(e => e.liked_at) || (engagements?.length || 0) > 0;
         const hasDiscoveryCall = engagements?.some(e => e.matched_at) || discoveryCalls?.some(dc => dc.status === 'scheduled');
-        const isInGettingToKnowStage = engagements?.some(e => e.stage === 'getting_to_know_your_coach');
         const hasChosenCoach = engagements?.some(e => e.discovery_completed_at);
         const isOnboarding = engagements?.some(e => e.became_client_at && !e.discovery_completed_at);
         const isActiveClient = engagements?.some(e => e.became_client_at && e.discovery_completed_at);
 
         if (stageKey === 'preferences_identified') {
-          hasData = profile?.client_survey_completed || false;
+          hasData = true; // Always has data if we're showing the progress
         } else if (stageKey === 'exploring_coaches') {
           hasData = hasLikedCoaches;
         } else if (stageKey === 'getting_to_know_your_coach') {
-          hasData = hasDiscoveryCall || isInGettingToKnowStage;
+          hasData = hasDiscoveryCall;
         } else if (stageKey === 'coach_chosen') {
           hasData = hasChosenCoach;
         } else if (stageKey === 'onboarding_in_progress') {
@@ -237,7 +213,7 @@ export const useClientJourneyProgress = () => {
           icon = '✅';
         } else if (current && hasData) {
           icon = '🟠'; // Orange for partial progress
-        } else if (current) {
+        } else if (current) {  
           icon = '🟠'; // Orange for current stage  
         } else {
           icon = '⬜'; // Grey for future stages
@@ -255,7 +231,7 @@ export const useClientJourneyProgress = () => {
         };
       });
 
-      // Determine next action
+      // Determine next action based on current stage
       let nextAction = '';
       const hasLikedCoaches = engagements?.some(e => e.liked_at) || (engagements?.length || 0) > 0;
       const hasShortlisted = engagements?.some(e => e.stage === 'shortlisted');
@@ -287,7 +263,7 @@ export const useClientJourneyProgress = () => {
           nextAction = 'Continue your fitness journey with your coach';
           break;
         case 'goal_achieved':
-          nextAction = 'Congratulations! Consider renewal, new goals, or sharing your success story.';
+          nextAction = 'Congratulations! Consider renewal, new goals, or sharing success story.';
           break;
       }
 
@@ -301,7 +277,7 @@ export const useClientJourneyProgress = () => {
       });
 
     } catch (error) {
-      console.error('Error fetching client journey progress:', error);
+      console.error('Error fetching journey progress:', error);
     } finally {
       setLoading(false);
     }
@@ -311,42 +287,20 @@ export const useClientJourneyProgress = () => {
     if (!user) return;
 
     try {
-      // Map local stage to database engagement stage
-      let dbStage: any = newStage;
-      switch (newStage) {
-        case 'preferences_identified':
-          dbStage = 'browsing';
-          break;
-        case 'exploring_coaches':
-          dbStage = 'exploring_coaches';
-          break;
-        case 'getting_to_know_your_coach':
-          dbStage = 'getting_to_know_your_coach';
-          break;
-        case 'coach_chosen':
-          dbStage = 'coach_chosen';
-          break;
-        case 'onboarding_in_progress':
-          dbStage = 'onboarding_in_progress';
-          break;
-        case 'on_your_journey':
-          dbStage = 'active_client';
-          break;
-        case 'goal_achieved':
-          dbStage = 'goal_achieved';
-          break;
-      }
+      // Update both tables for consistency
+      await supabase
+        .from('profiles')
+        .update({ journey_stage: newStage })
+        .eq('id', user.id);
 
-      // Update via the engagement system instead of profile
-      await supabase.rpc('update_engagement_stage', {
-        client_uuid: user.id,
-        trainer_uuid: user.id, // Use self-reference for general journey tracking
-        new_stage: dbStage
-      });
+      await supabase
+        .from('client_profiles')
+        .update({ client_journey_stage: newStage })
+        .eq('id', user.id);
 
       await fetchProgress();
     } catch (error) {
-      console.error('Error updating client journey stage:', error);
+      console.error('Error updating journey stage:', error);
     }
   };
 
