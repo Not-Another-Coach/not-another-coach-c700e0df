@@ -327,24 +327,38 @@ export const EnhancedVerificationManagement = () => {
                           {check.expiry_date && (
                             <p><strong>Expiry:</strong> {new Date(check.expiry_date).toLocaleDateString()}</p>
                           )}
-                          {check.evidence_file_url && (
-                            <div className="mt-2">
-                              <p className="text-sm font-medium text-blue-800">Document:</p>
-                              <a 
-                                href={`${supabase.storage.from('trainer-verification-documents').getPublicUrl(check.evidence_file_url.replace('trainer-verification-documents/', '')).data.publicUrl}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-sm text-blue-600 hover:text-blue-800 underline"
-                              >
-                                {check.evidence_metadata?.filename || 'View Document'}
-                              </a>
-                              {check.evidence_metadata && (
-                                <p className="text-xs text-muted-foreground">
-                                  {check.evidence_metadata.type} • {Math.round(check.evidence_metadata.size / 1024)} KB
-                                </p>
-                              )}
-                            </div>
-                          )}
+                           {check.evidence_file_url && (
+                             <div className="mt-2">
+                               <p className="text-sm font-medium text-blue-800">Document:</p>
+                               <Button
+                                 variant="outline"
+                                 size="sm"
+                                 className="h-7 text-xs"
+                                 onClick={async () => {
+                                   try {
+                                     const filePath = check.evidence_file_url.replace('trainer-verification-documents/', '');
+                                     const { data, error } = await supabase.storage
+                                       .from('trainer-verification-documents')
+                                       .createSignedUrl(filePath, 300);
+                                     
+                                     if (error) throw error;
+                                     window.open(data.signedUrl, '_blank');
+                                   } catch (error) {
+                                     console.error('Error accessing document:', error);
+                                     toast.error('Unable to access document');
+                                   }
+                                 }}
+                               >
+                                 <FileText className="h-3 w-3 mr-1" />
+                                 {check.evidence_metadata?.filename || 'View Document'}
+                               </Button>
+                               {check.evidence_metadata && (
+                                 <p className="text-xs text-muted-foreground mt-1">
+                                   {check.evidence_metadata.type} • {Math.round(check.evidence_metadata.size / 1024)} KB
+                                 </p>
+                               )}
+                             </div>
+                           )}
                         </div>
 
                         {check.admin_notes && (

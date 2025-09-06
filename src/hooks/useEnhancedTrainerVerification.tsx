@@ -77,7 +77,7 @@ export const useEnhancedTrainerVerification = () => {
     checkAdminRole();
   }, [user]);
 
-  // Fetch trainer's verification data
+  // Fetch trainer's verification data (optimized)
   const fetchVerificationData = useCallback(async (trainerId?: string) => {
     if (!user) return;
     
@@ -85,39 +85,41 @@ export const useEnhancedTrainerVerification = () => {
     setLoading(true);
 
     try {
-      console.log('Fetching verification data for trainer:', targetTrainerId);
-      
-      // Fetch overview
-      const { data: overviewData } = await supabase
-        .from('trainer_verification_overview')
-        .select('*')
-        .eq('trainer_id', targetTrainerId)
-        .single();
-
-      console.log('Overview data:', overviewData);
-      setOverview(overviewData);
-
-      // Fetch checks
-      const { data: checksData } = await supabase
-        .from('trainer_verification_checks')
-        .select('*')
-        .eq('trainer_id', targetTrainerId)
-        .order('check_type');
-
-      console.log('Checks data:', checksData);
-      setChecks(checksData || []);
-
-      // Fetch audit log (only if admin or own data)
-      if (isAdmin || targetTrainerId === user.id) {
-        const { data: auditData } = await supabase
-          .from('trainer_verification_audit_log')
+      // Batch all data fetching in parallel for better performance
+      const [overviewResult, checksResult, auditResult] = await Promise.all([
+        supabase
+          .from('trainer_verification_overview')
           .select('*')
           .eq('trainer_id', targetTrainerId)
-          .order('created_at', { ascending: false })
-          .limit(50);
+          .maybeSingle(),
+        supabase
+          .from('trainer_verification_checks')
+          .select('*')
+          .eq('trainer_id', targetTrainerId)
+          .order('check_type'),
+        (isAdmin || targetTrainerId === user.id) 
+          ? supabase
+              .from('trainer_verification_audit_log')
+              .select('*')
+              .eq('trainer_id', targetTrainerId)
+              .order('created_at', { ascending: false })
+              .limit(50)
+          : Promise.resolve({ data: [] })
+      ]);
 
-        setAuditLog(auditData || []);
+      // Handle overview data (may not exist)
+      if (overviewResult.error && overviewResult.error.code !== 'PGRST116') {
+        throw overviewResult.error;
       }
+      setOverview(overviewResult.data);
+
+      // Handle checks data  
+      if (checksResult.error) throw checksResult.error;
+      setChecks(checksResult.data || []);
+
+      // Handle audit log data
+      if ('error' in auditResult && auditResult.error) throw auditResult.error;
+      setAuditLog(auditResult.data || []);
     } catch (error) {
       console.error('Error fetching verification data:', error);
       toast.error('Failed to load verification data');
