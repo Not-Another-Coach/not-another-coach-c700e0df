@@ -266,15 +266,15 @@ export const EnhancedActivityBuilder = ({
             <div className="space-y-2">
               <Label htmlFor="ways-of-working-category">Ways of Working Category</Label>
               <Select
-                value={formData.ways_of_working_category || ''}
-                onValueChange={(value) => updateFormData('ways_of_working_category', value || null)}
+                value={formData.ways_of_working_category || 'none'}
+                onValueChange={(value) => updateFormData('ways_of_working_category', value === 'none' ? null : value)}
                 disabled={categoriesLoading}
               >
                 <SelectTrigger>
                   <SelectValue placeholder={categoriesLoading ? "Loading categories..." : "Select ways of working category (optional)"} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">
+                  <SelectItem value="none">
                     <span className="text-muted-foreground">None - Don't map to profile section</span>
                   </SelectItem>
                   {waysOfWorkingCategories.map(category => {
