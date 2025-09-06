@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, Save, CheckCircle, AlertCircle } from "lucide-react";
+import { ArrowLeft, ArrowRight, Save, CheckCircle, AlertCircle, Target, MapPin, Calendar, Users, User, Package, DollarSign, Clock } from "lucide-react";
 
 // Import survey sections
 import { GoalsSection } from "@/components/client-survey/GoalsSection";
@@ -79,6 +79,17 @@ const ClientSurvey = () => {
     "Package Preferences",
     "Budget Range",
     "Availability & Start Date"
+  ];
+
+  const stepIcons = [
+    Target,        // Your Goals
+    MapPin,        // Training Location  
+    Calendar,      // Scheduling Preferences
+    Users,         // Coaching Style
+    User,          // About You
+    Package,       // Package Preferences
+    DollarSign,    // Budget Range
+    Clock          // Availability & Start Date
   ];
 
   // Redirect if not client or if survey is already completed
@@ -438,6 +449,7 @@ const ClientSurvey = () => {
               const stepNumber = index + 1;
               const completion = getStepCompletion(stepNumber);
               const isCurrent = stepNumber === currentStep;
+              const StepIcon = stepIcons[index];
               
               let statusColor = 'text-muted-foreground';
               let borderColor = 'border-muted-foreground';
@@ -482,10 +494,10 @@ const ClientSurvey = () => {
                       {showIcon ? (
                         isPartial ? <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4" /> : <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4" />
                       ) : (
-                        <span className={cn(
-                          "text-xs sm:text-sm font-medium",
-                          isCurrent ? "font-bold" : ""
-                        )}>{stepNumber}</span>
+                        <StepIcon className={cn(
+                          "h-3 w-3 sm:h-4 sm:w-4",
+                          isCurrent ? "text-white" : ""
+                        )} />
                       )}
                     </div>
                     <span className={cn(
