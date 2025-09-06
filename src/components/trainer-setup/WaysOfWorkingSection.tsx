@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, X, Eye, EyeOff, Info, MapPin, Users, Settings, Workflow } from "lucide-react";
 import { SectionHeader } from "./SectionHeader";
 import { useTrainerActivities } from "@/hooks/useTrainerActivities";
-import { useWaysOfWorkingTemplateSections } from "@/hooks/useWaysOfWorkingTemplateSections";
 
 interface WaysOfWorkingSectionProps {
   formData: any;
@@ -24,18 +23,9 @@ interface WaysOfWorkingItem {
 
 export default function WaysOfWorkingSection({ formData, updateFormData, errors }: WaysOfWorkingSectionProps) {
   const { getSuggestionsBySection, getSuggestionsByProfileSection } = useTrainerActivities();
-  const { sections: templateSections, getProfileSections } = useWaysOfWorkingTemplateSections();
   
   // Use the actual profile sections mapped in ways_of_working_categories
   const sections = ['how_i_work', 'what_i_provide', 'client_expectations'];
-
-  // Group template sections by profile section key for aggregating activity suggestions
-  const templateSectionsByProfile = templateSections.reduce((acc, templateSection) => {
-    const profileKey = templateSection.profile_section_key;
-    if (!acc[profileKey]) acc[profileKey] = [];
-    acc[profileKey].push(templateSection);
-    return acc;
-  }, {} as Record<string, typeof templateSections>);
 
   const [newItems, setNewItems] = useState<{ [key: string]: string }>(() => {
     const initialItems: { [key: string]: string } = {};
@@ -45,22 +35,12 @@ export default function WaysOfWorkingSection({ formData, updateFormData, errors 
     return initialItems;
   });
 
-  // Use dynamic section titles from database or fallback
-  const sectionTitles = templateSections.reduce((acc, ts) => {
-    if (!acc[ts.profile_section_key]) {
-      // Create a title based on profile section key
-      const titleMap: Record<string, string> = {
-        'onboarding': 'Onboarding & Welcome Process',
-        'ongoing_support': 'Ongoing Support & Structure', 
-        'first_week': 'First Week Experience',
-        'how_i_work': 'How I Work',
-        'what_i_provide': 'What I Provide',
-        'client_expectations': 'Client Expectations'
-      };
-      acc[ts.profile_section_key] = titleMap[ts.profile_section_key] || ts.profile_section_key;
-    }
-    return acc;
-  }, {} as { [key: string]: string });
+  // Use hardcoded section titles for the profile sections
+  const sectionTitles: Record<string, string> = {
+    'how_i_work': 'How I Work',
+    'what_i_provide': 'What I Provide',
+    'client_expectations': 'Client Expectations'
+  };
 
   const sectionDescriptions = {
     onboarding: "Your process for welcoming and assessing new clients",
