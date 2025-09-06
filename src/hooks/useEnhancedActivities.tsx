@@ -9,6 +9,7 @@ export interface EnhancedActivity {
   activity_name: string;
   description?: string;
   category: string;
+  ways_of_working_category?: string | null;
   activity_type: 'task' | 'appointment' | 'survey' | 'training_content' | 'file_upload';
   appointment_config?: any;
   survey_config?: any;
@@ -112,6 +113,7 @@ export const useEnhancedActivities = (isAdminMode = false) => {
           trainer_id: isAdminMode ? null : user.id, // System activities have null trainer_id
           is_system: isAdminMode, // Mark as system activity if admin creates it
           category: activityData.category || 'Onboarding',
+          ways_of_working_category: activityData.ways_of_working_category || null,
           activity_type: activityData.activity_type || 'task',
           description: activityData.description,
           completion_method: activityData.completion_method || 'client',

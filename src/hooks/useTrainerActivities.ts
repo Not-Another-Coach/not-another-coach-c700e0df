@@ -7,6 +7,7 @@ export type TrainerActivity = {
   id: string;
   activity_name: string;
   category: string;
+  ways_of_working_category?: string | null;
   is_system: boolean;
   description?: string | null;
   guidance_html?: string | null;
@@ -29,7 +30,7 @@ export function useTrainerActivities() {
       // RLS ensures we get: system activities + current trainer's activities
       const { data, error } = await supabase
         .from("trainer_onboarding_activities")
-        .select("id, activity_name, category, is_system, description, guidance_html, default_due_days, default_sla_days")
+        .select("id, activity_name, category, ways_of_working_category, is_system, description, guidance_html, default_due_days, default_sla_days")
         .order("activity_name");
 
       if (error) {
@@ -113,6 +114,7 @@ export function useTrainerActivities() {
     details: {
       name: string;
       category: string;
+      ways_of_working_category?: string | null;
       description?: string | null;
       guidance_html?: string | null;
       default_due_days?: number | null;
@@ -127,13 +129,14 @@ export function useTrainerActivities() {
         .update({
           activity_name: details.name,
           category: details.category,
+          ways_of_working_category: details.ways_of_working_category ?? null,
           description: details.description ?? null,
           guidance_html: details.guidance_html ?? null,
           default_due_days: details.default_due_days ?? null,
           default_sla_days: details.default_sla_days ?? null,
         })
         .eq("id", id)
-        .select("id, activity_name, category, is_system, description, guidance_html, default_due_days, default_sla_days")
+        .select("id, activity_name, category, ways_of_working_category, is_system, description, guidance_html, default_due_days, default_sla_days")
         .maybeSingle();
 
       if (error) throw error;

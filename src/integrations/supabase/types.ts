@@ -4761,6 +4761,7 @@ export type Database = {
           trainer_id: string | null
           updated_at: string
           upload_config: Json | null
+          ways_of_working_category: string | null
         }
         Insert: {
           activity_name: string
@@ -4787,6 +4788,7 @@ export type Database = {
           trainer_id?: string | null
           updated_at?: string
           upload_config?: Json | null
+          ways_of_working_category?: string | null
         }
         Update: {
           activity_name?: string
@@ -4813,6 +4815,7 @@ export type Database = {
           trainer_id?: string | null
           updated_at?: string
           upload_config?: Json | null
+          ways_of_working_category?: string | null
         }
         Relationships: [
           {
