@@ -62,9 +62,18 @@ export const EnhancedActivityBuilder = ({
     .filter((category, index, arr) => arr.indexOf(category) === index)
     .sort();
     
-  // Get mapped ways of working categories (8 categories)
-  const waysOfWorkingCategories = categories.map(c => c.activity_category)
-    .filter((category, index, arr) => arr.indexOf(category) === index)
+  // Get all ways of working categories (mapped + unmapped from system activities)
+  const allWaysOfWorkingCategories = [
+    // Categories from database (mapped)
+    ...categories.map(c => c.activity_category),
+    // Categories from system activities that may not be mapped
+    ...systemActivities
+      .filter(a => a.ways_of_working_category)
+      .map(a => a.ways_of_working_category)
+  ];
+  
+  const waysOfWorkingCategories = [...new Set(allWaysOfWorkingCategories)]
+    .filter(Boolean)
     .sort();
     
   // Get category status and information
