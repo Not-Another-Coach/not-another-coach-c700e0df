@@ -22,10 +22,12 @@ interface WaysOfWorkingItem {
 }
 
 export default function WaysOfWorkingSection({ formData, updateFormData, errors }: WaysOfWorkingSectionProps) {
-  const { getSuggestionsBySection, getSuggestionsByProfileSection, refresh: refreshActivities } = useTrainerActivities();
+  const { getSuggestionsBySection, getSuggestionsByProfileSection, refresh: refreshActivities, activities, loading } = useTrainerActivities();
   
   // Use the actual profile sections mapped in ways_of_working_categories
   const sections = ['how_i_work', 'what_i_provide', 'client_expectations'];
+
+  console.log("WaysOfWorkingSection rendering with:", { activities: activities.length, loading });
 
   // Force refresh activities when component mounts
   useEffect(() => {
