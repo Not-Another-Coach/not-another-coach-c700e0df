@@ -162,20 +162,24 @@ export function useTrainerActivities() {
     return Array.from(new Set(names));
   };
 
-  const getSuggestionsByProfileSection = (profileSectionKey: string): string[] => {
-    // Get all activities that have ways_of_working_category matching template sections
-    // that map to this profile section key
-    const categoryMapping = getSectionToCategory();
+  const getSuggestionsByProfileSection = (profileSectionKey: string, templateSections: any[]): string[] => {
+    // Get all template sections that map to this profile section
+    const relevantTemplateSections = templateSections.filter(
+      ts => ts.profile_section_key === profileSectionKey
+    );
+    
+    // Get activity categories for those template sections
+    const sectionToCategory = getSectionToCategory();
     const relevantCategories: string[] = [];
     
-    // Find all template section keys that map to this profile section
-    // and get their corresponding activity categories
-    Object.entries(categoryMapping).forEach(([templateSectionKey, activityCategory]) => {
-      // We need to check if this template section maps to our profile section
-      // This would require template section data, so for now we'll use the direct approach
-      relevantCategories.push(activityCategory);
+    relevantTemplateSections.forEach(ts => {
+      const category = sectionToCategory[ts.section_key];
+      if (category) {
+        relevantCategories.push(category);
+      }
     });
 
+    // Get activities that have ways_of_working_category matching those categories
     const names = activities
       .filter((a) => a.ways_of_working_category && relevantCategories.includes(a.ways_of_working_category))
       .map((a) => a.activity_name.trim())

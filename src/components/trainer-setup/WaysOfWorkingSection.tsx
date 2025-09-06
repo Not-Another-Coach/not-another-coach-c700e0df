@@ -23,12 +23,19 @@ interface WaysOfWorkingItem {
 }
 
 export default function WaysOfWorkingSection({ formData, updateFormData, errors }: WaysOfWorkingSectionProps) {
-  const { getSuggestionsBySection, getSuggestionsByProfileSection } = useTrainerActivities();
+  const { getSuggestionsBySection } = useTrainerActivities();
   const { sections: templateSections, getProfileSections } = useWaysOfWorkingTemplateSections();
   
-  // Use profile sections as the main sections
-  const profileSections = getProfileSections();
-  const sections = profileSections.map(ps => ps.key);
+  // Get unique profile sections from template sections in database
+  const uniqueProfileSections = Array.from(new Set(
+    templateSections
+      .map(ts => ts.profile_section_key)
+      .filter(Boolean)
+  ));
+  
+  const sections = uniqueProfileSections.length > 0 
+    ? uniqueProfileSections 
+    : ['onboarding', 'ongoing_support', 'first_week']; // fallback
 
   // Group template sections by profile section key for aggregating activity suggestions
   const templateSectionsByProfile = templateSections.reduce((acc, templateSection) => {
@@ -46,13 +53,27 @@ export default function WaysOfWorkingSection({ formData, updateFormData, errors 
     return initialItems;
   });
 
-  // Use profile section titles and descriptions
-  const sectionTitles = profileSections.reduce((acc, section) => {
-    acc[section.key] = section.name;
+  // Use dynamic section titles from database or fallback
+  const sectionTitles = templateSections.reduce((acc, ts) => {
+    if (!acc[ts.profile_section_key]) {
+      // Create a title based on profile section key
+      const titleMap: Record<string, string> = {
+        'onboarding': 'Onboarding & Welcome Process',
+        'ongoing_support': 'Ongoing Support & Structure', 
+        'first_week': 'First Week Experience',
+        'how_i_work': 'How I Work',
+        'what_i_provide': 'What I Provide',
+        'client_expectations': 'Client Expectations'
+      };
+      acc[ts.profile_section_key] = titleMap[ts.profile_section_key] || ts.profile_section_key;
+    }
     return acc;
   }, {} as { [key: string]: string });
 
   const sectionDescriptions = {
+    onboarding: "Your process for welcoming and assessing new clients",
+    ongoing_support: "Your regular coaching rhythm, check-ins, and ongoing client support structure", 
+    first_week: "What clients can expect in their first week and early experience with you",
     how_i_work: "Your coaching process, methods, and approach to working with clients",
     what_i_provide: "The specific services, tools, and support you offer to clients", 
     client_expectations: "What you need from clients for a successful coaching relationship"
