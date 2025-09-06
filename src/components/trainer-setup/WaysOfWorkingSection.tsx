@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -22,10 +22,15 @@ interface WaysOfWorkingItem {
 }
 
 export default function WaysOfWorkingSection({ formData, updateFormData, errors }: WaysOfWorkingSectionProps) {
-  const { getSuggestionsBySection, getSuggestionsByProfileSection } = useTrainerActivities();
+  const { getSuggestionsBySection, getSuggestionsByProfileSection, refresh: refreshActivities } = useTrainerActivities();
   
   // Use the actual profile sections mapped in ways_of_working_categories
   const sections = ['how_i_work', 'what_i_provide', 'client_expectations'];
+
+  // Force refresh activities when component mounts
+  useEffect(() => {
+    refreshActivities();
+  }, [refreshActivities]);
 
   const [newItems, setNewItems] = useState<{ [key: string]: string }>(() => {
     const initialItems: { [key: string]: string } = {};

@@ -49,10 +49,17 @@ export function useTrainerActivities() {
     }
   };
 
-  // Fetch activities on mount
+  // Fetch activities on mount and refresh when categories change
   useEffect(() => {
     fetchAll();
   }, []);
+
+  // Refresh when categories data changes (for when database updates happen)
+  useEffect(() => {
+    if (categories.length > 0) {
+      fetchAll();
+    }
+  }, [categories.length]);
 
   const createActivity = async (name: string, category: string, description?: string | null) => {
     if (!user?.id) {
