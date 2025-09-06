@@ -116,21 +116,28 @@ export const useAdminProfilePublication = () => {
     try {
       const { data, error } = await supabase
         .from('profile_publication_requests')
-        .select(`
-          *,
-          trainer:profiles!trainer_id(
-            first_name,
-            last_name,
-            verification_status
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
         
       if (error) throw error;
-      setRequests((data as any[])?.map(item => ({
-        ...item,
-        trainer: Array.isArray(item.trainer) ? item.trainer[0] : item.trainer
-      })) || []);
+      
+      // Get trainer details separately to avoid foreign key issues
+      const requestsWithTrainerNames = await Promise.all(
+        (data || []).map(async (request) => {
+          const { data: trainerData } = await supabase
+            .from('profiles')
+            .select('first_name, last_name, verification_status')
+            .eq('id', request.trainer_id)
+            .single();
+            
+          return {
+            ...request,
+            trainer: trainerData
+          };
+        })
+      );
+      
+      setRequests(requestsWithTrainerNames);
     } catch (error) {
       console.error('Error fetching publication requests:', error);
       toast({
