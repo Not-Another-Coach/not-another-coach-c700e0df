@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useClientProfile } from '@/hooks/useClientProfile';
@@ -28,6 +28,12 @@ export default function Discovery() {
   const [likedTrainers, setLikedTrainers] = useState<string[]>([]);
   const [passedTrainers, setPassedTrainers] = useState<string[]>([]);
   const [trainersToShow, setTrainersToShow] = useState<Trainer[]>([]);
+  
+  // PHASE 3: Enhanced User Experience State
+  const [showAllTrainers, setShowAllTrainers] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedSpecialty, setSelectedSpecialty] = useState<string>('');
+  const [showMatchDetails, setShowMatchDetails] = useState(false);
 
   // Get matched trainers with enhanced algorithm using client survey data
   const clientSurveyData = profile ? {
@@ -63,6 +69,47 @@ export default function Discovery() {
     }
   }, [realTrainers, trainersLoading]);
 
+  // PHASE 3: Filter and search logic
+  const filteredTrainers = useMemo(() => {
+    let trainersToFilter = showAllTrainers ? 
+      realTrainers.map(trainer => ({
+        trainer,
+        score: 60 + Math.random() * 30, // Random score for "Show All" mode
+        matchReasons: [`Available trainer with ${trainer.experience} experience`],
+        matchDetails: [],
+        compatibilityPercentage: Math.floor(60 + Math.random() * 30)
+      })) : 
+      matchedTrainers;
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      trainersToFilter = trainersToFilter.filter(match => 
+        match.trainer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        match.trainer.specialties.some(spec => 
+          spec.toLowerCase().includes(searchQuery.toLowerCase())
+        ) ||
+        match.trainer.location?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Apply specialty filter
+    if (selectedSpecialty) {
+      trainersToFilter = trainersToFilter.filter(match =>
+        match.trainer.specialties.some(spec => 
+          spec.toLowerCase().includes(selectedSpecialty.toLowerCase())
+        )
+      );
+    }
+
+    return trainersToFilter;
+  }, [realTrainers, matchedTrainers, showAllTrainers, searchQuery, selectedSpecialty]);
+
+  // Get unique specialties for filter dropdown
+  const availableSpecialties = useMemo(() => {
+    const allSpecialties = realTrainers.flatMap(trainer => trainer.specialties);
+    return [...new Set(allSpecialties)].sort();
+  }, [realTrainers]);
+
   const handleSwipe = useCallback((direction: 'left' | 'right', trainer: Trainer) => {
     if (direction === 'right') {
       setLikedTrainers(prev => [...prev, trainer.id]);
@@ -88,20 +135,20 @@ export default function Discovery() {
   }, [saveTrainer, updateProgress]);
 
   const handleLike = () => {
-    if (currentTrainerIndex < matchedTrainers.length) {
-      handleSwipe('right', matchedTrainers[currentTrainerIndex].trainer);
+    if (currentTrainerIndex < filteredTrainers.length) {
+      handleSwipe('right', filteredTrainers[currentTrainerIndex].trainer);
     }
   };
 
   const handlePass = () => {
-    if (currentTrainerIndex < matchedTrainers.length) {
-      handleSwipe('left', matchedTrainers[currentTrainerIndex].trainer);
+    if (currentTrainerIndex < filteredTrainers.length) {
+      handleSwipe('left', filteredTrainers[currentTrainerIndex].trainer);
     }
   };
 
   const handleUndo = () => {
     if (currentTrainerIndex > 0) {
-      const prevTrainer = matchedTrainers[currentTrainerIndex - 1];
+      const prevTrainer = filteredTrainers[currentTrainerIndex - 1];
       setCurrentTrainerIndex(prev => prev - 1);
       setLikedTrainers(prev => prev.filter(id => id !== prevTrainer.trainer.id));
       setPassedTrainers(prev => prev.filter(id => id !== prevTrainer.trainer.id));
@@ -113,8 +160,8 @@ export default function Discovery() {
     }
   };
 
-  const remainingTrainers = matchedTrainers.slice(currentTrainerIndex, currentTrainerIndex + 3);
-  const isFinished = currentTrainerIndex >= matchedTrainers.length;
+  const remainingTrainers = filteredTrainers.slice(currentTrainerIndex, currentTrainerIndex + 3);
+  const isFinished = currentTrainerIndex >= filteredTrainers.length;
 
   // Show loading state while trainers are being fetched
   if (trainersLoading) {
@@ -163,13 +210,25 @@ export default function Discovery() {
         </Button>
         
         <div className="text-center">
-          <h1 className="font-bold text-lg">Discover Trainers</h1>
+          <h1 className="font-bold text-lg">
+            {showAllTrainers ? 'Browse All Trainers' : 'Discover Trainers'}
+          </h1>
           <p className="text-sm text-muted-foreground">
-            {currentTrainerIndex} of {matchedTrainers.length}
+            {currentTrainerIndex} of {filteredTrainers.length}
+            {showAllTrainers && ' (Showing All)'}
           </p>
         </div>
 
         <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setShowMatchDetails(!showMatchDetails)}
+            className="flex items-center gap-2 hover:bg-primary/10"
+          >
+            <MessageCircle className="h-4 w-4" />
+            <span className="hidden sm:inline">Why?</span>
+          </Button>
           <Button 
             variant="outline" 
             size="sm"
@@ -192,7 +251,99 @@ export default function Discovery() {
         </div>
       )}
 
+      {/* PHASE 3: Enhanced Controls */}
+      <div className="max-w-md mx-auto px-4 mb-4">
+        <Card className="p-4">
+          <div className="space-y-4">
+            {/* Show All Toggle */}
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium">Show All Trainers</label>
+              <Button
+                variant={showAllTrainers ? "default" : "outline"}
+                size="sm"
+                onClick={() => {
+                  setShowAllTrainers(!showAllTrainers);
+                  setCurrentTrainerIndex(0); // Reset to start
+                }}
+              >
+                {showAllTrainers ? 'Smart Match' : 'Show All'}
+              </Button>
+            </div>
+
+            {/* Search and Filter */}
+            <div className="space-y-3">
+              <div>
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 border rounded-md text-sm"
+                  placeholder="Search trainers, specialties, locations..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setCurrentTrainerIndex(0);
+                  }}
+                />
+              </div>
+              
+              <div>
+                <select
+                  className="w-full px-3 py-2 border rounded-md text-sm"
+                  value={selectedSpecialty}
+                  onChange={(e) => {
+                    setSelectedSpecialty(e.target.value);
+                    setCurrentTrainerIndex(0);
+                  }}
+                >
+                  <option value="">All Specialties</option>
+                  {availableSpecialties.map(specialty => (
+                    <option key={specialty} value={specialty}>{specialty}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Filter Stats */}
+            <div className="text-xs text-muted-foreground text-center">
+              {filteredTrainers.length} trainer{filteredTrainers.length !== 1 ? 's' : ''} 
+              {searchQuery || selectedSpecialty ? ' match your filters' : ' available'}
+            </div>
+          </div>
+        </Card>
+      </div>
+
       <div className="max-w-md mx-auto p-4">
+        {/* PHASE 3: Match Details Panel */}
+        {showMatchDetails && remainingTrainers.length > 0 && (
+          <Card className="mb-4 p-4 bg-primary/5">
+            <div className="space-y-3">
+              <h3 className="font-medium text-sm">
+                Why we {showAllTrainers ? 'show' : 'recommend'} {remainingTrainers[0].trainer.name}:
+              </h3>
+              <div className="space-y-2">
+                {remainingTrainers[0].matchReasons.map((reason, idx) => (
+                  <div key={idx} className="flex items-start gap-2 text-xs">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0" />
+                    <span className="text-muted-foreground">{reason}</span>
+                  </div>
+                ))}
+              </div>
+              {!showAllTrainers && (
+                <div className="pt-2 border-t">
+                  <div className="text-xs font-medium mb-2">Match Breakdown:</div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {remainingTrainers[0].matchDetails.map((detail, idx) => (
+                      <div key={idx} className="flex items-center gap-2 text-xs">
+                        <detail.icon className={`h-3 w-3 ${detail.color}`} />
+                        <span>{detail.category}: {detail.score}%</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </Card>
+        )}
+
         {/* Card Stack */}
         <div className="relative h-[600px] mb-6">
           {!isFinished ? (
@@ -275,7 +426,7 @@ export default function Discovery() {
                 <div className="text-xs text-muted-foreground">Passed</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-primary">{matchedTrainers.length - currentTrainerIndex}</div>
+                <div className="text-2xl font-bold text-primary">{filteredTrainers.length - currentTrainerIndex}</div>
                 <div className="text-xs text-muted-foreground">Remaining</div>
               </div>
             </div>
@@ -291,8 +442,9 @@ export default function Discovery() {
                 <li>• Swipe right or tap ❤️ to like</li>
                 <li>• Swipe left or tap ✕ to pass</li>
                 <li>• Tap ↻ to undo your last action</li>
-                <li>• Check match scores for recommendations</li>
-                <li>• Tap "Edit Survey" above to change your preferences</li>
+                <li>• Use "Why?" to see match reasoning</li>
+                <li>• Toggle "Show All" to bypass smart matching</li>
+                <li>• Use search/filters to find specific trainers</li>
               </ul>
             </CardContent>
           </Card>
