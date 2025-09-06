@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, AlertCircle, Info, X } from "lucide-react";
+import { CheckCircle2, AlertCircle, Info } from "lucide-react";
 import { toast } from "sonner";
 import { useWaysOfWorkingCategories, type WaysOfWorkingCategory } from "@/hooks/useWaysOfWorkingCategories";
 import { useWaysOfWorkingTemplateSections } from "@/hooks/useWaysOfWorkingTemplateSections";
@@ -45,7 +45,11 @@ export default function CategoryMappingManagement() {
   });
 
   const handleTemplateSection = async (activityCategory: string, sectionKey: string | null) => {
-    if (!sectionKey) return;
+    // Handle unassignment when empty value is selected
+    if (!sectionKey || sectionKey === "") {
+      await handleUnassign(activityCategory);
+      return;
+    }
 
     const section = templateSections.find(s => s.section_key === sectionKey);
     if (!section) return;
@@ -212,7 +216,6 @@ export default function CategoryMappingManagement() {
               <TableHead>Status</TableHead>
               <TableHead>Template Section</TableHead>
               <TableHead>Display Order</TableHead>
-              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -256,6 +259,9 @@ export default function CategoryMappingManagement() {
                         <SelectValue placeholder="Select template section..." />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="" className="text-muted-foreground italic">
+                          — Not assigned —
+                        </SelectItem>
                         {templateSections.map((section) => (
                           <SelectItem key={section.section_key} value={section.section_key}>
                             {section.section_name}
@@ -280,20 +286,6 @@ export default function CategoryMappingManagement() {
                     )}
                   </TableCell>
                   
-                  <TableCell>
-                    {row.mapping && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleUnassign(row.activityCategory)}
-                        disabled={isUpdating}
-                        className="flex items-center gap-1"
-                      >
-                        <X className="h-3 w-3" />
-                        Unassign
-                      </Button>
-                    )}
-                  </TableCell>
                 </TableRow>
               );
             })}
