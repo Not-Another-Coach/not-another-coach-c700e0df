@@ -128,14 +128,14 @@ export function SimplifiedWaysOfWorkingSection({
       title: "How I Work",
       description: "Describe your coaching approach and methodology",
       placeholder: "Activities selected above will appear here as a summary...",
-      suggestionCategories: ["Assessment", "Planning", "Goal Setting", "First Week", "Onboarding"]
+      suggestionCategories: ["Assessment", "Planning", "Goal Setting", "First Week", "Onboarding", "Discovery", "Training Programs", "Lifestyle"]
     },
     {
       key: "wow_what_i_provide", 
       title: "What I Provide",
       description: "Detail the services and support you offer to clients",
       placeholder: "Activities selected above will appear here as a summary...",
-      suggestionCategories: ["Education", "Motivation", "Ongoing Structure", "Tracking Tools"]
+      suggestionCategories: ["Education", "Motivation", "Ongoing Structure", "Tracking Tools", "Nutrition"]
     },
     {
       key: "wow_client_expectations",
