@@ -26,16 +26,8 @@ export default function WaysOfWorkingSection({ formData, updateFormData, errors 
   const { getSuggestionsBySection, getSuggestionsByProfileSection } = useTrainerActivities();
   const { sections: templateSections, getProfileSections } = useWaysOfWorkingTemplateSections();
   
-  // Get unique profile sections from template sections in database
-  const uniqueProfileSections = Array.from(new Set(
-    templateSections
-      .map(ts => ts.profile_section_key)
-      .filter(Boolean)
-  ));
-  
-  const sections = uniqueProfileSections.length > 0 
-    ? uniqueProfileSections 
-    : ['onboarding', 'ongoing_support', 'first_week']; // fallback
+  // Use the actual profile sections mapped in ways_of_working_categories
+  const sections = ['how_i_work', 'what_i_provide', 'client_expectations'];
 
   // Group template sections by profile section key for aggregating activity suggestions
   const templateSectionsByProfile = templateSections.reduce((acc, templateSection) => {
@@ -120,7 +112,7 @@ export default function WaysOfWorkingSection({ formData, updateFormData, errors 
     const items = formData[`ways_of_working_${section}`] || [];
     
     // Get activity suggestions directly by profile section
-    const sectionSuggestions = getSuggestionsByProfileSection(section, templateSections).sort();
+    const sectionSuggestions = getSuggestionsByProfileSection(section).sort();
 
     return (
       <Card key={section} className="space-y-4">

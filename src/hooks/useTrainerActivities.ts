@@ -21,7 +21,7 @@ export function useTrainerActivities() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
-  const { getSectionToCategory } = useWaysOfWorkingCategories();
+  const { getSectionToCategory, categories } = useWaysOfWorkingCategories();
 
   const fetchAll = async () => {
     setLoading(true);
@@ -162,20 +162,11 @@ export function useTrainerActivities() {
     return Array.from(new Set(names));
   };
 
-  const getSuggestionsByProfileSection = (profileSectionKey: string, templateSections: any[]): string[] => {
-    // Get all template sections that map to this profile section
-    const relevantTemplateSections = templateSections.filter(
-      ts => ts.profile_section_key === profileSectionKey
-    );
-    
-    // Get activity categories directly from template sections (not via section mapping)
-    const relevantCategories: string[] = [];
-    
-    relevantTemplateSections.forEach(ts => {
-      if (ts.activity_category) {
-        relevantCategories.push(ts.activity_category);
-      }
-    });
+  const getSuggestionsByProfileSection = (profileSectionKey: string): string[] => {
+    // Get categories directly from ways_of_working_categories table for this profile section
+    const relevantCategories = categories
+      .filter(cat => cat.profile_section_key === profileSectionKey)
+      .map(cat => cat.activity_category);
 
     // Get activities that have ways_of_working_category matching those categories
     const names = activities
