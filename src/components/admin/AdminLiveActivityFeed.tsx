@@ -2,147 +2,155 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Filter, Shield, UserCheck, FileText, Target, AlertTriangle } from 'lucide-react';
+import { Filter, Plus, MessageSquare, UserPlus, FileText, Settings, CheckCircle, XCircle, Target, Users } from 'lucide-react';
 import { useTrainerCustomRequests } from '@/hooks/useQualifications';
 import { useTrainerCustomSpecialtyRequests } from '@/hooks/useSpecialties';
 import { useUserRoles } from '@/hooks/useUserRoles';
-import { format } from 'date-fns';
+import { useTrainerVerification } from '@/hooks/useTrainerVerification';
+import { format, isToday, isYesterday, subDays } from 'date-fns';
 
 export const AdminLiveActivityFeed = () => {
   const { data: qualificationRequests } = useTrainerCustomRequests();
   const { requests: specialtyRequests } = useTrainerCustomSpecialtyRequests();
-  const { users } = useUserRoles();
+  const { users, loading: usersLoading } = useUserRoles();
+  const { verificationRequests } = useTrainerVerification();
 
-  // Create admin-focused activity feed
   const createAdminActivities = () => {
     const activities: any[] = [];
 
-    // Add recent user registrations (last 24 hours)
+    // Add recent user registrations (last 7 days)
     if (users) {
-      const oneDayAgo = new Date();
-      oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+      const sevenDaysAgo = subDays(new Date(), 7);
       
-      users
-        .filter(user => new Date(user.created_at) > oneDayAgo)
-        .forEach(user => {
-          const userType = user.roles?.[0] || 'user';
-          activities.push({
-            id: `user-${user.id}`,
-            title: `New ${userType} registered`,
-            description: `${user.first_name || 'User'} ${user.last_name || ''} joined the platform`.trim(),
-            icon: '👤',
-            color: 'bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200',
-            created_at: user.created_at,
-            type: 'user_registration'
-          });
+      const recentUsers = users.filter(user => 
+        new Date(user.created_at) > sevenDaysAgo
+      );
+
+      recentUsers.forEach(user => {
+        activities.push({
+          id: `user-${user.id}`,
+          title: 'New User Registration',
+          description: `${user.first_name || 'User'} ${user.last_name || ''} joined as ${user.user_type}`,
+          icon: <UserPlus className="h-4 w-4" />,
+          color: 'bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200',
+          created_at: user.created_at,
+          type: 'user_registration',
+          priority: user.user_type === 'trainer' ? 'high' : 'normal'
         });
+      });
     }
 
-    // Add pending qualification requests
+    // Add qualification requests
     if (qualificationRequests) {
-      qualificationRequests
-        .filter(req => req.status === 'pending')
-        .forEach(req => {
-          activities.push({
-            id: `qual-pending-${req.id}`,
-            title: `New qualification request`,
-            description: `"${req.qualification_name}" awaiting review`,
-            icon: '📋',
-            color: 'bg-gradient-to-r from-yellow-50 to-amber-50 border border-yellow-200',
-            created_at: req.created_at,
-            type: 'qualification_request',
-            priority: 'high'
-          });
-        });
+      const recentQualifications = qualificationRequests.filter(req => {
+        const updatedAt = new Date(req.updated_at || req.created_at);
+        const threeDaysAgo = subDays(new Date(), 3);
+        return updatedAt > threeDaysAgo;
+      });
 
-      // Add recent qualification updates
-      qualificationRequests
-        .filter(req => req.status !== 'pending')
-        .slice(0, 3)
-        .forEach(req => {
-          activities.push({
-            id: `qual-${req.id}`,
-            title: `Qualification ${req.status}`,
-            description: `"${req.qualification_name}" was ${req.status}`,
-            icon: req.status === 'approved' ? '✅' : '❌',
-            color: req.status === 'approved' 
-              ? 'bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200'
-              : 'bg-gradient-to-r from-red-50 to-pink-50 border border-red-200',
-            created_at: req.updated_at || req.created_at,
-            type: 'qualification_update'
-          });
+      recentQualifications.forEach(req => {
+        const isPending = req.status === 'pending';
+        activities.push({
+          id: `qual-${req.id}`,
+          title: isPending ? 'New Qualification Request' : `Qualification ${req.status}`,
+          description: `${req.qualification_name} - Custom qualification request`,
+          icon: isPending ? <FileText className="h-4 w-4" /> : (req.status === 'approved' ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />),
+          color: isPending 
+            ? 'bg-gradient-to-r from-yellow-50 to-yellow-100 border border-yellow-200'
+            : req.status === 'approved' 
+              ? 'bg-gradient-to-r from-green-50 to-green-100 border border-green-200'
+              : 'bg-gradient-to-r from-red-50 to-red-100 border border-red-200',
+          created_at: req.updated_at || req.created_at,
+          type: 'qualification',
+          priority: isPending ? 'high' : 'normal'
         });
+      });
     }
 
-    // Add pending specialty requests
+    // Add specialty requests
     if (specialtyRequests) {
-      specialtyRequests
-        .filter(req => req.status === 'pending')
-        .forEach(req => {
-          activities.push({
-            id: `spec-pending-${req.id}`,
-            title: `New specialty request`,
-            description: `"${req.requested_name}" awaiting review`,
-            icon: '🎯',
-            color: 'bg-gradient-to-r from-yellow-50 to-amber-50 border border-yellow-200',
-            created_at: req.created_at,
-            type: 'specialty_request',
-            priority: 'high'
-          });
-        });
+      const recentSpecialties = specialtyRequests.filter(req => {
+        const updatedAt = new Date(req.updated_at || req.created_at);
+        const threeDaysAgo = subDays(new Date(), 3);
+        return updatedAt > threeDaysAgo;
+      });
 
-      // Add recent specialty updates
-      specialtyRequests
-        .filter(req => req.status !== 'pending')
-        .slice(0, 3)
-        .forEach(req => {
-          activities.push({
-            id: `spec-${req.id}`,
-            title: `Specialty ${req.status}`,
-            description: `"${req.requested_name}" was ${req.status}`,
-            icon: req.status === 'approved' ? '✅' : '❌',
-            color: req.status === 'approved' 
-              ? 'bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200'
-              : 'bg-gradient-to-r from-red-50 to-pink-50 border border-red-200',
-            created_at: req.updated_at || req.created_at,
-            type: 'specialty_update'
-          });
+      recentSpecialties.forEach(req => {
+        const isPending = req.status === 'pending';
+        activities.push({
+          id: `spec-${req.id}`,
+          title: isPending ? 'New Specialty Request' : `Specialty ${req.status}`,
+          description: `${req.requested_name} - Custom specialty request`,
+          icon: isPending ? <Target className="h-4 w-4" /> : (req.status === 'approved' ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />),
+          color: isPending 
+            ? 'bg-gradient-to-r from-purple-50 to-purple-100 border border-purple-200'
+            : req.status === 'approved' 
+              ? 'bg-gradient-to-r from-green-50 to-green-100 border border-green-200'
+              : 'bg-gradient-to-r from-red-50 to-red-100 border border-red-200',
+          created_at: req.updated_at || req.created_at,
+          type: 'specialty',
+          priority: isPending ? 'high' : 'normal'
         });
+      });
     }
 
-    // Add system health notifications (simulated)
-    const systemActivities = [
-      {
-        id: 'system-backup',
-        title: 'Daily backup completed',
-        description: 'All data successfully backed up',
-        icon: '💾',
-        color: 'bg-gradient-to-r from-purple-50 to-violet-50 border border-purple-200',
-        created_at: new Date().toISOString(),
-        type: 'system'
-      }
-    ];
+    // Sort by priority (high first) then by date (newest first)
+    return activities
+      .sort((a, b) => {
+        if (a.priority === 'high' && b.priority !== 'high') return -1;
+        if (b.priority === 'high' && a.priority !== 'high') return 1;
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      })
+      .slice(0, 10); // Show latest 10 activities
+  };
 
-    activities.push(...systemActivities);
-
-    // Sort by created_at descending, with priority items first
-    return activities.sort((a, b) => {
-      if (a.priority === 'high' && b.priority !== 'high') return -1;
-      if (b.priority === 'high' && a.priority !== 'high') return 1;
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-    });
+  const formatRelativeTime = (dateString: string) => {
+    const date = new Date(dateString);
+    if (isToday(date)) {
+      return format(date, 'h:mm a');
+    } else if (isYesterday(date)) {
+      return 'Yesterday';
+    } else {
+      return format(date, 'MMM d');
+    }
   };
 
   const adminActivities = createAdminActivities();
+
+  if (usersLoading) {
+    return (
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg">Admin Activity Feed</CardTitle>
+            <Button variant="ghost" size="sm">
+              <Filter className="w-4 h-4" />
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-3 max-h-96 overflow-y-auto">
+          <div className="animate-pulse space-y-3">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="flex items-start gap-3 p-3 rounded-lg">
+                <div className="w-8 h-8 bg-muted rounded-full"></div>
+                <div className="flex-1">
+                  <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
+                  <div className="h-3 bg-muted rounded w-1/2 mb-2"></div>
+                  <div className="h-3 bg-muted rounded w-1/4"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Shield className="w-5 h-5" />
-            Admin Activity Feed
-          </CardTitle>
+          <CardTitle className="text-lg">Admin Activity Feed</CardTitle>
           <Button variant="ghost" size="sm">
             <Filter className="w-4 h-4" />
           </Button>
@@ -154,32 +162,25 @@ export const AdminLiveActivityFeed = () => {
             <p>No recent admin activity</p>
           </div>
         ) : (
-          adminActivities.slice(0, 10).map((activity) => (
+          adminActivities.map((activity) => (
             <div key={activity.id} className={`flex items-start gap-3 p-3 rounded-lg ${activity.color}`}>
               <div className="w-8 h-8 rounded-full bg-white/50 flex items-center justify-center flex-shrink-0">
                 {activity.icon}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="font-medium">{activity.title}</p>
-                    <p className="text-sm mt-1 opacity-75">{activity.description}</p>
-                  </div>
-                  {activity.priority === 'high' && (
-                    <AlertTriangle className="w-4 h-4 text-orange-500 flex-shrink-0 ml-2" />
-                  )}
-                </div>
+                <p className="font-medium">{activity.title}</p>
+                <p className="text-sm mt-1 opacity-75">{activity.description}</p>
                 <div className="flex items-center gap-2 mt-2">
-                  <Badge variant="secondary">
-                    {format(new Date(activity.created_at), 'h:mm a')}
+                  <Badge variant="secondary" className="text-xs">
+                    {formatRelativeTime(activity.created_at)}
                   </Badge>
-                  {activity.type === 'qualification_request' && (
+                  {activity.type === 'qualification' && (
                     <Badge variant="outline" className="text-xs">
                       <FileText className="w-3 h-3 mr-1" />
                       Qualification
                     </Badge>
                   )}
-                  {activity.type === 'specialty_request' && (
+                  {activity.type === 'specialty' && (
                     <Badge variant="outline" className="text-xs">
                       <Target className="w-3 h-3 mr-1" />
                       Specialty
@@ -187,7 +188,7 @@ export const AdminLiveActivityFeed = () => {
                   )}
                   {activity.type === 'user_registration' && (
                     <Badge variant="outline" className="text-xs">
-                      <UserCheck className="w-3 h-3 mr-1" />
+                      <Users className="w-3 h-3 mr-1" />
                       New User
                     </Badge>
                   )}

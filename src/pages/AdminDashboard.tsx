@@ -70,47 +70,10 @@ export const AdminDashboard = () => {
               </div>
               
               {/* Stats Dashboard */}
-              <AdminAnalyticsDashboard />
+              <AdminAnalyticsDashboard onNavigate={setActiveTab} />
               
               {/* Live Activity Feed */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <AdminLiveActivityFeed />
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Quick Access</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <Button 
-                      variant="outline" 
-                      className="w-full justify-start"
-                      onClick={() => setActiveTab("users")}
-                    >
-                      Manage Users & Verification
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      className="w-full justify-start"
-                      onClick={() => setActiveTab("content")}
-                    >
-                      Content & Knowledge Base
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      className="w-full justify-start"
-                      onClick={() => setActiveTab("analytics")}
-                    >
-                      View Analytics & Reports
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      className="w-full justify-start"
-                      onClick={() => navigate('/documentation')}
-                    >
-                      System Documentation
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
+              <AdminLiveActivityFeed />
             </div>
           )}
 
