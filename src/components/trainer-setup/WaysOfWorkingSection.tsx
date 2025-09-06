@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, X, Eye, EyeOff, Info, MapPin, Users, Settings, Workflow } from "lucide-react";
 import { SectionHeader } from "./SectionHeader";
 import { useTrainerActivities } from "@/hooks/useTrainerActivities";
+import { useWaysOfWorkingTemplateSections } from "@/hooks/useWaysOfWorkingTemplateSections";
 
 interface WaysOfWorkingSectionProps {
   formData: any;
@@ -21,26 +22,43 @@ interface WaysOfWorkingItem {
   id: string;
 }
 
-export function WaysOfWorkingSection({ formData, updateFormData, errors = {}, clearFieldError }: WaysOfWorkingSectionProps) {
-  const [newItems, setNewItems] = useState<{ [key: string]: string }>({
-    onboarding: "",
-    first_week: "",
-    ongoing_structure: "",
-    tracking_tools: "",
-    client_expectations: "",
-    what_i_bring: ""
+export default function WaysOfWorkingSection({ formData, updateFormData, errors }: WaysOfWorkingSectionProps) {
+  const { getSuggestionsBySection } = useTrainerActivities();
+  const { sections: templateSections } = useWaysOfWorkingTemplateSections();
+  
+  // Use dynamic sections from database, fallback to hardcoded if none found
+  const sections = templateSections.length > 0 
+    ? templateSections.map(s => s.section_key)
+    : [
+        "onboarding",
+        "first_week", 
+        "ongoing_structure",
+        "tracking_tools",
+        "client_expectations",
+        "what_i_bring"
+      ];
+
+  const [newItems, setNewItems] = useState<{ [key: string]: string }>(() => {
+    const initialItems: { [key: string]: string } = {};
+    sections.forEach(section => {
+      initialItems[section] = "";
+    });
+    return initialItems;
   });
 
-  const { getSuggestionsBySection } = useTrainerActivities();
-
-  const sectionTitles = {
-    onboarding: "Onboarding Process",
-    first_week: "First Week Experience",
-    ongoing_structure: "Ongoing Structure",
-    tracking_tools: "Tracking & Progress Tools",
-    client_expectations: "What I Expect From Clients",
-    what_i_bring: "What I Bring"
-  };
+  const sectionTitles = templateSections.length > 0 
+    ? templateSections.reduce((acc, section) => {
+        acc[section.section_key] = section.section_name;
+        return acc;
+      }, {} as { [key: string]: string })
+    : {
+        onboarding: "Onboarding Process",
+        first_week: "First Week Experience",
+        ongoing_structure: "Ongoing Structure",
+        tracking_tools: "Tracking & Progress Tools",
+        client_expectations: "What I Expect From Clients",
+        what_i_bring: "What I Bring"
+      };
 
   const sectionDescriptions = {
     onboarding: "How you welcome and assess new clients",
@@ -233,7 +251,7 @@ export function WaysOfWorkingSection({ formData, updateFormData, errors = {}, cl
 
       {/* All sections */}
       <div className="space-y-6">
-        {Object.keys(sectionTitles).map(section => renderSection(section))}
+        {sections.map(section => renderSection(section))}
       </div>
 
       {/* Completion Status */}

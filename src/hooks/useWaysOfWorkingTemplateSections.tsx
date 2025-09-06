@@ -2,57 +2,61 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
-export type WaysOfWorkingCategory = {
+export type WaysOfWorkingTemplateSection = {
   id: string;
   section_key: string;
   section_name: string;
-  activity_category: string;
+  profile_section_key: string;
   display_order: number;
-  profile_section_key?: string;
+  is_active: boolean;
   created_by?: string;
   created_at: string;
   updated_at: string;
 };
 
-export function useWaysOfWorkingCategories() {
-  const [categories, setCategories] = useState<WaysOfWorkingCategory[]>([]);
+export function useWaysOfWorkingTemplateSections() {
+  const [sections, setSections] = useState<WaysOfWorkingTemplateSection[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
-  const fetchCategories = async () => {
+  const PROFILE_SECTIONS = [
+    { key: 'onboarding', name: 'Onboarding & Welcome' },
+    { key: 'first_week', name: 'First Week Experience' },
+    { key: 'ongoing_support', name: 'Ongoing Support' }
+  ];
+
+  const fetchSections = async () => {
     setLoading(true);
     setError(null);
     try {
       const { data, error } = await supabase
-        .from("ways_of_working_categories")
+        .from("ways_of_working_template_sections")
         .select("*")
-        .order("section_key", { ascending: true })
         .order("display_order", { ascending: true });
 
       if (error) throw error;
-      setCategories(data || []);
+      setSections(data || []);
     } catch (e: any) {
-      console.error("Failed to load categories:", e);
-      setError(e.message || "Failed to load categories");
+      console.error("Failed to load template sections:", e);
+      setError(e.message || "Failed to load template sections");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchCategories();
+    fetchSections();
   }, []);
 
-  const createCategory = async (
-    sectionKey: string, 
-    sectionName: string, 
-    activityCategory: string, 
-    displayOrder: number,
-    profileSectionKey?: string
+  const createSection = async (
+    sectionKey: string,
+    sectionName: string,
+    profileSectionKey: string,
+    displayOrder: number
   ) => {
     if (!user?.id) {
-      const msg = "You must be signed in to create categories";
+      const msg = "You must be signed in to create template sections";
       setError(msg);
       return { error: msg } as const;
     }
@@ -61,23 +65,22 @@ export function useWaysOfWorkingCategories() {
     setError(null);
     try {
       const { data, error } = await supabase
-        .from("ways_of_working_categories")
+        .from("ways_of_working_template_sections")
         .insert({
           section_key: sectionKey,
           section_name: sectionName,
-          activity_category: activityCategory,
-          display_order: displayOrder,
           profile_section_key: profileSectionKey,
+          display_order: displayOrder,
           created_by: user.id,
         })
         .select()
         .single();
 
       if (error) throw error;
-      await fetchCategories();
+      await fetchSections();
       return { data } as const;
     } catch (e: any) {
-      const msg = e.message || "Failed to create category";
+      const msg = e.message || "Failed to create template section";
       setError(msg);
       return { error: msg } as const;
     } finally {
@@ -85,35 +88,33 @@ export function useWaysOfWorkingCategories() {
     }
   };
 
-  const updateCategory = async (
+  const updateSection = async (
     id: string,
     sectionKey: string,
     sectionName: string,
-    activityCategory: string,
-    displayOrder: number,
-    profileSectionKey?: string
+    profileSectionKey: string,
+    displayOrder: number
   ) => {
     setLoading(true);
     setError(null);
     try {
       const { data, error } = await supabase
-        .from("ways_of_working_categories")
+        .from("ways_of_working_template_sections")
         .update({
           section_key: sectionKey,
           section_name: sectionName,
-          activity_category: activityCategory,
-          display_order: displayOrder,
           profile_section_key: profileSectionKey,
+          display_order: displayOrder,
         })
         .eq("id", id)
         .select()
         .single();
 
       if (error) throw error;
-      await fetchCategories();
+      await fetchSections();
       return { data } as const;
     } catch (e: any) {
-      const msg = e.message || "Failed to update category";
+      const msg = e.message || "Failed to update template section";
       setError(msg);
       return { error: msg } as const;
     } finally {
@@ -121,20 +122,20 @@ export function useWaysOfWorkingCategories() {
     }
   };
 
-  const deleteCategory = async (id: string) => {
+  const deleteSection = async (id: string) => {
     setLoading(true);
     setError(null);
     try {
       const { error } = await supabase
-        .from("ways_of_working_categories")
+        .from("ways_of_working_template_sections")
         .delete()
         .eq("id", id);
 
       if (error) throw error;
-      await fetchCategories();
+      await fetchSections();
       return { success: true } as const;
     } catch (e: any) {
-      const msg = e.message || "Failed to delete category";
+      const msg = e.message || "Failed to delete template section";
       setError(msg);
       return { error: msg } as const;
     } finally {
@@ -142,31 +143,16 @@ export function useWaysOfWorkingCategories() {
     }
   };
 
-  const getSectionToCategory = () => {
-    const mapping: Record<string, string> = {};
-    categories.forEach(category => {
-      mapping[category.section_key] = category.activity_category;
-    });
-    return mapping;
-  };
-
-  const getCategoryToSection = () => {
-    const mapping: Record<string, string> = {};
-    categories.forEach(category => {
-      mapping[category.activity_category] = category.section_key;
-    });
-    return mapping;
-  };
+  const getProfileSections = () => PROFILE_SECTIONS;
 
   return {
-    categories,
+    sections,
     loading,
     error,
-    refresh: fetchCategories,
-    createCategory,
-    updateCategory,
-    deleteCategory,
-    getSectionToCategory,
-    getCategoryToSection,
+    refresh: fetchSections,
+    createSection,
+    updateSection,
+    deleteSection,
+    getProfileSections,
   };
 }

@@ -5846,6 +5846,7 @@ export type Database = {
           created_by: string | null
           display_order: number
           id: string
+          profile_section_key: string | null
           section_key: string
           section_name: string
           updated_at: string
@@ -5856,6 +5857,7 @@ export type Database = {
           created_by?: string | null
           display_order?: number
           id?: string
+          profile_section_key?: string | null
           section_key: string
           section_name: string
           updated_at?: string
@@ -5866,6 +5868,43 @@ export type Database = {
           created_by?: string | null
           display_order?: number
           id?: string
+          profile_section_key?: string | null
+          section_key?: string
+          section_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ways_of_working_template_sections: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          display_order: number
+          id: string
+          is_active: boolean
+          profile_section_key: string
+          section_key: string
+          section_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          profile_section_key: string
+          section_key: string
+          section_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          profile_section_key?: string
           section_key?: string
           section_name?: string
           updated_at?: string

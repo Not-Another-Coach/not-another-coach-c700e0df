@@ -25,7 +25,8 @@ import { EnhancedActivity } from '@/hooks/useEnhancedActivities';
 import { TemplateBuilder } from '@/components/onboarding/TemplateBuilder';
 import { useTemplateBuilder } from '@/hooks/useTemplateBuilder';
 import { TemplateAssignmentView } from '@/components/coach/TemplateAssignmentView';
-import { CategoryMappingManagement } from "@/components/admin/CategoryMappingManagement";
+import CategoryMappingManagement from "@/components/admin/CategoryMappingManagement";
+import TemplateSectionsManagement from "@/components/admin/TemplateSectionsManagement";
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { useTrainerProfile } from '@/hooks/useTrainerProfile';
 
@@ -366,7 +367,7 @@ export function TemplateManagementTabs() {
   return (
     <Tabs defaultValue="templates" className="space-y-4">
       <div className="flex flex-col space-y-4">
-        <TabsList className="grid grid-cols-5 w-full max-w-lg">
+        <TabsList className="grid grid-cols-6 w-full max-w-2xl">
           <TabsTrigger value="templates" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
             Templates
@@ -382,6 +383,10 @@ export function TemplateManagementTabs() {
           <TabsTrigger value="categories" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
             Categories
+          </TabsTrigger>
+          <TabsTrigger value="sections" className="flex items-center gap-2">
+            <Settings className="h-4 w-4" />
+            Template Sections
           </TabsTrigger>
           <TabsTrigger value="advanced" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
@@ -682,6 +687,23 @@ export function TemplateManagementTabs() {
             <CardContent>
               <div className="text-center p-8 text-muted-foreground">
                 <p>Only administrators can manage category mappings.</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </TabsContent>
+
+      <TabsContent value="sections" className="space-y-4">
+        {isAdmin ? (
+          <TemplateSectionsManagement />
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle>Template Sections</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center p-8 text-muted-foreground">
+                <p>Only administrators can manage template sections.</p>
               </div>
             </CardContent>
           </Card>
