@@ -187,7 +187,7 @@ export function EnhancedActivityPickerDialog({
             )}
           </div>
 
-          <ScrollArea className="flex-1 min-h-0 h-[400px] border rounded-lg">
+          <div className="flex-1 min-h-0 h-[400px] border rounded-lg overflow-y-auto">
             <div className="space-y-4 p-4">{loading && (
                 <div className="text-center py-8 text-muted-foreground">
                   <p>Loading activities...</p>
@@ -284,8 +284,8 @@ export function EnhancedActivityPickerDialog({
                   </div>
                 </div>
               )}
-            </div>
-          </ScrollArea>
+             </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
