@@ -19,11 +19,12 @@ export default function Home() {
 
       if (profile && user_type) {
         if (user_type === 'trainer') {
-          // Check if profile setup is needed
-          if (!profile.terms_agreed || !profile.profile_setup_completed) {
-            navigate('/trainer/profile-setup');
-          } else {
+          // If profile is completed (submitted), go to dashboard regardless of verification status
+          if (profile.profile_setup_completed && profile.terms_agreed) {
             navigate('/trainer/dashboard');
+          } else {
+            // If profile is not completed/submitted, go to profile setup
+            navigate('/trainer/profile-setup');
           }
         } else if (user_type === 'client') {
           if (!profile.client_survey_completed) {
