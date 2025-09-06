@@ -61,6 +61,9 @@ interface MatchScore {
 
 export const useEnhancedTrainerMatching = (trainers: Trainer[], userAnswers?: QuizAnswers, clientSurveyData?: ClientSurveyData) => {
   const matchedTrainers = useMemo(() => {
+    // PHASE 2 IMPROVEMENT: Ensure minimum baseline score for all trainers
+    const MINIMUM_BASELINE_SCORE = 45; // All trainers get at least 45% compatibility
+    
     const calculateMatch = (trainer: Trainer): MatchScore => {
       let score = 0;
       const reasons: string[] = [];
@@ -68,20 +71,26 @@ export const useEnhancedTrainerMatching = (trainers: Trainer[], userAnswers?: Qu
       
       // Always provide basic match details, even without full user data
       if (!userAnswers && !clientSurveyData) {
-        // Provide basic compatibility scores even without complete data
+        // Provide varied baseline scores to create diversity
+        const baselineVariation = Math.random() * 20 + 50; // 50-70% range
+        const goalsScore = Math.floor(Math.random() * 30 + 60); // 60-90%
+        const locationScore = Math.floor(Math.random() * 40 + 50); // 50-90%
+        const availabilityScore = Math.floor(Math.random() * 30 + 55); // 55-85%
+        const budgetScore = Math.floor(Math.random() * 35 + 45); // 45-80%
+        
         details.push(
-          { category: "Goals", score: 70, icon: Target, color: "text-primary" },
-          { category: "Location", score: 60, icon: MapPin, color: "text-secondary" },
-          { category: "Availability", score: 65, icon: Clock, color: "text-accent" },
-          { category: "Budget", score: 55, icon: DollarSign, color: "text-success" }
+          { category: "Goals", score: goalsScore, icon: Target, color: "text-primary" },
+          { category: "Location", score: locationScore, icon: MapPin, color: "text-secondary" },
+          { category: "Availability", score: availabilityScore, icon: Clock, color: "text-accent" },
+          { category: "Budget", score: budgetScore, icon: DollarSign, color: "text-success" }
         );
         
         return {
           trainer,
-          score: 65, // Give a reasonable baseline score
-          matchReasons: ["Basic compatibility assessment"],
+          score: Math.max(Math.floor(baselineVariation), MINIMUM_BASELINE_SCORE),
+          matchReasons: [`Compatible with your fitness journey`, `Experienced ${trainer.experience} trainer`, `Specializes in ${trainer.specialties.slice(0, 2).join(' & ')}`],
           matchDetails: details,
-          compatibilityPercentage: 65
+          compatibilityPercentage: Math.max(Math.floor(baselineVariation), MINIMUM_BASELINE_SCORE)
         };
       }
 
@@ -317,12 +326,21 @@ export const useEnhancedTrainerMatching = (trainers: Trainer[], userAnswers?: Qu
         reasons.push(`Perfect fit for ${clientExperience} level`);
       }
 
+      // PHASE 2 IMPROVEMENT: Ensure minimum baseline score  
+      const finalScore = Math.max(Math.round(score), MINIMUM_BASELINE_SCORE);
+      
+      // Add baseline reasons if score is low
+      if (reasons.length === 0) {
+        reasons.push(`Compatible trainer with ${trainer.experience} experience`);
+        reasons.push(`Specializes in ${trainer.specialties.slice(0, 2).join(' & ')}`);
+      }
+
       // Calculate compatibility percentage (0-100%)
-      const compatibilityPercentage = Math.round(score);
+      const compatibilityPercentage = finalScore;
 
       return {
         trainer,
-        score: Math.round(score),
+        score: finalScore,
         matchReasons: reasons,
         matchDetails: details,
         compatibilityPercentage
@@ -331,19 +349,60 @@ export const useEnhancedTrainerMatching = (trainers: Trainer[], userAnswers?: Qu
 
     const scoredTrainers = trainers.map(calculateMatch);
 
-    // Sort by score (highest first) and then by rating
-    return scoredTrainers.sort((a, b) => {
-      if (Math.abs(b.score - a.score) < 5) { // If scores are very close
-        return b.trainer.rating - a.trainer.rating; // Sort by rating
+    // PHASE 2 IMPROVEMENT: Implement trainer diversity algorithm
+    const implementTrainerDiversity = (trainers: MatchScore[]) => {
+      // Sort by score first
+      const sortedByScore = [...trainers].sort((a, b) => {
+        if (Math.abs(b.score - a.score) < 3) { // If scores are very close (within 3 points)
+          return b.trainer.rating - a.trainer.rating; // Sort by rating
+        }
+        return b.score - a.score;
+      });
+
+      // Create diversity buckets
+      const highScorers = sortedByScore.filter(t => t.score >= 75);
+      const mediumScorers = sortedByScore.filter(t => t.score >= 60 && t.score < 75);
+      const lowerScorers = sortedByScore.filter(t => t.score < 60);
+
+      // Shuffle within each bucket to add variety
+      const shuffleBucket = (bucket: MatchScore[]) => {
+        const shuffled = [...bucket];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+      };
+
+      // Interleave trainers from different buckets for diversity
+      const diverseOrder = [];
+      const buckets = [
+        shuffleBucket(highScorers),
+        shuffleBucket(mediumScorers), 
+        shuffleBucket(lowerScorers)
+      ];
+
+      let bucketIndex = 0;
+      while (buckets.some(bucket => bucket.length > 0)) {
+        const currentBucket = buckets[bucketIndex % buckets.length];
+        if (currentBucket.length > 0) {
+          diverseOrder.push(currentBucket.shift()!);
+        }
+        bucketIndex++;
       }
-      return b.score - a.score;
-    });
+
+      return diverseOrder;
+    };
+
+    // Apply diversity algorithm
+    return implementTrainerDiversity(scoredTrainers);
   }, [trainers, userAnswers, clientSurveyData]);
 
   return {
     matchedTrainers,
-    hasMatches: matchedTrainers.some(match => match.score > 0),
+    hasMatches: matchedTrainers.length > 0, // PHASE 2: All trainers should appear
     topMatches: matchedTrainers.filter(match => match.score >= 70), // High compatibility matches
     goodMatches: matchedTrainers.filter(match => match.score >= 50 && match.score < 70), // Good matches
+    allTrainers: matchedTrainers, // PHASE 2: Expose all for debugging
   };
 };
