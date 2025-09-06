@@ -54,6 +54,7 @@ export interface CustomSpecialtyRequest {
   reviewed_at?: string;
   created_at: string;
   updated_at: string;
+  trainer_name?: string;
   profiles?: {
     first_name?: string;
     last_name?: string;
@@ -176,19 +177,33 @@ export function useCustomSpecialtyRequests() {
 
   const fetchRequests = async () => {
     try {
-      const { data, error } = await supabase
+      // First get the specialty requests
+      const { data: requestsData, error: requestsError } = await supabase
         .from('custom_specialty_requests')
-        .select(`
-          *,
-          profiles:trainer_id (
-            first_name,
-            last_name
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setRequests((data || []) as CustomSpecialtyRequest[]);
+      if (requestsError) throw requestsError;
+
+      // Then get trainer names for each request
+      const requestsWithTrainerNames = await Promise.all(
+        (requestsData || []).map(async (request) => {
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('first_name, last_name')
+            .eq('id', request.trainer_id)
+            .single();
+
+          return {
+            ...request,
+            trainer_name: profileError 
+              ? 'Unknown Trainer' 
+              : `${profileData?.first_name || ''} ${profileData?.last_name || ''}`.trim() || 'Unknown Trainer'
+          };
+        })
+      );
+
+      setRequests(requestsWithTrainerNames as any);
     } catch (error) {
       console.error('Error fetching custom specialty requests:', error);
       toast({

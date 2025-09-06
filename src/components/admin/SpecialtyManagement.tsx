@@ -643,10 +643,7 @@ export function SpecialtyManagement() {
                         <TableRow key={request.id}>
                           <TableCell className="font-medium">{request.requested_name}</TableCell>
                           <TableCell className="text-sm">
-                            {request.profiles ? 
-                              `${request.profiles.first_name || ''} ${request.profiles.last_name || ''}`.trim() || `Trainer #${request.trainer_id.slice(0, 8)}`
-                              : `Trainer #${request.trainer_id.slice(0, 8)}`
-                            }
+                            {request.trainer_name || `Trainer #${request.trainer_id.slice(0, 8)}`}
                           </TableCell>
                           <TableCell className="max-w-[200px] truncate text-sm">{request.description}</TableCell>
                           <TableCell>
