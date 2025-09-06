@@ -364,34 +364,51 @@ export function TemplateManagementTabs() {
     }
   };
 
+  // Define which tabs to show based on user role
+  const visibleTabs = isAdmin 
+    ? ['activities', 'categories', 'sections'] // Admin sees only these tabs
+    : ['templates', 'assignment', 'activities', 'advanced']; // Trainers see these tabs
+
   return (
-    <Tabs defaultValue="templates" className="space-y-4">
+    <Tabs defaultValue={visibleTabs[0]} className="space-y-4">
       <div className="flex flex-col space-y-4">
-        <TabsList className="grid grid-cols-6 w-full max-w-2xl">
-          <TabsTrigger value="templates" className="flex items-center gap-2">
-            <Settings className="h-4 w-4" />
-            Templates
-          </TabsTrigger>
-          <TabsTrigger value="assignment" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            Assignment
-          </TabsTrigger>
-          <TabsTrigger value="activities" className="flex items-center gap-2">
-            <User className="h-4 w-4" />
-            Activities
-          </TabsTrigger>
-          <TabsTrigger value="categories" className="flex items-center gap-2">
-            <Settings className="h-4 w-4" />
-            Categories
-          </TabsTrigger>
-          <TabsTrigger value="sections" className="flex items-center gap-2">
-            <Settings className="h-4 w-4" />
-            Template Sections
-          </TabsTrigger>
-          <TabsTrigger value="advanced" className="flex items-center gap-2">
-            <Settings className="h-4 w-4" />
-            Advanced
-          </TabsTrigger>
+        <TabsList className={`grid w-full max-w-2xl ${isAdmin ? 'grid-cols-3' : 'grid-cols-4'}`}>
+          {visibleTabs.includes('templates') && (
+            <TabsTrigger value="templates" className="flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              Templates
+            </TabsTrigger>
+          )}
+          {visibleTabs.includes('assignment') && (
+            <TabsTrigger value="assignment" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Assignment
+            </TabsTrigger>
+          )}
+          {visibleTabs.includes('activities') && (
+            <TabsTrigger value="activities" className="flex items-center gap-2">
+              <User className="h-4 w-4" />
+              Activities
+            </TabsTrigger>
+          )}
+          {visibleTabs.includes('categories') && (
+            <TabsTrigger value="categories" className="flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              Categories
+            </TabsTrigger>
+          )}
+          {visibleTabs.includes('sections') && (
+            <TabsTrigger value="sections" className="flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              Template Sections
+            </TabsTrigger>
+          )}
+          {visibleTabs.includes('advanced') && (
+            <TabsTrigger value="advanced" className="flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              Advanced
+            </TabsTrigger>
+          )}
         </TabsList>
 
       <TabsContent value="activities" className="space-y-4">

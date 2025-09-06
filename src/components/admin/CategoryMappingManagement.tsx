@@ -23,6 +23,13 @@ const ACTIVITY_CATEGORIES = [
   'Planning'
 ];
 
+// Profile sections for direct mapping
+const PROFILE_SECTIONS = [
+  { key: 'how_i_work', name: 'How I Work' },
+  { key: 'what_i_provide', name: 'What I Provide' },
+  { key: 'client_expectations', name: 'Client Expectations' }
+];
+
 type CategoryRow = {
   activityCategory: string;
   mapping?: WaysOfWorkingCategory;
@@ -89,6 +96,87 @@ export default function CategoryMappingManagement() {
           toast.error(result.error);
         } else {
           toast.success(`Created ${activityCategory} mapping`);
+        }
+      }
+    } finally {
+      setUpdatingCategories(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(activityCategory);
+        return newSet;
+      });
+    }
+  };
+
+  const handleProfileSection = async (activityCategory: string, profileSectionKey: string | null) => {
+    // Handle unassignment when special unassign value is selected
+    if (!profileSectionKey || profileSectionKey === "UNASSIGN") {
+      const existingMapping = categories.find(c => c.activity_category === activityCategory);
+      if (existingMapping) {
+        setUpdatingCategories(prev => new Set(prev).add(activityCategory));
+        try {
+          const result = await updateCategory(
+            existingMapping.id,
+            existingMapping.section_key,
+            existingMapping.section_name,
+            activityCategory,
+            existingMapping.display_order,
+            undefined // Clear profile section mapping
+          );
+          
+          if ("error" in result) {
+            toast.error(result.error);
+          } else {
+            toast.success(`Removed profile section mapping for ${activityCategory}`);
+          }
+        } finally {
+          setUpdatingCategories(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(activityCategory);
+            return newSet;
+          });
+        }
+      }
+      return;
+    }
+
+    const profileSection = PROFILE_SECTIONS.find(ps => ps.key === profileSectionKey);
+    if (!profileSection) return;
+
+    setUpdatingCategories(prev => new Set(prev).add(activityCategory));
+
+    try {
+      const existingMapping = categories.find(c => c.activity_category === activityCategory);
+      
+      if (existingMapping) {
+        // Update existing mapping with profile section
+        const result = await updateCategory(
+          existingMapping.id,
+          existingMapping.section_key,
+          existingMapping.section_name,
+          activityCategory,
+          existingMapping.display_order,
+          profileSectionKey
+        );
+        
+        if ("error" in result) {
+          toast.error(result.error);
+        } else {
+          toast.success(`Updated profile section mapping for ${activityCategory}`);
+        }
+      } else {
+        // Create new mapping with only profile section (no template section)
+        const result = await createCategory(
+          'direct_profile_mapping', // Placeholder section key
+          'Direct Profile Mapping', // Placeholder section name
+          activityCategory,
+          0, // Default display order
+          profileSectionKey
+        );
+        
+        if ("error" in result) {
+          toast.error(result.error);
+        } else {
+          toast.success(`Created profile section mapping for ${activityCategory}`);
         }
       }
     } finally {
@@ -215,6 +303,7 @@ export default function CategoryMappingManagement() {
               <TableHead>Activity Category</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Template Section</TableHead>
+              <TableHead>Profile Section</TableHead>
               <TableHead>Display Order</TableHead>
             </TableRow>
           </TableHeader>
@@ -255,7 +344,7 @@ export default function CategoryMappingManagement() {
                       onValueChange={(value) => handleTemplateSection(row.activityCategory, value)}
                       disabled={isUpdating}
                     >
-                      <SelectTrigger className="w-64">
+                      <SelectTrigger className="w-48">
                         <SelectValue placeholder="Select template section..." />
                       </SelectTrigger>
                       <SelectContent>
@@ -265,6 +354,28 @@ export default function CategoryMappingManagement() {
                         {templateSections.map((section) => (
                           <SelectItem key={section.section_key} value={section.section_key}>
                             {section.section_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+                  
+                  <TableCell>
+                    <Select
+                      value={row.mapping?.profile_section_key || "UNASSIGN"}
+                      onValueChange={(value) => handleProfileSection(row.activityCategory, value)}
+                      disabled={isUpdating}
+                    >
+                      <SelectTrigger className="w-48">
+                        <SelectValue placeholder="Select profile section..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="UNASSIGN" className="text-muted-foreground italic">
+                          — Not assigned —
+                        </SelectItem>
+                        {PROFILE_SECTIONS.map((section) => (
+                          <SelectItem key={section.key} value={section.key}>
+                            {section.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -292,8 +403,10 @@ export default function CategoryMappingManagement() {
           </TableBody>
         </Table>
         
-        <div className="mt-4 text-sm text-muted-foreground">
-          <p><strong>Display Order:</strong> Controls the sequence in which activity categories appear within each template section (lower numbers appear first).</p>
+        <div className="mt-4 text-sm text-muted-foreground space-y-1">
+          <p><strong>Template Section:</strong> Maps activities to sections used in trainer onboarding templates.</p>
+          <p><strong>Profile Section:</strong> Directly maps activities to one of the 3 main profile sections for display.</p>
+          <p><strong>Display Order:</strong> Controls the sequence in which activity categories appear within each section (lower numbers appear first).</p>
         </div>
       </CardContent>
     </Card>
