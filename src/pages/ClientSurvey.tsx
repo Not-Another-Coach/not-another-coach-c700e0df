@@ -31,7 +31,7 @@ const ClientSurvey = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const hasInitialized = useRef(false);
+  
 
   const [formData, setFormData] = useState({
     // Goals and preferences
@@ -128,10 +128,9 @@ const ClientSurvey = () => {
     }
   }, [user, loading, navigate]);
 
-  // Initialize form data from profile - one time only
+  // Initialize form data from profile
   useEffect(() => {
-    if (profile && profile.id && !hasInitialized.current) {
-      hasInitialized.current = true;
+    if (profile && profile.id) {
       setFormData(prev => ({
         ...prev,
         primary_goals: profile.primary_goals || [],
