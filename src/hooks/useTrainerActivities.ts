@@ -163,16 +163,32 @@ export function useTrainerActivities() {
   };
 
   const getSuggestionsByProfileSection = (profileSectionKey: string): string[] => {
+    console.log("🔍 getSuggestionsByProfileSection called with:", profileSectionKey);
+    console.log("📊 Categories loaded:", categories.length, categories);
+    console.log("🎯 Activities loaded:", activities.length, activities.filter(a => a.is_system).length, "system activities");
+    
     // Get categories directly from ways_of_working_categories table for this profile section
     const relevantCategories = categories
       .filter(cat => cat.profile_section_key === profileSectionKey)
       .map(cat => cat.activity_category);
+    
+    console.log("🎯 Relevant categories for", profileSectionKey, ":", relevantCategories);
 
     // Get activities that have ways_of_working_category matching those categories
-    const names = activities
-      .filter((a) => a.ways_of_working_category && relevantCategories.includes(a.ways_of_working_category))
+    const matchingActivities = activities
+      .filter((a) => a.ways_of_working_category && relevantCategories.includes(a.ways_of_working_category));
+      
+    console.log("✅ Matching activities:", matchingActivities.map(a => ({
+      name: a.activity_name,
+      category: a.ways_of_working_category,
+      isSystem: a.is_system
+    })));
+    
+    const names = matchingActivities
       .map((a) => a.activity_name.trim())
       .filter((t) => t.length > 0);
+      
+    console.log("📝 Final suggestions:", names);
     return Array.from(new Set(names));
   };
 
