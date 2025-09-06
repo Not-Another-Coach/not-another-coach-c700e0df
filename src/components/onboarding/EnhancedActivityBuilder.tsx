@@ -181,204 +181,199 @@ export const EnhancedActivityBuilder = ({
 
           <Separator />
 
-          {/* System Activity Category Selection */}
-          <div className="space-y-4">
+          {/* Activity Classification & Profile Mapping */}
+          <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold">System Activity Classification</h3>
+              <h3 className="text-lg font-semibold">Activity Classification & Profile Mapping</h3>
               <p className="text-sm text-muted-foreground">
-                Choose the primary system category for internal organization and filtering.
+                Choose the system category and optionally map to a profile section for client workflow integration.
               </p>
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="system-category">System Activity Category *</Label>
-              <Select
-                value={formData.category}
-                onValueChange={(value) => updateFormData('category', value)}
-                disabled={categoriesLoading}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={categoriesLoading ? "Loading categories..." : "Select system category"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {systemActivityCategories.map(category => {
-                    const info = getSystemCategoryInfo(category);
-                    return (
-                      <SelectItem key={category} value={category}>
-                        <div className="flex items-center justify-between w-full">
-                          <span>{category}</span>
-                          <div className="flex items-center gap-1 ml-2">
-                            {info.status === 'active' && (
-                              <Badge variant="default" className="text-xs bg-success/10 text-success hover:bg-success/20">
-                                <CheckCircle className="w-3 h-3 mr-1" />
-                                Active
-                              </Badge>
-                            )}
-                            {isAdmin && (
-                              <span className="text-xs text-muted-foreground ml-1">
-                                ({info.activityCount})
-                              </span>
-                            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* System Activity Category */}
+              <div className="space-y-2">
+                <Label htmlFor="system-category">System Activity Category *</Label>
+                <Select
+                  value={formData.category}
+                  onValueChange={(value) => updateFormData('category', value)}
+                  disabled={categoriesLoading}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={categoriesLoading ? "Loading categories..." : "Select system category"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {systemActivityCategories.map(category => {
+                      const info = getSystemCategoryInfo(category);
+                      return (
+                        <SelectItem key={category} value={category}>
+                          <div className="flex items-center justify-between w-full">
+                            <span>{category}</span>
+                            <div className="flex items-center gap-1 ml-2">
+                              {info.status === 'active' && (
+                                <Badge variant="default" className="text-xs bg-success/10 text-success hover:bg-success/20">
+                                  <CheckCircle className="w-3 h-3 mr-1" />
+                                  Active
+                                </Badge>
+                              )}
+                              {isAdmin && (
+                                <span className="text-xs text-muted-foreground ml-1">
+                                  ({info.activityCount})
+                                </span>
+                              )}
+                            </div>
                           </div>
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+                
+                {/* System Category Context Information */}
+                {formData.category && (
+                  <div className="mt-2 p-3 border rounded-lg bg-muted/30">
+                    <div className="flex items-start gap-2">
+                      <Info className="w-4 h-4 mt-0.5 text-muted-foreground" />
+                      <div className="space-y-1 text-sm">
+                        <div className="font-medium">System Category: {formData.category}</div>
+                        <div className="text-muted-foreground">
+                          Used for internal organization and activity management
                         </div>
-                      </SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
-              
-              {/* System Category Context Information */}
-              {formData.category && (
-                <div className="mt-2 p-3 border rounded-lg bg-muted/30">
-                  <div className="flex items-start gap-2">
-                    <Info className="w-4 h-4 mt-0.5 text-muted-foreground" />
-                    <div className="space-y-1 text-sm">
-                      <div className="font-medium">System Category: {formData.category}</div>
-                      <div className="text-muted-foreground">
-                        Used for internal organization and activity management
+                        {isAdmin && (() => {
+                          const info = getSystemCategoryInfo(formData.category);
+                          return (
+                            <div className="text-muted-foreground">
+                              {info.activityCount} system {info.activityCount === 1 ? 'activity' : 'activities'} in this category
+                            </div>
+                          );
+                        })()}
                       </div>
-                      {isAdmin && (() => {
-                        const info = getSystemCategoryInfo(formData.category);
-                        return (
-                          <div className="text-muted-foreground">
-                            {info.activityCount} system {info.activityCount === 1 ? 'activity' : 'activities'} in this category
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Ways of Working Category */}
+              <div className="space-y-2">
+                <Label htmlFor="ways-of-working-category">Ways of Working Category (Optional)</Label>
+                <Select
+                  value={formData.ways_of_working_category || 'none'}
+                  onValueChange={(value) => {
+                    console.log('Selected ways of working category:', value);
+                    const newValue = value === 'none' ? null : value;
+                    console.log('Setting ways_of_working_category to:', newValue);
+                    updateFormData('ways_of_working_category', newValue);
+                  }}
+                  disabled={categoriesLoading}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={categoriesLoading ? "Loading categories..." : "Select ways of working category"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">
+                      <span className="text-muted-foreground">None - Don't map to profile section</span>
+                    </SelectItem>
+                    {waysOfWorkingCategories.map(category => {
+                      const info = getWaysOfWorkingCategoryInfo(category);
+                      return (
+                        <SelectItem key={category} value={category}>
+                          <div className="flex items-center justify-between w-full">
+                            <span>{category}</span>
+                            <div className="flex items-center gap-1 ml-2">
+                              {info.status === 'complete' && (
+                                <Badge variant="default" className="text-xs bg-success/10 text-success hover:bg-success/20">
+                                  <CheckCircle className="w-3 h-3 mr-1" />
+                                  Active
+                                </Badge>
+                              )}
+                              {info.status === 'mapped' && (
+                                <Badge variant="secondary" className="text-xs bg-warning/10 text-warning hover:bg-warning/20">
+                                  <AlertTriangle className="w-3 h-3 mr-1" />
+                                  Mapped
+                                </Badge>
+                              )}
+                              {info.status === 'unmapped' && (
+                                <Badge variant="destructive" className="text-xs">
+                                  <XCircle className="w-3 h-3 mr-1" />
+                                  Unmapped
+                                </Badge>
+                              )}
+                              {isAdmin && (
+                                <span className="text-xs text-muted-foreground ml-1">
+                                  ({info.activityCount})
+                                </span>
+                              )}
+                            </div>
                           </div>
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+                
+                {/* Ways of Working Category Context Information */}
+                {formData.ways_of_working_category ? (
+                  <div className="mt-2 p-3 border rounded-lg bg-muted/30">
+                    <div className="space-y-2">
+                      {(() => {
+                        const info = getWaysOfWorkingCategoryInfo(formData.ways_of_working_category);
+                        return (
+                          <>
+                            <div className="flex items-start gap-2">
+                              <Info className="w-4 h-4 mt-0.5 text-muted-foreground" />
+                              <div className="space-y-1 text-sm">
+                                <div className="font-medium">Ways of Working: {formData.ways_of_working_category}</div>
+                                {info.profileSection ? (
+                                  <div className="text-muted-foreground">
+                                    Maps to: <span className="font-medium">{info.profileSection}</span> profile section
+                                  </div>
+                                ) : (
+                                  <div className="text-destructive">
+                                    ⚠️ Not mapped to any profile section
+                                  </div>
+                                )}
+                                {isAdmin && (
+                                  <div className="text-muted-foreground">
+                                    {info.activityCount} system {info.activityCount === 1 ? 'activity' : 'activities'} with this mapping
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            
+                            {info.status === 'unmapped' && (
+                              <Alert className="border-warning bg-warning/5">
+                                <AlertTriangle className="h-4 w-4" />
+                                <AlertDescription className="text-sm">
+                                  This category isn't mapped to a profile section. Activities with this category won't appear in trainer profiles.
+                                </AlertDescription>
+                              </Alert>
+                            )}
+                          </>
                         );
                       })()}
                     </div>
                   </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Ways of Working Category Selection */}
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-lg font-semibold">Ways of Working Category</h3>
-              <p className="text-sm text-muted-foreground">
-                Optional: Map this activity to a profile section for client workflow integration.
-              </p>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="ways-of-working-category">Ways of Working Category</Label>
-              <Select
-                value={formData.ways_of_working_category || 'none'}
-                onValueChange={(value) => updateFormData('ways_of_working_category', value === 'none' ? null : value)}
-                disabled={categoriesLoading}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={categoriesLoading ? "Loading categories..." : "Select ways of working category (optional)"} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">
-                    <span className="text-muted-foreground">None - Don't map to profile section</span>
-                  </SelectItem>
-                  {waysOfWorkingCategories.map(category => {
-                    const info = getWaysOfWorkingCategoryInfo(category);
-                    return (
-                      <SelectItem key={category} value={category}>
-                        <div className="flex items-center justify-between w-full">
-                          <span>{category}</span>
-                          <div className="flex items-center gap-1 ml-2">
-                            {info.status === 'complete' && (
-                              <Badge variant="default" className="text-xs bg-success/10 text-success hover:bg-success/20">
-                                <CheckCircle className="w-3 h-3 mr-1" />
-                                Active
-                              </Badge>
-                            )}
-                            {info.status === 'mapped' && (
-                              <Badge variant="secondary" className="text-xs bg-warning/10 text-warning hover:bg-warning/20">
-                                <AlertTriangle className="w-3 h-3 mr-1" />
-                                Mapped
-                              </Badge>
-                            )}
-                            {info.status === 'unmapped' && (
-                              <Badge variant="destructive" className="text-xs">
-                                <XCircle className="w-3 h-3 mr-1" />
-                                Unmapped
-                              </Badge>
-                            )}
-                            {isAdmin && (
-                              <span className="text-xs text-muted-foreground ml-1">
-                                ({info.activityCount})
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
-              
-              {/* Ways of Working Category Context Information */}
-              {formData.ways_of_working_category && (
-                <div className="mt-2 p-3 border rounded-lg bg-muted/30">
-                  <div className="space-y-2">
-                    {(() => {
-                      const info = getWaysOfWorkingCategoryInfo(formData.ways_of_working_category);
-                      return (
-                        <>
-                          <div className="flex items-start gap-2">
-                            <Info className="w-4 h-4 mt-0.5 text-muted-foreground" />
-                            <div className="space-y-1 text-sm">
-                              <div className="font-medium">Ways of Working: {formData.ways_of_working_category}</div>
-                              {info.profileSection ? (
-                                <div className="text-muted-foreground">
-                                  Maps to: <span className="font-medium">{info.profileSection}</span> profile section
-                                </div>
-                              ) : (
-                                <div className="text-destructive">
-                                  ⚠️ Not mapped to any profile section
-                                </div>
-                              )}
-                              {isAdmin && (
-                                <div className="text-muted-foreground">
-                                  {info.activityCount} system {info.activityCount === 1 ? 'activity' : 'activities'} with this mapping
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                          
-                          {info.status === 'unmapped' && (
-                            <Alert className="border-warning bg-warning/5">
-                              <AlertTriangle className="h-4 w-4" />
-                              <AlertDescription className="text-sm">
-                                This category isn't mapped to a profile section. Activities with this category won't appear in trainer profiles.
-                              </AlertDescription>
-                            </Alert>
-                          )}
-                        </>
-                      );
-                    })()}
-                  </div>
-                </div>
-              )}
-              
-              {!formData.ways_of_working_category && (
-                <div className="mt-2 p-3 border rounded-lg bg-muted/10 border-muted">
-                  <div className="flex items-start gap-2">
-                    <Info className="w-4 h-4 mt-0.5 text-muted-foreground" />
-                    <div className="text-sm text-muted-foreground">
-                      <div className="font-medium">No Ways of Working Mapping</div>
-                      <div>This activity won't appear in trainer profile sections, but will be available for template building.</div>
+                ) : (
+                  <div className="mt-2 p-3 border rounded-lg bg-muted/10 border-muted">
+                    <div className="flex items-start gap-2">
+                      <Info className="w-4 h-4 mt-0.5 text-muted-foreground" />
+                      <div className="text-sm text-muted-foreground">
+                        <div className="font-medium">No Ways of Working Mapping</div>
+                        <div>This activity won't appear in trainer profile sections, but will be available for template building.</div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-              
-              {categoriesError && (
-                <Alert className="border-destructive bg-destructive/5">
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertDescription className="text-sm">
-                    Failed to load ways of working categories: {categoriesError}
-                  </AlertDescription>
-                </Alert>
-              )}
+                )}
+                
+                {categoriesError && (
+                  <Alert className="border-destructive bg-destructive/5">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertDescription className="text-sm">
+                      Failed to load ways of working categories: {categoriesError}
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </div>
             </div>
           </div>
 
