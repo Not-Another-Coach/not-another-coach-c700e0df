@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Activity } from "lucide-react";
+import { Search, Plus, Activity, ChevronUp, ChevronDown } from "lucide-react";
 import { useTrainerActivities } from "@/hooks/useTrainerActivities";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -36,6 +36,7 @@ export function EnhancedActivityPickerDialog({
 }: EnhancedActivityPickerDialogProps) {
   const [search, setSearch] = useState("");
   const [customActivityName, setCustomActivityName] = useState("");
+  const [showCustomForm, setShowCustomForm] = useState(false);
   const { activities, loading, createActivity, refresh } = useTrainerActivities();
 
   // Fetch activities when dialog opens
@@ -149,31 +150,45 @@ export function EnhancedActivityPickerDialog({
           </div>
 
           {/* Create Custom Activity */}
-          <div className="p-4 border rounded-lg bg-accent/30 flex-shrink-0">
-            <h4 className="font-medium mb-2">Create New Activity</h4>
-            <div className="flex gap-2">
-              <Input
-                placeholder="Enter activity name..."
-                value={customActivityName}
-                onChange={(e) => setCustomActivityName(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleCreateCustomActivity()}
-              />
-              <Button 
-                onClick={handleCreateCustomActivity}
-                disabled={!customActivityName.trim() || selectedActivityNames.includes(customActivityName.trim().toLowerCase())}
-                size="sm"
-              >
-                <Plus className="h-4 w-4 mr-1" />
-                Add
-              </Button>
-            </div>
-            {selectedActivityNames.includes(customActivityName.trim().toLowerCase()) && (
-              <p className="text-sm text-destructive mt-1">Activity already selected</p>
+          <div className="flex-shrink-0">
+            <Button
+              variant="outline"
+              onClick={() => setShowCustomForm(!showCustomForm)}
+              className="w-full justify-between"
+            >
+              <span className="flex items-center gap-2">
+                <Plus className="h-4 w-4" />
+                Create New Activity
+              </span>
+              {showCustomForm ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </Button>
+            
+            {showCustomForm && (
+              <div className="mt-3 p-4 border rounded-lg bg-accent/30">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Enter activity name..."
+                    value={customActivityName}
+                    onChange={(e) => setCustomActivityName(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleCreateCustomActivity()}
+                  />
+                  <Button 
+                    onClick={handleCreateCustomActivity}
+                    disabled={!customActivityName.trim() || selectedActivityNames.includes(customActivityName.trim().toLowerCase())}
+                    size="sm"
+                  >
+                    Add
+                  </Button>
+                </div>
+                {selectedActivityNames.includes(customActivityName.trim().toLowerCase()) && (
+                  <p className="text-sm text-destructive mt-1">Activity already selected</p>
+                )}
+              </div>
             )}
           </div>
 
-          <ScrollArea className="flex-1 min-h-0 max-h-[50vh]">
-            <div className="space-y-4 pr-4">{loading && (
+          <ScrollArea className="flex-1 min-h-0 h-[400px] border rounded-lg">
+            <div className="space-y-4 p-4">{loading && (
                 <div className="text-center py-8 text-muted-foreground">
                   <p>Loading activities...</p>
                 </div>
