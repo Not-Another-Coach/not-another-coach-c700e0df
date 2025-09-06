@@ -377,13 +377,13 @@ export function TemplateManagementTabs() {
       <Tabs defaultValue={visibleTabs[0]} className="space-y-4">
         <div className="flex flex-col space-y-4">
           <ScrollArea className="w-full">
-            <TabsList className="inline-flex h-10 items-center justify-start rounded-md bg-muted p-1 text-muted-foreground min-w-max">
+            <TabsList className="inline-flex h-auto items-center justify-start rounded-md bg-muted p-1 text-muted-foreground min-w-max">
               {visibleTabs.includes('templates') && (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <TabsTrigger value="templates" className="flex items-center gap-1 px-2 sm:px-3 py-1.5 text-xs sm:text-sm whitespace-nowrap">
+                    <TabsTrigger value="templates" className="flex items-center gap-1 px-2 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap">
                       <Settings className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                      <span className="hidden xs:inline sm:inline">Templates</span>
+                      <span className="hidden sm:inline">Templates</span>
                     </TabsTrigger>
                   </TooltipTrigger>
                   <TooltipContent>Templates</TooltipContent>
@@ -392,9 +392,9 @@ export function TemplateManagementTabs() {
               {visibleTabs.includes('assignment') && (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <TabsTrigger value="assignment" className="flex items-center gap-1 px-2 sm:px-3 py-1.5 text-xs sm:text-sm whitespace-nowrap">
+                    <TabsTrigger value="assignment" className="flex items-center gap-1 px-2 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap">
                       <Users className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                      <span className="hidden xs:inline sm:inline">Assignment</span>
+                      <span className="hidden sm:inline">Assignment</span>
                     </TabsTrigger>
                   </TooltipTrigger>
                   <TooltipContent>Assignment</TooltipContent>
@@ -403,9 +403,9 @@ export function TemplateManagementTabs() {
               {visibleTabs.includes('activities') && (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <TabsTrigger value="activities" className="flex items-center gap-1 px-2 sm:px-3 py-1.5 text-xs sm:text-sm whitespace-nowrap">
+                    <TabsTrigger value="activities" className="flex items-center gap-1 px-2 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap">
                       <User className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                      <span className="hidden xs:inline sm:inline">Activities</span>
+                      <span className="hidden sm:inline">Activities</span>
                     </TabsTrigger>
                   </TooltipTrigger>
                   <TooltipContent>Activities</TooltipContent>
@@ -414,9 +414,9 @@ export function TemplateManagementTabs() {
               {visibleTabs.includes('categories') && (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <TabsTrigger value="categories" className="flex items-center gap-1 px-2 sm:px-3 py-1.5 text-xs sm:text-sm whitespace-nowrap">
+                    <TabsTrigger value="categories" className="flex items-center gap-1 px-2 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap">
                       <Settings className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                      <span className="hidden xs:inline sm:inline">Categories</span>
+                      <span className="hidden sm:inline">Categories</span>
                     </TabsTrigger>
                   </TooltipTrigger>
                   <TooltipContent>Categories</TooltipContent>
@@ -425,9 +425,9 @@ export function TemplateManagementTabs() {
               {visibleTabs.includes('sections') && (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <TabsTrigger value="sections" className="flex items-center gap-1 px-2 sm:px-3 py-1.5 text-xs sm:text-sm whitespace-nowrap">
+                    <TabsTrigger value="sections" className="flex items-center gap-1 px-2 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap">
                       <Settings className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                      <span className="hidden xs:inline sm:inline">Sections</span>
+                      <span className="hidden sm:inline">Sections</span>
                     </TabsTrigger>
                   </TooltipTrigger>
                   <TooltipContent>Template Sections</TooltipContent>

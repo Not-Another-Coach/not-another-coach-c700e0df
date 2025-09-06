@@ -10,6 +10,8 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { 
   Plus, 
   Edit, 
@@ -752,14 +754,15 @@ export function TemplateBuilder({
 
       {/* Template Sections Dialog */}
       <Dialog open={showSectionsDialog} onOpenChange={setShowSectionsDialog}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] sm:max-w-4xl lg:max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit Template Sections</DialogTitle>
+            <DialogTitle className="text-lg sm:text-xl">Edit Template Sections</DialogTitle>
           </DialogHeader>
           {selectedTemplateForSections && templateSections.length > 0 && (
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${templateSections.length}, 1fr)` }}>
-                {templateSections.map((section) => {
+              <ScrollArea className="w-full">
+                <TabsList className="inline-flex h-auto p-1 bg-muted rounded-md min-w-max">
+                  {templateSections.map((section) => {
                   const getSectionIcon = (sectionKey: string) => {
                     switch (sectionKey) {
                       case 'onboarding':
@@ -779,18 +782,41 @@ export function TemplateBuilder({
                     }
                   };
 
+                  const getSectionDisplayName = (name: string) => {
+                    // Shorten section names for better mobile display
+                    const nameMap: Record<string, string> = {
+                      'Commitments & Expectations': 'Commitments',
+                      'Tracking & Tools': 'Tracking',
+                      'Ongoing Support': 'Support',
+                      'Getting Started': 'Getting Started',
+                      'First Week': 'First Week',
+                      'Trainer Specific': 'Trainer Notes'
+                    };
+                    return nameMap[name] || name;
+                  };
+
                   return (
-                    <TabsTrigger 
-                      key={section.id} 
-                      value={section.section_key} 
-                      className="flex items-center gap-2"
-                    >
-                      {getSectionIcon(section.section_key)}
-                      {section.section_name}
-                    </TabsTrigger>
+                    <TooltipProvider key={section.id}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <TabsTrigger 
+                            value={section.section_key} 
+                            className="flex items-center gap-1 px-2 sm:px-3 py-2 text-xs sm:text-sm whitespace-nowrap"
+                          >
+                            {getSectionIcon(section.section_key)}
+                            <span className="hidden sm:inline">{getSectionDisplayName(section.section_name)}</span>
+                            <span className="sm:hidden">{getSectionIcon(section.section_key)}</span>
+                          </TabsTrigger>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{section.section_name}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   );
-                })}
-              </TabsList>
+                  })}
+                </TabsList>
+              </ScrollArea>
               
               {templateSections.map((section) => {
                 const renderSectionContent = () => {
