@@ -21,8 +21,6 @@ import { FloatingMessageButton } from "@/components/FloatingMessageButton";
 import { ClientProspectSummary } from "@/components/coach/ClientProspectSummary";
 import { UpcomingSessionsWidget } from "@/components/dashboard/UpcomingSessionsWidget";
 import { CoachExclusivityEndedAlert } from "@/components/dashboard/CoachExclusivityEndedAlert";
-import { TrainerQualificationAlerts } from "@/components/alerts/QualificationRequestAlerts";
-import { TrainerSpecialtyAlerts } from "@/components/alerts/SpecialtyRequestAlerts";
 import { ClientOnboardingManagement } from "@/components/coach/ClientOnboardingManagement";
 import { OnboardingSummaryWidget } from "@/components/dashboard/OnboardingSummaryWidget";
 import { GoalsSection } from "@/components/goals/GoalsSection";
@@ -520,14 +518,9 @@ const TrainerDashboard = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Qualification and Specialty Request Alerts */}
+        {/* Qualification and Specialty Request Alerts - Moved to Live Activity Feed */}
         <div className="mb-6 space-y-4">
-          <TrainerQualificationAlerts 
-            onNavigateToProfile={() => navigate('/trainer/profile-setup?tab=qualifications')}
-          />
-          <TrainerSpecialtyAlerts 
-            onNavigateToProfile={() => navigate('/trainer/profile-setup?tab=expertise')}
-          />
+          {/* Alerts moved to Live Activity Feed */}
         </div>
         
         {/* Content based on active view */}

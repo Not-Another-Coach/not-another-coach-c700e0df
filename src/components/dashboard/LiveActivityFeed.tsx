@@ -2,9 +2,11 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Filter } from 'lucide-react';
+import { Filter, CheckCircle, XCircle, FileText, Target } from 'lucide-react';
 import { useActivityAlerts } from '@/hooks/useActivityAlerts';
 import { useTrainerStreak } from '@/hooks/useTrainerStreak';
+import { useTrainerCustomRequests } from '@/hooks/useQualifications';
+import { useTrainerCustomSpecialtyRequests } from '@/hooks/useSpecialties';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserTypeChecks } from '@/hooks/useUserType';
 import { format } from 'date-fns';
@@ -12,8 +14,80 @@ import { format } from 'date-fns';
 export const LiveActivityFeed = () => {
   const { alerts, loading } = useActivityAlerts();
   const { streakCount, loading: streakLoading } = useTrainerStreak();
+  const { data: qualificationRequests } = useTrainerCustomRequests();
+  const { requests: specialtyRequests } = useTrainerCustomSpecialtyRequests();
   const { user } = useAuth();
   const { isTrainer } = useUserTypeChecks();
+
+  // Create combined activity feed including qualifications and specialties
+  const createCombinedActivities = () => {
+    const activities: any[] = [...alerts];
+
+    // Add qualification notifications
+    if (qualificationRequests) {
+      qualificationRequests
+        .filter(req => req.status !== 'pending')
+        .forEach(req => {
+          const updatedAt = new Date(req.updated_at || req.created_at);
+          const threeDaysAgo = new Date();
+          threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+          
+          if (updatedAt > threeDaysAgo) {
+            activities.push({
+              id: `qual-${req.id}`,
+              title: req.status === 'approved' 
+                ? `Qualification "${req.qualification_name}" approved`
+                : `Qualification "${req.qualification_name}" rejected`,
+              description: req.admin_notes || (req.status === 'approved' 
+                ? 'Your custom qualification has been approved by admin'
+                : 'Please contact support if you have questions'),
+              icon: req.status === 'approved' ? '✅' : '❌',
+              color: req.status === 'approved' 
+                ? 'bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200'
+                : 'bg-gradient-to-r from-red-50 to-pink-50 border border-red-200',
+              created_at: req.updated_at || req.created_at,
+              type: 'qualification',
+              customType: true
+            });
+          }
+        });
+    }
+
+    // Add specialty notifications
+    if (specialtyRequests) {
+      specialtyRequests
+        .filter(req => req.status !== 'pending')
+        .forEach(req => {
+          const updatedAt = new Date(req.updated_at || req.created_at);
+          const threeDaysAgo = new Date();
+          threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+          
+          if (updatedAt > threeDaysAgo) {
+            activities.push({
+              id: `spec-${req.id}`,
+              title: req.status === 'approved' 
+                ? `Specialty "${req.requested_name}" approved`
+                : `Specialty "${req.requested_name}" rejected`,
+              description: req.admin_notes || (req.status === 'approved' 
+                ? 'Your custom specialty has been approved by admin'
+                : 'Please contact support if you have questions'),
+              icon: req.status === 'approved' ? '✅' : '❌',
+              color: req.status === 'approved' 
+                ? 'bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200'
+                : 'bg-gradient-to-r from-red-50 to-pink-50 border border-red-200',
+              created_at: req.updated_at || req.created_at,
+              type: 'specialty',
+              customType: true
+            });
+          }
+        });
+    }
+
+    // Sort by created_at descending
+    return activities.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  };
+
+  const combinedActivities = createCombinedActivities();
 
   if (loading) {
     return (
@@ -64,13 +138,13 @@ export const LiveActivityFeed = () => {
           </div>
         )}
 
-        {/* Regular activity alerts */}
-        {alerts.length === 0 ? (
+        {/* Regular activity alerts including qualifications and specialties */}
+        {combinedActivities.length === 0 ? (
           <div className="text-center py-6 text-muted-foreground">
             <p>No recent activity</p>
           </div>
         ) : (
-          alerts.map((alert) => (
+          combinedActivities.map((alert) => (
             <div key={alert.id} className={`flex items-start gap-3 p-3 rounded-lg ${alert.color}`}>
               <div className="w-8 h-8 rounded-full bg-white/50 flex items-center justify-center flex-shrink-0">
                 {alert.icon}
@@ -78,9 +152,23 @@ export const LiveActivityFeed = () => {
               <div className="flex-1 min-w-0">
                 <p className="font-medium">{alert.title}</p>
                 <p className="text-sm mt-1 opacity-75">{alert.description}</p>
-                <Badge variant="secondary" className="mt-2">
-                  {format(new Date(alert.created_at), 'h:mm a')}
-                </Badge>
+                <div className="flex items-center gap-2 mt-2">
+                  <Badge variant="secondary">
+                    {format(new Date(alert.created_at), 'h:mm a')}
+                  </Badge>
+                  {(alert as any).customType && (alert as any).type === 'qualification' && (
+                    <Badge variant="outline" className="text-xs">
+                      <FileText className="w-3 h-3 mr-1" />
+                      Qualification
+                    </Badge>
+                  )}
+                  {(alert as any).customType && (alert as any).type === 'specialty' && (
+                    <Badge variant="outline" className="text-xs">
+                      <Target className="w-3 h-3 mr-1" />
+                      Specialty
+                    </Badge>
+                  )}
+                </div>
               </div>
             </div>
           ))
