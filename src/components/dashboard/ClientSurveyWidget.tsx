@@ -72,7 +72,7 @@ export function ClientSurveyWidget({ profile }: ClientSurveyWidgetProps) {
     budget_flexibility: "flexible" as "strict" | "flexible" | "negotiable",
     
     // Waitlist and availability preferences
-    waitlist_preference: "quality_over_speed" as "asap" | "quality_over_speed",
+    waitlist_preference: null as boolean | null,
     flexible_scheduling: true,
     
     // Survey completion tracking
@@ -137,7 +137,7 @@ export function ClientSurveyWidget({ profile }: ClientSurveyWidgetProps) {
         budget_range_min: profileData.budget_range_min,
         budget_range_max: profileData.budget_range_max,
         budget_flexibility: profileData.budget_flexibility || "flexible",
-        waitlist_preference: profileData.waitlist_preference || "quality_over_speed",
+        waitlist_preference: profileData.waitlist_preference ?? null,
         flexible_scheduling: profileData.flexible_scheduling ?? true,
         client_survey_step: profileData.client_survey_step || 1,
       }));
@@ -222,8 +222,8 @@ export function ClientSurveyWidget({ profile }: ClientSurveyWidgetProps) {
         }
         break;
       case 9: // Availability
-        if (!formData.start_timeline) {
-          newErrors.start_timeline = "Please select when you'd like to start";
+        if (formData.waitlist_preference === null) {
+          newErrors.waitlist_preference = "Please select how you'd prefer to handle trainer availability";
         }
         break;
     }
@@ -262,7 +262,7 @@ export function ClientSurveyWidget({ profile }: ClientSurveyWidgetProps) {
         // Budget is mandatory - either min or max must be set
         return (formData.budget_range_min || formData.budget_range_max) ? 'completed' : 'not_started';
       case 9:
-        return formData.start_timeline ? 'completed' : 'not_started';
+        return formData.waitlist_preference !== null ? 'completed' : 'not_started';
       default:
         return 'not_started';
     }
