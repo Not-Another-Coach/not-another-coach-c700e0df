@@ -15,6 +15,7 @@ import { EnhancedActivity } from '@/hooks/useEnhancedActivities';
 import { useWaysOfWorkingCategories } from '@/hooks/useWaysOfWorkingCategories';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { useTrainerActivities } from '@/hooks/useTrainerActivities';
+import { useTrainerProfile } from '@/hooks/useTrainerProfile';
 import { CheckCircle, AlertTriangle, XCircle, Info } from 'lucide-react';
 
 interface EnhancedActivityBuilderProps {
@@ -62,19 +63,44 @@ export const EnhancedActivityBuilder = ({
     .filter((category, index, arr) => arr.indexOf(category) === index)
     .sort();
     
-  // Get all ways of working categories (mapped + unmapped from system activities)
+  // Get trainer profile data
+  const { profile: trainerProfile } = useTrainerProfile();
+  
+  // Get all ways of working categories from multiple sources
   const allWaysOfWorkingCategories = [
     // Categories from database (mapped)
     ...categories.map(c => c.activity_category),
     // Categories from system activities that may not be mapped
     ...systemActivities
       .filter(a => a.ways_of_working_category)
-      .map(a => a.ways_of_working_category)
+      .map(a => a.ways_of_working_category),
+    // Categories from trainer profile sections
+    ...(trainerProfile?.ways_of_working_onboarding || []),
+    ...(trainerProfile?.ways_of_working_first_week || []),
+    ...(trainerProfile?.ways_of_working_ongoing || []),
+    ...(trainerProfile?.ways_of_working_tracking || []),
+    ...(trainerProfile?.ways_of_working_expectations || []),
+    ...(trainerProfile?.ways_of_working_what_i_bring || [])
   ];
   
   const waysOfWorkingCategories = [...new Set(allWaysOfWorkingCategories)]
     .filter(Boolean)
     .sort();
+
+  // Debug logging
+  console.log('Ways of Working Debug:', {
+    mappedCategories: categories.map(c => c.activity_category),
+    systemActivities: systemActivities.filter(a => a.ways_of_working_category).map(a => a.ways_of_working_category),
+    trainerProfileCategories: {
+      onboarding: trainerProfile?.ways_of_working_onboarding,
+      firstWeek: trainerProfile?.ways_of_working_first_week,
+      ongoing: trainerProfile?.ways_of_working_ongoing,
+      tracking: trainerProfile?.ways_of_working_tracking,
+      expectations: trainerProfile?.ways_of_working_expectations,
+      whatIBring: trainerProfile?.ways_of_working_what_i_bring
+    },
+    finalCategories: waysOfWorkingCategories
+  });
     
   // Get category status and information
   const getSystemCategoryInfo = (categoryName: string) => {
