@@ -5,7 +5,7 @@ import { useClientProfile } from '@/hooks/useClientProfile';
 import { useEnhancedTrainerMatching } from '@/hooks/useEnhancedTrainerMatching';
 import { useSavedTrainers } from '@/hooks/useSavedTrainers';
 import { useJourneyProgress } from '@/hooks/useJourneyProgress';
-import { SwipeableCard } from '@/components/SwipeableCard';
+import { SwipeableInstagramCard } from '@/components/SwipeableInstagramCard';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -219,7 +219,7 @@ export default function Discovery() {
         <div className="relative h-[600px] mb-6">
           {!isFinished ? (
             remainingTrainers.map((match, index) => (
-              <SwipeableCard
+              <SwipeableInstagramCard
                 key={`${match.trainer.id}-${currentTrainerIndex + index}`}
                 trainer={match.trainer}
                 onSwipe={handleSwipe}
