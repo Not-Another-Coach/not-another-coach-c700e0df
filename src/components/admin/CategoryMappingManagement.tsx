@@ -300,7 +300,7 @@ export default function CategoryMappingManagement() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Activity Category</TableHead>
+              <TableHead>Ways of Working Category</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Template Section</TableHead>
               <TableHead>Profile Section</TableHead>
