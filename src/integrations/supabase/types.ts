@@ -3827,6 +3827,94 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_publication_requests: {
+        Row: {
+          admin_notes: string | null
+          created_at: string | null
+          id: string
+          rejection_reason: string | null
+          requested_at: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status:
+            | Database["public"]["Enums"]["publication_request_status"]
+            | null
+          trainer_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string | null
+          id?: string
+          rejection_reason?: string | null
+          requested_at?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?:
+            | Database["public"]["Enums"]["publication_request_status"]
+            | null
+          trainer_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string | null
+          id?: string
+          rejection_reason?: string | null
+          requested_at?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?:
+            | Database["public"]["Enums"]["publication_request_status"]
+            | null
+          trainer_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_publication_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_publication_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "v_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_publication_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "v_trainers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_publication_requests_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_publication_requests_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "v_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_publication_requests_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "v_trainers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profile_update_streaks: {
         Row: {
           created_at: string
@@ -6552,6 +6640,10 @@ export type Database = {
         Args: { question_ids: string[] }
         Returns: undefined
       }
+      request_profile_publication: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       request_profile_verification: {
         Args: { trainer_id: string }
         Returns: boolean
@@ -6567,6 +6659,15 @@ export type Database = {
       revert_waitlist_client_conversion: {
         Args: { p_client_id: string; p_trainer_id: string }
         Returns: boolean
+      }
+      review_profile_publication: {
+        Args: {
+          p_action: Database["public"]["Enums"]["publication_request_status"]
+          p_admin_notes?: string
+          p_rejection_reason?: string
+          p_request_id: string
+        }
+        Returns: undefined
       }
       start_waitlist_exclusive_period: {
         Args: { p_coach_id: string; p_duration_hours?: number }
@@ -6737,6 +6838,7 @@ export type Database = {
         | "high_sub_no_onboarding"
       onboarding_visibility: "client" | "trainer" | "shared"
       payout_frequency_enum: "weekly" | "monthly"
+      publication_request_status: "pending" | "approved" | "rejected"
       user_type: "client" | "trainer" | "admin"
       verification_audit_action:
         | "upload"
@@ -6983,6 +7085,7 @@ export const Constants = {
       ],
       onboarding_visibility: ["client", "trainer", "shared"],
       payout_frequency_enum: ["weekly", "monthly"],
+      publication_request_status: ["pending", "approved", "rejected"],
       user_type: ["client", "trainer", "admin"],
       verification_audit_action: [
         "upload",

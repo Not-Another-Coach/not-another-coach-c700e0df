@@ -24,12 +24,14 @@ import TemplateSectionsManagement from "@/components/admin/TemplateSectionsManag
 import { EnhancedVerificationManagement } from "@/components/admin/EnhancedVerificationManagement";
 import { QualificationRequestWidget } from "@/components/alerts/QualificationRequestAlerts";
 import { SpecialtyRequestWidget } from "@/components/alerts/SpecialtyRequestAlerts";
+import { ProfilePublicationManagement } from "@/components/admin/ProfilePublicationManagement";
 
 export const AdminDashboard = () => {
   const { user } = useAuth();
   const { isAdmin } = useUserRoles();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [usersSubTab, setUsersSubTab] = useState("user-management");
 
   if (!user || !isAdmin) {
     return (
@@ -80,8 +82,13 @@ export const AdminDashboard = () => {
           {/* Users & Access Tab */}
           {activeTab === "users" && (
             <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <Card className="cursor-pointer hover:shadow-md transition-shadow bg-blue-50 border-blue-200">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <Card 
+                  className={`cursor-pointer hover:shadow-md transition-shadow ${
+                    usersSubTab === "user-management" ? "bg-blue-100 border-blue-300" : "bg-blue-50 border-blue-200"
+                  }`}
+                  onClick={() => setUsersSubTab("user-management")}
+                >
                   <CardHeader>
                     <CardTitle>User Management</CardTitle>
                   </CardHeader>
@@ -90,7 +97,12 @@ export const AdminDashboard = () => {
                   </CardContent>
                 </Card>
                 
-                <Card className="cursor-pointer hover:shadow-md transition-shadow bg-green-50 border-green-200">
+                <Card 
+                  className={`cursor-pointer hover:shadow-md transition-shadow ${
+                    usersSubTab === "bulk-upload" ? "bg-green-100 border-green-300" : "bg-green-50 border-green-200"
+                  }`}
+                  onClick={() => setUsersSubTab("bulk-upload")}
+                >
                   <CardHeader>
                     <CardTitle>Bulk User Upload</CardTitle>
                   </CardHeader>
@@ -99,7 +111,12 @@ export const AdminDashboard = () => {
                   </CardContent>
                 </Card>
                 
-                <Card className="cursor-pointer hover:shadow-md transition-shadow bg-purple-50 border-purple-200">
+                <Card 
+                  className={`cursor-pointer hover:shadow-md transition-shadow ${
+                    usersSubTab === "verification" ? "bg-purple-100 border-purple-300" : "bg-purple-50 border-purple-200"
+                  }`}
+                  onClick={() => setUsersSubTab("verification")}
+                >
                   <CardHeader>
                     <CardTitle>Verification System</CardTitle>
                   </CardHeader>
@@ -107,12 +124,29 @@ export const AdminDashboard = () => {
                     <p className="text-sm text-muted-foreground">Manage trainer verification requests</p>
                   </CardContent>
                 </Card>
+
+                <Card 
+                  className={`cursor-pointer hover:shadow-md transition-shadow ${
+                    usersSubTab === "publications" ? "bg-indigo-100 border-indigo-300" : "bg-indigo-50 border-indigo-200"
+                  }`}
+                  onClick={() => setUsersSubTab("publications")}
+                >
+                  <CardHeader>
+                    <CardTitle>Profile Publications</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">Review and approve profile publication requests</p>
+                  </CardContent>
+                </Card>
               </div>
               
-              {/* Default to User Management */}
+              {/* Sub-tab content */}
               <Card>
                 <CardContent className="p-6">
-                  <UserManagement />
+                  {usersSubTab === "user-management" && <UserManagement />}
+                  {usersSubTab === "bulk-upload" && <BulkUserUpload />}
+                  {usersSubTab === "verification" && <EnhancedVerificationManagement />}
+                  {usersSubTab === "publications" && <ProfilePublicationManagement />}
                 </CardContent>
               </Card>
             </div>

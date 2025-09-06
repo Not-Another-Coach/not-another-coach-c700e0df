@@ -46,6 +46,7 @@ import { WorkingHoursAndAvailabilitySection } from "@/components/trainer-setup/W
 import { TermsAndNotificationsSection } from "@/components/trainer-setup/TermsAndNotificationsSection";
 import { EnhancedVerificationSection } from "@/components/trainer-setup/EnhancedVerificationSection";
 import { ProfessionalDocumentsSection } from "@/components/trainer-setup/ProfessionalDocumentsSection";
+import { ProfilePublicationSection } from "@/components/trainer-setup/ProfilePublicationSection";
 
 const TrainerProfileSetup = () => {
   const { user, loading } = useAuth();
@@ -1049,6 +1050,16 @@ const TrainerProfileSetup = () => {
               })}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Profile Publication Section - Show when profile is complete */}
+      {isFullyComplete() && (
+        <div className="max-w-4xl mx-auto px-6">
+          <ProfilePublicationSection 
+            profile={profile} 
+            isProfileComplete={isFullyComplete()} 
+          />
         </div>
       )}
 
