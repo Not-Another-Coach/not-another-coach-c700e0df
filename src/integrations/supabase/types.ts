@@ -3872,9 +3872,12 @@ export type Database = {
           discovery_call_settings: Json | null
           experience_level: string | null
           first_name: string | null
+          fitness_equipment_access: Json | null
           flexible_scheduling: boolean | null
           force_password_reset: boolean | null
           free_discovery_call: boolean | null
+          has_specific_event: string | null
+          health_conditions: string | null
           hourly_rate: number | null
           id: string
           ideal_client_age_range: string | null
@@ -3891,6 +3894,8 @@ export type Database = {
           last_login_at: string | null
           last_name: string | null
           last_verification_request: string | null
+          lifestyle_description: Json | null
+          lifestyle_other: string | null
           location: string | null
           login_attempts: number | null
           marketing_unsubscribed_at: string | null
@@ -3921,6 +3926,8 @@ export type Database = {
           special_credentials: string[] | null
           specialization_description: string | null
           specializations: string[] | null
+          specific_event_date: string | null
+          specific_event_details: string | null
           start_timeline: string | null
           suspended_at: string | null
           suspended_reason: string | null
@@ -4000,9 +4007,12 @@ export type Database = {
           discovery_call_settings?: Json | null
           experience_level?: string | null
           first_name?: string | null
+          fitness_equipment_access?: Json | null
           flexible_scheduling?: boolean | null
           force_password_reset?: boolean | null
           free_discovery_call?: boolean | null
+          has_specific_event?: string | null
+          health_conditions?: string | null
           hourly_rate?: number | null
           id: string
           ideal_client_age_range?: string | null
@@ -4019,6 +4029,8 @@ export type Database = {
           last_login_at?: string | null
           last_name?: string | null
           last_verification_request?: string | null
+          lifestyle_description?: Json | null
+          lifestyle_other?: string | null
           location?: string | null
           login_attempts?: number | null
           marketing_unsubscribed_at?: string | null
@@ -4049,6 +4061,8 @@ export type Database = {
           special_credentials?: string[] | null
           specialization_description?: string | null
           specializations?: string[] | null
+          specific_event_date?: string | null
+          specific_event_details?: string | null
           start_timeline?: string | null
           suspended_at?: string | null
           suspended_reason?: string | null
@@ -4128,9 +4142,12 @@ export type Database = {
           discovery_call_settings?: Json | null
           experience_level?: string | null
           first_name?: string | null
+          fitness_equipment_access?: Json | null
           flexible_scheduling?: boolean | null
           force_password_reset?: boolean | null
           free_discovery_call?: boolean | null
+          has_specific_event?: string | null
+          health_conditions?: string | null
           hourly_rate?: number | null
           id?: string
           ideal_client_age_range?: string | null
@@ -4147,6 +4164,8 @@ export type Database = {
           last_login_at?: string | null
           last_name?: string | null
           last_verification_request?: string | null
+          lifestyle_description?: Json | null
+          lifestyle_other?: string | null
           location?: string | null
           login_attempts?: number | null
           marketing_unsubscribed_at?: string | null
@@ -4177,6 +4196,8 @@ export type Database = {
           special_credentials?: string[] | null
           specialization_description?: string | null
           specializations?: string[] | null
+          specific_event_date?: string | null
+          specific_event_details?: string | null
           start_timeline?: string | null
           suspended_at?: string | null
           suspended_reason?: string | null
@@ -6142,12 +6163,17 @@ export type Database = {
           client_survey_completed_at: string | null
           experience_level: string | null
           first_name: string | null
+          fitness_equipment_access: Json | null
           fitness_goals: string[] | null
           flexible_scheduling: boolean | null
+          has_specific_event: string | null
+          health_conditions: string | null
           id: string | null
           is_uk_based: boolean | null
           journey_progress: Json | null
           last_name: string | null
+          lifestyle_description: Json | null
+          lifestyle_other: string | null
           location: string | null
           motivation_factors: string[] | null
           open_to_virtual_coaching: boolean | null
@@ -6164,6 +6190,8 @@ export type Database = {
           quiz_completed: boolean | null
           quiz_completed_at: string | null
           secondary_goals: string[] | null
+          specific_event_date: string | null
+          specific_event_details: string | null
           start_timeline: string | null
           tagline: string | null
           training_location_preference: string | null
