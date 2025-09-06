@@ -205,7 +205,7 @@ const ClientSurvey = () => {
         break;
       case 8: // Availability
         if (formData.waitlist_preference === null) {
-          newErrors.start_timeline = "Please select how you'd prefer to handle trainer availability";
+          newErrors.waitlist_preference = "Please select how you'd prefer to handle trainer availability";
         }
         break;
     }

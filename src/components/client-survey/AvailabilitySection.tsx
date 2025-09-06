@@ -30,7 +30,7 @@ const waitlistOptions = [
 export function AvailabilitySection({ formData, updateFormData, errors, clearFieldError }: AvailabilitySectionProps) {
   const handleWaitlistPreferenceChange = (preference: "asap" | "quality_over_speed") => {
     updateFormData({ waitlist_preference: preference });
-    clearFieldError?.('start_timeline');
+    clearFieldError?.('waitlist_preference');
   };
 
   const handleFlexibleSchedulingToggle = (checked: boolean) => {
@@ -55,8 +55,8 @@ export function AvailabilitySection({ formData, updateFormData, errors, clearFie
           </p>
         </div>
         
-        {errors?.start_timeline && (
-          <p className="text-sm text-destructive">{errors.start_timeline}</p>
+        {errors?.waitlist_preference && (
+          <p className="text-sm text-destructive">{errors.waitlist_preference}</p>
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
