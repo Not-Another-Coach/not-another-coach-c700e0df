@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, Save, CheckCircle, AlertCircle, Target, MapPin, Calendar, Users, User, Package, DollarSign, Clock } from "lucide-react";
+import { ArrowLeft, ArrowRight, Save, CheckCircle, AlertCircle, Check } from "lucide-react";
 
 // Import survey sections
 import { GoalsSection } from "@/components/client-survey/GoalsSection";
@@ -19,6 +19,7 @@ import { PersonalitySection } from "@/components/client-survey/PersonalitySectio
 import { PackagePreferencesSection } from "@/components/client-survey/PackagePreferencesSection";
 import { BudgetSection } from "@/components/client-survey/BudgetSection";
 import { AvailabilitySection } from "@/components/client-survey/AvailabilitySection";
+import { ScrollableBreadcrumb } from "@/components/ui/scrollable-breadcrumb";
 
 const ClientSurvey = () => {
   const { user, loading } = useAuth();
@@ -81,16 +82,6 @@ const ClientSurvey = () => {
     "Availability & Start Date"
   ];
 
-  const stepIcons = [
-    Target,        // Your Goals
-    MapPin,        // Training Location  
-    Calendar,      // Scheduling Preferences
-    Users,         // Coaching Style
-    User,          // About You
-    Package,       // Package Preferences
-    DollarSign,    // Budget Range
-    Clock          // Availability & Start Date
-  ];
 
   // Redirect if not client or if survey is already completed
   useEffect(() => {
@@ -443,81 +434,65 @@ const ClientSurvey = () => {
               </p>
             </div>
           
-          {/* Step indicators - More mobile friendly */}
-          <div className="grid grid-cols-4 sm:flex sm:justify-between gap-2 sm:gap-1 mt-3">
-            {stepTitles.map((title, index) => {
-              const stepNumber = index + 1;
-              const completion = getStepCompletion(stepNumber);
-              const isCurrent = stepNumber === currentStep;
-              const StepIcon = stepIcons[index];
-              
-              let statusColor = 'text-muted-foreground';
-              let borderColor = 'border-muted-foreground';
-              let bgColor = 'bg-transparent';
-              let showIcon = false;
-              let isPartial = false;
+            {/* Step indicators */}
+            <ScrollableBreadcrumb currentStep={currentStep}>
+              <div className="flex justify-between gap-1 min-w-max">
+                {stepTitles.map((title, index) => {
+                  const stepNumber = index + 1;
+                  const completion = getStepCompletion(stepNumber);
+                  const isCurrent = stepNumber === currentStep;
+                  
+                  let statusColor = 'text-muted-foreground';
+                  let borderColor = 'border-muted-foreground';
+                  let bgColor = 'bg-transparent';
+                  let showIcon = false;
+                  let isPartial = false;
 
-              if (completion === 'completed') {
-                statusColor = 'text-green-600';
-                borderColor = 'border-green-600';
-                bgColor = 'bg-green-600';
-                showIcon = true;
-              } else if (completion === 'partial') {
-                statusColor = 'text-amber-600';
-                borderColor = 'border-amber-600';
-                bgColor = 'bg-amber-600';
-                showIcon = true;
-                isPartial = true;
-              } else if (isCurrent) {
-                statusColor = 'text-primary';
-                borderColor = 'border-primary';
-                bgColor = 'bg-primary';
-              }
-              
-                return (
-                  <div
-                    key={stepNumber}
-                    className={`flex flex-col items-center text-xs cursor-pointer transition-all hover:scale-105 ${statusColor} p-1`}
-                    onClick={() => {
-                      setCurrentStep(stepNumber);
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }}
-                    title={`Go to step ${stepNumber}: ${title}`}
-                  >
+                  if (completion === 'completed') {
+                    statusColor = 'text-green-600';
+                    borderColor = 'border-green-600';
+                    bgColor = 'bg-green-600';
+                    showIcon = true;
+                  } else if (completion === 'partial') {
+                    statusColor = 'text-amber-600';
+                    borderColor = 'border-amber-600';
+                    bgColor = 'bg-amber-600';
+                    showIcon = true;
+                    isPartial = true;
+                  } else if (isCurrent) {
+                    statusColor = 'text-primary';
+                    borderColor = 'border-primary';
+                  }
+
+                  return (
                     <div
-                      className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center mb-1 relative ${borderColor} ${
-                        completion === 'completed' || completion === 'partial' || isCurrent 
-                          ? `${bgColor} text-white`
-                          : 'bg-transparent'
-                      }`}
+                      key={stepNumber}
+                      data-step={stepNumber}
+                      onClick={() => {
+                        setCurrentStep(stepNumber);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      className="flex flex-col items-center gap-1 min-w-0 flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
                     >
-                      {completion === 'completed' ? (
-                        <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4" />
-                      ) : completion === 'partial' ? (
-                        <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4" />
-                      ) : (
-                        <StepIcon className="h-3 w-3 sm:h-4 sm:w-4" />
-                      )}
+                      <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-medium ${borderColor} ${bgColor} ${statusColor}`}>
+                        {showIcon ? (
+                          isPartial ? (
+                            <AlertCircle className="w-3 h-3 text-white" />
+                          ) : (
+                            <Check className="w-3 h-3 text-white" />
+                          )
+                        ) : (
+                          stepNumber
+                        )}
+                      </div>
+                      <div className={`text-xs leading-tight text-center max-w-16 ${statusColor}`}>
+                        {title}
+                      </div>
                     </div>
-                    <span className={cn(
-                      "text-center text-xs leading-tight max-w-16 sm:max-w-20 hidden sm:block",
-                      isCurrent ? "font-bold" : ""
-                    )}>
-                      {title}
-                    </span>
-                    <span className={cn(
-                      "text-center text-xs leading-tight max-w-16 sm:hidden",
-                      isCurrent ? "font-bold" : ""
-                    )}>
-                      {title.split(' ')[0]}
-                    </span>
-                    {isCurrent && (
-                      <div className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full animate-pulse"></div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            </ScrollableBreadcrumb>
           </div>
         </div>
       )}
