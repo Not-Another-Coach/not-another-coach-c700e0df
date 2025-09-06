@@ -29,8 +29,19 @@ const waitlistOptions = [
 
 export function AvailabilitySection({ formData, updateFormData, errors, clearFieldError }: AvailabilitySectionProps) {
   const handleWaitlistPreferenceChange = (preference: "asap" | "quality_over_speed") => {
-    updateFormData({ waitlist_preference: preference });
+    // Convert string values to boolean for database compatibility
+    // "asap" = true (wants to start immediately)
+    // "quality_over_speed" = false (willing to wait for better match)
+    const booleanValue = preference === "asap";
+    updateFormData({ waitlist_preference: booleanValue });
     clearFieldError?.('waitlist_preference');
+  };
+
+  // Helper function to get current selection based on boolean value
+  const getCurrentSelection = () => {
+    if (formData.waitlist_preference === true) return "asap";
+    if (formData.waitlist_preference === false) return "quality_over_speed";
+    return null;
   };
 
   const handleFlexibleSchedulingToggle = (checked: boolean) => {
@@ -59,18 +70,18 @@ export function AvailabilitySection({ formData, updateFormData, errors, clearFie
           <p className="text-sm text-destructive">{errors.waitlist_preference}</p>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {waitlistOptions.map((option) => {
-            const isSelected = formData.waitlist_preference === option.id;
-            
-            return (
-              <Card 
-                key={option.id}
-                className={`cursor-pointer transition-all hover:shadow-md ${
-                  isSelected ? 'border-primary bg-primary/5' : ''
-                }`}
-                onClick={() => handleWaitlistPreferenceChange(option.id as any)}
-              >
+         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+           {waitlistOptions.map((option) => {
+             const isSelected = getCurrentSelection() === option.id;
+             
+             return (
+               <Card 
+                 key={option.id}
+                 className={`cursor-pointer transition-all hover:shadow-md ${
+                   isSelected ? 'border-primary bg-primary/5' : ''
+                 }`}
+                 onClick={() => handleWaitlistPreferenceChange(option.id as any)}
+               >
                 <CardContent className="p-6 space-y-4">
                   <div className="text-center space-y-3">
                     <div className="flex justify-center text-primary">
