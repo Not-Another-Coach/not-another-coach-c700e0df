@@ -45,8 +45,8 @@ export default function CategoryMappingManagement() {
   });
 
   const handleTemplateSection = async (activityCategory: string, sectionKey: string | null) => {
-    // Handle unassignment when empty value is selected
-    if (!sectionKey || sectionKey === "") {
+    // Handle unassignment when special unassign value is selected
+    if (!sectionKey || sectionKey === "UNASSIGN") {
       await handleUnassign(activityCategory);
       return;
     }
@@ -251,7 +251,7 @@ export default function CategoryMappingManagement() {
                   
                   <TableCell>
                     <Select
-                      value={row.mapping?.section_key || ""}
+                      value={row.mapping?.section_key || "UNASSIGN"}
                       onValueChange={(value) => handleTemplateSection(row.activityCategory, value)}
                       disabled={isUpdating}
                     >
@@ -259,7 +259,7 @@ export default function CategoryMappingManagement() {
                         <SelectValue placeholder="Select template section..." />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="" className="text-muted-foreground italic">
+                        <SelectItem value="UNASSIGN" className="text-muted-foreground italic">
                           — Not assigned —
                         </SelectItem>
                         {templateSections.map((section) => (
