@@ -1,12 +1,11 @@
 import { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Edit2, Trash2, Info } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { CheckCircle2, AlertCircle, Info, X } from "lucide-react";
 import { toast } from "sonner";
 import { useWaysOfWorkingCategories, type WaysOfWorkingCategory } from "@/hooks/useWaysOfWorkingCategories";
 import { useWaysOfWorkingTemplateSections } from "@/hooks/useWaysOfWorkingTemplateSections";
@@ -24,111 +23,128 @@ const ACTIVITY_CATEGORIES = [
   'Planning'
 ];
 
+type CategoryRow = {
+  activityCategory: string;
+  mapping?: WaysOfWorkingCategory;
+  isAssigned: boolean;
+};
+
 export default function CategoryMappingManagement() {
   const { categories, loading, error, createCategory, updateCategory, deleteCategory } = useWaysOfWorkingCategories();
   const { sections: templateSections } = useWaysOfWorkingTemplateSections();
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<WaysOfWorkingCategory | null>(null);
-  
-  const [formData, setFormData] = useState({
-    sectionKey: "",
-    sectionName: "",
-    activityCategory: "",
-    displayOrder: 0,
-    profileSectionKey: "",
+  const [updatingCategories, setUpdatingCategories] = useState<Set<string>>(new Set());
+
+  // Create comprehensive category rows showing all 9 categories
+  const categoryRows: CategoryRow[] = ACTIVITY_CATEGORIES.map(activityCategory => {
+    const mapping = categories.find(c => c.activity_category === activityCategory);
+    return {
+      activityCategory,
+      mapping,
+      isAssigned: !!mapping
+    };
   });
 
-  const resetForm = () => {
-    setFormData({
-      sectionKey: "",
-      sectionName: "",
-      activityCategory: "",
-      displayOrder: 0,
-      profileSectionKey: "",
-    });
-  };
+  const handleTemplateSection = async (activityCategory: string, sectionKey: string | null) => {
+    if (!sectionKey) return;
 
-  const handleCreate = async () => {
-    if (!formData.sectionKey.trim() || !formData.sectionName.trim() || !formData.activityCategory.trim()) {
-      toast.error("All fields are required");
-      return;
-    }
-
-    const result = await createCategory(
-      formData.sectionKey,
-      formData.sectionName,
-      formData.activityCategory,
-      formData.displayOrder,
-      formData.profileSectionKey
-    );
-
-    if ("error" in result) {
-      toast.error(result.error);
-    } else {
-      toast.success("Category mapping created successfully");
-      setIsCreateOpen(false);
-      resetForm();
-    }
-  };
-
-  const handleEdit = async () => {
-    if (!editingCategory || !formData.sectionKey.trim() || !formData.sectionName.trim() || !formData.activityCategory.trim()) {
-      toast.error("All fields are required");
-      return;
-    }
-
-    const result = await updateCategory(
-      editingCategory.id,
-      formData.sectionKey,
-      formData.sectionName,
-      formData.activityCategory,
-      formData.displayOrder,
-      formData.profileSectionKey
-    );
-
-    if ("error" in result) {
-      toast.error(result.error);
-    } else {
-      toast.success("Category mapping updated successfully");
-      setIsEditOpen(false);
-      setEditingCategory(null);
-      resetForm();
-    }
-  };
-
-  const handleDelete = async (category: WaysOfWorkingCategory) => {
-    if (!confirm(`Are you sure you want to delete "${category.activity_category}"?`)) return;
-
-    const result = await deleteCategory(category.id);
-    if ("error" in result) {
-      toast.error(result.error);
-    } else {
-      toast.success("Category mapping deleted successfully");
-    }
-  };
-
-  const openEditDialog = (category: WaysOfWorkingCategory) => {
-    setEditingCategory(category);
-    setFormData({
-      sectionKey: category.section_key,
-      sectionName: category.section_name,
-      activityCategory: category.activity_category,
-      displayOrder: category.display_order,
-      profileSectionKey: category.profile_section_key || "",
-    });
-    setIsEditOpen(true);
-  };
-
-  const handleSectionChange = (sectionKey: string) => {
     const section = templateSections.find(s => s.section_key === sectionKey);
-    if (section) {
-      setFormData(prev => ({
-        ...prev,
-        sectionKey: section.section_key,
-        sectionName: section.section_name,
-        profileSectionKey: section.profile_section_key,
-      }));
+    if (!section) return;
+
+    setUpdatingCategories(prev => new Set(prev).add(activityCategory));
+
+    try {
+      const existingMapping = categories.find(c => c.activity_category === activityCategory);
+      
+      if (existingMapping) {
+        // Update existing mapping
+        const result = await updateCategory(
+          existingMapping.id,
+          section.section_key,
+          section.section_name,
+          activityCategory,
+          existingMapping.display_order,
+          section.profile_section_key
+        );
+        
+        if ("error" in result) {
+          toast.error(result.error);
+        } else {
+          toast.success(`Updated ${activityCategory} mapping`);
+        }
+      } else {
+        // Create new mapping
+        const result = await createCategory(
+          section.section_key,
+          section.section_name,
+          activityCategory,
+          0, // Default display order
+          section.profile_section_key
+        );
+        
+        if ("error" in result) {
+          toast.error(result.error);
+        } else {
+          toast.success(`Created ${activityCategory} mapping`);
+        }
+      }
+    } finally {
+      setUpdatingCategories(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(activityCategory);
+        return newSet;
+      });
+    }
+  };
+
+  const handleDisplayOrder = async (activityCategory: string, displayOrder: number) => {
+    const existingMapping = categories.find(c => c.activity_category === activityCategory);
+    if (!existingMapping) return;
+
+    setUpdatingCategories(prev => new Set(prev).add(activityCategory));
+
+    try {
+      const result = await updateCategory(
+        existingMapping.id,
+        existingMapping.section_key,
+        existingMapping.section_name,
+        activityCategory,
+        displayOrder,
+        existingMapping.profile_section_key
+      );
+      
+      if ("error" in result) {
+        toast.error(result.error);
+      } else {
+        toast.success(`Updated display order for ${activityCategory}`);
+      }
+    } finally {
+      setUpdatingCategories(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(activityCategory);
+        return newSet;
+      });
+    }
+  };
+
+  const handleUnassign = async (activityCategory: string) => {
+    const existingMapping = categories.find(c => c.activity_category === activityCategory);
+    if (!existingMapping) return;
+
+    setUpdatingCategories(prev => new Set(prev).add(activityCategory));
+
+    try {
+      const result = await deleteCategory(existingMapping.id);
+      if ("error" in result) {
+        toast.error(result.error);
+      } else {
+        toast.success(`Unassigned ${activityCategory}`);
+      }
+    } finally {
+      setUpdatingCategories(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(activityCategory);
+        return newSet;
+      });
     }
   };
 
@@ -158,171 +174,135 @@ export default function CategoryMappingManagement() {
     );
   }
 
+  const assignedCount = categoryRows.filter(row => row.isAssigned).length;
+  const unassignedCount = ACTIVITY_CATEGORIES.length - assignedCount;
+
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Activity Category to Template Section Mappings</CardTitle>
-        <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={() => { resetForm(); setIsCreateOpen(true); }}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Mapping
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create New Category Mapping</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="flex items-start gap-2 p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                <Info className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                <div className="text-sm text-blue-800 dark:text-blue-200">
-                  <p className="font-medium mb-1">Category Mapping</p>
-                  <p>Map activity categories to template sections. Activities with these categories will appear in the selected template section during trainer setup.</p>
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="waysSection">Template Section</Label>
-                <Select value={formData.sectionKey} onValueChange={handleSectionChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a template section" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {templateSections.map((section) => (
-                      <SelectItem key={section.section_key} value={section.section_key}>
-                        {section.section_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="activityCategory">Activity Category</Label>
-                <Select
-                  value={formData.activityCategory}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, activityCategory: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select an activity category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ACTIVITY_CATEGORIES.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="displayOrder">Display Order</Label>
-                <Input
-                  id="displayOrder"
-                  type="number"
-                  value={formData.displayOrder}
-                  onChange={(e) => setFormData(prev => ({ ...prev, displayOrder: parseInt(e.target.value) }))}
-                />
-                <p className="text-sm text-muted-foreground mt-1">
-                  Controls the order in which categories appear within the template section (lower numbers appear first)
-                </p>
-              </div>
-              <Button onClick={handleCreate} className="w-full">Create Mapping</Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          <span>Activity Category to Template Section Mappings</span>
+          <div className="flex items-center gap-4 text-sm">
+            <Badge variant="secondary" className="flex items-center gap-1">
+              <CheckCircle2 className="h-3 w-3 text-green-600" />
+              {assignedCount} Assigned
+            </Badge>
+            {unassignedCount > 0 && (
+              <Badge variant="outline" className="flex items-center gap-1">
+                <AlertCircle className="h-3 w-3 text-amber-600" />
+                {unassignedCount} Unassigned
+              </Badge>
+            )}
+          </div>
+        </CardTitle>
       </CardHeader>
       <CardContent>
-        {categories.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            No category mappings found. Create your first mapping to get started.
+        <div className="flex items-start gap-2 p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800 mb-6">
+          <Info className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+          <div className="text-sm text-blue-800 dark:text-blue-200">
+            <p className="font-medium mb-1">Complete Category Mapping Overview</p>
+            <p>All 9 activity categories are shown below. Assign each category to a template section to organize activities during trainer setup. Categories without assignments will not appear in the trainer interface.</p>
           </div>
-        ) : (
-            <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Template Section</TableHead>
-                <TableHead>Activity Category</TableHead>
-                <TableHead>Display Order</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {categories.map((category) => (
-                <TableRow key={category.id}>
-                  <TableCell>{category.section_name}</TableCell>
-                  <TableCell className="font-mono text-sm bg-blue-50 dark:bg-blue-950/30 px-2 py-1 rounded">
-                    {category.activity_category}
+        </div>
+
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Activity Category</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Template Section</TableHead>
+              <TableHead>Display Order</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {categoryRows.map((row) => {
+              const isUpdating = updatingCategories.has(row.activityCategory);
+              
+              return (
+                <TableRow 
+                  key={row.activityCategory}
+                  className={!row.isAssigned ? "bg-amber-50/30 dark:bg-amber-950/10" : ""}
+                >
+                  <TableCell className="font-medium">
+                    <div className="flex items-center gap-2">
+                      <code className="px-2 py-1 bg-muted rounded text-xs">
+                        {row.activityCategory}
+                      </code>
+                    </div>
                   </TableCell>
-                  <TableCell className="text-center">{category.display_order}</TableCell>
-                  <TableCell className="space-x-2">
-                    <Button variant="outline" size="sm" onClick={() => openEditDialog(category)}>
-                      <Edit2 className="h-4 w-4" />
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleDelete(category)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                  
+                  <TableCell>
+                    {row.isAssigned ? (
+                      <Badge variant="secondary" className="flex items-center gap-1 w-fit">
+                        <CheckCircle2 className="h-3 w-3 text-green-600" />
+                        Assigned
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="flex items-center gap-1 w-fit">
+                        <AlertCircle className="h-3 w-3 text-amber-600" />
+                        Not Assigned
+                      </Badge>
+                    )}
+                  </TableCell>
+                  
+                  <TableCell>
+                    <Select
+                      value={row.mapping?.section_key || ""}
+                      onValueChange={(value) => handleTemplateSection(row.activityCategory, value)}
+                      disabled={isUpdating}
+                    >
+                      <SelectTrigger className="w-64">
+                        <SelectValue placeholder="Select template section..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {templateSections.map((section) => (
+                          <SelectItem key={section.section_key} value={section.section_key}>
+                            {section.section_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+                  
+                  <TableCell>
+                    {row.mapping ? (
+                      <Input
+                        type="number"
+                        value={row.mapping.display_order}
+                        onChange={(e) => handleDisplayOrder(row.activityCategory, parseInt(e.target.value) || 0)}
+                        className="w-20"
+                        disabled={isUpdating}
+                        min="0"
+                      />
+                    ) : (
+                      <span className="text-muted-foreground text-sm">-</span>
+                    )}
+                  </TableCell>
+                  
+                  <TableCell>
+                    {row.mapping && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleUnassign(row.activityCategory)}
+                        disabled={isUpdating}
+                        className="flex items-center gap-1"
+                      >
+                        <X className="h-3 w-3" />
+                        Unassign
+                      </Button>
+                    )}
                   </TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
-
-        <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Edit Category Mapping</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="editWaysSection">Template Section</Label>
-                <Select value={formData.sectionKey} onValueChange={handleSectionChange}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {templateSections.map((section) => (
-                      <SelectItem key={section.section_key} value={section.section_key}>
-                        {section.section_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="editActivityCategory">Activity Category</Label>
-                <Select
-                  value={formData.activityCategory}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, activityCategory: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ACTIVITY_CATEGORIES.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="editDisplayOrder">Display Order</Label>
-                <Input
-                  id="editDisplayOrder"
-                  type="number"
-                  value={formData.displayOrder}
-                  onChange={(e) => setFormData(prev => ({ ...prev, displayOrder: parseInt(e.target.value) }))}
-                />
-                <p className="text-sm text-muted-foreground mt-1">
-                  Controls the order in which categories appear within the template section
-                </p>
-              </div>
-              <Button onClick={handleEdit} className="w-full">Update Mapping</Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+              );
+            })}
+          </TableBody>
+        </Table>
+        
+        <div className="mt-4 text-sm text-muted-foreground">
+          <p><strong>Display Order:</strong> Controls the sequence in which activity categories appear within each template section (lower numbers appear first).</p>
+        </div>
       </CardContent>
     </Card>
   );
