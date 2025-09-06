@@ -21,7 +21,30 @@
 .backdrop-blur-custom {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-}
+        /* Custom scrollbar styles */
+        .scrollbar-thin {
+          scrollbar-width: thin;
+          scrollbar-color: rgb(209 213 219) rgb(243 244 246);
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar {
+          height: 8px;
+          width: 8px;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-track {
+          background: rgb(243 244 246);
+          border-radius: 4px;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+          background: rgb(209 213 219);
+          border-radius: 4px;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+          background: rgb(156 163 175);
+        }
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.

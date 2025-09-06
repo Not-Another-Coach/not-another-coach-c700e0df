@@ -292,7 +292,7 @@ export function SpecialtyManagement() {
               {categoriesLoading ? (
                 <div>Loading categories...</div>
               ) : (
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -626,7 +626,7 @@ export function SpecialtyManagement() {
               {requestsLoading ? (
                 <div>Loading requests...</div>
               ) : (
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400">
                   <Table>
                     <TableHeader>
                       <TableRow>

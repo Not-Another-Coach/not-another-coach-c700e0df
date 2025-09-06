@@ -274,7 +274,7 @@ export const QualificationManagement = () => {
 
           <Card>
             <CardContent className="p-0">
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -356,12 +356,10 @@ export const QualificationManagement = () => {
         <TabsContent value="requests" className="space-y-4">
           <h2 className="text-lg font-semibold">Custom Qualification Requests</h2>
           
-          {requestsLoading ? (
-            <div>Loading requests...</div>
-          ) : (
-            <Card>
-              <CardContent className="p-0">
-                <div className="overflow-x-auto">
+              {requestsLoading ? (
+                <div>Loading requests...</div>
+              ) : (
+                <div className="overflow-x-auto scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -402,9 +400,7 @@ export const QualificationManagement = () => {
                     </TableBody>
                   </Table>
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              )}
 
           {/* Review Request Dialog */}
           <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
