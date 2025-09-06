@@ -6364,13 +6364,21 @@ export type Database = {
         Returns: Json
       }
       admin_update_verification_check: {
-        Args: {
-          p_admin_notes?: string
-          p_check_type: Database["public"]["Enums"]["verification_check_type"]
-          p_rejection_reason?: string
-          p_status: Database["public"]["Enums"]["verification_check_status"]
-          p_trainer_id: string
-        }
+        Args:
+          | {
+              p_admin_notes?: string
+              p_check_type: Database["public"]["Enums"]["verification_check_type"]
+              p_rejection_reason?: string
+              p_status: Database["public"]["Enums"]["verification_check_status"]
+              p_trainer_id: string
+            }
+          | {
+              p_admin_notes?: string
+              p_check_type: string
+              p_rejection_reason?: string
+              p_status: string
+              p_trainer_id: string
+            }
         Returns: string
       }
       auto_end_expired_exclusive_periods: {
@@ -6615,9 +6623,9 @@ export type Database = {
       }
       log_admin_action: {
         Args: {
-          p_action_details?: Json
+          p_action_details: Json
           p_action_type: string
-          p_reason?: string
+          p_reason: string
           p_target_user_id: string
         }
         Returns: undefined
