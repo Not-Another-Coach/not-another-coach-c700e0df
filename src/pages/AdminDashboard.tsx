@@ -11,18 +11,15 @@ import { QualificationRequestWidget } from "@/components/alerts/QualificationReq
 import { SpecialtyRequestWidget } from "@/components/alerts/SpecialtyRequestAlerts";
 import { 
   Users, 
-  Upload, 
   Shield, 
   FileCheck, 
   BookOpen, 
   Target, 
   Award, 
   BarChart3, 
-  FileBarChart, 
   MessageCircle, 
   Database, 
   FileText,
-  ArrowRight,
   User
 } from "lucide-react";
 
@@ -62,99 +59,6 @@ export const AdminDashboard = () => {
     navigate(path);
   };
 
-  const adminFunctions = [
-    // Users & Access
-    { 
-      title: "User Management", 
-      description: "Manage users, roles, and permissions", 
-      icon: Users,
-      path: "/admin/users",
-      color: "bg-blue-50 border-blue-200 hover:bg-blue-100"
-    },
-    { 
-      title: "Bulk User Upload", 
-      description: "Import users in bulk from CSV files", 
-      icon: Upload,
-      path: "/admin/bulk-upload", 
-      color: "bg-green-50 border-green-200 hover:bg-green-100"
-    },
-    { 
-      title: "Verification System", 
-      description: "Manage trainer verification requests", 
-      icon: Shield,
-      path: "/admin/verification",
-      color: "bg-purple-50 border-purple-200 hover:bg-purple-100"
-    },
-    { 
-      title: "Profile Publications", 
-      description: "Review and approve profile publication requests", 
-      icon: FileCheck,
-      path: "/admin/publications",
-      color: "bg-indigo-50 border-indigo-200 hover:bg-indigo-100"
-    },
-    
-    // Content Management
-    { 
-      title: "Knowledge Base", 
-      description: "Manage articles and categories", 
-      icon: BookOpen,
-      path: "/admin/knowledge-base",
-      color: "bg-teal-50 border-teal-200 hover:bg-teal-100"
-    },
-    { 
-      title: "Specialties & Training", 
-      description: "Manage specialty categories", 
-      icon: Target,
-      path: "/admin/specialties",
-      color: "bg-orange-50 border-orange-200 hover:bg-orange-100"
-    },
-    { 
-      title: "Qualifications", 
-      description: "Manage certification categories", 
-      icon: Award,
-      path: "/admin/qualifications",
-      color: "bg-yellow-50 border-yellow-200 hover:bg-yellow-100"
-    },
-    
-    // Analytics
-    { 
-      title: "Specialty Analytics", 
-      description: "View specialty performance data", 
-      icon: BarChart3,
-      path: "/admin/specialty-analytics",
-      color: "bg-cyan-50 border-cyan-200 hover:bg-cyan-100"
-    },
-    { 
-      title: "Verification Analytics", 
-      description: "Monitor verification trends", 
-      icon: FileBarChart,
-      path: "/admin/verification-analytics",
-      color: "bg-emerald-50 border-emerald-200 hover:bg-emerald-100"
-    },
-    
-    // System Tools
-    { 
-      title: "Feedback Builder", 
-      description: "Create discovery call questions", 
-      icon: MessageCircle,
-      path: "/admin/feedback-builder",
-      color: "bg-pink-50 border-pink-200 hover:bg-pink-100"
-    },
-    { 
-      title: "Data Cleanup Tools", 
-      description: "Clean up test data and interactions", 
-      icon: Database,
-      path: "/admin/data-cleanup",
-      color: "bg-red-50 border-red-200 hover:bg-red-100"
-    },
-    { 
-      title: "Template Management", 
-      description: "Manage onboarding templates", 
-      icon: FileText,
-      path: "/admin/templates",
-      color: "bg-violet-50 border-violet-200 hover:bg-violet-100"
-    }
-  ];
 
   return (
     <div className="flex flex-col min-h-screen w-full bg-background">
@@ -225,28 +129,6 @@ export const AdminDashboard = () => {
           {/* Analytics Dashboard */}
           <AdminAnalyticsDashboard />
 
-          {/* Admin Functions Grid */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Quick Actions</h3>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {adminFunctions.map((func, index) => (
-                <Card key={index} className="cursor-pointer hover:shadow-md transition-all duration-200">
-                  <CardContent 
-                    className="p-4 flex flex-col items-center text-center space-y-3"
-                    onClick={() => navigate(func.path)}
-                  >
-                    <div className="p-3 rounded-full bg-primary/10">
-                      <func.icon className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-sm">{func.title}</h4>
-                      <p className="text-xs text-muted-foreground mt-1">{func.description}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
 
           {/* Live Activity Feed */}
           <AdminLiveActivityFeed />
