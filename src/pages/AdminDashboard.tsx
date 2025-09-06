@@ -1,209 +1,43 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { UserManagement } from '@/components/admin/UserManagement';
-import { FeedbackQuestionBuilder } from '@/components/admin/FeedbackQuestionBuilder';
-import { BulkUserUpload } from '@/components/admin/BulkUserUpload';
-import { TestUserCleanup } from '@/components/admin/TestUserCleanup';
-import { ClientTrainerCleanup } from '@/components/admin/ClientTrainerCleanup';
-import { KnowledgeBaseAdmin } from '@/components/knowledge-base/KnowledgeBaseAdmin';
-import { VisibilitySettingsSection } from '@/components/trainer-setup/VisibilitySettingsSection';
-import { UserValidityChecker } from '@/components/admin/UserValidityChecker';
-import { VerificationManagement } from '@/components/admin/VerificationManagement';
-import { SpecialtyManagement } from '@/components/admin/SpecialtyManagement';
-import { SpecialtyAnalyticsDashboard } from '@/components/admin/SpecialtyAnalyticsDashboard';
-import { QualificationManagement } from '@/components/admin/QualificationManagement';
-import { AdminQualificationAlerts } from '@/components/alerts/QualificationRequestAlerts';
-import { AdminSpecialtyAlerts } from '@/components/alerts/SpecialtyRequestAlerts';
-import { TemplateManagementTabs } from '@/components/coach/TemplateManagementTabs';
-import { ProfileDropdown } from '@/components/ProfileDropdown';
-import { Settings, Users, Shield, BarChart3, Home, Eye, Upload, FileText, ExternalLink, CheckCircle, Trash2, Layout } from 'lucide-react';
-import { useUserRoles } from '@/hooks/useUserRoles';
-import { useAuth } from '@/hooks/useAuth';
-import { useProfileByType } from '@/hooks/useProfileByType';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useUserRoles } from "@/hooks/useUserRoles";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AdminHeader } from "@/components/AdminHeader";
+import { AdminAnalyticsDashboard } from "@/components/admin/AdminAnalyticsDashboard";
+import { AdminLiveActivityFeed } from "@/components/admin/AdminLiveActivityFeed";
+
+// Import admin components
+import { UserManagement } from "@/components/admin/UserManagement";
+import { BulkUserUpload } from "@/components/admin/BulkUserUpload";
+import { VerificationManagement } from "@/components/admin/VerificationManagement";
+import { KnowledgeBaseAdmin } from "@/components/knowledge-base/KnowledgeBaseAdmin";
+import { SpecialtyManagement } from "@/components/admin/SpecialtyManagement";
+import { QualificationManagement } from "@/components/admin/QualificationManagement";
+import { FeedbackQuestionBuilder } from "@/components/admin/FeedbackQuestionBuilder";
+import { SpecialtyAnalyticsDashboard } from "@/components/admin/SpecialtyAnalyticsDashboard";
+import { VerificationAnalytics } from "@/components/admin/VerificationAnalytics";
+import { ClientTrainerCleanup } from "@/components/admin/ClientTrainerCleanup";
+import { TestUserCleanup } from "@/components/admin/TestUserCleanup";
+import TemplateSectionsManagement from "@/components/admin/TemplateSectionsManagement";
+import { EnhancedVerificationManagement } from "@/components/admin/EnhancedVerificationManagement";
+import { QualificationRequestWidget } from "@/components/alerts/QualificationRequestAlerts";
+import { SpecialtyRequestWidget } from "@/components/alerts/SpecialtyRequestAlerts";
 
 export const AdminDashboard = () => {
-  const { isAdmin } = useUserRoles();
   const { user } = useAuth();
-  const { profile } = useProfileByType();
+  const { isAdmin } = useUserRoles();
   const navigate = useNavigate();
-  const [selectedSection, setSelectedSection] = useState<string>('users');
+  const [activeTab, setActiveTab] = useState("dashboard");
 
-  const adminSections = [
-    {
-      id: 'users',
-      title: 'Users & Roles',
-      description: 'Manage user accounts and permissions',
-      icon: Users,
-      color: 'from-blue-500/10 to-blue-600/10 border-blue-200'
-    },
-    {
-      id: 'verification',
-      title: 'Verification',
-      description: 'Handle trainer verification requests',
-      icon: CheckCircle,
-      color: 'from-green-500/10 to-green-600/10 border-green-200'
-    },
-    {
-      id: 'bulk-upload',
-      title: 'Bulk Upload',
-      description: 'Upload multiple users and manage test data',
-      icon: Upload,
-      color: 'from-purple-500/10 to-purple-600/10 border-purple-200'
-    },
-    {
-      id: 'feedback',
-      title: 'Feedback Builder',
-      description: 'Configure discovery call feedback questions',
-      icon: Settings,
-      color: 'from-amber-500/10 to-amber-600/10 border-amber-200'
-    },
-    {
-      id: 'knowledge-base',
-      title: 'Knowledge Base',
-      description: 'Manage articles and documentation',
-      icon: FileText,
-      color: 'from-indigo-500/10 to-indigo-600/10 border-indigo-200'
-    },
-    {
-      id: 'template-management',
-      title: 'Template Management',
-      description: 'Manage system activities and onboarding templates',
-      icon: Layout,
-      color: 'from-orange-500/10 to-orange-600/10 border-orange-200'
-    },
-    {
-      id: 'visibility',
-      title: 'Content Visibility',
-      description: 'Control trainer content visibility settings',
-      icon: Eye,
-      color: 'from-cyan-500/10 to-cyan-600/10 border-cyan-200'
-    },
-    {
-      id: 'cleanup',
-      title: 'Data Cleanup',
-      description: 'Clean up client-trainer interactions',
-      icon: Trash2,
-      color: 'from-red-500/10 to-red-600/10 border-red-200'
-    },
-    {
-      id: 'analytics',
-      title: 'Analytics',
-      description: 'View system analytics and reports',
-      icon: BarChart3,
-      color: 'from-emerald-500/10 to-emerald-600/10 border-emerald-200'
-    },
-    {
-      id: 'specialties',
-      title: 'Specialties & Training Types',
-      description: 'Manage specialties, categories, and training types',
-      icon: Settings,
-      color: 'from-violet-500/10 to-violet-600/10 border-violet-200'
-    },
-    {
-      id: 'qualifications',
-      title: 'Qualifications',
-      description: 'Manage popular qualifications and review requests',
-      icon: FileText,
-      color: 'from-teal-500/10 to-teal-600/10 border-teal-200'
-    },
-    {
-      id: 'settings',
-      title: 'Settings',
-      description: 'System configuration and utilities',
-      icon: Settings,
-      color: 'from-gray-500/10 to-gray-600/10 border-gray-200'
-    }
-  ];
-
-  const renderSectionContent = () => {
-    switch (selectedSection) {
-      case 'users':
-        return <UserManagement />;
-      case 'verification':
-        return <VerificationManagement />;
-      case 'bulk-upload':
-        return (
-          <div className="space-y-6">
-            <BulkUserUpload />
-            <TestUserCleanup />
-          </div>
-        );
-      case 'cleanup':
-        return <ClientTrainerCleanup />;
-      case 'feedback':
-        return <FeedbackQuestionBuilder />;
-      case 'knowledge-base':
-        return <KnowledgeBaseAdmin />;
-      case 'template-management':
-        return (
-          <Card>
-            <CardHeader>
-              <CardTitle>Template Management</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Manage system activities and onboarding templates for all trainers
-              </p>
-            </CardHeader>
-            <CardContent>
-              <TemplateManagementTabs />
-            </CardContent>
-          </Card>
-        );
-      case 'visibility':
-        return (
-          <Card>
-            <CardHeader>
-              <CardTitle>Content Visibility Matrix</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Manage how trainer content appears at different engagement stages
-              </p>
-            </CardHeader>
-            <CardContent>
-              <VisibilitySettingsSection />
-            </CardContent>
-          </Card>
-        );
-      case 'specialties':
-        return <SpecialtyManagement />;
-      case 'qualifications':
-        return <QualificationManagement />;
-      case 'analytics':
-        return <SpecialtyAnalyticsDashboard />;
-      case 'settings':
-        return (
-          <div className="space-y-6">
-            <UserValidityChecker />
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>System Settings</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Additional system settings coming soon...
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
-
-  if (!isAdmin) {
+  if (!user || !isAdmin) {
     return (
-      <div className="container mx-auto p-6">
-        <Card>
-          <CardContent className="flex items-center justify-center h-64">
-            <div className="text-center">
-              <Shield className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-              <h2 className="text-2xl font-bold mb-2">Access Denied</h2>
-              <p className="text-muted-foreground">
-                You don't have admin privileges to access this page.
-              </p>
-            </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <Card className="p-6">
+          <CardContent>
+            <h1 className="text-xl font-semibold mb-4">Access Denied</h1>
+            <p>You do not have permission to access this page.</p>
           </CardContent>
         </Card>
       </div>
@@ -211,91 +45,230 @@ export const AdminDashboard = () => {
   }
 
   return (
-    <div className="container mx-auto p-6">
-      {/* Header with Navigation */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Shield className="w-8 h-8" />
-            Admin Dashboard
-          </h1>
-          <p className="text-muted-foreground">
-            Manage users, roles, and system settings
-          </p>
-        </div>
-        
-        <div className="flex items-center gap-3">
-          <Button 
-            onClick={() => navigate('/documentation')}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <FileText className="h-4 w-4" />
-            Documentation
-            <ExternalLink className="h-3 w-3" />
-          </Button>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <AdminHeader 
+        profile={{
+          ...user,
+          user_type: 'admin'
+        }}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+      />
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto p-6">
+        <div className="space-y-6">
           
-          {profile && (
-            <ProfileDropdown profile={profile} />
+          {/* Dashboard Tab */}
+          {activeTab === "dashboard" && (
+            <div className="space-y-6">
+              {/* Alert components for pending requests */}
+              <div className="space-y-4">
+                <QualificationRequestWidget />
+                <SpecialtyRequestWidget />
+              </div>
+              
+              {/* Stats Dashboard */}
+              <AdminAnalyticsDashboard />
+              
+              {/* Live Activity Feed */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <AdminLiveActivityFeed />
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Quick Access</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start"
+                      onClick={() => setActiveTab("users")}
+                    >
+                      Manage Users & Verification
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start"
+                      onClick={() => setActiveTab("content")}
+                    >
+                      Content & Knowledge Base
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start"
+                      onClick={() => setActiveTab("analytics")}
+                    >
+                      View Analytics & Reports
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start"
+                      onClick={() => navigate('/documentation')}
+                    >
+                      System Documentation
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
+
+          {/* Users & Access Tab */}
+          {activeTab === "users" && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <Card className="cursor-pointer hover:shadow-md transition-shadow bg-blue-50 border-blue-200">
+                  <CardHeader>
+                    <CardTitle>User Management</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">Manage users, roles, and permissions</p>
+                  </CardContent>
+                </Card>
+                
+                <Card className="cursor-pointer hover:shadow-md transition-shadow bg-green-50 border-green-200">
+                  <CardHeader>
+                    <CardTitle>Bulk User Upload</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">Import users in bulk from CSV files</p>
+                  </CardContent>
+                </Card>
+                
+                <Card className="cursor-pointer hover:shadow-md transition-shadow bg-purple-50 border-purple-200">
+                  <CardHeader>
+                    <CardTitle>Verification System</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">Manage trainer verification requests</p>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              {/* Default to User Management */}
+              <Card>
+                <CardContent className="p-6">
+                  <UserManagement />
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Content Management Tab */}
+          {activeTab === "content" && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <Card className="cursor-pointer hover:shadow-md transition-shadow bg-indigo-50 border-indigo-200">
+                  <CardHeader>
+                    <CardTitle>Knowledge Base</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">Manage articles and categories</p>
+                  </CardContent>
+                </Card>
+                
+                <Card className="cursor-pointer hover:shadow-md transition-shadow bg-orange-50 border-orange-200">
+                  <CardHeader>
+                    <CardTitle>Specialties & Training</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">Manage specialty categories</p>
+                  </CardContent>
+                </Card>
+                
+                <Card className="cursor-pointer hover:shadow-md transition-shadow bg-yellow-50 border-yellow-200">
+                  <CardHeader>
+                    <CardTitle>Qualifications</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">Manage certification categories</p>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              {/* Default to Knowledge Base */}
+              <Card>
+                <CardContent className="p-6">
+                  <KnowledgeBaseAdmin />
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Data & Analytics Tab */}
+          {activeTab === "analytics" && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card className="cursor-pointer hover:shadow-md transition-shadow bg-cyan-50 border-cyan-200">
+                  <CardHeader>
+                    <CardTitle>Specialty Analytics</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">View specialty performance data</p>
+                  </CardContent>
+                </Card>
+                
+                <Card className="cursor-pointer hover:shadow-md transition-shadow bg-emerald-50 border-emerald-200">
+                  <CardHeader>
+                    <CardTitle>Verification Analytics</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">Monitor verification trends</p>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              {/* Default to Specialty Analytics */}
+              <Card>
+                <CardContent className="p-6">
+                  <SpecialtyAnalyticsDashboard />
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* System Settings Tab */}
+          {activeTab === "system" && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <Card className="cursor-pointer hover:shadow-md transition-shadow bg-pink-50 border-pink-200">
+                  <CardHeader>
+                    <CardTitle>Feedback Builder</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">Create discovery call questions</p>
+                  </CardContent>
+                </Card>
+                
+                <Card className="cursor-pointer hover:shadow-md transition-shadow bg-red-50 border-red-200">
+                  <CardHeader>
+                    <CardTitle>Data Cleanup Tools</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">Clean up test data and interactions</p>
+                  </CardContent>
+                </Card>
+                
+                <Card className="cursor-pointer hover:shadow-md transition-shadow bg-teal-50 border-teal-200">
+                  <CardHeader>
+                    <CardTitle>Template Management</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">Manage onboarding templates</p>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              {/* Default to Feedback Builder */}
+              <Card>
+                <CardContent className="p-6">
+                  <FeedbackQuestionBuilder />
+                </CardContent>
+              </Card>
+            </div>
           )}
         </div>
-      </div>
-
-      {/* Qualification and Specialty Request Alerts */}
-      <div className="mb-6 space-y-4">
-        <AdminQualificationAlerts 
-          onNavigateToRequests={() => setSelectedSection('qualifications')}
-        />
-        <AdminSpecialtyAlerts 
-          onNavigateToRequests={() => setSelectedSection('specialties')}
-        />
-      </div>
-
-      {/* Admin Section Tiles */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        {adminSections.map((section) => {
-          const IconComponent = section.icon;
-          const isSelected = selectedSection === section.id;
-          
-          return (
-            <Card 
-              key={section.id}
-              className={`cursor-pointer transition-all duration-200 hover:scale-105 bg-gradient-to-br ${section.color} ${
-                isSelected 
-                  ? 'ring-2 ring-primary shadow-lg transform scale-105' 
-                  : 'hover:shadow-md'
-              }`}
-              onClick={() => setSelectedSection(section.id)}
-            >
-              <CardContent className="p-6">
-                <div className="flex items-start gap-4">
-                  <div className={`p-3 rounded-lg ${
-                    isSelected 
-                      ? 'bg-primary text-primary-foreground' 
-                      : 'bg-white/50 text-muted-foreground'
-                  }`}>
-                    <IconComponent className="w-6 h-6" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className={`font-semibold text-lg ${
-                      isSelected ? 'text-primary' : 'text-foreground'
-                    }`}>
-                      {section.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {section.description}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-
-      {/* Selected Section Content */}
-      <div className="mt-8">
-        {renderSectionContent()}
       </div>
     </div>
   );
