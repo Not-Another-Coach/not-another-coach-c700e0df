@@ -57,12 +57,13 @@ export function ClientSurveyWidget({ profile }: ClientSurveyWidgetProps) {
     
     // Lifestyle and health
     location: null as string | null,
-    fitness_equipment_access: null as string | null,
+    fitness_equipment_access: [] as string[],
     lifestyle_description: [] as string[],
     lifestyle_other: null as string | null,
     health_conditions: null as string | null,
     has_specific_event: null as string | null,
     specific_event_details: null as string | null,
+    specific_event_date: null as Date | null,
     
     // Package and budget preferences
     preferred_package_type: "ongoing" as "ongoing" | "short_term" | "single_session",
@@ -125,12 +126,13 @@ export function ClientSurveyWidget({ profile }: ClientSurveyWidgetProps) {
         client_personality_type: profileData.client_personality_type || [],
         experience_level: profileData.experience_level || "beginner",
         location: (profileData as any).location || null,
-        fitness_equipment_access: (profileData as any).fitness_equipment_access || null,
+        fitness_equipment_access: (profileData as any).fitness_equipment_access || [],
         lifestyle_description: (profileData as any).lifestyle_description || [],
         lifestyle_other: (profileData as any).lifestyle_other || null,
         health_conditions: (profileData as any).health_conditions || null,
         has_specific_event: (profileData as any).has_specific_event || null,
         specific_event_details: (profileData as any).specific_event_details || null,
+        specific_event_date: (profileData as any).specific_event_date ? new Date((profileData as any).specific_event_date) : null,
         preferred_package_type: profileData.preferred_package_type || "ongoing",
         budget_range_min: profileData.budget_range_min,
         budget_range_max: profileData.budget_range_max,
@@ -198,7 +200,7 @@ export function ClientSurveyWidget({ profile }: ClientSurveyWidgetProps) {
         if (!formData.location || formData.location.trim() === "") {
           newErrors.location = "Please tell us where you're based";
         }
-        if (!formData.fitness_equipment_access) {
+        if (!formData.fitness_equipment_access || formData.fitness_equipment_access.length === 0) {
           newErrors.fitness_equipment_access = "Please select your equipment access";
         }
         if (!formData.lifestyle_description || formData.lifestyle_description.length === 0) {
@@ -246,7 +248,7 @@ export function ClientSurveyWidget({ profile }: ClientSurveyWidgetProps) {
         return formData.client_personality_type?.length > 0 ? 'completed' : 'not_started';
       case 6: // Lifestyle & Health
         const hasLocation = formData.location && formData.location.trim() !== "";
-        const hasEquipment = formData.fitness_equipment_access;
+        const hasEquipment = formData.fitness_equipment_access && formData.fitness_equipment_access.length > 0;
         const hasLifestyle = formData.lifestyle_description?.length > 0;
         const hasEventChoice = formData.has_specific_event;
         

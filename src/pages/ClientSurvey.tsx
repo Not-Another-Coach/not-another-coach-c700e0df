@@ -57,12 +57,13 @@ const ClientSurvey = () => {
     
     // Lifestyle and health
     location: null as string | null,
-    fitness_equipment_access: null as string | null,
+    fitness_equipment_access: [] as string[],
     lifestyle_description: [] as string[],
     lifestyle_other: null as string | null,
     health_conditions: null as string | null,
     has_specific_event: null as string | null,
     specific_event_details: null as string | null,
+    specific_event_date: null as Date | null,
     
     // Package and budget preferences
     preferred_package_type: null as string | null,
@@ -145,12 +146,13 @@ const ClientSurvey = () => {
         client_personality_type: profile.client_personality_type || [],
         experience_level: profile.experience_level || "beginner",
         location: (profile as any).location || null,
-        fitness_equipment_access: (profile as any).fitness_equipment_access || null,
+        fitness_equipment_access: (profile as any).fitness_equipment_access || [],
         lifestyle_description: (profile as any).lifestyle_description || [],
         lifestyle_other: (profile as any).lifestyle_other || null,
         health_conditions: (profile as any).health_conditions || null,
         has_specific_event: (profile as any).has_specific_event || null,
         specific_event_details: (profile as any).specific_event_details || null,
+        specific_event_date: (profile as any).specific_event_date ? new Date((profile as any).specific_event_date) : null,
         preferred_package_type: profile.preferred_package_type || null,
         budget_range_min: profile.budget_range_min,
         budget_range_max: profile.budget_range_max,
@@ -215,7 +217,7 @@ const ClientSurvey = () => {
         if (!formData.location || formData.location.trim() === "") {
           newErrors.location = "Please tell us where you're based";
         }
-        if (!formData.fitness_equipment_access) {
+        if (!formData.fitness_equipment_access || formData.fitness_equipment_access.length === 0) {
           newErrors.fitness_equipment_access = "Please select your equipment access";
         }
         if (!formData.lifestyle_description || formData.lifestyle_description.length === 0) {
@@ -263,7 +265,7 @@ const ClientSurvey = () => {
         return formData.client_personality_type?.length > 0 ? 'completed' : 'not_started';
       case 6: // Lifestyle & Health
         const hasLocation = formData.location && formData.location.trim() !== "";
-        const hasEquipment = formData.fitness_equipment_access;
+        const hasEquipment = formData.fitness_equipment_access && formData.fitness_equipment_access.length > 0;
         const hasLifestyle = formData.lifestyle_description?.length > 0;
         const hasEventChoice = formData.has_specific_event;
         

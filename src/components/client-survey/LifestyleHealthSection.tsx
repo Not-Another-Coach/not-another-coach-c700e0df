@@ -4,7 +4,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Heart, Home, Calendar, Shield, Target } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Heart, Home, Calendar as CalendarIcon, Shield, Target } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface LifestyleHealthSectionProps {
   formData: any;
@@ -69,8 +74,17 @@ export function LifestyleHealthSection({ formData, updateFormData, errors, clear
     clearFieldError?.('location');
   };
 
-  const handleEquipmentChange = (value: string) => {
-    updateFormData({ fitness_equipment_access: value });
+  const handleEquipmentChange = (equipmentId: string, checked: boolean) => {
+    const currentEquipment = formData.fitness_equipment_access || [];
+    let updatedEquipment;
+
+    if (checked) {
+      updatedEquipment = [...currentEquipment, equipmentId];
+    } else {
+      updatedEquipment = currentEquipment.filter((item: string) => item !== equipmentId);
+    }
+
+    updateFormData({ fitness_equipment_access: updatedEquipment });
     clearFieldError?.('fitness_equipment_access');
   };
 
@@ -108,8 +122,16 @@ export function LifestyleHealthSection({ formData, updateFormData, errors, clear
     updateFormData({ specific_event_details: value });
   };
 
+  const handleEventDateChange = (date: Date | undefined) => {
+    updateFormData({ specific_event_date: date });
+  };
+
   const isLifestyleSelected = (lifestyleId: string) => {
     return (formData.lifestyle_description || []).includes(lifestyleId);
+  };
+
+  const isEquipmentSelected = (equipmentId: string) => {
+    return (formData.fitness_equipment_access || []).includes(equipmentId);
   };
 
   return (
@@ -149,20 +171,23 @@ export function LifestyleHealthSection({ formData, updateFormData, errors, clear
         <CardContent className="p-6 space-y-4">
           <div>
             <Label className="text-base font-semibold">Do you have access to fitness equipment?</Label>
+            <p className="text-sm text-muted-foreground mt-1">
+              Select all that apply
+            </p>
           </div>
           
           {errors?.fitness_equipment_access && (
             <p className="text-sm text-destructive">{errors.fitness_equipment_access}</p>
           )}
 
-          <RadioGroup
-            value={formData.fitness_equipment_access || ""}
-            onValueChange={handleEquipmentChange}
-            className="space-y-3"
-          >
+          <div className="space-y-3">
             {equipmentOptions.map((option) => (
-              <div key={option.id} className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-accent/50 cursor-pointer">
-                <RadioGroupItem value={option.id} id={option.id} />
+              <div key={option.id} className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-accent/50">
+                <Checkbox
+                  id={option.id}
+                  checked={isEquipmentSelected(option.id)}
+                  onCheckedChange={(checked) => handleEquipmentChange(option.id, checked as boolean)}
+                />
                 <div className="flex items-center space-x-3 flex-1">
                   <div className="text-primary">
                     {option.icon}
@@ -173,7 +198,7 @@ export function LifestyleHealthSection({ formData, updateFormData, errors, clear
                 </div>
               </div>
             ))}
-          </RadioGroup>
+          </div>
         </CardContent>
       </Card>
 
@@ -268,7 +293,7 @@ export function LifestyleHealthSection({ formData, updateFormData, errors, clear
             <div className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-accent/50 cursor-pointer">
               <RadioGroupItem value="no" id="no_event" />
               <div className="flex items-center space-x-3 flex-1">
-                <Calendar className="h-5 w-5 text-primary" />
+                <CalendarIcon className="h-5 w-5 text-primary" />
                 <Label htmlFor="no_event" className="cursor-pointer flex-1">
                   No – I just want long-term progress
                 </Label>
@@ -277,14 +302,48 @@ export function LifestyleHealthSection({ formData, updateFormData, errors, clear
           </RadioGroup>
 
           {formData.has_specific_event === "yes" && (
-            <div className="mt-4">
-              <Label className="text-sm font-medium">Event/Date details:</Label>
-              <Input
-                placeholder="e.g., Wedding in June 2024, Marathon in September"
-                value={formData.specific_event_details || ""}
-                onChange={(e) => handleEventDetailsChange(e.target.value)}
-                className="mt-2"
-              />
+            <div className="mt-4 space-y-4">
+              <div>
+                <Label className="text-sm font-medium">Event/Date details:</Label>
+                <Input
+                  placeholder="e.g., Wedding in June 2024, Marathon in September"
+                  value={formData.specific_event_details || ""}
+                  onChange={(e) => handleEventDetailsChange(e.target.value)}
+                  className="mt-2"
+                />
+              </div>
+              
+              <div>
+                <Label className="text-sm font-medium">Event Date (Optional):</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal mt-2",
+                        !formData.specific_event_date && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.specific_event_date ? (
+                        format(formData.specific_event_date, "PPP")
+                      ) : (
+                        <span>Pick your event date</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formData.specific_event_date}
+                      onSelect={handleEventDateChange}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                      disabled={(date) => date < new Date()}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
             </div>
           )}
         </CardContent>
