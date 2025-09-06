@@ -1,8 +1,9 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useClientProfile } from '@/hooks/useClientProfile';
 import { useEnhancedTrainerMatching } from '@/hooks/useEnhancedTrainerMatching';
+import { useRealTrainers } from '@/hooks/useRealTrainers';
 import { useSavedTrainers } from '@/hooks/useSavedTrainers';
 import { useJourneyProgress } from '@/hooks/useJourneyProgress';
 import { SwipeableInstagramCard } from '@/components/SwipeableInstagramCard';
@@ -14,86 +15,19 @@ import { ProgressBreadcrumb } from '@/components/ProgressBreadcrumb';
 import { toast } from '@/hooks/use-toast';
 import { Trainer } from '@/components/TrainerCard';
 
-// Sample trainer data (in real app, this would come from API)
-import trainerSarah from "@/assets/trainer-sarah.jpg";
-import trainerMike from "@/assets/trainer-mike.jpg";
-import trainerEmma from "@/assets/trainer-emma.jpg";
-import trainerAlex from "@/assets/trainer-alex.jpg";
-
-const sampleTrainers: Trainer[] = [
-  {
-    id: "1",
-    name: "Sarah Johnson",
-    specialties: ["Weight Loss", "Strength Training", "Nutrition"],
-    rating: 4.9,
-    reviews: 127,
-    experience: "8 years",
-    location: "Downtown",
-    hourlyRate: 85,
-    image: trainerSarah,
-    certifications: ["NASM-CPT", "Precision Nutrition"],
-    description: "Passionate about helping clients achieve sustainable weight loss and building strength.",
-    availability: "Mon-Fri",
-    trainingType: ["In-Person", "Online"]
-  },
-  {
-    id: "2", 
-    name: "Mike Rodriguez",
-    specialties: ["Muscle Building", "Powerlifting", "Sports Performance"],
-    rating: 4.8,
-    reviews: 94,
-    experience: "12 years",
-    location: "Westside",
-    hourlyRate: 95,
-    image: trainerMike,
-    certifications: ["CSCS", "USAPL Coach"],
-    description: "Former competitive powerlifter dedicated to helping clients build serious muscle and strength.",
-    availability: "All Week",
-    trainingType: ["In-Person", "Hybrid"]
-  },
-  {
-    id: "3",
-    name: "Emma Chen",
-    specialties: ["Yoga", "Flexibility", "Mindfulness", "Rehabilitation"],
-    rating: 4.9,
-    reviews: 156,
-    experience: "6 years", 
-    location: "Eastside",
-    hourlyRate: 70,
-    image: trainerEmma,
-    certifications: ["RYT-500", "Corrective Exercise"],
-    description: "Certified yoga instructor focusing on mind-body connection and flexibility.",
-    availability: "Flexible",
-    trainingType: ["Online", "In-Person"]
-  },
-  {
-    id: "4",
-    name: "Alex Thompson", 
-    specialties: ["CrossFit", "HIIT", "Endurance", "Functional Training"],
-    rating: 4.7,
-    reviews: 89,
-    experience: "5 years",
-    location: "Northside",
-    hourlyRate: 80,
-    image: trainerAlex,
-    certifications: ["CrossFit L2", "ACSM-CPT"],
-    description: "High-energy trainer specializing in functional movements and metabolic conditioning.",
-    availability: "Evenings",
-    trainingType: ["In-Person", "Group"]
-  }
-];
 
 export default function Discovery() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { profile } = useClientProfile();
+  const { trainers: realTrainers, loading: trainersLoading } = useRealTrainers();
   const { saveTrainer } = useSavedTrainers();
   const { updateProgress, advanceToStage } = useJourneyProgress();
   const { progress: journeyProgress } = useJourneyProgress();
   const [currentTrainerIndex, setCurrentTrainerIndex] = useState(0);
   const [likedTrainers, setLikedTrainers] = useState<string[]>([]);
   const [passedTrainers, setPassedTrainers] = useState<string[]>([]);
-  const [trainersToShow, setTrainersToShow] = useState(sampleTrainers);
+  const [trainersToShow, setTrainersToShow] = useState<Trainer[]>([]);
 
   // Get matched trainers with enhanced algorithm using client survey data
   const clientSurveyData = profile ? {
@@ -117,10 +51,17 @@ export default function Discovery() {
   } : undefined;
 
   const { matchedTrainers, topMatches, goodMatches } = useEnhancedTrainerMatching(
-    trainersToShow, 
+    realTrainers, 
     profile?.quiz_answers,
     clientSurveyData
   );
+
+  // Update trainersToShow when real trainers are loaded
+  useEffect(() => {
+    if (!trainersLoading && realTrainers.length > 0) {
+      setTrainersToShow(realTrainers);
+    }
+  }, [realTrainers, trainersLoading]);
 
   const handleSwipe = useCallback((direction: 'left' | 'right', trainer: Trainer) => {
     if (direction === 'right') {
@@ -174,6 +115,43 @@ export default function Discovery() {
 
   const remainingTrainers = matchedTrainers.slice(currentTrainerIndex, currentTrainerIndex + 3);
   const isFinished = currentTrainerIndex >= matchedTrainers.length;
+
+  // Show loading state while trainers are being fetched
+  if (trainersLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 to-background flex items-center justify-center">
+        <Card className="w-full max-w-md mx-4">
+          <CardContent className="p-8 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <h2 className="text-xl font-semibold mb-2">Finding Your Perfect Trainers</h2>
+            <p className="text-muted-foreground">
+              We're loading personalized trainer recommendations just for you...
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Show empty state if no trainers found
+  if (!trainersLoading && realTrainers.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 to-background flex items-center justify-center">
+        <Card className="w-full max-w-md mx-4">
+          <CardContent className="p-8 text-center">
+            <div className="text-6xl mb-4">🔍</div>
+            <h2 className="text-xl font-semibold mb-2">No Trainers Available</h2>
+            <p className="text-muted-foreground mb-4">
+              We're currently adding new trainers to the platform. Check back soon!
+            </p>
+            <Button onClick={() => navigate('/')} className="w-full">
+              Go Back to Dashboard
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-background">
