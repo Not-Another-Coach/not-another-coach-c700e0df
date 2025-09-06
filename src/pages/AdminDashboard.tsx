@@ -14,6 +14,7 @@ import { VerificationManagement } from '@/components/admin/VerificationManagemen
 import { SpecialtyManagement } from '@/components/admin/SpecialtyManagement';
 import { SpecialtyAnalyticsDashboard } from '@/components/admin/SpecialtyAnalyticsDashboard';
 import { QualificationManagement } from '@/components/admin/QualificationManagement';
+import { AdminQualificationAlerts } from '@/components/alerts/QualificationRequestAlerts';
 import { TemplateManagementTabs } from '@/components/coach/TemplateManagementTabs';
 import { ProfileDropdown } from '@/components/ProfileDropdown';
 import { Settings, Users, Shield, BarChart3, Home, Eye, Upload, FileText, ExternalLink, CheckCircle, Trash2, Layout } from 'lucide-react';
@@ -237,6 +238,13 @@ export const AdminDashboard = () => {
             <ProfileDropdown profile={profile} />
           )}
         </div>
+      </div>
+
+      {/* Qualification Request Alerts */}
+      <div className="mb-6">
+        <AdminQualificationAlerts 
+          onNavigateToRequests={() => setSelectedSection('qualifications')}
+        />
       </div>
 
       {/* Admin Section Tiles */}

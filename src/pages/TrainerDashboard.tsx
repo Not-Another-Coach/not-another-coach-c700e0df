@@ -21,6 +21,7 @@ import { FloatingMessageButton } from "@/components/FloatingMessageButton";
 import { ClientProspectSummary } from "@/components/coach/ClientProspectSummary";
 import { UpcomingSessionsWidget } from "@/components/dashboard/UpcomingSessionsWidget";
 import { CoachExclusivityEndedAlert } from "@/components/dashboard/CoachExclusivityEndedAlert";
+import { TrainerQualificationAlerts } from "@/components/alerts/QualificationRequestAlerts";
 import { ClientOnboardingManagement } from "@/components/coach/ClientOnboardingManagement";
 import { OnboardingSummaryWidget } from "@/components/dashboard/OnboardingSummaryWidget";
 import { GoalsSection } from "@/components/goals/GoalsSection";
@@ -518,6 +519,13 @@ const TrainerDashboard = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Qualification Request Alerts */}
+        <div className="mb-6">
+          <TrainerQualificationAlerts 
+            onNavigateToProfile={() => navigate('/trainer/profile-setup?tab=qualifications')}
+          />
+        </div>
+        
         {/* Content based on active view */}
         {activeView === 'dashboard' && (
           <div className="space-y-8">
