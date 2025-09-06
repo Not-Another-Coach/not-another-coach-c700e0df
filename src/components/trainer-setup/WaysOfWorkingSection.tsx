@@ -23,7 +23,7 @@ interface WaysOfWorkingItem {
 }
 
 export default function WaysOfWorkingSection({ formData, updateFormData, errors }: WaysOfWorkingSectionProps) {
-  const { getSuggestionsBySection } = useTrainerActivities();
+  const { getSuggestionsBySection, getSuggestionsByProfileSection } = useTrainerActivities();
   const { sections: templateSections, getProfileSections } = useWaysOfWorkingTemplateSections();
   
   // Get unique profile sections from template sections in database
@@ -119,17 +119,8 @@ export default function WaysOfWorkingSection({ formData, updateFormData, errors 
   const renderSection = (section: string) => {
     const items = formData[`ways_of_working_${section}`] || [];
     
-    // Get activity suggestions by aggregating from all template sections that map to this profile section
-    const templateSectionsForProfile = templateSectionsByProfile[section] || [];
-    const aggregatedSuggestions: string[] = [];
-    
-    templateSectionsForProfile.forEach(templateSection => {
-      const suggestions = getSuggestionsBySection(templateSection.section_key);
-      aggregatedSuggestions.push(...suggestions);
-    });
-    
-    // Remove duplicates and sort
-    const sectionSuggestions = Array.from(new Set(aggregatedSuggestions)).sort();
+    // Get activity suggestions directly by profile section
+    const sectionSuggestions = getSuggestionsByProfileSection(section, templateSections).sort();
 
     return (
       <Card key={section} className="space-y-4">

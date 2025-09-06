@@ -168,14 +168,12 @@ export function useTrainerActivities() {
       ts => ts.profile_section_key === profileSectionKey
     );
     
-    // Get activity categories for those template sections
-    const sectionToCategory = getSectionToCategory();
+    // Get activity categories directly from template sections (not via section mapping)
     const relevantCategories: string[] = [];
     
     relevantTemplateSections.forEach(ts => {
-      const category = sectionToCategory[ts.section_key];
-      if (category) {
-        relevantCategories.push(category);
+      if (ts.activity_category) {
+        relevantCategories.push(ts.activity_category);
       }
     });
 
