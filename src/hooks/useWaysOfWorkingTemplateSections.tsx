@@ -21,9 +21,9 @@ export function useWaysOfWorkingTemplateSections() {
   const { user } = useAuth();
 
   const PROFILE_SECTIONS = [
-    { key: 'onboarding', name: 'Onboarding & Welcome' },
-    { key: 'first_week', name: 'First Week Experience' },
-    { key: 'ongoing_support', name: 'Ongoing Support' }
+    { key: 'how_i_work', name: 'How I Work' },
+    { key: 'what_i_provide', name: 'What I Provide' },
+    { key: 'client_expectations', name: 'Client Expectations' }
   ];
 
   const fetchSections = async () => {

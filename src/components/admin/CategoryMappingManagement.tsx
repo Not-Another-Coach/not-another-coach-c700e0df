@@ -6,14 +6,27 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Edit2, Trash2 } from "lucide-react";
+import { Plus, Edit2, Trash2, Info } from "lucide-react";
 import { toast } from "sonner";
 import { useWaysOfWorkingCategories, type WaysOfWorkingCategory } from "@/hooks/useWaysOfWorkingCategories";
 import { useWaysOfWorkingTemplateSections } from "@/hooks/useWaysOfWorkingTemplateSections";
 
+// Activity categories from the system
+const ACTIVITY_CATEGORIES = [
+  'Onboarding',
+  'First Week', 
+  'Ongoing Structure',
+  'Tracking Tools',
+  'Client Expectations',
+  'What I Bring',
+  'Assessment',
+  'Goal Setting',
+  'Planning'
+];
+
 export default function CategoryMappingManagement() {
   const { categories, loading, error, createCategory, updateCategory, deleteCategory } = useWaysOfWorkingCategories();
-  const { sections: templateSections, getProfileSections } = useWaysOfWorkingTemplateSections();
+  const { sections: templateSections } = useWaysOfWorkingTemplateSections();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<WaysOfWorkingCategory | null>(null);
@@ -25,8 +38,6 @@ export default function CategoryMappingManagement() {
     displayOrder: 0,
     profileSectionKey: "",
   });
-
-  const profileSections = getProfileSections();
 
   const resetForm = () => {
     setFormData({
@@ -163,6 +174,13 @@ export default function CategoryMappingManagement() {
               <DialogTitle>Create New Category Mapping</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
+              <div className="flex items-start gap-2 p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <Info className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-blue-800 dark:text-blue-200">
+                  <p className="font-medium mb-1">Category Mapping</p>
+                  <p>Map activity categories to template sections. Activities with these categories will appear in the selected template section during trainer setup.</p>
+                </div>
+              </div>
               <div>
                 <Label htmlFor="waysSection">Template Section</Label>
                 <Select value={formData.sectionKey} onValueChange={handleSectionChange}>
@@ -179,25 +197,22 @@ export default function CategoryMappingManagement() {
                 </Select>
               </div>
               <div>
-                <Label htmlFor="profileSection">Maps to Profile Section</Label>
-                <Input
-                  id="profileSection"
-                  value={profileSections.find(p => p.key === formData.profileSectionKey)?.name || formData.profileSectionKey}
-                  disabled
-                  className="bg-muted"
-                />
-                <p className="text-sm text-muted-foreground mt-1">
-                  This is automatically set based on the selected template section
-                </p>
-              </div>
-              <div>
                 <Label htmlFor="activityCategory">Activity Category</Label>
-                <Input
-                  id="activityCategory"
-                  placeholder="e.g., general"
+                <Select
                   value={formData.activityCategory}
-                  onChange={(e) => setFormData(prev => ({ ...prev, activityCategory: e.target.value }))}
-                />
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, activityCategory: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select an activity category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ACTIVITY_CATEGORIES.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label htmlFor="displayOrder">Display Order</Label>
@@ -207,6 +222,9 @@ export default function CategoryMappingManagement() {
                   value={formData.displayOrder}
                   onChange={(e) => setFormData(prev => ({ ...prev, displayOrder: parseInt(e.target.value) }))}
                 />
+                <p className="text-sm text-muted-foreground mt-1">
+                  Controls the order in which categories appear within the template section (lower numbers appear first)
+                </p>
               </div>
               <Button onClick={handleCreate} className="w-full">Create Mapping</Button>
             </div>
@@ -219,36 +237,33 @@ export default function CategoryMappingManagement() {
             No category mappings found. Create your first mapping to get started.
           </div>
         ) : (
-          <Table>
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Template Section</TableHead>
                 <TableHead>Activity Category</TableHead>
-                <TableHead>Profile Section</TableHead>
                 <TableHead>Display Order</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {categories.map((category) => {
-                const profileSection = profileSections.find(p => p.key === category.profile_section_key);
-                return (
-                  <TableRow key={category.id}>
-                    <TableCell>{category.section_name}</TableCell>
-                    <TableCell className="font-mono text-sm">{category.activity_category}</TableCell>
-                    <TableCell>{profileSection?.name || category.profile_section_key || 'Not mapped'}</TableCell>
-                    <TableCell>{category.display_order}</TableCell>
-                    <TableCell className="space-x-2">
-                      <Button variant="outline" size="sm" onClick={() => openEditDialog(category)}>
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
-                      <Button variant="outline" size="sm" onClick={() => handleDelete(category)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+              {categories.map((category) => (
+                <TableRow key={category.id}>
+                  <TableCell>{category.section_name}</TableCell>
+                  <TableCell className="font-mono text-sm bg-blue-50 dark:bg-blue-950/30 px-2 py-1 rounded">
+                    {category.activity_category}
+                  </TableCell>
+                  <TableCell className="text-center">{category.display_order}</TableCell>
+                  <TableCell className="space-x-2">
+                    <Button variant="outline" size="sm" onClick={() => openEditDialog(category)}>
+                      <Edit2 className="h-4 w-4" />
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => handleDelete(category)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         )}
@@ -275,21 +290,22 @@ export default function CategoryMappingManagement() {
                 </Select>
               </div>
               <div>
-                <Label htmlFor="editProfileSection">Maps to Profile Section</Label>
-                <Input
-                  id="editProfileSection"
-                  value={profileSections.find(p => p.key === formData.profileSectionKey)?.name || formData.profileSectionKey}
-                  disabled
-                  className="bg-muted"
-                />
-              </div>
-              <div>
                 <Label htmlFor="editActivityCategory">Activity Category</Label>
-                <Input
-                  id="editActivityCategory"
+                <Select
                   value={formData.activityCategory}
-                  onChange={(e) => setFormData(prev => ({ ...prev, activityCategory: e.target.value }))}
-                />
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, activityCategory: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ACTIVITY_CATEGORIES.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label htmlFor="editDisplayOrder">Display Order</Label>
@@ -299,6 +315,9 @@ export default function CategoryMappingManagement() {
                   value={formData.displayOrder}
                   onChange={(e) => setFormData(prev => ({ ...prev, displayOrder: parseInt(e.target.value) }))}
                 />
+                <p className="text-sm text-muted-foreground mt-1">
+                  Controls the order in which categories appear within the template section
+                </p>
               </div>
               <Button onClick={handleEdit} className="w-full">Update Mapping</Button>
             </div>

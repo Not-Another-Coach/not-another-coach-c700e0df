@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Edit2, Trash2 } from "lucide-react";
+import { Plus, Edit2, Trash2, Info, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { useWaysOfWorkingTemplateSections, type WaysOfWorkingTemplateSection } from "@/hooks/useWaysOfWorkingTemplateSections";
 
@@ -131,7 +131,12 @@ export default function TemplateSectionsManagement() {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Template Sections Management</CardTitle>
+        <div>
+          <CardTitle>Template Sections Management</CardTitle>
+          <p className="text-sm text-muted-foreground mt-1">
+            Configure template sections and map them to profile sections
+          </p>
+        </div>
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => { resetForm(); setIsCreateOpen(true); }}>
@@ -144,14 +149,29 @@ export default function TemplateSectionsManagement() {
               <DialogTitle>Create New Template Section</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
+              <div className="flex items-start gap-2 p-4 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                <Info className="h-4 w-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-emerald-800 dark:text-emerald-200">
+                  <p className="font-medium mb-1">Template Section to Profile Section Mapping</p>
+                  <p>Template sections group activities in trainer setup and map to profile sections that are displayed on trainer profiles.</p>
+                  <div className="flex items-center gap-2 mt-2 text-xs">
+                    <span className="bg-emerald-100 dark:bg-emerald-900 px-2 py-1 rounded">Template Section</span>
+                    <ArrowRight className="h-3 w-3" />
+                    <span className="bg-emerald-100 dark:bg-emerald-900 px-2 py-1 rounded">Profile Section</span>
+                  </div>
+                </div>
+              </div>
               <div>
                 <Label htmlFor="sectionKey">Section Key</Label>
                 <Input
                   id="sectionKey"
-                  placeholder="e.g., onboarding"
+                  placeholder="e.g., onboarding_welcome"
                   value={formData.sectionKey}
                   onChange={(e) => setFormData(prev => ({ ...prev, sectionKey: e.target.value }))}
                 />
+                <p className="text-sm text-muted-foreground mt-1">
+                  Unique identifier for this template section
+                </p>
               </div>
               <div>
                 <Label htmlFor="sectionName">Section Name</Label>
@@ -161,6 +181,9 @@ export default function TemplateSectionsManagement() {
                   value={formData.sectionName}
                   onChange={(e) => setFormData(prev => ({ ...prev, sectionName: e.target.value }))}
                 />
+                <p className="text-sm text-muted-foreground mt-1">
+                  Display name shown in trainer setup
+                </p>
               </div>
               <div>
                 <Label htmlFor="profileSection">Maps to Profile Section</Label>
@@ -176,6 +199,9 @@ export default function TemplateSectionsManagement() {
                     ))}
                   </SelectContent>
                 </Select>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Which profile section will display these activities
+                </p>
               </div>
               <div>
                 <Label htmlFor="displayOrder">Display Order</Label>
@@ -185,6 +211,9 @@ export default function TemplateSectionsManagement() {
                   value={formData.displayOrder}
                   onChange={(e) => setFormData(prev => ({ ...prev, displayOrder: parseInt(e.target.value) }))}
                 />
+                <p className="text-sm text-muted-foreground mt-1">
+                  Order of template sections in trainer setup (lower numbers appear first)
+                </p>
               </div>
               <Button onClick={handleCreate} className="w-full">Create Template Section</Button>
             </div>
@@ -244,6 +273,9 @@ export default function TemplateSectionsManagement() {
                   value={formData.sectionKey}
                   onChange={(e) => setFormData(prev => ({ ...prev, sectionKey: e.target.value }))}
                 />
+                <p className="text-sm text-muted-foreground mt-1">
+                  Unique identifier for this template section
+                </p>
               </div>
               <div>
                 <Label htmlFor="editSectionName">Section Name</Label>
@@ -252,6 +284,9 @@ export default function TemplateSectionsManagement() {
                   value={formData.sectionName}
                   onChange={(e) => setFormData(prev => ({ ...prev, sectionName: e.target.value }))}
                 />
+                <p className="text-sm text-muted-foreground mt-1">
+                  Display name shown in trainer setup
+                </p>
               </div>
               <div>
                 <Label htmlFor="editProfileSection">Maps to Profile Section</Label>
@@ -267,6 +302,9 @@ export default function TemplateSectionsManagement() {
                     ))}
                   </SelectContent>
                 </Select>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Which profile section will display these activities
+                </p>
               </div>
               <div>
                 <Label htmlFor="editDisplayOrder">Display Order</Label>
@@ -276,6 +314,9 @@ export default function TemplateSectionsManagement() {
                   value={formData.displayOrder}
                   onChange={(e) => setFormData(prev => ({ ...prev, displayOrder: parseInt(e.target.value) }))}
                 />
+                <p className="text-sm text-muted-foreground mt-1">
+                  Order of template sections in trainer setup (lower numbers appear first)
+                </p>
               </div>
               <Button onClick={handleEdit} className="w-full">Update Template Section</Button>
             </div>
