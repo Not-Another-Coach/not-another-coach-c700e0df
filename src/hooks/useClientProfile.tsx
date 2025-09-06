@@ -41,6 +41,15 @@ interface ClientProfile {
   client_status: string | null;
   client_journey_stage: string | null;
   journey_progress: any;
+  
+  // Lifestyle and health fields
+  fitness_equipment_access: string[] | null;
+  lifestyle_description: string[] | null;
+  lifestyle_other: string | null;
+  health_conditions: string | null;
+  has_specific_event: string | null;
+  specific_event_details: string | null;
+  specific_event_date: string | Date | null;
 }
 
 export function useClientProfile() {
@@ -98,7 +107,10 @@ export function useClientProfile() {
         'budget_range_min', 'budget_range_max', 'budget_flexibility', 'waitlist_preference',
         'flexible_scheduling', 'preferred_package_type', 'quiz_completed', 'quiz_answers',
         'quiz_completed_at', 'client_survey_completed', 'client_survey_completed_at',
-        'client_status', 'client_journey_stage', 'journey_progress'
+        'client_status', 'client_journey_stage', 'journey_progress',
+        // Lifestyle and health fields
+        'fitness_equipment_access', 'lifestyle_description', 'lifestyle_other', 'health_conditions',
+        'has_specific_event', 'specific_event_details', 'specific_event_date'
       ];
 
       Object.keys(updates).forEach(key => {
