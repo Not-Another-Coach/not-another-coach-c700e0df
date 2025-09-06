@@ -174,9 +174,23 @@ export function useTrainerActivities() {
     
     console.log("🎯 Relevant categories for", profileSectionKey, ":", relevantCategories);
 
+    // Log all system activities and their ways_of_working_category
+    const systemActivities = activities.filter(a => a.is_system);
+    console.log("🔧 System activities and their categories:", systemActivities.map(a => ({
+      name: a.activity_name,
+      ways_of_working_category: a.ways_of_working_category,
+      category: a.category
+    })));
+
     // Get activities that have ways_of_working_category matching those categories
     const matchingActivities = activities
-      .filter((a) => a.ways_of_working_category && relevantCategories.includes(a.ways_of_working_category));
+      .filter((a) => {
+        const hasCategory = a.ways_of_working_category && relevantCategories.includes(a.ways_of_working_category);
+        if (a.is_system && profileSectionKey === 'how_i_work') {
+          console.log(`🔍 Activity "${a.activity_name}": ways_of_working_category="${a.ways_of_working_category}", matches=${hasCategory}`);
+        }
+        return hasCategory;
+      });
       
     console.log("✅ Matching activities:", matchingActivities.map(a => ({
       name: a.activity_name,
