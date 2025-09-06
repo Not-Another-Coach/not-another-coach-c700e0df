@@ -207,30 +207,58 @@ export const EnhancedVerificationManagement = () => {
             </TabsContent>
 
             <TabsContent value="all-trainers" className="space-y-4">
+              <div className="space-y-2 mb-4">
+                <p className="text-sm text-muted-foreground">
+                  Click on any trainer to view their verification details and uploaded documents.
+                </p>
+              </div>
               <div className="grid gap-4">
-                {trainers.map(trainer => (
-                  <Card key={trainer.id} className="cursor-pointer hover:bg-muted/50">
-                    <CardContent 
-                      className="p-4"
-                      onClick={() => setSelectedTrainer(trainer.id)}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <User className="h-8 w-8 text-muted-foreground" />
-                          <div>
-                            <h4 className="font-medium">{getTrainerName(trainer)}</h4>
-                            <p className="text-sm text-muted-foreground">
-                              Status: {trainer.verification_status || 'Not Verified'}
-                            </p>
+                {trainers.map(trainer => {
+                  const trainerChecks = checks.filter(check => check.trainer_id === trainer.id);
+                  const pendingCount = trainerChecks.filter(check => check.status === 'pending').length;
+                  const verifiedCount = trainerChecks.filter(check => check.status === 'verified').length;
+                  
+                  return (
+                    <Card key={trainer.id} className="cursor-pointer hover:bg-muted/50">
+                      <CardContent 
+                        className="p-4"
+                        onClick={() => setSelectedTrainer(trainer.id)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <User className="h-8 w-8 text-muted-foreground" />
+                            <div>
+                              <h4 className="font-medium">{getTrainerName(trainer)}</h4>
+                              <p className="text-sm text-muted-foreground">
+                                Status: {trainer.verification_status || 'Not Verified'}
+                              </p>
+                              <div className="flex gap-2 mt-1">
+                                {verifiedCount > 0 && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    {verifiedCount} Verified
+                                  </Badge>
+                                )}
+                                {pendingCount > 0 && (
+                                  <Badge variant="outline" className="text-xs">
+                                    {pendingCount} Pending
+                                  </Badge>
+                                )}
+                                {trainerChecks.length === 0 && (
+                                  <Badge variant="outline" className="text-xs">
+                                    No submissions
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
                           </div>
+                          <Button size="sm" variant="outline">
+                            View Details
+                          </Button>
                         </div>
-                        <Button size="sm" variant="outline">
-                          View Details
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             </TabsContent>
 
@@ -300,7 +328,22 @@ export const EnhancedVerificationManagement = () => {
                             <p><strong>Expiry:</strong> {new Date(check.expiry_date).toLocaleDateString()}</p>
                           )}
                           {check.evidence_file_url && (
-                            <p><strong>Document:</strong> <span className="text-blue-600">Uploaded</span></p>
+                            <div className="mt-2">
+                              <p className="text-sm font-medium text-blue-800">Document:</p>
+                              <a 
+                                href={`${supabase.storage.from('trainer-verification-documents').getPublicUrl(check.evidence_file_url.replace('trainer-verification-documents/', '')).data.publicUrl}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm text-blue-600 hover:text-blue-800 underline"
+                              >
+                                {check.evidence_metadata?.filename || 'View Document'}
+                              </a>
+                              {check.evidence_metadata && (
+                                <p className="text-xs text-muted-foreground">
+                                  {check.evidence_metadata.type} • {Math.round(check.evidence_metadata.size / 1024)} KB
+                                </p>
+                              )}
+                            </div>
                           )}
                         </div>
 

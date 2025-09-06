@@ -121,7 +121,6 @@ export const ProfilePublicationManagement = () => {
                     <h3 className="font-medium">
                       {request.trainer?.first_name} {request.trainer?.last_name}
                     </h3>
-                    <p className="text-sm text-muted-foreground">{request.trainer?.email}</p>
                     <p className="text-xs text-muted-foreground">
                       Requested {formatDistanceToNow(new Date(request.requested_at), { addSuffix: true })}
                     </p>
@@ -180,7 +179,6 @@ export const ProfilePublicationManagement = () => {
                   <h4 className="font-medium">
                     {request.trainer?.first_name} {request.trainer?.last_name}
                   </h4>
-                  <p className="text-sm text-muted-foreground">{request.trainer?.email}</p>
                   <p className="text-xs text-muted-foreground">
                     {request.reviewed_at 
                       ? `Reviewed ${formatDistanceToNow(new Date(request.reviewed_at), { addSuffix: true })}`

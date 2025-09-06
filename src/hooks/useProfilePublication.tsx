@@ -17,7 +17,6 @@ export interface PublicationRequest {
   trainer?: {
     first_name: string;
     last_name: string;
-    email: string;
     verification_status?: string;
   } | null;
 }
@@ -122,7 +121,6 @@ export const useAdminProfilePublication = () => {
           trainer:profiles!trainer_id(
             first_name,
             last_name,
-            email,
             verification_status
           )
         `)
