@@ -170,46 +170,19 @@ export function useTrainerActivities() {
   };
 
   const getSuggestionsByProfileSection = (profileSectionKey: string): string[] => {
-    console.log("🔍 getSuggestionsByProfileSection called with:", profileSectionKey);
-    console.log("📊 Categories loaded:", categories.length, categories);
-    console.log("🎯 Activities loaded:", activities.length, activities.filter(a => a.is_system).length, "system activities");
-    
     // Get categories directly from ways_of_working_categories table for this profile section
     const relevantCategories = categories
       .filter(cat => cat.profile_section_key === profileSectionKey)
       .map(cat => cat.activity_category);
-    
-    console.log("🎯 Relevant categories for", profileSectionKey, ":", relevantCategories);
-
-    // Log all system activities and their ways_of_working_category
-    const systemActivities = activities.filter(a => a.is_system);
-    console.log("🔧 System activities and their categories:", systemActivities.map(a => ({
-      name: a.activity_name,
-      ways_of_working_category: a.ways_of_working_category,
-      category: a.category
-    })));
 
     // Get activities that have ways_of_working_category matching those categories
     const matchingActivities = activities
-      .filter((a) => {
-        const hasCategory = a.ways_of_working_category && relevantCategories.includes(a.ways_of_working_category);
-        if (a.is_system && profileSectionKey === 'how_i_work') {
-          console.log(`🔍 Activity "${a.activity_name}": ways_of_working_category="${a.ways_of_working_category}", matches=${hasCategory}`);
-        }
-        return hasCategory;
-      });
-      
-    console.log("✅ Matching activities:", matchingActivities.map(a => ({
-      name: a.activity_name,
-      category: a.ways_of_working_category,
-      isSystem: a.is_system
-    })));
+      .filter((a) => a.ways_of_working_category && relevantCategories.includes(a.ways_of_working_category));
     
     const names = matchingActivities
       .map((a) => a.activity_name.trim())
       .filter((t) => t.length > 0);
       
-    console.log("📝 Final suggestions:", names);
     return Array.from(new Set(names));
   };
 
