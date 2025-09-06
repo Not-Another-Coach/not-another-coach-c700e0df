@@ -440,13 +440,12 @@ export function ClientSurveyWidget({ profile }: ClientSurveyWidgetProps) {
                           : 'bg-transparent'
                       }`}
                     >
-                      {showIcon ? (
-                        isPartial ? <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4" /> : <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                      {completion === 'completed' ? (
+                        <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                      ) : completion === 'partial' ? (
+                        <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4" />
                       ) : (
-                        <StepIcon className={cn(
-                          "h-3 w-3 sm:h-4 sm:w-4",
-                          isCurrent ? "text-white" : ""
-                        )} />
+                        <StepIcon className="h-3 w-3 sm:h-4 sm:w-4" />
                       )}
                     </div>
                     <span className={cn(
@@ -511,7 +510,7 @@ export function ClientSurveyWidget({ profile }: ClientSurveyWidgetProps) {
                       {isCurrent ? (
                         <StepIcon className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
                       ) : (
-                        <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <StepIcon className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
                       )}
                     </div>
                     <span className={cn(

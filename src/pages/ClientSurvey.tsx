@@ -491,13 +491,12 @@ const ClientSurvey = () => {
                           : 'bg-transparent'
                       }`}
                     >
-                      {showIcon ? (
-                        isPartial ? <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4" /> : <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                      {completion === 'completed' ? (
+                        <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                      ) : completion === 'partial' ? (
+                        <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4" />
                       ) : (
-                        <StepIcon className={cn(
-                          "h-3 w-3 sm:h-4 sm:w-4",
-                          isCurrent ? "text-white" : ""
-                        )} />
+                        <StepIcon className="h-3 w-3 sm:h-4 sm:w-4" />
                       )}
                     </div>
                     <span className={cn(
