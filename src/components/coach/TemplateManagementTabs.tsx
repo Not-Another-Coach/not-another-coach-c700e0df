@@ -130,6 +130,7 @@ export function TemplateManagementTabs() {
     requires_file_upload?: boolean;
     trainerName?: string;
     trainer_id?: string;
+    ways_of_working_category?: string;
   };
 
   const allActivities: CombinedActivity[] = [
@@ -486,17 +487,22 @@ export function TemplateManagementTabs() {
                   <div className="flex items-start justify-between">
                     <div className="space-y-1 flex-1">
                       <CardTitle className="text-base">{a.activity_name}</CardTitle>
-                      <div className="flex items-center gap-2">
-                        <Badge variant={a.is_system ? 'secondary' : 'default'}>
-                          {a.is_system ? 'System' : 'Custom'}
-                        </Badge>
-                        <Badge variant="outline">{a.category}</Badge>
-                         {a.isEnhanced && (
-                           <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200">
-                             {a.activity_type ? a.activity_type.replace('_', ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') : 'Enhanced'}
+                       <div className="flex items-center gap-2">
+                         <Badge variant={a.is_system ? 'secondary' : 'default'}>
+                           {a.is_system ? 'System' : 'Custom'}
+                         </Badge>
+                         <Badge variant="outline">{a.category}</Badge>
+                         {a.ways_of_working_category && (
+                           <Badge variant="secondary" className="bg-green-50 text-green-700 border-green-200">
+                             {a.ways_of_working_category}
                            </Badge>
                          )}
-                      </div>
+                          {a.isEnhanced && (
+                            <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200">
+                              {a.activity_type ? a.activity_type.replace('_', ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') : 'Enhanced'}
+                            </Badge>
+                          )}
+                       </div>
                     </div>
                     <div className="flex items-center gap-1 ml-4">
                       {/* Only show edit button for: admin users (all activities) or non-admin users (only custom activities) */}
