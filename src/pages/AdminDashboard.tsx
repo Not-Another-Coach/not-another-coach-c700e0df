@@ -15,6 +15,7 @@ import { SpecialtyManagement } from '@/components/admin/SpecialtyManagement';
 import { SpecialtyAnalyticsDashboard } from '@/components/admin/SpecialtyAnalyticsDashboard';
 import { QualificationManagement } from '@/components/admin/QualificationManagement';
 import { AdminQualificationAlerts } from '@/components/alerts/QualificationRequestAlerts';
+import { AdminSpecialtyAlerts } from '@/components/alerts/SpecialtyRequestAlerts';
 import { TemplateManagementTabs } from '@/components/coach/TemplateManagementTabs';
 import { ProfileDropdown } from '@/components/ProfileDropdown';
 import { Settings, Users, Shield, BarChart3, Home, Eye, Upload, FileText, ExternalLink, CheckCircle, Trash2, Layout } from 'lucide-react';
@@ -240,10 +241,13 @@ export const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Qualification Request Alerts */}
-      <div className="mb-6">
+      {/* Qualification and Specialty Request Alerts */}
+      <div className="mb-6 space-y-4">
         <AdminQualificationAlerts 
           onNavigateToRequests={() => setSelectedSection('qualifications')}
+        />
+        <AdminSpecialtyAlerts 
+          onNavigateToRequests={() => setSelectedSection('specialties')}
         />
       </div>
 

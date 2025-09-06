@@ -188,18 +188,26 @@ export function SpecialtyManagement() {
       </div>
 
       <Tabs defaultValue="categories" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="categories">Categories</TabsTrigger>
-          <TabsTrigger value="specialties">Specialties</TabsTrigger>
-          <TabsTrigger value="training-types">Training Types</TabsTrigger>
-          <TabsTrigger value="requests">
-            Requests {requests.filter(r => r.status === 'pending').length > 0 && (
-              <Badge variant="destructive" className="ml-2">
-                {requests.filter(r => r.status === 'pending').length}
-              </Badge>
-            )}
-          </TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto">
+          <TabsList className="grid w-full grid-cols-4 sm:inline-flex sm:h-10 sm:w-auto min-w-max">
+            <TabsTrigger value="categories" className="text-xs sm:text-sm">
+              Categories
+            </TabsTrigger>
+            <TabsTrigger value="specialties" className="text-xs sm:text-sm">
+              Specialties
+            </TabsTrigger>
+            <TabsTrigger value="training-types" className="text-xs sm:text-sm">
+              Training Types
+            </TabsTrigger>
+            <TabsTrigger value="requests" className="text-xs sm:text-sm">
+              Requests {requests.filter(r => r.status === 'pending').length > 0 && (
+                <Badge variant="destructive" className="ml-1 text-xs px-1">
+                  {requests.filter(r => r.status === 'pending').length}
+                </Badge>
+              )}
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="categories">
           <Card>
@@ -284,67 +292,69 @@ export function SpecialtyManagement() {
               {categoriesLoading ? (
                 <div>Loading categories...</div>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead>Icon</TableHead>
-                      <TableHead>Color</TableHead>
-                      <TableHead>Specialties Count</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {categories.map((category) => {
-                      const IconComponent = ICON_OPTIONS.find(i => i.value === category.icon)?.icon || Dumbbell;
-                      const specialtyCount = specialties.filter(s => s.category_id === category.id).length;
-                      
-                      return (
-                        <TableRow key={category.id}>
-                          <TableCell className="font-medium">{category.name}</TableCell>
-                          <TableCell>{category.description}</TableCell>
-                          <TableCell>
-                            <IconComponent className="w-4 h-4" />
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className={`text-${category.color}-600`}>
-                              {category.color}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{specialtyCount}</TableCell>
-                          <TableCell>
-                            <div className="flex gap-2">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  setEditingCategory(category);
-                                  setCategoryForm({
-                                    name: category.name,
-                                    description: category.description || '',
-                                    icon: category.icon || 'Dumbbell',
-                                    color: category.color
-                                  });
-                                  setShowCategoryDialog(true);
-                                }}
-                              >
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => setDeleteConfirmId(category.id)}
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="min-w-[120px]">Name</TableHead>
+                        <TableHead className="min-w-[150px]">Description</TableHead>
+                        <TableHead className="min-w-[60px]">Icon</TableHead>
+                        <TableHead className="min-w-[60px]">Color</TableHead>
+                        <TableHead className="min-w-[80px]">Specialties Count</TableHead>
+                        <TableHead className="min-w-[100px]">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {categories.map((category) => {
+                        const IconComponent = ICON_OPTIONS.find(i => i.value === category.icon)?.icon || Dumbbell;
+                        const specialtyCount = specialties.filter(s => s.category_id === category.id).length;
+                        
+                        return (
+                          <TableRow key={category.id}>
+                            <TableCell className="font-medium">{category.name}</TableCell>
+                            <TableCell className="max-w-[200px] truncate">{category.description}</TableCell>
+                            <TableCell>
+                              <IconComponent className="w-4 h-4" />
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className={`text-${category.color}-600 text-xs`}>
+                                {category.color}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>{specialtyCount}</TableCell>
+                            <TableCell>
+                              <div className="flex gap-1">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setEditingCategory(category);
+                                    setCategoryForm({
+                                      name: category.name,
+                                      description: category.description || '',
+                                      icon: category.icon || 'Dumbbell',
+                                      color: category.color
+                                    });
+                                    setShowCategoryDialog(true);
+                                  }}
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => setDeleteConfirmId(category.id)}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
               )}
             </CardContent>
           </Card>
@@ -616,53 +626,63 @@ export function SpecialtyManagement() {
               {requestsLoading ? (
                 <div>Loading requests...</div>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Specialty Name</TableHead>
-                      <TableHead>Trainer</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {requests.map((request) => (
-                      <TableRow key={request.id}>
-                        <TableCell className="font-medium">{request.requested_name}</TableCell>
-                        <TableCell>{request.trainer_id}</TableCell>
-                        <TableCell>{request.description}</TableCell>
-                        <TableCell>
-                          <Badge variant={request.status === 'pending' ? 'secondary' : request.status === 'approved' ? 'default' : 'destructive'}>
-                            {request.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{new Date(request.created_at).toLocaleDateString()}</TableCell>
-                        <TableCell>
-                          {request.status === 'pending' && (
-                            <div className="flex gap-2">
-                              <Button
-                                size="sm"
-                                onClick={() => handleReviewRequest(request.id, 'approved', true)}
-                                title="Approve and add as specialty"
-                              >
-                                <Check className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleReviewRequest(request.id, 'rejected')}
-                              >
-                                <X className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          )}
-                        </TableCell>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="min-w-[150px]">Specialty Name</TableHead>
+                        <TableHead className="min-w-[120px]">Trainer</TableHead>
+                        <TableHead className="min-w-[150px]">Description</TableHead>
+                        <TableHead className="min-w-[80px]">Status</TableHead>
+                        <TableHead className="min-w-[100px]">Date</TableHead>
+                        <TableHead className="min-w-[120px]">Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {requests.map((request) => (
+                        <TableRow key={request.id}>
+                          <TableCell className="font-medium">{request.requested_name}</TableCell>
+                          <TableCell className="text-sm">
+                            {request.profiles ? 
+                              `${request.profiles.first_name || ''} ${request.profiles.last_name || ''}`.trim() || `Trainer #${request.trainer_id.slice(0, 8)}`
+                              : `Trainer #${request.trainer_id.slice(0, 8)}`
+                            }
+                          </TableCell>
+                          <TableCell className="max-w-[200px] truncate text-sm">{request.description}</TableCell>
+                          <TableCell>
+                            <Badge 
+                              variant={request.status === 'pending' ? 'secondary' : request.status === 'approved' ? 'default' : 'destructive'}
+                              className="text-xs"
+                            >
+                              {request.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-sm">{new Date(request.created_at).toLocaleDateString()}</TableCell>
+                          <TableCell>
+                            {request.status === 'pending' && (
+                              <div className="flex gap-1">
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleReviewRequest(request.id, 'approved', true)}
+                                  title="Approve and add as specialty"
+                                >
+                                  <Check className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleReviewRequest(request.id, 'rejected')}
+                                >
+                                  <X className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               )}
             </CardContent>
           </Card>

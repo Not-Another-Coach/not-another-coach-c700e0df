@@ -54,6 +54,10 @@ export interface CustomSpecialtyRequest {
   reviewed_at?: string;
   created_at: string;
   updated_at: string;
+  profiles?: {
+    first_name?: string;
+    last_name?: string;
+  };
 }
 
 // Hook to fetch specialty categories
@@ -174,7 +178,13 @@ export function useCustomSpecialtyRequests() {
     try {
       const { data, error } = await supabase
         .from('custom_specialty_requests')
-        .select('*')
+        .select(`
+          *,
+          profiles:trainer_id (
+            first_name,
+            last_name
+          )
+        `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
