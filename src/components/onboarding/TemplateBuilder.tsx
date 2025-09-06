@@ -28,7 +28,8 @@ import {
   StickyNote,
   Send,
   Lock,
-  ArchiveX
+  ArchiveX,
+  BarChart3
 } from 'lucide-react';
 import { OnboardingTemplate } from '@/hooks/useTrainerOnboarding';
 import { GettingStartedTask, FirstWeekTask, useOnboardingSections } from '@/hooks/useOnboardingSections';
@@ -37,6 +38,8 @@ import { FirstWeekSection } from '@/components/onboarding/sections/FirstWeekSect
 import { OngoingSupportSection } from '@/components/onboarding/sections/OngoingSupportSection';
 import { CommitmentsExpectationsSection } from '@/components/onboarding/sections/CommitmentsExpectationsSection';
 import { TrainerSpecificSection } from '@/components/onboarding/sections/TrainerSpecificSection';
+import { TrackingToolsSection } from '@/components/onboarding/sections/TrackingToolsSection';
+import { useWaysOfWorkingTemplateSections } from '@/hooks/useWaysOfWorkingTemplateSections';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { toast } from 'sonner';
@@ -91,7 +94,7 @@ export function TemplateBuilder({
   const [selectedTemplateForPackages, setSelectedTemplateForPackages] = useState<string | null>(null);
   const [selectedTemplateForSections, setSelectedTemplateForSections] = useState<string | null>(null);
   const [selectedPackageIds, setSelectedPackageIds] = useState<string[]>([]);
-  const [activeTab, setActiveTab] = useState<string>('getting-started');
+  const [activeTab, setActiveTab] = useState<string>('');
   const [newTemplate, setNewTemplate] = useState<Partial<ExtendedTemplate>>({
     step_name: '',
     step_type: 'mandatory',
@@ -106,6 +109,9 @@ export function TemplateBuilder({
 
   // Initialize onboarding sections hook
   const onboardingSections = useOnboardingSections();
+
+  // Initialize template sections hook
+  const { sections: templateSections } = useWaysOfWorkingTemplateSections();
 
   // Get linked packages for a template
   const getLinkedPackages = (templateId: string) => {
@@ -243,7 +249,11 @@ export function TemplateBuilder({
 
   const openSectionsDialog = async (templateId: string) => {
     setSelectedTemplateForSections(templateId);
-    setActiveTab('getting-started');
+    // Set first available section as active tab
+    const firstSection = templateSections[0];
+    if (firstSection) {
+      setActiveTab(firstSection.section_key);
+    }
     setShowSectionsDialog(true);
     
     // Load all sections for this template
@@ -746,70 +756,110 @@ export function TemplateBuilder({
           <DialogHeader>
             <DialogTitle>Edit Template Sections</DialogTitle>
           </DialogHeader>
-          {selectedTemplateForSections && (
+          {selectedTemplateForSections && templateSections.length > 0 && (
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-5">
-                <TabsTrigger value="getting-started" className="flex items-center gap-2">
-                  <CheckSquare className="h-4 w-4" />
-                  Getting Started
-                </TabsTrigger>
-                <TabsTrigger value="first-week" className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  First Week
-                </TabsTrigger>
-                <TabsTrigger value="ongoing-support" className="flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  Ongoing Support
-                </TabsTrigger>
-                <TabsTrigger value="commitments" className="flex items-center gap-2">
-                  <FileText className="h-4 w-4" />
-                  Commitments
-                </TabsTrigger>
-                <TabsTrigger value="trainer-notes" className="flex items-center gap-2">
-                  <StickyNote className="h-4 w-4" />
-                  Trainer Notes
-                </TabsTrigger>
+              <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${templateSections.length}, 1fr)` }}>
+                {templateSections.map((section) => {
+                  const getSectionIcon = (sectionKey: string) => {
+                    switch (sectionKey) {
+                      case 'onboarding':
+                        return <CheckSquare className="h-4 w-4" />;
+                      case 'first_week':
+                        return <Clock className="h-4 w-4" />;
+                      case 'commitments_expectations':
+                        return <FileText className="h-4 w-4" />;
+                      case 'tracking_tools':
+                        return <BarChart3 className="h-4 w-4" />;
+                      case 'ongoing_support':
+                        return <Users className="h-4 w-4" />;
+                      case 'trainer_specific':
+                        return <StickyNote className="h-4 w-4" />;
+                      default:
+                        return <FileText className="h-4 w-4" />;
+                    }
+                  };
+
+                  return (
+                    <TabsTrigger 
+                      key={section.id} 
+                      value={section.section_key} 
+                      className="flex items-center gap-2"
+                    >
+                      {getSectionIcon(section.section_key)}
+                      {section.section_name}
+                    </TabsTrigger>
+                  );
+                })}
               </TabsList>
               
-              <TabsContent value="getting-started" className="mt-6">
-                <GettingStartedSection
-                  templateId={selectedTemplateForSections}
-                  tasks={onboardingSections.gettingStartedTasks}
-                  onTasksChange={() => onboardingSections.fetchGettingStartedTasks(selectedTemplateForSections)}
-                />
-              </TabsContent>
-              
-              <TabsContent value="first-week" className="mt-6">
-                <FirstWeekSection
-                  templateId={selectedTemplateForSections}
-                  tasks={onboardingSections.firstWeekTasks}
-                  onTasksChange={() => onboardingSections.fetchFirstWeekTasks(selectedTemplateForSections)}
-                />
-              </TabsContent>
-              
-              <TabsContent value="ongoing-support" className="mt-6">
-                <OngoingSupportSection
-                  templateId={selectedTemplateForSections}
-                  settings={onboardingSections.ongoingSupportSettings}
-                  onSettingsChange={() => onboardingSections.fetchOngoingSupportSettings(selectedTemplateForSections)}
-                />
-              </TabsContent>
-              
-              <TabsContent value="commitments" className="mt-6">
-                <CommitmentsExpectationsSection
-                  templateId={selectedTemplateForSections}
-                  commitments={onboardingSections.commitments}
-                  onCommitmentsChange={() => onboardingSections.fetchCommitments(selectedTemplateForSections)}
-                />
-              </TabsContent>
-              
-              <TabsContent value="trainer-notes" className="mt-6">
-                <TrainerSpecificSection
-                  templateId={selectedTemplateForSections}
-                  notes={onboardingSections.trainerNotes}
-                  onNotesChange={() => onboardingSections.fetchTrainerNotes(selectedTemplateForSections)}
-                />
-              </TabsContent>
+              {templateSections.map((section) => {
+                const renderSectionContent = () => {
+                  switch (section.section_key) {
+                    case 'onboarding':
+                      return (
+                        <GettingStartedSection
+                          templateId={selectedTemplateForSections}
+                          tasks={onboardingSections.gettingStartedTasks}
+                          onTasksChange={() => onboardingSections.fetchGettingStartedTasks(selectedTemplateForSections)}
+                        />
+                      );
+                    case 'first_week':
+                      return (
+                        <FirstWeekSection
+                          templateId={selectedTemplateForSections}
+                          tasks={onboardingSections.firstWeekTasks}
+                          onTasksChange={() => onboardingSections.fetchFirstWeekTasks(selectedTemplateForSections)}
+                        />
+                      );
+                    case 'commitments_expectations':
+                      return (
+                        <CommitmentsExpectationsSection
+                          templateId={selectedTemplateForSections}
+                          commitments={onboardingSections.commitments}
+                          onCommitmentsChange={() => onboardingSections.fetchCommitments(selectedTemplateForSections)}
+                        />
+                      );
+                    case 'tracking_tools':
+                      return (
+                        <TrackingToolsSection
+                          templateId={selectedTemplateForSections}
+                          tasks={onboardingSections.firstWeekTasks} // Reusing for now
+                          onTasksChange={() => onboardingSections.fetchFirstWeekTasks(selectedTemplateForSections)}
+                        />
+                      );
+                    case 'ongoing_support':
+                      return (
+                        <OngoingSupportSection
+                          templateId={selectedTemplateForSections}
+                          settings={onboardingSections.ongoingSupportSettings}
+                          onSettingsChange={() => onboardingSections.fetchOngoingSupportSettings(selectedTemplateForSections)}
+                        />
+                      );
+                    case 'trainer_specific':
+                      return (
+                        <TrainerSpecificSection
+                          templateId={selectedTemplateForSections}
+                          notes={onboardingSections.trainerNotes}
+                          onNotesChange={() => onboardingSections.fetchTrainerNotes(selectedTemplateForSections)}
+                        />
+                      );
+                    default:
+                      return (
+                        <div className="text-center py-8">
+                          <p className="text-muted-foreground">
+                            Section content not implemented yet: {section.section_name}
+                          </p>
+                        </div>
+                      );
+                  }
+                };
+
+                return (
+                  <TabsContent key={section.id} value={section.section_key} className="mt-6">
+                    {renderSectionContent()}
+                  </TabsContent>
+                );
+              })}
             </Tabs>
           )}
           
