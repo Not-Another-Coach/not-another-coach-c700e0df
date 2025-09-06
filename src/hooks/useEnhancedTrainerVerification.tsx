@@ -268,25 +268,41 @@ export const useEnhancedTrainerVerification = () => {
     adminNotes?: string,
     rejectionReason?: string
   ) => {
-    if (!isAdmin) return;
+    if (!isAdmin) {
+      toast.error('Admin privileges required');
+      return;
+    }
 
     try {
-      const { error } = await supabase.rpc('admin_update_verification_check', {
+      console.log('Calling admin_update_verification_check with:', {
+        trainerId,
+        checkType,
+        status,
+        adminNotes,
+        rejectionReason
+      });
+
+      const { data, error } = await supabase.rpc('admin_update_verification_check', {
         p_trainer_id: trainerId,
         p_check_type: checkType,
         p_status: status,
-        p_admin_notes: adminNotes,
-        p_rejection_reason: rejectionReason,
+        p_admin_notes: adminNotes || '',
+        p_rejection_reason: rejectionReason || '',
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('RPC error:', error);
+        throw error;
+      }
+
+      console.log('RPC success:', data);
 
       // Refresh data
       await fetchVerificationData(trainerId);
-      toast.success(`Verification check ${status}`);
+      toast.success(`Verification check ${status === 'verified' ? 'approved' : status}`);
     } catch (error) {
       console.error('Error updating verification check:', error);
-      toast.error('Failed to update verification check');
+      toast.error(`Failed to update verification check: ${error.message}`);
     }
   }, [isAdmin, fetchVerificationData]);
 

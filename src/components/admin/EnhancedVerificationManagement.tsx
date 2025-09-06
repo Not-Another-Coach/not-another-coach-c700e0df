@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { CheckCircle2, XCircle, Clock, AlertCircle, Eye, FileText, Shield, Award, User, BarChart3 } from 'lucide-react';
 import { VerificationAnalytics } from './VerificationAnalytics';
+import { DocumentViewer } from './DocumentViewer';
 import { useEnhancedTrainerVerification } from '@/hooks/useEnhancedTrainerVerification';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -48,30 +49,50 @@ export const EnhancedVerificationManagement = () => {
   } = useEnhancedTrainerVerification();
 
   const [trainers, setTrainers] = useState<TrainerProfile[]>([]);
+  const [allPendingChecks, setAllPendingChecks] = useState<any[]>([]);
   const [selectedTrainer, setSelectedTrainer] = useState<string | null>(null);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [reviewData, setReviewData] = useState({
     checkType: '' as any,
+    trainerId: '' as any,
     status: '' as any,
     adminNotes: '',
     rejectionReason: '',
   });
 
-  // Fetch all trainers
+  // Fetch all trainers and pending checks
   useEffect(() => {
-    const fetchTrainers = async () => {
+    const fetchTrainersAndPendingChecks = async () => {
       if (!isAdmin) return;
 
-      const { data } = await supabase
-        .from('profiles')
-        .select('id, first_name, last_name, verification_status, user_type')
-        .eq('user_type', 'trainer')
-        .order('first_name');
+      try {
+        // Fetch trainers
+        const { data: trainersData } = await supabase
+          .from('profiles')
+          .select('id, first_name, last_name, verification_status, user_type')
+          .eq('user_type', 'trainer')
+          .order('first_name');
 
-      setTrainers(data || []);
+        setTrainers(trainersData || []);
+
+        // Fetch all pending verification checks
+        const { data: pendingData } = await supabase
+          .from('trainer_verification_checks')
+          .select(`
+            *,
+            profiles!inner(id, first_name, last_name, email)
+          `)
+          .eq('status', 'pending')
+          .order('created_at', { ascending: false });
+
+        setAllPendingChecks(pendingData || []);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        toast.error('Failed to load verification data');
+      }
     };
 
-    fetchTrainers();
+    fetchTrainersAndPendingChecks();
   }, [isAdmin]);
 
   // Fetch verification data when trainer is selected
@@ -81,9 +102,10 @@ export const EnhancedVerificationManagement = () => {
     }
   }, [selectedTrainer, fetchVerificationData]);
 
-  const handleReviewCheck = (checkType: string, currentStatus: string) => {
+  const handleReviewCheck = (checkType: string, trainerId: string, currentStatus: string) => {
     setReviewData({
       checkType,
+      trainerId,
       status: currentStatus === 'pending' ? 'verified' : currentStatus,
       adminNotes: '',
       rejectionReason: '',
@@ -92,31 +114,52 @@ export const EnhancedVerificationManagement = () => {
   };
 
   const handleSubmitReview = async () => {
-    if (!selectedTrainer || !reviewData.checkType) return;
+    if (!reviewData.trainerId || !reviewData.checkType) return;
 
     try {
       await adminUpdateCheck(
-        selectedTrainer,
+        reviewData.trainerId,
         reviewData.checkType,
         reviewData.status,
         reviewData.adminNotes,
         reviewData.rejectionReason
       );
 
+      // Refresh both the selected trainer data and all pending checks
+      if (selectedTrainer) {
+        await fetchVerificationData(selectedTrainer);
+      }
+      
+      // Refresh all pending checks
+      const { data: pendingData } = await supabase
+        .from('trainer_verification_checks')
+        .select(`
+          *,
+          profiles!inner(id, first_name, last_name, email)
+        `)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
+
+      setAllPendingChecks(pendingData || []);
+
       setReviewModalOpen(false);
       setReviewData({
         checkType: '',
+        trainerId: '',
         status: '',
         adminNotes: '',
         rejectionReason: '',
       });
+
+      toast.success(`Verification check ${reviewData.status === 'verified' ? 'approved' : 'rejected'} successfully`);
     } catch (error) {
       console.error('Error submitting review:', error);
+      toast.error('Failed to update verification check');
     }
   };
 
   const getPendingChecksCount = () => {
-    return checks.filter(check => check.status === 'pending').length;
+    return allPendingChecks.length;
   };
 
   const getTrainerName = (trainer: TrainerProfile) => {
@@ -159,45 +202,45 @@ export const EnhancedVerificationManagement = () => {
             <TabsContent value="pending" className="space-y-4">
               {loading ? (
                 <p>Loading pending reviews...</p>
-              ) : checks.filter(check => check.status === 'pending').length > 0 ? (
+              ) : allPendingChecks.length > 0 ? (
                 <div className="space-y-4">
-                  {checks
-                    .filter(check => check.status === 'pending')
-                    .map(check => {
-                      const trainer = trainers.find(t => t.id === check.trainer_id);
-                      return (
-                        <Card key={check.id}>
-                          <CardContent className="p-4">
-                            <div className="flex items-center justify-between">
-                              <div className="space-y-1">
-                                <h4 className="font-medium">
-                                  {CheckTypeLabels[check.check_type as keyof typeof CheckTypeLabels]}
-                                </h4>
-                                <p className="text-sm text-muted-foreground">
-                                  Trainer: {trainer ? getTrainerName(trainer) : 'Unknown'}
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                  Submitted: {new Date(check.created_at).toLocaleDateString()}
-                                </p>
-                              </div>
-                              <div className="flex gap-2">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => {
-                                    setSelectedTrainer(check.trainer_id);
-                                    handleReviewCheck(check.check_type, check.status);
-                                  }}
-                                >
-                                  <Eye className="h-4 w-4 mr-1" />
-                                  Review
-                                </Button>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      );
-                    })}
+                  {allPendingChecks.map(check => (
+                    <Card key={`${check.trainer_id}-${check.check_type}`}>
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="space-y-1">
+                            <h4 className="font-medium">
+                              {CheckTypeLabels[check.check_type as keyof typeof CheckTypeLabels]}
+                            </h4>
+                            <p className="text-sm text-muted-foreground">
+                              Trainer: {check.profiles ? `${check.profiles.first_name || ''} ${check.profiles.last_name || ''}`.trim() : 'Unknown'}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              Submitted: {new Date(check.created_at).toLocaleDateString()}
+                            </p>
+                            {check.evidence_file_url && (
+                              <p className="text-xs text-blue-600">
+                                📎 Document attached
+                              </p>
+                            )}
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedTrainer(check.trainer_id);
+                                handleReviewCheck(check.check_type, check.trainer_id, check.status);
+                              }}
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              Review
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
               ) : (
                 <p className="text-center text-muted-foreground py-8">
@@ -328,37 +371,14 @@ export const EnhancedVerificationManagement = () => {
                             <p><strong>Expiry:</strong> {new Date(check.expiry_date).toLocaleDateString()}</p>
                           )}
                            {check.evidence_file_url && (
-                             <div className="mt-2">
-                               <p className="text-sm font-medium text-blue-800">Document:</p>
-                               <Button
-                                 variant="outline"
-                                 size="sm"
-                                 className="h-7 text-xs"
-                                 onClick={async () => {
-                                   try {
-                                     const filePath = check.evidence_file_url.replace('trainer-verification-documents/', '');
-                                     const { data, error } = await supabase.storage
-                                       .from('trainer-verification-documents')
-                                       .createSignedUrl(filePath, 300);
-                                     
-                                     if (error) throw error;
-                                     window.open(data.signedUrl, '_blank');
-                                   } catch (error) {
-                                     console.error('Error accessing document:', error);
-                                     toast.error('Unable to access document');
-                                   }
-                                 }}
-                               >
-                                 <FileText className="h-3 w-3 mr-1" />
-                                 {check.evidence_metadata?.filename || 'View Document'}
-                               </Button>
-                               {check.evidence_metadata && (
-                                 <p className="text-xs text-muted-foreground mt-1">
-                                   {check.evidence_metadata.type} • {Math.round(check.evidence_metadata.size / 1024)} KB
-                                 </p>
-                               )}
-                             </div>
-                           )}
+                              <DocumentViewer
+                                fileUrl={check.evidence_file_url}
+                                filename={check.evidence_metadata?.filename}
+                                fileSize={check.evidence_metadata?.size}
+                                fileType={check.evidence_metadata?.type}
+                                className="mt-2"
+                              />
+                            )}
                         </div>
 
                         {check.admin_notes && (
@@ -378,7 +398,7 @@ export const EnhancedVerificationManagement = () => {
                         <div className="flex gap-2 mt-3">
                           <Button 
                             size="sm"
-                            onClick={() => handleReviewCheck(check.check_type, check.status)}
+                            onClick={() => handleReviewCheck(check.check_type, check.trainer_id, check.status)}
                           >
                             Review
                           </Button>
