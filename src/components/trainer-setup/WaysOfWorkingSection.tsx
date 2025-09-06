@@ -23,20 +23,20 @@ interface WaysOfWorkingItem {
 }
 
 export default function WaysOfWorkingSection({ formData, updateFormData, errors }: WaysOfWorkingSectionProps) {
-  const { getSuggestionsBySection } = useTrainerActivities();
-  const { sections: templateSections } = useWaysOfWorkingTemplateSections();
+  const { getSuggestionsBySection, getSuggestionsByProfileSection } = useTrainerActivities();
+  const { sections: templateSections, getProfileSections } = useWaysOfWorkingTemplateSections();
   
-  // Use dynamic sections from database, fallback to hardcoded if none found
-  const sections = templateSections.length > 0 
-    ? templateSections.map(s => s.section_key)
-    : [
-        "onboarding",
-        "first_week", 
-        "ongoing_structure",
-        "tracking_tools",
-        "client_expectations",
-        "what_i_bring"
-      ];
+  // Use profile sections as the main sections
+  const profileSections = getProfileSections();
+  const sections = profileSections.map(ps => ps.key);
+
+  // Group template sections by profile section key for aggregating activity suggestions
+  const templateSectionsByProfile = templateSections.reduce((acc, templateSection) => {
+    const profileKey = templateSection.profile_section_key;
+    if (!acc[profileKey]) acc[profileKey] = [];
+    acc[profileKey].push(templateSection);
+    return acc;
+  }, {} as Record<string, typeof templateSections>);
 
   const [newItems, setNewItems] = useState<{ [key: string]: string }>(() => {
     const initialItems: { [key: string]: string } = {};
@@ -46,27 +46,16 @@ export default function WaysOfWorkingSection({ formData, updateFormData, errors 
     return initialItems;
   });
 
-  const sectionTitles = templateSections.length > 0 
-    ? templateSections.reduce((acc, section) => {
-        acc[section.section_key] = section.section_name;
-        return acc;
-      }, {} as { [key: string]: string })
-    : {
-        onboarding: "Onboarding Process",
-        first_week: "First Week Experience",
-        ongoing_structure: "Ongoing Structure",
-        tracking_tools: "Tracking & Progress Tools",
-        client_expectations: "What I Expect From Clients",
-        what_i_bring: "What I Bring"
-      };
+  // Use profile section titles and descriptions
+  const sectionTitles = profileSections.reduce((acc, section) => {
+    acc[section.key] = section.name;
+    return acc;
+  }, {} as { [key: string]: string });
 
   const sectionDescriptions = {
-    onboarding: "How you welcome and assess new clients",
-    first_week: "What clients can expect in their first week",
-    ongoing_structure: "Your regular coaching rhythm and touchpoints",
-    tracking_tools: "Tools and methods you use to track progress",
-    client_expectations: "What you need from clients for success",
-    what_i_bring: "Your unique value and approach"
+    how_i_work: "Your coaching process, methods, and approach to working with clients",
+    what_i_provide: "The specific services, tools, and support you offer to clients", 
+    client_expectations: "What you need from clients for a successful coaching relationship"
   };
 
   const addItem = (section: string) => {
@@ -108,7 +97,18 @@ export default function WaysOfWorkingSection({ formData, updateFormData, errors 
 
   const renderSection = (section: string) => {
     const items = formData[`ways_of_working_${section}`] || [];
-    const sectionSuggestions = getSuggestionsBySection(section);
+    
+    // Get activity suggestions by aggregating from all template sections that map to this profile section
+    const templateSectionsForProfile = templateSectionsByProfile[section] || [];
+    const aggregatedSuggestions: string[] = [];
+    
+    templateSectionsForProfile.forEach(templateSection => {
+      const suggestions = getSuggestionsBySection(templateSection.section_key);
+      aggregatedSuggestions.push(...suggestions);
+    });
+    
+    // Remove duplicates and sort
+    const sectionSuggestions = Array.from(new Set(aggregatedSuggestions)).sort();
 
     return (
       <Card key={section} className="space-y-4">
@@ -164,29 +164,31 @@ export default function WaysOfWorkingSection({ formData, updateFormData, errors 
           </div>
 
           {/* Suggestions */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Quick suggestions:</Label>
-            <div className="flex flex-wrap gap-2">
-              {sectionSuggestions.map((suggestion, index) => {
-                const isAdded = items.some((item: WaysOfWorkingItem) => item.text === suggestion);
-                return (
-                  <Badge
-                    key={index}
-                    variant={isAdded ? "secondary" : "outline"}
-                    className={`cursor-pointer transition-colors ${
-                      isAdded 
-                        ? "opacity-50 cursor-not-allowed" 
-                        : "hover:bg-primary hover:text-primary-foreground"
-                    }`}
-                    onClick={() => !isAdded && addSuggestion(section, suggestion)}
-                  >
-                    {suggestion}
-                    {isAdded && <span className="ml-1">✓</span>}
-                  </Badge>
-                );
-              })}
+          {sectionSuggestions.length > 0 && (
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Quick suggestions:</Label>
+              <div className="flex flex-wrap gap-2">
+                {sectionSuggestions.map((suggestion, index) => {
+                  const isAdded = items.some((item: WaysOfWorkingItem) => item.text === suggestion);
+                  return (
+                    <Badge
+                      key={index}
+                      variant={isAdded ? "secondary" : "outline"}
+                      className={`cursor-pointer transition-colors ${
+                        isAdded 
+                          ? "opacity-50 cursor-not-allowed" 
+                          : "hover:bg-primary hover:text-primary-foreground"
+                      }`}
+                      onClick={() => !isAdded && addSuggestion(section, suggestion)}
+                    >
+                      {suggestion}
+                      {isAdded && <span className="ml-1">✓</span>}
+                    </Badge>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )}
         </CardContent>
       </Card>
     );

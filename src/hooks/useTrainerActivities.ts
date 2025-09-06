@@ -156,7 +156,28 @@ export function useTrainerActivities() {
     const category = sectionToCategory[sectionKey];
     if (!category) return [];
     const names = activities
-      .filter((a) => a.category === category)
+      .filter((a) => a.ways_of_working_category === category)
+      .map((a) => a.activity_name.trim())
+      .filter((t) => t.length > 0);
+    return Array.from(new Set(names));
+  };
+
+  const getSuggestionsByProfileSection = (profileSectionKey: string): string[] => {
+    // Get all activities that have ways_of_working_category matching template sections
+    // that map to this profile section key
+    const categoryMapping = getSectionToCategory();
+    const relevantCategories: string[] = [];
+    
+    // Find all template section keys that map to this profile section
+    // and get their corresponding activity categories
+    Object.entries(categoryMapping).forEach(([templateSectionKey, activityCategory]) => {
+      // We need to check if this template section maps to our profile section
+      // This would require template section data, so for now we'll use the direct approach
+      relevantCategories.push(activityCategory);
+    });
+
+    const names = activities
+      .filter((a) => a.ways_of_working_category && relevantCategories.includes(a.ways_of_working_category))
       .map((a) => a.activity_name.trim())
       .filter((t) => t.length > 0);
     return Array.from(new Set(names));
@@ -168,6 +189,7 @@ export function useTrainerActivities() {
     error,
     refresh: fetchAll,
     getSuggestionsBySection,
+    getSuggestionsByProfileSection,
     createActivity,
     updateActivity,
     updateActivityDetails
