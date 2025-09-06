@@ -121,11 +121,11 @@ export function useClientProfile() {
         }
       }
 
-      // Update client_profiles table if needed
+      // Upsert client_profiles table if needed
       if (Object.keys(clientUpdates).length > 0) {
         const { error: clientError } = await supabase
           .from('client_profiles')
-          .update(clientUpdates)
+          .upsert({ id: user.id, ...clientUpdates })
           .eq('id', user.id);
 
         if (clientError) {
