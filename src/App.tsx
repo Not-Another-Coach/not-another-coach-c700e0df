@@ -26,6 +26,20 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import AdminDiagnostics from "@/pages/AdminDiagnostics";
 import { PaymentManagement } from "./pages/PaymentManagement";
 
+// Admin pages
+import UserManagement from "./pages/admin/UserManagement";
+import BulkUserUpload from "./pages/admin/BulkUserUpload";
+import VerificationManagement from "./pages/admin/VerificationManagement";
+import ProfilePublications from "./pages/admin/ProfilePublications";
+import KnowledgeBase from "./pages/admin/KnowledgeBase";
+import SpecialtyManagement from "./pages/admin/SpecialtyManagement";
+import QualificationManagement from "./pages/admin/QualificationManagement";
+import SpecialtyAnalytics from "./pages/admin/SpecialtyAnalytics";
+import VerificationAnalytics from "./pages/admin/VerificationAnalytics";
+import FeedbackBuilder from "./pages/admin/FeedbackBuilder";
+import DataCleanup from "./pages/admin/DataCleanup";
+import TemplateManagement from "./pages/admin/TemplateManagement";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -53,6 +67,20 @@ const App = () => (
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
                 <Route path="/admin/diagnostics" element={<AdminDiagnostics />} />
+                
+                {/* Admin function pages */}
+                <Route path="/admin/users" element={<UserManagement />} />
+                <Route path="/admin/bulk-upload" element={<BulkUserUpload />} />
+                <Route path="/admin/verification" element={<VerificationManagement />} />
+                <Route path="/admin/publications" element={<ProfilePublications />} />
+                <Route path="/admin/knowledge-base" element={<KnowledgeBase />} />
+                <Route path="/admin/specialties" element={<SpecialtyManagement />} />
+                <Route path="/admin/qualifications" element={<QualificationManagement />} />
+                <Route path="/admin/specialty-analytics" element={<SpecialtyAnalytics />} />
+                <Route path="/admin/verification-analytics" element={<VerificationAnalytics />} />
+                <Route path="/admin/feedback-builder" element={<FeedbackBuilder />} />
+                <Route path="/admin/data-cleanup" element={<DataCleanup />} />
+                <Route path="/admin/templates" element={<TemplateManagement />} />
                 <Route path="/trainer/:trainerId" element={<TrainerProfile />} />
                 <Route path="/messages/:trainerId?" element={<Messaging />} />
                 <Route path="/documentation" element={<Documentation />} />

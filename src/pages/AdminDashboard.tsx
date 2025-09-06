@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRoles } from "@/hooks/useUserRoles";
@@ -7,31 +6,28 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AdminHeader } from "@/components/AdminHeader";
 import { AdminAnalyticsDashboard } from "@/components/admin/AdminAnalyticsDashboard";
 import { AdminLiveActivityFeed } from "@/components/admin/AdminLiveActivityFeed";
-
-// Import admin components
-import { UserManagement } from "@/components/admin/UserManagement";
-import { BulkUserUpload } from "@/components/admin/BulkUserUpload";
-import { VerificationManagement } from "@/components/admin/VerificationManagement";
-import { KnowledgeBaseAdmin } from "@/components/knowledge-base/KnowledgeBaseAdmin";
-import { SpecialtyManagement } from "@/components/admin/SpecialtyManagement";
-import { QualificationManagement } from "@/components/admin/QualificationManagement";
-import { FeedbackQuestionBuilder } from "@/components/admin/FeedbackQuestionBuilder";
-import { SpecialtyAnalyticsDashboard } from "@/components/admin/SpecialtyAnalyticsDashboard";
-import { VerificationAnalytics } from "@/components/admin/VerificationAnalytics";
-import { ClientTrainerCleanup } from "@/components/admin/ClientTrainerCleanup";
-import { TestUserCleanup } from "@/components/admin/TestUserCleanup";
-import TemplateSectionsManagement from "@/components/admin/TemplateSectionsManagement";
-import { EnhancedVerificationManagement } from "@/components/admin/EnhancedVerificationManagement";
 import { QualificationRequestWidget } from "@/components/alerts/QualificationRequestAlerts";
 import { SpecialtyRequestWidget } from "@/components/alerts/SpecialtyRequestAlerts";
-import { ProfilePublicationManagement } from "@/components/admin/ProfilePublicationManagement";
+import { 
+  Users, 
+  Upload, 
+  Shield, 
+  FileCheck, 
+  BookOpen, 
+  Target, 
+  Award, 
+  BarChart3, 
+  FileBarChart, 
+  MessageCircle, 
+  Database, 
+  FileText,
+  ArrowRight
+} from "lucide-react";
 
 export const AdminDashboard = () => {
   const { user } = useAuth();
   const { isAdmin } = useUserRoles();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("dashboard");
-  const [usersSubTab, setUsersSubTab] = useState("user-management");
 
   if (!user || !isAdmin) {
     return (
@@ -46,225 +42,160 @@ export const AdminDashboard = () => {
     );
   }
 
+  const adminFunctions = [
+    // Users & Access
+    { 
+      title: "User Management", 
+      description: "Manage users, roles, and permissions", 
+      icon: Users,
+      path: "/admin/users",
+      color: "bg-blue-50 border-blue-200 hover:bg-blue-100"
+    },
+    { 
+      title: "Bulk User Upload", 
+      description: "Import users in bulk from CSV files", 
+      icon: Upload,
+      path: "/admin/bulk-upload", 
+      color: "bg-green-50 border-green-200 hover:bg-green-100"
+    },
+    { 
+      title: "Verification System", 
+      description: "Manage trainer verification requests", 
+      icon: Shield,
+      path: "/admin/verification",
+      color: "bg-purple-50 border-purple-200 hover:bg-purple-100"
+    },
+    { 
+      title: "Profile Publications", 
+      description: "Review and approve profile publication requests", 
+      icon: FileCheck,
+      path: "/admin/publications",
+      color: "bg-indigo-50 border-indigo-200 hover:bg-indigo-100"
+    },
+    
+    // Content Management
+    { 
+      title: "Knowledge Base", 
+      description: "Manage articles and categories", 
+      icon: BookOpen,
+      path: "/admin/knowledge-base",
+      color: "bg-teal-50 border-teal-200 hover:bg-teal-100"
+    },
+    { 
+      title: "Specialties & Training", 
+      description: "Manage specialty categories", 
+      icon: Target,
+      path: "/admin/specialties",
+      color: "bg-orange-50 border-orange-200 hover:bg-orange-100"
+    },
+    { 
+      title: "Qualifications", 
+      description: "Manage certification categories", 
+      icon: Award,
+      path: "/admin/qualifications",
+      color: "bg-yellow-50 border-yellow-200 hover:bg-yellow-100"
+    },
+    
+    // Analytics
+    { 
+      title: "Specialty Analytics", 
+      description: "View specialty performance data", 
+      icon: BarChart3,
+      path: "/admin/specialty-analytics",
+      color: "bg-cyan-50 border-cyan-200 hover:bg-cyan-100"
+    },
+    { 
+      title: "Verification Analytics", 
+      description: "Monitor verification trends", 
+      icon: FileBarChart,
+      path: "/admin/verification-analytics",
+      color: "bg-emerald-50 border-emerald-200 hover:bg-emerald-100"
+    },
+    
+    // System Tools
+    { 
+      title: "Feedback Builder", 
+      description: "Create discovery call questions", 
+      icon: MessageCircle,
+      path: "/admin/feedback-builder",
+      color: "bg-pink-50 border-pink-200 hover:bg-pink-100"
+    },
+    { 
+      title: "Data Cleanup Tools", 
+      description: "Clean up test data and interactions", 
+      icon: Database,
+      path: "/admin/data-cleanup",
+      color: "bg-red-50 border-red-200 hover:bg-red-100"
+    },
+    { 
+      title: "Template Management", 
+      description: "Manage onboarding templates", 
+      icon: FileText,
+      path: "/admin/templates",
+      color: "bg-violet-50 border-violet-200 hover:bg-violet-100"
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <AdminHeader 
         profile={{
           ...user,
           user_type: 'admin'
         }}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
+        showNavigation={false}
       />
 
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto p-6">
         <div className="space-y-6">
           
-          {/* Dashboard Tab */}
-          {activeTab === "dashboard" && (
-            <div className="space-y-6">
-              {/* Alert components for pending requests */}
-              <div className="space-y-4">
-                <QualificationRequestWidget />
-                <SpecialtyRequestWidget />
-              </div>
-              
-              {/* Stats Dashboard */}
-              <AdminAnalyticsDashboard onNavigate={setActiveTab} />
-              
-              {/* Live Activity Feed */}
-              <AdminLiveActivityFeed />
-            </div>
-          )}
+          {/* Welcome Section */}
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+            <p className="text-muted-foreground">
+              Manage your platform with comprehensive administrative tools
+            </p>
+          </div>
 
-          {/* Users & Access Tab */}
-          {activeTab === "users" && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <Card 
-                  className={`cursor-pointer hover:shadow-md transition-shadow ${
-                    usersSubTab === "user-management" ? "bg-blue-100 border-blue-300" : "bg-blue-50 border-blue-200"
-                  }`}
-                  onClick={() => setUsersSubTab("user-management")}
-                >
-                  <CardHeader>
-                    <CardTitle>User Management</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">Manage users, roles, and permissions</p>
-                  </CardContent>
-                </Card>
-                
-                <Card 
-                  className={`cursor-pointer hover:shadow-md transition-shadow ${
-                    usersSubTab === "bulk-upload" ? "bg-green-100 border-green-300" : "bg-green-50 border-green-200"
-                  }`}
-                  onClick={() => setUsersSubTab("bulk-upload")}
-                >
-                  <CardHeader>
-                    <CardTitle>Bulk User Upload</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">Import users in bulk from CSV files</p>
-                  </CardContent>
-                </Card>
-                
-                <Card 
-                  className={`cursor-pointer hover:shadow-md transition-shadow ${
-                    usersSubTab === "verification" ? "bg-purple-100 border-purple-300" : "bg-purple-50 border-purple-200"
-                  }`}
-                  onClick={() => setUsersSubTab("verification")}
-                >
-                  <CardHeader>
-                    <CardTitle>Verification System</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">Manage trainer verification requests</p>
-                  </CardContent>
-                </Card>
-
-                <Card 
-                  className={`cursor-pointer hover:shadow-md transition-shadow ${
-                    usersSubTab === "publications" ? "bg-indigo-100 border-indigo-300" : "bg-indigo-50 border-indigo-200"
-                  }`}
-                  onClick={() => setUsersSubTab("publications")}
-                >
-                  <CardHeader>
-                    <CardTitle>Profile Publications</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">Review and approve profile publication requests</p>
-                  </CardContent>
-                </Card>
-              </div>
-              
-              {/* Sub-tab content */}
-              <Card>
-                <CardContent className="p-6">
-                  {usersSubTab === "user-management" && <UserManagement />}
-                  {usersSubTab === "bulk-upload" && <BulkUserUpload />}
-                  {usersSubTab === "verification" && <EnhancedVerificationManagement />}
-                  {usersSubTab === "publications" && <ProfilePublicationManagement />}
-                </CardContent>
-              </Card>
+          {/* Alert components for pending requests */}
+          <div className="space-y-4">
+            <QualificationRequestWidget />
+            <SpecialtyRequestWidget />
+          </div>
+          
+          {/* Stats Dashboard */}
+          <AdminAnalyticsDashboard onNavigate={() => {}} />
+          
+          {/* Admin Functions Grid */}
+          <div className="space-y-6">
+            <h2 className="text-xl font-semibold">Administrative Functions</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {adminFunctions.map((func) => {
+                const Icon = func.icon;
+                return (
+                  <Card 
+                    key={func.path}
+                    className={`cursor-pointer transition-all duration-200 ${func.color}`}
+                    onClick={() => navigate(func.path)}
+                  >
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <Icon className="w-6 h-6 text-primary" />
+                        <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                      </div>
+                      <CardTitle className="text-lg">{func.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground">{func.description}</p>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
-          )}
-
-          {/* Content Management Tab */}
-          {activeTab === "content" && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <Card className="cursor-pointer hover:shadow-md transition-shadow bg-indigo-50 border-indigo-200">
-                  <CardHeader>
-                    <CardTitle>Knowledge Base</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">Manage articles and categories</p>
-                  </CardContent>
-                </Card>
-                
-                <Card className="cursor-pointer hover:shadow-md transition-shadow bg-orange-50 border-orange-200">
-                  <CardHeader>
-                    <CardTitle>Specialties & Training</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">Manage specialty categories</p>
-                  </CardContent>
-                </Card>
-                
-                <Card className="cursor-pointer hover:shadow-md transition-shadow bg-yellow-50 border-yellow-200">
-                  <CardHeader>
-                    <CardTitle>Qualifications</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">Manage certification categories</p>
-                  </CardContent>
-                </Card>
-              </div>
-              
-              {/* Default to Knowledge Base */}
-              <Card>
-                <CardContent className="p-6">
-                  <KnowledgeBaseAdmin />
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
-          {/* Data & Analytics Tab */}
-          {activeTab === "analytics" && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card className="cursor-pointer hover:shadow-md transition-shadow bg-cyan-50 border-cyan-200">
-                  <CardHeader>
-                    <CardTitle>Specialty Analytics</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">View specialty performance data</p>
-                  </CardContent>
-                </Card>
-                
-                <Card className="cursor-pointer hover:shadow-md transition-shadow bg-emerald-50 border-emerald-200">
-                  <CardHeader>
-                    <CardTitle>Verification Analytics</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">Monitor verification trends</p>
-                  </CardContent>
-                </Card>
-              </div>
-              
-              {/* Default to Specialty Analytics */}
-              <Card>
-                <CardContent className="p-6">
-                  <SpecialtyAnalyticsDashboard />
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
-          {/* System Settings Tab */}
-          {activeTab === "system" && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <Card className="cursor-pointer hover:shadow-md transition-shadow bg-pink-50 border-pink-200">
-                  <CardHeader>
-                    <CardTitle>Feedback Builder</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">Create discovery call questions</p>
-                  </CardContent>
-                </Card>
-                
-                <Card className="cursor-pointer hover:shadow-md transition-shadow bg-red-50 border-red-200">
-                  <CardHeader>
-                    <CardTitle>Data Cleanup Tools</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">Clean up test data and interactions</p>
-                  </CardContent>
-                </Card>
-                
-                <Card className="cursor-pointer hover:shadow-md transition-shadow bg-teal-50 border-teal-200">
-                  <CardHeader>
-                    <CardTitle>Template Management</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">Manage onboarding templates</p>
-                  </CardContent>
-                </Card>
-              </div>
-              
-              {/* Default to Feedback Builder */}
-              <Card>
-                <CardContent className="p-6">
-                  <FeedbackQuestionBuilder />
-                </CardContent>
-              </Card>
-            </div>
-          )}
+          </div>
+          
+          {/* Live Activity Feed */}
+          <AdminLiveActivityFeed />
         </div>
       </div>
     </div>
