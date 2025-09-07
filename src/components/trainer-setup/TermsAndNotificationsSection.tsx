@@ -111,10 +111,7 @@ export function TermsAndNotificationsSection({ formData, updateFormData }: Terms
             <Checkbox
               id="accuracy"
               checked={formData.accuracy_confirmed || false}
-              onCheckedChange={(checked) => {
-                console.log('Accuracy confirmation checkbox clicked:', checked);
-                updateFormData({ accuracy_confirmed: checked });
-              }}
+              onCheckedChange={(checked) => updateFormData({ accuracy_confirmed: checked })}
             />
             <div className="space-y-1 leading-none">
               <Label

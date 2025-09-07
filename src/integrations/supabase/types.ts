@@ -6309,8 +6309,10 @@ export type Database = {
           accuracy_confirmed: boolean | null
           admin_review_notes: string | null
           admin_verification_notes: string | null
+          availability_schedule: Json | null
           bio: string | null
           calendar_link: string | null
+          certifying_body: string | null
           coaching_style: string[] | null
           communication_style: string[] | null
           delivery_format: string[] | null
@@ -6338,10 +6340,12 @@ export type Database = {
           profile_published: boolean | null
           profile_setup_completed: boolean | null
           qualifications: string[] | null
+          rating: number | null
           specializations: string[] | null
           tagline: string | null
           terms_agreed: boolean | null
           testimonials: Json | null
+          total_ratings: number | null
           training_types: string[] | null
           uploaded_certificates: Json | null
           user_type: Database["public"]["Enums"]["user_type"] | null
@@ -6356,6 +6360,7 @@ export type Database = {
           ways_of_working_tracking: string[] | null
           ways_of_working_what_i_bring: string[] | null
           weekly_programming_only: boolean | null
+          works_bank_holidays: boolean | null
           wow_activities: Json | null
           wow_activity_assignments: Json | null
           wow_client_expectations: string | null
@@ -6363,6 +6368,7 @@ export type Database = {
           wow_setup_completed: boolean | null
           wow_visibility: string | null
           wow_what_i_provide: string | null
+          year_certified: number | null
         }
         Relationships: []
       }

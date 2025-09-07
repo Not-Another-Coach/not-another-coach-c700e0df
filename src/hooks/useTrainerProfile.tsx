@@ -134,6 +134,11 @@ export function useTrainerProfile() {
           notify_profile_views: (data as any)?.notify_profile_views ?? null,
           notify_messages: (data as any)?.notify_messages ?? null,
           notify_insights: (data as any)?.notify_insights ?? null,
+          // Add missing trainer_profiles fields
+          offers_discovery_call: (data as any)?.offers_discovery_call ?? null,
+          discovery_call_price: (data as any)?.discovery_call_price ?? null,
+          certifying_body: (data as any)?.certifying_body ?? null,
+          year_certified: (data as any)?.year_certified ?? null,
         } as TrainerProfile;
         setProfile(profileWithDefaults);
       }
