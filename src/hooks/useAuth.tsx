@@ -71,8 +71,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (error) {
       console.error('Sign out error:', error);
     } else {
-      // Force a page reload to ensure complete state reset
-      window.location.href = '/auth';
+      // Clear the user and session state immediately
+      setUser(null);
+      setSession(null);
+      
+      // Use a short timeout to ensure state updates are processed
+      setTimeout(() => {
+        window.location.href = '/auth';
+      }, 100);
     }
     
     return { error };
