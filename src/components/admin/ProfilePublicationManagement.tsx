@@ -13,8 +13,9 @@ import {
   DialogTrigger,
   DialogFooter
 } from '@/components/ui/dialog';
-import { Clock, CheckCircle, XCircle, User, Shield, AlertTriangle } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, User, Shield, AlertTriangle, Eye } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { TrainerProfilePreviewModal } from './TrainerProfilePreviewModal';
 
 export const ProfilePublicationManagement = () => {
   const { requests, loading, reviewRequest } = useAdminProfilePublication();
@@ -28,6 +29,17 @@ export const ProfilePublicationManagement = () => {
     requestId: '', 
     action: null,
     trainerName: ''
+  });
+  const [profilePreview, setProfilePreview] = useState<{
+    open: boolean;
+    trainerId: string;
+    trainerName: string;
+    requestId: string;
+  }>({
+    open: false,
+    trainerId: '',
+    trainerName: '',
+    requestId: ''
   });
   const [adminNotes, setAdminNotes] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
@@ -53,6 +65,22 @@ export const ProfilePublicationManagement = () => {
         return <Badge variant="outline" className="gap-1"><AlertTriangle className="w-3 h-3" />Not Verified</Badge>;
       default:
         return <Badge variant="outline" className="gap-1"><User className="w-3 h-3" />Unknown</Badge>;
+    }
+  };
+
+  const handleViewProfile = (trainerId: string, trainerName: string, requestId: string) => {
+    setProfilePreview({
+      open: true,
+      trainerId,
+      trainerName,
+      requestId
+    });
+  };
+
+  const handleProfileReview = async (requestId: string, action: 'approved' | 'rejected', adminNotes: string, rejectionReason?: string) => {
+    const success = await reviewRequest(requestId, action, adminNotes, rejectionReason);
+    if (success) {
+      setProfilePreview({ open: false, trainerId: '', trainerName: '', requestId: '' });
     }
   };
 
@@ -134,6 +162,19 @@ export const ProfilePublicationManagement = () => {
                 <div className="flex gap-2">
                   <Button
                     size="sm"
+                    variant="outline"
+                    onClick={() => handleViewProfile(
+                      request.trainer_id,
+                      `${request.trainer?.first_name} ${request.trainer?.last_name}`,
+                      request.id
+                    )}
+                    className="gap-1"
+                  >
+                    <Eye className="w-4 h-4" />
+                    View Profile
+                  </Button>
+                  <Button
+                    size="sm"
                     onClick={() => handleReview(
                       request.id, 
                       'approved',
@@ -213,6 +254,16 @@ export const ProfilePublicationManagement = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Profile Preview Modal */}
+      <TrainerProfilePreviewModal
+        open={profilePreview.open}
+        onOpenChange={(open) => setProfilePreview(prev => ({ ...prev, open }))}
+        trainerId={profilePreview.trainerId}
+        trainerName={profilePreview.trainerName}
+        requestId={profilePreview.requestId}
+        onReview={handleProfileReview}
+      />
 
       {/* Review Dialog */}
       <Dialog open={reviewDialog.open} onOpenChange={(open) => setReviewDialog(prev => ({ ...prev, open }))}>
