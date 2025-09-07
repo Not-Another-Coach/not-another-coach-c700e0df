@@ -188,9 +188,11 @@ export const useEnhancedTrainerVerification = () => {
     try {
       // Check if there's an existing check to preserve audit trail
       const existingCheck = checks.find(c => c.check_type === checkType);
+      const isResubmission = existingCheck && existingCheck.status === 'rejected';
+      const isInitialSubmission = !existingCheck;
       
       // If resubmitting after rejection, preserve audit trail
-      if (existingCheck && existingCheck.status === 'rejected') {
+      if (isResubmission) {
         // Create audit log entry for the previous version before overwriting
         await supabase
           .from('trainer_verification_audit_log')
@@ -198,8 +200,7 @@ export const useEnhancedTrainerVerification = () => {
             trainer_id: user.id,
             check_id: existingCheck.id,
             actor: 'trainer',
-            actor_id: user.id,
-            action: 'upload',
+            action: 'resubmit',
             previous_status: existingCheck.status,
             new_status: 'pending',
             reason: 'Resubmission after rejection',
@@ -215,7 +216,9 @@ export const useEnhancedTrainerVerification = () => {
                 evidence_file_url: existingCheck.evidence_file_url,
                 rejection_reason: existingCheck.rejection_reason,
                 admin_notes: existingCheck.admin_notes
-              }
+              },
+              new_data: checkData,
+              resubmission_timestamp: new Date().toISOString()
             }
           });
       }
@@ -224,7 +227,7 @@ export const useEnhancedTrainerVerification = () => {
       const submitData: any = {
         trainer_id: user.id,
         check_type: checkType as any,
-        status: 'pending'
+        status: checkData.not_applicable ? 'not_applicable' : 'pending'
       };
 
       // Add optional fields only if they have values
@@ -274,6 +277,38 @@ export const useEnhancedTrainerVerification = () => {
         throw new Error('No data returned from database after upsert');
       }
 
+      // Create audit log entry for initial submissions or updates
+      if (isInitialSubmission || !isResubmission) {
+        await supabase
+          .from('trainer_verification_audit_log')
+          .insert({
+            trainer_id: user.id,
+            check_id: data.id,
+            actor: 'trainer',
+            action: isInitialSubmission ? 'upload' : 'update',
+            previous_status: existingCheck?.status || null,
+            new_status: data.status,
+            reason: checkData.not_applicable 
+              ? 'Marked as not applicable' 
+              : (isInitialSubmission ? 'Initial document submission' : 'Document updated'),
+            metadata: {
+              submission_data: {
+                provider: checkData.provider,
+                member_id: checkData.member_id,
+                certificate_id: checkData.certificate_id,
+                policy_number: checkData.policy_number,
+                coverage_amount: checkData.coverage_amount,
+                issue_date: checkData.issue_date,
+                expiry_date: checkData.expiry_date,
+                has_file: !!checkData.file,
+                file_name: checkData.file?.name
+              },
+              is_not_applicable: checkData.not_applicable || false,
+              submission_timestamp: new Date().toISOString()
+            }
+          });
+      }
+
       console.log('Verification check saved successfully:', data);
 
       // Refresh data to update UI
@@ -292,7 +327,7 @@ export const useEnhancedTrainerVerification = () => {
       }
       throw error;
     }
-  }, [user, fetchVerificationData, uploadDocument]);
+  }, [user, checks, fetchVerificationData, uploadDocument]);
 
   // Admin function to update verification check status
   const adminUpdateCheck = useCallback(async (
