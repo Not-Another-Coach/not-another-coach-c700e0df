@@ -13,7 +13,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from '@/hooks/use-toast';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { TestUserSelector } from '@/components/auth/TestUserSelector';
+
 
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
@@ -283,53 +283,12 @@ export default function Auth() {
     setIsLoading(false);
   };
 
-  const handleTestUserSelect = (email: string, password: string) => {
-    setLoginForm({ email, password });
-    // Auto-check remember me for test users
-    setRememberMe(true);
-  };
-
-  const handleAutoLogin = async (email: string, password: string) => {
-    setIsLoading(true);
-    const { error } = await signIn(email, password);
-    
-    if (error) {
-      toast({
-        title: "Auto-Login Failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
-      // Handle remember me functionality
-      if (rememberMe) {
-        localStorage.setItem('savedCredentials', JSON.stringify({ 
-          email: email,
-          password: password
-        }));
-        localStorage.setItem('rememberMe', 'true');
-      }
-
-      toast({
-        title: "Welcome back!",
-        description: "Auto-login successful!",
-      });
-      // Navigate to home page to trigger role-based redirect logic
-      navigate('/');
-    }
-    setIsLoading(false);
-  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="w-full max-w-4xl space-y-6">
-        {/* Test User Selector */}
-        <TestUserSelector 
-          onUserSelect={handleTestUserSelect}
-          onAutoLogin={handleAutoLogin}
-        />
-        
+      <div className="w-full max-w-md mx-auto">        
         {/* Main Auth Card */}
-        <Card className="w-full max-w-md mx-auto">
+        <Card className="w-full">
           <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
               <img 
