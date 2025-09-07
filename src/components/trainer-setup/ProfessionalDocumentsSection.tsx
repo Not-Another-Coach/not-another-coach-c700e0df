@@ -161,7 +161,7 @@ export const ProfessionalDocumentsSection = () => {
             )}
 
             {/* Not Applicable Toggle */}
-            {!isSubmitted && (
+            {!isSubmitted && finalDisplayStatus !== 'verified' && (
               <div className="mb-4">
                 <div className="flex items-center space-x-2">
                   <Switch
