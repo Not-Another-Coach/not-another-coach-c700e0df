@@ -161,6 +161,11 @@ export const useProfileStepValidation = () => {
   const validation = useFormValidation(validationRules);
 
   const validateStep = (formData: any, step: number): boolean => {
+    // Add null check for formData
+    if (!formData) {
+      return false;
+    }
+    
     const stepFields = stepFieldMapping[step] || [];
     
     // Special handling for step 3 (Expertise) - location validation depends on delivery format
@@ -197,6 +202,11 @@ export const useProfileStepValidation = () => {
   };
 
   const validateProfessionalDocuments = (formData: any): boolean => {
+    // Add null check for formData
+    if (!formData) {
+      return false;
+    }
+    
     // Professional documents validation: 
     // - If no fields filled and not marked as "not applicable" → valid (optional)
     // - If marked as "not applicable" → valid
@@ -228,6 +238,11 @@ export const useProfileStepValidation = () => {
   };
 
   const getStepCompletion = (formData: any, step: number): 'completed' | 'partial' | 'not_started' => {
+    // Add null check for formData
+    if (!formData) {
+      return 'not_started';
+    }
+    
     const stepFields = stepFieldMapping[step] || [];
     
     if (stepFields.length === 0) {
@@ -288,6 +303,11 @@ export const useProfileStepValidation = () => {
   };
 
   const getProfessionalDocumentsCompletion = (formData: any): 'completed' | 'partial' | 'not_started' => {
+    // Add null check for formData
+    if (!formData) {
+      return 'not_started';
+    }
+    
     const checkTypes = ['cimspa_membership', 'insurance_proof', 'first_aid_certification'];
     
     let completedCount = 0;
