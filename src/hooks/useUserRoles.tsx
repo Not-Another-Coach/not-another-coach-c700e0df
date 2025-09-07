@@ -60,12 +60,9 @@ export function useUserRoles() {
       setAdminCheckLoading(true);
       
       try {
-        // Use the security definer function for role checking
+        // Use the optimized security definer function for better performance
         const { data, error } = await supabase
-          .rpc('has_role', {
-            _user_id: user.id,
-            _role: 'admin'
-          });
+          .rpc('is_current_user_admin');
 
         if (error) {
           console.error('Error checking admin role:', error);
