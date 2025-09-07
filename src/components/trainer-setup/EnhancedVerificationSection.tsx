@@ -68,22 +68,6 @@ export const EnhancedVerificationSection = () => {
   const [formData, setFormData] = useState<Record<string, VerificationCheckFormData>>({});
   const [uploading, setUploading] = useState<string | null>(null);
 
-  // Debug logging
-  React.useEffect(() => {
-    console.log('=== ENHANCED VERIFICATION SECTION DEBUG ===');
-    console.log('Checks loaded:', checks?.length || 0, 'Loading:', loading);
-    console.log('Raw checks data:', checks);
-    
-    if (checks && checks.length > 0) {
-      console.log('Testing getCheckByType for each config type:');
-      Object.keys(CheckTypeConfig).forEach(checkType => {
-        const found = getCheckByType(checkType as any);
-        console.log(`  ${checkType}:`, found ? { id: found.id, status: found.status, check_type: found.check_type } : 'NOT FOUND');
-      });
-    }
-    console.log('=== END DEBUG ===');
-  }, [checks, getCheckByType]);
-
   const handleInputChange = (checkType: string, field: string, value: any) => {
     setFormData(prev => ({
       ...prev,
@@ -199,47 +183,57 @@ export const EnhancedVerificationSection = () => {
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">{config.description}</p>
 
-              {/* Show existing check details if verified or under review */}
-              {existingCheck && (
-                <div className="p-4 bg-muted/30 rounded-lg space-y-2">
-                  <h4 className="font-medium">
-                    Submitted Information 
-                    <span className="text-xs text-muted-foreground ml-2">
-                      (Status: {existingCheck.status})
-                    </span>
-                  </h4>
-                  {existingCheck.provider && (
-                    <p className="text-sm"><strong>Provider:</strong> {existingCheck.provider}</p>
-                  )}
-                  {existingCheck.member_id && (
-                    <p className="text-sm"><strong>Member ID:</strong> {existingCheck.member_id}</p>
-                  )}
-                  {existingCheck.certificate_id && (
-                    <p className="text-sm"><strong>Certificate ID:</strong> {existingCheck.certificate_id}</p>
-                  )}
-                  {existingCheck.policy_number && (
-                    <p className="text-sm"><strong>Policy Number:</strong> {existingCheck.policy_number}</p>
-                  )}
-                  {existingCheck.coverage_amount && (
-                    <p className="text-sm"><strong>Coverage:</strong> £{existingCheck.coverage_amount.toLocaleString()}</p>
-                  )}
-                  {existingCheck.expiry_date && (
-                    <p className="text-sm"><strong>Expiry Date:</strong> {new Date(existingCheck.expiry_date).toLocaleDateString()}</p>
-                  )}
-                  {existingCheck.rejection_reason && (
-                    <div className="p-3 bg-red-50 border border-red-200 rounded">
-                      <p className="text-sm font-medium text-red-800">Rejection Reason:</p>
-                      <p className="text-sm text-red-700">{existingCheck.rejection_reason}</p>
-                    </div>
-                  )}
-                  {existingCheck.admin_notes && (
-                    <div className="p-3 bg-blue-50 border border-blue-200 rounded">
-                      <p className="text-sm font-medium text-blue-800">Admin Notes:</p>
-                      <p className="text-sm text-blue-700">{existingCheck.admin_notes}</p>
-                    </div>
-                  )}
-                </div>
-              )}
+        {existingCheck && (
+          <div className="p-4 bg-muted/30 rounded-lg space-y-2">
+            <h4 className="font-medium">
+              Submitted Information 
+            </h4>
+            {existingCheck.provider && (
+              <p className="text-sm"><strong>Provider:</strong> {existingCheck.provider}</p>
+            )}
+            {existingCheck.member_id && (
+              <p className="text-sm"><strong>Member ID:</strong> {existingCheck.member_id}</p>
+            )}
+            {existingCheck.certificate_id && (
+              <p className="text-sm"><strong>Certificate ID:</strong> {existingCheck.certificate_id}</p>
+            )}
+            {existingCheck.policy_number && (
+              <p className="text-sm"><strong>Policy Number:</strong> {existingCheck.policy_number}</p>
+            )}
+            {existingCheck.coverage_amount && (
+              <p className="text-sm"><strong>Coverage:</strong> £{existingCheck.coverage_amount.toLocaleString()}</p>
+            )}
+            {existingCheck.expiry_date && (
+              <p className="text-sm"><strong>Expiry Date:</strong> {new Date(existingCheck.expiry_date).toLocaleDateString()}</p>
+            )}
+            {existingCheck.evidence_file_url && (
+              <div className="text-sm">
+                <strong>Document:</strong> 
+                <a 
+                  href={`https://ogpiovfxjxcclptfybrk.supabase.co/storage/v1/object/public/trainer-verification-documents/${existingCheck.evidence_file_url.split('/').pop()}`}
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline ml-1 inline-flex items-center gap-1"
+                >
+                  <FileText className="h-4 w-4" />
+                  View document
+                </a>
+              </div>
+            )}
+            {existingCheck.rejection_reason && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded">
+                <p className="text-sm font-medium text-red-800">Rejection Reason:</p>
+                <p className="text-sm text-red-700">{existingCheck.rejection_reason}</p>
+              </div>
+            )}
+            {existingCheck.admin_notes && (
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded">
+                <p className="text-sm font-medium text-blue-800">Admin Notes:</p>
+                <p className="text-sm text-blue-700">{existingCheck.admin_notes}</p>
+              </div>
+            )}
+          </div>
+        )}
 
               {/* Status message for pending/verified checks */}
               {existingCheck && (existingCheck.status === 'pending' || existingCheck.status === 'verified') && (

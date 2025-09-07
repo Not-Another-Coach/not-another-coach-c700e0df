@@ -242,29 +242,35 @@ export const ProfessionalDocumentsSection = () => {
               </div>
             )}
 
-            {/* Show existing information if available */}
-            {check && !isNotApplicable && (
-              <div className="mb-4 p-4 bg-muted/50 rounded-lg">
-                <h4 className="font-medium mb-2">
-                  {draftStatus === 'draft' ? 'Current Draft:' : 'Submitted Information:'}
-                </h4>
-                {check.provider && <p className="text-sm"><strong>Provider:</strong> {check.provider}</p>}
-                {check.member_id && <p className="text-sm"><strong>Member ID:</strong> {check.member_id}</p>}
-                {check.certificate_id && <p className="text-sm"><strong>Certificate ID:</strong> {check.certificate_id}</p>}
-                {check.policy_number && <p className="text-sm"><strong>Policy Number:</strong> {check.policy_number}</p>}
-                {check.coverage_amount && <p className="text-sm"><strong>Coverage:</strong> £{check.coverage_amount}</p>}
-                {check.issue_date && <p className="text-sm"><strong>Issue Date:</strong> {format(new Date(check.issue_date), 'PPP')}</p>}
-                {check.expiry_date && <p className="text-sm"><strong>Expiry Date:</strong> {format(new Date(check.expiry_date), 'PPP')}</p>}
-                {check.evidence_file_url && (
-                  <p className="text-sm">
-                    <strong>Document:</strong> 
-                    <a href={check.evidence_file_url} target="_blank" className="text-primary hover:underline ml-1">
-                      View uploaded document
-                    </a>
-                  </p>
-                )}
-              </div>
-            )}
+              {/* Show existing information if available */}
+              {check && !isNotApplicable && (
+                <div className="mb-4 p-4 bg-muted/50 rounded-lg">
+                  <h4 className="font-medium mb-2">
+                    {draftStatus === 'draft' ? 'Current Draft:' : 'Submitted Information:'}
+                  </h4>
+                  {check.provider && <p className="text-sm"><strong>Provider:</strong> {check.provider}</p>}
+                  {check.member_id && <p className="text-sm"><strong>Member ID:</strong> {check.member_id}</p>}
+                  {check.certificate_id && <p className="text-sm"><strong>Certificate ID:</strong> {check.certificate_id}</p>}
+                  {check.policy_number && <p className="text-sm"><strong>Policy Number:</strong> {check.policy_number}</p>}
+                  {check.coverage_amount && <p className="text-sm"><strong>Coverage:</strong> £{check.coverage_amount}</p>}
+                  {check.issue_date && <p className="text-sm"><strong>Issue Date:</strong> {format(new Date(check.issue_date), 'PPP')}</p>}
+                  {check.expiry_date && <p className="text-sm"><strong>Expiry Date:</strong> {format(new Date(check.expiry_date), 'PPP')}</p>}
+                  {check.evidence_file_url && (
+                    <div className="text-sm">
+                      <strong>Document:</strong> 
+                      <a 
+                        href={`https://ogpiovfxjxcclptfybrk.supabase.co/storage/v1/object/public/trainer-verification-documents/${check.evidence_file_url.split('/').pop()}`}
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline ml-1 inline-flex items-center gap-1"
+                      >
+                        <FileText className="h-4 w-4" />
+                        View uploaded document
+                      </a>
+                    </div>
+                  )}
+                </div>
+              )}
 
             {/* Form for editing (only if not submitted, rejected, or needs renewal) */}
             {!isNotApplicable && (!isSubmitted || finalDisplayStatus === 'rejected' || isExpiringSoon) && (

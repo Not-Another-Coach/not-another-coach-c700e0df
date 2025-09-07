@@ -325,14 +325,11 @@ export const EnhancedVerificationManagement = () => {
                     </Card>
                   ))}
                 </div>
-              ) : (
-                <div className="text-center text-muted-foreground py-8">
-                  <p>No pending reviews found</p>
-                  <p className="text-sm">Debug info: allPendingChecks.length = {allPendingChecks.length}</p>
-                  <p className="text-sm">isAdmin = {isAdmin.toString()}</p>
-                  <p className="text-sm">loading = {loading.toString()}</p>
-                </div>
-              )}
+                ) : (
+                  <div className="text-center text-muted-foreground py-8">
+                    <p>No pending reviews found</p>
+                  </div>
+                )}
             </TabsContent>
 
             <TabsContent value="all-trainers" className="space-y-4">
