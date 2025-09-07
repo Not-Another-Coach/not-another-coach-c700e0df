@@ -28,7 +28,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ProfilePreviewModal } from "@/components/trainer-setup/ProfilePreviewModal";
-import { ScrollableBreadcrumb } from "@/components/ui/scrollable-breadcrumb";
+import { ResponsiveBreadcrumb, BreadcrumbItem } from "@/components/ui/responsive-breadcrumb";
 
 // Import form sections
 import { BasicInfoSection } from "@/components/trainer-setup/BasicInfoSection";
@@ -503,6 +503,9 @@ const TrainerProfileSetup = () => {
         wow_activity_assignments: formData.wow_activity_assignments || [],
         wow_visibility: formData.wow_visibility || "public",
         wow_setup_completed: formData.wow_setup_completed || false,
+        // Explicitly include terms and accuracy confirmation to ensure persistence
+        terms_agreed: formData.terms_agreed || false,
+        accuracy_confirmed: formData.accuracy_confirmed || false,
       };
       
       console.log('Saving trainer profile data:', saveData);
@@ -881,61 +884,24 @@ const TrainerProfileSetup = () => {
             </div>
             
             {/* Step indicators */}
-            <ScrollableBreadcrumb currentStep={currentStep}>
-              <div className="flex gap-3 min-w-max px-2">
-                {stepTitles.map((title, index) => {
-                  const stepNumber = index + 1;
-                  const completion = getValidationStepCompletion(profile, stepNumber);
-                  const isCurrent = stepNumber === currentStep;
-                  
-                  let statusColor = 'text-muted-foreground';
-                  let borderColor = 'border-muted-foreground';
-                  let bgColor = 'bg-transparent';
-                  let showIcon = false;
-                  let isPartial = false;
-
-                  if (completion === 'completed') {
-                    statusColor = 'text-green-600';
-                    borderColor = 'border-green-600';
-                    bgColor = 'bg-green-600';
-                    showIcon = true;
-                  } else if (completion === 'partial') {
-                    statusColor = 'text-amber-600';
-                    borderColor = 'border-amber-600';
-                    bgColor = 'bg-amber-600';
-                    showIcon = true;
-                    isPartial = true;
-                  } else if (isCurrent) {
-                    statusColor = 'text-primary';
-                    borderColor = 'border-primary';
-                  }
-
-                  return (
-                    <div
-                      key={stepNumber}
-                      data-step={stepNumber}
-                      onClick={() => setCurrentStep(stepNumber)}
-                      className="flex flex-col items-center gap-1 min-w-0 flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
-                    >
-                      <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-medium ${borderColor} ${bgColor} ${statusColor}`}>
-                        {showIcon ? (
-                          isPartial ? (
-                            <AlertCircle className="w-3 h-3 text-white" />
-                          ) : (
-                            <Check className="w-3 h-3 text-white" />
-                          )
-                        ) : (
-                          stepNumber
-                        )}
-                      </div>
-                      <div className={`text-xs leading-tight text-center max-w-16 ${statusColor}`}>
-                        {title}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </ScrollableBreadcrumb>
+            <ResponsiveBreadcrumb className="px-4">
+              {stepTitles.map((title, index) => {
+                const stepNumber = index + 1;
+                const completion = getValidationStepCompletion(profile, stepNumber);
+                const isCurrent = stepNumber === currentStep;
+                
+                return (
+                  <BreadcrumbItem
+                    key={stepNumber}
+                    stepNumber={stepNumber}
+                    title={title}
+                    completion={completion}
+                    isCurrent={isCurrent}
+                    onClick={() => setCurrentStep(stepNumber)}
+                  />
+                );
+              })}
+            </ResponsiveBreadcrumb>
           </div>
         </div>
       )}
@@ -985,14 +951,6 @@ const TrainerProfileSetup = () => {
       )}
 
 
-      {/* Manage profile settings description when fully complete */}
-      {isFullyComplete() && (
-        <div className="text-center py-4">
-          <p className="text-muted-foreground">
-            Manage your trainer profile settings
-          </p>
-        </div>
-      )}
 
       {/* Main Content */}
       <div className="max-w-4xl mx-auto p-6">
