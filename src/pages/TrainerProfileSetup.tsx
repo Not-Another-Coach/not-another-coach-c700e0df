@@ -876,7 +876,7 @@ const TrainerProfileSetup = () => {
             
             {/* Step indicators */}
             <ScrollableBreadcrumb currentStep={currentStep}>
-              <div className="flex justify-between gap-1 min-w-max">
+              <div className="flex gap-3 min-w-max px-2">
                 {stepTitles.map((title, index) => {
                   const stepNumber = index + 1;
                   const completion = getStepCompletion(stepNumber);
