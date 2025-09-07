@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Filter, CheckCircle, XCircle, FileText, Target, AlertTriangle, Clock } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Filter, CheckCircle, XCircle, FileText, Target, AlertTriangle, Clock, Check, Eye, EyeOff } from 'lucide-react';
 import { useActivityAlerts } from '@/hooks/useActivityAlerts';
 import { useTrainerStreak } from '@/hooks/useTrainerStreak';
 import { useTrainerCustomRequests } from '@/hooks/useQualifications';
 import { useTrainerCustomSpecialtyRequests } from '@/hooks/useSpecialties';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserTypeChecks } from '@/hooks/useUserType';
+import { useActivityAcknowledgment } from '@/hooks/useActivityAcknowledgment';
 import { format } from 'date-fns';
 
 export const LiveActivityFeed = () => {
@@ -18,6 +20,36 @@ export const LiveActivityFeed = () => {
   const { requests: specialtyRequests } = useTrainerCustomSpecialtyRequests();
   const { user } = useAuth();
   const { isTrainer } = useUserTypeChecks();
+  const { acknowledgeActivity, checkIfAcknowledged, loading: acknowledgmentLoading } = useActivityAcknowledgment();
+
+  const [showFilter, setShowFilter] = useState('unacknowledged'); // 'all', 'unacknowledged', 'acknowledged'
+  const [acknowledgedItems, setAcknowledgedItems] = useState<Set<string>>(new Set());
+
+  // Check acknowledgment status for activities
+  useEffect(() => {
+    const checkAcknowledgments = async () => {
+      if (!alerts.length) return;
+      
+      const acknowledged = new Set<string>();
+      for (const alert of alerts) {
+        const isAcknowledged = await checkIfAcknowledged(alert.id);
+        if (isAcknowledged) {
+          acknowledged.add(alert.id);
+        }
+      }
+      setAcknowledgedItems(acknowledged);
+    };
+
+    checkAcknowledgments();
+  }, [alerts, checkIfAcknowledged]);
+
+  // Handle acknowledgment
+  const handleAcknowledge = async (alertId: string) => {
+    const success = await acknowledgeActivity(alertId);
+    if (success) {
+      setAcknowledgedItems(prev => new Set([...prev, alertId]));
+    }
+  };
 
   // Create combined activity feed including qualifications, specialties and verification notifications
   const createCombinedActivities = () => {
@@ -138,6 +170,21 @@ export const LiveActivityFeed = () => {
 
   const combinedActivities = createCombinedActivities();
 
+  // Filter activities based on acknowledgment status
+  const filteredActivities = combinedActivities.filter(activity => {
+    const isAcknowledged = acknowledgedItems.has(activity.id);
+    
+    switch (showFilter) {
+      case 'acknowledged':
+        return isAcknowledged;
+      case 'unacknowledged':
+        return !isAcknowledged;
+      case 'all':
+      default:
+        return true;
+    }
+  });
+
   if (loading) {
     return (
       <Card>
@@ -165,9 +212,33 @@ export const LiveActivityFeed = () => {
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">Live Activity</CardTitle>
-          <Button variant="ghost" size="sm">
-            <Filter className="w-4 h-4" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm">
+                <Filter className="w-4 h-4" />
+                {showFilter !== 'all' && (
+                  <span className="ml-2 text-xs capitalize">{showFilter}</span>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setShowFilter('unacknowledged')}>
+                <EyeOff className="w-4 h-4 mr-2" />
+                Unacknowledged
+                {showFilter === 'unacknowledged' && <Check className="w-4 h-4 ml-auto" />}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setShowFilter('acknowledged')}>
+                <Eye className="w-4 h-4 mr-2" />
+                Acknowledged
+                {showFilter === 'acknowledged' && <Check className="w-4 h-4 ml-auto" />}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setShowFilter('all')}>
+                <FileText className="w-4 h-4 mr-2" />
+                All Activities
+                {showFilter === 'all' && <Check className="w-4 h-4 ml-auto" />}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </CardHeader>
       <CardContent className="space-y-3 max-h-96 overflow-y-auto">
@@ -188,45 +259,65 @@ export const LiveActivityFeed = () => {
         )}
 
         {/* Regular activity alerts including qualifications and specialties */}
-        {combinedActivities.length === 0 ? (
+        {filteredActivities.length === 0 ? (
           <div className="text-center py-6 text-muted-foreground">
-            <p>No recent activity</p>
+            <p>No {showFilter !== 'all' ? showFilter + ' ' : ''}activity found</p>
           </div>
         ) : (
-          combinedActivities.map((alert) => (
-            <div key={alert.id} className={`flex items-start gap-3 p-3 rounded-lg ${alert.color}`}>
-              <div className="w-8 h-8 rounded-full bg-white/50 flex items-center justify-center flex-shrink-0">
-                {alert.icon}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium">{alert.title}</p>
-                <p className="text-sm mt-1 opacity-75">{alert.description}</p>
-                <div className="flex items-center gap-2 mt-2">
-                  <Badge variant="secondary">
-                    {format(new Date(alert.created_at), 'h:mm a')}
-                  </Badge>
-                  {(alert as any).customType && (alert as any).type === 'qualification' && (
-                    <Badge variant="outline" className="text-xs">
-                      <FileText className="w-3 h-3 mr-1" />
-                      Qualification
-                    </Badge>
-                  )}
-                  {(alert as any).customType && (alert as any).type === 'specialty' && (
-                    <Badge variant="outline" className="text-xs">
-                      <Target className="w-3 h-3 mr-1" />
-                      Specialty
-                    </Badge>
-                  )}
-                  {(alert as any).customType && (alert as any).type === 'verification' && (
-                    <Badge variant="outline" className="text-xs">
-                      <FileText className="w-3 h-3 mr-1" />
-                      Verification
-                    </Badge>
-                  )}
+          filteredActivities.map((alert) => {
+            const isAcknowledged = acknowledgedItems.has(alert.id);
+            return (
+              <div key={alert.id} className={`flex items-start gap-3 p-3 rounded-lg ${alert.color} ${isAcknowledged ? 'opacity-60' : ''}`}>
+                <div className="w-8 h-8 rounded-full bg-white/50 flex items-center justify-center flex-shrink-0">
+                  {alert.icon}
                 </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium">{alert.title}</p>
+                  <p className="text-sm mt-1 opacity-75">{alert.description}</p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Badge variant="secondary">
+                      {format(new Date(alert.created_at), 'h:mm a')}
+                    </Badge>
+                    {(alert as any).customType && (alert as any).type === 'qualification' && (
+                      <Badge variant="outline" className="text-xs">
+                        <FileText className="w-3 h-3 mr-1" />
+                        Qualification
+                      </Badge>
+                    )}
+                    {(alert as any).customType && (alert as any).type === 'specialty' && (
+                      <Badge variant="outline" className="text-xs">
+                        <Target className="w-3 h-3 mr-1" />
+                        Specialty
+                      </Badge>
+                    )}
+                    {(alert as any).customType && (alert as any).type === 'verification' && (
+                      <Badge variant="outline" className="text-xs">
+                        <FileText className="w-3 h-3 mr-1" />
+                        Verification
+                      </Badge>
+                    )}
+                    {isAcknowledged && (
+                      <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                        <CheckCircle className="w-3 h-3 mr-1" />
+                        Acknowledged
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+                {!isAcknowledged && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleAcknowledge(alert.id)}
+                    disabled={acknowledgmentLoading}
+                    className="ml-2 opacity-60 hover:opacity-100"
+                  >
+                    <Check className="w-4 h-4" />
+                  </Button>
+                )}
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </CardContent>
     </Card>

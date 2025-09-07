@@ -5796,6 +5796,8 @@ export type Database = {
       }
       user_alert_interactions: {
         Row: {
+          acknowledged_at: string | null
+          acknowledgment_note: string | null
           alert_id: string
           created_at: string
           id: string
@@ -5803,6 +5805,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          acknowledged_at?: string | null
+          acknowledgment_note?: string | null
           alert_id: string
           created_at?: string
           id?: string
@@ -5810,6 +5814,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          acknowledged_at?: string | null
+          acknowledgment_note?: string | null
           alert_id?: string
           created_at?: string
           id?: string
@@ -6355,6 +6361,10 @@ export type Database = {
       }
     }
     Functions: {
+      acknowledge_activity: {
+        Args: { p_alert_id: string; p_note?: string }
+        Returns: boolean
+      }
       admin_cleanup_client_trainer_interactions: {
         Args: { p_client_id: string; p_trainer_id: string }
         Returns: Json
@@ -6623,6 +6633,10 @@ export type Database = {
       initialize_trainer_visibility_defaults: {
         Args: { p_trainer_id: string }
         Returns: undefined
+      }
+      is_activity_acknowledged: {
+        Args: { p_alert_id: string }
+        Returns: boolean
       }
       is_client_on_waitlist: {
         Args: { p_client_id: string; p_trainer_id: string }
