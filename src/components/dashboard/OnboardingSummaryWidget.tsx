@@ -23,24 +23,24 @@ export function OnboardingSummaryWidget() {
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="text-center p-4 rounded-lg bg-muted/30 border">
-              <div className="text-3xl font-bold mb-2">{totalClients}</div>
+              <div className="text-3xl font-bold mb-2">{totalClients > 0 ? totalClients : '--'}</div>
               <p className="text-sm font-medium">Total Clients</p>
             </div>
             <div className="text-center p-4 rounded-lg bg-green-50 border border-green-200">
               <div className="text-3xl font-bold text-green-600 mb-2 flex items-center justify-center gap-2">
-                <CheckCircle className="h-6 w-6" /> {completed}
+                <CheckCircle className="h-6 w-6" /> {completed > 0 ? completed : '--'}
               </div>
               <p className="text-sm font-medium text-green-800">Completed</p>
             </div>
             <div className="text-center p-4 rounded-lg bg-amber-50 border border-amber-200">
               <div className="text-3xl font-bold text-amber-600 mb-2 flex items-center justify-center gap-2">
-                <Clock className="h-6 w-6" /> {inProgress}
+                <Clock className="h-6 w-6" /> {inProgress > 0 ? inProgress : '--'}
               </div>
               <p className="text-sm font-medium text-amber-800">In Progress</p>
             </div>
             <div className="text-center p-4 rounded-lg bg-blue-50 border border-blue-200">
               <div className="text-3xl font-bold text-blue-600 mb-2 flex items-center justify-center gap-2">
-                <Users className="h-6 w-6" /> {avgCompletion}%
+                <Users className="h-6 w-6" /> {avgCompletion > 0 ? `${avgCompletion}%` : '--'}
               </div>
               <p className="text-sm font-medium text-blue-800">Avg Completion</p>
             </div>

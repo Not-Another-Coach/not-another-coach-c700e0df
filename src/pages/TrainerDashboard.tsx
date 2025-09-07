@@ -603,10 +603,12 @@ const TrainerDashboard = () => {
                   </div>
                   <div className="text-center p-4 rounded-lg bg-yellow-50 border border-yellow-200">
                     <div className="text-3xl font-bold text-yellow-600 mb-2">
-                      {analyticsLoading ? '...' : shortlistedStats.total}
+                      {analyticsLoading ? '...' : (shortlistedStats.total > 0 ? shortlistedStats.total : '--')}
                     </div>
                     <p className="text-sm font-medium text-yellow-800">Shortlisted & Discovery</p>
-                    <p className="text-xs text-yellow-600 mt-1">+{shortlistedStats.last7Days} this week</p>
+                    <p className="text-xs text-yellow-600 mt-1">
+                      {shortlistedStats.last7Days > 0 ? `+${shortlistedStats.last7Days} this week` : 'No data yet'}
+                    </p>
                   </div>
                   <div className="text-center p-4 rounded-lg bg-green-50 border border-green-200">
                     <div className="text-3xl font-bold text-green-600 mb-2">
