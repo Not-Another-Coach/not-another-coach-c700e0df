@@ -3945,6 +3945,7 @@ export type Database = {
       profiles: {
         Row: {
           account_status: string | null
+          accuracy_confirmed: boolean | null
           admin_notes: string | null
           admin_verification_notes: string | null
           availability_schedule: Json | null
@@ -4073,6 +4074,7 @@ export type Database = {
         }
         Insert: {
           account_status?: string | null
+          accuracy_confirmed?: boolean | null
           admin_notes?: string | null
           admin_verification_notes?: string | null
           availability_schedule?: Json | null
@@ -4201,6 +4203,7 @@ export type Database = {
         }
         Update: {
           account_status?: string | null
+          accuracy_confirmed?: boolean | null
           admin_notes?: string | null
           admin_verification_notes?: string | null
           availability_schedule?: Json | null

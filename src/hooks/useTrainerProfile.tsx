@@ -68,6 +68,7 @@ interface TrainerProfile {
   ways_of_working_what_i_bring: string[] | null;
   profile_setup_completed: boolean | null;
   terms_agreed: boolean | null;
+  accuracy_confirmed: boolean | null;
   how_started: string | null;
   philosophy: string | null;
   professional_milestones: any[] | null;
@@ -126,6 +127,7 @@ export function useTrainerProfile() {
           wow_activity_assignments: (data as any)?.wow_activity_assignments || null,
           wow_visibility: (data as any)?.wow_visibility || null,
           wow_setup_completed: (data as any)?.wow_setup_completed || null,
+          accuracy_confirmed: (data as any)?.accuracy_confirmed || null,
         } as TrainerProfile;
         setProfile(profileWithDefaults);
       }

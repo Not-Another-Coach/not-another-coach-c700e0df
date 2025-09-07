@@ -138,6 +138,7 @@ const TrainerProfileSetup = () => {
     
     // Profile Management - this exists in TrainerProfile
     terms_agreed: false,
+    accuracy_confirmed: false,
     max_clients: null as number | null,
   });
 
@@ -225,6 +226,7 @@ const TrainerProfileSetup = () => {
         wow_visibility: profile.wow_visibility || "public",
         wow_setup_completed: profile.wow_setup_completed || false,
         terms_agreed: profile.terms_agreed || false,
+        accuracy_confirmed: profile.accuracy_confirmed || false,
         max_clients: profile.max_clients || null,
       };
       
@@ -325,6 +327,9 @@ const TrainerProfileSetup = () => {
       case 11:
         if (!formData.terms_agreed) {
           newErrors.terms_agreed = "You must agree to the terms";
+        }
+        if (!formData.accuracy_confirmed) {
+          newErrors.accuracy_confirmed = "You must confirm information accuracy";
         }
         break;
     }
@@ -435,7 +440,7 @@ const TrainerProfileSetup = () => {
         return hasFullConfiguration ? 'completed' : (hasPartialConfiguration ? 'partial' : 'not_started');
         
       case 11: // Terms & Notifications
-        return formData.terms_agreed ? 'completed' : 'not_started';
+        return (formData.terms_agreed && formData.accuracy_confirmed) ? 'completed' : 'not_started';
         
       case 12: // Professional Documents
         return getProfDocumentsStatus();
