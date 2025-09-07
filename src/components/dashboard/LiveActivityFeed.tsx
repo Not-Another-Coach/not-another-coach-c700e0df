@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Filter, CheckCircle, XCircle, FileText, Target } from 'lucide-react';
+import { Filter, CheckCircle, XCircle, FileText, Target, AlertTriangle, Clock } from 'lucide-react';
 import { useActivityAlerts } from '@/hooks/useActivityAlerts';
 import { useTrainerStreak } from '@/hooks/useTrainerStreak';
 import { useTrainerCustomRequests } from '@/hooks/useQualifications';
@@ -19,9 +19,27 @@ export const LiveActivityFeed = () => {
   const { user } = useAuth();
   const { isTrainer } = useUserTypeChecks();
 
-  // Create combined activity feed including qualifications and specialties
+  // Create combined activity feed including qualifications, specialties and verification notifications
   const createCombinedActivities = () => {
-    const activities: any[] = [...alerts];
+    const activities: any[] = [];
+
+    // Add regular alerts (excluding verification ones as we'll format them specially)
+    const regularAlerts = alerts.filter(alert => 
+      !['verification_check_update', 'verification_expiry_warning', 'verification_expired'].includes(alert.type)
+    );
+    activities.push(...regularAlerts);
+
+    // Add verification alerts with special formatting
+    const verificationAlerts = alerts.filter(alert => 
+      ['verification_check_update', 'verification_expiry_warning', 'verification_expired'].includes(alert.type)
+    ).map(alert => ({
+      ...alert,
+      icon: getVerificationIcon(alert),
+      color: getVerificationColor(alert),
+      type: 'verification',
+      customType: true
+    }));
+    activities.push(...verificationAlerts);
 
     // Add qualification notifications
     if (qualificationRequests) {
@@ -85,6 +103,37 @@ export const LiveActivityFeed = () => {
 
     // Sort by created_at descending
     return activities.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  };
+
+  // Helper functions for verification alerts
+  const getVerificationIcon = (alert: any) => {
+    if (alert.type === 'verification_check_update') {
+      if (alert.metadata?.status === 'verified') return '✅';
+      if (alert.metadata?.status === 'rejected') return '❌';
+      return '⏳';
+    }
+    if (alert.type === 'verification_expiry_warning') return '⚠️';
+    if (alert.type === 'verification_expired') return '🔴';
+    return '📄';
+  };
+
+  const getVerificationColor = (alert: any) => {
+    if (alert.type === 'verification_check_update') {
+      if (alert.metadata?.status === 'verified') {
+        return 'bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200';
+      }
+      if (alert.metadata?.status === 'rejected') {
+        return 'bg-gradient-to-r from-red-50 to-pink-50 border border-red-200';
+      }
+      return 'bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200';
+    }
+    if (alert.type === 'verification_expiry_warning') {
+      return 'bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200';
+    }
+    if (alert.type === 'verification_expired') {
+      return 'bg-gradient-to-r from-red-50 to-pink-50 border border-red-200';
+    }
+    return 'bg-gradient-to-r from-gray-50 to-slate-50 border border-gray-200';
   };
 
   const combinedActivities = createCombinedActivities();
@@ -166,6 +215,12 @@ export const LiveActivityFeed = () => {
                     <Badge variant="outline" className="text-xs">
                       <Target className="w-3 h-3 mr-1" />
                       Specialty
+                    </Badge>
+                  )}
+                  {(alert as any).customType && (alert as any).type === 'verification' && (
+                    <Badge variant="outline" className="text-xs">
+                      <FileText className="w-3 h-3 mr-1" />
+                      Verification
                     </Badge>
                   )}
                 </div>
