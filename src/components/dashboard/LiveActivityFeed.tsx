@@ -20,7 +20,7 @@ export const LiveActivityFeed = () => {
   const { requests: specialtyRequests } = useTrainerCustomSpecialtyRequests();
   const { user } = useAuth();
   const { isTrainer } = useUserTypeChecks();
-  const { acknowledgeActivity, checkIfAcknowledged, loading: acknowledgmentLoading } = useActivityAcknowledgment();
+  const { markAsRead, checkIfRead, loading: acknowledgmentLoading } = useActivityAcknowledgment();
 
   const [showFilter, setShowFilter] = useState('unacknowledged'); // 'all', 'unacknowledged', 'acknowledged'
   const [acknowledgedItems, setAcknowledgedItems] = useState<Set<string>>(new Set());
@@ -32,7 +32,7 @@ export const LiveActivityFeed = () => {
       
       const acknowledged = new Set<string>();
       for (const alert of alerts) {
-        const isAcknowledged = await checkIfAcknowledged(alert.id);
+        const isAcknowledged = await checkIfRead(alert.id);
         if (isAcknowledged) {
           acknowledged.add(alert.id);
         }
@@ -41,13 +41,13 @@ export const LiveActivityFeed = () => {
     };
 
     checkAcknowledgments();
-  }, [alerts, checkIfAcknowledged]);
+  }, [alerts, checkIfRead]);
 
   // Handle acknowledgment
   const handleMarkAsRead = async (alertId: string) => {
     const success = await markAsRead(alertId);
     if (success) {
-      setReadItems(prev => new Set([...prev, alertId]));
+      setAcknowledgedItems(prev => new Set([...prev, alertId]));
     }
   };
 
@@ -308,7 +308,7 @@ export const LiveActivityFeed = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => handleAcknowledge(alert.id)}
+                    onClick={() => handleMarkAsRead(alert.id)}
                     disabled={acknowledgmentLoading}
                     className="ml-2 opacity-60 hover:opacity-100"
                   >
