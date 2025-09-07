@@ -72,20 +72,37 @@ export const EnhancedVerificationManagement = () => {
 
         setTrainers(trainersData || []);
 
-        // Fetch all pending verification checks
+        // Fetch all pending verification checks - simplified query without join
         const { data: pendingData, error } = await supabase
           .from('trainer_verification_checks')
-          .select(`
-            *,
-            profiles!inner(id, first_name, last_name)
-          `)
+          .select('*')
           .eq('status', 'pending')
           .order('created_at', { ascending: false });
 
         if (error) {
           console.error('Error fetching pending checks:', error);
+          setAllPendingChecks([]);
         } else {
-          setAllPendingChecks(pendingData || []);
+          console.log('Pending checks raw data:', pendingData);
+          
+          // Manually fetch profile data for each pending check
+          const checksWithProfiles = await Promise.all(
+            (pendingData || []).map(async (check) => {
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('id, first_name, last_name')
+                .eq('id', check.trainer_id)
+                .single();
+              
+              return {
+                ...check,
+                profiles: profile
+              };
+            })
+          );
+          
+          console.log('Pending checks with profiles:', checksWithProfiles);
+          setAllPendingChecks(checksWithProfiles);
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -131,17 +148,34 @@ export const EnhancedVerificationManagement = () => {
         await fetchVerificationData(selectedTrainer);
       }
       
-      // Refresh all pending checks
-      const { data: pendingData } = await supabase
+      // Refresh all pending checks - simplified query
+      const { data: pendingData, error } = await supabase
         .from('trainer_verification_checks')
-        .select(`
-          *,
-          profiles!inner(id, first_name, last_name)
-        `)
+        .select('*')
         .eq('status', 'pending')
         .order('created_at', { ascending: false });
 
-      setAllPendingChecks(pendingData || []);
+      if (error) {
+        console.error('Error refreshing pending checks:', error);
+      } else {
+        // Manually fetch profile data for each pending check
+        const checksWithProfiles = await Promise.all(
+          (pendingData || []).map(async (check) => {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('id, first_name, last_name')
+              .eq('id', check.trainer_id)
+              .maybeSingle();
+            
+            return {
+              ...check,
+              profiles: profile
+            };
+          })
+        );
+        
+        setAllPendingChecks(checksWithProfiles);
+      }
 
       setReviewModalOpen(false);
       setReviewData({
