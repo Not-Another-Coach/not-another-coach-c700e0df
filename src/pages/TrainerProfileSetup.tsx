@@ -194,7 +194,8 @@ const TrainerProfileSetup = () => {
         console.log('Profile loaded with terms_agreed:', profile.terms_agreed);
         console.log('Full profile object:', profile);
         
-        const initialData = {
+      console.log('Initializing formData from profile - terms_agreed:', profile.terms_agreed, 'accuracy_confirmed:', profile.accuracy_confirmed);
+      const initialData = {
         first_name: profile.first_name || "",
         last_name: profile.last_name || "",
         tagline: profile.tagline || "",
@@ -247,6 +248,7 @@ const TrainerProfileSetup = () => {
         notify_insights: profile.notify_insights || true,
         max_clients: profile.max_clients || null,
       };
+      console.log('Final formData initialization - terms_agreed:', initialData.terms_agreed, 'accuracy_confirmed:', initialData.accuracy_confirmed);
       
       setFormData(prev => ({ ...prev, ...initialData }));
       initialFormData.current = { ...initialData };
@@ -458,6 +460,7 @@ const TrainerProfileSetup = () => {
         return hasFullConfiguration ? 'completed' : (hasPartialConfiguration ? 'partial' : 'not_started');
         
       case 11: // Terms & Notifications
+        console.log('Step 11 completion check - terms_agreed:', formData.terms_agreed, 'accuracy_confirmed:', formData.accuracy_confirmed);
         return (formData.terms_agreed && formData.accuracy_confirmed) ? 'completed' : 'not_started';
         
       case 12: // Professional Documents
