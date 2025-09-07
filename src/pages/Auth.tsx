@@ -44,9 +44,15 @@ export default function Auth() {
     const savedRememberMe = localStorage.getItem('rememberMe') === 'true';
     
     if (savedCredentials && savedRememberMe) {
-      const { email, password } = JSON.parse(savedCredentials);
-      setLoginForm(prev => ({ ...prev, email, password: password || '' }));
+      const { email } = JSON.parse(savedCredentials);
+      setLoginForm(prev => ({ ...prev, email }));
       setRememberMe(true);
+      
+      // Clear any old stored passwords for security
+      const parsedCreds = JSON.parse(savedCredentials);
+      if (parsedCreds.password) {
+        localStorage.setItem('savedCredentials', JSON.stringify({ email }));
+      }
     }
   }, []);
 
@@ -84,11 +90,11 @@ export default function Auth() {
         variant: "destructive",
       });
     } else {
-      // Handle remember me functionality
+      // Handle remember me functionality - ONLY store email for security
       if (rememberMe) {
         localStorage.setItem('savedCredentials', JSON.stringify({ 
-          email: loginForm.email,
-          password: loginForm.password
+          email: loginForm.email
+          // SECURITY: Never store passwords in localStorage
         }));
         localStorage.setItem('rememberMe', 'true');
       } else {
