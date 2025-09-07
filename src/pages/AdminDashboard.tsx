@@ -33,8 +33,9 @@ export const AdminDashboard = () => {
         {/* Alert Widgets */}
         <Card>
           <CardContent className="p-6">
-            <div className="grid gap-4 md:grid-cols-1">
+            <div className="grid gap-4 md:grid-cols-2">
               <SpecialtyRequestWidget />
+              <Trainer4StatusFixer />
             </div>
           </CardContent>
         </Card>
