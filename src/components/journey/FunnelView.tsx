@@ -19,8 +19,6 @@ export function FunnelView({ stageConfigs, getTrainersForStage, onTrainerAction 
     setExpandedStage(expandedStage === stage ? null : stage);
   };
 
-  const totalTrainers = stageConfigs.reduce((sum, stage) => sum + stage.count, 0);
-
   return (
     <div className="space-y-4">
       {/* Funnel Overview */}
@@ -28,14 +26,14 @@ export function FunnelView({ stageConfigs, getTrainersForStage, onTrainerAction 
         {stageConfigs.map((stage, index) => (
           <div key={stage.id} className="flex items-center">
             <Button
-              variant="outline"
+              variant="secondary"
               onClick={() => handleStageClick(stage.id)}
-              className="relative px-4 py-2 min-w-[120px]"
-              style={{ borderColor: stage.color }}
+              className="relative px-4 py-2 min-w-[120px] text-white"
+              style={{ backgroundColor: stage.color }}
             >
               <div className="text-center">
                 <div className="font-medium text-sm">{stage.title}</div>
-                <Badge variant="secondary" className="mt-1">
+                <Badge variant="outline" className="mt-1 bg-white/20 border-white/30 text-white">
                   {stage.count}
                 </Badge>
               </div>
@@ -46,30 +44,6 @@ export function FunnelView({ stageConfigs, getTrainersForStage, onTrainerAction 
           </div>
         ))}
       </div>
-
-      {/* Conversion Rates */}
-      <Card className="bg-muted/50">
-        <CardContent className="p-4">
-          <div className="grid grid-cols-5 gap-4 text-center">
-            {stageConfigs.map((stage, index) => {
-              const percentage = totalTrainers > 0 
-                ? ((stage.count / totalTrainers) * 100).toFixed(1)
-                : '0';
-              
-              return (
-                <div key={stage.id} className="space-y-1">
-                  <div className="text-2xl font-bold" style={{ color: stage.color }}>
-                    {percentage}%
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {stage.title}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Expanded Stage Details */}
       {expandedStage && (
@@ -122,7 +96,8 @@ export function FunnelView({ stageConfigs, getTrainersForStage, onTrainerAction 
                 <div className="flex items-center justify-between">
                   <Badge 
                     variant="secondary"
-                    style={{ backgroundColor: `${stage.color}20`, color: stage.color }}
+                    className="text-white"
+                    style={{ backgroundColor: stage.color }}
                   >
                     {stage.count} trainers
                   </Badge>
