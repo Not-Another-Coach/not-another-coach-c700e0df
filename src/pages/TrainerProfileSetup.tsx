@@ -45,7 +45,7 @@ import { WorkingHoursAndAvailabilitySection } from "@/components/trainer-setup/W
 import { TermsAndNotificationsSection } from "@/components/trainer-setup/TermsAndNotificationsSection";
 import { EnhancedVerificationSection } from "@/components/trainer-setup/EnhancedVerificationSection";
 import { ProfessionalDocumentsSection } from "@/components/trainer-setup/ProfessionalDocumentsSection";
-import { ProfilePublicationSection } from "@/components/trainer-setup/ProfilePublicationSection";
+import { PublishButton } from "@/components/trainer-setup/PublishButton";
 
 const TrainerProfileSetup = () => {
   const { user, loading } = useAuth();
@@ -702,7 +702,7 @@ const TrainerProfileSetup = () => {
     
     for (let i = 1; i <= totalSteps; i++) {
       const stepWeight = getStepWeight(i);
-      const stepCompletion = getStepCompletion(i);
+      const stepCompletion = getValidationStepCompletion(profile, i);
       
       stepDetails[`step${i}`] = { weight: stepWeight, completion: stepCompletion };
       
@@ -845,6 +845,7 @@ const TrainerProfileSetup = () => {
               <Eye className="h-4 w-4 mr-2" />
               Preview
             </Button>
+            <PublishButton profile={profile} />
             {profile?.profile_published && (
               <Button 
                 variant="outline" 
@@ -879,7 +880,7 @@ const TrainerProfileSetup = () => {
               <div className="flex gap-3 min-w-max px-2">
                 {stepTitles.map((title, index) => {
                   const stepNumber = index + 1;
-                  const completion = getStepCompletion(stepNumber);
+                  const completion = getValidationStepCompletion(profile, stepNumber);
                   const isCurrent = stepNumber === currentStep;
                   
                   let statusColor = 'text-muted-foreground';
@@ -943,7 +944,7 @@ const TrainerProfileSetup = () => {
             <div className="flex justify-between gap-1 overflow-x-auto scrollbar-hide pb-2">
               {stepTitles.map((title, index) => {
                 const stepNumber = index + 1;
-                const completion = getStepCompletion(stepNumber);
+                const completion = getValidationStepCompletion(profile, stepNumber);
                 const isCurrent = stepNumber === currentStep;
                 
                 return (
@@ -978,15 +979,6 @@ const TrainerProfileSetup = () => {
         </div>
       )}
 
-      {/* Profile Publication Section - Show when profile is complete */}
-      {isFullyComplete() && (
-        <div className="max-w-4xl mx-auto px-6">
-          <ProfilePublicationSection 
-            profile={profile} 
-            isProfileComplete={isFullyComplete()} 
-          />
-        </div>
-      )}
 
       {/* Manage profile settings description when fully complete */}
       {isFullyComplete() && (
