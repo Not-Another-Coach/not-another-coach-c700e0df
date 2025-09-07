@@ -141,11 +141,32 @@ export const EnhancedVerificationManagement = () => {
     }
 
     try {
+      console.log('Finding check ID for trainer and check type...');
+      
+      // First, find the check ID based on trainerId and checkType
+      const { data: checkData, error: checkError } = await supabase
+        .from('trainer_verification_checks')
+        .select('id')
+        .eq('trainer_id', reviewData.trainerId)
+        .eq('check_type', reviewData.checkType)
+        .single();
+
+      if (checkError) {
+        console.error('Error finding check:', checkError);
+        toast.error('Could not find verification check');
+        return;
+      }
+
+      if (!checkData?.id) {
+        toast.error('Verification check not found');
+        return;
+      }
+
+      console.log('Found check ID:', checkData.id);
       console.log('About to call adminUpdateCheck...');
       
       await adminUpdateCheck(
-        reviewData.trainerId,
-        reviewData.checkType,
+        checkData.id,
         reviewData.status,
         reviewData.adminNotes,
         reviewData.rejectionReason

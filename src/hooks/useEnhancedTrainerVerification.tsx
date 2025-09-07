@@ -200,7 +200,7 @@ export const useEnhancedTrainerVerification = () => {
             trainer_id: user.id,
             check_id: existingCheck.id,
             actor: 'trainer',
-            action: 'resubmit',
+            action: 'upload',
             previous_status: existingCheck.status,
             new_status: 'pending',
             reason: 'Resubmission after rejection',
@@ -218,6 +218,7 @@ export const useEnhancedTrainerVerification = () => {
                 admin_notes: existingCheck.admin_notes
               },
               new_data: checkData,
+              is_resubmission: true,
               resubmission_timestamp: new Date().toISOString()
             }
           });
@@ -285,7 +286,7 @@ export const useEnhancedTrainerVerification = () => {
             trainer_id: user.id,
             check_id: data.id,
             actor: 'trainer',
-            action: isInitialSubmission ? 'upload' : 'update',
+            action: 'upload',
             previous_status: existingCheck?.status || null,
             new_status: data.status,
             reason: checkData.not_applicable 
@@ -304,6 +305,7 @@ export const useEnhancedTrainerVerification = () => {
                 file_name: checkData.file?.name
               },
               is_not_applicable: checkData.not_applicable || false,
+              is_initial_submission: isInitialSubmission,
               submission_timestamp: new Date().toISOString()
             }
           });
