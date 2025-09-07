@@ -78,8 +78,8 @@ export const useProfessionalDocumentsState = () => {
     setSavingStatus(prev => ({ ...prev, [checkType]: true }));
     
     try {
-      // Save as draft - don't change status to pending
-      await submitVerificationCheck(checkType as any, formData[checkType], true);
+      // Save as draft - suppress the default toast since we show our own
+      await submitVerificationCheck(checkType as any, formData[checkType], true, true);
     } catch (error) {
       console.error('Error saving draft:', error);
     } finally {
@@ -93,10 +93,24 @@ export const useProfessionalDocumentsState = () => {
     setSavingStatus(prev => ({ ...prev, [checkType]: true }));
     
     try {
-      // Submit for review - sets status to pending
-      await submitVerificationCheck(checkType as any, formData[checkType], false);
+      // Submit for review - sets status to pending, suppress toast since we show our own
+      await submitVerificationCheck(checkType as any, formData[checkType], false, true);
+      
+      // Clear form data after successful submission since it's now stored in the database
+      setFormData(prev => ({
+        ...prev,
+        [checkType]: {}
+      }));
+      
+      // Clear not applicable flag if it was set
+      setNotApplicable(prev => ({
+        ...prev,
+        [checkType]: false
+      }));
+      
     } catch (error) {
       console.error('Error submitting for review:', error);
+      throw error; // Re-throw to let component handle error display
     } finally {
       setSavingStatus(prev => ({ ...prev, [checkType]: false }));
     }

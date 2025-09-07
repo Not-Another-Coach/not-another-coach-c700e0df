@@ -180,7 +180,8 @@ export const useEnhancedTrainerVerification = () => {
   const submitVerificationCheck = useCallback(async (
     checkType: string,
     checkData: any,
-    isDraft: boolean = false
+    isDraft: boolean = false,
+    suppressToast: boolean = false
   ) => {
     if (!user) {
       throw new Error('User not authenticated');
@@ -325,7 +326,10 @@ export const useEnhancedTrainerVerification = () => {
       
       console.log('Data refreshed after submission');
       
-      toast.success('Verification check submitted successfully!');
+      // Only show success toast for actual submissions (not drafts) and when not suppressed
+      if (!isDraft && !suppressToast) {
+        toast.success('Verification check submitted successfully!');
+      }
     } catch (error) {
       console.error('Error submitting verification:', error);
       // Show the actual error to help debug

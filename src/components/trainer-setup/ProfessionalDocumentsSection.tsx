@@ -120,12 +120,24 @@ export const ProfessionalDocumentsSection = () => {
       }
     }
 
-    await submitForReview(checkType);
-    
-    toast({
-      title: "Submitted for Review",
-      description: `Your ${config.title} has been submitted for admin review.`,
-    });
+    try {
+      await submitForReview(checkType);
+      
+      // Determine message based on context
+      const check = checks.find(c => c.check_type === checkType);
+      const isResubmission = check && check.status === 'rejected';
+      
+      toast({
+        title: isResubmission ? "Resubmitted for Review" : "Submitted for Review",
+        description: `Your ${config.title} has been ${isResubmission ? 'resubmitted' : 'submitted'} for admin review.`,
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Submission Failed",
+        description: "There was an error submitting your document. Please try again.",
+      });
+    }
   };
 
   const isReadyForSubmission = (checkType: string) => {
@@ -156,7 +168,7 @@ export const ProfessionalDocumentsSection = () => {
         const isNotApplicable = notApplicable[checkType];
         const hasFilledFields = isAnyFieldFilled(checkType);
         const canSave = hasFilledFields || isNotApplicable;
-        const isSubmitted = draftStatus === 'submitted' && finalDisplayStatus !== 'rejected' && finalDisplayStatus !== 'verified';
+        const isSubmitted = (check?.status === 'pending' || check?.status === 'verified') && draftStatus === 'submitted';
         const isExpiringSoon = check?.expiry_date ? isExpiringWithin14Days(check.expiry_date) : false;
         const isVerifiedAndNotExpiring = finalDisplayStatus === 'verified' && !isExpiringSoon;
 
