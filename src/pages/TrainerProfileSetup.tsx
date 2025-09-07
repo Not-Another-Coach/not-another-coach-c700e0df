@@ -4,7 +4,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useTrainerProfile } from "@/hooks/useTrainerProfile";
 import { useUserTypeChecks } from "@/hooks/useUserType";
 import { usePackageWaysOfWorking } from "@/hooks/usePackageWaysOfWorking";
-import { useInstagramConnection } from "@/hooks/useInstagramConnection";
 import { useTrainerVerification } from "@/hooks/useTrainerVerification";
 import { useEnhancedTrainerVerification } from "@/hooks/useEnhancedTrainerVerification";
 import { useDiscoveryCallSettings } from "@/hooks/useDiscoveryCallSettings";
@@ -40,7 +39,7 @@ import { RatesPackagesSection } from "@/components/trainer-setup/RatesPackagesSe
 import { DiscoveryCallSection } from "@/components/trainer-setup/DiscoveryCallSection";
 import { TestimonialsSection } from "@/components/trainer-setup/TestimonialsSection";
 import { SimplifiedWaysOfWorkingSection } from "@/components/trainer-setup/SimplifiedWaysOfWorkingSection";
-import { InstagramIntegration } from "@/components/instagram/InstagramIntegration";
+
 import { ImageManagementSection } from "@/components/trainer-setup/ImageManagementSection";
 import { WorkingHoursAndAvailabilitySection } from "@/components/trainer-setup/WorkingHoursAndAvailabilitySection";
 import { TermsAndNotificationsSection } from "@/components/trainer-setup/TermsAndNotificationsSection";
@@ -53,7 +52,6 @@ const TrainerProfileSetup = () => {
   const { profile, loading: profileLoading, updateProfile } = useTrainerProfile();
   const { isTrainer } = useUserTypeChecks();
   const { packageWorkflows, loading: waysOfWorkingLoading } = usePackageWaysOfWorking();
-  const { isConnected: isInstagramConnected } = useInstagramConnection();
   const { verificationRequest } = useTrainerVerification();
   const { getCheckByType } = useEnhancedTrainerVerification();
   const { settings: discoverySettings } = useDiscoveryCallSettings();
@@ -143,7 +141,7 @@ const TrainerProfileSetup = () => {
     max_clients: null as number | null,
   });
 
-  const totalSteps = 14;
+  const totalSteps = 13;
 
   const stepTitles = [
     "Basic Info",
@@ -154,7 +152,6 @@ const TrainerProfileSetup = () => {
     "Discovery Calls",
     "Testimonials & Case Studies",
     "Ways of Working",
-    "Instagram Integration",
     "Image Management",
     "Working Hours & New Client Availability",
     "T&Cs and Notifications",
@@ -325,7 +322,7 @@ const TrainerProfileSetup = () => {
           newErrors.package_options = "At least one package is required";
         }
         break;
-      case 12:
+      case 11:
         if (!formData.terms_agreed) {
           newErrors.terms_agreed = "You must agree to the terms";
         }
@@ -347,12 +344,11 @@ const TrainerProfileSetup = () => {
       6: 7,   // Discovery Calls (valuable but optional)
       7: 7,   // Testimonials & Case Studies (social proof)
       8: 9,   // Ways of Working (client experience)
-      9: 4,   // Instagram Integration (optional, lower weight)
-      10: 3,  // Image Management (optional, cosmetic)
-      11: 3,  // Working Hours (optional)
-      12: 4,  // Terms & Notifications (compliance)
-      13: 7,  // Professional Documents (important for credibility)
-      14: 1   // Verification (final step, external dependency)
+      9: 7,   // Image Management (enhanced from 3% to 7%)
+      10: 3,  // Working Hours (optional)
+      11: 4,  // Terms & Notifications (compliance)
+      12: 7,  // Professional Documents (important for credibility)
+      13: 1   // Verification (final step, external dependency)
     };
     return weights[step] || 0;
   };
@@ -408,10 +404,7 @@ const TrainerProfileSetup = () => {
         if (hasActivities && !hasSetupCompleted) return 'partial';
         return hasSetupCompleted ? 'completed' : validationCompletion;
         
-      case 9: // Instagram Integration
-        return isInstagramConnected ? 'completed' : 'not_started';
-        
-      case 10: // Image Management
+      case 9: // Image Management
         const selectedCount = getSelectedImagesCount();
         const gridSize = imagePreferences?.max_images_per_view;
         const validationStatus = getValidationStatus();
@@ -424,7 +417,7 @@ const TrainerProfileSetup = () => {
         }
         return 'not_started';
         
-      case 11: // Working Hours & New Client Availability
+      case 10: // Working Hours & New Client Availability
         if (!availabilitySettings) return 'not_started';
         
         // Any valid availability status is considered configured (accepting, waitlist, or unavailable)
@@ -441,13 +434,13 @@ const TrainerProfileSetup = () => {
         
         return hasFullConfiguration ? 'completed' : (hasPartialConfiguration ? 'partial' : 'not_started');
         
-      case 12: // Terms & Notifications
+      case 11: // Terms & Notifications
         return formData.terms_agreed ? 'completed' : 'not_started';
         
-      case 13: // Professional Documents
+      case 12: // Professional Documents
         return getProfDocumentsStatus();
         
-      case 14: // Verification
+      case 13: // Verification
         // Check verification checks using enhanced verification system
         const checkTypes = ['cimspa_membership', 'insurance_proof', 'first_aid_certification'];
         const verificationChecks = checkTypes.map(type => getCheckByType(type as any)).filter(Boolean);
@@ -761,19 +754,17 @@ const TrainerProfileSetup = () => {
       case 8:
         return <SimplifiedWaysOfWorkingSection {...commonProps} />;
       case 9:
-        return <InstagramIntegration />;
-      case 10:
         return <ImageManagementSection {...commonProps} />;
-      case 11:
+      case 10:
         return <WorkingHoursAndAvailabilitySection 
           {...commonProps} 
           onAvailabilityChange={handleAvailabilityChange}
         />;
-      case 12:
+      case 11:
         return <TermsAndNotificationsSection {...commonProps} />;
-      case 13:
+      case 12:
         return <ProfessionalDocumentsSection />;
-      case 14:
+      case 13:
         return <EnhancedVerificationSection />;
       default:
         return null;

@@ -80,8 +80,8 @@ export const useProfilePublication = () => {
   const isProfileReadyToPublish = (profile: any, stepValidation: any) => {
     if (!profile || !stepValidation) return false;
     
-    // All steps should be green except verification (step 14)
-    const requiredSteps = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+    // All steps should be green except verification (step 13)
+    const requiredSteps = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
     
     return requiredSteps.every(step => {
       const completion = stepValidation.getStepCompletion(profile, step);

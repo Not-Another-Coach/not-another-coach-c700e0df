@@ -16,6 +16,7 @@ import Discovery from "./pages/Discovery";
 import SavedTrainers from "./pages/SavedTrainers";
 import TrainerDashboard from "./pages/TrainerDashboard";
 import TrainerProfileSetup from "./pages/TrainerProfileSetup";
+import TrainerSettings from "./pages/TrainerSettings";
 import { AdminDashboard } from "./pages/AdminDashboard";
 import { TrainerProfile } from "./pages/TrainerProfile";
 import { Messaging } from "./pages/Messaging";
@@ -64,6 +65,7 @@ const App = () => (
                 <Route path="/saved" element={<SavedTrainers />} />
                 <Route path="/trainer/dashboard" element={<TrainerDashboard />} />
                 <Route path="/trainer/profile-setup" element={<TrainerProfileSetup />} />
+                <Route path="/trainer/settings" element={<TrainerSettings />} />
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
                 <Route path="/admin/diagnostics" element={<AdminDiagnostics />} />
