@@ -333,27 +333,45 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
     if (!profile?.id) return;
     
     try {
+      console.log('🔍 Loading messages for:', clientId, 'as', isTrainer ? 'trainer' : 'client');
+      
       // Get the conversation
-      const { data: conversation } = await supabase
+      const { data: conversation, error: convError } = await supabase
         .from('conversations')
         .select('id')
         .eq(isTrainer ? 'trainer_id' : 'client_id', profile.id)
         .eq(isTrainer ? 'client_id' : 'trainer_id', clientId)
         .maybeSingle();
 
-      if (!conversation) {
+      if (convError) {
+        console.error('Error loading conversation:', convError);
         setMessages([]);
         return;
       }
 
+      if (!conversation) {
+        console.log('📝 No conversation found between users');
+        setMessages([]);
+        return;
+      }
+
+      console.log('✅ Found conversation:', conversation.id);
+
       // Get messages for this conversation
-      const { data: messagesData } = await supabase
+      const { data: messagesData, error: msgError } = await supabase
         .from('messages')
         .select('*')
         .eq('conversation_id', conversation.id)
         .order('created_at', { ascending: true });
 
+      if (msgError) {
+        console.error('Error loading messages:', msgError);
+        setMessages([]);
+        return;
+      }
+
       if (messagesData) {
+        console.log('📨 Loaded messages:', messagesData.length);
         const formattedMessages: Message[] = messagesData.map(msg => ({
           id: msg.id,
           content: msg.content,
@@ -362,6 +380,8 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
           trainerId: clientId
         }));
         setMessages(formattedMessages);
+      } else {
+        setMessages([]);
       }
     } catch (error) {
       console.error('Error loading messages:', error);
@@ -437,6 +457,8 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
 
       setMessages(prev => [...prev, newMessage]);
       setMessage('');
+      
+      console.log('✅ Message sent successfully:', savedMessage.content);
 
       // If this is the first message from client to trainer, refresh trainer's contact list
       if (!isTrainer && !existingConversation) {
