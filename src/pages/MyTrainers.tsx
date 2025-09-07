@@ -140,7 +140,7 @@ export default function MyTrainers() {
     }
   }, [getFilteredTrainers, activeFilter]);
 
-  // Enhanced debug logging
+  // Enhanced debug logging with manual refresh button
   useEffect(() => {
     console.log('🔍 Current user:', user?.id, user?.email);
     console.log('📊 Counts:', counts);
@@ -148,7 +148,19 @@ export default function MyTrainers() {
     console.log('🗨️ Conversations:', conversations.length);
     console.log('🎯 Data ready state:', isDataReady);
     console.log('⏳ Loading state:', { trainersLoading, engagementLoading, isLoading });
-  }, [counts, filteredTrainers.length, conversations.length, user, isDataReady, trainersLoading, engagementLoading, isLoading]);
+    console.log('🔄 MyTrainers render state:', {
+      user: !!user,
+      profile: !!profile,
+      filteredTrainers: filteredTrainers.length,
+      isDataReady,
+      showComparison,
+      allTrainers: allTrainers.length,
+      counts,
+      activeFilter,
+      engagementLoading,
+      trainersLoading
+    });
+  }, [counts, filteredTrainers.length, conversations.length, user, isDataReady, trainersLoading, engagementLoading, isLoading, profile, allTrainers.length, activeFilter, showComparison]);
 
   // Handler functions
   const handleSaveTrainer = async (trainerId: string) => {
@@ -727,11 +739,12 @@ export default function MyTrainers() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => window.location.reload()}
+            onClick={refreshData}
+            disabled={isRefreshing}
             className="flex items-center gap-2"
           >
-            <RefreshCw className="h-4 w-4" />
-            Refresh
+            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            Refresh Data
           </Button>
         </div>
         <DataSyncIndicator 
