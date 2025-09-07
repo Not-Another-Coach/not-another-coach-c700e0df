@@ -38,20 +38,31 @@ export default function Auth() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  // Load saved credentials on component mount
+  // Load saved email on component mount (secure - no password storage)
   useEffect(() => {
-    const savedCredentials = localStorage.getItem('savedCredentials');
+    const savedEmail = localStorage.getItem('savedEmail'); 
     const savedRememberMe = localStorage.getItem('rememberMe') === 'true';
     
-    if (savedCredentials && savedRememberMe) {
-      const { email } = JSON.parse(savedCredentials);
-      setLoginForm(prev => ({ ...prev, email }));
+    if (savedEmail && savedRememberMe) {
+      setLoginForm(prev => ({ ...prev, email: savedEmail }));
       setRememberMe(true);
-      
-      // Clear any old stored passwords for security
-      const parsedCreds = JSON.parse(savedCredentials);
-      if (parsedCreds.password) {
-        localStorage.setItem('savedCredentials', JSON.stringify({ email }));
+    }
+
+    // Clean up any legacy password storage for security
+    const savedCredentials = localStorage.getItem('savedCredentials');
+    if (savedCredentials) {
+      try {
+        const parsed = JSON.parse(savedCredentials);
+        if (parsed.password) {
+          // Remove password and save only email if remember me is enabled
+          if (savedRememberMe && parsed.email) {
+            localStorage.setItem('savedEmail', parsed.email);
+          }
+          localStorage.removeItem('savedCredentials');
+        }
+      } catch (e) {
+        // Clear corrupted credentials
+        localStorage.removeItem('savedCredentials');
       }
     }
   }, []);
@@ -92,12 +103,12 @@ export default function Auth() {
     } else {
       // Handle remember me functionality - ONLY store email for security
       if (rememberMe) {
-        localStorage.setItem('savedCredentials', JSON.stringify({ 
-          email: loginForm.email
-          // SECURITY: Never store passwords in localStorage
-        }));
+        localStorage.setItem('savedEmail', loginForm.email);
         localStorage.setItem('rememberMe', 'true');
+        // Clean up any legacy credential storage
+        localStorage.removeItem('savedCredentials');
       } else {
+        localStorage.removeItem('savedEmail');
         localStorage.removeItem('savedCredentials');
         localStorage.removeItem('rememberMe');
       }
