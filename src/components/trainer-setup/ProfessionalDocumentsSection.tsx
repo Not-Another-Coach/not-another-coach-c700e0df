@@ -113,7 +113,7 @@ export const ProfessionalDocumentsSection = () => {
         const isNotApplicable = notApplicable[checkType];
         const hasFilledFields = isAnyFieldFilled(checkType);
         const canSave = hasFilledFields || isNotApplicable;
-        const isSubmitted = draftStatus === 'submitted' && finalDisplayStatus !== 'rejected';
+        const isSubmitted = draftStatus === 'submitted' && finalDisplayStatus !== 'rejected' && finalDisplayStatus !== 'verified';
 
         // Handle draft state
         if (draftStatus === 'draft' && hasFilledFields) {
@@ -272,6 +272,11 @@ export const ProfessionalDocumentsSection = () => {
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Saving...
+                    </>
+                  ) : finalDisplayStatus === 'rejected' && hasFilledFields ? (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Resubmit
                     </>
                   ) : (
                     <>
