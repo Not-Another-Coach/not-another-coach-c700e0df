@@ -4006,6 +4006,9 @@ export type Database = {
           marketing_unsubscribed_at: string | null
           max_clients: number | null
           messaging_support: boolean | null
+          notify_insights: boolean | null
+          notify_messages: boolean | null
+          notify_profile_views: boolean | null
           onboarding_step: number | null
           open_to_virtual_coaching: boolean | null
           package_inclusions: Json | null
@@ -4135,6 +4138,9 @@ export type Database = {
           marketing_unsubscribed_at?: string | null
           max_clients?: number | null
           messaging_support?: boolean | null
+          notify_insights?: boolean | null
+          notify_messages?: boolean | null
+          notify_profile_views?: boolean | null
           onboarding_step?: number | null
           open_to_virtual_coaching?: boolean | null
           package_inclusions?: Json | null
@@ -4264,6 +4270,9 @@ export type Database = {
           marketing_unsubscribed_at?: string | null
           max_clients?: number | null
           messaging_support?: boolean | null
+          notify_insights?: boolean | null
+          notify_messages?: boolean | null
+          notify_profile_views?: boolean | null
           onboarding_step?: number | null
           open_to_virtual_coaching?: boolean | null
           package_inclusions?: Json | null

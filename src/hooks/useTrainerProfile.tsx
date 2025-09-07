@@ -69,6 +69,9 @@ interface TrainerProfile {
   profile_setup_completed: boolean | null;
   terms_agreed: boolean | null;
   accuracy_confirmed: boolean | null;
+  notify_profile_views: boolean | null;
+  notify_messages: boolean | null;
+  notify_insights: boolean | null;
   how_started: string | null;
   philosophy: string | null;
   professional_milestones: any[] | null;
@@ -128,6 +131,9 @@ export function useTrainerProfile() {
           wow_visibility: (data as any)?.wow_visibility || null,
           wow_setup_completed: (data as any)?.wow_setup_completed || null,
           accuracy_confirmed: (data as any)?.accuracy_confirmed || null,
+          notify_profile_views: (data as any)?.notify_profile_views || null,
+          notify_messages: (data as any)?.notify_messages || null,
+          notify_insights: (data as any)?.notify_insights || null,
         } as TrainerProfile;
         setProfile(profileWithDefaults);
       }

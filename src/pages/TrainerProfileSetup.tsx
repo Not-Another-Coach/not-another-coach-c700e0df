@@ -230,6 +230,9 @@ const TrainerProfileSetup = () => {
         wow_setup_completed: profile.wow_setup_completed || false,
         terms_agreed: profile.terms_agreed || false,
         accuracy_confirmed: profile.accuracy_confirmed || false,
+        notify_profile_views: profile.notify_profile_views || false,
+        notify_messages: profile.notify_messages || true,
+        notify_insights: profile.notify_insights || true,
         max_clients: profile.max_clients || null,
       };
       
