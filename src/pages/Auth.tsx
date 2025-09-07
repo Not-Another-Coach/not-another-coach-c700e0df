@@ -16,6 +16,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 
 export default function Auth() {
+  console.log('Auth component rendering...');
   const [isLoading, setIsLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [showPasswordReset, setShowPasswordReset] = useState(false);
@@ -301,9 +302,10 @@ export default function Auth() {
   };
 
 
+  console.log('About to render Auth component UI');
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md mx-auto">        
+      <div className="w-full max-w-md mx-auto">
         {/* Main Auth Card */}
         <Card className="w-full">
           <CardHeader className="text-center">
