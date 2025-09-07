@@ -6,9 +6,12 @@ export const useTrainer4FixStatus = () => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const fixTrainer4Status = useCallback(async (trainerId: string = 'trainer4') => {
+  const fixTrainer4Status = useCallback(async () => {
     setLoading(true);
     try {
+      // Use the actual UUID for Trainer4 
+      const trainerId = '1051dd7c-ee79-48fd-b287-2cbe7483f9f7';
+
       // First check if trainer has approved publication request
       const { data: publicationData, error: publicationError } = await supabase
         .from('profile_publication_requests')
