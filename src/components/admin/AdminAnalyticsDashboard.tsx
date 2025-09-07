@@ -13,12 +13,14 @@ import {
   ExternalLink,
   ChevronRight,
   Calendar,
-  Settings
+  Settings,
+  FileCheck
 } from 'lucide-react';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { useTrainerCustomRequests } from '@/hooks/useQualifications';
 import { useTrainerCustomSpecialtyRequests } from '@/hooks/useSpecialties';
 import { useTrainerVerification } from '@/hooks/useTrainerVerification';
+import { useAdminProfilePublication } from '@/hooks/useProfilePublication';
 import { supabase } from '@/integrations/supabase/client';
 
 interface AdminAnalyticsDashboardProps {
@@ -30,6 +32,7 @@ export const AdminAnalyticsDashboard = ({ onNavigate }: AdminAnalyticsDashboardP
   const { data: qualificationRequests } = useTrainerCustomRequests();
   const { requests: specialtyRequests } = useTrainerCustomSpecialtyRequests();
   const { verificationRequests, loading: verificationLoading } = useTrainerVerification();
+  const { requests: publicationRequests } = useAdminProfilePublication();
   
   const [systemMetrics, setSystemMetrics] = useState({
     uptime: 99.9,
@@ -53,7 +56,8 @@ export const AdminAnalyticsDashboard = ({ onNavigate }: AdminAnalyticsDashboardP
   
   const pendingQualifications = qualificationRequests?.filter(q => q.status === 'pending').length || 0;
   const pendingSpecialties = specialtyRequests?.filter(s => s.status === 'pending').length || 0;
-  const totalPendingRequests = pendingVerifications + pendingQualifications + pendingSpecialties;
+  const pendingPublications = publicationRequests?.filter(p => p.status === 'pending').length || 0;
+  const totalPendingRequests = pendingVerifications + pendingQualifications + pendingSpecialties + pendingPublications;
 
   // Calculate growth percentages
   const userGrowth = previousPeriodData.totalUsers > 0 
@@ -120,7 +124,7 @@ export const AdminAnalyticsDashboard = ({ onNavigate }: AdminAnalyticsDashboardP
       textColor: totalPendingRequests > 0 ? "text-orange-900" : "text-green-900",
       valueColor: totalPendingRequests > 0 ? "text-orange-700" : "text-green-700",
       changeColor: totalPendingRequests > 0 ? "text-orange-600" : "text-green-600",
-      breakdown: `${pendingVerifications} verifications, ${pendingQualifications} qualifications, ${pendingSpecialties} specialties`,
+      breakdown: `${pendingVerifications} verifications, ${pendingQualifications} qualifications, ${pendingSpecialties} specialties, ${pendingPublications} publications`,
       onClick: () => onNavigate?.('users')
     },
     {
@@ -239,19 +243,19 @@ export const AdminAnalyticsDashboard = ({ onNavigate }: AdminAnalyticsDashboardP
         </Card>
         
         <Card 
-          className="cursor-pointer hover:shadow-lg transition-all duration-200 border-slate-200 bg-gradient-to-br from-slate-50 to-slate-100"
-          onClick={() => window.open('/documentation', '_blank')}
+          className="cursor-pointer hover:shadow-lg transition-all duration-200 border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100"
+          onClick={() => onNavigate?.('publications')}
         >
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <div className="p-3 rounded-full bg-slate-500 text-white">
-                <Database className="h-6 w-6" />
+              <div className="p-3 rounded-full bg-blue-500 text-white">
+                <FileCheck className="h-6 w-6" />
               </div>
-              <ExternalLink className="h-5 w-5 text-slate-600" />
+              <ChevronRight className="h-5 w-5 text-blue-600" />
             </div>
-            <h3 className="font-semibold text-slate-900 mb-1">Documentation</h3>
-            <div className="text-3xl font-bold text-slate-700 mb-2">API</div>
-            <p className="text-sm text-slate-600">System architecture & guides</p>
+            <h3 className="font-semibold text-blue-900 mb-1">Profile Publications</h3>
+            <div className="text-3xl font-bold text-blue-700 mb-2">{pendingPublications}</div>
+            <p className="text-sm text-blue-600">Publication requests pending</p>
           </CardContent>
         </Card>
       </div>

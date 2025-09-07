@@ -2,11 +2,12 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Filter, Plus, MessageSquare, UserPlus, FileText, Settings, CheckCircle, XCircle, Target, Users } from 'lucide-react';
+import { Filter, Plus, MessageSquare, UserPlus, FileText, Settings, CheckCircle, XCircle, Target, Users, FileCheck } from 'lucide-react';
 import { useTrainerCustomRequests } from '@/hooks/useQualifications';
 import { useTrainerCustomSpecialtyRequests } from '@/hooks/useSpecialties';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { useTrainerVerification } from '@/hooks/useTrainerVerification';
+import { useAdminProfilePublication } from '@/hooks/useProfilePublication';
 import { format, isToday, isYesterday, subDays } from 'date-fns';
 
 export const AdminLiveActivityFeed = () => {
@@ -14,6 +15,7 @@ export const AdminLiveActivityFeed = () => {
   const { requests: specialtyRequests } = useTrainerCustomSpecialtyRequests();
   const { users, loading: usersLoading } = useUserRoles();
   const { verificationRequests } = useTrainerVerification();
+  const { requests: publicationRequests } = useAdminProfilePublication();
 
   const createAdminActivities = () => {
     const activities: any[] = [];
@@ -40,56 +42,86 @@ export const AdminLiveActivityFeed = () => {
       });
     }
 
-    // Add qualification requests
+    // Add qualification requests (only pending - admin action required)
     if (qualificationRequests) {
-      const recentQualifications = qualificationRequests.filter(req => {
-        const updatedAt = new Date(req.updated_at || req.created_at);
-        const threeDaysAgo = subDays(new Date(), 3);
-        return updatedAt > threeDaysAgo;
-      });
+      const pendingQualifications = qualificationRequests.filter(req => 
+        req.status === 'pending' && 
+        new Date(req.created_at) > subDays(new Date(), 7)
+      );
 
-      recentQualifications.forEach(req => {
-        const isPending = req.status === 'pending';
+      pendingQualifications.forEach(req => {
         activities.push({
           id: `qual-${req.id}`,
-          title: isPending ? 'New Qualification Request' : `Qualification ${req.status}`,
-          description: `${req.qualification_name} - Custom qualification request`,
-          icon: isPending ? <FileText className="h-4 w-4" /> : (req.status === 'approved' ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />),
-          color: isPending 
-            ? 'bg-gradient-to-r from-yellow-50 to-yellow-100 border border-yellow-200'
-            : req.status === 'approved' 
-              ? 'bg-gradient-to-r from-green-50 to-green-100 border border-green-200'
-              : 'bg-gradient-to-r from-red-50 to-red-100 border border-red-200',
-          created_at: req.updated_at || req.created_at,
+          title: 'New Qualification Request',
+          description: `${req.qualification_name} - Requires admin review`,
+          icon: <FileText className="h-4 w-4" />,
+          color: 'bg-gradient-to-r from-yellow-50 to-yellow-100 border border-yellow-200',
+          created_at: req.created_at,
           type: 'qualification',
-          priority: isPending ? 'high' : 'normal'
+          priority: 'high'
         });
       });
     }
 
-    // Add specialty requests
+    // Add specialty requests (only pending - admin action required)
     if (specialtyRequests) {
-      const recentSpecialties = specialtyRequests.filter(req => {
-        const updatedAt = new Date(req.updated_at || req.created_at);
-        const threeDaysAgo = subDays(new Date(), 3);
-        return updatedAt > threeDaysAgo;
-      });
+      const pendingSpecialties = specialtyRequests.filter(req => 
+        req.status === 'pending' && 
+        new Date(req.created_at) > subDays(new Date(), 7)
+      );
 
-      recentSpecialties.forEach(req => {
-        const isPending = req.status === 'pending';
+      pendingSpecialties.forEach(req => {
         activities.push({
           id: `spec-${req.id}`,
-          title: isPending ? 'New Specialty Request' : `Specialty ${req.status}`,
-          description: `${req.requested_name} - Custom specialty request`,
-          icon: isPending ? <Target className="h-4 w-4" /> : (req.status === 'approved' ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />),
-          color: isPending 
-            ? 'bg-gradient-to-r from-purple-50 to-purple-100 border border-purple-200'
-            : req.status === 'approved' 
-              ? 'bg-gradient-to-r from-green-50 to-green-100 border border-green-200'
-              : 'bg-gradient-to-r from-red-50 to-red-100 border border-red-200',
-          created_at: req.updated_at || req.created_at,
+          title: 'New Specialty Request',
+          description: `${req.requested_name} - Requires admin review`,
+          icon: <Target className="h-4 w-4" />,
+          color: 'bg-gradient-to-r from-purple-50 to-purple-100 border border-purple-200',
+          created_at: req.created_at,
           type: 'specialty',
-          priority: isPending ? 'high' : 'normal'
+          priority: 'high'
+        });
+      });
+    }
+
+    // Add verification requests (only pending - admin action required)
+    if (verificationRequests) {
+      const pendingVerifications = verificationRequests.filter(req => 
+        req.status === 'pending' && 
+        new Date(req.created_at || req.submitted_at) > subDays(new Date(), 7)
+      );
+
+      pendingVerifications.forEach(req => {
+        activities.push({
+          id: `verify-${req.id}`,
+          title: 'New Verification Request',
+          description: `Trainer verification - Requires admin review`,
+          icon: <CheckCircle className="h-4 w-4" />,
+          color: 'bg-gradient-to-r from-orange-50 to-orange-100 border border-orange-200',
+          created_at: req.created_at || req.submitted_at,
+          type: 'verification',
+          priority: 'high'
+        });
+      });
+    }
+
+    // Add profile publication requests (only pending - admin action required)
+    if (publicationRequests) {
+      const pendingPublications = publicationRequests.filter(req => 
+        req.status === 'pending' && 
+        new Date(req.created_at || req.requested_at) > subDays(new Date(), 7)
+      );
+
+      pendingPublications.forEach(req => {
+        activities.push({
+          id: `pub-${req.id}`,
+          title: 'New Profile Publication Request',
+          description: `Trainer profile publication - Requires admin review`,
+          icon: <FileCheck className="h-4 w-4" />,
+          color: 'bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200',
+          created_at: req.created_at || req.requested_at,
+          type: 'publication',
+          priority: 'high'
         });
       });
     }
@@ -151,15 +183,17 @@ export const AdminLiveActivityFeed = () => {
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">Admin Activity Feed</CardTitle>
-          <Button variant="ghost" size="sm">
-            <Filter className="w-4 h-4" />
-          </Button>
+          <Badge variant="secondary" className="text-xs">
+            Pending Actions Only
+          </Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-3 max-h-96 overflow-y-auto">
         {adminActivities.length === 0 ? (
           <div className="text-center py-6 text-muted-foreground">
-            <p>No recent admin activity</p>
+            <CheckCircle className="w-8 h-8 mx-auto mb-2 text-green-500" />
+            <p className="font-medium">All caught up!</p>
+            <p className="text-sm">No pending admin requests</p>
           </div>
         ) : (
           adminActivities.map((activity) => (
@@ -190,6 +224,18 @@ export const AdminLiveActivityFeed = () => {
                     <Badge variant="outline" className="text-xs">
                       <Users className="w-3 h-3 mr-1" />
                       New User
+                    </Badge>
+                  )}
+                  {activity.type === 'publication' && (
+                    <Badge variant="outline" className="text-xs">
+                      <FileCheck className="w-3 h-3 mr-1" />
+                      Publication
+                    </Badge>
+                  )}
+                  {activity.type === 'verification' && (
+                    <Badge variant="outline" className="text-xs">
+                      <CheckCircle className="w-3 h-3 mr-1" />
+                      Verification
                     </Badge>
                   )}
                   {activity.priority === 'high' && (

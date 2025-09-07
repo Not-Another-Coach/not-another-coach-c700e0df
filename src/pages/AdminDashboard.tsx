@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { AdminAnalyticsDashboard } from "@/components/admin/AdminAnalyticsDashboard";
 import { AdminLiveActivityFeed } from "@/components/admin/AdminLiveActivityFeed";
-import { QualificationRequestWidget } from "@/components/alerts/QualificationRequestAlerts";
 import { SpecialtyRequestWidget } from "@/components/alerts/SpecialtyRequestAlerts";
 import { 
   Users, 
@@ -68,13 +67,6 @@ export const AdminDashboard = () => {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-6">
               <h1 className="text-xl font-semibold">Admin Dashboard</h1>
-              <Badge variant="secondary" className="bg-primary/10 text-primary">
-                System Administrator
-              </Badge>
-              <div className="hidden md:flex items-center gap-1 text-sm text-muted-foreground">
-                <User className="h-4 w-4" />
-                <span>Platform Management</span>
-              </div>
             </div>
             <div className="flex items-center gap-4">
               <Button variant="outline" size="sm" onClick={() => navigate('/trainer-dashboard')}>
@@ -121,13 +113,12 @@ export const AdminDashboard = () => {
           </div>
 
           {/* Alert Widgets */}
-          <div className="grid gap-4 md:grid-cols-2">
-            <QualificationRequestWidget />
+          <div className="grid gap-4 md:grid-cols-1">
             <SpecialtyRequestWidget />
           </div>
 
           {/* Analytics Dashboard */}
-          <AdminAnalyticsDashboard />
+          <AdminAnalyticsDashboard onNavigate={(tab) => navigate(`/admin/${tab}`)} />
 
 
           {/* Live Activity Feed */}
