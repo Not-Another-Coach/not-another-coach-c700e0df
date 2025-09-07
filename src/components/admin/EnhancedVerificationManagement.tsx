@@ -398,21 +398,66 @@ export const EnhancedVerificationManagement = () => {
             <TabsContent value="audit-log" className="space-y-4">
               <ScrollArea className="h-[400px]">
                 <div className="space-y-2">
-                  {auditLog.map(entry => (
-                    <div key={entry.id} className="p-3 border border-border rounded-lg">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="font-medium">
-                          {entry.action} - {CheckTypeLabels[entry.check_id as keyof typeof CheckTypeLabels] || 'General'}
-                        </span>
-                        <span className="text-muted-foreground">
-                          {new Date(entry.created_at).toLocaleString()}
-                        </span>
+                  {auditLog.map(entry => {
+                    const metadata = entry.metadata || {};
+                    const checkType = metadata.check_type || 'Unknown';
+                    const trainerName = metadata.trainer_name || 'Unknown';
+                    const adminName = metadata.admin_name || 'Admin';
+                    const processingDays = metadata.processing_time_days ? Math.ceil(metadata.processing_time_days) : 'N/A';
+                    
+                    return (
+                      <div key={entry.id} className="p-4 border border-border rounded-lg bg-card">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <Badge variant={entry.new_status === 'verified' ? 'default' : entry.new_status === 'rejected' ? 'destructive' : 'secondary'}>
+                              {entry.action.toUpperCase()}
+                            </Badge>
+                            <span className="font-medium text-sm">
+                              {metadata.check_type_label || checkType}
+                            </span>
+                          </div>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(entry.created_at).toLocaleString()}
+                          </span>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <p><strong>Trainer:</strong> {trainerName}</p>
+                            <p><strong>Admin:</strong> {adminName}</p>
+                            <p><strong>Status Change:</strong> {entry.previous_status} → {entry.new_status}</p>
+                          </div>
+                          <div>
+                            <p><strong>Processing Time:</strong> {processingDays} days</p>
+                            {metadata.expiry_date && (
+                              <p><strong>Expires:</strong> {new Date(metadata.expiry_date).toLocaleDateString()}</p>
+                            )}
+                            <p><strong>Has Document:</strong> {metadata.has_evidence_file ? 'Yes' : 'No'}</p>
+                          </div>
+                        </div>
+                        
+                        {metadata.provider && (
+                          <div className="mt-3 p-2 bg-muted rounded text-xs">
+                            <p><strong>Provider:</strong> {metadata.provider}</p>
+                            {metadata.certificate_id && <p><strong>Certificate ID:</strong> {metadata.certificate_id}</p>}
+                            {metadata.member_id && <p><strong>Member ID:</strong> {metadata.member_id}</p>}
+                            {metadata.policy_number && <p><strong>Policy Number:</strong> {metadata.policy_number}</p>}
+                          </div>
+                        )}
+                        
+                        {(metadata.admin_notes || metadata.rejection_reason) && (
+                          <div className="mt-3 p-2 bg-muted rounded text-xs">
+                            {metadata.admin_notes && <p><strong>Admin Notes:</strong> {metadata.admin_notes}</p>}
+                            {metadata.rejection_reason && <p><strong>Rejection Reason:</strong> {metadata.rejection_reason}</p>}
+                          </div>
+                        )}
+                        
+                        <p className="text-xs text-muted-foreground mt-2">
+                          <strong>Reason:</strong> {entry.reason || 'No reason provided'}
+                        </p>
                       </div>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Actor: {entry.actor} | Reason: {entry.reason || 'No reason provided'}
-                      </p>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </ScrollArea>
             </TabsContent>
