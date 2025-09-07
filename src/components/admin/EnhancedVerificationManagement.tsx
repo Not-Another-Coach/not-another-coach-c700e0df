@@ -59,11 +59,23 @@ export const EnhancedVerificationManagement = () => {
     rejectionReason: '',
   });
 
+  // Debug logging
+  console.log('EnhancedVerificationManagement render:', {
+    isAdmin,
+    loading,
+    allPendingChecksLength: allPendingChecks.length,
+    trainersLength: trainers.length,
+  });
+
   // Fetch all trainers and pending checks
   useEffect(() => {
     const fetchTrainersAndPendingChecks = async () => {
-      if (!isAdmin) return;
+      if (!isAdmin) {
+        console.log('Not admin, skipping fetch');
+        return;
+      }
 
+      console.log('Starting to fetch trainers and pending checks...');
       try {
         // Fetch trainers
         const { data: trainersData } = await supabase
@@ -72,10 +84,11 @@ export const EnhancedVerificationManagement = () => {
           .eq('user_type', 'trainer')
           .order('first_name');
 
+        console.log('Trainers data:', trainersData);
         setTrainers(trainersData || []);
 
         // Fetch all pending verification checks
-        const { data: pendingData } = await supabase
+        const { data: pendingData, error } = await supabase
           .from('trainer_verification_checks')
           .select(`
             *,
@@ -84,6 +97,7 @@ export const EnhancedVerificationManagement = () => {
           .eq('status', 'pending')
           .order('created_at', { ascending: false });
 
+        console.log('Pending checks query result:', { data: pendingData, error });
         setAllPendingChecks(pendingData || []);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -203,6 +217,9 @@ export const EnhancedVerificationManagement = () => {
                 <p>Loading pending reviews...</p>
               ) : allPendingChecks.length > 0 ? (
                 <div className="space-y-4">
+                  <div className="text-sm text-muted-foreground mb-2">
+                    Found {allPendingChecks.length} pending reviews
+                  </div>
                   {allPendingChecks.map(check => (
                     <Card key={`${check.trainer_id}-${check.check_type}`}>
                       <CardContent className="p-4">
@@ -214,8 +231,14 @@ export const EnhancedVerificationManagement = () => {
                             <p className="text-sm text-muted-foreground">
                               Trainer: {check.profiles ? `${check.profiles.first_name || ''} ${check.profiles.last_name || ''}`.trim() : 'Unknown'}
                             </p>
+                            <p className="text-sm text-muted-foreground">
+                              Trainer ID: {check.trainer_id}
+                            </p>
                             <p className="text-xs text-muted-foreground">
                               Submitted: {new Date(check.created_at).toLocaleDateString()}
+                            </p>
+                            <p className="text-xs text-blue-600">
+                              Status: {check.status}
                             </p>
                             {check.evidence_file_url && (
                               <p className="text-xs text-blue-600">
@@ -242,9 +265,12 @@ export const EnhancedVerificationManagement = () => {
                   ))}
                 </div>
               ) : (
-                <p className="text-center text-muted-foreground py-8">
-                  No pending reviews
-                </p>
+                <div className="text-center text-muted-foreground py-8">
+                  <p>No pending reviews found</p>
+                  <p className="text-sm">Debug info: allPendingChecks.length = {allPendingChecks.length}</p>
+                  <p className="text-sm">isAdmin = {isAdmin.toString()}</p>
+                  <p className="text-sm">loading = {loading.toString()}</p>
+                </div>
               )}
             </TabsContent>
 
