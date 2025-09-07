@@ -182,7 +182,19 @@ const TrainerProfileSetup = () => {
     // Only initialize when we have a profile with an ID and haven't initialized yet
     if (profile && profile.id && !hasInitialized.current) {
       hasInitialized.current = true;
-      const initialData = {
+      console.log('Form data being initialized from profile:', {
+        accuracy_confirmed: profile.accuracy_confirmed,
+        terms_agreed: profile.terms_agreed,
+        notify_profile_views: profile.notify_profile_views,
+        notify_messages: profile.notify_messages,
+        notify_insights: profile.notify_insights
+      });
+      
+        console.log('Profile loaded with accuracy_confirmed:', profile.accuracy_confirmed);
+        console.log('Profile loaded with terms_agreed:', profile.terms_agreed);
+        console.log('Full profile object:', profile);
+        
+        const initialData = {
         first_name: profile.first_name || "",
         last_name: profile.last_name || "",
         tagline: profile.tagline || "",
@@ -512,7 +524,14 @@ const TrainerProfileSetup = () => {
         // Explicitly include terms and accuracy confirmation to ensure persistence
         terms_agreed: formData.terms_agreed || false,
         accuracy_confirmed: formData.accuracy_confirmed || false,
+        // Explicitly include notification preferences
+        notify_profile_views: formData.notify_profile_views || false,
+        notify_messages: formData.notify_messages || true,
+        notify_insights: formData.notify_insights || true,
       };
+      
+      console.log('Saving profile with accuracy_confirmed:', saveData.accuracy_confirmed);
+      console.log('Saving profile with terms_agreed:', saveData.terms_agreed);
       
       console.log('Saving trainer profile data:', saveData);
       console.log('Testimonials being saved:', saveData.testimonials);
@@ -850,6 +869,14 @@ const TrainerProfileSetup = () => {
             </div>
           </div>
           <div className="flex items-center gap-2 justify-end sm:justify-start">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setCurrentStep(11)}
+              className="flex-1 sm:flex-none"
+            >
+              Go to Terms & Notifications
+            </Button>
             <Button variant="outline" size="sm" onClick={() => handleSave()} className="flex-1 sm:flex-none">
               <Save className="h-4 w-4 mr-2" />
               <span className="hidden xs:inline">{profile?.profile_setup_completed ? 'Update' : 'Save Draft'}</span>

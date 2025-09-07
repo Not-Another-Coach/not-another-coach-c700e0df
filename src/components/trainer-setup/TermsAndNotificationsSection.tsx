@@ -21,9 +21,14 @@ export function TermsAndNotificationsSection({ formData, updateFormData }: Terms
         description="Configure your preferences and complete your profile setup"
       />
 
-      {/* Notification Preferences */}
-      <Card className="border-muted bg-muted/20">
-        <CardContent className="p-6 space-y-4">
+      {/* Notification Preferences - Coming Soon */}
+      <Card className="border-muted bg-muted/20 relative">
+        <div className="absolute inset-0 bg-muted/50 rounded-lg flex items-center justify-center z-10">
+          <div className="bg-background px-4 py-2 rounded-md border shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">Coming Soon</p>
+          </div>
+        </div>
+        <CardContent className="p-6 space-y-4 opacity-50">
           <div className="flex items-center gap-2 mb-4">
             <Bell className="w-5 h-5 text-primary" />
             <Label className="text-lg font-semibold">Notification Preferences</Label>
@@ -38,6 +43,7 @@ export function TermsAndNotificationsSection({ formData, updateFormData }: Terms
             <Switch
               checked={formData.notify_profile_views || false}
               onCheckedChange={(checked) => updateFormData({ notify_profile_views: checked })}
+              disabled
             />
           </div>
 
@@ -51,6 +57,7 @@ export function TermsAndNotificationsSection({ formData, updateFormData }: Terms
             <Switch
               checked={formData.notify_messages || true}
               onCheckedChange={(checked) => updateFormData({ notify_messages: checked })}
+              disabled
             />
           </div>
 
@@ -64,6 +71,7 @@ export function TermsAndNotificationsSection({ formData, updateFormData }: Terms
             <Switch
               checked={formData.notify_insights || true}
               onCheckedChange={(checked) => updateFormData({ notify_insights: checked })}
+              disabled
             />
           </div>
         </CardContent>
@@ -99,11 +107,14 @@ export function TermsAndNotificationsSection({ formData, updateFormData }: Terms
             </div>
           </div>
 
-          <div className="flex items-start space-x-2">
+          <div className="flex items-center space-x-2">
             <Checkbox
               id="accuracy"
               checked={formData.accuracy_confirmed || false}
-              onCheckedChange={(checked) => updateFormData({ accuracy_confirmed: checked })}
+              onCheckedChange={(checked) => {
+                console.log('Accuracy confirmation checkbox clicked:', checked);
+                updateFormData({ accuracy_confirmed: checked });
+              }}
             />
             <div className="space-y-1 leading-none">
               <Label
