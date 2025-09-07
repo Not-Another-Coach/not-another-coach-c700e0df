@@ -31,7 +31,7 @@ export default function MyTrainers() {
 
   return (
     <div className="min-h-screen bg-background px-4 py-6">
-      <ClientHeader profile={profile} />
+      {profile && <ClientHeader profile={profile} />}
       
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -60,7 +60,7 @@ export default function MyTrainers() {
             isRefreshing={isRefreshing}
             isConnected={true}
           />
-          <ProfileDropdown profile={profile} />
+          {profile && <ProfileDropdown profile={profile} />}
         </div>
       </div>
 
