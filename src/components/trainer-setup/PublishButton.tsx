@@ -43,20 +43,26 @@ export const PublishButton = ({ profile }: PublishButtonProps) => {
   const getIncompleteSteps = () => {
     if (readyToPublish) return [];
     
-    const stepTitles = [
-      "Basic Info", "Qualifications", "Expertise & Services", 
-      "Client Fit Preferences", "Rates & Packages", "Discovery Calls",
-      "Testimonials & Case Studies", "Ways of Working",
-      "Image Management", "Working Hours & New Client Availability",
-      "T&Cs and Notifications", "Professional Documents"
-    ];
+    const stepTitles: Record<number, string> = {
+      1: "Basic Info",
+      2: "Qualifications", 
+      3: "Expertise & Services",
+      4: "Client Fit Preferences",
+      5: "Rates & Packages",
+      6: "Discovery Calls",
+      7: "Testimonials & Case Studies",
+      8: "Ways of Working",
+      9: "Image Management",
+      10: "Working Hours & New Client Availability",
+      11: "T&Cs and Notifications",
+      12: "Professional Documents"
+    };
     
     const incompleteSteps: string[] = [];
-    [1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13].forEach(step => {
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].forEach(step => {
       const completion = stepValidation.getStepCompletion(profile, step);
       if (completion !== 'completed') {
-        const stepIndex = step <= 8 ? step - 1 : step - 2; // Adjust for removed Instagram step
-        incompleteSteps.push(stepTitles[stepIndex]);
+        incompleteSteps.push(stepTitles[step]);
       }
     });
     

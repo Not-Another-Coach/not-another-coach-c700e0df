@@ -68,7 +68,7 @@ const validationRules: ValidationRules = {
     message: 'At least one package is required' 
   },
   
-  // Step 7: Profile Management
+  // Step 11: T&Cs and Notifications
   terms_agreed: { 
     required: true, 
     custom: (value) => value === true,
@@ -116,10 +116,13 @@ const stepFieldMapping: Record<number, string[]> = {
   4: ['ideal_client_types', 'coaching_style'], // Fixed: coaching_style (singular) matches database field
   5: ['package_options'],
   6: [], // Discovery calls - handled separately
-  7: ['terms_agreed'],
+  7: [], // Testimonials & Case Studies - handled separately
   8: ['wow_how_i_work', 'wow_what_i_provide', 'wow_client_expectations', 'wow_activities', 'wow_setup_completed'],
-  10: ['image_management'], // Image Management - handled separately
-  13: ['professional_documents'] // Professional documents - handled separately
+  9: [], // Image Management - handled separately
+  10: [], // Working Hours & New Client Availability - handled separately
+  11: ['terms_agreed'], // T&Cs and Notifications
+  12: [], // Professional documents - handled separately
+  13: [] // Verification - handled separately
 };
 
 // Additional fields to ensure they're saved (not validated but tracked for completeness)
@@ -179,13 +182,13 @@ export const useProfileStepValidation = () => {
       return customValidation;
     }
 
-    // Special handling for step 10 (Image Management) - always valid as it's optional
-    if (step === 10) {
-      return true;
+    // Special handling for steps with no required fields
+    if ([6, 7, 9, 10, 13].includes(step)) {
+      return true; // These steps are always valid (optional or handled separately)
     }
     
-    // Special handling for step 13 (Professional Documents)
-    if (step === 13) {
+    // Special handling for step 12 (Professional Documents)
+    if (step === 12) {
       return validateProfessionalDocuments(formData);
     }
     
@@ -231,14 +234,20 @@ export const useProfileStepValidation = () => {
       return 'completed'; // Steps with no required fields are considered completed
     }
 
-    // Step 10 (Image Management) - handled separately in TrainerProfileSetup
+    // Special completion logic for specific steps
     if (step === 10) {
-      return 'not_started'; // This will be overridden by TrainerProfileSetup logic
+      // Working Hours & New Client Availability - check availability_status
+      return formData.availability_status ? 'completed' : 'not_started';
     }
     
-    // Step 13 (Professional Documents) - special completion logic
-    if (step === 13) {
+    if (step === 12) {
+      // Professional Documents - special completion logic
       return getProfessionalDocumentsCompletion(formData);
+    }
+    
+    // Steps 6, 7, 9, 13 are always completed (optional or handled separately)
+    if ([6, 7, 9, 13].includes(step)) {
+      return 'completed';
     }
 
     // Step 8 (Ways of Working) - check both completion flag and activities
