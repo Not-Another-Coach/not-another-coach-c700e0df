@@ -331,8 +331,7 @@ export const useEnhancedTrainerVerification = () => {
 
   // Admin function to update verification check status
   const adminUpdateCheck = useCallback(async (
-    trainerId: string,
-    checkType: VerificationCheck['check_type'],
+    checkId: string,
     status: VerificationCheck['status'],
     adminNotes?: string,
     rejectionReason?: string
@@ -344,19 +343,17 @@ export const useEnhancedTrainerVerification = () => {
 
     try {
       console.log('Calling admin_update_verification_check with:', {
-        trainerId,
-        checkType,
+        checkId,
         status,
         adminNotes,
         rejectionReason
       });
 
       const { data, error } = await supabase.rpc('admin_update_verification_check', {
-        p_trainer_id: trainerId,
-        p_check_type: checkType,
+        p_check_id: checkId,
         p_status: status,
-        p_admin_notes: adminNotes || '',
-        p_rejection_reason: rejectionReason || '',
+        p_admin_notes: adminNotes || null,
+        p_rejection_reason: rejectionReason || null,
       });
 
       if (error) {
@@ -367,7 +364,7 @@ export const useEnhancedTrainerVerification = () => {
       console.log('RPC success:', data);
 
       // Refresh data
-      await fetchVerificationData(trainerId);
+      await fetchVerificationData();
       toast.success(`Verification check ${status === 'verified' ? 'approved' : status}`);
     } catch (error) {
       console.error('Error updating verification check:', error);
