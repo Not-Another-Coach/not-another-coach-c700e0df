@@ -175,6 +175,10 @@ export const AdminLiveActivityFeed = () => {
       });
     }
 
+    // Add recent admin verification actions from alerts table
+    // This will show verification check updates (approved/rejected) as admin activities
+    const sevenDaysAgo = subDays(new Date(), 7);
+
     // Sort by priority (high first) then by date (newest first)
     return activities
       .sort((a, b) => {
