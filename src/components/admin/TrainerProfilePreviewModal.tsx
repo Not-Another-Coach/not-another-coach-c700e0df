@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
+import { ImageGallery } from './ImageGallery';
 import { 
   User, 
   MapPin, 
@@ -18,7 +19,9 @@ import {
   Star,
   Calendar,
   FileText,
-  Award
+  Award,
+  Image,
+  ExternalLink
 } from 'lucide-react';
 
 interface TrainerProfilePreviewModalProps {
@@ -51,12 +54,35 @@ export const TrainerProfilePreviewModal = ({
     try {
       const { data, error } = await supabase
         .from('v_trainers')
-        .select('*')
+        .select(`
+          *,
+          trainer_specializations!inner(specialty:specialties(name)),
+          trainer_qualifications!inner(qualification:popular_qualifications(name)),
+          trainer_training_types!inner(training_type:training_types(name))
+        `)
         .eq('id', trainerId)
         .single();
 
-      if (error) throw error;
-      setProfile(data);
+      if (error) {
+        console.error('Error fetching from v_trainers:', error);
+        // Fallback to basic profile data
+        const { data: basicData, error: basicError } = await supabase
+          .from('profiles')
+          .select(`
+            *,
+            trainer_profiles(*),
+            trainer_specializations(specialties(name)),
+            trainer_qualifications(popular_qualifications(name)),
+            trainer_training_types(training_types(name))
+          `)
+          .eq('id', trainerId)
+          .single();
+          
+        if (basicError) throw basicError;
+        setProfile(basicData);
+      } else {
+        setProfile(data);
+      }
     } catch (error) {
       console.error('Error fetching trainer profile:', error);
       setProfile(null);
@@ -120,6 +146,7 @@ export const TrainerProfilePreviewModal = ({
               <TabsList>
                 <TabsTrigger value="basic">Basic Info</TabsTrigger>
                 <TabsTrigger value="services">Services</TabsTrigger>
+                <TabsTrigger value="images">Images</TabsTrigger>
                 <TabsTrigger value="verification">Verification</TabsTrigger>
                 <TabsTrigger value="packages">Packages</TabsTrigger>
               </TabsList>
@@ -183,39 +210,144 @@ export const TrainerProfilePreviewModal = ({
                     <CardTitle>Services & Expertise</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {profile.specializations && (
+                    {/* Specializations */}
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Specializations</label>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {(profile.trainer_specializations || profile.specializations || []).map((item: any, index: number) => (
+                          <Badge key={index} variant="outline">
+                            {item.specialty?.name || item.name || item}
+                          </Badge>
+                        ))}
+                        {(!profile.trainer_specializations?.length && !profile.specializations?.length) && (
+                          <p className="text-sm text-muted-foreground">No specializations added</p>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Training Types */}
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Training Types</label>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {(profile.trainer_training_types || profile.training_types || []).map((item: any, index: number) => (
+                          <Badge key={index} variant="outline">
+                            {item.training_type?.name || item.name || item}
+                          </Badge>
+                        ))}
+                        {(!profile.trainer_training_types?.length && !profile.training_types?.length) && (
+                          <p className="text-sm text-muted-foreground">No training types added</p>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Qualifications */}
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Qualifications</label>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {(profile.trainer_qualifications || profile.qualifications || []).map((item: any, index: number) => (
+                          <Badge key={index} variant="outline">
+                            <Award className="w-3 h-3 mr-1" />
+                            {item.qualification?.name || item.name || item}
+                          </Badge>
+                        ))}
+                        {(!profile.trainer_qualifications?.length && !profile.qualifications?.length) && (
+                          <p className="text-sm text-muted-foreground">No qualifications added</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Delivery Format */}
+                    {profile.delivery_format && (
                       <div>
-                        <label className="text-sm font-medium text-muted-foreground">Specializations</label>
+                        <label className="text-sm font-medium text-muted-foreground">Delivery Format</label>
                         <div className="flex flex-wrap gap-2 mt-1">
-                          {profile.specializations.map((spec: any, index: number) => (
-                            <Badge key={index} variant="outline">{spec.name}</Badge>
+                          {profile.delivery_format.map((format: string, index: number) => (
+                            <Badge key={index} variant="outline">{format}</Badge>
                           ))}
                         </div>
                       </div>
                     )}
-                    
-                    {profile.training_types && (
+
+                    {/* Coaching Style */}
+                    {profile.coaching_style && (
                       <div>
-                        <label className="text-sm font-medium text-muted-foreground">Training Types</label>
+                        <label className="text-sm font-medium text-muted-foreground">Coaching Style</label>
                         <div className="flex flex-wrap gap-2 mt-1">
-                          {profile.training_types.map((type: any, index: number) => (
-                            <Badge key={index} variant="outline">{type.name}</Badge>
+                          {profile.coaching_style.map((style: string, index: number) => (
+                            <Badge key={index} variant="outline">{style}</Badge>
                           ))}
                         </div>
                       </div>
                     )}
-                    
-                    {profile.qualifications && (
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="images" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Profile Images</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {/* Profile Photo */}
+                    {profile.profile_photo_url && (
                       <div>
-                        <label className="text-sm font-medium text-muted-foreground">Qualifications</label>
-                        <div className="flex flex-wrap gap-2 mt-1">
-                          {profile.qualifications.map((qual: any, index: number) => (
-                            <Badge key={index} variant="outline">
-                              <Award className="w-3 h-3 mr-1" />
-                              {qual.name}
-                            </Badge>
-                          ))}
+                        <label className="text-sm font-medium text-muted-foreground">Profile Photo</label>
+                        <div className="mt-2">
+                          <img
+                            src={profile.profile_photo_url}
+                            alt="Profile"
+                            className="w-32 h-32 rounded-lg object-cover border"
+                          />
                         </div>
+                      </div>
+                    )}
+
+                    {/* Testimonial Images */}
+                    {profile.testimonials && (
+                      <div>
+                        <ImageGallery
+                          images={profile.testimonials
+                            .filter((t: any) => t.image_url)
+                            .map((t: any) => ({
+                              url: t.image_url,
+                              caption: t.text ? `"${t.text.substring(0, 50)}..."` : 'Testimonial image',
+                              type: 'Testimonial'
+                            }))}
+                          title="Testimonial Images"
+                        />
+                      </div>
+                    )}
+
+                    {/* Professional Milestones Images */}
+                    {profile.professional_milestones && (
+                      <div>
+                        <ImageGallery
+                          images={Object.values(profile.professional_milestones)
+                            .filter((milestone: any) => milestone.image_url)
+                            .map((milestone: any) => ({
+                              url: milestone.image_url,
+                              caption: milestone.title || 'Professional milestone',
+                              type: 'Achievement'
+                            }))}
+                          title="Achievement Images"
+                        />
+                      </div>
+                    )}
+
+                    {/* Uploaded Certificates */}
+                    {profile.uploaded_certificates && (
+                      <div>
+                        <ImageGallery
+                          images={Object.values(profile.uploaded_certificates)
+                            .filter((cert: any) => cert.file_url)
+                            .map((cert: any) => ({
+                              url: cert.file_url,
+                              caption: cert.name || 'Certificate',
+                              type: 'Certificate'
+                            }))}
+                          title="Certificates"
+                        />
                       </div>
                     )}
                   </CardContent>
@@ -236,10 +368,31 @@ export const TrainerProfilePreviewModal = ({
                         </Badge>
                       </div>
                       
-                      {profile.admin_review_notes && (
+                      {profile.admin_verification_notes && (
                         <div>
                           <label className="text-sm font-medium text-muted-foreground">Admin Notes</label>
-                          <p className="text-sm bg-muted p-2 rounded">{profile.admin_review_notes}</p>
+                          <p className="text-sm bg-muted p-2 rounded">{profile.admin_verification_notes}</p>
+                        </div>
+                      )}
+
+                      {profile.verification_documents && (
+                        <div>
+                          <label className="text-sm font-medium text-muted-foreground">Verification Documents</label>
+                          <div className="mt-2 space-y-2">
+                            {Object.entries(profile.verification_documents).map(([type, doc]: [string, any]) => (
+                              <div key={type} className="flex items-center justify-between p-2 border rounded">
+                                <span className="text-sm capitalize">{type.replace('_', ' ')}</span>
+                                {doc.file_url && (
+                                  <Button size="sm" variant="outline" asChild>
+                                    <a href={doc.file_url} target="_blank" rel="noopener noreferrer">
+                                      <ExternalLink className="w-3 h-3 mr-1" />
+                                      View
+                                    </a>
+                                  </Button>
+                                )}
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       )}
                     </div>
