@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfileByType } from "@/hooks/useProfileByType";
 import { useDataSynchronization } from "@/hooks/useDataSynchronization";
-import { ClientHeader } from "@/components/ClientHeader";
 import { Button } from "@/components/ui/button";
 import { DataSyncIndicator } from "@/components/ui/data-sync-indicator";
+import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { FloatingMessageButton } from "@/components/FloatingMessageButton";
 import { ClientJourneyVisualization } from "@/components/journey/ClientJourneyVisualization";
 import { ToggleLeft } from "lucide-react";
@@ -30,8 +30,6 @@ export default function MyTrainers() {
 
   return (
     <div className="min-h-screen bg-background px-4 py-6">
-      {profile && <ClientHeader profile={profile} />}
-      
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">My Trainers</h1>
@@ -59,6 +57,7 @@ export default function MyTrainers() {
             isRefreshing={isRefreshing}
             isConnected={true}
           />
+          {profile && <ProfileDropdown profile={profile} />}
         </div>
       </div>
 
