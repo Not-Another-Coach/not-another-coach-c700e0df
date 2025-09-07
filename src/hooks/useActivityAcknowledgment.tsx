@@ -6,7 +6,7 @@ export const useActivityAcknowledgment = () => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const acknowledgeActivity = async (alertId: string, note?: string) => {
+  const markAsRead = async (alertId: string, note?: string) => {
     try {
       setLoading(true);
       
@@ -18,16 +18,16 @@ export const useActivityAcknowledgment = () => {
       if (error) throw error;
 
       toast({
-        title: "Activity acknowledged",
-        description: "The activity has been marked as acknowledged.",
+        title: "Marked as read",
+        description: "The activity has been marked as read.",
       });
 
       return true;
     } catch (error: any) {
-      console.error('Error acknowledging activity:', error);
+      console.error('Error marking activity as read:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to acknowledge activity",
+        description: error.message || "Failed to mark activity as read",
         variant: "destructive"
       });
       return false;
@@ -36,7 +36,7 @@ export const useActivityAcknowledgment = () => {
     }
   };
 
-  const checkIfAcknowledged = async (alertId: string) => {
+  const checkIfRead = async (alertId: string) => {
     try {
       const { data, error } = await supabase.rpc('is_activity_acknowledged', {
         p_alert_id: alertId
@@ -45,14 +45,14 @@ export const useActivityAcknowledgment = () => {
       if (error) throw error;
       return data === true;
     } catch (error) {
-      console.error('Error checking acknowledgment status:', error);
+      console.error('Error checking read status:', error);
       return false;
     }
   };
 
   return {
-    acknowledgeActivity,
-    checkIfAcknowledged,
+    markAsRead,
+    checkIfRead,
     loading
   };
 };

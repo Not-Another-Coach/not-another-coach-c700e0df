@@ -44,10 +44,10 @@ export const LiveActivityFeed = () => {
   }, [alerts, checkIfAcknowledged]);
 
   // Handle acknowledgment
-  const handleAcknowledge = async (alertId: string) => {
-    const success = await acknowledgeActivity(alertId);
+  const handleMarkAsRead = async (alertId: string) => {
+    const success = await markAsRead(alertId);
     if (success) {
-      setAcknowledgedItems(prev => new Set([...prev, alertId]));
+      setReadItems(prev => new Set([...prev, alertId]));
     }
   };
 
