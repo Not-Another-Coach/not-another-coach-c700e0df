@@ -12,7 +12,7 @@ import { DashboardSummary } from "@/components/dashboard/DashboardSummary";
 import { EditPreferencesSection } from "@/components/dashboard/EditPreferencesSection";
 import { ExploreAllTrainers } from "@/components/dashboard/ExploreAllTrainers";
 import { ClientSurveyWidget } from "@/components/dashboard/ClientSurveyWidget";
-import MyTrainers from "./MyTrainers";
+import { MyTrainersSection } from "@/components/dashboard/MyTrainersSection";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { FloatingMessageButton } from "@/components/FloatingMessageButton";
 import { ClientJourneyBreadcrumb } from "@/components/ClientJourneyBreadcrumb";
@@ -276,9 +276,7 @@ export default function ClientDashboard() {
           )}
 
           {!isActiveClient && activeTab === "my-trainers" && (
-            <div className="space-y-6">
-              <MyTrainers />
-            </div>
+            <MyTrainersSection />
           )}
 
           {!isActiveClient && activeTab === "explore" && (
