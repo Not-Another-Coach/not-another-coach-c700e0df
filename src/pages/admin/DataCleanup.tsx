@@ -5,10 +5,7 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 
 export default function DataCleanup() {
   return (
-    <AdminLayout 
-      title="Data Cleanup Tools"
-      description="Clean up test data and interactions"
-    >
+    <AdminLayout>
       <div className="space-y-6">
         <Card>
           <CardHeader>

@@ -78,19 +78,19 @@ export function AdminHeader({
       {/* Navigation Menu */}
       {showNavigation && (
         <div className="border-t">
-          <nav className="flex space-x-1 py-2 overflow-x-auto px-4">
+          <nav className="flex space-x-1 py-3 overflow-x-auto px-4">
             {navigationItems.map((item) => {
               const Icon = item.icon;
               const isActive = window.location.pathname === item.path;
               return (
                 <Button
                   key={item.key}
-                  variant={isActive ? "secondary" : "ghost"}
+                  variant={isActive ? "default" : "ghost"}
                   size="sm"
-                  className="flex items-center gap-2 whitespace-nowrap text-xs px-3 py-2 h-8"
+                  className="flex items-center gap-2 whitespace-nowrap text-sm px-4 py-2 h-9 font-medium"
                   onClick={() => handleNavigation(item.path)}
                 >
-                  <Icon className="h-3 w-3" />
+                  <Icon className="h-4 w-4" />
                   <span className="hidden sm:inline">{item.label}</span>
                 </Button>
               );

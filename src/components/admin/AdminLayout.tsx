@@ -3,24 +3,24 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { Card, CardContent } from "@/components/ui/card";
 import { AdminHeader } from "@/components/AdminHeader";
-import { 
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 
 interface AdminLayoutProps {
   children: ReactNode;
-  title: string;
+  title?: string;
   description?: string;
 }
 
-export function AdminLayout({ children, title, description }: AdminLayoutProps) {
-  const { user } = useAuth();
-  const { isAdmin } = useUserRoles();
+export function AdminLayout({ children }: AdminLayoutProps) {
+  const { user, loading: authLoading } = useAuth();
+  const { isAdmin, loading: rolesLoading } = useUserRoles();
+
+  if (authLoading || rolesLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   if (!user || !isAdmin) {
     return (
@@ -46,31 +46,7 @@ export function AdminLayout({ children, title, description }: AdminLayoutProps) 
       />
 
       <main className="flex-1 container mx-auto px-4 py-6">
-        <div className="space-y-6">
-          {/* Breadcrumb Navigation */}
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/admin">Admin Dashboard</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>{title}</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-
-          {/* Page Header */}
-          <div className="space-y-2">
-            <h1 className="text-2xl font-bold">{title}</h1>
-            {description && (
-              <p className="text-muted-foreground">{description}</p>
-            )}
-          </div>
-
-          {/* Page Content */}
-          {children}
-        </div>
+        {children}
       </main>
     </div>
   );
