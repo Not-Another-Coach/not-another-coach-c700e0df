@@ -6306,17 +6306,14 @@ export type Database = {
       }
       v_trainers: {
         Row: {
+          accuracy_confirmed: boolean | null
+          admin_review_notes: string | null
           admin_verification_notes: string | null
-          availability_schedule: Json | null
           bio: string | null
           calendar_link: string | null
-          certifying_body: string | null
-          client_preferences: string[] | null
           coaching_style: string[] | null
           communication_style: string[] | null
-          created_at: string | null
           delivery_format: string[] | null
-          discovery_call_price: number | null
           first_name: string | null
           free_discovery_call: boolean | null
           hourly_rate: number | null
@@ -6330,7 +6327,9 @@ export type Database = {
           location: string | null
           max_clients: number | null
           messaging_support: boolean | null
-          offers_discovery_call: boolean | null
+          notify_insights: boolean | null
+          notify_messages: boolean | null
+          notify_profile_views: boolean | null
           package_options: Json | null
           philosophy: string | null
           professional_milestones: Json | null
@@ -6339,15 +6338,13 @@ export type Database = {
           profile_published: boolean | null
           profile_setup_completed: boolean | null
           qualifications: string[] | null
-          rating: number | null
           specializations: string[] | null
           tagline: string | null
           terms_agreed: boolean | null
           testimonials: Json | null
-          total_ratings: number | null
           training_types: string[] | null
-          updated_at: string | null
           uploaded_certificates: Json | null
+          user_type: Database["public"]["Enums"]["user_type"] | null
           verification_documents: Json | null
           verification_requested_at: string | null
           verification_status: string | null
@@ -6359,7 +6356,6 @@ export type Database = {
           ways_of_working_tracking: string[] | null
           ways_of_working_what_i_bring: string[] | null
           weekly_programming_only: boolean | null
-          works_bank_holidays: boolean | null
           wow_activities: Json | null
           wow_activity_assignments: Json | null
           wow_client_expectations: string | null
@@ -6367,7 +6363,6 @@ export type Database = {
           wow_setup_completed: boolean | null
           wow_visibility: string | null
           wow_what_i_provide: string | null
-          year_certified: number | null
         }
         Relationships: []
       }
