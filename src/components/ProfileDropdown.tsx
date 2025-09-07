@@ -88,10 +88,7 @@ export const ProfileDropdown = ({ profile }: ProfileDropdownProps) => {
   const handleSignOut = async () => {
     try {
       await signOut();
-      toast({
-        title: "Signed out successfully",
-        description: "You have been logged out.",
-      });
+      // No toast needed - signOut() redirects immediately
     } catch (error) {
       toast({
         title: "Sign out failed",
