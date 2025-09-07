@@ -66,20 +66,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('savedCredentials');
     localStorage.removeItem('rememberMe');
     
+    // Clear the user and session state immediately
+    setUser(null);
+    setSession(null);
+    
     const { error } = await supabase.auth.signOut();
     
     if (error) {
       console.error('Sign out error:', error);
-    } else {
-      // Clear the user and session state immediately
-      setUser(null);
-      setSession(null);
-      
-      // Use a short timeout to ensure state updates are processed
-      setTimeout(() => {
-        window.location.href = '/auth';
-      }, 100);
+      // Even if there's an error (like session missing), still redirect
+      // because the user wants to be logged out
     }
+    
+    // Always redirect to auth page regardless of error
+    setTimeout(() => {
+      window.location.href = '/auth';
+    }, 100);
     
     return { error };
   };
