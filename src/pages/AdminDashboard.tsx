@@ -18,8 +18,7 @@ import {
   BarChart3, 
   MessageCircle, 
   Database, 
-  FileText,
-  User
+  FileText
 } from "lucide-react";
 
 export const AdminDashboard = () => {
@@ -69,10 +68,6 @@ export const AdminDashboard = () => {
               <h1 className="text-xl font-semibold">Admin Dashboard</h1>
             </div>
             <div className="flex items-center gap-4">
-              <Button variant="outline" size="sm" onClick={() => navigate('/trainer-dashboard')}>
-                <User className="h-4 w-4 mr-2" />
-                Trainer View
-              </Button>
               <ProfileDropdown profile={{
                 first_name: user.user_metadata?.first_name || 'Admin',
                 last_name: user.user_metadata?.last_name || 'User',
@@ -113,16 +108,27 @@ export const AdminDashboard = () => {
           </div>
 
           {/* Alert Widgets */}
-          <div className="grid gap-4 md:grid-cols-1">
-            <SpecialtyRequestWidget />
-          </div>
+          <Card>
+            <CardContent className="p-6">
+              <div className="grid gap-4 md:grid-cols-1">
+                <SpecialtyRequestWidget />
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Analytics Dashboard */}
-          <AdminAnalyticsDashboard onNavigate={(tab) => navigate(`/admin/${tab}`)} />
-
+          <Card>
+            <CardContent className="p-6">
+              <AdminAnalyticsDashboard onNavigate={(tab) => navigate(`/admin/${tab}`)} />
+            </CardContent>
+          </Card>
 
           {/* Live Activity Feed */}
-          <AdminLiveActivityFeed />
+          <Card>
+            <CardContent className="p-6">
+              <AdminLiveActivityFeed />
+            </CardContent>
+          </Card>
         </div>
       </main>
     </div>

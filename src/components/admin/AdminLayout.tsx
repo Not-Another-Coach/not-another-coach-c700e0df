@@ -36,16 +36,16 @@ export function AdminLayout({ children, title, description }: AdminLayoutProps) 
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex flex-col min-h-screen w-full bg-background">
       <AdminHeader 
         profile={{
           ...user,
           user_type: 'admin'
         }}
-        showNavigation={false}
+        showNavigation={true}
       />
 
-      <div className="max-w-7xl mx-auto p-6">
+      <main className="flex-1 container mx-auto px-4 py-6">
         <div className="space-y-6">
           {/* Breadcrumb Navigation */}
           <Breadcrumb>
@@ -71,7 +71,7 @@ export function AdminLayout({ children, title, description }: AdminLayoutProps) 
           {/* Page Content */}
           {children}
         </div>
-      </div>
+      </main>
     </div>
   );
 }
