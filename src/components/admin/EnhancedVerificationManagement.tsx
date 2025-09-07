@@ -132,9 +132,17 @@ export const EnhancedVerificationManagement = () => {
   };
 
   const handleSubmitReview = async () => {
-    if (!reviewData.trainerId || !reviewData.checkType) return;
+    console.log('handleSubmitReview called with:', reviewData);
+    
+    if (!reviewData.trainerId || !reviewData.checkType) {
+      console.error('Missing required data:', reviewData);
+      toast.error('Missing required data');
+      return;
+    }
 
     try {
+      console.log('About to call adminUpdateCheck...');
+      
       await adminUpdateCheck(
         reviewData.trainerId,
         reviewData.checkType,
@@ -143,11 +151,15 @@ export const EnhancedVerificationManagement = () => {
         reviewData.rejectionReason
       );
 
+      console.log('adminUpdateCheck completed');
+
       // Refresh both the selected trainer data and all pending checks
       if (selectedTrainer) {
+        console.log('Refreshing selected trainer data...');
         await fetchVerificationData(selectedTrainer);
       }
       
+      console.log('Refreshing all pending checks...');
       // Refresh all pending checks - simplified query
       const { data: pendingData, error } = await supabase
         .from('trainer_verification_checks')
@@ -189,7 +201,7 @@ export const EnhancedVerificationManagement = () => {
       toast.success(`Verification check ${reviewData.status === 'verified' ? 'approved' : 'rejected'} successfully`);
     } catch (error) {
       console.error('Error submitting review:', error);
-      toast.error('Failed to update verification check');
+      toast.error('Failed to update verification check: ' + (error as Error).message);
     }
   };
 
