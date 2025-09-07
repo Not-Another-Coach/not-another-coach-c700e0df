@@ -12,9 +12,10 @@ interface AdminLayoutProps {
 
 export function AdminLayout({ children }: AdminLayoutProps) {
   const { user, loading: authLoading } = useAuth();
-  const { isAdmin, loading: rolesLoading } = useUserRoles();
+  const { isAdmin, adminCheckLoading } = useUserRoles();
 
-  if (authLoading || rolesLoading) {
+  // Show loading while checking auth or admin status
+  if (authLoading || adminCheckLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -22,6 +23,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     );
   }
 
+  // Only show access denied after all checks are complete
   if (!user || !isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center">

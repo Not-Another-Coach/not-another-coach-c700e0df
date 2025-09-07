@@ -46,12 +46,19 @@ export function useUserRoles() {
   const [users, setUsers] = useState<UserWithRoles[]>([]);
   const [loading, setLoading] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [adminCheckLoading, setAdminCheckLoading] = useState(true);
 
-  // Check if current user is admin
+  // Check if current user is admin with optimized loading states
   useEffect(() => {
     const checkAdminStatus = async () => {
-      if (!user) return;
+      if (!user) {
+        setIsAdmin(false);
+        setAdminCheckLoading(false);
+        return;
+      }
 
+      setAdminCheckLoading(true);
+      
       try {
         // Use the security definer function for role checking
         const { data, error } = await supabase
@@ -63,13 +70,14 @@ export function useUserRoles() {
         if (error) {
           console.error('Error checking admin role:', error);
           setIsAdmin(false);
-          return;
+        } else {
+          setIsAdmin(!!data);
         }
-
-        setIsAdmin(!!data);
       } catch (error) {
         console.error('Error in admin check:', error);
         setIsAdmin(false);
+      } finally {
+        setAdminCheckLoading(false);
       }
     };
 
@@ -370,6 +378,7 @@ export function useUserRoles() {
     users,
     loading,
     isAdmin,
+    adminCheckLoading,
     fetchUsers,
     addRole,
     removeRole,
