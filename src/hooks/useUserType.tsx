@@ -17,11 +17,13 @@ export function useUserType(): UserTypeInfo {
 
   const fetchUserType = useCallback(async () => {
     if (!user) {
+      console.log('useUserType: No user, setting to null');
       setUserType(null);
       setLoading(false);
       return;
     }
 
+    console.log('useUserType: Fetching user type for user:', user.id);
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -30,15 +32,17 @@ export function useUserType(): UserTypeInfo {
         .single();
 
       if (error) {
-        console.error('Error fetching user type:', error);
+        console.error('useUserType: Error fetching user type:', error);
         setUserType(null);
       } else {
+        console.log('useUserType: Successfully fetched user type:', data.user_type);
         setUserType(data.user_type as 'client' | 'trainer' | 'admin');
       }
     } catch (error) {
-      console.error('Error fetching user type:', error);
+      console.error('useUserType: Exception fetching user type:', error);
       setUserType(null);
     } finally {
+      console.log('useUserType: Setting loading to false');
       setLoading(false);
     }
   }, [user]);

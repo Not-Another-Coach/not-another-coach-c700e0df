@@ -22,6 +22,7 @@ function useAdminProfile() {
   const fetchProfile = useCallback(async () => {
     if (!user) return;
 
+    console.log('useAdminProfile: Fetching admin profile for user:', user.id);
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -31,13 +32,15 @@ function useAdminProfile() {
         .single();
 
       if (error) {
-        console.error('Error fetching admin profile:', error);
+        console.error('useAdminProfile: Error fetching admin profile:', error);
       } else {
+        console.log('useAdminProfile: Successfully fetched admin profile:', data);
         setProfile(data as BaseSharedProfile);
       }
     } catch (error) {
-      console.error('Error fetching admin profile:', error);
+      console.error('useAdminProfile: Exception fetching admin profile:', error);
     } finally {
+      console.log('useAdminProfile: Setting loading to false');
       setLoading(false);
     }
   }, [user]);
