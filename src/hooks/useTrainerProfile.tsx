@@ -129,11 +129,11 @@ export function useTrainerProfile() {
           wow_activities: (data as any)?.wow_activities || null,
           wow_activity_assignments: (data as any)?.wow_activity_assignments || null,
           wow_visibility: (data as any)?.wow_visibility || null,
-          wow_setup_completed: (data as any)?.wow_setup_completed || null,
-          accuracy_confirmed: (data as any)?.accuracy_confirmed || null,
-          notify_profile_views: (data as any)?.notify_profile_views || null,
-          notify_messages: (data as any)?.notify_messages || null,
-          notify_insights: (data as any)?.notify_insights || null,
+          wow_setup_completed: (data as any)?.wow_setup_completed ?? null,
+          accuracy_confirmed: (data as any)?.accuracy_confirmed ?? null,
+          notify_profile_views: (data as any)?.notify_profile_views ?? null,
+          notify_messages: (data as any)?.notify_messages ?? null,
+          notify_insights: (data as any)?.notify_insights ?? null,
         } as TrainerProfile;
         setProfile(profileWithDefaults);
       }
