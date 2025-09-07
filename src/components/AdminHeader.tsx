@@ -31,13 +31,22 @@ export function AdminHeader({
   const { users } = useUserRoles();
 
   const navigationItems = [
+    // High Priority
     { key: "dashboard", label: "Dashboard", icon: Home, path: "/admin" },
-    { key: "users", label: "User Management", icon: Users, path: "/admin/users" },
+    { key: "users", label: "Users", icon: Users, path: "/admin/users" },
     { key: "verification", label: "Verification", icon: Shield, path: "/admin/verification" },
     { key: "publications", label: "Publications", icon: FileText, path: "/admin/publications" },
+    
+    // Medium Priority
     { key: "specialties", label: "Specialties", icon: Database, path: "/admin/specialties" },
     { key: "qualifications", label: "Qualifications", icon: Briefcase, path: "/admin/qualifications" },
-    { key: "analytics", label: "Analytics", icon: BarChart3, path: "/admin/specialty-analytics" }
+    { key: "analytics", label: "Analytics", icon: BarChart3, path: "/admin/specialty-analytics" },
+    
+    // Administrative Functions
+    { key: "knowledge-base", label: "Knowledge Base", icon: FileText, path: "/admin/knowledge-base" },
+    { key: "templates", label: "Templates", icon: Settings, path: "/admin/templates" },
+    { key: "feedback-builder", label: "Feedback", icon: Settings, path: "/admin/feedback-builder" },
+    { key: "data-cleanup", label: "Cleanup", icon: Settings, path: "/admin/data-cleanup" }
   ];
 
   const handleNavigation = (path: string) => {
@@ -54,9 +63,6 @@ export function AdminHeader({
             <h1 className="text-xl font-bold">
               Admin Control Center
             </h1>
-            <Badge variant="secondary" className="text-xs">
-              System Administrator
-            </Badge>
             <Badge variant="outline" className="text-xs">
               {users?.length || 0} Total Users
             </Badge>
