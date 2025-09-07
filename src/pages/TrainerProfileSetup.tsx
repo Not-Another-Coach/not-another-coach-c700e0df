@@ -136,9 +136,12 @@ const TrainerProfileSetup = () => {
     wow_visibility: "public",
     wow_setup_completed: false,
     
-    // Profile Management - this exists in TrainerProfile
-    terms_agreed: false,
-    accuracy_confirmed: false,
+  // Profile Management - this exists in TrainerProfile
+  terms_agreed: false,
+  accuracy_confirmed: false,
+  notify_profile_views: false,
+  notify_messages: true,
+  notify_insights: true,
     max_clients: null as number | null,
   });
 

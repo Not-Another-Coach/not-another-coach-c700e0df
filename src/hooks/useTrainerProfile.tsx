@@ -169,8 +169,8 @@ export function useTrainerProfile() {
         'ideal_client_personality', 'ideal_client_types', 'video_checkins', 'messaging_support', 
         'weekly_programming_only', 'ways_of_working_onboarding', 'ways_of_working_first_week',
         'ways_of_working_ongoing', 'ways_of_working_tracking', 'ways_of_working_expectations',
-        'ways_of_working_what_i_bring', 'profile_setup_completed', 'terms_agreed', 'how_started', 'philosophy', 
-        'professional_milestones'
+        'ways_of_working_what_i_bring', 'profile_setup_completed', 'terms_agreed', 'accuracy_confirmed', 'how_started', 'philosophy', 
+        'professional_milestones', 'notify_profile_views', 'notify_messages', 'notify_insights'
       ];
 
       Object.keys(updates).forEach(key => {
