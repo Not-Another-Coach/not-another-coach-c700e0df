@@ -6455,6 +6455,10 @@ export type Database = {
         Args: { p_changelog?: string; p_template_id: string }
         Returns: string
       }
+      current_user_has_role: {
+        Args: { _role: Database["public"]["Enums"]["app_role"] }
+        Returns: boolean
+      }
       end_waitlist_exclusive_period: {
         Args: { p_coach_id: string }
         Returns: undefined
@@ -6602,6 +6606,10 @@ export type Database = {
         Args: { p_client_id: string; p_trainer_id: string }
         Returns: boolean
       }
+      is_current_user_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       list_users_minimal_admin: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -6745,6 +6753,18 @@ export type Database = {
           p_current_step: string
           p_state_data?: Json
         }
+        Returns: boolean
+      }
+      user_in_conversation: {
+        Args: { conversation_id: string }
+        Returns: boolean
+      }
+      user_in_target_audience: {
+        Args: { audience_json: Json }
+        Returns: boolean
+      }
+      user_owns_template: {
+        Args: { template_id: string }
         Returns: boolean
       }
     }
