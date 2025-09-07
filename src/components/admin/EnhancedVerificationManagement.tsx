@@ -18,7 +18,6 @@ interface TrainerProfile {
   id: string;
   first_name?: string;
   last_name?: string;
-  email?: string;
   verification_status?: string;
   user_type: string;
 }
@@ -80,7 +79,7 @@ export const EnhancedVerificationManagement = () => {
           .from('trainer_verification_checks')
           .select(`
             *,
-            profiles!inner(id, first_name, last_name, email)
+            profiles!inner(id, first_name, last_name)
           `)
           .eq('status', 'pending')
           .order('created_at', { ascending: false });
@@ -135,7 +134,7 @@ export const EnhancedVerificationManagement = () => {
         .from('trainer_verification_checks')
         .select(`
           *,
-          profiles!inner(id, first_name, last_name, email)
+          profiles!inner(id, first_name, last_name)
         `)
         .eq('status', 'pending')
         .order('created_at', { ascending: false });
