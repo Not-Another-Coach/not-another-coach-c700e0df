@@ -78,10 +78,25 @@ export const useProfessionalDocumentsState = () => {
     setSavingStatus(prev => ({ ...prev, [checkType]: true }));
     
     try {
-      // Save as draft by submitting with draft_status
-      await submitVerificationCheck(checkType as any, formData[checkType]);
+      // Save as draft - don't change status to pending
+      await submitVerificationCheck(checkType as any, formData[checkType], true);
     } catch (error) {
       console.error('Error saving draft:', error);
+    } finally {
+      setSavingStatus(prev => ({ ...prev, [checkType]: false }));
+    }
+  };
+
+  const submitForReview = async (checkType: string) => {
+    if (!formData[checkType]) return;
+    
+    setSavingStatus(prev => ({ ...prev, [checkType]: true }));
+    
+    try {
+      // Submit for review - sets status to pending
+      await submitVerificationCheck(checkType as any, formData[checkType], false);
+    } catch (error) {
+      console.error('Error submitting for review:', error);
     } finally {
       setSavingStatus(prev => ({ ...prev, [checkType]: false }));
     }
@@ -142,6 +157,7 @@ export const useProfessionalDocumentsState = () => {
     isAnyFieldFilled,
     getCompletionStatus,
     saveDraft,
+    submitForReview,
     canSubmitForReview
   };
 };

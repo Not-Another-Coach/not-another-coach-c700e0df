@@ -179,7 +179,8 @@ export const useEnhancedTrainerVerification = () => {
   // Submit verification check
   const submitVerificationCheck = useCallback(async (
     checkType: string,
-    checkData: any
+    checkData: any,
+    isDraft: boolean = false
   ) => {
     if (!user) {
       throw new Error('User not authenticated');
@@ -228,8 +229,14 @@ export const useEnhancedTrainerVerification = () => {
       const submitData: any = {
         trainer_id: user.id,
         check_type: checkType as any,
-        status: checkData.not_applicable ? 'not_applicable' : 'pending'
+        draft_status: isDraft ? 'draft' : 'submitted'
       };
+
+      // Only set status to pending for actual submissions, not drafts
+      if (!isDraft) {
+        submitData.status = checkData.not_applicable ? 'not_applicable' : 'pending';
+        submitData.submitted_at = new Date().toISOString();
+      }
 
       // Add optional fields only if they have values
       if (checkData.provider) submitData.provider = checkData.provider;

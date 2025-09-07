@@ -62,7 +62,8 @@ export const ProfessionalDocumentsSection = () => {
     updateFormData,
     updateNotApplicable,
     isAnyFieldFilled,
-    saveDraft
+    saveDraft,
+    submitForReview
   } = useProfessionalDocumentsState();
 
   const { 
@@ -95,6 +96,47 @@ export const ProfessionalDocumentsSection = () => {
     toast({
       title: "Draft Saved",
       description: `Your ${CheckTypeConfig[checkType as keyof typeof CheckTypeConfig].title} draft has been saved.`,
+    });
+  };
+
+  const handleSubmitForReview = async (checkType: string) => {
+    const data = formData[checkType];
+    const config = CheckTypeConfig[checkType as keyof typeof CheckTypeConfig];
+    
+    // Validate all required fields are present
+    if (!notApplicable[checkType]) {
+      const missingFields = config.requiredFields.filter(field => {
+        const value = data?.[field as keyof DocumentFormData];
+        return !value || (typeof value === 'string' && value.trim() === '');
+      });
+      
+      if (missingFields.length > 0) {
+        toast({
+          variant: "destructive",
+          title: "Missing Required Fields",
+          description: `Please fill in all required fields: ${missingFields.join(', ')}`,
+        });
+        return;
+      }
+    }
+
+    await submitForReview(checkType);
+    
+    toast({
+      title: "Submitted for Review",
+      description: `Your ${config.title} has been submitted for admin review.`,
+    });
+  };
+
+  const isReadyForSubmission = (checkType: string) => {
+    const data = formData[checkType];
+    const config = CheckTypeConfig[checkType as keyof typeof CheckTypeConfig];
+    
+    if (notApplicable[checkType]) return true;
+    
+    return config.requiredFields.every(field => {
+      const value = data?.[field as keyof DocumentFormData];
+      return value && (typeof value !== 'string' || value.trim() !== '');
     });
   };
 
@@ -274,34 +316,56 @@ export const ProfessionalDocumentsSection = () => {
                   );
                 })}
 
-                <Button
-                  onClick={() => handleSaveDraft(checkType)}
-                  disabled={!canSave || savingStatus[checkType]}
-                  className="w-full"
-                  variant="outline"
-                >
-                  {savingStatus[checkType] ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Saving...
-                    </>
-                  ) : finalDisplayStatus === 'rejected' && hasFilledFields ? (
-                    <>
-                      <Save className="mr-2 h-4 w-4" />
-                      Resubmit
-                    </>
-                  ) : isExpiringSoon && hasFilledFields ? (
-                    <>
-                      <Save className="mr-2 h-4 w-4" />
-                      Submit Renewal
-                    </>
-                  ) : (
-                    <>
-                      <Save className="mr-2 h-4 w-4" />
-                      Save Draft
-                    </>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => handleSaveDraft(checkType)}
+                    disabled={!canSave || savingStatus[checkType]}
+                    className="flex-1"
+                    variant="outline"
+                  >
+                    {savingStatus[checkType] ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="mr-2 h-4 w-4" />
+                        Save Draft
+                      </>
+                    )}
+                  </Button>
+                  
+                  {isReadyForSubmission(checkType) && (
+                    <Button
+                      onClick={() => handleSubmitForReview(checkType)}
+                      disabled={savingStatus[checkType]}
+                      className="flex-1"
+                    >
+                      {savingStatus[checkType] ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Submitting...
+                        </>
+                      ) : finalDisplayStatus === 'rejected' ? (
+                        <>
+                          <Save className="mr-2 h-4 w-4" />
+                          Resubmit
+                        </>
+                      ) : isExpiringSoon ? (
+                        <>
+                          <Save className="mr-2 h-4 w-4" />
+                          Submit Renewal
+                        </>
+                      ) : (
+                        <>
+                          <Save className="mr-2 h-4 w-4" />
+                          Submit for Review
+                        </>
+                      )}
+                    </Button>
                   )}
-                </Button>
+                </div>
               </div>
             )}
           </Card>
@@ -313,9 +377,9 @@ export const ProfessionalDocumentsSection = () => {
         <div className="p-6">
           <h4 className="font-medium mb-2 text-blue-900">Document Upload Guidelines</h4>
           <ul className="text-sm text-blue-800 space-y-1">
-            <li>• Save your documents as drafts as you work on them</li>
-            <li>• All fields become mandatory once you start filling any field</li>
-            <li>• Use the verification overview to submit all documents for admin review</li>
+            <li>• <strong>Save Draft:</strong> Save your progress without validation - you can save partial information</li>
+            <li>• <strong>Submit for Review:</strong> Submit complete documents (all fields + file upload required)</li>
+            <li>• All fields become mandatory when submitting for review</li>
             <li>• Accepted formats: PDF, JPG, PNG, DOC, DOCX (max 10MB per file)</li>
             <li>• Ensure all documents are current and clearly readable</li>
             <li>• Processing time: 2-5 business days after submission</li>
