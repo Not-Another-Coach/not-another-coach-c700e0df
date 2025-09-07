@@ -186,6 +186,40 @@ export const useEnhancedTrainerVerification = () => {
     }
 
     try {
+      // Check if there's an existing check to preserve audit trail
+      const existingCheck = checks.find(c => c.check_type === checkType);
+      
+      // If resubmitting after rejection, preserve audit trail
+      if (existingCheck && existingCheck.status === 'rejected') {
+        // Create audit log entry for the previous version before overwriting
+        await supabase
+          .from('trainer_verification_audit_log')
+          .insert({
+            trainer_id: user.id,
+            check_id: existingCheck.id,
+            actor: 'trainer',
+            actor_id: user.id,
+            action: 'upload',
+            previous_status: existingCheck.status,
+            new_status: 'pending',
+            reason: 'Resubmission after rejection',
+            metadata: {
+              previous_data: {
+                provider: existingCheck.provider,
+                member_id: existingCheck.member_id,
+                certificate_id: existingCheck.certificate_id,
+                policy_number: existingCheck.policy_number,
+                coverage_amount: existingCheck.coverage_amount,
+                issue_date: existingCheck.issue_date,
+                expiry_date: existingCheck.expiry_date,
+                evidence_file_url: existingCheck.evidence_file_url,
+                rejection_reason: existingCheck.rejection_reason,
+                admin_notes: existingCheck.admin_notes
+              }
+            }
+          });
+      }
+
       // Prepare the data for submission
       const submitData: any = {
         trainer_id: user.id,
@@ -329,6 +363,18 @@ export const useEnhancedTrainerVerification = () => {
     }
   }, [user, fetchVerificationData]);
 
+  // Check if certificate is expiring within 14 days
+  const isExpiringWithin14Days = useCallback((expiryDate?: string) => {
+    if (!expiryDate) return false;
+    
+    const today = new Date();
+    const expiry = new Date(expiryDate);
+    const fourteenDaysFromNow = new Date();
+    fourteenDaysFromNow.setDate(today.getDate() + 14);
+    
+    return expiry <= fourteenDaysFromNow && expiry >= today;
+  }, []);
+
   return {
     loading,
     overview,
@@ -342,5 +388,6 @@ export const useEnhancedTrainerVerification = () => {
     adminUpdateCheck,
     getCheckByType,
     getVerificationBadgeStatus,
+    isExpiringWithin14Days,
   };
 };

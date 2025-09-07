@@ -67,7 +67,8 @@ export const ProfessionalDocumentsSection = () => {
 
   const { 
     checks, 
-    uploadDocument 
+    uploadDocument,
+    isExpiringWithin14Days
   } = useEnhancedTrainerVerification();
   
   const [uploadingFiles, setUploadingFiles] = useState<Record<string, boolean>>({});
@@ -114,6 +115,8 @@ export const ProfessionalDocumentsSection = () => {
         const hasFilledFields = isAnyFieldFilled(checkType);
         const canSave = hasFilledFields || isNotApplicable;
         const isSubmitted = draftStatus === 'submitted' && finalDisplayStatus !== 'rejected' && finalDisplayStatus !== 'verified';
+        const isExpiringSoon = check?.expiry_date ? isExpiringWithin14Days(check.expiry_date) : false;
+        const isVerifiedAndNotExpiring = finalDisplayStatus === 'verified' && !isExpiringSoon;
 
         // Handle draft state
         if (draftStatus === 'draft' && hasFilledFields) {
@@ -152,10 +155,19 @@ export const ProfessionalDocumentsSection = () => {
             </div>
 
             {/* Submission lock notice */}
-            {isSubmitted && (
+            {isSubmitted && finalDisplayStatus !== 'verified' && (
               <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
                 <p className="text-sm text-amber-800 font-medium">
                   This document has been submitted for admin review and cannot be edited.
+                </p>
+              </div>
+            )}
+
+            {/* Expiry warning notice */}
+            {isExpiringSoon && (
+              <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                <p className="text-sm text-orange-800 font-medium">
+                  ⚠️ This certificate expires within 14 days. Please upload renewal documentation.
                 </p>
               </div>
             )}
@@ -200,8 +212,8 @@ export const ProfessionalDocumentsSection = () => {
               </div>
             )}
 
-            {/* Form for editing (only if not submitted or rejected) */}
-            {!isNotApplicable && (!isSubmitted || finalDisplayStatus === 'rejected') && (
+            {/* Form for editing (only if not submitted, rejected, or needs renewal) */}
+            {!isNotApplicable && (!isSubmitted || finalDisplayStatus === 'rejected' || isExpiringSoon) && (
               <div className="space-y-4">
                 {config.requiredFields.map((field) => {
                   const fieldKey = field as keyof DocumentFormData;
@@ -277,6 +289,11 @@ export const ProfessionalDocumentsSection = () => {
                     <>
                       <Save className="mr-2 h-4 w-4" />
                       Resubmit
+                    </>
+                  ) : isExpiringSoon && hasFilledFields ? (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Submit Renewal
                     </>
                   ) : (
                     <>
