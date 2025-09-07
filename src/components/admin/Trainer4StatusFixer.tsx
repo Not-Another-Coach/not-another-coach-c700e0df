@@ -26,8 +26,9 @@ export const Trainer4StatusFixer = () => {
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">
-          This utility checks and fixes Trainer 4's profile publication status. 
-          It will create a publication request if needed and auto-publish if fully verified.
+          This utility verifies Trainer 4's status and syncs verification fields.
+          It will check that verification_status and is_verified are consistent,
+          and auto-publish if verified with approved publication.
         </p>
         
         <div className="flex items-center gap-2">
@@ -44,7 +45,7 @@ export const Trainer4StatusFixer = () => {
             ) : (
               <>
                 <CheckCircle className="h-4 w-4 mr-2" />
-                Fix Trainer 4 Status
+                Fix Trainer Status & Sync Fields
               </>
             )}
           </Button>

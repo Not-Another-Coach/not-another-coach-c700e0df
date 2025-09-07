@@ -15,7 +15,7 @@ export const VerificationBadgeIntegration: React.FC<VerificationBadgeIntegration
   size = 'sm',
   className
 }) => {
-  if (!trainer.verification_status || trainer.verification_status === 'not_verified') {
+  if (!trainer.verification_status || trainer.verification_status === 'pending') {
     return null;
   }
 

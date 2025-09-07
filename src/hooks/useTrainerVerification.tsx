@@ -27,8 +27,8 @@ interface TrainerProfile {
   first_name: string;
   last_name: string;
   email: string;
-  is_verified: boolean;
-  verification_status?: 'pending' | 'verified' | 'rejected'; // Optional for compatibility
+  verification_status: 'pending' | 'verified' | 'rejected';
+  is_verified: boolean; // Optional for compatibility - synced with verification_status
   verification_requested_at?: string; // Optional for compatibility  
   verification_documents?: any; // Optional for compatibility
   admin_review_notes?: string; // Optional for compatibility
@@ -113,6 +113,7 @@ export function useTrainerVerification() {
           id,
           first_name,
           last_name,
+          verification_status,
           is_verified
         `)
         .order('id', { ascending: false }); // Use id instead of created_at since created_at doesn't exist in v_trainers
@@ -124,6 +125,7 @@ export function useTrainerVerification() {
       
       const profilesWithEmails = (data || []).map(profile => ({
         ...profile,
+        verification_status: (profile.verification_status || 'pending') as 'pending' | 'verified' | 'rejected',
         email: emails?.find((e: any) => e.user_id === profile.id)?.email || 'N/A'
       }));
 

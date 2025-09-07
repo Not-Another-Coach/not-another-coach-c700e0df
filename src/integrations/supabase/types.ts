@@ -6730,6 +6730,10 @@ export type Database = {
         Args: { p_duration_days?: number; p_reason: string; p_user_id: string }
         Returns: undefined
       }
+      sync_verification_fields: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       sync_ways_of_working_to_activities: {
         Args: {
           p_items: Json
