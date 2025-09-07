@@ -4,6 +4,7 @@ import { MessageCircle } from 'lucide-react';
 import { useConversations } from '@/hooks/useConversations';
 import { useShortlistedTrainers } from '@/hooks/useShortlistedTrainers';
 import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 interface StartConversationButtonProps {
@@ -26,6 +27,7 @@ export function StartConversationButton({
   const { user } = useAuth();
   const { createConversation, conversations } = useConversations();
   const { isShortlisted } = useShortlistedTrainers();
+  const navigate = useNavigate();
 
   // Check if conversation already exists
   const existingConversation = conversations.find(conv => 
@@ -62,6 +64,9 @@ export function StartConversationButton({
     }
     
     toast.success(`Conversation started with ${trainerName || 'trainer'}!`);
+    
+    // Navigate to messaging page after successful conversation creation
+    navigate('/messaging');
   };
 
   // Don't show button if conversation already exists
