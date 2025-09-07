@@ -22,32 +22,32 @@ export const LiveActivityFeed = () => {
   const { isTrainer } = useUserTypeChecks();
   const { markAsRead, checkIfRead, loading: acknowledgmentLoading } = useActivityAcknowledgment();
 
-  const [showFilter, setShowFilter] = useState('unacknowledged'); // 'all', 'unacknowledged', 'acknowledged'
-  const [acknowledgedItems, setAcknowledgedItems] = useState<Set<string>>(new Set());
+  const [showFilter, setShowFilter] = useState('unread'); // 'all', 'unread', 'read'
+  const [readItems, setReadItems] = useState<Set<string>>(new Set());
 
-  // Check acknowledgment status for activities
+  // Check read status for activities
   useEffect(() => {
-    const checkAcknowledgments = async () => {
+    const checkReadStatus = async () => {
       if (!alerts.length) return;
       
-      const acknowledged = new Set<string>();
+      const readStatusSet = new Set<string>();
       for (const alert of alerts) {
-        const isAcknowledged = await checkIfRead(alert.id);
-        if (isAcknowledged) {
-          acknowledged.add(alert.id);
+        const isRead = await checkIfRead(alert.id);
+        if (isRead) {
+          readStatusSet.add(alert.id);
         }
       }
-      setAcknowledgedItems(acknowledged);
+      setReadItems(readStatusSet);
     };
 
-    checkAcknowledgments();
+    checkReadStatus();
   }, [alerts, checkIfRead]);
 
-  // Handle acknowledgment
+  // Handle marking as read
   const handleMarkAsRead = async (alertId: string) => {
     const success = await markAsRead(alertId);
     if (success) {
-      setAcknowledgedItems(prev => new Set([...prev, alertId]));
+      setReadItems(prev => new Set([...prev, alertId]));
     }
   };
 
@@ -170,15 +170,15 @@ export const LiveActivityFeed = () => {
 
   const combinedActivities = createCombinedActivities();
 
-  // Filter activities based on acknowledgment status
+  // Filter activities based on read status
   const filteredActivities = combinedActivities.filter(activity => {
-    const isAcknowledged = acknowledgedItems.has(activity.id);
+    const isRead = readItems.has(activity.id);
     
     switch (showFilter) {
-      case 'acknowledged':
-        return isAcknowledged;
-      case 'unacknowledged':
-        return !isAcknowledged;
+      case 'read':
+        return isRead;
+      case 'unread':
+        return !isRead;
       case 'all':
       default:
         return true;
@@ -222,15 +222,15 @@ export const LiveActivityFeed = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setShowFilter('unacknowledged')}>
+              <DropdownMenuItem onClick={() => setShowFilter('unread')}>
                 <EyeOff className="w-4 h-4 mr-2" />
-                Unacknowledged
-                {showFilter === 'unacknowledged' && <Check className="w-4 h-4 ml-auto" />}
+                Unread
+                {showFilter === 'unread' && <Check className="w-4 h-4 ml-auto" />}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setShowFilter('acknowledged')}>
+              <DropdownMenuItem onClick={() => setShowFilter('read')}>
                 <Eye className="w-4 h-4 mr-2" />
-                Acknowledged
-                {showFilter === 'acknowledged' && <Check className="w-4 h-4 ml-auto" />}
+                Read
+                {showFilter === 'read' && <Check className="w-4 h-4 ml-auto" />}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setShowFilter('all')}>
                 <FileText className="w-4 h-4 mr-2" />
@@ -265,9 +265,9 @@ export const LiveActivityFeed = () => {
           </div>
         ) : (
           filteredActivities.map((alert) => {
-            const isAcknowledged = acknowledgedItems.has(alert.id);
+            const isRead = readItems.has(alert.id);
             return (
-              <div key={alert.id} className={`flex items-start gap-3 p-3 rounded-lg ${alert.color} ${isAcknowledged ? 'opacity-60' : ''}`}>
+              <div key={alert.id} className={`flex items-start gap-3 p-3 rounded-lg ${alert.color} ${isRead ? 'opacity-60' : ''}`}>
                 <div className="w-8 h-8 rounded-full bg-white/50 flex items-center justify-center flex-shrink-0">
                   {alert.icon}
                 </div>
@@ -296,21 +296,22 @@ export const LiveActivityFeed = () => {
                         Verification
                       </Badge>
                     )}
-                    {isAcknowledged && (
+                    {isRead && (
                       <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
                         <CheckCircle className="w-3 h-3 mr-1" />
-                        Acknowledged
+                        Read
                       </Badge>
                     )}
                   </div>
                 </div>
-                {!isAcknowledged && (
+                {!isRead && (
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => handleMarkAsRead(alert.id)}
                     disabled={acknowledgmentLoading}
                     className="ml-2 opacity-60 hover:opacity-100"
+                    title="Mark as read"
                   >
                     <Check className="w-4 h-4" />
                   </Button>
