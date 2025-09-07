@@ -59,23 +59,9 @@ export const EnhancedVerificationManagement = () => {
     rejectionReason: '',
   });
 
-  // Debug logging
-  console.log('EnhancedVerificationManagement render:', {
-    isAdmin,
-    loading,
-    allPendingChecksLength: allPendingChecks.length,
-    trainersLength: trainers.length,
-  });
-
   // Fetch all trainers and pending checks
   useEffect(() => {
     const fetchTrainersAndPendingChecks = async () => {
-      if (!isAdmin) {
-        console.log('Not admin, skipping fetch');
-        return;
-      }
-
-      console.log('Starting to fetch trainers and pending checks...');
       try {
         // Fetch trainers
         const { data: trainersData } = await supabase
@@ -84,7 +70,6 @@ export const EnhancedVerificationManagement = () => {
           .eq('user_type', 'trainer')
           .order('first_name');
 
-        console.log('Trainers data:', trainersData);
         setTrainers(trainersData || []);
 
         // Fetch all pending verification checks
@@ -97,8 +82,11 @@ export const EnhancedVerificationManagement = () => {
           .eq('status', 'pending')
           .order('created_at', { ascending: false });
 
-        console.log('Pending checks query result:', { data: pendingData, error });
-        setAllPendingChecks(pendingData || []);
+        if (error) {
+          console.error('Error fetching pending checks:', error);
+        } else {
+          setAllPendingChecks(pendingData || []);
+        }
       } catch (error) {
         console.error('Error fetching data:', error);
         toast.error('Failed to load verification data');
@@ -106,7 +94,7 @@ export const EnhancedVerificationManagement = () => {
     };
 
     fetchTrainersAndPendingChecks();
-  }, [isAdmin]);
+  }, []);
 
   // Fetch verification data when trainer is selected
   useEffect(() => {
