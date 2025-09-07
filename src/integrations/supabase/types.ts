@@ -6497,6 +6497,21 @@ export type Database = {
           usage_count: number
         }[]
       }
+      get_admin_verification_activities: {
+        Args: { days_back?: number }
+        Returns: {
+          activity_type: string
+          check_type: string
+          created_at: string
+          days_until_expiry: number
+          expires_at: string
+          id: string
+          priority: string
+          status: string
+          trainer_id: string
+          trainer_name: string
+        }[]
+      }
       get_client_journey_stage: {
         Args: { p_client_id: string }
         Returns: string

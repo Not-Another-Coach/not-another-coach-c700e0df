@@ -2,12 +2,13 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Filter, Plus, MessageSquare, UserPlus, FileText, Settings, CheckCircle, XCircle, Target, Users, FileCheck } from 'lucide-react';
+import { Filter, Plus, MessageSquare, UserPlus, FileText, Settings, CheckCircle, XCircle, Target, Users, FileCheck, AlertTriangle, Clock } from 'lucide-react';
 import { useTrainerCustomRequests } from '@/hooks/useQualifications';
 import { useTrainerCustomSpecialtyRequests } from '@/hooks/useSpecialties';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { useTrainerVerification } from '@/hooks/useTrainerVerification';
 import { useAdminProfilePublication } from '@/hooks/useProfilePublication';
+import { useAdminVerificationActivities } from '@/hooks/useAdminVerificationActivities';
 import { format, isToday, isYesterday, subDays } from 'date-fns';
 
 export const AdminLiveActivityFeed = () => {
@@ -16,6 +17,7 @@ export const AdminLiveActivityFeed = () => {
   const { users, loading: usersLoading } = useUserRoles();
   const { verificationRequests } = useTrainerVerification();
   const { requests: publicationRequests } = useAdminProfilePublication();
+  const { activities: verificationActivities } = useAdminVerificationActivities();
 
   const createAdminActivities = () => {
     const activities: any[] = [];
@@ -122,6 +124,53 @@ export const AdminLiveActivityFeed = () => {
           created_at: req.created_at || req.requested_at,
           type: 'publication',
           priority: 'high'
+        });
+      });
+    }
+
+    // Add verification activities (admin actions, expiring/expired certificates)
+    if (verificationActivities) {
+      verificationActivities.forEach(activity => {
+        let activityTitle, activityDescription, activityIcon, activityColor;
+        
+        switch (activity.activity_type) {
+          case 'admin_verification_action':
+            activityTitle = `Verification ${activity.status === 'verified' ? 'Approved' : 'Rejected'}`;
+            activityDescription = `${activity.trainer_name}'s ${activity.check_type.replace('_', ' ')} verification`;
+            activityIcon = activity.status === 'verified' ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />;
+            activityColor = activity.status === 'verified' 
+              ? 'bg-gradient-to-r from-green-50 to-green-100 border border-green-200'
+              : 'bg-gradient-to-r from-red-50 to-red-100 border border-red-200';
+            break;
+          case 'certificate_expiring':
+            activityTitle = 'Certificate Expiring Soon';
+            activityDescription = `${activity.trainer_name}'s ${activity.check_type.replace('_', ' ')} expires in ${activity.days_until_expiry} days`;
+            activityIcon = <AlertTriangle className="h-4 w-4" />;
+            activityColor = activity.days_until_expiry && activity.days_until_expiry <= 7 
+              ? 'bg-gradient-to-r from-red-50 to-red-100 border border-red-200'
+              : 'bg-gradient-to-r from-yellow-50 to-yellow-100 border border-yellow-200';
+            break;
+          case 'certificate_expired':
+            activityTitle = 'Certificate Expired';
+            activityDescription = `${activity.trainer_name}'s ${activity.check_type.replace('_', ' ')} has expired`;
+            activityIcon = <Clock className="h-4 w-4" />;
+            activityColor = 'bg-gradient-to-r from-red-50 to-red-100 border border-red-200';
+            break;
+          default:
+            return; // Skip unknown activity types
+        }
+
+        activities.push({
+          id: `verification-${activity.id}`,
+          title: activityTitle,
+          description: activityDescription,
+          icon: activityIcon,
+          color: activityColor,
+          created_at: activity.created_at,
+          type: 'verification_activity',
+          priority: activity.priority,
+          expires_at: activity.expires_at,
+          days_until_expiry: activity.days_until_expiry
         });
       });
     }
@@ -236,6 +285,17 @@ export const AdminLiveActivityFeed = () => {
                     <Badge variant="outline" className="text-xs">
                       <CheckCircle className="w-3 h-3 mr-1" />
                       Verification
+                    </Badge>
+                  )}
+                  {activity.type === 'verification_activity' && (
+                    <Badge variant="outline" className="text-xs">
+                      <FileCheck className="w-3 h-3 mr-1" />
+                      {activity.expires_at ? 'Expiry Alert' : 'Admin Action'}
+                    </Badge>
+                  )}
+                  {activity.days_until_expiry !== undefined && (
+                    <Badge variant={activity.days_until_expiry <= 7 ? "destructive" : "secondary"} className="text-xs">
+                      {activity.days_until_expiry > 0 ? `${activity.days_until_expiry} days left` : 'Expired'}
                     </Badge>
                   )}
                   {activity.priority === 'high' && (
