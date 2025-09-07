@@ -162,7 +162,13 @@ export function useTrainerProfile() {
       const trainerUpdates: any = {};
 
       // Shared profile fields (general profile info, profile_image_position, and new WoW fields)
-      const sharedFields = ['first_name', 'last_name', 'bio', 'profile_photo_url', 'location', 'tagline', 'is_uk_based', 'profile_published', 'profile_image_position', 'wow_how_i_work', 'wow_what_i_provide', 'wow_client_expectations', 'wow_activities', 'wow_activity_assignments', 'wow_visibility', 'wow_setup_completed'];
+      const sharedFields = [
+        'first_name', 'last_name', 'bio', 'profile_photo_url', 'location', 'tagline', 'is_uk_based', 
+        'profile_published', 'profile_image_position', 'wow_how_i_work', 'wow_what_i_provide', 
+        'wow_client_expectations', 'wow_activities', 'wow_activity_assignments', 'wow_visibility', 
+        'wow_setup_completed', 'terms_agreed', 'accuracy_confirmed', 'notify_profile_views', 
+        'notify_messages', 'notify_insights'
+      ];
       
       // Trainer-specific fields (all trainer-related fields including the moved ones)
       const trainerFields = [
@@ -175,8 +181,8 @@ export function useTrainerProfile() {
         'ideal_client_personality', 'ideal_client_types', 'video_checkins', 'messaging_support', 
         'weekly_programming_only', 'ways_of_working_onboarding', 'ways_of_working_first_week',
         'ways_of_working_ongoing', 'ways_of_working_tracking', 'ways_of_working_expectations',
-        'ways_of_working_what_i_bring', 'profile_setup_completed', 'terms_agreed', 'accuracy_confirmed', 'how_started', 'philosophy', 
-        'professional_milestones', 'notify_profile_views', 'notify_messages', 'notify_insights'
+        'ways_of_working_what_i_bring', 'profile_setup_completed', 'how_started', 'philosophy', 
+        'professional_milestones'
       ];
 
       Object.keys(updates).forEach(key => {
