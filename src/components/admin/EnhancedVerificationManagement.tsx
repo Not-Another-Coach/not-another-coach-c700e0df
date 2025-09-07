@@ -262,11 +262,17 @@ export const EnhancedVerificationManagement = () => {
                             <p className="text-xs text-blue-600">
                               Status: {check.status}
                             </p>
-                            {check.evidence_file_url && (
-                              <p className="text-xs text-blue-600">
-                                📎 Document attached
-                              </p>
-                            )}
+                             {check.evidence_file_url && (
+                               <div className="mt-2">
+                                 <DocumentViewer
+                                   fileUrl={check.evidence_file_url}
+                                   filename={check.evidence_metadata?.filename}
+                                   fileSize={check.evidence_metadata?.size}
+                                   fileType={check.evidence_metadata?.type}
+                                   className="text-xs"
+                                 />
+                               </div>
+                             )}
                           </div>
                           <div className="flex gap-2">
                             <Button
