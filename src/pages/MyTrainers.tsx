@@ -5,7 +5,6 @@ import { useDataSynchronization } from "@/hooks/useDataSynchronization";
 import { ClientHeader } from "@/components/ClientHeader";
 import { Button } from "@/components/ui/button";
 import { DataSyncIndicator } from "@/components/ui/data-sync-indicator";
-import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { FloatingMessageButton } from "@/components/FloatingMessageButton";
 import { ClientJourneyVisualization } from "@/components/journey/ClientJourneyVisualization";
 import { ToggleLeft } from "lucide-react";
@@ -60,7 +59,6 @@ export default function MyTrainers() {
             isRefreshing={isRefreshing}
             isConnected={true}
           />
-          {profile && <ProfileDropdown profile={profile} />}
         </div>
       </div>
 
