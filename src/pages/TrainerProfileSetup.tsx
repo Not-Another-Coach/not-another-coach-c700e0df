@@ -872,14 +872,6 @@ const TrainerProfileSetup = () => {
             </div>
           </div>
           <div className="flex items-center gap-2 justify-end sm:justify-start">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setCurrentStep(11)}
-              className="flex-1 sm:flex-none"
-            >
-              Go to Terms & Notifications
-            </Button>
             <Button variant="outline" size="sm" onClick={() => handleSave()} className="flex-1 sm:flex-none">
               <Save className="h-4 w-4 mr-2" />
               <span className="hidden xs:inline">{profile?.profile_setup_completed ? 'Update' : 'Save Draft'}</span>
