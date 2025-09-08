@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { InstagramTrainerCard } from "@/components/ui/instagram-trainer-card";
+import { EnhancedTrainerCard } from "@/components/trainer-cards/EnhancedTrainerCard";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { FloatingMessageButton } from "@/components/FloatingMessageButton";
 import { ClientHeader } from "@/components/ClientHeader";
@@ -279,17 +279,13 @@ export default function MyTrainers() {
                   ) : filteredTrainers.length > 0 ? (
                     filteredTrainers.map((trainer) => (
                       <div key={trainer.id} className="relative">
-                        <InstagramTrainerCard
-                          trainer={trainer}
-                          onSave={handleSaveTrainer}
-                          onUnsave={handleUnsaveTrainer}
-                          onShortlist={handleAddToShortlist}
-                          onRemoveFromShortlist={handleRemoveFromShortlist}
+                        <EnhancedTrainerCard
+                          trainer={trainer as any}
+                          onAddToShortlist={handleAddToShortlist}
                           onStartConversation={handleStartConversation}
                           onBookDiscoveryCall={handleBookDiscoveryCall}
-                          onJoinWaitlist={handleJoinWaitlist}
                           onViewProfile={handleViewProfile}
-                          isShortlistFull={counts.shortlisted + counts.discovery >= 4}
+                          isShortlisted={!!trainer.shortlistedAt}
                         />
                         {!showComparison && (
                           <div className="absolute top-2 right-2">
