@@ -16,7 +16,7 @@ import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 
 interface ProfileDropdownProps {
-  profile: {
+  profile?: {
     first_name: string | null;
     last_name: string | null;
     user_type: string;
@@ -24,12 +24,17 @@ interface ProfileDropdownProps {
     profile_image_position?: any;
     quiz_completed?: boolean;
     email?: string;
-  };
+  } | null;
 }
 
 export const ProfileDropdown = ({ profile }: ProfileDropdownProps) => {
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
+  
+  // Early return if profile is null or undefined
+  if (!profile) {
+    return null;
+  }
   
   const getInitials = () => {
     const first = profile.first_name?.charAt(0) || '';
