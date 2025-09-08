@@ -11,10 +11,10 @@ interface FeatureSummaryViewProps {
 
 export const FeatureSummaryView = ({ trainer, children }: FeatureSummaryViewProps) => {
   // Get top 3 specialties for feature cards
-  const topSpecialties = trainer.specialties.slice(0, 3);
+  const topSpecialties = ((trainer as any).specializations || (trainer as any).specialties || []).slice(0, 3);
   
   // Get training types for display
-  const trainingTypes = trainer.trainingType.slice(0, 2);
+  const trainingTypes = ((trainer as any).trainingTypes || (trainer as any).trainingType || []).slice(0, 2);
 
   return (
     <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-card to-muted/30 border-0 relative overflow-hidden">
@@ -64,10 +64,10 @@ export const FeatureSummaryView = ({ trainer, children }: FeatureSummaryViewProp
             </div>
 
             {/* Additional specialties if any */}
-            {trainer.specialties.length > 3 && (
+            {((trainer as any).specializations || (trainer as any).specialties || []).length > 3 && (
               <div className="mt-3 flex justify-center">
                 <Badge variant="outline" className="text-xs">
-                  +{trainer.specialties.length - 3} more specialties
+                  +{((trainer as any).specializations || (trainer as any).specialties || []).length - 3} more specialties
                 </Badge>
               </div>
             )}

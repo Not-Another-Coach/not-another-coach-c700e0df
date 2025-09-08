@@ -125,7 +125,7 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
         setDisplayImages([{ 
           id: 'fallback', 
           type: 'profile', 
-          url: trainer.image, 
+          url: (trainer as any).profilePhotoUrl || trainer.image, 
           mediaType: 'IMAGE' 
         }]);
       } finally {
@@ -230,7 +230,7 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
             // Single hero image fallback
             <div className="aspect-square relative">
               <img
-                src={trainer.image}
+                src={(trainer as any).profilePhotoUrl || trainer.image}
                 alt={trainer.name}
                 className="w-full h-full object-cover"
               />
@@ -272,7 +272,7 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
               
               {/* Top specialties */}
               <div className="flex gap-1 flex-wrap">
-                {trainer.specialties.slice(0, 2).map((specialty) => (
+                {((trainer as any).specializations || (trainer as any).specialties || []).slice(0, 2).map((specialty: string) => (
                   <Badge 
                     key={specialty} 
                     variant="secondary" 
@@ -281,12 +281,12 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
                     {specialty}
                   </Badge>
                 ))}
-                {trainer.specialties.length > 2 && (
+                {((trainer as any).specializations || (trainer as any).specialties || []).length > 2 && (
                   <Badge 
                     variant="secondary" 
                     className="text-xs bg-white/20 text-white border-white/30 backdrop-blur-sm"
                   >
-                    +{trainer.specialties.length - 2}
+                    +{((trainer as any).specializations || (trainer as any).specialties || []).length - 2}
                   </Badge>
                 )}
               </div>
