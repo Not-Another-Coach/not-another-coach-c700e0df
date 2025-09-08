@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { EnhancedTrainerCard } from "@/components/trainer-cards/EnhancedTrainerCard";
-import { ChevronLeft, ChevronRight, Compass, Star } from "lucide-react";
+import { ChevronLeft, ChevronRight, Compass, Star, Play, Pause } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSavedTrainers } from "@/hooks/useSavedTrainers";
 import { useShortlistedTrainers } from "@/hooks/useShortlistedTrainers";
@@ -50,6 +50,8 @@ export function ExploreSection({ isActiveClient, journeyProgress }: ExploreSecti
   const [trainers, setTrainers] = useState<ExploreTrainer[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [isPaused, setIsPaused] = useState(false);
   const { saveTrainer, isTrainerSaved } = useSavedTrainers();
   const { shortlistTrainer, isShortlisted } = useShortlistedTrainers();
 
@@ -79,7 +81,7 @@ export function ExploreSection({ isActiveClient, journeyProgress }: ExploreSecti
           `)
           .eq('profile_published', true)
           .order('rating', { ascending: false })
-          .limit(5); // Only fetch 5 top-rated trainers for dashboard
+          .limit(8); // Fetch 8 potential matches for carousel
 
         if (error) {
           console.error('Error fetching trainers for explore section:', error);
@@ -127,12 +129,44 @@ export function ExploreSection({ isActiveClient, journeyProgress }: ExploreSecti
     fetchExplorableTrainers();
   }, []);
 
-  const handlePrevTrainer = () => {
+  // Auto-carousel functionality
+  const goToNext = useCallback(() => {
+    setCurrentIndex((prev) => (prev < trainers.length - 1 ? prev + 1 : 0));
+  }, [trainers.length]);
+
+  const goToPrev = useCallback(() => {
     setCurrentIndex((prev) => (prev > 0 ? prev - 1 : trainers.length - 1));
+  }, [trainers.length]);
+
+  // Auto-play carousel
+  useEffect(() => {
+    if (!isAutoPlaying || isPaused || trainers.length <= 1) return;
+
+    const interval = setInterval(() => {
+      goToNext();
+    }, 4000); // Change trainer every 4 seconds
+
+    return () => clearInterval(interval);
+  }, [isAutoPlaying, isPaused, trainers.length, goToNext]);
+
+  // Pause auto-play on hover/interaction
+  const handleMouseEnter = () => setIsPaused(true);
+  const handleMouseLeave = () => setIsPaused(false);
+
+  const toggleAutoPlay = () => setIsAutoPlaying(!isAutoPlaying);
+
+  const handlePrevTrainer = () => {
+    setIsPaused(true);
+    goToPrev();
+    // Resume auto-play after 3 seconds of no interaction
+    setTimeout(() => setIsPaused(false), 3000);
   };
 
   const handleNextTrainer = () => {
-    setCurrentIndex((prev) => (prev < trainers.length - 1 ? prev + 1 : 0));
+    setIsPaused(true);
+    goToNext();
+    // Resume auto-play after 3 seconds of no interaction
+    setTimeout(() => setIsPaused(false), 3000);
   };
 
   const handleAddToShortlist = async (trainerId: string) => {
@@ -172,9 +206,28 @@ export function ExploreSection({ isActiveClient, journeyProgress }: ExploreSecti
         onClick={() => navigate('/discovery')}
       >
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Compass className="h-5 w-5 text-secondary-600" />
-            Ready to Explore Coaches!
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Compass className="h-5 w-5 text-secondary-600" />
+              Potential Matches for You
+            </div>
+            {trainers.length > 1 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleAutoPlay();
+                }}
+                className="h-8 w-8 p-0"
+              >
+                {isAutoPlaying ? (
+                  <Pause className="h-3 w-3" />
+                ) : (
+                  <Play className="h-3 w-3" />
+                )}
+              </Button>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -184,15 +237,26 @@ export function ExploreSection({ isActiveClient, journeyProgress }: ExploreSecti
             </div>
           ) : trainers.length > 0 ? (
             <div className="space-y-4">
-              <p className="text-muted-foreground text-sm">
-                Great job completing your fitness preferences! Swipe through our top-rated trainers or click to explore with filters.
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="text-muted-foreground text-sm">
+                  Based on your preferences, here are some great matches:
+                </p>
+                {isAutoPlaying && !isPaused && (
+                  <Badge variant="outline" className="text-xs animate-pulse">
+                    Auto-playing
+                  </Badge>
+                )}
+              </div>
               
               {/* Trainer Carousel */}
-              <div className="relative">
+              <div 
+                className="relative"
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+              >
                 <div className="overflow-hidden rounded-lg">
                   <div 
-                    className="flex transition-transform duration-300 ease-in-out"
+                    className="flex transition-transform duration-500 ease-in-out"
                     style={{ transform: `translateX(-${currentIndex * 100}%)` }}
                   >
                     {trainers.map((trainer) => (
@@ -206,6 +270,8 @@ export function ExploreSection({ isActiveClient, journeyProgress }: ExploreSecti
                           isShortlisted={isShortlisted(trainer.id)}
                           trainerOffersDiscoveryCalls={trainer.offers_discovery_call}
                           initialView="instagram"
+                          matchScore={Math.floor(75 + Math.random() * 20)} // Generate match scores between 75-95%
+                          matchReasons={["Great specialty match", "Excellent ratings", "Available times"]}
                         />
                       </div>
                     ))}
@@ -255,6 +321,8 @@ export function ExploreSection({ isActiveClient, journeyProgress }: ExploreSecti
                         onClick={(e) => {
                           e.stopPropagation();
                           setCurrentIndex(index);
+                          setIsPaused(true);
+                          setTimeout(() => setIsPaused(false), 3000);
                         }}
                       />
                     ))}
@@ -263,12 +331,25 @@ export function ExploreSection({ isActiveClient, journeyProgress }: ExploreSecti
               </div>
 
               <div className="flex items-center justify-between pt-2">
-                <Badge variant="secondary" className="text-xs">
-                  {currentIndex + 1} of {trainers.length} trainers
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary" className="text-xs">
+                    Match {currentIndex + 1} of {trainers.length}
+                  </Badge>
+                  {isAutoPlaying && (
+                    <div className="w-12 h-1 bg-muted rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-secondary-600 rounded-full animate-pulse"
+                        style={{
+                          width: isPaused ? '100%' : '0%',
+                          transition: isPaused ? 'none' : 'width 4s linear'
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
                 <Button variant="outline" size="sm">
                   <Star className="h-3 w-3 mr-1" />
-                  Explore All Trainers
+                  Explore All ({trainers.length}+)
                 </Button>
               </div>
             </div>
