@@ -93,9 +93,9 @@ export function MetricsSnapshot({ onTabChange }: MetricsSnapshotProps) {
     return (
       <div className="space-y-4">
         <h2 className="text-xl font-semibold text-foreground">My Snapshot</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-20 bg-muted rounded-lg animate-pulse" />
+            <div key={i} className="h-16 bg-muted rounded-lg animate-pulse" />
           ))}
         </div>
       </div>
@@ -105,19 +105,19 @@ export function MetricsSnapshot({ onTabChange }: MetricsSnapshotProps) {
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-semibold text-foreground">My Snapshot</h2>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         {/* Saved Trainers */}
         <Card 
           className="cursor-pointer hover:shadow-md transition-shadow bg-gradient-to-br from-primary-50 to-primary-100 border-primary-200"
           onClick={() => navigateToMyTrainers('saved')}
         >
-          <CardContent className="p-3 flex flex-col items-center text-center">
-            <div className="p-2 rounded-full bg-primary-500/10 mb-2">
-              <Heart className="h-4 w-4 text-primary-600" />
+          <CardContent className="p-2 flex flex-col items-center text-center">
+            <div className="p-1 rounded-full bg-primary-500/10 mb-1">
+              <Heart className="h-3 w-3 text-primary-600" />
             </div>
             <div>
-              <p className="text-xs text-primary-700 font-medium mb-1">Saved</p>
-              <p className="text-xl font-bold text-primary-800">{metrics.savedTrainers}</p>
+              <p className="text-xs text-primary-700 font-medium mb-0.5">Saved</p>
+              <p className="text-lg font-bold text-primary-800">{metrics.savedTrainers}</p>
             </div>
           </CardContent>
         </Card>
@@ -127,13 +127,13 @@ export function MetricsSnapshot({ onTabChange }: MetricsSnapshotProps) {
           className="cursor-pointer hover:shadow-md transition-shadow bg-gradient-to-br from-secondary-50 to-secondary-100 border-secondary-200"
           onClick={() => onTabChange('explore')}
         >
-          <CardContent className="p-3 flex flex-col items-center text-center">
-            <div className="p-2 rounded-full bg-secondary-500/10 mb-2">
-              <Search className="h-4 w-4 text-secondary-600" />
+          <CardContent className="p-2 flex flex-col items-center text-center">
+            <div className="p-1 rounded-full bg-secondary-500/10 mb-1">
+              <Search className="h-3 w-3 text-secondary-600" />
             </div>
             <div>
-              <p className="text-xs text-secondary-700 font-medium mb-1">Viewed</p>
-              <p className="text-xl font-bold text-secondary-800">{metrics.discoveryViewedToday}</p>
+              <p className="text-xs text-secondary-700 font-medium mb-0.5">Viewed</p>
+              <p className="text-lg font-bold text-secondary-800">{metrics.discoveryViewedToday}</p>
               <p className="text-xs text-secondary-600">today</p>
             </div>
           </CardContent>
@@ -144,12 +144,12 @@ export function MetricsSnapshot({ onTabChange }: MetricsSnapshotProps) {
           className="cursor-pointer hover:shadow-md transition-shadow bg-gradient-to-br from-accent-50 to-accent-100 border-accent-200"
           onClick={() => navigateToMyTrainers('discovery')}
         >
-          <CardContent className="p-3 flex flex-col items-center text-center">
-            <div className="p-2 rounded-full bg-accent-500/10 mb-2">
-              <Calendar className="h-4 w-4 text-accent-600" />
+          <CardContent className="p-2 flex flex-col items-center text-center">
+            <div className="p-1 rounded-full bg-accent-500/10 mb-1">
+              <Calendar className="h-3 w-3 text-accent-600" />
             </div>
             <div>
-              <p className="text-xs text-accent-700 font-medium mb-1">Calls</p>
+              <p className="text-xs text-accent-700 font-medium mb-0.5">Calls</p>
               {metrics.nextCall.date ? (
                 <>
                   <p className="text-sm font-bold text-accent-800">
@@ -161,7 +161,7 @@ export function MetricsSnapshot({ onTabChange }: MetricsSnapshotProps) {
                 </>
               ) : (
                 <>
-                  <p className="text-xl font-bold text-accent-800">0</p>
+                  <p className="text-lg font-bold text-accent-800">0</p>
                   <p className="text-xs text-accent-600">upcoming</p>
                 </>
               )}
@@ -174,13 +174,13 @@ export function MetricsSnapshot({ onTabChange }: MetricsSnapshotProps) {
           className="cursor-pointer hover:shadow-md transition-shadow bg-gradient-to-br from-success-50 to-success-100 border-success-200"
           onClick={() => onTabChange('payments')}
         >
-          <CardContent className="p-3 flex flex-col items-center text-center">
-            <div className="p-2 rounded-full bg-success-500/10 mb-2">
-              <Package className="h-4 w-4 text-success-600" />
+          <CardContent className="p-2 flex flex-col items-center text-center">
+            <div className="p-1 rounded-full bg-success-500/10 mb-1">
+              <Package className="h-3 w-3 text-success-600" />
             </div>
             <div>
-              <p className="text-xs text-success-700 font-medium mb-1">Packages</p>
-              <p className="text-xl font-bold text-success-800">{metrics.activePackages}</p>
+              <p className="text-xs text-success-700 font-medium mb-0.5">Packages</p>
+              <p className="text-lg font-bold text-success-800">{metrics.activePackages}</p>
               <p className="text-xs text-success-600">active</p>
             </div>
           </CardContent>

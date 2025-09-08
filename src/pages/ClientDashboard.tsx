@@ -170,17 +170,14 @@ export default function ClientDashboard() {
         {/* Section 3: My Trainers Carousel */}
         <MyTrainersCarousel onTabChange={handleTabChange} />
 
-        {/* Section 4: Live Activity Feed & Explore Side by Side */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Live Activity Feed */}
-          <ClientActivityFeed />
+        {/* Section 4: Enhanced Explore Section with Swipeable Trainers */}
+        <ExploreSection 
+          isActiveClient={isActiveClient}
+          journeyProgress={journeyProgress}
+        />
 
-          {/* Enhanced Explore Section with Swipeable Trainers */}
-          <ExploreSection 
-            isActiveClient={isActiveClient}
-            journeyProgress={journeyProgress}
-          />
-        </div>
+        {/* Section 5: Live Activity Feed */}
+        <ClientActivityFeed />
 
         {/* Spacer for floating button */}
         <div className="h-20" />
