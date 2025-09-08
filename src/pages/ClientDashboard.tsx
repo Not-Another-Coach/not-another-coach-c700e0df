@@ -14,7 +14,7 @@ import { FloatingMessageButton } from "@/components/FloatingMessageButton";
 import { HighlightsCarousel } from "@/components/dashboard/HighlightsCarousel";
 import { MetricsSnapshot } from "@/components/dashboard/MetricsSnapshot";
 import { ClientActivityFeed } from "@/components/dashboard/ClientActivityFeed";
-import { DiscoverySwipeDeck } from "@/components/dashboard/DiscoverySwipeDeck";
+import { MyTrainersCarousel } from "@/components/dashboard/MyTrainersCarousel";
 import { ActivityCompletionInterface } from "@/components/client/ActivityCompletionInterface";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -169,10 +169,8 @@ export default function ClientDashboard() {
         {/* Section 3: Live Activity Feed */}
         <ClientActivityFeed />
 
-        {/* Section 4: Discover Trainers */}
-        {!isActiveClient && (
-          <DiscoverySwipeDeck profile={profile} />
-        )}
+        {/* Section 4: My Trainers Carousel */}
+        <MyTrainersCarousel onTabChange={handleTabChange} />
 
         {/* Journey-based Explorer CTA for New Users */}
         {!isActiveClient && journeyProgress?.stage === 'exploring_coaches' && (
