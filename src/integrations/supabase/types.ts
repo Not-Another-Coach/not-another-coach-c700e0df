@@ -1423,6 +1423,33 @@ export type Database = {
           },
         ]
       }
+      daily_highlights_batches: {
+        Row: {
+          created_at: string | null
+          date: string
+          generated_at: string | null
+          highlight_ids: string[] | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          date: string
+          generated_at?: string | null
+          highlight_ids?: string[] | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          generated_at?: string | null
+          highlight_ids?: string[] | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       data_retention_policies: {
         Row: {
           auto_purge_enabled: boolean | null
@@ -2026,6 +2053,95 @@ export type Database = {
             columns: ["parent_goal_id"]
             isOneToOne: false
             referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      highlights_content: {
+        Row: {
+          content_type: string
+          created_at: string | null
+          description: string | null
+          engagement_score: number | null
+          featured_until: string | null
+          id: string
+          is_active: boolean | null
+          media_urls: string[] | null
+          title: string
+          trainer_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          content_type: string
+          created_at?: string | null
+          description?: string | null
+          engagement_score?: number | null
+          featured_until?: string | null
+          id?: string
+          is_active?: boolean | null
+          media_urls?: string[] | null
+          title: string
+          trainer_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          content_type?: string
+          created_at?: string | null
+          description?: string | null
+          engagement_score?: number | null
+          featured_until?: string | null
+          id?: string
+          is_active?: boolean | null
+          media_urls?: string[] | null
+          title?: string
+          trainer_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      highlights_submissions: {
+        Row: {
+          admin_notes: string | null
+          content_id: string | null
+          created_at: string | null
+          id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          submitted_at: string | null
+          trainer_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          content_id?: string | null
+          created_at?: string | null
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_at?: string | null
+          trainer_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          content_id?: string | null
+          created_at?: string | null
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_at?: string | null
+          trainer_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "highlights_submissions_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "highlights_content"
             referencedColumns: ["id"]
           },
         ]
@@ -5840,6 +5956,38 @@ export type Database = {
             columns: ["alert_id"]
             isOneToOne: false
             referencedRelation: "alerts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_highlight_interactions: {
+        Row: {
+          created_at: string | null
+          highlight_id: string
+          id: string
+          interaction_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          highlight_id: string
+          id?: string
+          interaction_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          highlight_id?: string
+          id?: string
+          interaction_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_highlight_interactions_highlight_id_fkey"
+            columns: ["highlight_id"]
+            isOneToOne: false
+            referencedRelation: "highlights_content"
             referencedColumns: ["id"]
           },
         ]
