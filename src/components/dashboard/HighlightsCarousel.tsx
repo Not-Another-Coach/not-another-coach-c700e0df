@@ -33,43 +33,61 @@ export function HighlightsCarousel() {
     if (!user) return;
 
     try {
-      // For now, get sample highlights from active trainers
-      // In production, this would use the daily_highlights_batches table
-      const { data, error } = await supabase
-        .from('highlights_content')
-        .select(`
-          id,
-          trainer_id,
-          title,
-          description,
-          media_urls,
-          content_type
-        `)
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
-        .limit(10);
-
-      if (data && !error) {
-        const formattedHighlights = [];
-        
-        for (const item of data) {
-          // Get trainer profile separately
-          const { data: trainerProfile } = await supabase
-            .from('profiles')
-            .select('first_name, last_name, profile_photo_url')
-            .eq('id', item.trainer_id)
-            .single();
-
-          formattedHighlights.push({
-            ...item,
-            content_type: item.content_type as 'transformation' | 'motivational' | 'article' | 'tip',
-            trainer_name: trainerProfile ? `${trainerProfile.first_name} ${trainerProfile.last_name}` : 'Trainer',
-            trainer_image: trainerProfile?.profile_photo_url || '/placeholder.svg'
-          });
+      // Using dummy data for now
+      const dummyHighlights: Highlight[] = [
+        {
+          id: '1',
+          trainer_id: 'trainer-1',
+          title: '30-Day Transformation Success',
+          description: 'See how Sarah lost 25lbs and gained confidence through our personalized program.',
+          media_urls: ['https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400'],
+          content_type: 'transformation',
+          trainer_name: 'Alex Johnson',
+          trainer_image: 'https://images.unsplash.com/photo-1567515004624-219c11d31f2e?w=100'
+        },
+        {
+          id: '2',
+          trainer_id: 'trainer-2',
+          title: 'Morning Motivation: Start Strong',
+          description: 'Your daily dose of motivation to crush your fitness goals and stay consistent.',
+          media_urls: ['https://images.unsplash.com/photo-1549476464-37392f717541?w=400'],
+          content_type: 'motivational',
+          trainer_name: 'Maria Rodriguez',
+          trainer_image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100'
+        },
+        {
+          id: '3',
+          trainer_id: 'trainer-3',
+          title: 'The Science of Fat Loss',
+          description: 'Understanding the metabolic processes that drive effective weight loss.',
+          media_urls: ['https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?w=400'],
+          content_type: 'article',
+          trainer_name: 'Dr. Michael Chen',
+          trainer_image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100'
+        },
+        {
+          id: '4',
+          trainer_id: 'trainer-4',
+          title: 'Perfect Form: Deadlift Basics',
+          description: 'Master the deadlift with proper form and technique for maximum results.',
+          media_urls: ['https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400'],
+          content_type: 'tip',
+          trainer_name: 'Jake Thompson',
+          trainer_image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100'
+        },
+        {
+          id: '5',
+          trainer_id: 'trainer-5',
+          title: 'Client Spotlight: From Couch to 5K',
+          description: 'Follow John\'s inspiring journey from sedentary lifestyle to running his first 5K.',
+          media_urls: ['https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400'],
+          content_type: 'transformation',
+          trainer_name: 'Emma Wilson',
+          trainer_image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100'
         }
-        
-        setHighlights(formattedHighlights);
-      }
+      ];
+      
+      setHighlights(dummyHighlights);
     } catch (error) {
       console.error('Error loading highlights:', error);
     } finally {

@@ -63,7 +63,7 @@ export function MetricsSnapshot({ onTabChange }: MetricsSnapshotProps) {
       
       setMetrics({
         savedTrainers: savedTrainers.length,
-        discoveryViewedToday: Math.floor(Math.random() * 15) + 5, // Mock data
+        discoveryViewedToday: 0, // Mock data
         nextCall: {
           date: discoveryCalls?.[0]?.scheduled_for || null,
           trainerName: discoveryCalls?.[0]?.profiles ? 
