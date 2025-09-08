@@ -96,7 +96,7 @@ export default function ClientDashboard() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border">
-        <div className="max-w-4xl mx-auto px-4 py-3">
+        <div className="mx-auto px-6 lg:px-8 xl:px-12 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="font-bold text-xl text-foreground">FitQuest</div>
@@ -115,7 +115,7 @@ export default function ClientDashboard() {
       </header>
 
       {/* Main Content - Scrollable Sections */}
-      <main className="max-w-4xl mx-auto px-4 py-6 space-y-8">
+      <main className="mx-auto px-6 lg:px-8 xl:px-12 py-6 space-y-8">
         
         {/* Active Client Onboarding Section (Priority) */}
         {isActiveClient && enhancedOnboardingData && (
