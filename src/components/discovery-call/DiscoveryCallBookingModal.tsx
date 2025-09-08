@@ -15,13 +15,13 @@ import { cn } from '@/lib/utils';
 interface DiscoveryCallBookingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  trainer: {
+  trainer?: {
     id: string;
     name: string;
     firstName?: string;
     lastName?: string;
     profilePhotoUrl?: string;
-  };
+  } | null;
   onCallBooked?: () => void;
   isReschedule?: boolean; // Add flag to indicate if this is a reschedule
 }
@@ -35,6 +35,11 @@ export const DiscoveryCallBookingModal = ({
   onCallBooked,
   isReschedule = false
 }: DiscoveryCallBookingModalProps) => {
+  // Early return if trainer is not provided
+  if (!trainer) {
+    return null;
+  }
+
   const [currentStep, setCurrentStep] = useState<BookingStep>('date');
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState<string>();
