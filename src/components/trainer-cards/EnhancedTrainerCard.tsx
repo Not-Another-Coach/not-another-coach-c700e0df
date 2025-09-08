@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Heart, X, MoreVertical, ChevronLeft, ChevronRight } from "lucide-react";
+import { Heart, X, MoreVertical, ChevronLeft, ChevronRight, MessageCircle, Calendar, Star, Eye } from "lucide-react";
 import { Trainer } from "@/components/TrainerCard";
 import { TrainerCardViewMode } from "./TrainerCardViewSelector";
 import { InstagramGalleryView } from "./InstagramGalleryView";
@@ -221,6 +221,169 @@ export const EnhancedTrainerCard = ({
 
   const stateBadge = getStateBadge();
 
+  // Render contextual action buttons based on state and available handlers
+  const renderActionButtons = () => {
+    const buttons = [];
+
+    // Always show View Profile button
+    buttons.push(
+      <Button
+        key="view-profile"
+        variant="outline"
+        size="sm"
+        onClick={(e) => {
+          e.stopPropagation();
+          if (onViewProfile) {
+            onViewProfile(trainer.id);
+          } else {
+            navigate(`/trainer/${trainer.id}`);
+          }
+        }}
+        className="flex-1"
+      >
+        <Eye className="w-4 h-4 mr-2" />
+        View Profile
+      </Button>
+    );
+
+    // Show different buttons based on card state
+    switch (cardState) {
+      case 'shortlisted':
+        if (trainerOffersDiscoveryCalls && onBookDiscoveryCall && !hasDiscoveryCall) {
+          buttons.unshift(
+            <Button
+              key="book-call"
+              variant="default"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onBookDiscoveryCall(trainer.id);
+              }}
+              className="flex-1"
+            >
+              <Calendar className="w-4 h-4 mr-2" />
+              Book Call
+            </Button>
+          );
+        }
+        if (onStartConversation) {
+          buttons.unshift(
+            <Button
+              key="message"
+              variant="secondary"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onStartConversation(trainer.id);
+              }}
+              className="flex-1"
+            >
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Message
+            </Button>
+          );
+        }
+        break;
+
+      case 'discovery':
+        if (hasDiscoveryCall && onEditDiscoveryCall) {
+          buttons.unshift(
+            <Button
+              key="edit-call"
+              variant="secondary"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEditDiscoveryCall(trainer.id);
+              }}
+              className="flex-1"
+            >
+              <Calendar className="w-4 h-4 mr-2" />
+              Edit Call
+            </Button>
+          );
+        }
+        if (onStartConversation) {
+          buttons.unshift(
+            <Button
+              key="message"
+              variant="default"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onStartConversation(trainer.id);
+              }}
+              className="flex-1"
+            >
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Message
+            </Button>
+          );
+        }
+        break;
+
+      case 'matched':
+        if (onStartConversation) {
+          buttons.unshift(
+            <Button
+              key="message"
+              variant="default"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onStartConversation(trainer.id);
+              }}
+              className="flex-1"
+            >
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Start Chat
+            </Button>
+          );
+        }
+        break;
+
+      default:
+        // For saved or default state, show shortlist button if available
+        if (onAddToShortlist && !isShortlisted) {
+          buttons.unshift(
+            <Button
+              key="shortlist"
+              variant="default"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onAddToShortlist(trainer.id);
+              }}
+              className="flex-1"
+            >
+              <Star className="w-4 h-4 mr-2" />
+              Add to Shortlist
+            </Button>
+          );
+        }
+        if (onStartConversation) {
+          buttons.unshift(
+            <Button
+              key="message"
+              variant="secondary"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onStartConversation(trainer.id);
+              }}
+              className="flex-1"
+            >
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Message
+            </Button>
+          );
+        }
+        break;
+    }
+
+    return buttons;
+  };
+
   // Create interactive elements overlay
   const interactiveElements = (
     <>
@@ -399,6 +562,13 @@ export const EnhancedTrainerCard = ({
     >
       {/* Enhanced Trainer Card */}
       {renderCurrentView()}
+      
+      {/* Bottom Action Bar */}
+      <div className="absolute bottom-0 left-0 right-0 z-40 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 pt-8">
+        <div className="flex gap-2">
+          {renderActionButtons()}
+        </div>
+      </div>
     </div>
   );
 };
