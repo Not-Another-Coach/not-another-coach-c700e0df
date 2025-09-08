@@ -166,26 +166,31 @@ export default function ClientDashboard() {
         {/* Section 2: My Snapshot (Metrics) */}
         <MetricsSnapshot onTabChange={handleTabChange} />
 
-        {/* Section 3: Live Activity Feed */}
-        <ClientActivityFeed />
-
-        {/* Section 4: My Trainers Carousel */}
+        {/* Section 3: My Trainers Carousel */}
         <MyTrainersCarousel onTabChange={handleTabChange} />
 
-        {/* Journey-based Explorer CTA for New Users */}
-        {!isActiveClient && journeyProgress?.stage === 'exploring_coaches' && (
-          <Card className="border-secondary-200 bg-gradient-to-br from-secondary-50 to-accent-50">
-            <CardContent className="p-6 text-center">
-              <h3 className="text-lg font-semibold mb-2 text-foreground">Ready to Explore Coaches!</h3>
-              <p className="text-muted-foreground mb-4">
-                Great job completing your fitness preferences! Now let's find the perfect trainer for you.
-              </p>
-              <Button onClick={() => navigate('/discovery')} size="lg">
-                Start Exploring Trainers
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+        {/* Section 4: Live Activity Feed & Explore Side by Side */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Live Activity Feed */}
+          <ClientActivityFeed />
+
+          {/* Journey-based Explorer CTA for New Users */}
+          {!isActiveClient && journeyProgress?.stage === 'exploring_coaches' && (
+            <Card className="border-secondary-200 bg-gradient-to-br from-secondary-50 to-accent-50">
+              <CardHeader>
+                <CardTitle>Ready to Explore Coaches!</CardTitle>
+              </CardHeader>
+              <CardContent className="text-center">
+                <p className="text-muted-foreground mb-4">
+                  Great job completing your fitness preferences! Now let's find the perfect trainer for you.
+                </p>
+                <Button onClick={() => navigate('/discovery')} size="lg">
+                  Start Exploring Trainers
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </div>
 
         {/* Spacer for floating button */}
         <div className="h-20" />
