@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { OptimizedTrainerCard } from "@/components/ui/optimized-trainer-card";
+import { InstagramTrainerCard } from "@/components/ui/instagram-trainer-card";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { FloatingMessageButton } from "@/components/FloatingMessageButton";
 import { ClientHeader } from "@/components/ClientHeader";
@@ -185,7 +185,7 @@ export default function MyTrainers() {
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-background">
-        <ClientHeader profile={profile} />
+        <ClientHeader profile={profile} showNavigation={false} />
         
         <div className="container mx-auto px-4 py-8 space-y-6">
           <div className="flex items-center gap-2">
@@ -279,7 +279,7 @@ export default function MyTrainers() {
                   ) : filteredTrainers.length > 0 ? (
                     filteredTrainers.map((trainer) => (
                       <div key={trainer.id} className="relative">
-                        <OptimizedTrainerCard
+                        <InstagramTrainerCard
                           trainer={trainer}
                           onSave={handleSaveTrainer}
                           onUnsave={handleUnsaveTrainer}
