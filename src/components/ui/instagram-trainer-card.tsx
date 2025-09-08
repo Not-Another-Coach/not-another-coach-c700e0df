@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { UnifiedTrainer } from '@/hooks/useUnifiedTrainerData';
 import { MatchBadge } from '@/components/MatchBadge';
+import { ImageGalleryModal } from '@/components/ui/image-gallery-modal';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   Heart, 
@@ -19,7 +20,8 @@ import {
   BookmarkCheck,
   UserPlus,
   UserMinus,
-  Eye
+  Eye,
+  Image as ImageIcon
 } from 'lucide-react';
 
 interface InstagramTrainerCardProps {
@@ -82,6 +84,8 @@ export const InstagramTrainerCard = memo(({
   const [gridSize, setGridSize] = useState<number>(6);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [showGallery, setShowGallery] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   const handleImageLoad = useCallback(() => {
     setImageLoaded(true);
@@ -89,6 +93,11 @@ export const InstagramTrainerCard = memo(({
 
   const handleImageError = useCallback(() => {
     setImageError(true);
+  }, []);
+
+  const handleImageClick = useCallback((index: number) => {
+    setSelectedImageIndex(index);
+    setShowGallery(true);
   }, []);
 
   // Fetch trainer images from uploaded and instagram tables
@@ -232,8 +241,9 @@ export const InstagramTrainerCard = memo(({
                 <img
                   src={image.url}
                   alt={`${trainer.name} photo ${idx + 1}`}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-200 cursor-pointer"
                   loading="lazy"
+                  onClick={() => handleImageClick(idx)}
                 />
               </div>
             ))}
@@ -248,6 +258,14 @@ export const InstagramTrainerCard = memo(({
               </div>
               <p className="text-xs text-muted-foreground">No photos available</p>
             </div>
+          </div>
+        )}
+
+        {/* Gallery overlay indicator */}
+        {displayImages.length > 0 && (
+          <div className="absolute top-2 right-2 bg-black/50 text-white px-2 py-1 rounded-lg text-xs flex items-center gap-1">
+            <ImageIcon className="w-3 h-3" />
+            {displayImages.length}
           </div>
         )}
       </div>
@@ -369,6 +387,18 @@ export const InstagramTrainerCard = memo(({
           </div>
         </div>
       </CardContent>
+
+      {/* Image Gallery Modal */}
+      <ImageGalleryModal
+        isOpen={showGallery}
+        onClose={() => setShowGallery(false)}
+        images={displayImages.map((img, idx) => ({
+          id: img.id || `image-${idx}`,
+          url: img.url,
+          caption: `${trainer.name} - Photo ${idx + 1}`
+        }))}
+        initialIndex={selectedImageIndex}
+      />
     </Card>
   );
 });

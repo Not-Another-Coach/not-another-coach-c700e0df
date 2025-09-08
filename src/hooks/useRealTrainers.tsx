@@ -46,7 +46,7 @@ export function useRealTrainers(refreshTrigger?: number, includeOwnUnpublished?:
           query = query.eq('profile_published', true);
         }
         
-        const { data, error } = await query.order('created_at');
+        const { data, error } = await query;
 
         if (error) {
           console.error('Error fetching trainers in useRealTrainers:', error);

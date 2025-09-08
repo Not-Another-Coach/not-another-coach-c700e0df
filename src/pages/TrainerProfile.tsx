@@ -45,8 +45,18 @@ export const TrainerProfile = () => {
       // Came from profile settings - go back to profile setup
       navigate('/trainer/profile-setup');
     } else {
-      // Default: use browser history
-      navigate(-1);
+      // Check if we're coming from My Trainers or client context
+      const referrer = document.referrer;
+      if (referrer.includes('/my-trainers') || referrer.includes('/client/')) {
+        // Client viewing trainer profile - go back to My Trainers
+        navigate('/my-trainers');
+      } else if (user?.id === trainerId) {
+        // Own profile view - go to appropriate dashboard
+        navigate('/trainer/dashboard');
+      } else {
+        // Default: use browser history
+        navigate(-1);
+      }
     }
   };
 
@@ -74,7 +84,7 @@ export const TrainerProfile = () => {
               <p className="text-muted-foreground mb-4">
                 The trainer you're looking for doesn't exist or may have been removed.
               </p>
-              <Button onClick={() => navigate('/trainer/dashboard')}>
+              <Button onClick={() => navigate('/my-trainers')}>
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Go Back
               </Button>
