@@ -16,6 +16,7 @@ import { MetricsSnapshot } from "@/components/dashboard/MetricsSnapshot";
 import { ClientActivityFeed } from "@/components/dashboard/ClientActivityFeed";
 import { MyTrainersCarousel } from "@/components/dashboard/MyTrainersCarousel";
 import { ActivityCompletionInterface } from "@/components/client/ActivityCompletionInterface";
+import { ExploreSection } from "@/components/dashboard/ExploreSection";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function ClientDashboard() {
@@ -174,22 +175,11 @@ export default function ClientDashboard() {
           {/* Live Activity Feed */}
           <ClientActivityFeed />
 
-          {/* Journey-based Explorer CTA for New Users */}
-          {!isActiveClient && journeyProgress?.stage === 'exploring_coaches' && (
-            <Card className="border-secondary-200 bg-gradient-to-br from-secondary-50 to-accent-50">
-              <CardHeader>
-                <CardTitle>Ready to Explore Coaches!</CardTitle>
-              </CardHeader>
-              <CardContent className="text-center">
-                <p className="text-muted-foreground mb-4">
-                  Great job completing your fitness preferences! Now let's find the perfect trainer for you.
-                </p>
-                <Button onClick={() => navigate('/discovery')} size="lg">
-                  Start Exploring Trainers
-                </Button>
-              </CardContent>
-            </Card>
-          )}
+          {/* Enhanced Explore Section with Swipeable Trainers */}
+          <ExploreSection 
+            isActiveClient={isActiveClient}
+            journeyProgress={journeyProgress}
+          />
         </div>
 
         {/* Spacer for floating button */}
