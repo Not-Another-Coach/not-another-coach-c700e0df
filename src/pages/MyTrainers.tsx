@@ -144,13 +144,8 @@ export default function MyTrainers() {
   // Loading states
   if (!user || !profile) {
     return (
-      <div className="min-h-screen bg-background">
-        <ClientHeader profile={profile} />
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
-        </div>
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -158,46 +153,40 @@ export default function MyTrainers() {
   // Show comparison view if active
   if (showComparison) {
     return (
-      <div className="min-h-screen bg-background">
-        <ClientHeader profile={profile} />
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center gap-4 mb-6">
-            <Button
-              onClick={() => setShowComparison(false)}
-              variant="ghost"
-              size="sm"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Trainers
-            </Button>
-            <h1 className="text-2xl font-bold">Compare Trainers</h1>
-          </div>
-          
-          <ComparisonView 
-            trainers={getSelectedTrainersData() as any} 
-            onClose={() => setShowComparison(false)}
-          />
+      <div className="space-y-6">
+        <div className="flex items-center gap-4 mb-6">
+          <Button
+            onClick={() => setShowComparison(false)}
+            variant="ghost"
+            size="sm"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Trainers
+          </Button>
+          <h1 className="text-2xl font-bold">Compare Trainers</h1>
         </div>
+        
+        <ComparisonView 
+          trainers={getSelectedTrainersData() as any} 
+          onClose={() => setShowComparison(false)}
+        />
       </div>
     );
   }
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-background">
-        <ClientHeader profile={profile} showNavigation={false} />
-        
-        <div className="container mx-auto px-4 py-8 space-y-6">
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold">My Trainers</h1>
-            {error && (
-              <Badge variant="destructive" className="ml-2">
-                Error loading data
-              </Badge>
-            )}
-            <Button
-              onClick={refreshData}
-              variant="outline"
+      <div className="space-y-6">
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-bold">My Trainers</h1>
+          {error && (
+            <Badge variant="destructive" className="ml-2">
+              Error loading data
+            </Badge>
+          )}
+          <Button
+            onClick={refreshData}
+            variant="outline"
               size="sm"
               className="ml-auto"
               disabled={loading}
@@ -325,22 +314,21 @@ export default function MyTrainers() {
                   )}
                 </div>
               </TrainerDataErrorBoundary>
-            </TabsContent>
-          </Tabs>
-        </div>
-
-        <FloatingMessageButton />
-
-        {/* Discovery Call Booking Modal */}
-        <DiscoveryCallBookingModal
-          isOpen={!!selectedTrainerForCall}
-          trainer={trainers.find(t => t.id === selectedTrainerForCall)}
-          onClose={() => {
-            setSelectedTrainerForCall(null);
-            refreshData();
-          }}
-        />
+          </TabsContent>
+        </Tabs>
       </div>
+
+      <FloatingMessageButton />
+
+      {/* Discovery Call Booking Modal */}
+      <DiscoveryCallBookingModal
+        isOpen={!!selectedTrainerForCall}
+        trainer={trainers.find(t => t.id === selectedTrainerForCall)}
+        onClose={() => {
+          setSelectedTrainerForCall(null);
+          refreshData();
+        }}
+      />
     </ErrorBoundary>
   );
 }
