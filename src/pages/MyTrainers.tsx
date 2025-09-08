@@ -336,15 +336,14 @@ export default function MyTrainers() {
         <FloatingMessageButton />
 
         {/* Discovery Call Booking Modal */}
-        {selectedTrainerForCall && (
-          <DiscoveryCallBookingModal
-            trainer={trainers.find(t => t.id === selectedTrainerForCall)}
-            onClose={() => {
-              setSelectedTrainerForCall(null);
-              refreshData();
-            }}
-          />
-        )}
+        <DiscoveryCallBookingModal
+          isOpen={!!selectedTrainerForCall}
+          trainer={trainers.find(t => t.id === selectedTrainerForCall)}
+          onClose={() => {
+            setSelectedTrainerForCall(null);
+            refreshData();
+          }}
+        />
       </div>
     </ErrorBoundary>
   );
