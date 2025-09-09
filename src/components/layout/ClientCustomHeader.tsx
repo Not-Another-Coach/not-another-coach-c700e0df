@@ -59,7 +59,7 @@ export function ClientCustomHeader({
             {showJourneyProgress && journeyProgress && (
               <div className="flex items-center gap-2 ml-6 px-3 py-1 bg-primary/10 rounded-full">
                 <div className="text-sm font-medium text-primary">
-                  {formatJourneyStage(journeyProgress.stage)} • {journeyProgress.percentage}% Complete
+                  {formatJourneyStage(journeyProgress.stage)}
                 </div>
                 <Button 
                   variant="ghost" 
@@ -100,9 +100,6 @@ export function ClientCustomHeader({
                         <div className="space-y-2">
                           <div className="flex items-center justify-between">
                             <span className="text-sm font-medium">Journey Progress</span>
-                            <Badge variant="secondary" className="text-xs">
-                              {journeyProgress.percentage}%
-                            </Badge>
                           </div>
                           <p className="text-xs text-muted-foreground">
                             {formatJourneyStage(journeyProgress.stage)}
