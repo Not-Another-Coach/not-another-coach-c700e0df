@@ -6753,19 +6753,31 @@ export type Database = {
         Returns: string
       }
       get_content_visibility: {
-        Args: {
-          p_content_type: Database["public"]["Enums"]["content_type"]
-          p_engagement_stage: Database["public"]["Enums"]["engagement_stage"]
-          p_trainer_id: string
-        }
-        Returns: Database["public"]["Enums"]["visibility_state"]
+        Args:
+          | {
+              p_content_type: Database["public"]["Enums"]["content_type"]
+              p_engagement_stage: Database["public"]["Enums"]["engagement_stage"]
+              p_trainer_id: string
+            }
+          | {
+              p_content_type: string
+              p_engagement_stage: string
+              p_trainer_id: string
+            }
+        Returns: string
       }
       get_content_visibility_by_group: {
-        Args: {
-          p_content_type: Database["public"]["Enums"]["content_type"]
-          p_stage_group: Database["public"]["Enums"]["engagement_stage_group"]
-          p_trainer_id: string
-        }
+        Args:
+          | {
+              p_content_type: Database["public"]["Enums"]["content_type"]
+              p_stage_group: Database["public"]["Enums"]["engagement_stage_group"]
+              p_trainer_id: string
+            }
+          | {
+              p_content_type: string
+              p_stage_group: string
+              p_trainer_id: string
+            }
         Returns: Database["public"]["Enums"]["visibility_state"]
       }
       get_current_user_type: {
