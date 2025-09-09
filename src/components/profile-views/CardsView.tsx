@@ -1,16 +1,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EnhancedTrainerCard } from '@/components/trainer-cards/EnhancedTrainerCard';
-import { Trainer } from '@/components/TrainerCard';
+import { AnyTrainer, TrainerCardViewMode } from '@/types/trainer';
 import { Eye, Smartphone, Monitor } from 'lucide-react';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 
 interface CardsViewProps {
-  trainer: Trainer;
+  trainer: AnyTrainer;
 }
 
 export const CardsView = ({ trainer }: CardsViewProps) => {
-  const [currentCardView, setCurrentCardView] = useState<'instagram' | 'features' | 'transformations'>('features');
+  const [currentCardView, setCurrentCardView] = useState<TrainerCardViewMode>('features');
 
   return (
     <div className="space-y-6">
@@ -50,8 +50,11 @@ export const CardsView = ({ trainer }: CardsViewProps) => {
           <EnhancedTrainerCard
             trainer={trainer}
             initialView={currentCardView}
+            layout="grid"
             // Remove interactive elements for preview
             showComparisonCheckbox={false}
+            allowViewSwitching={true}
+            hideViewControls={false}
           />
           <p className="text-xs text-muted-foreground">
             Clients see this enhanced card with swipeable views and can click to view your full profile.

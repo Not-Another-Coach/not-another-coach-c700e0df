@@ -1,10 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Star, Quote, Heart, Users, Calendar, Award } from 'lucide-react';
-import { Trainer } from '@/components/TrainerCard';
+import { AnyTrainer } from '@/types/trainer';
 
 interface StoryViewProps {
-  trainer: Trainer;
+  trainer: AnyTrainer;
 }
 
 // Helper function to get journey content from trainer data

@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Trophy, TrendingUp, Target, Users, Calendar, Zap } from 'lucide-react';
-import { Trainer } from '@/components/TrainerCard';
+import { AnyTrainer } from '@/types/trainer';
 
 interface Testimonial {
   id: string;
@@ -18,7 +18,7 @@ interface Testimonial {
 }
 
 interface ResultsViewProps {
-  trainer: Trainer;
+  trainer: AnyTrainer;
 }
 
 // Helper function to process testimonials into results data

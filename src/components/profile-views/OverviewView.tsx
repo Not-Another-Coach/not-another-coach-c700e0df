@@ -3,11 +3,11 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { PositionedAvatar } from '@/components/ui/positioned-avatar';
 import { Star, MapPin, Clock, Award, Users, MessageCircle, Calendar, User } from 'lucide-react';
-import { Trainer } from '@/components/TrainerCard';
+import { AnyTrainer } from '@/types/trainer';
 import { getTrainerDisplayPrice } from '@/lib/priceUtils';
 
 interface OverviewViewProps {
-  trainer: Trainer;
+  trainer: AnyTrainer;
   onMessage?: () => void;
   onBookDiscovery?: () => void;
 }

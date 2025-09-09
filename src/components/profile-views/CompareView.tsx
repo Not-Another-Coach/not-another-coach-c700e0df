@@ -2,11 +2,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Star, MapPin, Award, Users, Clock, CheckCircle, X } from 'lucide-react';
-import { Trainer } from '@/components/TrainerCard';
+import { AnyTrainer } from '@/types/trainer';
 import { getTrainerDisplayPrice } from '@/lib/priceUtils';
 
 interface CompareViewProps {
-  trainers: Trainer[];
+  trainers: AnyTrainer[];
   onRemoveTrainer?: (trainerId: string) => void;
   onSelectTrainer?: (trainerId: string) => void;
 }
@@ -38,7 +38,7 @@ export const CompareView = ({ trainers, onRemoveTrainer, onSelectTrainer }: Comp
     );
   }
 
-  const getBestValue = (category: string, trainers: Trainer[]) => {
+  const getBestValue = (category: string, trainers: AnyTrainer[]) => {
     if (category === 'rating') {
       return Math.max(...trainers.map(t => t.rating));
     }
@@ -54,8 +54,8 @@ export const CompareView = ({ trainers, onRemoveTrainer, onSelectTrainer }: Comp
     return null;
   };
 
-  const renderCellValue = (trainer: Trainer, category: any) => {
-    const value = trainer[category.key as keyof Trainer];
+  const renderCellValue = (trainer: AnyTrainer, category: any) => {
+    const value = trainer[category.key as keyof AnyTrainer];
     const bestValue = getBestValue(category.key, trainers);
     const isBest = bestValue !== null && (
       (category.key === 'rating' && trainer.rating === bestValue) ||
