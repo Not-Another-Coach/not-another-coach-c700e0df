@@ -617,11 +617,41 @@ export const EnhancedTrainerCard = memo(({
         "bg-gradient-to-br from-card to-secondary-50 h-80 overflow-hidden"
       )}>
         <CardContent className="p-0 h-full relative">
-          {/* Main image/view content - Always show InstagramGalleryView for dashboard carousel */}
+          {/* Main image/view content - Render based on currentView */}
           <div className="h-48 relative overflow-hidden rounded-t-lg">
-            <InstagramGalleryView trainer={trainer}>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-            </InstagramGalleryView>
+            {(() => {
+              // Check if current view is a transformation view with index
+              if (currentView.startsWith('transformations-')) {
+                const testimonialIndex = parseInt(currentView.split('-')[1]);
+                return (
+                  <ClientTransformationView trainer={trainer} testimonialIndex={testimonialIndex}>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  </ClientTransformationView>
+                );
+              }
+              
+              switch (currentView) {
+                case 'transformations':
+                  return (
+                    <ClientTransformationView trainer={trainer} testimonialIndex={0}>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                    </ClientTransformationView>
+                  );
+                case 'features':
+                  return (
+                    <FeatureSummaryView trainer={trainer}>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                    </FeatureSummaryView>
+                  );
+                case 'instagram':
+                default:
+                  return (
+                    <InstagramGalleryView trainer={trainer}>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                    </InstagramGalleryView>
+                  );
+              }
+            })()}
             
             {/* Top Badge */}
             {stateBadge && finalShowEngagementBadge && (
@@ -644,7 +674,7 @@ export const EnhancedTrainerCard = memo(({
           </div>
 
           {/* Content section */}
-          <div className="p-4 flex flex-col justify-between h-32">
+          <div className="p-4 flex flex-col justify-between flex-1">
             <div className="flex items-center justify-between mb-2">
               {trainer.location && (
                 <p className="text-sm text-muted-foreground truncate flex-1">
@@ -764,8 +794,8 @@ export const EnhancedTrainerCard = memo(({
       {/* Enhanced Trainer Card */}
       {finalLayout === 'carousel' ? renderCarouselView() : renderCurrentView()}
       
-      {/* Bottom Action Bar - Only show when there are actions to display */}
-      {(finalLayout !== 'carousel' || !finalCompactActions) && renderActionButtons().length > 0 && (
+      {/* Bottom Action Bar - Don't show for carousel layout */}
+      {finalLayout !== 'carousel' && renderActionButtons().length > 0 && (
         <div className="absolute bottom-0 left-0 right-0 z-40 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 pt-6">
           <div className="flex gap-2">
             {renderActionButtons()}
