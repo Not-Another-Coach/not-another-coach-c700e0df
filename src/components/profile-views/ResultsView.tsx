@@ -76,10 +76,9 @@ const processTestimonialsData = (testimonials: Testimonial[] = []) => {
 
 export const ResultsView = ({ trainer }: ResultsViewProps) => {
   const testimonials = (trainer as any).testimonials || [];
-  const milestones = (trainer as any).professional_milestones || [];
   const resultsData = processTestimonialsData(testimonials);
 
-  if (testimonials.length === 0 && milestones.length === 0) {
+  if (testimonials.length === 0) {
     return (
       <div className="space-y-6">
         <Card>
@@ -87,7 +86,7 @@ export const ResultsView = ({ trainer }: ResultsViewProps) => {
             <Trophy className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
             <h3 className="text-lg font-medium mb-2">No Results Yet</h3>
             <p className="text-muted-foreground">
-              Add testimonials, transformations, and professional milestones in the Profile Management section to showcase your achievements.
+              Add testimonials and transformations in the Profile Management section to showcase your achievements.
             </p>
           </CardContent>
         </Card>
@@ -97,30 +96,6 @@ export const ResultsView = ({ trainer }: ResultsViewProps) => {
 
   return (
     <div className="space-y-6">
-      {/* Professional Milestones */}
-      {milestones.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              Professional Milestones & Career Journey
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {milestones.map((milestone: any, index: number) => (
-                <div key={`milestone-${index}`} className="flex items-start gap-3 p-3 rounded-lg bg-gradient-to-r from-primary/5 to-secondary/5 border-l-4 border-primary">
-                  <Badge variant="outline" className="shrink-0 text-sm font-semibold">{milestone.year}</Badge>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium leading-relaxed">{milestone.event}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Before & After Gallery */}
       {resultsData.beforeAfterImages.length > 0 && (
         <Card>
