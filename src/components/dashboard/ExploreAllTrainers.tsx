@@ -480,6 +480,7 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
               <div key={trainer.id} className="space-y-3">
                 <EnhancedTrainerCard
                   trainer={trainer}
+                  layout="grid"
                   onViewProfile={handleViewProfile}
                   cardState={
                     isShortlisted(trainer.id) ? "shortlisted" : 
