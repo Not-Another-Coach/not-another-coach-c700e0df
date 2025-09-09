@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { CheckSquare, Bell, MessageCircle } from "lucide-react";
+import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { FloatingMessageButton } from "@/components/FloatingMessageButton";
 import { HighlightsCarousel } from "@/components/dashboard/HighlightsCarousel";
 import { MetricsSnapshot } from "@/components/dashboard/MetricsSnapshot";
@@ -102,6 +103,22 @@ export default function ClientDashboard() {
             <div className="flex items-center gap-3">
               <div className="font-bold text-xl text-foreground">FitQuest</div>
               <div className="text-muted-foreground">Dashboard</div>
+              {/* Your Journey Progress */}
+              {journeyProgress && (
+                <div className="flex items-center gap-2 ml-6 px-3 py-1 bg-primary/10 rounded-full">
+                  <div className="text-sm font-medium text-primary">
+                    Your Journey: {journeyProgress.percentage}% Complete
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => navigate('/client/journey')}
+                    className="text-xs h-6 px-2 text-primary hover:bg-primary/20"
+                  >
+                    View
+                  </Button>
+                </div>
+              )}
             </div>
             <div className="flex items-center gap-3">
               <Button variant="ghost" size="sm" className="h-9 w-9 p-0">
@@ -110,6 +127,8 @@ export default function ClientDashboard() {
               <Button variant="ghost" size="sm" className="h-9 w-9 p-0">
                 <MessageCircle className="h-4 w-4" />
               </Button>
+              {/* Profile Dropdown */}
+              {profile && <ProfileDropdown profile={profile} />}
             </div>
           </div>
         </div>

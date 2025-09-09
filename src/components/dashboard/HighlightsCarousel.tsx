@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ChevronLeft, ChevronRight, Play, Heart, Star } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play, Pause, Heart, Star } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -24,10 +24,22 @@ export function HighlightsCarousel() {
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(true);
 
   useEffect(() => {
     loadTodaysHighlights();
   }, [user]);
+
+  // Auto-cycle through highlights
+  useEffect(() => {
+    if (!isPlaying || highlights.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % highlights.length);
+    }, 4000); // Change every 4 seconds
+
+    return () => clearInterval(interval);
+  }, [isPlaying, highlights.length]);
 
   const loadTodaysHighlights = async () => {
     if (!user) return;
@@ -185,6 +197,16 @@ export function HighlightsCarousel() {
             {currentIndex + 1} of {highlights.length}
           </span>
           <div className="flex gap-1">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsPlaying(!isPlaying)}
+              disabled={highlights.length <= 1}
+              className="h-8 w-8 p-0"
+              title={isPlaying ? "Pause auto-scroll" : "Resume auto-scroll"}
+            >
+              {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+            </Button>
             <Button
               variant="outline"
               size="sm"

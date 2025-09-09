@@ -39,14 +39,8 @@ export function ClientActivityFeed() {
     try {
       const activities: ActivityItem[] = [];
 
-      // Load user's own recent activities
+      // Load user's own recent activities only - no mock data
       await loadUserActivities(activities);
-      
-      // Load social proof activities (mock data for MVP)
-      await loadSocialProofActivities(activities);
-      
-      // Load trainer activity updates
-      await loadTrainerActivities(activities);
 
       // Sort by timestamp descending
       activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
@@ -269,7 +263,7 @@ export function ClientActivityFeed() {
         {activities.length === 0 ? (
           <div className="text-center py-6 text-muted-foreground">
             <p>No recent activity</p>
-            <p className="text-sm mt-1">Start exploring trainers to see your activity here!</p>
+            <p className="text-sm mt-1">Your activity updates will appear here as you interact with trainers</p>
           </div>
         ) : (
           activities.map((activity) => (
@@ -278,9 +272,7 @@ export function ClientActivityFeed() {
               className={`flex items-start gap-3 p-3 rounded-lg transition-colors ${
                 activity.type === 'user_action' 
                   ? 'bg-primary-50 hover:bg-primary-100 cursor-pointer' 
-                  : activity.type === 'social_proof'
-                  ? 'bg-secondary-50 hover:bg-secondary-100 cursor-pointer'
-                  : 'bg-accent-50 hover:bg-accent-100 cursor-pointer'
+                  : 'bg-secondary-50 hover:bg-secondary-100 cursor-pointer'
               }`}
               onClick={() => handleActivityClick(activity)}
             >

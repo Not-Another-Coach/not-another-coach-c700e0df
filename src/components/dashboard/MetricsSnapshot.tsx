@@ -4,18 +4,19 @@ import { Heart, Search, Calendar, Package, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSavedTrainers } from '@/hooks/useSavedTrainers';
 import { useConversations } from '@/hooks/useConversations';
+import { useTrainerEngagement } from '@/hooks/useTrainerEngagement';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
 
 interface MetricsData {
   savedTrainers: number;
-  discoveryViewedToday: number;
+  shortlistedTrainers: number;
+  discoveryStageTrainers: number;
   nextCall: {
     date: string | null;
     trainerName: string | null;
   };
-  activePackages: number;
 }
 
 interface MetricsSnapshotProps {
@@ -27,17 +28,18 @@ export function MetricsSnapshot({ onTabChange }: MetricsSnapshotProps) {
   const { user } = useAuth();
   const { savedTrainers } = useSavedTrainers();
   const { conversations } = useConversations();
+  const { getOnlyShortlistedTrainers, getDiscoveryStageTrainers } = useTrainerEngagement();
   const [metrics, setMetrics] = useState<MetricsData>({
     savedTrainers: 0,
-    discoveryViewedToday: 0,
-    nextCall: { date: null, trainerName: null },
-    activePackages: 0
+    shortlistedTrainers: 0,
+    discoveryStageTrainers: 0,
+    nextCall: { date: null, trainerName: null }
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadMetrics();
-  }, [user, savedTrainers]);
+  }, [user, savedTrainers, getOnlyShortlistedTrainers, getDiscoveryStageTrainers]);
 
   const loadMetrics = async () => {
     if (!user) return;
@@ -57,19 +59,19 @@ export function MetricsSnapshot({ onTabChange }: MetricsSnapshotProps) {
         .order('scheduled_for', { ascending: true })
         .limit(1);
 
-      // For MVP: Set mock values for discovery views and packages
-      // In production, these would come from actual tracking tables
-      const today = new Date().toISOString().split('T')[0];
+      // Get shortlisted and discovery stage trainers
+      const shortlisted = getOnlyShortlistedTrainers();
+      const discoveryStage = getDiscoveryStageTrainers();
       
       setMetrics({
         savedTrainers: savedTrainers.length,
-        discoveryViewedToday: 0, // Mock data
+        shortlistedTrainers: shortlisted.length,
+        discoveryStageTrainers: discoveryStage.length,
         nextCall: {
           date: discoveryCalls?.[0]?.scheduled_for || null,
           trainerName: discoveryCalls?.[0]?.profiles ? 
             `${discoveryCalls[0].profiles.first_name} ${discoveryCalls[0].profiles.last_name}` : null
-        },
-        activePackages: 0 // Mock data for now
+        }
       });
     } catch (error) {
       console.error('Error loading metrics:', error);
@@ -122,66 +124,65 @@ export function MetricsSnapshot({ onTabChange }: MetricsSnapshotProps) {
           </CardContent>
         </Card>
 
-        {/* Discovery Viewed Today */}
+        {/* Shortlisted Trainers */}
         <Card 
           className="cursor-pointer hover:shadow-md transition-shadow bg-gradient-to-br from-secondary-50 to-secondary-100 border-secondary-200"
-          onClick={() => onTabChange('explore')}
+          onClick={() => navigateToMyTrainers('shortlisted')}
         >
           <CardContent className="p-2 flex flex-col items-center text-center">
             <div className="p-1 rounded-full bg-secondary-500/10 mb-1">
               <Search className="h-3 w-3 text-secondary-600" />
             </div>
             <div>
-              <p className="text-xs text-secondary-700 font-medium mb-0.5">Viewed</p>
-              <p className="text-lg font-bold text-secondary-800">{metrics.discoveryViewedToday}</p>
-              <p className="text-xs text-secondary-600">today</p>
+              <p className="text-xs text-secondary-700 font-medium mb-0.5">Shortlisted</p>
+              <p className="text-lg font-bold text-secondary-800">{metrics.shortlistedTrainers}</p>
             </div>
           </CardContent>
         </Card>
 
-        {/* Calls Booked */}
+        {/* Discovery Stage */}
         <Card 
           className="cursor-pointer hover:shadow-md transition-shadow bg-gradient-to-br from-accent-50 to-accent-100 border-accent-200"
           onClick={() => navigateToMyTrainers('discovery')}
         >
           <CardContent className="p-2 flex flex-col items-center text-center">
             <div className="p-1 rounded-full bg-accent-500/10 mb-1">
-              <Calendar className="h-3 w-3 text-accent-600" />
+              <Search className="h-3 w-3 text-accent-600" />
             </div>
             <div>
-              <p className="text-xs text-accent-700 font-medium mb-0.5">Calls</p>
+              <p className="text-xs text-accent-700 font-medium mb-0.5">Discovery</p>
+              <p className="text-lg font-bold text-accent-800">{metrics.discoveryStageTrainers}</p>
+              <p className="text-xs text-accent-600">in progress</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Discovery Calls Booked */}
+        <Card 
+          className="cursor-pointer hover:shadow-md transition-shadow bg-gradient-to-br from-success-50 to-success-100 border-success-200"
+          onClick={() => navigateToMyTrainers('discovery')}
+        >
+          <CardContent className="p-2 flex flex-col items-center text-center">
+            <div className="p-1 rounded-full bg-success-500/10 mb-1">
+              <Calendar className="h-3 w-3 text-success-600" />
+            </div>
+            <div>
+              <p className="text-xs text-success-700 font-medium mb-0.5">Calls</p>
               {metrics.nextCall.date ? (
                 <>
-                  <p className="text-sm font-bold text-accent-800">
+                  <p className="text-sm font-bold text-success-800">
                     {format(new Date(metrics.nextCall.date), 'EEE')}
                   </p>
-                  <p className="text-xs text-accent-600 truncate">
+                  <p className="text-xs text-success-600 truncate">
                     {format(new Date(metrics.nextCall.date), 'h:mm a')}
                   </p>
                 </>
               ) : (
                 <>
-                  <p className="text-lg font-bold text-accent-800">0</p>
-                  <p className="text-xs text-accent-600">upcoming</p>
+                  <p className="text-lg font-bold text-success-800">0</p>
+                  <p className="text-xs text-success-600">upcoming</p>
                 </>
               )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Packages Active */}
-        <Card 
-          className="cursor-pointer hover:shadow-md transition-shadow bg-gradient-to-br from-success-50 to-success-100 border-success-200"
-          onClick={() => onTabChange('payments')}
-        >
-          <CardContent className="p-2 flex flex-col items-center text-center">
-            <div className="p-1 rounded-full bg-success-500/10 mb-1">
-              <Package className="h-3 w-3 text-success-600" />
-            </div>
-            <div>
-              <p className="text-xs text-success-700 font-medium mb-0.5">Packages</p>
-              <p className="text-lg font-bold text-success-800">{metrics.activePackages}</p>
-              <p className="text-xs text-success-600">active</p>
             </div>
           </CardContent>
         </Card>

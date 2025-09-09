@@ -242,26 +242,13 @@ export const LiveActivityFeed = () => {
         </div>
       </CardHeader>
       <CardContent className="space-y-3 max-h-96 overflow-y-auto">
-        {/* 3 Week Streak Achievement - Only show for trainers with streak >= 3 */}
-        {isTrainer() && !streakLoading && streakCount >= 3 && (
-          <div className="flex items-start gap-3 p-3 rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200">
-            <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0 text-white">
-              🔥
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-green-800">{streakCount} Week Streak!</p>
-              <p className="text-sm mt-1 text-green-600">You've updated your profile {streakCount} weeks in a row</p>
-              <Badge variant="secondary" className="mt-2 bg-green-100 text-green-700">
-                Achievement Unlocked
-              </Badge>
-            </div>
-          </div>
-        )}
+        {/* Remove hardcoded achievements and streaks for clients */}
 
-        {/* Regular activity alerts including qualifications and specialties */}
+        {/* Activity alerts - filtered to relevant ones only */}
         {filteredActivities.length === 0 ? (
           <div className="text-center py-6 text-muted-foreground">
             <p>No {showFilter !== 'all' ? showFilter + ' ' : ''}activity found</p>
+            <p className="text-sm mt-1">Your activity updates will appear here</p>
           </div>
         ) : (
           filteredActivities.map((alert) => {
