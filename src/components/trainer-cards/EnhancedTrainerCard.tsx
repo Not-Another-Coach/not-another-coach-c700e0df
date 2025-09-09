@@ -62,11 +62,25 @@ export const EnhancedTrainerCard = memo(({
   const navigate = useNavigate();
   const { isTrainerSaved, saveTrainer, unsaveTrainer } = useSavedTrainers();
   
-  // Apply configuration if provided
-  const appliedConfig = useMemo(() => 
-    config ? TRAINER_CARD_CONFIGS[config] : null, 
-    [config]
-  );
+  // Use trainer-specific saved state
+  const isSaved = isTrainerSaved(trainer.id);
+
+  // Add visibility context - this will be passed to sub-components through their own hooks
+  const { stage } = useEngagementStage(trainer.id);
+  const { canViewContent, loading: visibilityLoading } = useContentVisibility({
+    trainerId: trainer.id,
+    engagementStage: stage || 'browsing'
+  });
+
+  // Apply configuration if provided, with automatic dashboardCarousel for explore status
+  const appliedConfig = useMemo(() => {
+    // If trainer is in explore status for client, use dashboardCarousel config
+    const exploreStages = ['browsing', 'liked', 'shortlisted'];
+    if (exploreStages.includes(stage || 'browsing') && !config) {
+      return TRAINER_CARD_CONFIGS['dashboardCarousel'];
+    }
+    return config ? TRAINER_CARD_CONFIGS[config] : null;
+  }, [config, stage]);
   
   const finalLayout = appliedConfig?.layout || layout;
   const finalAllowViewSwitching = appliedConfig?.allowViewSwitching ?? allowViewSwitching;
@@ -83,16 +97,6 @@ export const EnhancedTrainerCard = memo(({
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
-  
-  // Use trainer-specific saved state
-  const isSaved = isTrainerSaved(trainer.id);
-
-  // Add visibility context - this will be passed to sub-components through their own hooks
-  const { stage } = useEngagementStage(trainer.id);
-  const { canViewContent, loading: visibilityLoading } = useContentVisibility({
-    trainerId: trainer.id,
-    engagementStage: stage || 'browsing'
-  });
 
   // Available views in order - memoized to prevent recalculation
   const getAvailableViews = useCallback((): TrainerCardViewMode[] => {
