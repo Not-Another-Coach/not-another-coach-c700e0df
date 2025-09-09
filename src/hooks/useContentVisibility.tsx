@@ -71,6 +71,18 @@ export function useContentVisibility({ trainerId, engagementStage }: UseContentV
         const visibilityPromises = contentTypes.map(async (contentType) => {
           // Use group-based visibility check for better performance
           const visibility = await getContentVisibilityByGroup(trainerId, contentType, stageGroup);
+          
+          // Debug visibility fetching
+          if (contentType === 'gallery_images') {
+            console.log('useContentVisibility Debug - Gallery Images:', {
+              trainerId,
+              contentType,
+              stageGroup,
+              engagementStage,
+              visibility
+            });
+          }
+          
           return { contentType, visibility };
         });
 

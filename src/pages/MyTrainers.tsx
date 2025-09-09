@@ -400,7 +400,7 @@ export default function MyTrainers() {
                              isShortlisted={!!trainer.shortlistedAt}
                              cardState={trainer.status === 'shortlisted' ? 'shortlisted' : trainer.status === 'saved' ? 'saved' : 'default'}
                              initialView={getSmartInitialView(trainer)}
-                             onMoveToSaved={handleUnsaveTrainer}
+                             onMoveToSaved={handleSaveTrainer}
                              onRemoveCompletely={handleRemoveFromShortlist}
                            />
                          {!showComparison && (

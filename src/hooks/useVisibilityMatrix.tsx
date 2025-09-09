@@ -195,7 +195,25 @@ export function useVisibilityMatrix(): VisibilityMatrixHook {
       if (error) {
         console.error('Error getting content visibility by group:', error);
         // Fallback to system defaults
-        return await VisibilityConfigService.getDefaultVisibility(contentType, stageGroup);
+        const fallbackVisibility = await VisibilityConfigService.getDefaultVisibility(contentType, stageGroup);
+        console.log('useVisibilityMatrix Debug - Using Fallback:', {
+          trainerId,
+          contentType,
+          stageGroup,
+          fallbackVisibility,
+          error
+        });
+        return fallbackVisibility;
+      }
+
+      // Debug successful RPC call
+      if (contentType === 'gallery_images') {
+        console.log('useVisibilityMatrix Debug - RPC Success:', {
+          trainerId,
+          contentType,
+          stageGroup,
+          rpcResult: data
+        });
       }
 
       return data as VisibilityState;

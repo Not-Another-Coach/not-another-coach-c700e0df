@@ -59,6 +59,14 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
 
   const galleryVisibility = getVisibility('gallery_images');
 
+  // Debug visibility system
+  console.log('InstagramGalleryView Debug - Visibility:', {
+    trainerId: trainer.id,
+    engagementStage: stage || 'browsing',
+    galleryVisibility,
+    visibilityLoading
+  });
+
   useEffect(() => {
     const fetchTrainerImages = async () => {
       if (!trainer.id) return;
