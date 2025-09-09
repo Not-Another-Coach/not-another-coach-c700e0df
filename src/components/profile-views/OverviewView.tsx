@@ -128,6 +128,30 @@ export const OverviewView = ({ trainer, onMessage, onBookDiscovery }: OverviewVi
         </Card>
       )}
 
+      {/* Professional Milestones */}
+      {(trainer as any).professional_milestones && (trainer as any).professional_milestones.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              Professional Milestones
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {(trainer as any).professional_milestones.map((milestone: any, index: number) => (
+                <div key={`milestone-${index}`} className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
+                  <Badge variant="outline" className="shrink-0 text-xs">{milestone.year}</Badge>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium break-words">{milestone.event}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Action Buttons */}
       <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
         {onMessage && (
