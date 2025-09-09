@@ -5,24 +5,20 @@ import { useUnifiedTrainerData } from "@/hooks/useUnifiedTrainerData";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfileByType } from "@/hooks/useProfileByType";
 import { ErrorBoundary, TrainerDataErrorBoundary } from "@/components/ErrorBoundary";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EnhancedTrainerCard } from "@/components/trainer-cards/EnhancedTrainerCard";
-import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { FloatingMessageButton } from "@/components/FloatingMessageButton";
 import { ClientHeader } from "@/components/ClientHeader";
 import { SkeletonTrainerCard } from "@/components/ui/skeleton-trainer-card";
 import { 
   ArrowLeft, 
-  Filter,
   Users,
   BarChart3,
   RefreshCw
 } from "lucide-react";
 import { DiscoveryCallBookingModal } from "@/components/discovery-call/DiscoveryCallBookingModal";
-import { ClientRescheduleModal } from "@/components/dashboard/ClientRescheduleModal";
 
 export default function MyTrainers() {
   const navigate = useNavigate();
@@ -141,6 +137,22 @@ export default function MyTrainers() {
     await joinWaitlist(trainerId);
   };
 
+  // Smart initial view selection based on trainer content
+  const getSmartInitialView = (trainer: any) => {
+    // Check if trainer has testimonials with transformations
+    const testimonials = trainer.testimonials || [];
+    const hasTransformations = testimonials.some((t: any) => 
+      t.showImages && t.beforeImage && t.afterImage && t.consentGiven
+    );
+    
+    if (hasTransformations) {
+      return 'transformations';
+    }
+    
+    // Default to Instagram view for photo-focused trainers
+    return 'instagram';
+  };
+
   // Loading states
   if (!user || !profile) {
     return (
@@ -153,40 +165,63 @@ export default function MyTrainers() {
   // Show comparison view if active
   if (showComparison) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-4 mb-6">
-          <Button
-            onClick={() => setShowComparison(false)}
-            variant="ghost"
-            size="sm"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Trainers
-          </Button>
-          <h1 className="text-2xl font-bold">Compare Trainers</h1>
+      <ErrorBoundary>
+        <div className="min-h-screen bg-background">
+          {/* Header with Navigation */}
+          <ClientHeader 
+            profile={profile} 
+            activeTab="my-trainers"
+            showNavigation={true}
+          />
+
+          {/* Main Content */}
+          <main className="mx-auto px-6 lg:px-8 xl:px-12 py-6 space-y-6">
+            <div className="flex items-center gap-4 mb-6">
+              <Button
+                onClick={() => setShowComparison(false)}
+                variant="ghost"
+                size="sm"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Trainers
+              </Button>
+              <h1 className="text-2xl font-bold">Compare Trainers</h1>
+            </div>
+            
+            <ComparisonView 
+              trainers={getSelectedTrainersData() as any} 
+              onClose={() => setShowComparison(false)}
+            />
+          </main>
+
+          <FloatingMessageButton />
         </div>
-        
-        <ComparisonView 
-          trainers={getSelectedTrainersData() as any} 
-          onClose={() => setShowComparison(false)}
-        />
-      </div>
+      </ErrorBoundary>
     );
   }
 
   return (
     <ErrorBoundary>
-      <div className="space-y-6">
-        <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-bold">My Trainers</h1>
-          {error && (
-            <Badge variant="destructive" className="ml-2">
-              Error loading data
-            </Badge>
-          )}
-          <Button
-            onClick={refreshData}
-            variant="outline"
+      <div className="min-h-screen bg-background">
+        {/* Header with Navigation */}
+        <ClientHeader 
+          profile={profile} 
+          activeTab="my-trainers"
+          showNavigation={true}
+        />
+
+        {/* Main Content */}
+        <main className="mx-auto px-6 lg:px-8 xl:px-12 py-6 space-y-6">
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold">My Trainers</h1>
+            {error && (
+              <Badge variant="destructive" className="ml-2">
+                Error loading data
+              </Badge>
+            )}
+            <Button
+              onClick={refreshData}
+              variant="outline"
               size="sm"
               className="ml-auto"
               disabled={loading}
@@ -266,28 +301,29 @@ export default function MyTrainers() {
                       </Button>
                     </div>
                   ) : filteredTrainers.length > 0 ? (
-                    filteredTrainers.map((trainer) => (
-                      <div key={trainer.id} className="relative">
-                        <EnhancedTrainerCard
-                          trainer={trainer as any}
-                          onAddToShortlist={handleAddToShortlist}
-                          onStartConversation={handleStartConversation}
-                          onBookDiscoveryCall={handleBookDiscoveryCall}
-                          onViewProfile={handleViewProfile}
-                          isShortlisted={!!trainer.shortlistedAt}
-                        />
-                        {!showComparison && (
-                          <div className="absolute top-2 right-2">
-                            <input
-                              type="checkbox"
-                              checked={selectedForComparison.includes(trainer.id)}
-                              onChange={() => handleComparisonToggle(trainer.id)}
-                              className="rounded"
-                            />
-                          </div>
-                        )}
-                      </div>
-                    ))
+                     filteredTrainers.map((trainer) => (
+                       <div key={trainer.id} className="relative">
+                         <EnhancedTrainerCard
+                           trainer={trainer as any}
+                           onAddToShortlist={handleAddToShortlist}
+                           onStartConversation={handleStartConversation}
+                           onBookDiscoveryCall={handleBookDiscoveryCall}
+                           onViewProfile={handleViewProfile}
+                           isShortlisted={!!trainer.shortlistedAt}
+                           initialView={getSmartInitialView(trainer)}
+                         />
+                         {!showComparison && (
+                           <div className="absolute top-2 right-2">
+                             <input
+                               type="checkbox"
+                               checked={selectedForComparison.includes(trainer.id)}
+                               onChange={() => handleComparisonToggle(trainer.id)}
+                               className="rounded"
+                             />
+                           </div>
+                         )}
+                       </div>
+                     ))
                   ) : (
                     <div className="col-span-full text-center py-12">
                       <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -314,21 +350,22 @@ export default function MyTrainers() {
                   )}
                 </div>
               </TrainerDataErrorBoundary>
-          </TabsContent>
-        </Tabs>
+            </TabsContent>
+          </Tabs>
+        </main>
+
+        <FloatingMessageButton />
+
+        {/* Discovery Call Booking Modal */}
+        <DiscoveryCallBookingModal
+          isOpen={!!selectedTrainerForCall}
+          trainer={trainers.find(t => t.id === selectedTrainerForCall)}
+          onClose={() => {
+            setSelectedTrainerForCall(null);
+            refreshData();
+          }}
+        />
       </div>
-
-      <FloatingMessageButton />
-
-      {/* Discovery Call Booking Modal */}
-      <DiscoveryCallBookingModal
-        isOpen={!!selectedTrainerForCall}
-        trainer={trainers.find(t => t.id === selectedTrainerForCall)}
-        onClose={() => {
-          setSelectedTrainerForCall(null);
-          refreshData();
-        }}
-      />
     </ErrorBoundary>
   );
 }
