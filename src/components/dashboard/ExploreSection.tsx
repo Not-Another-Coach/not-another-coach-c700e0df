@@ -296,7 +296,8 @@ export function ExploreSection({ isActiveClient, journeyProgress }: ExploreSecti
                       <div key={trainer.id} className="w-full flex-shrink-0">
                         <EnhancedTrainerCard
                           trainer={trainer}
-                          config="explore"
+                          layout="grid"
+                          allowViewSwitching={true}
                           onViewProfile={handleViewProfile}
                           onAddToShortlist={handleAddToShortlist}
                           onStartConversation={handleStartConversation}
