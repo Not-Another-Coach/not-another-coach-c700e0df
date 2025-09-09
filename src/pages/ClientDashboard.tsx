@@ -77,6 +77,7 @@ export default function ClientDashboard() {
       
       // If survey is complete but they're still on profile_setup stage, trigger journey update
       if (surveyCompleted && journeyProgress?.stage === 'preferences_identified') {
+        // Don't redirect, just refetch journey to update the stage
         refetchJourney();
       }
     }
@@ -124,18 +125,20 @@ export default function ClientDashboard() {
         <div className="mx-auto px-6 lg:px-8 xl:px-12 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="font-bold text-xl text-foreground">FitQuest</div>
-              <div className="text-muted-foreground">Dashboard</div>
-              {journeyProgress && (
-                <div className="text-xs text-muted-foreground/80 font-medium">
-                  {formatJourneyStage(journeyProgress.stage)}
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold">
+                    FQ
+                  </div>
                 </div>
-              )}
+                <div className="font-bold text-xl text-foreground">FitQuest</div>
+              </div>
+              <div className="text-muted-foreground">Your Journey</div>
               {/* Your Journey Progress */}
               {journeyProgress && (
                 <div className="flex items-center gap-2 ml-6 px-3 py-1 bg-primary/10 rounded-full">
                   <div className="text-sm font-medium text-primary">
-                    Your Journey: {journeyProgress.percentage}% Complete
+                    {formatJourneyStage(journeyProgress.stage)} • {journeyProgress.percentage}% Complete
                   </div>
                   <Button 
                     variant="ghost" 

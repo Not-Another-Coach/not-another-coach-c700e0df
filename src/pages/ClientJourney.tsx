@@ -95,18 +95,20 @@ const ClientJourney = () => {
         <div className="mx-auto px-6 lg:px-8 xl:px-12 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <button 
-                onClick={() => navigate('/client/dashboard')}
-                className="font-bold text-xl text-foreground hover:text-primary transition-colors cursor-pointer"
-              >
-                FitQuest
-              </button>
-              <div className="text-muted-foreground">Your Journey</div>
-              {progress && (
-                <div className="text-xs text-muted-foreground/80 font-medium">
-                  {formatJourneyStage(progress.stage)}
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold">
+                    FQ
+                  </div>
                 </div>
-              )}
+                <button 
+                  onClick={() => navigate('/client/dashboard')}
+                  className="font-bold text-xl text-foreground hover:text-primary transition-colors cursor-pointer"
+                >
+                  FitQuest
+                </button>
+              </div>
+              <div className="text-muted-foreground">Your Journey</div>
             </div>
             <div className="flex items-center gap-3">
               {/* Notifications */}
@@ -226,7 +228,8 @@ const ClientJourney = () => {
               const getNavigationForStep = (stepTitle: string) => {
                 const title = stepTitle.toLowerCase();
                 if (title.includes('preferences') || title.includes('survey')) {
-                  return () => navigate('/client-survey');
+                  // If survey is already completed, don't navigate away
+                  return null;
                 } else if (title.includes('exploring') && title.includes('coach')) {
                   return () => navigate('/client/explore');
                 } else if (title.includes('getting') && title.includes('know') && title.includes('coach')) {
