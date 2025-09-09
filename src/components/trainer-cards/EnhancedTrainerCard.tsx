@@ -617,22 +617,11 @@ export const EnhancedTrainerCard = memo(({
         "bg-gradient-to-br from-card to-secondary-50 h-80"
       )}>
         <CardContent className="p-0 h-full relative">
-          {/* Main image/view content */}
+          {/* Main image/view content - Always show InstagramGalleryView for dashboard carousel */}
           <div className="h-48 relative overflow-hidden rounded-t-lg">
-            {currentView === 'instagram' ? (
-              <InstagramGalleryView trainer={trainer}>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-              </InstagramGalleryView>
-            ) : (
-              <div className="relative h-full">
-                <img 
-                  src={(trainer.profilePhotoUrl || trainer.image) || '/placeholder.svg'} 
-                  alt={trainer.name}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-              </div>
-            )}
+            <InstagramGalleryView trainer={trainer}>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+            </InstagramGalleryView>
             
             {/* Top Badge */}
             {stateBadge && finalShowEngagementBadge && (
