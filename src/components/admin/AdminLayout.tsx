@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { Card, CardContent } from "@/components/ui/card";
-import { AdminHeader } from "@/components/AdminHeader";
+import { AdminCustomHeader } from "@/components/layout/AdminCustomHeader";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -39,12 +39,11 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
   return (
     <div className="flex flex-col min-h-screen w-full bg-background">
-      <AdminHeader 
+      <AdminCustomHeader 
         profile={{
           ...user,
           user_type: 'admin'
         }}
-        showNavigation={true}
       />
 
       <main className="flex-1 container mx-auto px-4 py-6">
