@@ -519,7 +519,7 @@ export default function MyTrainers() {
                           View All Trainers
                         </Button>
                       )}
-                      <Button onClick={() => navigate('/trainers')}>
+                      <Button onClick={() => navigate('/client/explore')}>
                         Explore Trainers
                       </Button>
                     </div>
