@@ -160,6 +160,14 @@ export const TRAINER_CARD_CONFIGS: Record<string, TrainerCardConfig> = {
     hideViewControls: false,
     availableViews: ['instagram', 'features']
   },
+  dashboardCarousel: {
+    layout: 'carousel',
+    allowViewSwitching: true,
+    showEngagementBadge: true,
+    compactActions: true,
+    hideViewControls: false,
+    availableViews: ['instagram', 'features']
+  },
   explore: {
     layout: 'full',
     allowViewSwitching: true,

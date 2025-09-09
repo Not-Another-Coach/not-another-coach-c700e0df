@@ -173,13 +173,17 @@ export function MyTrainersCarousel({ onTabChange }: MyTrainersCarouselProps) {
           <div key={trainer.id} onClick={() => handleViewProfile(trainer.id)}>
             <EnhancedTrainerCard
               trainer={trainer as AnyTrainer}
-              config="carousel"
+              config="dashboardCarousel"
               cardState={getCardState(trainer.id)}
               onViewProfile={handleViewProfile}
-              onStartConversation={handleMessage}
-              onBookDiscoveryCall={handleBookDiscoveryCall}
-              trainerOffersDiscoveryCalls={trainer.offersDiscoveryCall || (trainer as any).free_discovery_call}
+              // Remove all action buttons - only allow profile viewing
+              onStartConversation={undefined}
+              onBookDiscoveryCall={undefined}
+              trainerOffersDiscoveryCalls={false}
               initialView="instagram"
+              // Hide bottom action bar completely
+              compactActions={true}
+              hideViewControls={false}
             />
           </div>
         ))}

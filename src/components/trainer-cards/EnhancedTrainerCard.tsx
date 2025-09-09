@@ -233,9 +233,9 @@ export const EnhancedTrainerCard = memo(({
   const renderActionButtons = () => {
     const buttons = [];
 
-    // For carousel layout, show compact actions
+    // For carousel layout, show compact actions or no actions at all
     if (finalLayout === 'carousel' && finalCompactActions) {
-      // Primary action button based on state
+      // Only show actions if handlers are provided
       if (onStartConversation) {
         buttons.push(
           <Button
@@ -272,6 +272,7 @@ export const EnhancedTrainerCard = memo(({
         );
       }
       
+      // For carousel with no actions, return empty array
       return buttons.slice(0, 2); // Limit to 2 buttons for carousel
     }
 
@@ -669,10 +670,12 @@ export const EnhancedTrainerCard = memo(({
               )}
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-2">
-              {renderActionButtons()}
-            </div>
+            {/* Action Buttons - Only show if there are actions */}
+            {renderActionButtons().length > 0 && (
+              <div className="flex gap-2">
+                {renderActionButtons()}
+              </div>
+            )}
           </div>
 
           {/* Interactive elements for carousel */}
@@ -748,8 +751,8 @@ export const EnhancedTrainerCard = memo(({
       {/* Enhanced Trainer Card */}
       {finalLayout === 'carousel' ? renderCarouselView() : renderCurrentView()}
       
-      {/* Bottom Action Bar - Only show for non-carousel layouts or when actions are needed */}
-      {(finalLayout !== 'carousel' || !finalCompactActions) && (
+      {/* Bottom Action Bar - Only show when there are actions to display */}
+      {(finalLayout !== 'carousel' || !finalCompactActions) && renderActionButtons().length > 0 && (
         <div className="absolute bottom-0 left-0 right-0 z-40 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 pt-6">
           <div className="flex gap-2">
             {renderActionButtons()}
