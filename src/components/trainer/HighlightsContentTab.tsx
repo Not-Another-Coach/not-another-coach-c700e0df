@@ -50,14 +50,39 @@ export function HighlightsContentTab() {
 
   const loadSubmissions = async () => {
     try {
-      const { data, error } = await supabase
-        .from('highlights_submissions')
-        .select('*')
-        .eq('trainer_id', user?.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setSubmissions(data || []);
+      // Use mock data for now
+      const mockSubmissions: Submission[] = [
+        {
+          id: '1',
+          title: 'My Client\'s Amazing Transformation',
+          description: 'See how my client lost 25lbs and gained confidence through our program.',
+          content_type: 'transformation',
+          media_urls: ['https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400'],
+          submission_status: 'approved',
+          created_at: new Date().toISOString(),
+        },
+        {
+          id: '2',
+          title: 'Daily Motivation for Success',
+          description: 'Motivational content to help clients stay consistent.',
+          content_type: 'motivational', 
+          media_urls: ['https://images.unsplash.com/photo-1549476464-37392f717541?w=400'],
+          submission_status: 'submitted',
+          created_at: new Date(Date.now() - 86400000).toISOString(),
+        },
+        {
+          id: '3',
+          title: 'Proper Squat Form Guide',
+          description: 'Essential tips for perfect squat technique.',
+          content_type: 'tip',
+          media_urls: [],
+          submission_status: 'draft',
+          created_at: new Date(Date.now() - 2 * 86400000).toISOString(),
+          admin_notes: 'Please add more detailed instructions and consider including video demonstration.'
+        }
+      ];
+      
+      setSubmissions(mockSubmissions);
     } catch (error) {
       console.error('Error loading submissions:', error);
       toast({

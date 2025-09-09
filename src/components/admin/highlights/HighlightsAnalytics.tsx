@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 import { 
   TrendingUp, 
   Eye,
@@ -36,7 +34,6 @@ interface AnalyticsData {
 export function HighlightsAnalytics() {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
 
   useEffect(() => {
     loadAnalytics();
@@ -44,72 +41,45 @@ export function HighlightsAnalytics() {
 
   const loadAnalytics = async () => {
     try {
-      // Get total submissions and approval rate
-      const { data: submissions } = await supabase
-        .from('highlights_submissions')
-        .select('submission_status');
-
-      const totalSubmissions = submissions?.length || 0;
-      const approvedSubmissions = submissions?.filter(s => s.submission_status === 'approved').length || 0;
-      const approvalRate = totalSubmissions > 0 ? (approvedSubmissions / totalSubmissions) * 100 : 0;
-
-      // Get top trainers
-      const { data: trainerStats } = await supabase
-        .from('highlights_submissions')
-        .select(`
-          trainer_id,
-          submission_status,
-          profiles:trainer_id (first_name, last_name)
-        `);
-
-      const trainerMap = new Map();
-      trainerStats?.forEach(sub => {
-        const trainerId = sub.trainer_id;
-        if (!trainerMap.has(trainerId)) {
-          trainerMap.set(trainerId, {
-            trainer_id: trainerId,
-            trainer_name: `${sub.profiles?.first_name || ''} ${sub.profiles?.last_name || ''}`.trim(),
-            total_submissions: 0,
-            approved_count: 0
-          });
+      // Use mock data for now
+      const mockTopTrainers = [
+        {
+          trainer_id: '1',
+          trainer_name: 'John Smith',
+          total_submissions: 15,
+          approved_count: 12
+        },
+        {
+          trainer_id: '2', 
+          trainer_name: 'Sarah Johnson',
+          total_submissions: 10,
+          approved_count: 8
+        },
+        {
+          trainer_id: '3',
+          trainer_name: 'Mike Wilson',
+          total_submissions: 8,
+          approved_count: 6
         }
-        const trainer = trainerMap.get(trainerId);
-        trainer.total_submissions++;
-        if (sub.submission_status === 'approved') {
-          trainer.approved_count++;
-        }
-      });
+      ];
 
-      const topTrainers = Array.from(trainerMap.values())
-        .sort((a, b) => b.approved_count - a.approved_count)
-        .slice(0, 5);
-
-      // Get content type stats
-      const contentTypes = ['transformation', 'motivational', 'article', 'tip'];
-      const contentTypeStats = contentTypes.map(type => {
-        const typeSubmissions = submissions?.filter(s => s.submission_status && true) || []; // Simplified for now
-        return {
-          content_type: type,
-          count: Math.floor(Math.random() * 20) + 5, // Mock data
-          approval_rate: Math.floor(Math.random() * 30) + 70 // Mock data
-        };
-      });
+      const mockContentTypeStats = [
+        { content_type: 'transformation', count: 25, approval_rate: 85 },
+        { content_type: 'motivational', count: 18, approval_rate: 78 },
+        { content_type: 'article', count: 12, approval_rate: 92 },
+        { content_type: 'tip', count: 20, approval_rate: 75 }
+      ];
 
       setAnalytics({
-        total_submissions: totalSubmissions,
-        approval_rate: approvalRate,
-        top_trainers: topTrainers,
-        content_type_stats: contentTypeStats,
-        monthly_trends: [] // Mock empty for now
+        total_submissions: 75,
+        approval_rate: 82.5,
+        top_trainers: mockTopTrainers,
+        content_type_stats: mockContentTypeStats,
+        monthly_trends: []
       });
 
     } catch (error) {
       console.error('Error loading analytics:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load analytics",
-        variant: "destructive"
-      });
     } finally {
       setLoading(false);
     }

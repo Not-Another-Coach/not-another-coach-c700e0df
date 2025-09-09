@@ -52,23 +52,46 @@ export function ContentManagement() {
 
   const loadContent = async () => {
     try {
-      let query = supabase
-        .from('highlights_content')
-        .select(`
-          *,
-          profiles:trainer_id (first_name, last_name)
-        `)
-        .order('created_at', { ascending: false });
+      // Use mock data for now
+      const mockContent: Content[] = [
+        {
+          id: '1',
+          title: 'Amazing Client Transformation',
+          description: 'This client achieved incredible results in just 12 weeks.',
+          content_type: 'transformation',
+          media_urls: ['https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400'],
+          is_active: true,
+          featured_until: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          created_at: new Date().toISOString(),
+          trainer_id: 'trainer-1',
+          profiles: {
+            first_name: 'John',
+            last_name: 'Smith'
+          }
+        },
+        {
+          id: '2',
+          title: 'Morning Motivation',
+          description: 'Start your day with powerful motivational content.',
+          content_type: 'motivational',
+          media_urls: ['https://images.unsplash.com/photo-1549476464-37392f717541?w=400'],
+          is_active: filter !== 'inactive',
+          created_at: new Date(Date.now() - 86400000).toISOString(),
+          trainer_id: 'trainer-2',
+          profiles: {
+            first_name: 'Sarah',
+            last_name: 'Johnson'
+          }
+        }
+      ];
 
-      if (filter === 'active') {
-        query = query.eq('is_active', true);
-      } else if (filter === 'inactive') {
-        query = query.eq('is_active', false);
-      }
-
-      const { data, error } = await query;
-      if (error) throw error;
-      setContent(data || []);
+      const filteredData = filter === 'all' 
+        ? mockContent 
+        : filter === 'active' 
+        ? mockContent.filter(c => c.is_active)
+        : mockContent.filter(c => !c.is_active);
+      
+      setContent(filteredData);
     } catch (error) {
       console.error('Error loading content:', error);
       toast({

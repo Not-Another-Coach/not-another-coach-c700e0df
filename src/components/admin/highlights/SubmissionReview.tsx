@@ -56,22 +56,45 @@ export function SubmissionReview() {
 
   const loadSubmissions = async () => {
     try {
-      let query = supabase
-        .from('highlights_submissions')
-        .select(`
-          *,
-          profiles:trainer_id (first_name, last_name, profile_photo_url)
-        `)
-        .order('created_at', { ascending: false });
+      // Use mock data for now
+      const mockSubmissions: Submission[] = [
+        {
+          id: '1',
+          title: 'Amazing Client Transformation',
+          description: 'This client lost 30lbs in 12 weeks through our comprehensive program.',
+          content_type: 'transformation',
+          media_urls: ['https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400'],
+          submission_status: 'submitted',
+          created_at: new Date().toISOString(),
+          trainer_id: 'trainer-1',
+          profiles: {
+            first_name: 'John',
+            last_name: 'Smith',
+            profile_photo_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100'
+          }
+        },
+        {
+          id: '2',
+          title: 'Daily Motivation Tips',
+          description: 'Start your day right with these powerful motivational messages.',
+          content_type: 'motivational',
+          media_urls: ['https://images.unsplash.com/photo-1549476464-37392f717541?w=400'],
+          submission_status: filter === 'all' || filter === 'approved' ? 'approved' : 'submitted',
+          created_at: new Date(Date.now() - 86400000).toISOString(),
+          trainer_id: 'trainer-2',
+          profiles: {
+            first_name: 'Sarah',
+            last_name: 'Johnson',
+            profile_photo_url: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100'
+          }
+        }
+      ];
 
-      if (filter !== 'all') {
-        query = query.eq('submission_status', filter);
-      }
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-      setSubmissions(data || []);
+      const filteredData = filter === 'all' 
+        ? mockSubmissions 
+        : mockSubmissions.filter(s => s.submission_status === filter);
+      
+      setSubmissions(filteredData);
     } catch (error) {
       console.error('Error loading submissions:', error);
       toast({

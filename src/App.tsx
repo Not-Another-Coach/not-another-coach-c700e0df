@@ -17,6 +17,7 @@ import TrainerDashboard from "./pages/TrainerDashboard";
 import TrainerProfileSetup from "./pages/TrainerProfileSetup";
 import TrainerSettings from "./pages/TrainerSettings";
 import { AdminDashboard } from "./pages/AdminDashboard";
+import { AdminHighlights } from "./pages/AdminHighlights";
 import { TrainerProfile } from "./pages/TrainerProfile";
 import { Messaging } from "./pages/Messaging";
 import Documentation from "./pages/Documentation";
@@ -71,6 +72,7 @@ const App = () => (
                 <Route path="/trainer/settings" element={<TrainerSettings />} />
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/admin/highlights" element={<AdminHighlights />} />
                 <Route path="/admin/diagnostics" element={<AdminDiagnostics />} />
                 
                 {/* Admin function pages */}

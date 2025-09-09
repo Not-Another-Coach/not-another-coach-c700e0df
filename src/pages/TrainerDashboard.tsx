@@ -25,6 +25,7 @@ import { ClientOnboardingManagement } from "@/components/coach/ClientOnboardingM
 import { OnboardingSummaryWidget } from "@/components/dashboard/OnboardingSummaryWidget";
 import { GoalsSection } from "@/components/goals/GoalsSection";
 import { WeeklyExecutionCard } from "@/components/dashboard/WeeklyExecutionCard";
+import { HighlightsContentTab } from "@/components/trainer/HighlightsContentTab";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -376,12 +377,14 @@ const TrainerDashboard = () => {
                   {activeView === 'all-prospects' && <UserSearch className="w-4 h-4" />}
                   {activeView === 'templates' && <CheckCircle className="w-4 h-4" />}
                   {activeView === 'goals' && <Goal className="w-4 h-4" />}
+                  {activeView === 'content' && <FileText className="w-4 h-4" />}
                   {activeView === 'payments' && <CreditCard className="w-4 h-4" />}
                   {activeView === 'dashboard' && 'Dashboard'}
                   {activeView === 'clients' && `Clients (${activeClientsCount})`}
                   {activeView === 'all-prospects' && `Prospects (${prospectsCount + (waitlistEntries?.length || 0)})`}
                   {activeView === 'templates' && 'Templates'}
                   {activeView === 'goals' && 'Goals'}
+                  {activeView === 'content' && 'Content'}
                   {activeView === 'payments' && 'Payments'}
                 </span>
                 {showMobileMenu ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
@@ -433,6 +436,15 @@ const TrainerDashboard = () => {
                   >
                     <Goal className="w-4 h-4" />
                     Goals
+                  </Button>
+                  <Button
+                    variant={activeView === 'content' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => {setActiveView('content'); setShowMobileMenu(false);}}
+                    className="flex items-center gap-2 w-full justify-start"
+                  >
+                    <FileText className="w-4 h-4" />
+                    Content
                   </Button>
                   <Button
                     variant={activeView === 'payments' ? 'default' : 'ghost'}
@@ -502,13 +514,23 @@ const TrainerDashboard = () => {
             <span className="lg:hidden hidden md:inline">Goals</span>
           </Button>
           
+          <Button
+            variant={activeView === 'content' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setActiveView('content')}
+            className="flex items-center gap-2 flex-shrink-0"
+          >
+            <FileText className="w-4 h-4" />
+            <span className="hidden lg:inline">Content</span>
+          </Button>
+          
               <Button
                 variant={activeView === 'payments' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setActiveView('payments')}
                 className="flex items-center gap-2 flex-shrink-0"
               >
-                <CreditCard className="w-4 h-4" />
+                <CreditCard className="w-4 w-4" />
                 <span className="hidden lg:inline">Payment & Payouts</span>
                 <span className="lg:hidden hidden md:inline">Payments</span>
               </Button>
@@ -755,6 +777,12 @@ const TrainerDashboard = () => {
         
         {activeView === 'goals' && (
           <GoalsSection />
+        )}
+        
+        {activeView === 'content' && (
+          <div className="space-y-6">
+            <HighlightsContentTab />
+          </div>
         )}
         
         {activeView === 'payments' && (

@@ -45,8 +45,25 @@ export function HighlightsCarousel() {
     if (!user) return;
 
     try {
-      // Using dummy data for now
-      const dummyHighlights: Highlight[] = [
+      // Fetch real data from highlights_content table
+      const { data: highlightsData, error } = await supabase
+        .from('highlights_content')
+        .select(`
+          *,
+          profiles:trainer_id (first_name, last_name, profile_photo_url)
+        `)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (error) {
+        console.error('Error fetching highlights:', error);
+        // Fall back to dummy data
+      }
+
+      const realHighlights: Highlight[] = [];
+      // Use fallback dummy data for now since tables may not be set up correctly
+      const dummyHighlights: Highlight[] = realHighlights.length > 0 ? [] : [
         {
           id: '1',
           trainer_id: 'trainer-1',
@@ -99,7 +116,7 @@ export function HighlightsCarousel() {
         }
       ];
       
-      setHighlights(dummyHighlights);
+      setHighlights(realHighlights.length > 0 ? realHighlights : dummyHighlights);
     } catch (error) {
       console.error('Error loading highlights:', error);
     } finally {

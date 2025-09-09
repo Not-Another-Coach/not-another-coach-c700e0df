@@ -34,6 +34,7 @@ export function AdminHeader({
     // High Priority
     { key: "dashboard", label: "Dashboard", icon: Home, path: "/admin" },
     { key: "users", label: "Users", icon: Users, path: "/admin/users" },
+    { key: "highlights", label: "Highlights", icon: FileText, path: "/admin/highlights" },
     { key: "verification", label: "Verification", icon: Shield, path: "/admin/verification" },
     { key: "publications", label: "Publications", icon: FileText, path: "/admin/publications" },
     
