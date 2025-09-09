@@ -107,18 +107,53 @@ export function MyTrainersCarousel({ onTabChange }: MyTrainersCarouselProps) {
             Discover Trainers
           </Button>
         </div>
-        <Card className="p-8 text-center bg-gradient-to-br from-muted to-secondary-50">
-          <CardContent>
-            <Heart className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-            <h3 className="text-lg font-semibold text-foreground mb-2">
-              No trainers saved yet
-            </h3>
-            <p className="text-muted-foreground mb-4">
-              Start exploring to find and save trainers you're interested in.
-            </p>
-            <Button onClick={() => onTabChange('explore')}>
-              Explore Trainers
-            </Button>
+        
+        {/* Enhanced Empty State matching the explore design */}
+        <Card className="text-center py-16 px-6 relative overflow-hidden">
+          <CardContent className="p-0">
+            {/* Background gradient */}
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent opacity-60" />
+            <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-background/80" />
+            
+            <div className="relative z-10 max-w-2xl mx-auto">
+              {/* Animated Icon */}
+              <div className="mb-8">
+                <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-primary/20 via-primary/10 to-transparent flex items-center justify-center shadow-lg">
+                  <Heart className="h-10 w-10 text-primary" />
+                </div>
+              </div>
+
+              {/* Progress badge */}
+              <div className="mb-4">
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-muted/50 text-muted-foreground">
+                  Your fitness journey starts here
+                </span>
+              </div>
+
+              {/* Main content */}
+              <h3 className="text-2xl font-bold mb-4 text-foreground">
+                Let's find a trainer that matches your goals 💪
+              </h3>
+              
+              <p className="text-muted-foreground mb-8 text-lg leading-relaxed">
+                Browse through our curated trainers and start building your fitness journey
+              </p>
+
+              {/* Action buttons */}
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button
+                  onClick={() => onTabChange('explore')}
+                  size="lg"
+                  className="group relative overflow-hidden bg-primary hover:bg-primary/90 shadow-lg"
+                >
+                  <span className="relative z-10 flex items-center gap-2">
+                    Explore Trainers
+                    <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </Button>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
