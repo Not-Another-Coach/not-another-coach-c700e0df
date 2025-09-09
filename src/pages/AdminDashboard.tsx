@@ -5,7 +5,6 @@ import { AdminAnalyticsDashboard } from "@/components/admin/AdminAnalyticsDashbo
 import { AdminLiveActivityFeed } from "@/components/admin/AdminLiveActivityFeed";
 import { SpecialtyRequestWidget } from "@/components/alerts/SpecialtyRequestAlerts";
 import { AdminLayout } from "@/components/admin/AdminLayout";
-import { Trainer4StatusFixer } from "@/components/admin/Trainer4StatusFixer";
 
 export const AdminDashboard = () => {
   const { user } = useAuth();
@@ -33,10 +32,7 @@ export const AdminDashboard = () => {
         {/* Alert Widgets */}
         <Card>
           <CardContent className="p-6">
-            <div className="grid gap-4 md:grid-cols-2">
-              <SpecialtyRequestWidget />
-              <Trainer4StatusFixer />
-            </div>
+            <SpecialtyRequestWidget />
           </CardContent>
         </Card>
 
