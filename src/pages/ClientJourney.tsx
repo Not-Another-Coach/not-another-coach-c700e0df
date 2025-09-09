@@ -1,5 +1,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useClientJourneyProgress } from "@/hooks/useClientJourneyProgress";
+import { useClientProfile } from "@/hooks/useClientProfile";
+import { ClientHeader } from "@/components/ClientHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -9,34 +11,39 @@ import { useNavigate } from "react-router-dom";
 
 const ClientJourney = () => {
   const { user } = useAuth();
+  const { profile } = useClientProfile();
   const { progress, loading } = useClientJourneyProgress();
   const navigate = useNavigate();
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading your journey...</p>
+      <div className="min-h-screen bg-background">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading your journey...</p>
+          </div>
         </div>
       </div>
     );
   }
 
-  if (!progress) {
+  if (!progress || !profile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 flex items-center justify-center">
-        <Card className="max-w-md">
-          <CardContent className="pt-6 text-center">
-            <p className="text-muted-foreground">No journey data available</p>
-            <Button 
-              onClick={() => navigate('/client/dashboard')} 
-              className="mt-4"
-            >
-              Return to Dashboard
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-background">
+        <div className="flex items-center justify-center min-h-screen">
+          <Card className="max-w-md">
+            <CardContent className="pt-6 text-center">
+              <p className="text-muted-foreground">No journey data available</p>
+              <Button 
+                onClick={() => navigate('/client/dashboard')} 
+                className="mt-4"
+              >
+                Return to Dashboard
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -50,8 +57,16 @@ const ClientJourney = () => {
   const currentStageIndex = progress.currentStageIndex;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-background">
+      {/* Header with Navigation */}
+      <ClientHeader 
+        profile={profile} 
+        activeTab="summary"
+        showNavigation={true}
+      />
+
+      {/* Main Content */}
+      <main className="mx-auto px-6 lg:px-8 xl:px-12 py-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <Button 
@@ -195,7 +210,7 @@ const ClientJourney = () => {
             </Card>
           )}
         </div>
-      </div>
+      </main>
     </div>
   );
 };

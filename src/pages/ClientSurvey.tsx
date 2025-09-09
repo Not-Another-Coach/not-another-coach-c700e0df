@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useClientProfile } from "@/hooks/useClientProfile";
 import { useUserTypeChecks } from "@/hooks/useUserType";
 import { useToast } from "@/hooks/use-toast";
+import { ClientHeader } from "@/components/ClientHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -431,23 +432,24 @@ const ClientSurvey = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-card border-b">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-4 gap-3">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/')}
-              className="hidden sm:flex"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Home
-            </Button>
+      {/* Header with Navigation */}
+      {profile && (
+        <ClientHeader 
+          profile={profile} 
+          activeTab="preferences"
+          showNavigation={true}
+        />
+      )}
+
+      {/* Survey Progress & Content */}
+      <div className="pb-16 sm:pb-0">
+        {/* Progress indicator - only show after header */}
+        <div className="bg-card border-b px-4 py-3">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
             <div className="flex-1 min-w-0">
-              <h1 className="text-lg sm:text-xl font-bold truncate">
+              <h2 className="text-lg sm:text-xl font-bold truncate">
                 {isFullyComplete() ? 'Profile Settings' : 'Find Your Perfect Trainer'}
-              </h1>
+              </h2>
               <p className="text-xs sm:text-sm text-muted-foreground">
                 {isFullyComplete() 
                   ? 'Manage your fitness preferences' 

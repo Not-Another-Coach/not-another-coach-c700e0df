@@ -27,6 +27,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import AdminDiagnostics from "@/pages/AdminDiagnostics";
 import { PaymentManagement } from "./pages/PaymentManagement";
 import ClientExplore from "./pages/ClientExplore";
+import ClientPayments from "./pages/ClientPayments";
 
 // Admin pages
 import UserManagement from "./pages/admin/UserManagement";
@@ -60,6 +61,7 @@ const App = () => (
                 <Route path="/auth/callback" element={<AuthCallback />} />
                 <Route path="/client/dashboard" element={<ClientDashboard />} />
                 <Route path="/client/explore" element={<ClientExplore />} />
+                <Route path="/client/payments" element={<ClientPayments />} />
                 <Route path="/my-trainers" element={<MyTrainers />} />
                 <Route path="/client-survey" element={<ClientSurvey />} />
                 <Route path="/client/journey" element={<ClientJourney />} />

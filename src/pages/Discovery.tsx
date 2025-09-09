@@ -7,6 +7,7 @@ import { useRealTrainers } from '@/hooks/useRealTrainers';
 import { useSavedTrainers } from '@/hooks/useSavedTrainers';
 import { useJourneyProgress } from '@/hooks/useJourneyProgress';
 import { SwipeableInstagramCard } from '@/components/SwipeableInstagramCard';
+import { ClientHeader } from '@/components/ClientHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -239,7 +240,6 @@ export default function Discovery() {
             <span className="hidden sm:inline">Edit Survey</span>
           </Button>
         </div>
-      </div>
 
       {/* Progress Breadcrumb */}
       {journeyProgress && (
@@ -449,6 +449,7 @@ export default function Discovery() {
             </CardContent>
           </Card>
         )}
+        </div>
       </div>
     </div>
   );
