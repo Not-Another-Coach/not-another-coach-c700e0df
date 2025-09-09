@@ -387,16 +387,21 @@ export default function MyTrainers() {
                     </div>
                   ) : filteredTrainers.length > 0 ? (
                      filteredTrainers.map((trainer) => (
-                       <div key={trainer.id} className="relative">
-                         <EnhancedTrainerCard
-                           trainer={trainer as any}
-                           onAddToShortlist={handleAddToShortlist}
-                           onStartConversation={handleStartConversation}
-                           onBookDiscoveryCall={handleBookDiscoveryCall}
-                           onViewProfile={handleViewProfile}
-                           isShortlisted={!!trainer.shortlistedAt}
-                           initialView={getSmartInitialView(trainer)}
-                         />
+                        <div key={trainer.id} className="relative">
+                          <EnhancedTrainerCard
+                            trainer={trainer as any}
+                            config="dashboardCarousel"
+                            onAddToShortlist={handleAddToShortlist}
+                            onRemove={trainer.shortlistedAt ? handleRemoveFromShortlist : undefined}
+                            onStartConversation={handleStartConversation}
+                            onBookDiscoveryCall={handleBookDiscoveryCall}
+                            onViewProfile={handleViewProfile}
+                            isShortlisted={!!trainer.shortlistedAt}
+                            cardState={trainer.status === 'shortlisted' ? 'shortlisted' : trainer.status === 'saved' ? 'saved' : 'default'}
+                            initialView={getSmartInitialView(trainer)}
+                            onMoveToSaved={handleUnsaveTrainer}
+                            onRemoveCompletely={handleRemoveFromShortlist}
+                          />
                          {!showComparison && (
                            <div className="absolute top-2 right-2">
                              <input

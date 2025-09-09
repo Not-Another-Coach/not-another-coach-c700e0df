@@ -72,15 +72,11 @@ export const EnhancedTrainerCard = memo(({
     engagementStage: stage || 'browsing'
   });
 
-  // Apply configuration if provided, with automatic dashboardCarousel for explore status
-  const appliedConfig = useMemo(() => {
-    // If trainer is in explore status for client, use dashboardCarousel config
-    const exploreStages = ['browsing', 'liked', 'shortlisted'];
-    if (exploreStages.includes(stage || 'browsing') && !config) {
-      return TRAINER_CARD_CONFIGS['dashboardCarousel'];
-    }
-    return config ? TRAINER_CARD_CONFIGS[config] : null;
-  }, [config, stage]);
+  // Apply configuration if provided
+  const appliedConfig = useMemo(() => 
+    config ? TRAINER_CARD_CONFIGS[config] : null, 
+    [config]
+  );
   
   const finalLayout = appliedConfig?.layout || layout;
   const finalAllowViewSwitching = appliedConfig?.allowViewSwitching ?? allowViewSwitching;
@@ -462,7 +458,7 @@ export const EnhancedTrainerCard = memo(({
               className="bg-white/80 backdrop-blur hover:bg-white/90 transition-all"
               onClick={handleToggleSave}
             >
-              {isSaved || cardState === 'saved' ? (
+              {isSaved || cardState === 'saved' || cardState === 'shortlisted' ? (
                 <Heart className="h-4 w-4 text-destructive fill-current" />
               ) : (
                 <Heart className="h-4 w-4 text-muted-foreground hover:text-destructive transition-colors" />
@@ -680,7 +676,7 @@ export const EnhancedTrainerCard = memo(({
               className="bg-white/80 backdrop-blur hover:bg-white/90 transition-all"
               onClick={handleToggleSave}
             >
-              {isSaved || cardState === 'saved' ? (
+              {isSaved || cardState === 'saved' || cardState === 'shortlisted' ? (
                 <Heart className="h-4 w-4 text-destructive fill-current" />
               ) : (
                 <Heart className="h-4 w-4 text-muted-foreground hover:text-destructive transition-colors" />
