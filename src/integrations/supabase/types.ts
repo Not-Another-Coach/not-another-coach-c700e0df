@@ -6583,6 +6583,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      client_can_view_trainer_images: {
+        Args: { p_trainer_id: string }
+        Returns: boolean
+      }
       client_has_sent_first_message: {
         Args: { client_uuid: string; conversation_uuid: string }
         Returns: boolean
