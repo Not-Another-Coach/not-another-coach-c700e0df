@@ -38,14 +38,15 @@ export function useAppLogo() {
     }
   };
 
-  const updateLogoSettings = async (newSettings: LogoSettings) => {
+  const updateLogoSettings = async (newSettings: LogoSettings): Promise<boolean> => {
     try {
       const { error } = await supabase
         .from('app_settings')
         .upsert({
           setting_key: 'app_logo',
-          setting_value: newSettings as any,
-          updated_by: (await supabase.auth.getUser()).data.user?.id
+          setting_value: JSON.stringify(newSettings)
+        }, {
+          onConflict: 'setting_key'
         });
 
       if (error) {
