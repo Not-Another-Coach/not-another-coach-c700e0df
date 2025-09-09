@@ -4,6 +4,10 @@ import { Star, MapPin, Clock, Users, Crown, Sparkles } from "lucide-react";
 import { Trainer } from "@/components/TrainerCard";
 import { getTrainerDisplayPrice } from "@/lib/priceUtils";
 import { getServiceIcon, standardizeServiceName, getServiceHighlight } from "@/lib/serviceIcons";
+import { useEngagementStage } from '@/hooks/useEngagementStage';
+import { useContentVisibility } from '@/hooks/useContentVisibility';
+import { VisibilityAwareRating } from "@/components/ui/VisibilityAwareRating";
+import { VisibilityAwareText } from "@/components/ui/VisibilityAwareText";
 
 interface FeatureSummaryViewProps {
   trainer: Trainer;
@@ -11,6 +15,12 @@ interface FeatureSummaryViewProps {
 }
 
 export const FeatureSummaryView = ({ trainer, children }: FeatureSummaryViewProps) => {
+  const { stage: engagementStage } = useEngagementStage(trainer.id);
+  const { canViewContent, getVisibility } = useContentVisibility({
+    trainerId: trainer.id,
+    engagementStage
+  });
+  
   // Get and standardize specialties for feature cards
   const allSpecialties = ((trainer as any).specializations || (trainer as any).specialties || []);
   const topSpecialties = allSpecialties.slice(0, 3).map((specialty: string) => ({
@@ -185,11 +195,15 @@ export const FeatureSummaryView = ({ trainer, children }: FeatureSummaryViewProp
             </div>
 
             {/* Description */}
-            <div className="bg-gradient-to-br from-muted/30 to-muted/50 rounded-xl p-4 border border-muted-foreground/10 backdrop-blur-sm">
+            <VisibilityAwareText
+              visibilityState={getVisibility('description_bio')}
+              className="bg-gradient-to-br from-muted/30 to-muted/50 rounded-xl p-4 border border-muted-foreground/10 backdrop-blur-sm"
+              placeholder="Bio unlocks as you engage"
+            >
               <p className="text-sm text-muted-foreground line-clamp-4 leading-relaxed">
                 {trainer.description}
               </p>
-            </div>
+            </VisibilityAwareText>
 
             {/* Additional specialties if any */}
             {((trainer as any).specializations || (trainer as any).specialties || []).length > 3 && (
@@ -213,10 +227,13 @@ export const FeatureSummaryView = ({ trainer, children }: FeatureSummaryViewProp
                 </h3>
                 
                 <div className="flex items-center gap-3 text-white/90 text-sm mb-2">
-                  <div className="flex items-center gap-1">
-                    <Star className="h-3 w-3 fill-current" />
-                    <span className="font-medium">{trainer.rating}</span>
-                  </div>
+                  <VisibilityAwareRating
+                    rating={trainer.rating}
+                    reviewCount={trainer.reviews}
+                    visibilityState={getVisibility('stats_ratings')}
+                    size="sm"
+                    className="text-white/90"
+                  />
                   <div className="flex items-center gap-1">
                     <MapPin className="h-3 w-3" />
                     <span>{trainer.location}</span>

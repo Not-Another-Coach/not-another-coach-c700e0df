@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { VisibilityConfigService } from '@/services/VisibilityConfigService';
 
 export type ContentType = 
   | 'profile_image'
@@ -95,15 +96,31 @@ export function useVisibilityMatrix(): VisibilityMatrixHook {
 
       if (error) {
         console.error('Error getting content visibility:', error);
+        // Fallback to system defaults
+        const stageGroup = Object.entries(stageGroupMapping).find(([_, stages]) => 
+          stages.includes(engagementStage)
+        )?.[0] as EngagementStageGroup;
+        
+        if (stageGroup) {
+          return await VisibilityConfigService.getDefaultVisibility(contentType, stageGroup);
+        }
         return 'hidden'; // Safe default
       }
 
       return data as VisibilityState;
     } catch (error) {
       console.error('Error getting content visibility:', error);
+      // Fallback to system defaults
+      const stageGroup = Object.entries(stageGroupMapping).find(([_, stages]) => 
+        stages.includes(engagementStage)
+      )?.[0] as EngagementStageGroup;
+      
+      if (stageGroup) {
+        return await VisibilityConfigService.getDefaultVisibility(contentType, stageGroup);
+      }
       return 'hidden'; // Safe default
     }
-  }, []);
+  }, [stageGroupMapping]);
 
   const updateVisibilitySettings = useCallback(async (
     trainerId: string,
@@ -177,13 +194,15 @@ export function useVisibilityMatrix(): VisibilityMatrixHook {
 
       if (error) {
         console.error('Error getting content visibility by group:', error);
-        return 'hidden'; // Safe default
+        // Fallback to system defaults
+        return await VisibilityConfigService.getDefaultVisibility(contentType, stageGroup);
       }
 
       return data as VisibilityState;
     } catch (error) {
       console.error('Error getting content visibility by group:', error);
-      return 'hidden'; // Safe default
+      // Fallback to system defaults
+      return await VisibilityConfigService.getDefaultVisibility(contentType, stageGroup);
     }
   }, []);
 

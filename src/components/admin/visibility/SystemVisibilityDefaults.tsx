@@ -1,14 +1,14 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Eye, EyeOff, Lock, Save } from 'lucide-react';
-import { ContentType, VisibilityState, EngagementStageGroup } from '@/hooks/useVisibilityMatrix';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { HelpCircle } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { ContentType, EngagementStageGroup, VisibilityState } from "@/hooks/useVisibilityMatrix";
+import { Eye, EyeOff, Lock, RefreshCw, HelpCircle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { VisibilityConfigService } from "@/services/VisibilityConfigService";
 
 const contentTypeLabels: Record<ContentType, string> = {
   profile_image: 'Profile Image',
@@ -107,41 +107,37 @@ export function SystemVisibilityDefaults() {
   const loadDefaultSettings = async () => {
     setLoading(true);
     try {
+      const { data, error } = await supabase.rpc('get_system_default_visibility');
+      
+      if (error) {
+        console.error('Error loading visibility defaults:', error);
+        toast.error('Failed to load default settings');
+        return;
+      }
+
       const defaults: Record<string, VisibilityState> = {};
       
-      // Load settings for each content type and stage group combination
+      // Initialize with fallback defaults
       for (const contentType of allContentTypes) {
         for (const stageGroup of stageGroups) {
           const key = `${contentType}_${stageGroup}`;
           
-          // Call the database function to get the default visibility
-          const { data, error } = await supabase.rpc('get_system_default_visibility', {
-            p_content_type: contentType,
-            p_stage_group: stageGroup as any // Type cast needed until Supabase regenerates types
-          });
-          
-          if (error) {
-            console.error('Error loading visibility default:', error);
-            // Fall back to hardcoded defaults
-            if (alwaysVisibleTypes.includes(contentType)) {
-              defaults[key] = 'visible';
-            } else if (defaultVisibleTypes.includes(contentType)) {
-              defaults[key] = 'visible';
-            } else if (adminControllableTypes.includes(contentType)) {
-              if (stageGroup === 'committed') {
-                defaults[key] = 'visible';
-              } else if (stageGroup === 'browsing') {
-                defaults[key] = ['profile_image', 'basic_information', 'pricing_discovery_call'].includes(contentType) ? 'visible' : 'blurred';
-              } else if (['shortlisted', 'discovery_process'].includes(stageGroup)) {
-                defaults[key] = contentType === 'testimonial_images' ? 'visible' : 'blurred';
-              } else {
-                defaults[key] = 'hidden';
-              }
-            }
+          if (alwaysVisibleTypes.includes(contentType)) {
+            defaults[key] = 'visible';
+          } else if (defaultVisibleTypes.includes(contentType)) {
+            defaults[key] = 'visible';
           } else {
-            defaults[key] = data as VisibilityState;
+            defaults[key] = 'hidden'; // Safe default
           }
         }
+      }
+      
+      // Override with actual data from database
+      if (Array.isArray(data)) {
+        data.forEach((item: any) => {
+          const key = `${item.content_type}_${item.stage_group}`;
+          defaults[key] = item.visibility_state;
+        });
       }
       
       setDefaultSettings(defaults);
@@ -164,7 +160,7 @@ export function SystemVisibilityDefaults() {
   const saveDefaults = async () => {
     setSaving(true);
     try {
-      // Save each admin-controllable setting to the database
+      // Save each admin-controllable setting individually since the RPC expects single parameters
       const savePromises = [];
       
       for (const contentType of adminControllableTypes) {
@@ -176,7 +172,7 @@ export function SystemVisibilityDefaults() {
             savePromises.push(
               supabase.rpc('save_system_default_visibility', {
                 p_content_type: contentType,
-                p_stage_group: stageGroup as any, // Type cast needed until Supabase regenerates types
+                p_stage_group: stageGroup as any,
                 p_visibility_state: visibilityState
               })
             );
@@ -192,11 +188,13 @@ export function SystemVisibilityDefaults() {
         console.error('Errors saving some settings:', errors);
         toast.error(`Failed to save ${errors.length} settings. Please try again.`);
       } else {
-        toast.success('System default visibility settings saved successfully');
+        // Invalidate the cache so changes are picked up immediately
+        await VisibilityConfigService.refreshCache();
+        toast.success("Default settings saved and cache refreshed");
       }
     } catch (error) {
       console.error('Error saving defaults:', error);
-      toast.error('Failed to save default settings');
+      toast.error("Failed to save default settings");
     } finally {
       setSaving(false);
     }
@@ -229,10 +227,24 @@ export function SystemVisibilityDefaults() {
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             System Visibility Defaults
-            <Button onClick={saveDefaults} disabled={saving} className="ml-4">
-              <Save className="h-4 w-4 mr-2" />
-              {saving ? 'Saving...' : 'Save Defaults'}
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                onClick={saveDefaults} 
+                disabled={saving}
+                className="flex-1 sm:flex-none"
+              >
+                {saving ? "Saving..." : "Save Defaults"}
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={() => VisibilityConfigService.refreshCache()}
+                disabled={saving}
+                className="flex-1 sm:flex-none"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh Cache
+              </Button>
+            </div>
           </CardTitle>
           <p className="text-sm text-muted-foreground">
             Configure the default visibility settings that will be applied to all new trainer profiles.
