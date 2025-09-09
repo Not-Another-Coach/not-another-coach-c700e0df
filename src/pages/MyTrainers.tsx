@@ -25,6 +25,7 @@ import {
   Settings,
   RefreshCw
 } from "lucide-react";
+import { AppLogo } from "@/components/ui/app-logo";
 import { DiscoveryCallBookingModal } from "@/components/discovery-call/DiscoveryCallBookingModal";
 
 export default function MyTrainers() {
@@ -198,21 +199,9 @@ export default function MyTrainers() {
           <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border">
             <div className="mx-auto px-6 lg:px-8 xl:px-12 py-3">
               <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold">
-                    FQ
-                  </div>
-                </div>
-                <button 
-                  onClick={() => navigate('/client/dashboard')}
-                  className="font-bold text-xl text-foreground hover:text-primary transition-colors cursor-pointer"
-                >
-                  FitQuest
-                </button>
-              </div>
-              <div className="text-muted-foreground">Your Journey</div>
+              <div className="flex items-center gap-3">
+                <AppLogo onClick={() => navigate('/client/dashboard')} />
+                <div className="text-muted-foreground">Your Journey</div>
                 </div>
                 <div className="flex items-center gap-3">
                   {/* Notifications */}
@@ -334,19 +323,7 @@ export default function MyTrainers() {
           <div className="mx-auto px-6 lg:px-8 xl:px-12 py-3">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                      <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold">
-                        FQ
-                      </div>
-                    </div>
-                    <button 
-                      onClick={() => navigate('/client/dashboard')}
-                      className="font-bold text-xl text-foreground hover:text-primary transition-colors cursor-pointer"
-                    >
-                      FitQuest
-                    </button>
-                  </div>
+                  <AppLogo onClick={() => navigate('/client/dashboard')} />
                   <div className="text-muted-foreground">Your Journey</div>
               </div>
               <div className="flex items-center gap-3">

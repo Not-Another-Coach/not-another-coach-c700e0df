@@ -21,6 +21,7 @@ import { MetricsSnapshot } from "@/components/dashboard/MetricsSnapshot";
 import { ClientActivityFeed } from "@/components/dashboard/ClientActivityFeed";
 import { MyTrainersCarousel } from "@/components/dashboard/MyTrainersCarousel";
 import { ActivityCompletionInterface } from "@/components/client/ActivityCompletionInterface";
+import { AppLogo } from "@/components/ui/app-logo";
 import { ExploreSection } from "@/components/dashboard/ExploreSection";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -125,14 +126,7 @@ export default function ClientDashboard() {
         <div className="mx-auto px-6 lg:px-8 xl:px-12 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold">
-                    FQ
-                  </div>
-                </div>
-                <div className="font-bold text-xl text-foreground">FitQuest</div>
-              </div>
+              <AppLogo onClick={() => navigate('/client/dashboard')} />
               <div className="text-muted-foreground">Your Journey</div>
               {/* Your Journey Progress */}
               {journeyProgress && (

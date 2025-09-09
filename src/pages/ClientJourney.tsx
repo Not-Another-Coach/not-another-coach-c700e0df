@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { MessagingPopup } from "@/components/MessagingPopup";
+import { AppLogo } from "@/components/ui/app-logo";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { 
   ArrowLeft, 
@@ -95,19 +96,7 @@ const ClientJourney = () => {
         <div className="mx-auto px-6 lg:px-8 xl:px-12 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold">
-                    FQ
-                  </div>
-                </div>
-                <button 
-                  onClick={() => navigate('/client/dashboard')}
-                  className="font-bold text-xl text-foreground hover:text-primary transition-colors cursor-pointer"
-                >
-                  FitQuest
-                </button>
-              </div>
+              <AppLogo onClick={() => navigate('/client/dashboard')} />
               <div className="text-muted-foreground">Your Journey</div>
             </div>
             <div className="flex items-center gap-3">
