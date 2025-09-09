@@ -181,7 +181,7 @@ export default function MyTrainers() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <button 
-                    onClick={() => navigate('/dashboard')}
+                    onClick={() => navigate('/client/dashboard')}
                     className="font-bold text-xl text-foreground hover:text-primary transition-colors cursor-pointer"
                   >
                     FitQuest
@@ -309,7 +309,7 @@ export default function MyTrainers() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <button 
-                  onClick={() => navigate('/dashboard')}
+                  onClick={() => navigate('/client/dashboard')}
                   className="font-bold text-xl text-foreground hover:text-primary transition-colors cursor-pointer"
                 >
                   FitQuest
