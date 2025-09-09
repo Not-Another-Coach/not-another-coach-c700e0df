@@ -180,7 +180,12 @@ export default function MyTrainers() {
             <div className="mx-auto px-6 lg:px-8 xl:px-12 py-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="font-bold text-xl text-foreground">FitQuest</div>
+                  <button 
+                    onClick={() => navigate('/dashboard')}
+                    className="font-bold text-xl text-foreground hover:text-primary transition-colors cursor-pointer"
+                  >
+                    FitQuest
+                  </button>
                   <div className="text-muted-foreground">My Trainers</div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -303,7 +308,12 @@ export default function MyTrainers() {
           <div className="mx-auto px-6 lg:px-8 xl:px-12 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="font-bold text-xl text-foreground">FitQuest</div>
+                <button 
+                  onClick={() => navigate('/dashboard')}
+                  className="font-bold text-xl text-foreground hover:text-primary transition-colors cursor-pointer"
+                >
+                  FitQuest
+                </button>
                 <div className="text-muted-foreground">My Trainers</div>
               </div>
               <div className="flex items-center gap-3">
@@ -395,16 +405,6 @@ export default function MyTrainers() {
                 Error loading data
               </Badge>
             )}
-            <Button
-              onClick={refreshData}
-              variant="outline"
-              size="sm"
-              className="ml-auto"
-              disabled={loading}
-            >
-              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
           </div>
 
           {/* Filter Tabs */}
