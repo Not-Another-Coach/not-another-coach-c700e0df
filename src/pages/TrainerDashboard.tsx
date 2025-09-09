@@ -78,6 +78,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { PaymentStatementView } from "@/components/payment-statements/PaymentStatementView";
 import { MembershipSettings } from "@/components/payment-statements/MembershipSettings";
 import { usePaymentStatements } from "@/hooks/usePaymentStatements";
+import { TrainerCustomHeader } from "@/components/layout/TrainerCustomHeader";
 
 const TrainerDashboard = () => {
   const { user, loading } = useAuth();
@@ -287,82 +288,20 @@ const TrainerDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="border-b">
-        {/* Top Row - Mission Control and Profile Dropdown */}
-        <div className="flex justify-between items-start p-4 gap-4">
-          <div className="flex flex-col gap-4 flex-1 min-w-0">
-            <h1 className="text-xl font-bold">Mission Control</h1>
-            
-            {/* Status indicators */}
-            <div className="flex flex-wrap items-center gap-2 text-sm">
-              {/* Availability Status */}
-              <div className="flex items-center gap-2 flex-shrink-0">
-                {availabilityStatus === 'accepting' && (
-                  <>
-                    <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="font-medium text-green-700">Accepting Clients</span>
-                  </>
-                )}
-                {availabilityStatus === 'waitlist' && (
-                  <>
-                    <div className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse"></div>
-                    <span className="font-medium text-yellow-700">Waitlist Only</span>
-                  </>
-                )}
-                {availabilityStatus === 'unavailable' && (
-                  <>
-                    <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                    <span className="font-medium text-red-700">Not Available</span>
-                  </>
-                )}
-              </div>
-               
-              <Separator orientation="vertical" className="h-4 hidden md:inline" />
-              
-              {/* Next Billing */}
-              <div className="flex items-center gap-2 flex-shrink-0 hidden md:flex">
-                <CreditCard className="w-3 h-3 text-muted-foreground" />
-                <span className="text-muted-foreground">Next Billing: Sep 1</span>
-              </div>
-            </div>
-            
-            {isAdmin && (
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => navigate('/admin/dashboard')}
-                className="flex items-center gap-2 w-fit"
-              >
-                <Shield className="w-4 h-4" />
-                Admin Panel
-              </Button>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => navigate('/trainer/profile-setup?tab=working-hours')}
-              className="flex-shrink-0"
-            >
-              <Settings className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">Profile Settings</span>
-              <span className="sm:hidden">Settings</span>
-            </Button>
-            {profile && (
-              <ProfileDropdown 
-                profile={{
-                  ...profile,
-                  user_type: 'trainer'
-                }}
-              />
-            )}
-          </div>
-        </div>
+      {/* New Trainer Custom Header */}
+      <TrainerCustomHeader 
+        profile={profile}
+        availabilityStatus={availabilityStatus}
+        onMessagingOpen={() => {
+          // Trigger messaging popup
+          const event = new CustomEvent('openMessagePopup');
+          window.dispatchEvent(event);
+        }}
+      />
 
-        {/* Bottom Row - Navigation Menu */}
-        <div className="px-4 pb-4">
+      {/* Navigation Menu - Moved out of header */}
+      <div className="border-b bg-card">
+        <div className="px-6 lg:px-8 xl:px-12 py-4">
           {isMobile ? (
             <div className="relative">
               <Button
@@ -578,6 +517,16 @@ const TrainerDashboard = () => {
                     <Coins className="h-4 w-4 flex-shrink-0" />
                     <span className="truncate">Payment Statements</span>
                   </Button>
+                  {isAdmin && (
+                    <Button 
+                      className="h-12 justify-start gap-3" 
+                      variant="outline"
+                      onClick={() => navigate('/admin/dashboard')}
+                    >
+                      <Shield className="h-4 w-4 flex-shrink-0" />
+                      <span className="truncate">Admin Panel</span>
+                    </Button>
+                  )}
                   <Button 
                     className="h-12 justify-start gap-3" 
                     variant="default"
