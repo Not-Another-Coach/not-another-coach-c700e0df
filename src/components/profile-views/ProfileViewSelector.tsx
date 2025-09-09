@@ -14,6 +14,8 @@ interface ProfileViewSelectorProps {
   isMobile?: boolean;
   hideCardsView?: boolean;
   hideCompareView?: boolean;
+  hideDescriptions?: boolean;
+  hideViewingBadge?: boolean;
 }
 
 const viewOptions = [
@@ -55,7 +57,9 @@ export const ProfileViewSelector = ({
   compareCount = 0,
   isMobile = false,
   hideCardsView = false,
-  hideCompareView = false
+  hideCompareView = false,
+  hideDescriptions = false,
+  hideViewingBadge = false
 }: ProfileViewSelectorProps) => {
   let filteredViewOptions = viewOptions;
   
@@ -73,16 +77,18 @@ export const ProfileViewSelector = ({
     // Mobile: Dropdown menu
     return (
       <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Badge variant="outline" className="text-xs">
-            Viewing: {currentOption?.label}
-          </Badge>
-          {currentView === 'compare' && compareCount > 0 && (
-            <Badge variant="secondary" className="text-xs">
-              {compareCount} selected
+        {!hideViewingBadge && (
+          <div className="flex items-center justify-between">
+            <Badge variant="outline" className="text-xs">
+              Viewing: {currentOption?.label}
             </Badge>
-          )}
-        </div>
+            {currentView === 'compare' && compareCount > 0 && (
+              <Badge variant="secondary" className="text-xs">
+                {compareCount} selected
+              </Badge>
+            )}
+          </div>
+        )}
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -113,9 +119,11 @@ export const ProfileViewSelector = ({
                       </Badge>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {option.description}
-                  </p>
+                  {!hideDescriptions && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {option.description}
+                    </p>
+                  )}
                 </DropdownMenuItem>
               );
             })}
@@ -128,16 +136,18 @@ export const ProfileViewSelector = ({
   // Desktop: Tabs
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <Badge variant="outline" className="text-sm">
-          Viewing: {currentOption?.label}
-        </Badge>
-        {currentView === 'compare' && compareCount > 0 && (
-          <Badge variant="secondary" className="text-sm">
-            {compareCount} selected for comparison
+      {!hideViewingBadge && (
+        <div className="flex items-center justify-between">
+          <Badge variant="outline" className="text-sm">
+            Viewing: {currentOption?.label}
           </Badge>
-        )}
-      </div>
+          {currentView === 'compare' && compareCount > 0 && (
+            <Badge variant="secondary" className="text-sm">
+              {compareCount} selected for comparison
+            </Badge>
+          )}
+        </div>
+      )}
       
       <Tabs value={currentView} onValueChange={(value) => onViewChange(value as ProfileViewMode)}>
         <TabsList className={`grid w-full h-auto p-1 ${
@@ -167,7 +177,7 @@ export const ProfileViewSelector = ({
         </TabsList>
       </Tabs>
       
-      {currentOption && (
+      {!hideDescriptions && currentOption && (
         <p className="text-sm text-muted-foreground text-center">
           {currentOption.description}
         </p>

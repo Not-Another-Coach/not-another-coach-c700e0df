@@ -20,7 +20,7 @@ export const TrainerProfile = () => {
   const { trainerId } = useParams<{ trainerId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { user_type } = useUserTypeChecks();
+  const { user_type, isClient } = useUserTypeChecks();
   const [searchParams] = useSearchParams();
   const fromSource = searchParams.get('from');
   
@@ -35,30 +35,36 @@ export const TrainerProfile = () => {
   const isMobile = useIsMobile();
 
   const handleBackNavigation = () => {
-    // Handle context-aware navigation based on where user came from
-    if (fromSource === 'dropdown') {
-      // Came from "View Public Profile" in dropdown - go to dashboard
-      if (user?.id === trainerId) {
-        navigate('/trainer/dashboard');
+    try {
+      // Handle context-aware navigation based on where user came from
+      if (fromSource === 'dropdown') {
+        // Came from "View Public Profile" in dropdown - go to dashboard
+        if (user?.id === trainerId) {
+          navigate('/trainer/dashboard');
+        } else {
+          navigate('/my-trainers'); // For viewing other trainer's profile
+        }
+      } else if (fromSource === 'profile-setup') {
+        // Came from profile settings - go back to profile setup
+        navigate('/trainer/profile-setup');
       } else {
-        navigate(-1); // For viewing other trainer's profile
+        // Check if we're coming from My Trainers or client context
+        const referrer = document.referrer;
+        if (referrer.includes('/my-trainers') || referrer.includes('/client/') || isClient()) {
+          // Client viewing trainer profile - go back to My Trainers
+          navigate('/my-trainers');
+        } else if (user?.id === trainerId) {
+          // Own profile view - go to appropriate dashboard
+          navigate('/trainer/dashboard');
+        } else {
+          // Default: go to my trainers for clients, trainer dashboard for trainers
+          navigate(isClient() ? '/my-trainers' : '/trainer/dashboard');
+        }
       }
-    } else if (fromSource === 'profile-setup') {
-      // Came from profile settings - go back to profile setup
-      navigate('/trainer/profile-setup');
-    } else {
-      // Check if we're coming from My Trainers or client context
-      const referrer = document.referrer;
-      if (referrer.includes('/my-trainers') || referrer.includes('/client/')) {
-        // Client viewing trainer profile - go back to My Trainers
-        navigate('/my-trainers');
-      } else if (user?.id === trainerId) {
-        // Own profile view - go to appropriate dashboard
-        navigate('/trainer/dashboard');
-      } else {
-        // Default: use browser history
-        navigate(-1);
-      }
+    } catch (error) {
+      console.error('Navigation error:', error);
+      // Fallback navigation
+      navigate(isClient() ? '/my-trainers' : '/trainer/dashboard');
     }
   };
 
@@ -181,8 +187,10 @@ export const TrainerProfile = () => {
           currentView={currentView}
           onViewChange={setCurrentView}
           isMobile={isMobile}
-          hideCardsView={user_type === 'client'}
+          hideCardsView={isClient()}
           hideCompareView={true}
+          hideDescriptions={true}
+          hideViewingBadge={true}
         />
       </div>
 
