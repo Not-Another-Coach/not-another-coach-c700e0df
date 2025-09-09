@@ -89,8 +89,7 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
             training_types,
             testimonials
           `)
-        .eq('profile_published', true)
-        .order('created_at');
+          .eq('profile_published', true);
 
         if (error) {
           console.error('Error fetching trainers in ExploreAllTrainers:', error);
