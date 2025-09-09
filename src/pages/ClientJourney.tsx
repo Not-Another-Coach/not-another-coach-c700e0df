@@ -1,19 +1,34 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useClientJourneyProgress } from "@/hooks/useClientJourneyProgress";
 import { useClientProfile } from "@/hooks/useClientProfile";
-import { ClientHeader } from "@/components/ClientHeader";
+import { useDiscoveryCallNotifications } from "@/hooks/useDiscoveryCallNotifications";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, CheckCircle, Circle, Clock, Star } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Progress } from "@/components/ui/progress";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { MessagingPopup } from "@/components/MessagingPopup";
+import { ProfileDropdown } from "@/components/ProfileDropdown";
+import { 
+  ArrowLeft, 
+  CheckCircle, 
+  Circle, 
+  Clock, 
+  Star, 
+  Bell, 
+  MessageCircle, 
+  Settings 
+} from "lucide-react";
 
 const ClientJourney = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { profile } = useClientProfile();
   const { progress, loading } = useClientJourneyProgress();
-  const navigate = useNavigate();
+  const { notifications, upcomingCalls } = useDiscoveryCallNotifications();
+  const [isMessagingOpen, setIsMessagingOpen] = useState(false);
 
   if (loading) {
     return (
@@ -58,16 +73,102 @@ const ClientJourney = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header with Navigation */}
-      <ClientHeader 
-        profile={profile} 
-        activeTab="summary"
-        showNavigation={true}
-      />
+      {/* Enhanced Custom Header */}
+      <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border">
+        <div className="mx-auto px-6 lg:px-8 xl:px-12 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => navigate('/client/dashboard')}
+                className="font-bold text-xl text-foreground hover:text-primary transition-colors cursor-pointer"
+              >
+                FitQuest
+              </button>
+              <div className="text-muted-foreground">Your Journey</div>
+            </div>
+            <div className="flex items-center gap-3">
+              {/* Notifications */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-9 w-9 p-0 relative">
+                    <Bell className="h-4 w-4" />
+                    {(notifications.length > 0 || upcomingCalls.length > 0) && (
+                      <Badge 
+                        variant="destructive" 
+                        className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center"
+                      >
+                        {notifications.length + upcomingCalls.length}
+                      </Badge>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80" align="end">
+                  <div className="space-y-4">
+                    <h4 className="font-medium text-sm">Notifications</h4>
+                    {upcomingCalls.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-xs text-muted-foreground">Upcoming Calls</p>
+                        {upcomingCalls.slice(0, 3).map((call) => (
+                          <div key={call.id} className="p-2 bg-muted/50 rounded text-xs">
+                            <p className="font-medium">Discovery Call</p>
+                            <p className="text-muted-foreground">
+                              {new Date(call.scheduled_for).toLocaleDateString()} at{' '}
+                              {new Date(call.scheduled_for).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {notifications.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-xs text-muted-foreground">Recent Notifications</p>
+                        {notifications.slice(0, 3).map((notification) => (
+                          <div key={notification.id} className="p-2 bg-muted/50 rounded text-xs">
+                            <p className="text-muted-foreground">
+                              {notification.notification_type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {notifications.length === 0 && upcomingCalls.length === 0 && (
+                      <p className="text-xs text-muted-foreground">No new notifications</p>
+                    )}
+                  </div>
+                </PopoverContent>
+              </Popover>
+
+              {/* Messaging */}
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-9 w-9 p-0"
+                onClick={() => setIsMessagingOpen(true)}
+              >
+                <MessageCircle className="h-4 w-4" />
+              </Button>
+
+              {/* Preferences */}
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => navigate('/client-survey')}
+                className="flex items-center gap-2 h-9 px-3"
+              >
+                <Settings className="h-4 w-4" />
+                <span className="text-sm">Preferences</span>
+              </Button>
+
+              {/* Profile Dropdown */}
+              {profile && <ProfileDropdown profile={profile} />}
+            </div>
+          </div>
+        </div>
+      </header>
 
       {/* Main Content */}
       <main className="mx-auto px-6 lg:px-8 xl:px-12 py-6">
-        {/* Header */}
+        {/* Back Button */}
         <div className="flex items-center gap-4 mb-8">
           <Button 
             variant="ghost" 
@@ -211,6 +312,12 @@ const ClientJourney = () => {
           )}
         </div>
       </main>
+
+      {/* Messaging Popup */}
+      <MessagingPopup 
+        isOpen={isMessagingOpen}
+        onClose={() => setIsMessagingOpen(false)}
+      />
     </div>
   );
 };
