@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { EnhancedTrainerCard } from "@/components/trainer-cards/EnhancedTrainerCard";
-import { ChevronLeft, ChevronRight, Compass, Star, Play, Pause } from "lucide-react";
+import { ChevronLeft, ChevronRight, Compass, Star, Play, Pause, Eye } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSavedTrainers } from "@/hooks/useSavedTrainers";
 import { useShortlistedTrainers } from "@/hooks/useShortlistedTrainers";
@@ -210,6 +210,17 @@ export function ExploreSection({ isActiveClient, journeyProgress }: ExploreSecti
             <div className="flex items-center gap-2">
               <Compass className="h-5 w-5 text-secondary-600" />
               Potential Matches for You
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate('/client/explore');
+                }}
+                className="h-8 w-8 p-0 text-muted-foreground hover:text-primary"
+              >
+                <Eye className="h-4 w-4" />
+              </Button>
             </div>
             {trainers.length > 1 && (
               <Button

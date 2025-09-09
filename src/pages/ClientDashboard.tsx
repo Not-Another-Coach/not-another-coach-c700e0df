@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CheckSquare, Bell, MessageCircle, Settings } from "lucide-react";
+import { CheckSquare, Bell, MessageCircle, Settings, Eye } from "lucide-react";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { FloatingMessageButton } from "@/components/FloatingMessageButton";
 import { MessagingPopup } from "@/components/MessagingPopup";
@@ -24,6 +24,7 @@ import { ActivityCompletionInterface } from "@/components/client/ActivityComplet
 import { AppLogo } from "@/components/ui/app-logo";
 import { ExploreSection } from "@/components/dashboard/ExploreSection";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 export default function ClientDashboard() {
   const { user, loading } = useAuth();
@@ -161,9 +162,44 @@ export default function ClientDashboard() {
                     )}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-80" align="end">
+                <PopoverContent className="w-96" align="end">
                   <div className="space-y-4">
                     <h4 className="font-medium text-sm">Notifications</h4>
+                    
+                    {/* Live Activity Section */}
+                    <div className="space-y-2">
+                      <p className="text-xs text-muted-foreground">Live Activity</p>
+                      <div className="p-3 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-lg">
+                        {journeyProgress && (
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm font-medium">Journey Progress</span>
+                              <Badge variant="secondary" className="text-xs">
+                                {journeyProgress.percentage}%
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              {formatJourneyStage(journeyProgress.stage)}
+                            </p>
+                          </div>
+                        )}
+                        <div className="mt-2 pt-2 border-t border-border/50">
+                          <p className="text-xs text-muted-foreground">
+                            Profile Status: {profile?.client_survey_completed ? 'Complete' : 'In Progress'}
+                          </p>
+                        </div>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full text-xs"
+                        onClick={() => navigate('/client/journey')}
+                      >
+                        <Eye className="h-3 w-3 mr-1" />
+                        View Full Live Tracker
+                      </Button>
+                    </div>
+
                     {upcomingCalls.length > 0 && (
                       <div className="space-y-2">
                         <p className="text-xs text-muted-foreground">Upcoming Calls</p>
@@ -211,7 +247,16 @@ export default function ClientDashboard() {
               <Button 
                 variant="ghost" 
                 size="sm"
-                onClick={() => navigate('/client-survey')}
+                onClick={() => {
+                  if (profile?.client_survey_completed && profile?.quiz_completed) {
+                    toast({
+                      title: "Survey Already Complete",
+                      description: "You've already completed your preferences survey. Your profile is up to date!",
+                    });
+                  } else {
+                    navigate('/client-survey');
+                  }
+                }}
                 className="flex items-center gap-2 h-9 px-3"
               >
                 <Settings className="h-4 w-4" />

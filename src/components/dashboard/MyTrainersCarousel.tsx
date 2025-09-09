@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Heart, Calendar, Star, MessageCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Heart, Calendar, Star, MessageCircle, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSavedTrainers } from '@/hooks/useSavedTrainers';
 import { useShortlistedTrainers } from '@/hooks/useShortlistedTrainers';
@@ -76,21 +76,31 @@ export function MyTrainersCarousel({ onTabChange }: MyTrainersCarouselProps) {
   if (myTrainers.length === 0) {
     return (
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
           <button 
             onClick={() => onTabChange('my-trainers')}
             className="text-xl font-semibold text-foreground hover:text-primary transition-colors cursor-pointer"
           >
             My Trainers
           </button>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="ghost"
             size="sm"
-            onClick={() => onTabChange('explore')}
+            onClick={() => onTabChange('my-trainers')}
+            className="h-8 w-8 p-0 text-muted-foreground hover:text-primary"
           >
-            Discover Trainers
+            <Eye className="h-4 w-4" />
           </Button>
         </div>
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => onTabChange('explore')}
+        >
+          Discover Trainers
+        </Button>
+      </div>
         <Card className="p-8 text-center bg-gradient-to-br from-muted to-secondary-50">
           <CardContent>
             <Heart className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
@@ -112,12 +122,22 @@ export function MyTrainersCarousel({ onTabChange }: MyTrainersCarouselProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <button 
-          onClick={() => onTabChange('my-trainers')}
-          className="text-xl font-semibold text-foreground hover:text-primary transition-colors cursor-pointer"
-        >
-          My Trainers
-        </button>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={() => onTabChange('my-trainers')}
+            className="text-xl font-semibold text-foreground hover:text-primary transition-colors cursor-pointer"
+          >
+            My Trainers
+          </button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onTabChange('my-trainers')}
+            className="h-8 w-8 p-0 text-muted-foreground hover:text-primary"
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+        </div>
         <div className="flex items-center gap-2">
           <Button
             variant="ghost"
