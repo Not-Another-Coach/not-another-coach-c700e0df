@@ -2,10 +2,11 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { AppLogo } from "@/components/ui/app-logo";
 import { useUserRoles } from "@/hooks/useUserRoles";
-import { Bell, MessageCircle, Users, Shield, FileText, Database, Briefcase, Settings } from "lucide-react";
+import { Bell, MessageCircle, Users, Shield, FileText, Database, Briefcase, Settings, BarChart3, ChevronDown } from "lucide-react";
 
 interface AdminCustomHeaderProps {
   profile: any;
@@ -19,22 +20,48 @@ export function AdminCustomHeader({
   const navigate = useNavigate();
   const { users } = useUserRoles();
 
-  // User Management Navigation Items
-  const userManagementItems = [
-    { key: "users", label: "Users", icon: Users, path: "/admin/users" },
-    { key: "verification", label: "Verification", icon: Shield, path: "/admin/verification" },
-    { key: "publications", label: "Publications", icon: FileText, path: "/admin/publications" },
-  ];
-
-  // Configuration Navigation Items
-  const configurationItems = [
-    { key: "highlights", label: "Highlights", icon: FileText, path: "/admin/highlights" },
-    { key: "specialties", label: "Specialties", icon: Database, path: "/admin/specialties" },
-    { key: "qualifications", label: "Qualifications", icon: Briefcase, path: "/admin/qualifications" },
-    { key: "templates", label: "Templates", icon: Settings, path: "/admin/templates" },
-    { key: "feedback-builder", label: "Feedback", icon: Settings, path: "/admin/feedback-builder" },
-    { key: "system-settings", label: "System Settings", icon: Settings, path: "/admin/system-settings" },
-    { key: "data-cleanup", label: "Cleanup", icon: Settings, path: "/admin/data-cleanup" },
+  // Navigation Groups
+  const navigationGroups = [
+    {
+      key: "user-management",
+      label: "User Management",
+      icon: Users,
+      items: [
+        { key: "users", label: "Users", icon: Users, path: "/admin/users" },
+        { key: "verification", label: "Verification", icon: Shield, path: "/admin/verification" },
+        { key: "publications", label: "Publications", icon: FileText, path: "/admin/publications" },
+      ]
+    },
+    {
+      key: "configuration",
+      label: "Configuration",
+      icon: Settings,
+      items: [
+        { key: "highlights", label: "Highlights", icon: FileText, path: "/admin/highlights" },
+        { key: "specialties", label: "Specialties", icon: Database, path: "/admin/specialties" },
+        { key: "qualifications", label: "Qualifications", icon: Briefcase, path: "/admin/qualifications" },
+        { key: "templates", label: "Templates", icon: Settings, path: "/admin/templates" },
+        { key: "feedback-builder", label: "Feedback", icon: Settings, path: "/admin/feedback-builder" },
+      ]
+    },
+    {
+      key: "system-settings",
+      label: "System Settings",
+      icon: Settings,
+      items: [
+        { key: "system-settings", label: "System Settings", icon: Settings, path: "/admin/system-settings" },
+        { key: "data-cleanup", label: "Data Cleanup", icon: Settings, path: "/admin/data-cleanup" },
+      ]
+    },
+    {
+      key: "analytics-documents",
+      label: "Analytics & Documents",
+      icon: BarChart3,
+      items: [
+        { key: "analytics", label: "Analytics", icon: BarChart3, path: "/admin/specialty-analytics" },
+        { key: "knowledge-base", label: "Knowledge Base", icon: FileText, path: "/admin/knowledge-base" },
+      ]
+    }
   ];
 
   const handleNavigation = (path: string) => {
@@ -110,48 +137,51 @@ export function AdminCustomHeader({
       {/* Navigation Menu */}
       <div className="border-t border-border/50">
         <div className="mx-auto px-6 lg:px-8 xl:px-12">
-          <nav className="flex flex-wrap gap-1 py-3 overflow-x-auto">
-            {/* User Management Section */}
-            <div className="flex items-center gap-1 pr-4 border-r border-border/50">
-              <span className="text-xs text-muted-foreground mr-2 whitespace-nowrap">User Management</span>
-              {userManagementItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = window.location.pathname === item.path;
-                return (
-                  <Button
-                    key={item.key}
-                    variant={isActive ? "default" : "ghost"}
-                    size="sm"
-                    className="flex items-center gap-2 whitespace-nowrap text-sm px-3 py-2 h-8 font-medium"
-                    onClick={() => handleNavigation(item.path)}
+          <nav className="flex items-center gap-2 py-3 overflow-x-auto">
+            {navigationGroups.map((group) => {
+              const GroupIcon = group.icon;
+              const hasActiveItem = group.items.some(item => window.location.pathname === item.path);
+              
+              return (
+                <DropdownMenu key={group.key}>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant={hasActiveItem ? "default" : "ghost"}
+                      size="sm"
+                      className="flex items-center gap-2 whitespace-nowrap text-sm px-3 py-2 h-8 font-medium"
+                    >
+                      <GroupIcon className="h-4 w-4" />
+                      <span>{group.label}</span>
+                      <ChevronDown className="h-3 w-3" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent 
+                    align="start" 
+                    className="w-48 bg-background border border-border shadow-lg z-50"
                   >
-                    <Icon className="h-4 w-4" />
-                    <span className="hidden sm:inline">{item.label}</span>
-                  </Button>
-                );
-              })}
-            </div>
-
-            {/* Configuration Section */}
-            <div className="flex items-center gap-1 pl-4">
-              <span className="text-xs text-muted-foreground mr-2 whitespace-nowrap">Configuration</span>
-              {configurationItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = window.location.pathname === item.path;
-                return (
-                  <Button
-                    key={item.key}
-                    variant={isActive ? "default" : "ghost"}
-                    size="sm"
-                    className="flex items-center gap-2 whitespace-nowrap text-sm px-3 py-2 h-8 font-medium"
-                    onClick={() => handleNavigation(item.path)}
-                  >
-                    <Icon className="h-4 w-4" />
-                    <span className="hidden sm:inline">{item.label}</span>
-                  </Button>
-                );
-              })}
-            </div>
+                    {group.items.map((item) => {
+                      const ItemIcon = item.icon;
+                      const isActive = window.location.pathname === item.path;
+                      
+                      return (
+                        <DropdownMenuItem
+                          key={item.key}
+                          onClick={() => handleNavigation(item.path)}
+                          className={`flex items-center gap-2 px-3 py-2 cursor-pointer ${
+                            isActive 
+                              ? 'bg-primary text-primary-foreground' 
+                              : 'hover:bg-muted'
+                          }`}
+                        >
+                          <ItemIcon className="h-4 w-4" />
+                          <span>{item.label}</span>
+                        </DropdownMenuItem>
+                      );
+                    })}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              );
+            })}
           </nav>
         </div>
       </div>
