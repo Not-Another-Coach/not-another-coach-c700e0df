@@ -1,8 +1,9 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star, MapPin, Award, Users, Clock, Dumbbell, Target } from "lucide-react";
+import { Star, MapPin, Clock, Users, Crown, Sparkles } from "lucide-react";
 import { Trainer } from "@/components/TrainerCard";
 import { getTrainerDisplayPrice } from "@/lib/priceUtils";
+import { getServiceIcon, standardizeServiceName, getServiceHighlight } from "@/lib/serviceIcons";
 
 interface FeatureSummaryViewProps {
   trainer: Trainer;
@@ -10,11 +11,23 @@ interface FeatureSummaryViewProps {
 }
 
 export const FeatureSummaryView = ({ trainer, children }: FeatureSummaryViewProps) => {
-  // Get top 3 specialties for feature cards
-  const topSpecialties = ((trainer as any).specializations || (trainer as any).specialties || []).slice(0, 3);
+  // Get and standardize specialties for feature cards
+  const allSpecialties = ((trainer as any).specializations || (trainer as any).specialties || []);
+  const topSpecialties = allSpecialties.slice(0, 3).map((specialty: string) => ({
+    name: standardizeServiceName(specialty),
+    original: specialty,
+    icon: getServiceIcon(specialty),
+    highlight: getServiceHighlight(specialty, allSpecialties)
+  }));
   
-  // Get training types for display
-  const trainingTypes = ((trainer as any).trainingTypes || (trainer as any).trainingType || []).slice(0, 2);
+  // Get and standardize training types for display
+  const allTrainingTypes = ((trainer as any).trainingTypes || (trainer as any).trainingType || []);
+  const trainingTypes = allTrainingTypes.slice(0, 2).map((type: string) => ({
+    name: standardizeServiceName(type),
+    original: type,
+    icon: getServiceIcon(type),
+    highlight: getServiceHighlight(type, allTrainingTypes)
+  }));
 
   return (
     <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-card to-muted/30 border-0 relative overflow-hidden">
@@ -27,37 +40,152 @@ export const FeatureSummaryView = ({ trainer, children }: FeatureSummaryViewProp
           <div className="h-full p-4 pb-20">
             <div className="grid grid-cols-2 gap-3 mb-4">
               {/* Specialties Cards */}
-              {topSpecialties.map((specialty, index) => (
-                <div 
-                  key={specialty}
-                  className="bg-gradient-to-br from-primary/10 to-primary/20 border border-primary/30 rounded-lg p-4 text-center"
-                >
-                  <Target className="h-5 w-5 mx-auto text-primary mb-2" />
-                  <div className="text-sm font-medium text-primary">{specialty}</div>
-                </div>
-              ))}
-              
-              {/* Training Type Card */}
-              {trainingTypes.length > 0 && (
-                <div className="bg-gradient-to-br from-success/10 to-success/20 border border-success/30 rounded-lg p-4 text-center">
-                  <Users className="h-5 w-5 mx-auto text-success mb-2" />
-                  <div className="text-sm font-medium text-success">
-                    {trainingTypes.join(' & ')}
+              {topSpecialties.map((specialty, index) => {
+                const IconComponent = specialty.icon;
+                const isHighlighted = specialty.highlight;
+                
+                return (
+                  <div 
+                    key={specialty.original}
+                    className={`
+                      relative rounded-xl p-4 text-center transition-all duration-200 hover:scale-105
+                      ${isHighlighted === 'popular' 
+                        ? 'bg-gradient-to-br from-primary/15 to-primary/25 border-2 border-primary/40 shadow-lg shadow-primary/20' 
+                        : isHighlighted === 'specialist'
+                        ? 'bg-gradient-to-br from-accent/15 to-accent/25 border-2 border-accent/40 shadow-lg shadow-accent/20'
+                        : 'bg-gradient-to-br from-muted/40 to-muted/60 border border-muted-foreground/20 hover:border-primary/30'
+                      }
+                    `}
+                  >
+                    {/* Highlight Badge */}
+                    {isHighlighted && (
+                      <div className="absolute -top-2 -right-2">
+                        <Badge 
+                          variant="secondary" 
+                          className={`
+                            text-xs px-2 py-1 text-white border-0 shadow-sm
+                            ${isHighlighted === 'popular' 
+                              ? 'bg-primary' 
+                              : 'bg-accent'
+                            }
+                          `}
+                        >
+                          {isHighlighted === 'popular' ? (
+                            <><Crown className="h-3 w-3 mr-1" />Popular</>
+                          ) : (
+                            <><Sparkles className="h-3 w-3 mr-1" />Specialist</>
+                          )}
+                        </Badge>
+                      </div>
+                    )}
+                    
+                    <IconComponent 
+                      className={`
+                        h-6 w-6 mx-auto mb-2
+                        ${isHighlighted === 'popular' 
+                          ? 'text-primary' 
+                          : isHighlighted === 'specialist'
+                          ? 'text-accent'
+                          : 'text-muted-foreground'
+                        }
+                      `} 
+                    />
+                    <div 
+                      className={`
+                        text-sm font-medium leading-tight
+                        ${isHighlighted === 'popular' 
+                          ? 'text-primary' 
+                          : isHighlighted === 'specialist'
+                          ? 'text-accent'
+                          : 'text-foreground'
+                        }
+                      `}
+                    >
+                      {specialty.name}
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })}
+              
+              {/* Training Type Cards */}
+              {trainingTypes.map((trainingType, index) => {
+                const IconComponent = trainingType.icon;
+                const isHighlighted = trainingType.highlight;
+                
+                return (
+                  <div 
+                    key={trainingType.original}
+                    className={`
+                      relative rounded-xl p-4 text-center transition-all duration-200 hover:scale-105
+                      ${isHighlighted === 'popular' 
+                        ? 'bg-gradient-to-br from-success/15 to-success/25 border-2 border-success/40 shadow-lg shadow-success/20' 
+                        : isHighlighted === 'specialist'
+                        ? 'bg-gradient-to-br from-accent/15 to-accent/25 border-2 border-accent/40 shadow-lg shadow-accent/20'
+                        : 'bg-gradient-to-br from-muted/40 to-muted/60 border border-muted-foreground/20 hover:border-success/30'
+                      }
+                    `}
+                  >
+                    {/* Highlight Badge */}
+                    {isHighlighted && (
+                      <div className="absolute -top-2 -right-2">
+                        <Badge 
+                          variant="secondary" 
+                          className={`
+                            text-xs px-2 py-1 text-white border-0 shadow-sm
+                            ${isHighlighted === 'popular' 
+                              ? 'bg-success' 
+                              : 'bg-accent'
+                            }
+                          `}
+                        >
+                          {isHighlighted === 'popular' ? (
+                            <><Crown className="h-3 w-3 mr-1" />Popular</>
+                          ) : (
+                            <><Sparkles className="h-3 w-3 mr-1" />Specialist</>
+                          )}
+                        </Badge>
+                      </div>
+                    )}
+                    
+                    <IconComponent 
+                      className={`
+                        h-6 w-6 mx-auto mb-2
+                        ${isHighlighted === 'popular' 
+                          ? 'text-success' 
+                          : isHighlighted === 'specialist'
+                          ? 'text-accent'
+                          : 'text-muted-foreground'
+                        }
+                      `} 
+                    />
+                    <div 
+                      className={`
+                        text-sm font-medium leading-tight
+                        ${isHighlighted === 'popular' 
+                          ? 'text-success' 
+                          : isHighlighted === 'specialist'
+                          ? 'text-accent'
+                          : 'text-foreground'
+                        }
+                      `}
+                    >
+                      {trainingType.name}
+                    </div>
+                  </div>
+                );
+              })}
               
               {/* Availability Card */}
-              <div className="bg-gradient-to-br from-accent/10 to-accent/20 border border-accent/30 rounded-lg p-4 text-center">
-                <Clock className="h-5 w-5 mx-auto text-accent mb-2" />
-                <div className="text-sm font-medium text-accent">
+              <div className="rounded-xl p-4 text-center bg-gradient-to-br from-muted/40 to-muted/60 border border-muted-foreground/20 hover:border-accent/30 transition-all duration-200 hover:scale-105">
+                <Clock className="h-6 w-6 mx-auto text-muted-foreground mb-2" />
+                <div className="text-sm font-medium text-foreground leading-tight">
                   {trainer.availability}
                 </div>
               </div>
             </div>
 
             {/* Description */}
-            <div className="bg-muted/40 rounded-lg p-4 border border-muted-foreground/10">
+            <div className="bg-gradient-to-br from-muted/30 to-muted/50 rounded-xl p-4 border border-muted-foreground/10 backdrop-blur-sm">
               <p className="text-sm text-muted-foreground line-clamp-4 leading-relaxed">
                 {trainer.description}
               </p>
