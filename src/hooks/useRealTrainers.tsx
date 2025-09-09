@@ -36,7 +36,8 @@ export function useRealTrainers(refreshTrigger?: number, includeOwnUnpublished?:
             profile_image_position,
             is_verified,
             package_options,
-            testimonials
+            testimonials,
+            professional_milestones
           `);
 
         // If we need to include own unpublished profile, use OR condition
@@ -90,7 +91,8 @@ export function useRealTrainers(refreshTrigger?: number, includeOwnUnpublished?:
             trainingType: trainer.training_types || ["In-Person", "Online"],
             offers_discovery_call: false, // Default to false since discovery_call_settings not available
             package_options: (trainer.package_options as any[]) || [],
-            testimonials: (trainer.testimonials as any[]) || []
+            testimonials: (trainer.testimonials as any[]) || [],
+            professional_milestones: (trainer.professional_milestones as any[]) || []
           };
         }) || [];
 
