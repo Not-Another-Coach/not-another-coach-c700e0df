@@ -39,14 +39,14 @@ export function VisibilityAnalytics() {
           percentage: 85
         },
         {
-          contentType: 'before_after_images', 
+          contentType: 'testimonial_images', 
           stage: 'browsing',
           visibilityState: 'blurred',
           trainerCount: 38,
           percentage: 72
         },
         {
-          contentType: 'package_images',
+          contentType: 'gallery_images',
           stage: 'shortlisted',
           visibilityState: 'visible',
           trainerCount: 50,
@@ -150,7 +150,7 @@ export function VisibilityAnalytics() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {['profile_image', 'before_after_images', 'package_images'].map((contentType) => (
+                    {['profile_image', 'testimonial_images', 'gallery_images'].map((contentType) => (
                       <div key={contentType} className="space-y-2">
                         <div className="flex justify-between text-sm">
                           <span className="capitalize">{contentType.replace('_', ' ')}</span>

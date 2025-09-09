@@ -4,10 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 export type ContentType = 
   | 'profile_image'
-  | 'before_after_images' 
-  | 'package_images'
   | 'testimonial_images'
-  | 'certification_images'
   | 'gallery_images';
 
 export type VisibilityState = 'hidden' | 'blurred' | 'visible';

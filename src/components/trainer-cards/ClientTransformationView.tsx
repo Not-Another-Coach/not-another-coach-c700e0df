@@ -68,7 +68,6 @@ export const ClientTransformationView = ({ trainer, children, testimonialIndex =
     engagementStage: stage || 'browsing'
   });
 
-  const beforeAfterVisibility = getVisibility('before_after_images');
   const testimonialVisibility = getVisibility('testimonial_images');
 
   // If no transformations available, show placeholder
@@ -144,10 +143,10 @@ export const ClientTransformationView = ({ trainer, children, testimonialIndex =
                 src={currentTransformation.before}
                 alt="Before transformation"
                 className="w-full h-full object-cover"
-                visibilityState={beforeAfterVisibility}
+                visibilityState={testimonialVisibility}
                 lockMessage="Before photos unlock with engagement"
               >
-                {beforeAfterVisibility === 'visible' && (
+                {testimonialVisibility === 'visible' && (
                   <div className="absolute top-3 left-3">
                     <Badge className="text-sm bg-black/70 text-white border-0 px-3 py-1">
                       Before
@@ -163,10 +162,10 @@ export const ClientTransformationView = ({ trainer, children, testimonialIndex =
                 src={currentTransformation.after}
                 alt="After transformation"
                 className="w-full h-full object-cover"
-                visibilityState={beforeAfterVisibility}
+                visibilityState={testimonialVisibility}
                 lockMessage="After photos unlock with engagement"
               >
-                {beforeAfterVisibility === 'visible' && (
+                {testimonialVisibility === 'visible' && (
                   <div className="absolute top-3 right-3">
                     <Badge className="text-sm bg-success text-white border-0 px-3 py-1">
                       After

@@ -8,10 +8,7 @@ interface UseContentVisibilityProps {
 
 interface ContentVisibilityMap {
   profile_image: VisibilityState;
-  before_after_images: VisibilityState;
-  package_images: VisibilityState;
   testimonial_images: VisibilityState;
-  certification_images: VisibilityState;
   gallery_images: VisibilityState;
 }
 
@@ -19,20 +16,14 @@ export function useContentVisibility({ trainerId, engagementStage }: UseContentV
   const { getContentVisibility } = useVisibilityMatrix();
   const [visibilityMap, setVisibilityMap] = useState<ContentVisibilityMap>({
     profile_image: 'hidden',
-    before_after_images: 'hidden',
-    package_images: 'hidden',
     testimonial_images: 'hidden',
-    certification_images: 'hidden',
     gallery_images: 'hidden'
   });
   const [loading, setLoading] = useState(true);
 
   const contentTypes: ContentType[] = [
     'profile_image',
-    'before_after_images', 
-    'package_images',
     'testimonial_images',
-    'certification_images',
     'gallery_images'
   ];
 
@@ -68,14 +59,11 @@ export function useContentVisibility({ trainerId, engagementStage }: UseContentV
   // Helper functions for common visibility checks
   const canViewContent = useMemo(() => ({
     profileImage: visibilityMap.profile_image === 'visible',
-    beforeAfterImages: visibilityMap.before_after_images === 'visible',
-    packageImages: visibilityMap.package_images === 'visible',
     testimonialImages: visibilityMap.testimonial_images === 'visible',
-    certificationImages: visibilityMap.certification_images === 'visible',
     galleryImages: visibilityMap.gallery_images === 'visible',
     
-    // Pricing related visibility (packages are considered pricing-sensitive)
-    pricing: visibilityMap.package_images === 'visible'
+    // Pricing visibility is typically controlled by testimonial access level
+    pricing: visibilityMap.testimonial_images === 'visible'
   }), [visibilityMap]);
 
   const getVisibility = (contentType: ContentType): VisibilityState => {

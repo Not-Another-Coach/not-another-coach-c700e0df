@@ -10,11 +10,8 @@ import { ProfilePreviewModal } from './ProfilePreviewModal';
 import { toast } from 'sonner';
 
 const contentTypeLabels: Record<ContentType, string> = {
-  profile_image: 'Profile Photo',
-  before_after_images: 'Before/After Photos',
-  package_images: 'Package Images',
-  testimonial_images: 'Testimonial Photos',
-  certification_images: 'Certifications',
+  profile_image: 'Profile Image',
+  testimonial_images: 'Testimonial Before/After Photos',
   gallery_images: 'Gallery Images'
 };
 
@@ -49,10 +46,7 @@ export const VisibilitySettingsSection = () => {
 
   const contentTypes: ContentType[] = [
     'profile_image',
-    'before_after_images', 
-    'package_images',
     'testimonial_images',
-    'certification_images',
     'gallery_images'
   ];
 

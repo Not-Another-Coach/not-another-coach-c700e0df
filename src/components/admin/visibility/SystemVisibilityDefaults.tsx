@@ -8,11 +8,8 @@ import { ContentType, VisibilityState, EngagementStage } from '@/hooks/useVisibi
 import { toast } from 'sonner';
 
 const contentTypeLabels: Record<ContentType, string> = {
-  profile_image: 'Profile Photo',
-  before_after_images: 'Before/After Photos', 
-  package_images: 'Package Images',
-  testimonial_images: 'Testimonial Photos',
-  certification_images: 'Certifications',
+  profile_image: 'Profile Image',
+  testimonial_images: 'Testimonial Before/After Photos',
   gallery_images: 'Gallery Images'
 };
 
@@ -45,10 +42,7 @@ export function SystemVisibilityDefaults() {
 
   const contentTypes: ContentType[] = [
     'profile_image',
-    'before_after_images', 
-    'package_images',
     'testimonial_images',
-    'certification_images',
     'gallery_images'
   ];
 
@@ -86,7 +80,7 @@ export function SystemVisibilityDefaults() {
           } else if (stage === 'browsing') {
             defaults[key] = contentType === 'profile_image' ? 'visible' : 'blurred';
           } else if (['shortlisted', 'discovery_in_progress', 'discovery_completed'].includes(stage)) {
-            defaults[key] = contentType === 'before_after_images' ? 'blurred' : 'visible';
+            defaults[key] = contentType === 'testimonial_images' ? 'visible' : 'blurred';
           } else {
             defaults[key] = 'hidden';
           }
