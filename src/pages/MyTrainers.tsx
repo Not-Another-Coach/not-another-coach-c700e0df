@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { ClientCustomHeader } from "@/components/layout/ClientCustomHeader";
 import { DiscoveryCallBookingModal } from "@/components/discovery-call/DiscoveryCallBookingModal";
+import { EnhancedEmptyState } from "@/components/ui/EnhancedEmptyState";
 
 export default function MyTrainers() {
   const navigate = useNavigate();
@@ -409,28 +410,14 @@ export default function MyTrainers() {
                        </div>
                      ))
                   ) : (
-                    <div className="col-span-full text-center py-12">
-                      <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">No trainers found</h3>
-                      <p className="text-muted-foreground mb-4">
-                        {activeFilter === 'all' 
-                          ? "You haven't saved or shortlisted any trainers yet."
-                          : `No ${activeFilter} trainers found.`
-                        }
-                      </p>
-                      {activeFilter !== 'all' && (
-                        <Button
-                          onClick={() => setActiveFilter('all')}
-                          variant="outline"
-                          className="mr-2"
-                        >
-                          View All Trainers
-                        </Button>
-                      )}
-                      <Button onClick={() => navigate('/client/explore')}>
-                        Explore Trainers
-                      </Button>
-                    </div>
+                    <EnhancedEmptyState
+                      filterType={activeFilter}
+                      counts={counts}
+                      onExploreTrainers={() => navigate('/client/explore')}
+                      onViewAllTrainers={() => setActiveFilter('all')}
+                      onNeedHelp={() => navigate('/client/help')}
+                      journeyStage={journeyProgress?.stage}
+                    />
                   )}
                 </div>
               </TrainerDataErrorBoundary>
@@ -455,6 +442,15 @@ export default function MyTrainers() {
           isOpen={isMessagingOpen}
           onClose={() => setIsMessagingOpen(false)}
         />
+
+        {/* Discovery Call Booking Modal */}
+        {selectedTrainerForCall && (
+          <DiscoveryCallBookingModal
+            trainer={trainers.find(t => t.id === selectedTrainerForCall) as any}
+            isOpen={!!selectedTrainerForCall}
+            onClose={() => setSelectedTrainerForCall(null)}
+          />
+        )}
       </div>
     </ErrorBoundary>
   );
