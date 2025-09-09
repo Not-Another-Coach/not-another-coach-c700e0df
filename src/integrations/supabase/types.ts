@@ -6809,11 +6809,17 @@ export type Database = {
         Returns: Database["public"]["Enums"]["engagement_stage_group"]
       }
       get_system_default_visibility: {
-        Args: {
-          p_content_type: Database["public"]["Enums"]["content_type"]
-          p_stage_group: Database["public"]["Enums"]["engagement_stage_group"]
-        }
-        Returns: Database["public"]["Enums"]["visibility_state"]
+        Args:
+          | Record<PropertyKey, never>
+          | {
+              p_content_type: Database["public"]["Enums"]["content_type"]
+              p_stage_group: Database["public"]["Enums"]["engagement_stage_group"]
+            }
+        Returns: {
+          content_type: string
+          stage_group: string
+          visibility_state: string
+        }[]
       }
       get_trainer_membership_details: {
         Args: { p_trainer_id: string }
