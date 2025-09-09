@@ -168,18 +168,6 @@ const ClientJourney = () => {
 
       {/* Main Content */}
       <main className="mx-auto px-6 lg:px-8 xl:px-12 py-6">
-        {/* Back Button */}
-        <div className="flex items-center gap-4 mb-8">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => navigate('/client/dashboard')}
-            className="gap-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Dashboard
-          </Button>
-        </div>
 
         {/* Main Content */}
         <div className="max-w-4xl mx-auto">
