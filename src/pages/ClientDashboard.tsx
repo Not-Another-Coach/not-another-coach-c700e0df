@@ -193,7 +193,15 @@ export default function ClientDashboard() {
                         variant="outline" 
                         size="sm" 
                         className="w-full text-xs"
-                        onClick={() => navigate('/client/journey')}
+                        onClick={() => {
+                          const liveActivityElement = document.getElementById('live-activity-tracker');
+                          if (liveActivityElement) {
+                            liveActivityElement.scrollIntoView({ 
+                              behavior: 'smooth',
+                              block: 'start'
+                            });
+                          }
+                        }}
                       >
                         <Eye className="h-3 w-3 mr-1" />
                         View Full Live Tracker
@@ -332,7 +340,9 @@ export default function ClientDashboard() {
         />
 
         {/* Section 5: Live Activity Feed */}
-        <ClientActivityFeed />
+        <div id="live-activity-tracker">
+          <ClientActivityFeed />
+        </div>
 
         {/* Spacer for floating button */}
         <div className="h-20" />
