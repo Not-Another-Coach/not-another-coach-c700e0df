@@ -179,16 +179,7 @@ const ClientJourney = () => {
               <Button 
                 variant="ghost" 
                 size="sm"
-                onClick={() => {
-                  if (profile?.client_survey_completed && profile?.quiz_completed) {
-                    toast({
-                      title: "Survey Already Complete",
-                      description: "You've already completed your preferences survey. Your profile is up to date!",
-                    });
-                  } else {
-                    navigate('/client-survey');
-                  }
-                }}
+                onClick={() => navigate('/client-survey')}
                 className="flex items-center gap-2 h-9 px-3"
               >
                 <Settings className="h-4 w-4" />
@@ -240,16 +231,7 @@ const ClientJourney = () => {
               const getNavigationForStep = (stepTitle: string) => {
                 const title = stepTitle.toLowerCase();
                 if (title.includes('preferences') || title.includes('survey')) {
-                  return () => {
-                    if (profile?.client_survey_completed && profile?.quiz_completed) {
-                      toast({
-                        title: "Survey Already Complete",
-                        description: "You've already completed your preferences survey. Your profile is up to date!",
-                      });
-                    } else {
-                      navigate('/client-survey');
-                    }
-                  };
+                  return () => navigate('/client-survey');
                 } else if (title.includes('exploring') && title.includes('coach')) {
                   return () => navigate('/client/explore');
                 } else if (title.includes('getting') && title.includes('know') && title.includes('coach')) {

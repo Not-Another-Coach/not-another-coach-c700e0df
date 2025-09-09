@@ -255,16 +255,7 @@ export default function ClientDashboard() {
               <Button 
                 variant="ghost" 
                 size="sm"
-                onClick={() => {
-                  if (profile?.client_survey_completed && profile?.quiz_completed) {
-                    toast({
-                      title: "Survey Already Complete",
-                      description: "You've already completed your preferences survey. Your profile is up to date!",
-                    });
-                  } else {
-                    navigate('/client-survey');
-                  }
-                }}
+                onClick={() => navigate('/client-survey')}
                 className="flex items-center gap-2 h-9 px-3"
               >
                 <Settings className="h-4 w-4" />
