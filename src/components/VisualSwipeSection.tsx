@@ -91,7 +91,7 @@ export const VisualSwipeSection = () => {
                 </div>
 
                 <Button 
-                  onClick={() => navigate('/discovery')}
+                  onClick={() => navigate('/client/explore')}
                   size="lg"
                   className="bg-gradient-to-r from-primary via-secondary to-success hover:from-primary/90 hover:via-secondary/90 hover:to-success/90 text-white font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                 >

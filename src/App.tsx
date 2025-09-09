@@ -12,7 +12,6 @@ import Auth from "./pages/Auth";
 import AuthCallback from "./pages/AuthCallback";
 import ClientSurvey from "./pages/ClientSurvey";
 import ClientJourney from "./pages/ClientJourney";
-import Discovery from "./pages/Discovery";
 import SavedTrainers from "./pages/SavedTrainers";
 import TrainerDashboard from "./pages/TrainerDashboard";
 import TrainerProfileSetup from "./pages/TrainerProfileSetup";
@@ -65,7 +64,6 @@ const App = () => (
                 <Route path="/my-trainers" element={<MyTrainers />} />
                 <Route path="/client-survey" element={<ClientSurvey />} />
                 <Route path="/client/journey" element={<ClientJourney />} />
-                <Route path="/discovery" element={<Discovery />} />
                 <Route path="/saved" element={<SavedTrainers />} />
                 <Route path="/trainer/dashboard" element={<TrainerDashboard />} />
                 <Route path="/trainer/profile-setup" element={<TrainerProfileSetup />} />

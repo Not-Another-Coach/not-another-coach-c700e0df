@@ -203,7 +203,7 @@ export function ExploreSection({ isActiveClient, journeyProgress }: ExploreSecti
     return (
       <Card 
         className="border-secondary-200 bg-gradient-to-br from-secondary-50 to-accent-50 cursor-pointer hover:shadow-lg transition-all duration-300"
-        onClick={() => navigate('/discovery')}
+        onClick={() => navigate('/client/explore')}
       >
         <CardHeader>
           <CardTitle className="flex items-center justify-between">

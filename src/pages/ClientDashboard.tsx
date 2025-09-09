@@ -73,7 +73,7 @@ export default function ClientDashboard() {
         navigate('/my-trainers');
         break;
       case 'explore':
-        navigate('/discovery');
+        navigate('/client/explore');
         break;
       case 'preferences':
         navigate('/client-survey');
