@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Grid3X3, List, Trophy } from "lucide-react";
-
-export type TrainerCardViewMode = 'instagram' | 'features' | 'transformations';
+import { TrainerCardViewMode } from '@/types/trainer';
 
 interface TrainerCardViewSelectorProps {
   currentView: TrainerCardViewMode;

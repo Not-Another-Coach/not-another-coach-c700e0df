@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Card, CardContent } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Heart, X, MoreVertical, ChevronLeft, ChevronRight, MessageCircle, Calendar, Star, Eye } from "lucide-react";
 import { Trainer } from "@/components/TrainerCard";
-import { TrainerCardViewMode } from "./TrainerCardViewSelector";
 import { InstagramGalleryView } from "./InstagramGalleryView";
 import { FeatureSummaryView } from "./FeatureSummaryView";
 import { ClientTransformationView } from "./ClientTransformationView";
@@ -14,42 +14,15 @@ import { useSavedTrainers } from "@/hooks/useSavedTrainers";
 import { useNavigate } from "react-router-dom";
 import { useContentVisibility } from '@/hooks/useContentVisibility';
 import { useEngagementStage } from '@/hooks/useEngagementStage';
+import { AnyTrainer, TrainerCardLayout, UnifiedTrainerCardProps, TRAINER_CARD_CONFIGS, TrainerCardViewMode } from '@/types/trainer';
+import { cn } from '@/lib/utils';
 
-interface EnhancedTrainerCardProps {
-  trainer: Trainer;
-  onViewProfile?: (trainerId: string) => void;
-  onMessage?: (trainerId: string) => void;
-  matchScore?: number;
-  matchReasons?: string[];
+// Extended interface that merges UnifiedTrainerCardProps with specific props
+interface EnhancedTrainerCardProps extends Omit<UnifiedTrainerCardProps, 'trainer'> {
+  trainer: AnyTrainer;
   
-  // Unified state management
-  cardState?: 'saved' | 'shortlisted' | 'discovery' | 'matched' | 'declined' | 'waitlist' | 'default';
-  showComparisonCheckbox?: boolean;
-  comparisonChecked?: boolean;
-  onComparisonToggle?: (trainerId: string) => void;
-  comparisonDisabled?: boolean;
-  showRemoveButton?: boolean;
-  onRemove?: (trainerId: string) => void;
-  
-  // CTA actions
-  onAddToShortlist?: (trainerId: string) => void;
-  onStartConversation?: (trainerId: string) => void;
-  onBookDiscoveryCall?: (trainerId: string) => void;
-  onEditDiscoveryCall?: (trainerId: string) => void;
-  onProceedWithCoach?: (trainerId: string) => void;
-  onRejectCoach?: (trainerId: string) => void;
-  isShortlisted?: boolean;
-  hasDiscoveryCall?: boolean;
-  discoveryCallData?: any;
-  trainerOffersDiscoveryCalls?: boolean;
-  waitlistRefreshKey?: number;
-  
-  // Management actions
-  onMoveToSaved?: (trainerId: string) => void;
-  onRemoveCompletely?: (trainerId: string) => void;
-  
-  // View control
-  initialView?: TrainerCardViewMode;
+  // Additional layout configuration
+  config?: string; // Key from TRAINER_CARD_CONFIGS
 }
 
 export const EnhancedTrainerCard = ({ 

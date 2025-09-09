@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star, MapPin, Instagram, Play, Image as ImageIcon } from "lucide-react";
-import { Trainer } from "@/components/TrainerCard";
+import { AnyTrainer } from "@/types/trainer";
 import { getTrainerDisplayPrice } from "@/lib/priceUtils";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
@@ -48,7 +48,7 @@ const getRecommendedGridSizeForCount = (count: number) => {
 };
 
 interface InstagramGalleryViewProps {
-  trainer: Trainer;
+  trainer: AnyTrainer;
   children?: React.ReactNode; // For CTA buttons and interactive elements
 }
 

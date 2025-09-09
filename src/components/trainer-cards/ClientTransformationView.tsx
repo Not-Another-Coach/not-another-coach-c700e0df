@@ -1,20 +1,20 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star, MapPin, Quote } from "lucide-react";
-import { Trainer } from "@/components/TrainerCard";
+import { AnyTrainer } from "@/types/trainer";
 import { getTrainerDisplayPrice } from "@/lib/priceUtils";
 import { useContentVisibility } from '@/hooks/useContentVisibility';
 import { useEngagementStage } from '@/hooks/useEngagementStage';
 import { VisibilityAwareImage } from '@/components/ui/VisibilityAwareImage';
 
 interface ClientTransformationViewProps {
-  trainer: Trainer;
+  trainer: AnyTrainer;
   children?: React.ReactNode; // For CTA buttons and interactive elements
   testimonialIndex?: number; // Which specific testimonial to display (0-based index)
 }
 
 // Real transformation data from trainer's testimonials
-const getTransformationData = (trainer: Trainer) => {
+const getTransformationData = (trainer: AnyTrainer) => {
   // Get testimonials from trainer data
   const testimonials = (trainer as any).testimonials || [];
   

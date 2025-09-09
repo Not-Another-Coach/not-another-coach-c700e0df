@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star, MapPin, Clock, Users, Crown, Sparkles } from "lucide-react";
-import { Trainer } from "@/components/TrainerCard";
+import { AnyTrainer } from "@/types/trainer";
 import { getTrainerDisplayPrice } from "@/lib/priceUtils";
 import { getServiceIcon, standardizeServiceName, getServiceHighlight } from "@/lib/serviceIcons";
 import { useEngagementStage } from '@/hooks/useEngagementStage';
@@ -10,7 +10,7 @@ import { VisibilityAwareRating } from "@/components/ui/VisibilityAwareRating";
 import { VisibilityAwareText } from "@/components/ui/VisibilityAwareText";
 
 interface FeatureSummaryViewProps {
-  trainer: Trainer;
+  trainer: AnyTrainer;
   children?: React.ReactNode; // For CTA buttons and interactive elements
 }
 
