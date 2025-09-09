@@ -247,7 +247,7 @@ export function LogoManagement() {
                   ...prev,
                   app_name: e.target.value
                 }))}
-                placeholder="FitQuest"
+                placeholder="Your Journey"
               />
             </div>
             

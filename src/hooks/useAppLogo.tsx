@@ -10,8 +10,8 @@ interface LogoSettings {
 export function useAppLogo() {
   const [logoSettings, setLogoSettings] = useState<LogoSettings>({
     logo_url: null,
-    fallback_text: 'FQ',
-    app_name: 'FitQuest'
+    fallback_text: 'YJ',
+    app_name: 'Your Journey'
   });
   const [loading, setLoading] = useState(true);
 

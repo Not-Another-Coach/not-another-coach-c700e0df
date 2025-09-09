@@ -23,7 +23,8 @@ import {
   Bell,
   MessageCircle,
   Settings,
-  RefreshCw
+  RefreshCw,
+  Eye
 } from "lucide-react";
 import { AppLogo } from "@/components/ui/app-logo";
 import { DiscoveryCallBookingModal } from "@/components/discovery-call/DiscoveryCallBookingModal";
@@ -199,10 +200,26 @@ export default function MyTrainers() {
           <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border">
             <div className="mx-auto px-6 lg:px-8 xl:px-12 py-3">
               <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <AppLogo onClick={() => navigate('/client/dashboard')} />
-                <div className="text-muted-foreground">Your Journey</div>
-                </div>
+               <div className="flex items-center gap-3">
+                 <AppLogo onClick={() => navigate('/client/dashboard')} />
+                 <div className="text-muted-foreground">Your Journey</div>
+                 {/* Your Journey Progress */}
+                 {journeyProgress && (
+                   <div className="flex items-center gap-2 ml-6 px-3 py-1 bg-primary/10 rounded-full">
+                     <div className="text-sm font-medium text-primary">
+                       {formatJourneyStage(journeyProgress.stage)} • {journeyProgress.percentage}% Complete
+                     </div>
+                     <Button 
+                       variant="ghost" 
+                       size="sm"
+                       onClick={() => navigate('/client/journey')}
+                       className="h-6 w-6 p-0 rounded-full hover:bg-primary/20"
+                     >
+                       <Eye className="h-3 w-3" />
+                     </Button>
+                   </div>
+                 )}
+                 </div>
                 <div className="flex items-center gap-3">
                   {/* Notifications */}
                   <Popover>
@@ -325,7 +342,23 @@ export default function MyTrainers() {
                 <div className="flex items-center gap-3">
                   <AppLogo onClick={() => navigate('/client/dashboard')} />
                   <div className="text-muted-foreground">Your Journey</div>
-              </div>
+                  {/* Your Journey Progress */}
+                  {journeyProgress && (
+                    <div className="flex items-center gap-2 ml-6 px-3 py-1 bg-primary/10 rounded-full">
+                      <div className="text-sm font-medium text-primary">
+                        {formatJourneyStage(journeyProgress.stage)} • {journeyProgress.percentage}% Complete
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => navigate('/client/journey')}
+                        className="h-6 w-6 p-0 rounded-full hover:bg-primary/20"
+                      >
+                        <Eye className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
               <div className="flex items-center gap-3">
                 {/* Notifications */}
                 <Popover>

@@ -15,7 +15,8 @@ import {
   Loader2, 
   Bell, 
   MessageCircle, 
-  Settings 
+  Settings,
+  Eye
 } from "lucide-react";
 
 const ClientExplore = () => {
@@ -70,6 +71,22 @@ const ClientExplore = () => {
             <div className="flex items-center gap-3">
               <AppLogo onClick={() => navigate('/client/dashboard')} />
               <div className="text-muted-foreground">Your Journey</div>
+              {/* Your Journey Progress */}
+              {journeyProgress && (
+                <div className="flex items-center gap-2 ml-6 px-3 py-1 bg-primary/10 rounded-full">
+                  <div className="text-sm font-medium text-primary">
+                    {formatJourneyStage(journeyProgress.stage)} • {journeyProgress.percentage}% Complete
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => navigate('/client/journey')}
+                    className="h-6 w-6 p-0 rounded-full hover:bg-primary/20"
+                  >
+                    <Eye className="h-3 w-3" />
+                  </Button>
+                </div>
+              )}
             </div>
             <div className="flex items-center gap-3">
               {/* Notifications */}

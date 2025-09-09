@@ -144,6 +144,19 @@ const ClientJourney = () => {
                         ))}
                       </div>
                     )}
+                    
+                    {/* Live Tracker Section */}
+                    <div className="border-t pt-4">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full"
+                        onClick={() => navigate('/client/dashboard')}
+                      >
+                        View Live Tracker
+                      </Button>
+                    </div>
+                    
                     {notifications.length === 0 && upcomingCalls.length === 0 && (
                       <p className="text-xs text-muted-foreground">No new notifications</p>
                     )}
@@ -217,8 +230,7 @@ const ClientJourney = () => {
               const getNavigationForStep = (stepTitle: string) => {
                 const title = stepTitle.toLowerCase();
                 if (title.includes('preferences') || title.includes('survey')) {
-                  // If survey is already completed, don't navigate away
-                  return null;
+                  return () => navigate('/client-survey');
                 } else if (title.includes('exploring') && title.includes('coach')) {
                   return () => navigate('/client/explore');
                 } else if (title.includes('getting') && title.includes('know') && title.includes('coach')) {
