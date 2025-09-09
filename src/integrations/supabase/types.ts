@@ -6730,6 +6730,14 @@ export type Database = {
         }
         Returns: Database["public"]["Enums"]["visibility_state"]
       }
+      get_content_visibility_by_group: {
+        Args: {
+          p_content_type: Database["public"]["Enums"]["content_type"]
+          p_stage_group: Database["public"]["Enums"]["engagement_stage_group"]
+          p_trainer_id: string
+        }
+        Returns: Database["public"]["Enums"]["visibility_state"]
+      }
       get_current_user_type: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -6737,6 +6745,12 @@ export type Database = {
       get_engagement_stage: {
         Args: { client_uuid: string; trainer_uuid: string }
         Returns: Database["public"]["Enums"]["engagement_stage"]
+      }
+      get_individual_stages_for_group: {
+        Args: {
+          stage_group: Database["public"]["Enums"]["engagement_stage_group"]
+        }
+        Returns: Database["public"]["Enums"]["engagement_stage"][]
       }
       get_secure_profile_data: {
         Args: { p_user_id?: string }
@@ -6747,6 +6761,10 @@ export type Database = {
           last_name: string
           user_type: string
         }[]
+      }
+      get_stage_group_for_individual_stage: {
+        Args: { stage: Database["public"]["Enums"]["engagement_stage"] }
+        Returns: Database["public"]["Enums"]["engagement_stage_group"]
       }
       get_trainer_membership_details: {
         Args: { p_trainer_id: string }
@@ -6979,6 +6997,15 @@ export type Database = {
         Args: { new_email: string; target_user_id: string }
         Returns: boolean
       }
+      update_visibility_for_group: {
+        Args: {
+          p_content_type: Database["public"]["Enums"]["content_type"]
+          p_stage_group: Database["public"]["Enums"]["engagement_stage_group"]
+          p_trainer_id: string
+          p_visibility_state: Database["public"]["Enums"]["visibility_state"]
+        }
+        Returns: undefined
+      }
       update_workflow_progress: {
         Args: {
           p_correlation_id: string
@@ -7067,6 +7094,13 @@ export type Database = {
         | "goal_achieved"
         | "relationship_ended"
         | "discovery_call_booked"
+      engagement_stage_group:
+        | "browsing"
+        | "liked"
+        | "shortlisted"
+        | "discovery_process"
+        | "committed"
+        | "rejected"
       goal_status:
         | "not_started"
         | "in_progress"
@@ -7322,6 +7356,14 @@ export const Constants = {
         "goal_achieved",
         "relationship_ended",
         "discovery_call_booked",
+      ],
+      engagement_stage_group: [
+        "browsing",
+        "liked",
+        "shortlisted",
+        "discovery_process",
+        "committed",
+        "rejected",
       ],
       goal_status: [
         "not_started",
