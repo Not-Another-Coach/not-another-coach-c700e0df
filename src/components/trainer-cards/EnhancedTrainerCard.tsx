@@ -614,7 +614,7 @@ export const EnhancedTrainerCard = memo(({
     return (
       <Card className={cn(
         "cursor-pointer hover:shadow-lg transition-all duration-300 snap-start",
-        "bg-gradient-to-br from-card to-secondary-50 h-80"
+        "bg-gradient-to-br from-card to-secondary-50 h-80 overflow-hidden"
       )}>
         <CardContent className="p-0 h-full relative">
           {/* Main image/view content - Always show InstagramGalleryView for dashboard carousel */}
@@ -644,8 +644,8 @@ export const EnhancedTrainerCard = memo(({
           </div>
 
           {/* Content section */}
-          <div className="p-4 flex flex-col justify-between h-32">
-            <div className="flex items-center justify-between mb-3">
+          <div className="p-4 flex flex-col justify-between" style={{ height: 'calc(100% - 12rem)' }}>
+            <div className="flex items-center justify-between mb-2">
               {trainer.location && (
                 <p className="text-sm text-muted-foreground truncate flex-1">
                   {trainer.location}
@@ -661,7 +661,7 @@ export const EnhancedTrainerCard = memo(({
 
             {/* Action Buttons - Only show if there are actions */}
             {renderActionButtons().length > 0 && (
-              <div className="flex gap-2">
+              <div className="flex gap-2 mt-auto">
                 {renderActionButtons()}
               </div>
             )}

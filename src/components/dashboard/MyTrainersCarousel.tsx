@@ -166,7 +166,7 @@ export function MyTrainersCarousel({ onTabChange }: MyTrainersCarouselProps) {
 
       <div 
         id="trainers-carousel"
-        className="flex gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-2"
+        className="flex gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {myTrainers.map((trainer) => (
