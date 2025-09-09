@@ -32,16 +32,35 @@ export type EngagementStage =
   | 'declined'
   | 'declined_dismissed';
 
+export type EngagementStageGroup =
+  | 'browsing'
+  | 'liked'
+  | 'shortlisted'
+  | 'discovery_process'
+  | 'committed'
+  | 'rejected';
+
 interface VisibilityMatrixHook {
   getContentVisibility: (
     trainerId: string, 
     contentType: ContentType, 
     engagementStage: EngagementStage
   ) => Promise<VisibilityState>;
+  getContentVisibilityByGroup: (
+    trainerId: string,
+    contentType: ContentType,
+    stageGroup: EngagementStageGroup
+  ) => Promise<VisibilityState>;
   updateVisibilitySettings: (
     trainerId: string,
     contentType: ContentType,
     engagementStage: EngagementStage,
+    visibilityState: VisibilityState
+  ) => Promise<{ error?: any }>;
+  updateVisibilityByGroup: (
+    trainerId: string,
+    contentType: ContentType,
+    stageGroup: EngagementStageGroup,
     visibilityState: VisibilityState
   ) => Promise<{ error?: any }>;
   initializeDefaults: (trainerId: string) => Promise<{ error?: any }>;
@@ -51,6 +70,16 @@ interface VisibilityMatrixHook {
 export function useVisibilityMatrix(): VisibilityMatrixHook {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
+
+  // Stage group mapping
+  const stageGroupMapping: Record<EngagementStageGroup, EngagementStage[]> = {
+    browsing: ['browsing'],
+    liked: ['liked'],
+    shortlisted: ['shortlisted'],
+    discovery_process: ['getting_to_know_your_coach', 'discovery_in_progress', 'matched'],
+    committed: ['discovery_completed', 'agreed', 'payment_pending', 'active_client'],
+    rejected: ['unmatched', 'declined', 'declined_dismissed']
+  };
 
   const getContentVisibility = useCallback(async (
     trainerId: string,
@@ -134,9 +163,66 @@ export function useVisibilityMatrix(): VisibilityMatrixHook {
     }
   }, [user]);
 
+  const getContentVisibilityByGroup = useCallback(async (
+    trainerId: string,
+    contentType: ContentType,
+    stageGroup: EngagementStageGroup
+  ): Promise<VisibilityState> => {
+    try {
+      const { data, error } = await supabase.rpc('get_content_visibility_by_group', {
+        p_trainer_id: trainerId,
+        p_content_type: contentType,
+        p_stage_group: stageGroup as any // Type cast needed until Supabase regenerates types
+      });
+
+      if (error) {
+        console.error('Error getting content visibility by group:', error);
+        return 'hidden'; // Safe default
+      }
+
+      return data as VisibilityState;
+    } catch (error) {
+      console.error('Error getting content visibility by group:', error);
+      return 'hidden'; // Safe default
+    }
+  }, []);
+
+  const updateVisibilityByGroup = useCallback(async (
+    trainerId: string,
+    contentType: ContentType,
+    stageGroup: EngagementStageGroup,
+    visibilityState: VisibilityState
+  ) => {
+    if (!user) return { error: 'User not authenticated' };
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.rpc('update_visibility_for_group', {
+        p_trainer_id: trainerId,
+        p_content_type: contentType,
+        p_stage_group: stageGroup as any, // Type cast needed until Supabase regenerates types
+        p_visibility_state: visibilityState
+      });
+
+      if (error) {
+        console.error('Error updating visibility by group:', error);
+        return { error };
+      }
+
+      return {};
+    } catch (error) {
+      console.error('Error updating visibility by group:', error);
+      return { error };
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
+
   return {
     getContentVisibility,
+    getContentVisibilityByGroup,
     updateVisibilitySettings,
+    updateVisibilityByGroup,
     initializeDefaults,
     loading
   };

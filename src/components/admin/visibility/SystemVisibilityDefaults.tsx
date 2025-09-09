@@ -4,7 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Eye, EyeOff, Lock, Save } from 'lucide-react';
-import { ContentType, VisibilityState, EngagementStage } from '@/hooks/useVisibilityMatrix';
+import { ContentType, VisibilityState, EngagementStageGroup } from '@/hooks/useVisibilityMatrix';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { HelpCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 const contentTypeLabels: Record<ContentType, string> = {
@@ -21,20 +23,31 @@ const contentTypeLabels: Record<ContentType, string> = {
   professional_milestones: 'Professional Milestones'
 };
 
-const engagementStageLabels: Record<EngagementStage, string> = {
-  browsing: 'Browsing',
-  liked: 'Liked', 
-  shortlisted: 'Shortlisted',
-  getting_to_know_your_coach: 'Getting to Know',
-  discovery_in_progress: 'Discovery Active',
-  matched: 'Matched',
-  discovery_completed: 'Discovery Done',
-  agreed: 'Agreed',
-  payment_pending: 'Payment Pending',
-  active_client: 'Active Client',
-  unmatched: 'Unmatched',
-  declined: 'Declined',
-  declined_dismissed: 'Previously Declined'
+const stageGroupLabels: Record<EngagementStageGroup, { label: string; tooltip: string }> = {
+  browsing: { 
+    label: 'Browsing', 
+    tooltip: 'When clients are browsing trainer profiles' 
+  },
+  liked: { 
+    label: 'Liked', 
+    tooltip: 'When clients have liked a trainer profile' 
+  },
+  shortlisted: { 
+    label: 'Shortlisted', 
+    tooltip: 'When clients have shortlisted a trainer' 
+  },
+  discovery_process: { 
+    label: 'Discovery Process', 
+    tooltip: 'Getting to Know, Discovery Active, Matched' 
+  },
+  committed: { 
+    label: 'Committed', 
+    tooltip: 'Discovery Done, Agreed, Payment Pending, Active Client' 
+  },
+  rejected: { 
+    label: 'Rejected', 
+    tooltip: 'Unmatched, Declined, Previously Declined' 
+  }
 };
 
 const visibilityStateLabels: Record<VisibilityState, { label: string; icon: any; color: string }> = {
@@ -77,20 +90,13 @@ export function SystemVisibilityDefaults() {
     ...alwaysVisibleTypes
   ];
 
-  const engagementStages: EngagementStage[] = [
+  const stageGroups: EngagementStageGroup[] = [
     'browsing',
     'liked',
-    'shortlisted', 
-    'getting_to_know_your_coach',
-    'discovery_in_progress',
-    'matched',
-    'discovery_completed',
-    'agreed',
-    'payment_pending',
-    'active_client',
-    'unmatched',
-    'declined',
-    'declined_dismissed'
+    'shortlisted',
+    'discovery_process',
+    'committed',
+    'rejected'
   ];
 
   useEffect(() => {
@@ -103,8 +109,8 @@ export function SystemVisibilityDefaults() {
       // For now, use hardcoded defaults - this will be replaced with API call
       const defaults: Record<string, VisibilityState> = {};
       allContentTypes.forEach(contentType => {
-        engagementStages.forEach(stage => {
-          const key = `${contentType}_${stage}`;
+        stageGroups.forEach(stageGroup => {
+          const key = `${contentType}_${stageGroup}`;
           // Set sensible defaults based on content type category
           if (alwaysVisibleTypes.includes(contentType)) {
             defaults[key] = 'visible';
@@ -112,11 +118,11 @@ export function SystemVisibilityDefaults() {
             defaults[key] = 'visible';
           } else if (adminControllableTypes.includes(contentType)) {
             // Set engagement-based defaults for admin controllable types
-            if (stage === 'active_client') {
+            if (stageGroup === 'committed') {
               defaults[key] = 'visible';
-            } else if (stage === 'browsing') {
+            } else if (stageGroup === 'browsing') {
               defaults[key] = ['profile_image', 'basic_information', 'pricing_discovery_call'].includes(contentType) ? 'visible' : 'blurred';
-            } else if (['shortlisted', 'discovery_in_progress', 'discovery_completed'].includes(stage)) {
+            } else if (['shortlisted', 'discovery_process'].includes(stageGroup)) {
               defaults[key] = contentType === 'testimonial_images' ? 'visible' : 'blurred';
             } else {
               defaults[key] = 'hidden';
@@ -133,8 +139,8 @@ export function SystemVisibilityDefaults() {
     }
   };
 
-  const handleVisibilityChange = (contentType: ContentType, stage: EngagementStage, visibility: VisibilityState) => {
-    const key = `${contentType}_${stage}`;
+  const handleVisibilityChange = (contentType: ContentType, stageGroup: EngagementStageGroup, visibility: VisibilityState) => {
+    const key = `${contentType}_${stageGroup}`;
     setDefaultSettings(prev => ({
       ...prev,
       [key]: visibility
@@ -177,34 +183,45 @@ export function SystemVisibilityDefaults() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          System Visibility Defaults
-          <Button onClick={saveDefaults} disabled={saving} className="ml-4">
-            <Save className="h-4 w-4 mr-2" />
-            {saving ? 'Saving...' : 'Save Defaults'}
-          </Button>
-        </CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Configure the default visibility settings that will be applied to all new trainer profiles.
-        </p>
-      </CardHeader>
-      <CardContent>
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr>
-                <th className="text-left p-3 border-b font-medium">Content Type</th>
-                {engagementStages.map(stage => (
-                  <th key={stage} className="text-center p-2 border-b font-medium min-w-[120px]">
-                    <div className="text-xs">
-                      {engagementStageLabels[stage]}
-                    </div>
-                  </th>
-                ))}
-              </tr>
-            </thead>
+    <TooltipProvider>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            System Visibility Defaults
+            <Button onClick={saveDefaults} disabled={saving} className="ml-4">
+              <Save className="h-4 w-4 mr-2" />
+              {saving ? 'Saving...' : 'Save Defaults'}
+            </Button>
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Configure the default visibility settings that will be applied to all new trainer profiles.
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr>
+                  <th className="text-left p-3 border-b font-medium">Content Type</th>
+                  {stageGroups.map(stageGroup => (
+                    <th key={stageGroup} className="text-center p-2 border-b font-medium min-w-[140px]">
+                      <div className="flex items-center justify-center gap-1">
+                        <span className="text-xs font-medium">
+                          {stageGroupLabels[stageGroup].label}
+                        </span>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <HelpCircle className="h-3 w-3 text-muted-foreground cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="text-xs">{stageGroupLabels[stageGroup].tooltip}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
             <tbody>
               {/* Admin Controllable Content Types */}
               {adminControllableTypes.map(contentType => (
@@ -215,16 +232,16 @@ export function SystemVisibilityDefaults() {
                       <Badge variant="outline" className="text-xs">Editable</Badge>
                     </div>
                   </td>
-                  {engagementStages.map(stage => {
-                    const key = `${contentType}_${stage}`;
+                  {stageGroups.map(stageGroup => {
+                    const key = `${contentType}_${stageGroup}`;
                     const currentValue = defaultSettings[key] || 'hidden';
                     
                     return (
-                      <td key={stage} className="p-2 border-b text-center">
+                      <td key={stageGroup} className="p-2 border-b text-center">
                         <Select
                           value={currentValue}
                           onValueChange={(value: VisibilityState) => 
-                            handleVisibilityChange(contentType, stage, value)
+                            handleVisibilityChange(contentType, stageGroup, value)
                           }
                         >
                           <SelectTrigger className="w-full h-8 text-xs">
@@ -260,8 +277,8 @@ export function SystemVisibilityDefaults() {
                       <Badge variant="secondary" className="text-xs">Default Visible</Badge>
                     </div>
                   </td>
-                  {engagementStages.map(stage => (
-                    <td key={stage} className="p-2 border-b text-center">
+                  {stageGroups.map(stageGroup => (
+                    <td key={stageGroup} className="p-2 border-b text-center">
                       <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
                         <VisibilityIcon state="visible" />
                         <span>Visible</span>
@@ -280,8 +297,8 @@ export function SystemVisibilityDefaults() {
                       <Badge variant="default" className="text-xs bg-green-600">Always Visible</Badge>
                     </div>
                   </td>
-                  {engagementStages.map(stage => (
-                    <td key={stage} className="p-2 border-b text-center">
+                  {stageGroups.map(stageGroup => (
+                    <td key={stageGroup} className="p-2 border-b text-center">
                       <div className="flex items-center justify-center gap-1 text-xs text-green-600">
                         <VisibilityIcon state="visible" />
                         <span>Always</span>
@@ -312,5 +329,6 @@ export function SystemVisibilityDefaults() {
         </div>
       </CardContent>
     </Card>
+    </TooltipProvider>
   );
 }

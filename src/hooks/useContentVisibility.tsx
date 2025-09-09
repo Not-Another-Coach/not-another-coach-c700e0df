@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useVisibilityMatrix, ContentType, VisibilityState, EngagementStage } from './useVisibilityMatrix';
+import { useVisibilityMatrix, ContentType, VisibilityState, EngagementStage, EngagementStageGroup } from './useVisibilityMatrix';
 
 interface UseContentVisibilityProps {
   trainerId: string;
@@ -21,7 +21,7 @@ interface ContentVisibilityMap {
 }
 
 export function useContentVisibility({ trainerId, engagementStage }: UseContentVisibilityProps) {
-  const { getContentVisibility } = useVisibilityMatrix();
+  const { getContentVisibility, getContentVisibilityByGroup } = useVisibilityMatrix();
   const [visibilityMap, setVisibilityMap] = useState<ContentVisibilityMap>({
     profile_image: 'hidden',
     basic_information: 'hidden',
@@ -37,6 +37,23 @@ export function useContentVisibility({ trainerId, engagementStage }: UseContentV
   });
   const [loading, setLoading] = useState(true);
 
+  // Map individual stages to groups
+  const getStageGroup = (stage: EngagementStage): EngagementStageGroup => {
+    if (stage === 'browsing') return 'browsing';
+    if (stage === 'liked') return 'liked';
+    if (stage === 'shortlisted') return 'shortlisted';
+    if (['getting_to_know_your_coach', 'discovery_in_progress', 'matched'].includes(stage)) {
+      return 'discovery_process';
+    }
+    if (['discovery_completed', 'agreed', 'payment_pending', 'active_client'].includes(stage)) {
+      return 'committed';
+    }
+    if (['unmatched', 'declined', 'declined_dismissed'].includes(stage)) {
+      return 'rejected';
+    }
+    return 'browsing'; // fallback
+  };
+
   const contentTypes: ContentType[] = [
     'profile_image', 'basic_information', 'testimonial_images', 'gallery_images',
     'specializations', 'pricing_discovery_call', 'stats_ratings', 'description_bio',
@@ -49,8 +66,11 @@ export function useContentVisibility({ trainerId, engagementStage }: UseContentV
       
       setLoading(true);
       try {
+        const stageGroup = getStageGroup(engagementStage);
+        
         const visibilityPromises = contentTypes.map(async (contentType) => {
-          const visibility = await getContentVisibility(trainerId, contentType, engagementStage);
+          // Use group-based visibility check for better performance
+          const visibility = await getContentVisibilityByGroup(trainerId, contentType, stageGroup);
           return { contentType, visibility };
         });
 
@@ -83,7 +103,7 @@ export function useContentVisibility({ trainerId, engagementStage }: UseContentV
     };
 
     fetchVisibilityStates();
-  }, [trainerId, engagementStage, getContentVisibility]);
+  }, [trainerId, engagementStage, getContentVisibilityByGroup]);
 
   // Helper functions for common visibility checks
   const canViewContent = useMemo(() => ({

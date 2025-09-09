@@ -4,7 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Eye, EyeOff, Lock, Settings, ExternalLink } from 'lucide-react';
-import { useVisibilityMatrix, ContentType, VisibilityState, EngagementStage } from '@/hooks/useVisibilityMatrix';
+import { useVisibilityMatrix, ContentType, VisibilityState, EngagementStageGroup } from '@/hooks/useVisibilityMatrix';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { HelpCircle } from 'lucide-react';
 import { useTrainerProfile } from '@/hooks/useTrainerProfile';
 import { ProfilePreviewModal } from './ProfilePreviewModal';
 import { toast } from 'sonner';
@@ -23,20 +25,31 @@ const contentTypeLabels: Record<ContentType, string> = {
   professional_milestones: 'Professional Milestones'
 };
 
-const engagementStageLabels: Record<EngagementStage, string> = {
-  browsing: 'Browsing',
-  liked: 'Liked',
-  shortlisted: 'Shortlisted',
-  getting_to_know_your_coach: 'Getting to Know',
-  discovery_in_progress: 'Discovery Active',
-  matched: 'Matched',
-  discovery_completed: 'Discovery Done',
-  agreed: 'Agreed',
-  payment_pending: 'Payment Pending',
-  active_client: 'Active Client',
-  unmatched: 'Unmatched',
-  declined: 'Declined',
-  declined_dismissed: 'Previously Declined'
+const stageGroupLabels: Record<EngagementStageGroup, { label: string; tooltip: string }> = {
+  browsing: { 
+    label: 'Browsing', 
+    tooltip: 'When clients are browsing trainer profiles' 
+  },
+  liked: { 
+    label: 'Liked', 
+    tooltip: 'When clients have liked a trainer profile' 
+  },
+  shortlisted: { 
+    label: 'Shortlisted', 
+    tooltip: 'When clients have shortlisted a trainer' 
+  },
+  discovery_process: { 
+    label: 'Discovery Process', 
+    tooltip: 'Getting to Know, Discovery Active, Matched' 
+  },
+  committed: { 
+    label: 'Committed', 
+    tooltip: 'Discovery Done, Agreed, Payment Pending, Active Client' 
+  },
+  rejected: { 
+    label: 'Rejected', 
+    tooltip: 'Unmatched, Declined, Previously Declined' 
+  }
 };
 
 const visibilityStateLabels: Record<VisibilityState, { label: string; icon: any; color: string }> = {
@@ -47,10 +60,10 @@ const visibilityStateLabels: Record<VisibilityState, { label: string; icon: any;
 
 export const VisibilitySettingsSection = () => {
   const { profile } = useTrainerProfile();
-  const { updateVisibilitySettings, initializeDefaults, loading } = useVisibilityMatrix();
+  const { updateVisibilityByGroup, initializeDefaults, loading } = useVisibilityMatrix();
   const [settings, setSettings] = useState<Record<string, VisibilityState>>({});
   const [hasInitialized, setHasInitialized] = useState(false);
-  const [previewStage, setPreviewStage] = useState<EngagementStage | null>(null);
+  const [previewStage, setPreviewStage] = useState<EngagementStageGroup | null>(null);
 
   // Only show admin-controllable content types in trainer setup
   const adminControllableTypes: ContentType[] = [
@@ -61,16 +74,13 @@ export const VisibilitySettingsSection = () => {
     'pricing_discovery_call'
   ];
 
-  const engagementStages: EngagementStage[] = [
-    'browsing', 
-    'liked', 
+  const stageGroups: EngagementStageGroup[] = [
+    'browsing',
+    'liked',
     'shortlisted',
-    'getting_to_know_your_coach',
-    'discovery_in_progress',
-    'discovery_completed',
-    'agreed',
-    'payment_pending',
-    'active_client'
+    'discovery_process',
+    'committed',
+    'rejected'
   ];
 
   const initializeSettings = async () => {
@@ -87,18 +97,18 @@ export const VisibilitySettingsSection = () => {
 
   const handleVisibilityChange = async (
     contentType: ContentType,
-    stage: EngagementStage,
+    stageGroup: EngagementStageGroup,
     newVisibility: VisibilityState
   ) => {
     if (!profile?.id) return;
 
-    const key = `${contentType}-${stage}`;
+    const key = `${contentType}-${stageGroup}`;
     setSettings(prev => ({ ...prev, [key]: newVisibility }));
 
-    const { error } = await updateVisibilitySettings(
+    const { error } = await updateVisibilityByGroup(
       profile.id, 
       contentType, 
-      stage, 
+      stageGroup, 
       newVisibility
     );
 
@@ -126,51 +136,62 @@ export const VisibilitySettingsSection = () => {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Settings className="w-5 h-5" />
-          Content Visibility Matrix
-        </CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Control what content clients can see at each stage of engagement
-        </p>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {!hasInitialized && (
-          <div className="bg-muted/50 rounded-lg p-4 text-center">
-            <Button onClick={initializeSettings} disabled={loading}>
-              Initialize Default Settings
-            </Button>
-            <p className="text-sm text-muted-foreground mt-2">
-              This will set up recommended visibility settings for each engagement stage
-            </p>
-          </div>
-        )}
+    <TooltipProvider>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Settings className="w-5 h-5" />
+            Content Visibility Matrix
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Control what content clients can see at each engagement stage group
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {!hasInitialized && (
+            <div className="bg-muted/50 rounded-lg p-4 text-center">
+              <Button onClick={initializeSettings} disabled={loading}>
+                Initialize Default Settings
+              </Button>
+              <p className="text-sm text-muted-foreground mt-2">
+                This will set up recommended visibility settings for each engagement stage group
+              </p>
+            </div>
+          )}
 
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr>
-                <th className="text-left p-2 border-b">Content Type</th>
-                {engagementStages.map(stage => (
-                  <th key={stage} className="text-center p-2 border-b">
-                    <div className="space-y-2">
-                      <div className="text-xs font-medium">
-                        {engagementStageLabels[stage]}
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr>
+                  <th className="text-left p-2 border-b">Content Type</th>
+                  {stageGroups.map(stageGroup => (
+                    <th key={stageGroup} className="text-center p-2 border-b min-w-[140px]">
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-center gap-1">
+                          <span className="text-xs font-medium">
+                            {stageGroupLabels[stageGroup].label}
+                          </span>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <HelpCircle className="h-3 w-3 text-muted-foreground cursor-help" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="text-xs">{stageGroupLabels[stageGroup].tooltip}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setPreviewStage(stageGroup)}
+                          className="h-7 text-xs px-2"
+                        >
+                          <ExternalLink className="w-3 h-3 mr-1" />
+                          Preview
+                        </Button>
                       </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setPreviewStage(stage)}
-                        className="h-7 text-xs px-2"
-                      >
-                        <ExternalLink className="w-3 h-3 mr-1" />
-                        Preview
-                      </Button>
-                    </div>
-                  </th>
-                ))}
+                    </th>
+                  ))}
               </tr>
             </thead>
             <tbody>
@@ -179,19 +200,19 @@ export const VisibilitySettingsSection = () => {
                   <td className="p-2 font-medium text-sm">
                     {contentTypeLabels[contentType]}
                   </td>
-                  {engagementStages.map(stage => {
-                    const key = `${contentType}-${stage}`;
+                  {stageGroups.map(stageGroup => {
+                    const key = `${contentType}-${stageGroup}`;
                     const currentValue = settings[key] || 'hidden';
                     
                     return (
-                      <td key={stage} className="p-2 text-center">
+                      <td key={stageGroup} className="p-2 text-center">
                         <Select
                           value={currentValue}
                           onValueChange={(value: VisibilityState) => 
-                            handleVisibilityChange(contentType, stage, value)
+                            handleVisibilityChange(contentType, stageGroup, value)
                           }
                         >
-                          <SelectTrigger className="w-24 h-8">
+                          <SelectTrigger className="w-28 h-8">
                             <SelectValue>
                               <div className="flex items-center gap-1">
                                 <VisibilityIcon state={currentValue} />
@@ -245,10 +266,15 @@ export const VisibilitySettingsSection = () => {
             isOpen={!!previewStage}
             onClose={() => setPreviewStage(null)}
             trainer={profile}
-            stage={previewStage}
+            stage={previewStage === 'browsing' ? 'browsing' : 
+                   previewStage === 'liked' ? 'liked' :
+                   previewStage === 'shortlisted' ? 'shortlisted' :
+                   previewStage === 'discovery_process' ? 'discovery_in_progress' :
+                   previewStage === 'committed' ? 'active_client' : 'declined'}
           />
         )}
       </CardContent>
     </Card>
+    </TooltipProvider>
   );
 };
