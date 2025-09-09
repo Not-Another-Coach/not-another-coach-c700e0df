@@ -2,6 +2,9 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LogoManagement } from './LogoManagement';
+import { SystemVisibilityDefaults } from './visibility/SystemVisibilityDefaults';
+import { TrainerVisibilityManagement } from './visibility/TrainerVisibilityManagement';
+import { VisibilityAnalytics } from './visibility/VisibilityAnalytics';
 import { Settings, Image, Database, Users } from 'lucide-react';
 
 export function SystemSettings() {
@@ -37,34 +40,37 @@ export function SystemSettings() {
         </TabsContent>
 
         <TabsContent value="general" className="space-y-6">
+          <SystemVisibilityDefaults />
           <Card>
             <CardHeader>
-              <CardTitle>General Settings</CardTitle>
+              <CardTitle>Other General Settings</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">General application settings will be available here.</p>
+              <p className="text-muted-foreground">Additional general application settings will be available here.</p>
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="database" className="space-y-6">
+          <VisibilityAnalytics />
           <Card>
             <CardHeader>
               <CardTitle>Database Management</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">Database management tools will be available here.</p>
+              <p className="text-muted-foreground">Additional database management tools will be available here.</p>
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="users" className="space-y-6">
+          <TrainerVisibilityManagement />
           <Card>
             <CardHeader>
-              <CardTitle>User Management</CardTitle>
+              <CardTitle>Other User Management</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">User management tools will be available here.</p>
+              <p className="text-muted-foreground">Additional user management tools will be available here.</p>
             </CardContent>
           </Card>
         </TabsContent>
