@@ -58,9 +58,6 @@ export function ClientHeader({
             </h1>
             {journeyProgress && !journeyLoading && (
               <>
-                <Badge variant="secondary" className="text-xs">
-                  {journeyProgress.percentage}% Complete
-                </Badge>
                 <Badge variant="outline" className="text-xs">
                   {journeyProgress.stage.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                 </Badge>

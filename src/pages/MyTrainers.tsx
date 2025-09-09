@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { EnhancedTrainerCard } from "@/components/trainer-cards/EnhancedTrainerCard";
 import { FloatingMessageButton } from "@/components/FloatingMessageButton";
 import { MessagingPopup } from "@/components/MessagingPopup";
@@ -24,7 +25,8 @@ import {
   MessageCircle,
   Settings,
   RefreshCw,
-  Eye
+  Eye,
+  ChevronDown
 } from "lucide-react";
 import { ClientCustomHeader } from "@/components/layout/ClientCustomHeader";
 import { DiscoveryCallBookingModal } from "@/components/discovery-call/DiscoveryCallBookingModal";
@@ -262,47 +264,98 @@ export default function MyTrainers() {
             )}
           </div>
 
-          {/* Filter Tabs */}
+          {/* Filter Tabs - Responsive */}
           <Tabs value={activeFilter} onValueChange={(value) => setActiveFilter(value as any)}>
             <div className="flex items-center justify-between">
-              <TabsList className="grid w-full grid-cols-6">
-                <TabsTrigger value="all" className="relative">
-                  All
-                  <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-xs">
-                    {counts.all}
-                  </Badge>
-                </TabsTrigger>
-                <TabsTrigger value="saved" className="relative">
-                  Saved
-                  <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-xs">
-                    {counts.saved}
-                  </Badge>
-                </TabsTrigger>
-                <TabsTrigger value="shortlisted" className="relative">
-                  Shortlisted
-                  <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-xs">
-                    {counts.shortlisted}
-                  </Badge>
-                </TabsTrigger>
-                <TabsTrigger value="discovery" className="relative">
-                  Discovery
-                  <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-xs">
-                    {counts.discovery}
-                  </Badge>
-                </TabsTrigger>
-                <TabsTrigger value="waitlist" className="relative">
-                  Waitlist
-                  <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-xs">
-                    {counts.waitlist}
-                  </Badge>
-                </TabsTrigger>
-                <TabsTrigger value="declined" className="relative">
-                  Declined
-                  <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-xs">
-                    {counts.declined}
-                  </Badge>
-                </TabsTrigger>
-              </TabsList>
+              {/* Desktop tabs */}
+              <div className="hidden md:block w-full">
+                <TabsList className="grid w-full grid-cols-6">
+                  <TabsTrigger value="all" className="relative">
+                    All
+                    <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-xs">
+                      {counts.all}
+                    </Badge>
+                  </TabsTrigger>
+                  <TabsTrigger value="saved" className="relative">
+                    Saved
+                    <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-xs">
+                      {counts.saved}
+                    </Badge>
+                  </TabsTrigger>
+                  <TabsTrigger value="shortlisted" className="relative">
+                    Shortlisted
+                    <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-xs">
+                      {counts.shortlisted}
+                    </Badge>
+                  </TabsTrigger>
+                  <TabsTrigger value="discovery" className="relative">
+                    Discovery
+                    <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-xs">
+                      {counts.discovery}
+                    </Badge>
+                  </TabsTrigger>
+                  <TabsTrigger value="waitlist" className="relative">
+                    Waitlist
+                    <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-xs">
+                      {counts.waitlist}
+                    </Badge>
+                  </TabsTrigger>
+                  <TabsTrigger value="declined" className="relative">
+                    Declined
+                    <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-xs">
+                      {counts.declined}
+                    </Badge>
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+
+              {/* Mobile dropdown */}
+              <div className="md:hidden w-full">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="w-full justify-between bg-card">
+                      <span className="flex items-center gap-2">
+                        {activeFilter === 'all' && 'All'}
+                        {activeFilter === 'saved' && 'Saved'}
+                        {activeFilter === 'shortlisted' && 'Shortlisted'}
+                        {activeFilter === 'discovery' && 'Discovery'}
+                        {activeFilter === 'waitlist' && 'Waitlist'}
+                        {activeFilter === 'declined' && 'Declined'}
+                        <Badge variant="secondary" className="h-5 px-1.5 text-xs">
+                          {counts[activeFilter]}
+                        </Badge>
+                      </span>
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-full bg-card border shadow-lg" align="start">
+                    <DropdownMenuItem onClick={() => setActiveFilter('all')} className="flex items-center justify-between">
+                      <span>All</span>
+                      <Badge variant="secondary" className="h-5 px-1.5 text-xs">{counts.all}</Badge>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setActiveFilter('saved')} className="flex items-center justify-between">
+                      <span>Saved</span>
+                      <Badge variant="secondary" className="h-5 px-1.5 text-xs">{counts.saved}</Badge>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setActiveFilter('shortlisted')} className="flex items-center justify-between">
+                      <span>Shortlisted</span>
+                      <Badge variant="secondary" className="h-5 px-1.5 text-xs">{counts.shortlisted}</Badge>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setActiveFilter('discovery')} className="flex items-center justify-between">
+                      <span>Discovery</span>
+                      <Badge variant="secondary" className="h-5 px-1.5 text-xs">{counts.discovery}</Badge>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setActiveFilter('waitlist')} className="flex items-center justify-between">
+                      <span>Waitlist</span>
+                      <Badge variant="secondary" className="h-5 px-1.5 text-xs">{counts.waitlist}</Badge>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setActiveFilter('declined')} className="flex items-center justify-between">
+                      <span>Declined</span>
+                      <Badge variant="secondary" className="h-5 px-1.5 text-xs">{counts.declined}</Badge>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
 
               {selectedForComparison.length >= 2 && !showComparison && (
                 <Button

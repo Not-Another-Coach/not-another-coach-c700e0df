@@ -572,8 +572,8 @@ export const EnhancedTrainerCard = ({
       {/* Enhanced Trainer Card */}
       {renderCurrentView()}
       
-      {/* Bottom Action Bar */}
-      <div className="absolute bottom-0 left-0 right-0 z-40 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 pt-8">
+      {/* Bottom Action Bar - Improved spacing to avoid content overlap */}
+      <div className="absolute bottom-0 left-0 right-0 z-40 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 pt-6">
         <div className="flex gap-2">
           {renderActionButtons()}
         </div>
