@@ -197,7 +197,7 @@ export function EnhancedEmptyState({
   return (
     <div className={`col-span-full ${className}`}>
       <motion.div
-        className="text-center py-16 px-6 relative overflow-hidden"
+        className="text-center py-8 px-4 relative overflow-hidden"
         variants={containerVariants}
         initial="hidden"
         animate={isVisible ? "visible" : "hidden"}

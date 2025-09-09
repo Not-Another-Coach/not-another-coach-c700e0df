@@ -54,7 +54,17 @@ class VisibilityConfigServiceClass {
   async getDefaultVisibility(contentType: ContentType, stageGroup: EngagementStageGroup): Promise<VisibilityState> {
     const cache = await this.getSystemDefaults();
     const key = this.getCacheKey(contentType, stageGroup);
-    return cache.get(key) || 'hidden'; // Safe default
+    
+    const cachedValue = cache.get(key);
+    if (cachedValue) return cachedValue;
+    
+    // For gallery_images, default to visible for all browsing scenarios
+    if (contentType === 'gallery_images' && ['browsing', 'liked', 'shortlisted'].includes(stageGroup)) {
+      console.log('VisibilityConfigService: Using visible default for gallery_images', { contentType, stageGroup });
+      return 'visible';
+    }
+    
+    return 'hidden'; // Safe default for other cases
   }
 
   invalidateCache(): void {
