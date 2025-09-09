@@ -1,25 +1,29 @@
-// Unified trainer types for the application
+// Consolidated trainer interface that merges all existing trainer types
 import { Trainer } from '@/components/TrainerCard';
 
-export interface UnifiedTrainer {
+export interface ConsolidatedTrainer {
   // Core identification
   id: string;
   name: string;
+  firstName?: string;
+  lastName?: string;
   
   // Profile information
   profilePhotoUrl?: string;
   image?: string; // Legacy field for backward compatibility
+  profileImagePosition?: { x: number; y: number; scale: number };
   bio?: string;
+  description?: string; // For compatibility with original Trainer
   tagline?: string;
   location?: string;
   
-  // Professional details
+  // Professional details - supporting both naming conventions
   specializations?: string[];
-  specialties?: string[]; // Legacy field for backward compatibility
+  specialties?: string[]; // Legacy field for backward compatibility (required in original Trainer)
   trainingType?: string[];
   training_types?: string[]; // Legacy field for backward compatibility
   qualifications?: string[];
-  certifications?: string[]; // For Trainer compatibility
+  certifications?: string[]; // For Trainer compatibility (required in original)
   deliveryFormat?: string[];
   delivery_format?: string[]; // Legacy field for backward compatibility
   
@@ -33,11 +37,12 @@ export interface UnifiedTrainer {
   hourlyRate?: number;
   hourly_rate?: number; // Legacy field for backward compatibility
   experience?: string;
-  availability?: string; // For Trainer compatibility
-  description?: string; // For Trainer compatibility
+  availability?: string; // For Trainer compatibility (required in original)
   offersDiscoveryCall?: boolean;
+  offers_discovery_call?: boolean; // Legacy field
   freeDiscoveryCall?: boolean;
   free_discovery_call?: boolean; // Legacy field for backward compatibility
+  package_options?: any[];
   
   // Engagement and status
   status?: string;
@@ -72,14 +77,17 @@ export interface UnifiedTrainer {
   verification_status?: string; // Legacy field for backward compatibility
 }
 
+// Legacy interfaces maintained for backward compatibility
+export interface UnifiedTrainer extends ConsolidatedTrainer {}
+
 // Layout modes for trainer cards
 export type TrainerCardLayout = 'full' | 'carousel' | 'grid' | 'compact';
 
 // View modes for trainer card content - updated to support dynamic transformations
 export type TrainerCardViewMode = 'instagram' | 'features' | 'transformations' | (string & {});
 
-// Unified trainer type that works with both interfaces
-export type AnyTrainer = Trainer | UnifiedTrainer;
+// Unified trainer type that works with all interfaces
+export type AnyTrainer = Trainer | ConsolidatedTrainer | UnifiedTrainer;
 
 // Unified trainer card props interface
 export interface UnifiedTrainerCardProps {

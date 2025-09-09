@@ -1,12 +1,13 @@
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Heart, Calendar, Star, MessageCircle, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Heart, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSavedTrainers } from '@/hooks/useSavedTrainers';
 import { useShortlistedTrainers } from '@/hooks/useShortlistedTrainers';
 import { useUnifiedTrainerData } from '@/hooks/useUnifiedTrainerData';
+import { EnhancedTrainerCard } from '@/components/trainer-cards/EnhancedTrainerCard';
+import { AnyTrainer } from '@/types/trainer';
 
 interface MyTrainersCarouselProps {
   onTabChange: (tab: string) => void;
@@ -46,18 +47,23 @@ export function MyTrainersCarousel({ onTabChange }: MyTrainersCarouselProps) {
     window.dispatchEvent(event);
   };
 
-  const getEngagementBadge = (trainerId: string) => {
+  const getCardState = (trainerId: string): 'saved' | 'shortlisted' | 'default' => {
     const isSaved = savedTrainers.some(saved => saved.trainer_id === trainerId);
     const isShortlisted = shortlistedTrainers.some(shortlisted => shortlisted.trainer_id === trainerId);
     
     if (isSaved && isShortlisted) {
-      return <Badge variant="secondary" className="text-xs">Saved & Shortlisted</Badge>;
-    } else if (isSaved) {
-      return <Badge variant="outline" className="text-xs">Saved</Badge>;
+      return 'shortlisted'; // Prioritize shortlisted if both
     } else if (isShortlisted) {
-      return <Badge variant="default" className="text-xs">Shortlisted</Badge>;
+      return 'shortlisted';
+    } else if (isSaved) {
+      return 'saved';
     }
-    return null;
+    return 'default';
+  };
+
+  const handleBookDiscoveryCall = (trainerId: string) => {
+    // Navigate to booking flow
+    navigate(`/trainer/${trainerId}?book-call=true`);
   };
 
   if (loading) {
@@ -76,31 +82,31 @@ export function MyTrainersCarousel({ onTabChange }: MyTrainersCarouselProps) {
   if (myTrainers.length === 0) {
     return (
       <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <button 
-            onClick={() => onTabChange('my-trainers')}
-            className="text-xl font-semibold text-foreground hover:text-primary transition-colors cursor-pointer"
-          >
-            My Trainers
-          </button>
-          <Button
-            variant="ghost"
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => onTabChange('my-trainers')}
+              className="text-xl font-semibold text-foreground hover:text-primary transition-colors cursor-pointer"
+            >
+              My Trainers
+            </button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onTabChange('my-trainers')}
+              className="h-8 w-8 p-0 text-muted-foreground hover:text-primary"
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
+          </div>
+          <Button 
+            variant="outline" 
             size="sm"
-            onClick={() => onTabChange('my-trainers')}
-            className="h-8 w-8 p-0 text-muted-foreground hover:text-primary"
+            onClick={() => onTabChange('explore')}
           >
-            <Eye className="h-4 w-4" />
+            Discover Trainers
           </Button>
         </div>
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => onTabChange('explore')}
-        >
-          Discover Trainers
-        </Button>
-      </div>
         <Card className="p-8 text-center bg-gradient-to-br from-muted to-secondary-50">
           <CardContent>
             <Heart className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
@@ -164,87 +170,18 @@ export function MyTrainersCarousel({ onTabChange }: MyTrainersCarouselProps) {
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {myTrainers.map((trainer) => (
-          <Card 
-            key={trainer.id}
-            className="min-w-[260px] cursor-pointer hover:shadow-lg transition-all duration-300 snap-start bg-gradient-to-br from-card to-secondary-50"
-            onClick={() => handleViewProfile(trainer.id)}
-          >
-            <CardContent className="p-0">
-              {/* Image */}
-              <div className="relative h-48 overflow-hidden rounded-t-lg">
-                <img 
-                  src={trainer.profilePhotoUrl || '/placeholder.svg'} 
-                  alt={trainer.name}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                
-                {/* Top Badge */}
-                <div className="absolute top-3 left-3">
-                  {getEngagementBadge(trainer.id)}
-                </div>
-
-                {/* Bottom Info */}
-                <div className="absolute bottom-3 left-3 right-3 text-white">
-                  <h3 className="font-semibold text-lg mb-1 truncate">{trainer.name}</h3>
-                  {trainer.specializations && trainer.specializations.length > 0 && (
-                    <p className="text-sm text-white/80 truncate">
-                      {trainer.specializations[0]}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Content */}
-              <div className="p-4">
-                <div className="flex items-center justify-between mb-3">
-                  {trainer.location && (
-                    <p className="text-sm text-muted-foreground truncate flex-1">
-                      {trainer.location}
-                    </p>
-                  )}
-                  {trainer.rating && (
-                    <div className="flex items-center gap-1 text-sm">
-                      <Star className="h-3 w-3 fill-warning text-warning" />
-                      <span className="font-medium">{trainer.rating}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleMessage(trainer.id);
-                    }}
-                  >
-                    <MessageCircle className="h-4 w-4 mr-1" />
-                    Message
-                  </Button>
-                  
-                  {trainer.offersDiscoveryCall && (
-                    <Button
-                      variant="default"
-                      size="sm"
-                      className="flex-1"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        // Navigate to booking flow
-                        navigate(`/trainer/${trainer.id}?book-call=true`);
-                      }}
-                    >
-                      <Calendar className="h-4 w-4 mr-1" />
-                      Book Call
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <div key={trainer.id} onClick={() => handleViewProfile(trainer.id)}>
+            <EnhancedTrainerCard
+              trainer={trainer as AnyTrainer}
+              config="carousel"
+              cardState={getCardState(trainer.id)}
+              onViewProfile={handleViewProfile}
+              onStartConversation={handleMessage}
+              onBookDiscoveryCall={handleBookDiscoveryCall}
+              trainerOffersDiscoveryCalls={trainer.offersDiscoveryCall || (trainer as any).free_discovery_call}
+              initialView="instagram"
+            />
+          </div>
         ))}
       </div>
     </div>

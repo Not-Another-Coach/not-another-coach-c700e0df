@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback, memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,8 +25,10 @@ interface EnhancedTrainerCardProps extends Omit<UnifiedTrainerCardProps, 'traine
   config?: string; // Key from TRAINER_CARD_CONFIGS
 }
 
-export const EnhancedTrainerCard = ({ 
+export const EnhancedTrainerCard = memo(({ 
   trainer,
+  layout = 'full',
+  config,
   onViewProfile,
   onMessage,
   matchScore = 0,
@@ -51,10 +53,27 @@ export const EnhancedTrainerCard = ({
   waitlistRefreshKey = 0,
   onMoveToSaved,
   onRemoveCompletely,
-  initialView = 'instagram'
+  initialView = 'instagram',
+  allowViewSwitching = true,
+  showEngagementBadge = false,
+  compactActions = false,
+  hideViewControls = false
 }: EnhancedTrainerCardProps) => {
   const navigate = useNavigate();
   const { isTrainerSaved, saveTrainer, unsaveTrainer } = useSavedTrainers();
+  
+  // Apply configuration if provided
+  const appliedConfig = useMemo(() => 
+    config ? TRAINER_CARD_CONFIGS[config] : null, 
+    [config]
+  );
+  
+  const finalLayout = appliedConfig?.layout || layout;
+  const finalAllowViewSwitching = appliedConfig?.allowViewSwitching ?? allowViewSwitching;
+  const finalShowEngagementBadge = appliedConfig?.showEngagementBadge ?? showEngagementBadge;
+  const finalCompactActions = appliedConfig?.compactActions ?? compactActions;
+  const finalHideViewControls = appliedConfig?.hideViewControls ?? hideViewControls;
+  
   const [currentView, setCurrentView] = useState<TrainerCardViewMode>(initialView);
   
   // Update internal state when initialView prop changes
@@ -75,11 +94,16 @@ export const EnhancedTrainerCard = ({
     engagementStage: stage || 'browsing'
   });
 
-  // Available views in order - dynamically add transformation views for each testimonial
-  const getAvailableViews = (): TrainerCardViewMode[] => {
+  // Available views in order - memoized to prevent recalculation
+  const getAvailableViews = useCallback((): TrainerCardViewMode[] => {
+    // Use restricted views if provided in config
+    if (appliedConfig?.availableViews) {
+      return appliedConfig.availableViews;
+    }
+    
     const baseViews: TrainerCardViewMode[] = ['instagram', 'features'];
     
-    // Get testimonials for this trainer
+    // Get testimonials for this trainer (memoized)
     const testimonials = ((trainer as any).testimonials || []);
     const filteredTestimonials = testimonials.filter((t: any) => t.showImages && t.beforeImage && t.afterImage && t.consentGiven);
     
@@ -94,12 +118,12 @@ export const EnhancedTrainerCard = ({
     }
     
     return baseViews;
-  };
+  }, [appliedConfig?.availableViews, trainer]);
 
-  const views = getAvailableViews();
+  const views = useMemo(() => getAvailableViews(), [getAvailableViews]);
   const currentViewIndex = views.indexOf(currentView as any);
 
-  const handleToggleSave = async (e: React.MouseEvent) => {
+  const handleToggleSave = useCallback(async (e: React.MouseEvent) => {
     e.stopPropagation();
     try {
       const success = isSaved 
@@ -109,32 +133,32 @@ export const EnhancedTrainerCard = ({
     } catch (error) {
       console.error('Error in handleToggleSave:', error);
     }
-  };
+  }, [isSaved, unsaveTrainer, saveTrainer, trainer.id]);
 
-  const handleComparisonClick = (checked: boolean) => {
+  const handleComparisonClick = useCallback((checked: boolean) => {
     if (onComparisonToggle) {
       onComparisonToggle(trainer.id);
     }
-  };
+  }, [onComparisonToggle, trainer.id]);
 
-  const handleRemoveClick = () => {
+  const handleRemoveClick = useCallback(() => {
     if (onRemove) {
       onRemove(trainer.id);
     }
-  };
+  }, [onRemove, trainer.id]);
 
-  // Navigation functions
-  const goToPreviousView = () => {
+  // Navigation functions - memoized
+  const goToPreviousView = useCallback(() => {
     const currentIndex = views.indexOf(currentView);
     const previousIndex = currentIndex > 0 ? currentIndex - 1 : views.length - 1;
     setCurrentView(views[previousIndex]);
-  };
+  }, [views, currentView]);
 
-  const goToNextView = () => {
+  const goToNextView = useCallback(() => {
     const currentIndex = views.indexOf(currentView);
     const nextIndex = currentIndex < views.length - 1 ? currentIndex + 1 : 0;
     setCurrentView(views[nextIndex]);
-  };
+  }, [views, currentView]);
 
   // Touch handlers for swipe
   const minSwipeDistance = 50;
@@ -165,6 +189,8 @@ export const EnhancedTrainerCard = ({
 
   // Get the appropriate state badge based on card state
   const getStateBadge = () => {
+    if (!finalShowEngagementBadge) return null;
+    
     switch (cardState) {
       case 'matched':
         return {
@@ -207,7 +233,49 @@ export const EnhancedTrainerCard = ({
   const renderActionButtons = () => {
     const buttons = [];
 
-    // Always show View Profile button
+    // For carousel layout, show compact actions
+    if (finalLayout === 'carousel' && finalCompactActions) {
+      // Primary action button based on state
+      if (onStartConversation) {
+        buttons.push(
+          <Button
+            key="message"
+            variant="outline"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onStartConversation(trainer.id);
+            }}
+            className="flex-1"
+          >
+            <MessageCircle className="w-4 h-4 mr-1" />
+            Message
+          </Button>
+        );
+      }
+      
+      if (trainerOffersDiscoveryCalls && onBookDiscoveryCall && !hasDiscoveryCall) {
+        buttons.push(
+          <Button
+            key="book-call"
+            variant="default"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onBookDiscoveryCall(trainer.id);
+            }}
+            className="flex-1"
+          >
+            <Calendar className="w-4 h-4 mr-1" />
+            Book Call
+          </Button>
+        );
+      }
+      
+      return buttons.slice(0, 2); // Limit to 2 buttons for carousel
+    }
+
+    // Full layout actions (existing logic)
     buttons.push(
       <Button
         key="view-profile"
@@ -444,51 +512,57 @@ export const EnhancedTrainerCard = ({
         ) : null}
       </div>
 
-      {/* Navigation arrows - ALWAYS show view navigation arrows */}
-      <Button
-        variant="ghost"
-        size="sm"
-        className="absolute left-2 top-1/2 -translate-y-1/2 z-30 bg-white/80 backdrop-blur hover:bg-white/90 transition-all p-1 h-8 w-8"
-        onClick={(e) => {
-          e.stopPropagation();
-          e.preventDefault();
-          goToPreviousView();
-        }}
-      >
-        <ChevronLeft className="h-4 w-4" />
-      </Button>
-      
-      <Button
-        variant="ghost"
-        size="sm"
-        className="absolute right-2 top-1/2 -translate-y-1/2 z-30 bg-white/80 backdrop-blur hover:bg-white/90 transition-all p-1 h-8 w-8"
-        onClick={(e) => {
-          e.stopPropagation();
-          e.preventDefault();
-          goToNextView();
-        }}
-      >
-        <ChevronRight className="h-4 w-4" />
-      </Button>
-
-      {/* View indicators - prevent event propagation */}
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 flex gap-1">
-        {views.map((view, index) => (
-          <button
-            key={view}
-            className={`w-2 h-2 rounded-full transition-all ${
-              index === currentViewIndex 
-                ? 'bg-white shadow-sm' 
-                : 'bg-white/50 hover:bg-white/70'
-            }`}
+      {/* Navigation arrows - Show based on layout and config */}
+      {finalAllowViewSwitching && !finalHideViewControls && (
+        <>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-30 bg-white/80 backdrop-blur hover:bg-white/90 transition-all p-1 h-8 w-8"
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
-              setCurrentView(view);
+              goToPreviousView();
             }}
-          />
-        ))}
-      </div>
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-30 bg-white/80 backdrop-blur hover:bg-white/90 transition-all p-1 h-8 w-8"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              goToNextView();
+            }}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </>
+      )}
+
+      {/* View indicators - Show based on config */}
+      {finalAllowViewSwitching && !finalHideViewControls && (
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 flex gap-1">
+          {views.map((view, index) => (
+            <button
+              key={view}
+              className={`w-2 h-2 rounded-full transition-all ${
+                index === currentViewIndex 
+                  ? 'bg-white shadow-sm' 
+                  : 'bg-white/50 hover:bg-white/70'
+              }`}
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                setCurrentView(view);
+              }}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Click handler for profile navigation */}
       <div 
@@ -534,23 +608,157 @@ export const EnhancedTrainerCard = ({
     }
   };
 
+  // Render carousel-specific layout
+  const renderCarouselView = () => {
+    return (
+      <Card className={cn(
+        "cursor-pointer hover:shadow-lg transition-all duration-300 snap-start",
+        "bg-gradient-to-br from-card to-secondary-50 h-80"
+      )}>
+        <CardContent className="p-0 h-full relative">
+          {/* Main image/view content */}
+          <div className="h-48 relative overflow-hidden rounded-t-lg">
+            {currentView === 'instagram' ? (
+              <InstagramGalleryView trainer={trainer}>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+              </InstagramGalleryView>
+            ) : (
+              <div className="relative h-full">
+                <img 
+                  src={(trainer.profilePhotoUrl || trainer.image) || '/placeholder.svg'} 
+                  alt={trainer.name}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+              </div>
+            )}
+            
+            {/* Top Badge */}
+            {stateBadge && finalShowEngagementBadge && (
+              <div className="absolute top-3 left-3">
+                <Badge className={stateBadge.className}>
+                  {stateBadge.text}
+                </Badge>
+              </div>
+            )}
+
+            {/* Bottom Info Overlay */}
+            <div className="absolute bottom-3 left-3 right-3 text-white">
+              <h3 className="font-semibold text-lg mb-1 truncate">{trainer.name}</h3>
+              {((trainer as any).specializations || trainer.specialties) && ((trainer as any).specializations || trainer.specialties)!.length > 0 && (
+                <p className="text-sm text-white/80 truncate">
+                  {((trainer as any).specializations || trainer.specialties)![0]}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Content section */}
+          <div className="p-4 flex flex-col justify-between h-32">
+            <div className="flex items-center justify-between mb-3">
+              {trainer.location && (
+                <p className="text-sm text-muted-foreground truncate flex-1">
+                  {trainer.location}
+                </p>
+              )}
+              {trainer.rating && (
+                <div className="flex items-center gap-1 text-sm">
+                  <Star className="h-3 w-3 fill-warning text-warning" />
+                  <span className="font-medium">{trainer.rating}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-2">
+              {renderActionButtons()}
+            </div>
+          </div>
+
+          {/* Interactive elements for carousel */}
+          <div className="absolute top-2 left-2 right-2 flex justify-between z-20">
+            {/* Left: Heart/Save button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="bg-white/80 backdrop-blur hover:bg-white/90 transition-all"
+              onClick={handleToggleSave}
+            >
+              {isSaved || cardState === 'saved' ? (
+                <Heart className="h-4 w-4 text-destructive fill-current" />
+              ) : (
+                <Heart className="h-4 w-4 text-muted-foreground hover:text-destructive transition-colors" />
+              )}
+            </Button>
+            
+            {/* Right: Match badge if available */}
+            {matchScore > 0 && (
+              <MatchBadge score={matchScore} reasons={matchReasons} />
+            )}
+          </div>
+
+          {/* View navigation for carousel */}
+          {finalAllowViewSwitching && views.length > 1 && (
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute left-2 top-1/2 -translate-y-1/2 z-30 bg-white/80 backdrop-blur hover:bg-white/90 transition-all p-1 h-6 w-6"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  goToPreviousView();
+                }}
+              >
+                <ChevronLeft className="h-3 w-3" />
+              </Button>
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute right-2 top-1/2 -translate-y-1/2 z-30 bg-white/80 backdrop-blur hover:bg-white/90 transition-all p-1 h-6 w-6"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  goToNextView();
+                }}
+              >
+                <ChevronRight className="h-3 w-3" />
+              </Button>
+            </>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
+
   return (
     <div 
       ref={cardRef}
-      className="relative select-none"
+      className={cn(
+        "relative select-none",
+        finalLayout === 'carousel' && "min-w-[260px] max-w-[260px]",
+        finalLayout === 'grid' && "w-full",
+        finalLayout === 'compact' && "w-full max-w-sm"
+      )}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
       {/* Enhanced Trainer Card */}
-      {renderCurrentView()}
+      {finalLayout === 'carousel' ? renderCarouselView() : renderCurrentView()}
       
-      {/* Bottom Action Bar - Improved spacing to avoid content overlap */}
-      <div className="absolute bottom-0 left-0 right-0 z-40 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 pt-6">
-        <div className="flex gap-2">
-          {renderActionButtons()}
+      {/* Bottom Action Bar - Only show for non-carousel layouts or when actions are needed */}
+      {(finalLayout !== 'carousel' || !finalCompactActions) && (
+        <div className="absolute bottom-0 left-0 right-0 z-40 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 pt-6">
+          <div className="flex gap-2">
+            {renderActionButtons()}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
-};
+});
+
+// Display name for debugging
+EnhancedTrainerCard.displayName = 'EnhancedTrainerCard';
