@@ -62,15 +62,21 @@ export function useContentVisibility({ trainerId, engagementStage }: UseContentV
 
   useEffect(() => {
     const fetchVisibilityStates = async () => {
-      if (!trainerId || !engagementStage) return;
+      if (!trainerId || !engagementStage) {
+        console.log('⚠️ useContentVisibility: Missing trainerId or engagementStage:', { trainerId, engagementStage });
+        return;
+      }
       
+      console.log('🔍 useContentVisibility: Fetching visibility states for:', { trainerId, engagementStage });
       setLoading(true);
       try {
         const stageGroup = getStageGroup(engagementStage);
+        console.log('📊 Stage group determined:', stageGroup);
         
         const visibilityPromises = contentTypes.map(async (contentType) => {
           // Use group-based visibility check for better performance
           const visibility = await getContentVisibilityByGroup(trainerId, contentType, stageGroup);
+          console.log(`📋 Visibility result for ${contentType}:`, visibility);
           return { contentType, visibility };
         });
 
@@ -94,9 +100,10 @@ export function useContentVisibility({ trainerId, engagementStage }: UseContentV
           professional_milestones: 'visible'
         } as ContentVisibilityMap);
 
+        console.log('✅ Final visibility map:', newVisibilityMap);
         setVisibilityMap(newVisibilityMap);
       } catch (error) {
-        console.error('Error fetching visibility states:', error);
+        console.error('❌ Error fetching visibility states:', error);
       } finally {
         setLoading(false);
       }
@@ -124,7 +131,9 @@ export function useContentVisibility({ trainerId, engagementStage }: UseContentV
   }), [visibilityMap]);
 
   const getVisibility = (contentType: ContentType): VisibilityState => {
-    return visibilityMap[contentType];
+    const result = visibilityMap[contentType];
+    console.log(`🔍 getVisibility called for ${contentType}:`, result);
+    return result;
   };
 
   const isContentBlurred = (contentType: ContentType): boolean => {

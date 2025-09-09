@@ -25,7 +25,9 @@ export const VisibilityConfigProvider: React.FC<{ children: React.ReactNode }> =
   const loadDefaults = async () => {
     setIsLoading(true);
     try {
+      console.log('🔍 Loading visibility defaults...');
       const defaults = await VisibilityConfigService.getSystemDefaults();
+      console.log('📋 Visibility defaults loaded:', Array.from(defaults.entries()));
       setCache(new Map(defaults));
     } catch (error) {
       console.error('Failed to load visibility defaults:', error);
@@ -40,10 +42,13 @@ export const VisibilityConfigProvider: React.FC<{ children: React.ReactNode }> =
 
   const getDefaultVisibility = (contentType: ContentType, stageGroup: EngagementStageGroup): VisibilityState => {
     const key = `${contentType}_${stageGroup}`;
-    return cache.get(key) || 'hidden';
+    const result = cache.get(key) || 'hidden';
+    console.log(`🔍 Getting default visibility for ${key}:`, result);
+    return result;
   };
 
   const refreshCache = async () => {
+    console.log('🔄 Refreshing visibility cache...');
     await VisibilityConfigService.refreshCache();
     await loadDefaults();
   };
