@@ -644,7 +644,7 @@ export const EnhancedTrainerCard = memo(({
           </div>
 
           {/* Content section */}
-          <div className="p-4 flex flex-col justify-between" style={{ height: 'calc(100% - 12rem)' }}>
+          <div className="p-4 flex flex-col justify-between h-32">
             <div className="flex items-center justify-between mb-2">
               {trainer.location && (
                 <p className="text-sm text-muted-foreground truncate flex-1">
@@ -661,7 +661,7 @@ export const EnhancedTrainerCard = memo(({
 
             {/* Action Buttons - Only show if there are actions */}
             {renderActionButtons().length > 0 && (
-              <div className="flex gap-2 mt-auto">
+              <div className="flex gap-2 mt-auto pt-2">
                 {renderActionButtons()}
               </div>
             )}

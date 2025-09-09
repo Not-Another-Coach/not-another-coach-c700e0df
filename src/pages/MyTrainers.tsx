@@ -255,7 +255,7 @@ export default function MyTrainers() {
         />
 
         {/* Main Content */}
-        <main className="mx-auto px-6 lg:px-8 xl:px-12 py-6 space-y-6">
+        <main className="mx-auto px-6 lg:px-8 xl:px-12 pt-6 pb-2 space-y-6">
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold">My Trainers</h1>
             {error && (
