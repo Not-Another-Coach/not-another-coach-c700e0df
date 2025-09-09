@@ -19,13 +19,13 @@ export function AppLogo({
   const sizeClasses = {
     sm: 'w-6 h-6',
     md: 'w-8 h-8', 
-    lg: 'w-12 h-12'
+    lg: 'w-24 h-24'
   };
 
   const textSizeClasses = {
     sm: 'text-lg',
     md: 'text-xl',
-    lg: 'text-2xl'
+    lg: 'text-4xl'
   };
 
   if (loading) {
@@ -58,12 +58,12 @@ export function AppLogo({
               target.style.display = 'none';
               const parent = target.parentElement;
               if (parent) {
-                parent.innerHTML = `<div class="w-full h-full rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold">${logoSettings.fallback_text}</div>`;
+                parent.innerHTML = `<div class="w-full h-full rounded-full bg-primary flex items-center justify-center text-white font-bold ${size === 'lg' ? 'text-lg' : size === 'md' ? 'text-sm' : 'text-xs'}">${logoSettings.fallback_text}</div>`;
               }
             }}
           />
         ) : (
-          <div className="w-full h-full rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold">
+          <div className={`w-full h-full rounded-full bg-primary flex items-center justify-center text-white font-bold ${size === 'lg' ? 'text-lg' : size === 'md' ? 'text-sm' : 'text-xs'}`}>
             {logoSettings.fallback_text}
           </div>
         )}

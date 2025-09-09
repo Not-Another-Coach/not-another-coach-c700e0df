@@ -13,6 +13,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from '@/hooks/use-toast';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { AppLogo } from '@/components/ui/app-logo';
 
 
 export default function Auth() {
@@ -310,11 +311,7 @@ export default function Auth() {
         <Card className="w-full">
           <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
-              <img 
-                src="/lovable-uploads/368e4fe2-dde9-4c8b-8657-e97a19f8afff.png" 
-                alt="Not Another Coach" 
-                className="h-24 w-auto"
-              />
+              <AppLogo size="lg" showText={false} />
             </div>
             <CardDescription>Not another app. Not another coach. This is personal.</CardDescription>
           </CardHeader>
