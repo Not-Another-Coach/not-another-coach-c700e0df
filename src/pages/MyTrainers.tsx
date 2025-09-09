@@ -4,18 +4,24 @@ import { ComparisonView } from "@/components/ComparisonView";
 import { useUnifiedTrainerData } from "@/hooks/useUnifiedTrainerData";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfileByType } from "@/hooks/useProfileByType";
+import { useDiscoveryCallNotifications } from "@/hooks/useDiscoveryCallNotifications";
 import { ErrorBoundary, TrainerDataErrorBoundary } from "@/components/ErrorBoundary";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EnhancedTrainerCard } from "@/components/trainer-cards/EnhancedTrainerCard";
 import { FloatingMessageButton } from "@/components/FloatingMessageButton";
-import { ClientHeader } from "@/components/ClientHeader";
+import { MessagingPopup } from "@/components/MessagingPopup";
+import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { SkeletonTrainerCard } from "@/components/ui/skeleton-trainer-card";
 import { 
   ArrowLeft, 
   Users,
   BarChart3,
+  Bell,
+  MessageCircle,
+  Settings,
   RefreshCw
 } from "lucide-react";
 import { DiscoveryCallBookingModal } from "@/components/discovery-call/DiscoveryCallBookingModal";
@@ -24,6 +30,7 @@ export default function MyTrainers() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { profile } = useProfileByType();
+  const { notifications, upcomingCalls } = useDiscoveryCallNotifications();
   
   // Unified trainer data hook
   const {
@@ -44,6 +51,7 @@ export default function MyTrainers() {
   const [activeFilter, setActiveFilter] = useState<'all' | 'saved' | 'shortlisted' | 'discovery' | 'declined' | 'waitlist'>('all');
   const [selectedForComparison, setSelectedForComparison] = useState<string[]>([]);
   const [showComparison, setShowComparison] = useState(false);
+  const [isMessagingOpen, setIsMessagingOpen] = useState(false);
 
   // Listen for filter events from dashboard
   useEffect(() => {
@@ -167,12 +175,93 @@ export default function MyTrainers() {
     return (
       <ErrorBoundary>
         <div className="min-h-screen bg-background">
-          {/* Header with Navigation */}
-          <ClientHeader 
-            profile={profile} 
-            activeTab="my-trainers"
-            showNavigation={true}
-          />
+          {/* Enhanced Header */}
+          <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border">
+            <div className="mx-auto px-6 lg:px-8 xl:px-12 py-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="font-bold text-xl text-foreground">FitQuest</div>
+                  <div className="text-muted-foreground">My Trainers</div>
+                </div>
+                <div className="flex items-center gap-3">
+                  {/* Notifications */}
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-9 w-9 p-0 relative">
+                        <Bell className="h-4 w-4" />
+                        {(notifications.length > 0 || upcomingCalls.length > 0) && (
+                          <Badge 
+                            variant="destructive" 
+                            className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center"
+                          >
+                            {notifications.length + upcomingCalls.length}
+                          </Badge>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-80" align="end">
+                      <div className="space-y-4">
+                        <h4 className="font-medium text-sm">Notifications</h4>
+                        {upcomingCalls.length > 0 && (
+                          <div className="space-y-2">
+                            <p className="text-xs text-muted-foreground">Upcoming Calls</p>
+                            {upcomingCalls.slice(0, 3).map((call) => (
+                              <div key={call.id} className="p-2 bg-muted/50 rounded text-xs">
+                                <p className="font-medium">Discovery Call</p>
+                                <p className="text-muted-foreground">
+                                  {new Date(call.scheduled_for).toLocaleDateString()} at{' '}
+                                  {new Date(call.scheduled_for).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {notifications.length > 0 && (
+                          <div className="space-y-2">
+                            <p className="text-xs text-muted-foreground">Recent Notifications</p>
+                            {notifications.slice(0, 3).map((notification) => (
+                              <div key={notification.id} className="p-2 bg-muted/50 rounded text-xs">
+                                <p className="text-muted-foreground">
+                                  {notification.notification_type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {notifications.length === 0 && upcomingCalls.length === 0 && (
+                          <p className="text-xs text-muted-foreground">No new notifications</p>
+                        )}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+
+                  {/* Messaging */}
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-9 w-9 p-0"
+                    onClick={() => setIsMessagingOpen(true)}
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                  </Button>
+
+                  {/* Preferences */}
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => navigate('/client-survey')}
+                    className="flex items-center gap-2 h-9 px-3"
+                  >
+                    <Settings className="h-4 w-4" />
+                    <span className="text-sm">Preferences</span>
+                  </Button>
+
+                  {/* Profile Dropdown */}
+                  {profile && <ProfileDropdown profile={profile} />}
+                </div>
+              </div>
+            </div>
+          </header>
 
           {/* Main Content */}
           <main className="mx-auto px-6 lg:px-8 xl:px-12 py-6 space-y-6">
@@ -195,6 +284,12 @@ export default function MyTrainers() {
           </main>
 
           <FloatingMessageButton />
+
+          {/* Messaging Popup */}
+          <MessagingPopup 
+            isOpen={isMessagingOpen}
+            onClose={() => setIsMessagingOpen(false)}
+          />
         </div>
       </ErrorBoundary>
     );
@@ -203,12 +298,93 @@ export default function MyTrainers() {
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-background">
-        {/* Header with Navigation */}
-        <ClientHeader 
-          profile={profile} 
-          activeTab="my-trainers"
-          showNavigation={true}
-        />
+        {/* Enhanced Header */}
+        <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border">
+          <div className="mx-auto px-6 lg:px-8 xl:px-12 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="font-bold text-xl text-foreground">FitQuest</div>
+                <div className="text-muted-foreground">My Trainers</div>
+              </div>
+              <div className="flex items-center gap-3">
+                {/* Notifications */}
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-9 w-9 p-0 relative">
+                      <Bell className="h-4 w-4" />
+                      {(notifications.length > 0 || upcomingCalls.length > 0) && (
+                        <Badge 
+                          variant="destructive" 
+                          className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center"
+                        >
+                          {notifications.length + upcomingCalls.length}
+                        </Badge>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80" align="end">
+                    <div className="space-y-4">
+                      <h4 className="font-medium text-sm">Notifications</h4>
+                      {upcomingCalls.length > 0 && (
+                        <div className="space-y-2">
+                          <p className="text-xs text-muted-foreground">Upcoming Calls</p>
+                          {upcomingCalls.slice(0, 3).map((call) => (
+                            <div key={call.id} className="p-2 bg-muted/50 rounded text-xs">
+                              <p className="font-medium">Discovery Call</p>
+                              <p className="text-muted-foreground">
+                                {new Date(call.scheduled_for).toLocaleDateString()} at{' '}
+                                {new Date(call.scheduled_for).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {notifications.length > 0 && (
+                        <div className="space-y-2">
+                          <p className="text-xs text-muted-foreground">Recent Notifications</p>
+                          {notifications.slice(0, 3).map((notification) => (
+                            <div key={notification.id} className="p-2 bg-muted/50 rounded text-xs">
+                              <p className="text-muted-foreground">
+                                {notification.notification_type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {notifications.length === 0 && upcomingCalls.length === 0 && (
+                        <p className="text-xs text-muted-foreground">No new notifications</p>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+
+                {/* Messaging */}
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-9 w-9 p-0"
+                  onClick={() => setIsMessagingOpen(true)}
+                >
+                  <MessageCircle className="h-4 w-4" />
+                </Button>
+
+                {/* Preferences */}
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => navigate('/client-survey')}
+                  className="flex items-center gap-2 h-9 px-3"
+                >
+                  <Settings className="h-4 w-4" />
+                  <span className="text-sm">Preferences</span>
+                </Button>
+
+                {/* Profile Dropdown */}
+                {profile && <ProfileDropdown profile={profile} />}
+              </div>
+            </div>
+          </div>
+        </header>
 
         {/* Main Content */}
         <main className="mx-auto px-6 lg:px-8 xl:px-12 py-6 space-y-6">
@@ -364,6 +540,12 @@ export default function MyTrainers() {
             setSelectedTrainerForCall(null);
             refreshData();
           }}
+        />
+
+        {/* Messaging Popup */}
+        <MessagingPopup 
+          isOpen={isMessagingOpen}
+          onClose={() => setIsMessagingOpen(false)}
         />
       </div>
     </ErrorBoundary>
