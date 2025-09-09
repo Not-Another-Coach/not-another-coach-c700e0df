@@ -8,6 +8,7 @@ import { ChevronLeft, ChevronRight, Compass, Star, Play, Pause, Eye } from "luci
 import { supabase } from "@/integrations/supabase/client";
 import { useSavedTrainers } from "@/hooks/useSavedTrainers";
 import { useShortlistedTrainers } from "@/hooks/useShortlistedTrainers";
+import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 
 // Fallback images for trainers
@@ -47,6 +48,7 @@ interface ExploreSectionProps {
 
 export function ExploreSection({ isActiveClient, journeyProgress }: ExploreSectionProps) {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [trainers, setTrainers] = useState<ExploreTrainer[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -60,7 +62,10 @@ export function ExploreSection({ isActiveClient, journeyProgress }: ExploreSecti
     const fetchExplorableTrainers = async () => {
       try {
         setLoading(true);
-        const { data, error } = await supabase
+        const currentUserId = user?.id;
+        
+        // Base query for published trainers
+        let query = supabase
           .from('v_trainers')
           .select(`
             id,
@@ -79,7 +84,24 @@ export function ExploreSection({ isActiveClient, journeyProgress }: ExploreSecti
             training_types,
             testimonials
           `)
-          .eq('profile_published', true)
+          .eq('profile_published', true);
+
+        // If user is authenticated, exclude trainers they're already engaged with
+        if (currentUserId) {
+          // Get trainers the user is already engaged with
+          const { data: engagedTrainers } = await supabase
+            .from('client_trainer_engagement')
+            .select('trainer_id')
+            .eq('client_id', currentUserId);
+          
+          const engagedTrainerIds = engagedTrainers?.map(e => e.trainer_id) || [];
+          
+          if (engagedTrainerIds.length > 0) {
+            query = query.not('id', 'in', `(${engagedTrainerIds.join(',')})`);
+          }
+        }
+
+        const { data, error } = await query
           .order('rating', { ascending: false })
           .limit(8); // Fetch 8 potential matches for carousel
 
