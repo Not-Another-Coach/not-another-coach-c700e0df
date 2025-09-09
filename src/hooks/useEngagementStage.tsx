@@ -25,10 +25,7 @@ export function useEngagementStage(trainerId: string) {
   const [loading, setLoading] = useState(true);
 
   const fetchEngagementStage = useCallback(async () => {
-    console.log('🎯 useEngagementStage: Fetching for trainer:', trainerId, 'user:', user?.id);
-    
     if (!user || !trainerId) {
-      console.log('📍 No user or trainerId, defaulting to browsing stage');
       setStage('browsing');
       setLoading(false);
       return;
@@ -43,20 +40,13 @@ export function useEngagementStage(trainerId: string) {
         .maybeSingle();
 
       if (error) {
-        console.error('❌ Error fetching engagement stage:', error);
-        console.log('📍 Falling back to browsing stage');
+        console.error('Error fetching engagement stage:', error);
         setStage('browsing');
       } else {
         // Convert old stages to new ones
         const normalizedStage = data?.stage === 'waitlist' ? 'browsing' : 
                                data?.stage === 'matched' ? 'agreed' : 
                                data?.stage || 'browsing';
-        
-        console.log('✅ Engagement stage fetched:', {
-          originalStage: data?.stage,
-          normalizedStage,
-          hasData: !!data
-        });
         
         const normalizedData = data ? {
           ...data,
