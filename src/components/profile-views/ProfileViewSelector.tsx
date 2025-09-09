@@ -13,6 +13,7 @@ interface ProfileViewSelectorProps {
   compareCount?: number;
   isMobile?: boolean;
   hideCardsView?: boolean;
+  hideCompareView?: boolean;
 }
 
 const viewOptions = [
@@ -53,11 +54,19 @@ export const ProfileViewSelector = ({
   onViewChange, 
   compareCount = 0,
   isMobile = false,
-  hideCardsView = false
+  hideCardsView = false,
+  hideCompareView = false
 }: ProfileViewSelectorProps) => {
-  const filteredViewOptions = hideCardsView 
-    ? viewOptions.filter(option => option.value !== 'cards')
-    : viewOptions;
+  let filteredViewOptions = viewOptions;
+  
+  if (hideCardsView) {
+    filteredViewOptions = filteredViewOptions.filter(option => option.value !== 'cards');
+  }
+  
+  if (hideCompareView) {
+    filteredViewOptions = filteredViewOptions.filter(option => option.value !== 'compare');
+  }
+  
   const currentOption = filteredViewOptions.find(option => option.value === currentView);
 
   if (isMobile) {
@@ -131,7 +140,12 @@ export const ProfileViewSelector = ({
       </div>
       
       <Tabs value={currentView} onValueChange={(value) => onViewChange(value as ProfileViewMode)}>
-        <TabsList className={`grid w-full h-auto p-1 ${hideCardsView ? 'grid-cols-5' : 'grid-cols-6'}`}>
+        <TabsList className={`grid w-full h-auto p-1 ${
+          filteredViewOptions.length === 3 ? 'grid-cols-3' :
+          filteredViewOptions.length === 4 ? 'grid-cols-4' :
+          filteredViewOptions.length === 5 ? 'grid-cols-5' :
+          'grid-cols-6'
+        }`}>
           {filteredViewOptions.map((option) => {
             const Icon = option.icon;
             return (

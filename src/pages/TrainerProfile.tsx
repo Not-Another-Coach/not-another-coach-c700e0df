@@ -182,6 +182,7 @@ export const TrainerProfile = () => {
           onViewChange={setCurrentView}
           isMobile={isMobile}
           hideCardsView={user_type === 'client'}
+          hideCompareView={true}
         />
       </div>
 
