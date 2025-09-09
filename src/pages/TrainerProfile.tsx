@@ -14,11 +14,13 @@ import { ContentView } from '@/components/profile-views/ContentView';
 import { CardsView } from '@/components/profile-views/CardsView';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserTypeChecks } from '@/hooks/useUserType';
 
 export const TrainerProfile = () => {
   const { trainerId } = useParams<{ trainerId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { user_type } = useUserTypeChecks();
   const [searchParams] = useSearchParams();
   const fromSource = searchParams.get('from');
   
@@ -179,6 +181,7 @@ export const TrainerProfile = () => {
           currentView={currentView}
           onViewChange={setCurrentView}
           isMobile={isMobile}
+          hideCardsView={user_type === 'client'}
         />
       </div>
 

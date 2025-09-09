@@ -12,6 +12,7 @@ interface ProfileViewSelectorProps {
   onViewChange: (view: ProfileViewMode) => void;
   compareCount?: number;
   isMobile?: boolean;
+  hideCardsView?: boolean;
 }
 
 const viewOptions = [
@@ -51,9 +52,13 @@ export const ProfileViewSelector = ({
   currentView, 
   onViewChange, 
   compareCount = 0,
-  isMobile = false 
+  isMobile = false,
+  hideCardsView = false
 }: ProfileViewSelectorProps) => {
-  const currentOption = viewOptions.find(option => option.value === currentView);
+  const filteredViewOptions = hideCardsView 
+    ? viewOptions.filter(option => option.value !== 'cards')
+    : viewOptions;
+  const currentOption = filteredViewOptions.find(option => option.value === currentView);
 
   if (isMobile) {
     // Mobile: Dropdown menu
@@ -82,7 +87,7 @@ export const ProfileViewSelector = ({
           </DropdownMenuTrigger>
           
           <DropdownMenuContent className="w-64">
-            {viewOptions.map((option) => {
+            {filteredViewOptions.map((option) => {
               const Icon = option.icon;
               return (
                 <DropdownMenuItem
@@ -126,8 +131,8 @@ export const ProfileViewSelector = ({
       </div>
       
       <Tabs value={currentView} onValueChange={(value) => onViewChange(value as ProfileViewMode)}>
-        <TabsList className="grid w-full grid-cols-6 h-auto p-1">
-          {viewOptions.map((option) => {
+        <TabsList className={`grid w-full h-auto p-1 ${hideCardsView ? 'grid-cols-5' : 'grid-cols-6'}`}>
+          {filteredViewOptions.map((option) => {
             const Icon = option.icon;
             return (
               <TabsTrigger
