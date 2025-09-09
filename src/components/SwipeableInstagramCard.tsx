@@ -14,6 +14,7 @@ import { useEffect } from 'react';
 import { useContentVisibility } from '@/hooks/useContentVisibility';
 import { useEngagementStage } from '@/hooks/useEngagementStage';
 import { VisibilityAwareGallery } from '@/components/ui/VisibilityAwareGallery';
+import { getRecommendedGridSizeForCount } from '@/hooks/useTrainerImages';
 
 interface SwipeableInstagramCardProps {
   trainer: Trainer;
@@ -46,13 +47,6 @@ const getGridClasses = (actualImageCount: number): string => {
   }
 };
 
-const getRecommendedGridSizeForCount = (count: number) => {
-  if (count <= 3) return 1;
-  if (count <= 5) return 4;
-  if (count <= 8) return 6;
-  if (count <= 11) return 9;
-  return 12;
-};
 
 export const SwipeableInstagramCard = ({ 
   trainer, 

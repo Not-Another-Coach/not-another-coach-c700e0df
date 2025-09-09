@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { useContentVisibility } from '@/hooks/useContentVisibility';
 import { useEngagementStage } from '@/hooks/useEngagementStage';
 import { VisibilityAwareGallery } from '@/components/ui/VisibilityAwareGallery';
+import { getRecommendedGridSizeForCount } from '@/hooks/useTrainerImages';
 
 const getGridClasses = (actualImageCount: number): string => {
   // Use actual image count to determine the best grid layout
@@ -38,15 +39,6 @@ const getGridClasses = (actualImageCount: number): string => {
   }
 };
 
-// Auto-selection logic matching useTrainerImages
-const getRecommendedGridSizeForCount = (count: number) => {
-  if (count === 0) return 0;
-  if (count === 1) return 1;
-  if (count <= 4) return 4; // Always try to show 4 images when we have 2-4
-  if (count <= 8) return 6;
-  if (count <= 11) return 9;
-  return 12;
-};
 
 interface InstagramGalleryViewProps {
   trainer: AnyTrainer;

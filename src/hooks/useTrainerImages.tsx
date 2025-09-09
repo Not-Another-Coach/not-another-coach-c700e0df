@@ -3,6 +3,28 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from '@/hooks/use-toast';
 
+// Single source of truth for grid size calculation - exported for reuse
+export const getRecommendedGridSizeForCount = (count: number) => {
+  if (count === 0) return 0;
+  if (count === 1) return 1;
+  if (count <= 3) return 1; // 2-3 images: show 1 (hero)
+  if (count <= 5) return 4; // 4-5 images: show 4 (2x2)
+  if (count <= 8) return 6; // 6-8 images: show 6 (3x2)
+  if (count <= 11) return 9; // 9-11 images: show 9 (3x3)
+  return 12; // 12+ images: show 12 (4x3)
+};
+
+export const getGridLabel = (gridSize: number) => {
+  const labels = {
+    1: '1 image (Hero)',
+    4: '4 images (2×2)',
+    6: '6 images (3×2)',
+    9: '9 images (3×3)',
+    12: '12 images (4×3)'
+  };
+  return labels[gridSize as keyof typeof labels] || `${gridSize} images`;
+};
+
 export interface TrainerUploadedImage {
   id: string;
   trainer_id: string;
@@ -353,28 +375,9 @@ export const useTrainerImages = () => {
 
   const getGridCapacity = (gridSize: number) => gridSize;
 
-  const getRecommendedGridSizeForCount = (count: number) => {
-    if (count <= 3) return 1;
-    if (count <= 5) return 4;
-    if (count <= 8) return 6;
-    if (count <= 11) return 9;
-    return 12;
-  };
-
   const getRecommendedGridSize = () => {
     const selectedCount = getSelectedImagesCount();
     return getRecommendedGridSizeForCount(selectedCount);
-  };
-
-  const getGridLabel = (gridSize: number) => {
-    const labels = {
-      1: '1 image (Hero)',
-      4: '4 images (2×2)',
-      6: '6 images (3×2)',
-      9: '9 images (3×3)',
-      12: '12 images (4×3)'
-    };
-    return labels[gridSize as keyof typeof labels] || `${gridSize} images`;
   };
 
   const handleExcessImages = async (maxImages: number) => {
