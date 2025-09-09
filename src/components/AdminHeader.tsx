@@ -46,7 +46,8 @@ export function AdminHeader({
     { key: "knowledge-base", label: "Knowledge Base", icon: FileText, path: "/admin/knowledge-base" },
     { key: "templates", label: "Templates", icon: Settings, path: "/admin/templates" },
     { key: "feedback-builder", label: "Feedback", icon: Settings, path: "/admin/feedback-builder" },
-    { key: "data-cleanup", label: "Cleanup", icon: Settings, path: "/admin/data-cleanup" }
+    { key: "data-cleanup", label: "Cleanup", icon: Settings, path: "/admin/data-cleanup" },
+    { key: "system-settings", label: "System Settings", icon: Settings, path: "/admin/system-settings" }
   ];
 
   const handleNavigation = (path: string) => {
