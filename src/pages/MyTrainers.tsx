@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { ComparisonView } from "@/components/ComparisonView";
 import { useUnifiedTrainerData } from "@/hooks/useUnifiedTrainerData";
 import { useAuth } from "@/hooks/useAuth";
-import { useProfileByType } from "@/hooks/useProfileByType";
+import { useClientProfile } from "@/hooks/useClientProfile";
+import { useClientJourneyProgress } from "@/hooks/useClientJourneyProgress";
 import { useDiscoveryCallNotifications } from "@/hooks/useDiscoveryCallNotifications";
 import { ErrorBoundary, TrainerDataErrorBoundary } from "@/components/ErrorBoundary";
 import { Button } from "@/components/ui/button";
@@ -29,7 +30,8 @@ import { DiscoveryCallBookingModal } from "@/components/discovery-call/Discovery
 export default function MyTrainers() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { profile } = useProfileByType();
+  const { profile } = useClientProfile();
+  const { progress: journeyProgress } = useClientJourneyProgress();
   const { notifications, upcomingCalls } = useDiscoveryCallNotifications();
   
   // Unified trainer data hook
@@ -113,6 +115,23 @@ export default function MyTrainers() {
 
   const [selectedTrainerForCall, setSelectedTrainerForCall] = useState<string | null>(null);
 
+  // Helper function to format journey stage
+  const formatJourneyStage = (stage: string) => {
+    switch (stage) {
+      case 'profile_setup': return 'Setting Up Profile';
+      case 'exploring_coaches': return 'Exploring Trainers';
+      case 'browsing': return 'Browsing';
+      case 'liked': return 'Finding Favorites';
+      case 'shortlisted': return 'Shortlisted Trainers';
+      case 'discovery_in_progress': return 'Discovery Process';
+      case 'discovery_call_booked': return 'Call Scheduled';
+      case 'discovery_completed': return 'Discovery Complete';
+      case 'waitlist': return 'On Waitlist';
+      case 'active_client': return 'Active Client';
+      default: return 'Getting Started';
+    }
+  };
+
   const handleBookDiscoveryCall = async (trainerId: string) => {
     setSelectedTrainerForCall(trainerId);
   };
@@ -186,7 +205,12 @@ export default function MyTrainers() {
                   >
                     FitQuest
                   </button>
-                  <div className="text-muted-foreground">My Trainers</div>
+              <div className="text-muted-foreground">My Trainers</div>
+              {journeyProgress && (
+                <div className="text-xs text-muted-foreground/80 font-medium">
+                  {formatJourneyStage(journeyProgress.stage)}
+                </div>
+              )}
                 </div>
                 <div className="flex items-center gap-3">
                   {/* Notifications */}
@@ -315,6 +339,11 @@ export default function MyTrainers() {
                   FitQuest
                 </button>
                 <div className="text-muted-foreground">My Trainers</div>
+                {journeyProgress && (
+                  <div className="text-xs text-muted-foreground/80 font-medium">
+                    {formatJourneyStage(journeyProgress.stage)}
+                  </div>
+                )}
               </div>
               <div className="flex items-center gap-3">
                 {/* Notifications */}

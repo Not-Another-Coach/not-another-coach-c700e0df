@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ExploreAllTrainers } from "@/components/dashboard/ExploreAllTrainers";
 import { useClientProfile } from "@/hooks/useClientProfile";
+import { useClientJourneyProgress } from "@/hooks/useClientJourneyProgress";
 import { useDiscoveryCallNotifications } from "@/hooks/useDiscoveryCallNotifications";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,8 +20,26 @@ import {
 const ClientExplore = () => {
   const navigate = useNavigate();
   const { profile, loading } = useClientProfile();
+  const { progress: journeyProgress } = useClientJourneyProgress();
   const { notifications, upcomingCalls } = useDiscoveryCallNotifications();
   const [isMessagingOpen, setIsMessagingOpen] = useState(false);
+
+  // Helper function to format journey stage
+  const formatJourneyStage = (stage: string) => {
+    switch (stage) {
+      case 'profile_setup': return 'Setting Up Profile';
+      case 'exploring_coaches': return 'Exploring Trainers';
+      case 'browsing': return 'Browsing';
+      case 'liked': return 'Finding Favorites';
+      case 'shortlisted': return 'Shortlisted Trainers';
+      case 'discovery_in_progress': return 'Discovery Process';
+      case 'discovery_call_booked': return 'Call Scheduled';
+      case 'discovery_completed': return 'Discovery Complete';
+      case 'waitlist': return 'On Waitlist';
+      case 'active_client': return 'Active Client';
+      default: return 'Getting Started';
+    }
+  };
 
   if (loading) {
     return (
@@ -55,6 +74,11 @@ const ClientExplore = () => {
                 FitQuest
               </button>
               <div className="text-muted-foreground">Explore Trainers</div>
+              {journeyProgress && (
+                <div className="text-xs text-muted-foreground/80 font-medium">
+                  {formatJourneyStage(journeyProgress.stage)}
+                </div>
+              )}
             </div>
             <div className="flex items-center gap-3">
               {/* Notifications */}

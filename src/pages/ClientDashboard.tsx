@@ -42,6 +42,23 @@ export default function ClientDashboard() {
   // Check if client is an active client with any trainer
   const isActiveClient = engagements.some(engagement => engagement.stage === 'active_client');
 
+  // Helper function to format journey stage
+  const formatJourneyStage = (stage: string) => {
+    switch (stage) {
+      case 'profile_setup': return 'Setting Up Profile';
+      case 'exploring_coaches': return 'Exploring Trainers';
+      case 'browsing': return 'Browsing';
+      case 'liked': return 'Finding Favorites';
+      case 'shortlisted': return 'Shortlisted Trainers';
+      case 'discovery_in_progress': return 'Discovery Process';
+      case 'discovery_call_booked': return 'Call Scheduled';
+      case 'discovery_completed': return 'Discovery Complete';
+      case 'waitlist': return 'On Waitlist';
+      case 'active_client': return 'Active Client';
+      default: return 'Getting Started';
+    }
+  };
+
   // Redirect if not logged in
   useEffect(() => {
     if (!loading && !user) {
@@ -109,6 +126,11 @@ export default function ClientDashboard() {
             <div className="flex items-center gap-3">
               <div className="font-bold text-xl text-foreground">FitQuest</div>
               <div className="text-muted-foreground">Dashboard</div>
+              {journeyProgress && (
+                <div className="text-xs text-muted-foreground/80 font-medium">
+                  {formatJourneyStage(journeyProgress.stage)}
+                </div>
+              )}
               {/* Your Journey Progress */}
               {journeyProgress && (
                 <div className="flex items-center gap-2 ml-6 px-3 py-1 bg-primary/10 rounded-full">

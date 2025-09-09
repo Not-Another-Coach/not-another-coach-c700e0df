@@ -30,6 +30,23 @@ const ClientJourney = () => {
   const { notifications, upcomingCalls } = useDiscoveryCallNotifications();
   const [isMessagingOpen, setIsMessagingOpen] = useState(false);
 
+  // Helper function to format journey stage
+  const formatJourneyStage = (stage: string) => {
+    switch (stage) {
+      case 'profile_setup': return 'Setting Up Profile';
+      case 'exploring_coaches': return 'Exploring Trainers';
+      case 'browsing': return 'Browsing';
+      case 'liked': return 'Finding Favorites';
+      case 'shortlisted': return 'Shortlisted Trainers';
+      case 'discovery_in_progress': return 'Discovery Process';
+      case 'discovery_call_booked': return 'Call Scheduled';
+      case 'discovery_completed': return 'Discovery Complete';
+      case 'waitlist': return 'On Waitlist';
+      case 'active_client': return 'Active Client';
+      default: return 'Getting Started';
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -85,6 +102,11 @@ const ClientJourney = () => {
                 FitQuest
               </button>
               <div className="text-muted-foreground">Your Journey</div>
+              {progress && (
+                <div className="text-xs text-muted-foreground/80 font-medium">
+                  {formatJourneyStage(progress.stage)}
+                </div>
+              )}
             </div>
             <div className="flex items-center gap-3">
               {/* Notifications */}
