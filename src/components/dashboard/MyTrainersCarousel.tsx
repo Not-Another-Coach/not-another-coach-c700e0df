@@ -77,7 +77,12 @@ export function MyTrainersCarousel({ onTabChange }: MyTrainersCarouselProps) {
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-foreground">My Trainers</h2>
+          <button 
+            onClick={() => onTabChange('my-trainers')}
+            className="text-xl font-semibold text-foreground hover:text-primary transition-colors cursor-pointer"
+          >
+            My Trainers
+          </button>
           <Button 
             variant="outline" 
             size="sm"
@@ -107,7 +112,12 @@ export function MyTrainersCarousel({ onTabChange }: MyTrainersCarouselProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-foreground">My Trainers</h2>
+        <button 
+          onClick={() => onTabChange('my-trainers')}
+          className="text-xl font-semibold text-foreground hover:text-primary transition-colors cursor-pointer"
+        >
+          My Trainers
+        </button>
         <div className="flex items-center gap-2">
           <Button
             variant="ghost"
@@ -124,13 +134,6 @@ export function MyTrainersCarousel({ onTabChange }: MyTrainersCarouselProps) {
             className="rounded-full w-8 h-8 p-0"
           >
             <ChevronRight className="h-4 w-4" />
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => onTabChange('my-trainers')}
-          >
-            View All
           </Button>
         </div>
       </div>
