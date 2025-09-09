@@ -201,16 +201,31 @@ const ClientJourney = () => {
             {progress.steps.map((step, index) => {
               const status = getStageStatus(index, currentStageIndex);
               
+              const getNavigationForStep = (stepTitle: string) => {
+                const title = stepTitle.toLowerCase();
+                if (title.includes('preferences') || title.includes('survey')) {
+                  return () => navigate('/client-survey');
+                } else if (title.includes('exploring') && title.includes('coach')) {
+                  return () => navigate('/client/explore');
+                } else if (title.includes('getting') && title.includes('know') && title.includes('coach')) {
+                  return () => navigate('/my-trainers');
+                }
+                return null;
+              };
+
+              const handleStepClick = getNavigationForStep(step.title);
+              
               return (
                 <Card 
                   key={step.id} 
-                  className={`transition-all duration-300 ${
+                  className={`transition-all duration-300 ${handleStepClick ? 'cursor-pointer hover:shadow-lg' : ''} ${
                     status === 'current' 
                       ? 'ring-2 ring-primary/50 bg-gradient-to-r from-primary/5 to-transparent' 
                       : status === 'completed'
                       ? 'bg-green-50/50 dark:bg-green-950/20'
                       : 'opacity-70'
                   }`}
+                  onClick={handleStepClick}
                 >
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
@@ -282,22 +297,6 @@ const ClientJourney = () => {
               );
             })}
           </div>
-
-          {/* Call to Action */}
-          {progress.nextAction && (
-            <Card className="mt-8 bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20">
-              <CardContent className="p-6 text-center">
-                <h3 className="text-lg font-semibold mb-2">Ready for Your Next Step?</h3>
-                <p className="text-muted-foreground mb-4">{progress.nextAction}</p>
-                <Button 
-                  onClick={() => navigate('/client/dashboard')}
-                  className="gap-2"
-                >
-                  Continue Journey
-                </Button>
-              </CardContent>
-            </Card>
-          )}
         </div>
       </main>
 
