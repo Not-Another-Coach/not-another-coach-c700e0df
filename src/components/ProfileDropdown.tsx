@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { PositionedAvatar } from '@/components/ui/positioned-avatar';
 import { Badge } from "@/components/ui/badge";
-import { User, Settings, LogOut, Key, Edit } from "lucide-react";
+import { User, Settings, LogOut, Key, Edit, CreditCard } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -159,13 +159,23 @@ export const ProfileDropdown = ({ profile }: ProfileDropdownProps) => {
         </DropdownMenuItem>
         
         {profile.user_type === 'client' && (
-          <DropdownMenuItem 
-            className="cursor-pointer"
-            onClick={handleUpdatePreferences}
-          >
-            <Edit className="mr-2 h-4 w-4" />
-            <span>Update Preferences</span>
-          </DropdownMenuItem>
+          <>
+            <DropdownMenuItem 
+              className="cursor-pointer"
+              onClick={handleUpdatePreferences}
+            >
+              <Edit className="mr-2 h-4 w-4" />
+              <span>Update Preferences</span>
+            </DropdownMenuItem>
+            
+            <DropdownMenuItem 
+              className="cursor-pointer"
+              onClick={() => navigate('/client/payments')}
+            >
+              <CreditCard className="mr-2 h-4 w-4" />
+              <span>Payments</span>
+            </DropdownMenuItem>
+          </>
         )}
         
         {profile.user_type === 'trainer' && (

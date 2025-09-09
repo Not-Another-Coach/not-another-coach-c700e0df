@@ -27,10 +27,8 @@ export function ClientHeader({
 
   const defaultNavigationItems = [
     { key: "summary", label: "Dashboard", icon: Home, route: "/client/dashboard" },
-    { key: "preferences", label: "Preferences", icon: Settings, route: "/client/preferences" },
     { key: "my-trainers", label: "My Trainers", icon: Users, route: "/my-trainers" },
-    { key: "explore", label: "Explore", icon: UserSearch, route: "/client/explore" },
-    { key: "payments", label: "Payments", icon: CreditCard, route: "/client/payments" }
+    { key: "explore", label: "Explore", icon: UserSearch, route: "/client/explore" }
   ];
 
   const activeClientNavigationItems = [
@@ -91,6 +89,16 @@ export function ClientHeader({
               Admin
             </Button>
           )}
+          
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => navigate('/client-survey')}
+            className="flex items-center gap-2"
+          >
+            <Settings className="w-4 h-4" />
+            Preferences
+          </Button>
           
           <ProfileDropdown 
             profile={profile}
