@@ -7,6 +7,7 @@ import { Eye, EyeOff, Lock, Save } from 'lucide-react';
 import { ContentType, VisibilityState, EngagementStageGroup } from '@/hooks/useVisibilityMatrix';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { HelpCircle } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 const contentTypeLabels: Record<ContentType, string> = {
@@ -106,30 +107,43 @@ export function SystemVisibilityDefaults() {
   const loadDefaultSettings = async () => {
     setLoading(true);
     try {
-      // For now, use hardcoded defaults - this will be replaced with API call
       const defaults: Record<string, VisibilityState> = {};
-      allContentTypes.forEach(contentType => {
-        stageGroups.forEach(stageGroup => {
+      
+      // Load settings for each content type and stage group combination
+      for (const contentType of allContentTypes) {
+        for (const stageGroup of stageGroups) {
           const key = `${contentType}_${stageGroup}`;
-          // Set sensible defaults based on content type category
-          if (alwaysVisibleTypes.includes(contentType)) {
-            defaults[key] = 'visible';
-          } else if (defaultVisibleTypes.includes(contentType)) {
-            defaults[key] = 'visible';
-          } else if (adminControllableTypes.includes(contentType)) {
-            // Set engagement-based defaults for admin controllable types
-            if (stageGroup === 'committed') {
+          
+          // Call the database function to get the default visibility
+          const { data, error } = await supabase.rpc('get_system_default_visibility', {
+            p_content_type: contentType,
+            p_stage_group: stageGroup as any // Type cast needed until Supabase regenerates types
+          });
+          
+          if (error) {
+            console.error('Error loading visibility default:', error);
+            // Fall back to hardcoded defaults
+            if (alwaysVisibleTypes.includes(contentType)) {
               defaults[key] = 'visible';
-            } else if (stageGroup === 'browsing') {
-              defaults[key] = ['profile_image', 'basic_information', 'pricing_discovery_call'].includes(contentType) ? 'visible' : 'blurred';
-            } else if (['shortlisted', 'discovery_process'].includes(stageGroup)) {
-              defaults[key] = contentType === 'testimonial_images' ? 'visible' : 'blurred';
-            } else {
-              defaults[key] = 'hidden';
+            } else if (defaultVisibleTypes.includes(contentType)) {
+              defaults[key] = 'visible';
+            } else if (adminControllableTypes.includes(contentType)) {
+              if (stageGroup === 'committed') {
+                defaults[key] = 'visible';
+              } else if (stageGroup === 'browsing') {
+                defaults[key] = ['profile_image', 'basic_information', 'pricing_discovery_call'].includes(contentType) ? 'visible' : 'blurred';
+              } else if (['shortlisted', 'discovery_process'].includes(stageGroup)) {
+                defaults[key] = contentType === 'testimonial_images' ? 'visible' : 'blurred';
+              } else {
+                defaults[key] = 'hidden';
+              }
             }
+          } else {
+            defaults[key] = data as VisibilityState;
           }
-        });
-      });
+        }
+      }
+      
       setDefaultSettings(defaults);
     } catch (error) {
       console.error('Error loading default settings:', error);
@@ -150,9 +164,36 @@ export function SystemVisibilityDefaults() {
   const saveDefaults = async () => {
     setSaving(true);
     try {
-      // TODO: Implement API call to save system defaults
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-      toast.success('System default visibility settings saved successfully');
+      // Save each admin-controllable setting to the database
+      const savePromises = [];
+      
+      for (const contentType of adminControllableTypes) {
+        for (const stageGroup of stageGroups) {
+          const key = `${contentType}_${stageGroup}`;
+          const visibilityState = defaultSettings[key];
+          
+          if (visibilityState) {
+            savePromises.push(
+              supabase.rpc('save_system_default_visibility', {
+                p_content_type: contentType,
+                p_stage_group: stageGroup as any, // Type cast needed until Supabase regenerates types
+                p_visibility_state: visibilityState
+              })
+            );
+          }
+        }
+      }
+      
+      const results = await Promise.all(savePromises);
+      
+      // Check for any errors
+      const errors = results.filter(result => result.error);
+      if (errors.length > 0) {
+        console.error('Errors saving some settings:', errors);
+        toast.error(`Failed to save ${errors.length} settings. Please try again.`);
+      } else {
+        toast.success('System default visibility settings saved successfully');
+      }
     } catch (error) {
       console.error('Error saving defaults:', error);
       toast.error('Failed to save default settings');

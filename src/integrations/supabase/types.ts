@@ -4717,6 +4717,36 @@ export type Database = {
           },
         ]
       }
+      system_visibility_defaults: {
+        Row: {
+          content_type: Database["public"]["Enums"]["content_type"]
+          created_at: string | null
+          created_by: string | null
+          id: string
+          stage_group: Database["public"]["Enums"]["engagement_stage_group"]
+          updated_at: string | null
+          visibility_state: Database["public"]["Enums"]["visibility_state"]
+        }
+        Insert: {
+          content_type: Database["public"]["Enums"]["content_type"]
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          stage_group: Database["public"]["Enums"]["engagement_stage_group"]
+          updated_at?: string | null
+          visibility_state?: Database["public"]["Enums"]["visibility_state"]
+        }
+        Update: {
+          content_type?: Database["public"]["Enums"]["content_type"]
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          stage_group?: Database["public"]["Enums"]["engagement_stage_group"]
+          updated_at?: string | null
+          visibility_state?: Database["public"]["Enums"]["visibility_state"]
+        }
+        Relationships: []
+      }
       template_activities: {
         Row: {
           activity_id: string
@@ -6766,6 +6796,13 @@ export type Database = {
         Args: { stage: Database["public"]["Enums"]["engagement_stage"] }
         Returns: Database["public"]["Enums"]["engagement_stage_group"]
       }
+      get_system_default_visibility: {
+        Args: {
+          p_content_type: Database["public"]["Enums"]["content_type"]
+          p_stage_group: Database["public"]["Enums"]["engagement_stage_group"]
+        }
+        Returns: Database["public"]["Enums"]["visibility_state"]
+      }
       get_trainer_membership_details: {
         Args: { p_trainer_id: string }
         Returns: {
@@ -6920,6 +6957,14 @@ export type Database = {
           p_admin_notes?: string
           p_rejection_reason?: string
           p_request_id: string
+        }
+        Returns: undefined
+      }
+      save_system_default_visibility: {
+        Args: {
+          p_content_type: Database["public"]["Enums"]["content_type"]
+          p_stage_group: Database["public"]["Enums"]["engagement_stage_group"]
+          p_visibility_state: Database["public"]["Enums"]["visibility_state"]
         }
         Returns: undefined
       }
