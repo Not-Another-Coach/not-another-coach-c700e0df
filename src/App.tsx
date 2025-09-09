@@ -41,6 +41,7 @@ import VerificationAnalytics from "./pages/admin/VerificationAnalytics";
 import FeedbackBuilder from "./pages/admin/FeedbackBuilder";
 import DataCleanup from "./pages/admin/DataCleanup";
 import TemplateManagement from "./pages/admin/TemplateManagement";
+import { AdminSystemSettings } from "./pages/AdminSystemSettings";
 
 const queryClient = new QueryClient();
 
@@ -85,6 +86,7 @@ const App = () => (
                 <Route path="/admin/feedback-builder" element={<FeedbackBuilder />} />
                 <Route path="/admin/data-cleanup" element={<DataCleanup />} />
                 <Route path="/admin/templates" element={<TemplateManagement />} />
+                <Route path="/admin/system-settings" element={<AdminSystemSettings />} />
                 <Route path="/trainer/:trainerId" element={<TrainerProfile />} />
                 <Route path="/messages/:trainerId?" element={<Messaging />} />
                 <Route path="/documentation" element={<Documentation />} />

@@ -7061,6 +7061,7 @@ export type Database = {
         | "onboarding_in_progress"
         | "goal_achieved"
         | "relationship_ended"
+        | "discovery_call_booked"
       goal_status:
         | "not_started"
         | "in_progress"
@@ -7310,6 +7311,7 @@ export const Constants = {
         "onboarding_in_progress",
         "goal_achieved",
         "relationship_ended",
+        "discovery_call_booked",
       ],
       goal_status: [
         "not_started",

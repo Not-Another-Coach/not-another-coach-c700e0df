@@ -6,7 +6,6 @@ import { AdminLiveActivityFeed } from "@/components/admin/AdminLiveActivityFeed"
 import { SpecialtyRequestWidget } from "@/components/alerts/SpecialtyRequestAlerts";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Trainer4StatusFixer } from "@/components/admin/Trainer4StatusFixer";
-import { SystemSettings } from "@/components/admin/SystemSettings";
 
 export const AdminDashboard = () => {
   const { user } = useAuth();
@@ -31,9 +30,6 @@ export const AdminDashboard = () => {
       description="Manage your fitness platform from this central dashboard"
     >
       <div className="space-y-6">
-        {/* System Settings */}
-        <SystemSettings />
-
         {/* Alert Widgets */}
         <Card>
           <CardContent className="p-6">

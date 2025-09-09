@@ -29,7 +29,11 @@ export function useAppLogo() {
       }
 
       if (data?.setting_value) {
-        setLogoSettings(data.setting_value as unknown as LogoSettings);
+        // Parse JSON if it's a string, otherwise use directly
+        const parsedSettings = typeof data.setting_value === 'string' 
+          ? JSON.parse(data.setting_value) 
+          : data.setting_value;
+        setLogoSettings(parsedSettings);
       }
     } catch (error) {
       console.error('Error fetching logo settings:', error);
