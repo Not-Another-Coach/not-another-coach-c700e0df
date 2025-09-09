@@ -5,6 +5,9 @@ import { Trainer } from "@/components/TrainerCard";
 import { getTrainerDisplayPrice } from "@/lib/priceUtils";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
+import { useContentVisibility } from '@/hooks/useContentVisibility';
+import { useEngagementStage } from '@/hooks/useEngagementStage';
+import { VisibilityAwareGallery } from '@/components/ui/VisibilityAwareGallery';
 
 const getGridClasses = (actualImageCount: number): string => {
   // Use actual image count to determine the best grid layout
@@ -53,6 +56,15 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
   const [displayImages, setDisplayImages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [gridSize, setGridSize] = useState<number>(6);
+
+  // Add visibility logic
+  const { stage } = useEngagementStage(trainer.id);
+  const { getVisibility, loading: visibilityLoading } = useContentVisibility({
+    trainerId: trainer.id,
+    engagementStage: stage || 'browsing'
+  });
+
+  const galleryVisibility = getVisibility('gallery_images');
 
   useEffect(() => {
     const fetchTrainerImages = async () => {
@@ -197,32 +209,13 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
         {/* Gallery Grid */}
         <div className="relative">
           {displayImages.length > 0 ? (
-            <div className={`grid gap-1 aspect-square ${getGridClasses(displayImages.length)}`}>
-              {displayImages.map((image, index) => (
-                <div key={image.id} className="relative overflow-hidden bg-muted">
-                  <img
-                    src={image.url}
-                    alt={`Gallery ${index + 1}`}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
-                  {image.mediaType === 'VIDEO' && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="bg-black/50 rounded-full p-2">
-                        <Play className="h-4 w-4 text-white fill-current" />
-                      </div>
-                    </div>
-                  )}
-                  {image.type === 'instagram' && (
-                    <div className="absolute bottom-1 right-1 bg-black/70 rounded-full p-1">
-                      <Instagram className="h-2 w-2 text-white" />
-                    </div>
-                  )}
-                </div>
-              ))}
-              
-            </div>
-          ) : loading ? (
+            <VisibilityAwareGallery
+              images={displayImages}
+              visibilityState={galleryVisibility}
+              gridClasses={`aspect-square ${getGridClasses(displayImages.length)}`}
+              lockMessage="Gallery unlocks as you engage"
+            />
+          ) : loading || visibilityLoading ? (
             <div className="aspect-square relative flex items-center justify-center bg-muted">
               <ImageIcon className="h-8 w-8 text-muted-foreground animate-pulse" />
             </div>

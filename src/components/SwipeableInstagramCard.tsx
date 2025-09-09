@@ -11,6 +11,9 @@ import { useSavedTrainers } from '@/hooks/useSavedTrainers';
 import { getTrainerDisplayPrice } from '@/lib/priceUtils';
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect } from 'react';
+import { useContentVisibility } from '@/hooks/useContentVisibility';
+import { useEngagementStage } from '@/hooks/useEngagementStage';
+import { VisibilityAwareGallery } from '@/components/ui/VisibilityAwareGallery';
 
 interface SwipeableInstagramCardProps {
   trainer: Trainer;
@@ -71,6 +74,15 @@ export const SwipeableInstagramCard = ({
   const isSaved = isTrainerSaved(trainer.id);
 
   const cardRef = useRef<HTMLDivElement>(null);
+
+  // Add visibility logic
+  const { stage } = useEngagementStage(trainer.id);
+  const { getVisibility, loading: visibilityLoading } = useContentVisibility({
+    trainerId: trainer.id,
+    engagementStage: stage || 'browsing'
+  });
+
+  const galleryVisibility = getVisibility('gallery_images');
 
   // Fetch trainer images for Instagram gallery
   useEffect(() => {
@@ -255,34 +267,16 @@ export const SwipeableInstagramCard = ({
         )}
 
         <CardContent className="p-0 relative h-full">
-          {/* Instagram Gallery Grid */}
+          {/* Instagram Gallery Grid with Visibility */}
           <div className="relative h-full">
             {displayImages.length > 0 ? (
-              <div className={`grid gap-1 h-full ${getGridClasses(displayImages.length)}`}>
-                {displayImages.map((image, imgIndex) => (
-                  <div key={image.id} className="relative overflow-hidden bg-muted">
-                    <img
-                      src={image.url}
-                      alt={`Gallery ${imgIndex + 1}`}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                    {image.mediaType === 'VIDEO' && (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="bg-black/50 rounded-full p-2">
-                          <Play className="h-4 w-4 text-white fill-current" />
-                        </div>
-                      </div>
-                    )}
-                    {image.type === 'instagram' && (
-                      <div className="absolute bottom-1 right-1 bg-black/70 rounded-full p-1">
-                        <Instagram className="h-2 w-2 text-white" />
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : loading ? (
+              <VisibilityAwareGallery
+                images={displayImages}
+                visibilityState={galleryVisibility}
+                gridClasses={`h-full ${getGridClasses(displayImages.length)}`}
+                lockMessage="Swipe to unlock gallery"
+              />
+            ) : loading || visibilityLoading ? (
               <div className="h-full relative flex items-center justify-center bg-muted">
                 <ImageIcon className="h-8 w-8 text-muted-foreground animate-pulse" />
               </div>

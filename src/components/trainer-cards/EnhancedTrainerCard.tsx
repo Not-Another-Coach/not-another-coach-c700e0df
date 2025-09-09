@@ -12,6 +12,8 @@ import { MatchBadge } from "@/components/MatchBadge";
 import { Badge } from "@/components/ui/badge";
 import { useSavedTrainers } from "@/hooks/useSavedTrainers";
 import { useNavigate } from "react-router-dom";
+import { useContentVisibility } from '@/hooks/useContentVisibility';
+import { useEngagementStage } from '@/hooks/useEngagementStage';
 
 interface EnhancedTrainerCardProps {
   trainer: Trainer;
@@ -92,6 +94,13 @@ export const EnhancedTrainerCard = ({
   
   // Use trainer-specific saved state
   const isSaved = isTrainerSaved(trainer.id);
+
+  // Add visibility context - this will be passed to sub-components through their own hooks
+  const { stage } = useEngagementStage(trainer.id);
+  const { canViewContent, loading: visibilityLoading } = useContentVisibility({
+    trainerId: trainer.id,
+    engagementStage: stage || 'browsing'
+  });
 
   // Available views in order - dynamically add transformation views for each testimonial
   const getAvailableViews = (): TrainerCardViewMode[] => {

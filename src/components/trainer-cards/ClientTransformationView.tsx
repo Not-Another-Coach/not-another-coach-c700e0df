@@ -3,6 +3,9 @@ import { Badge } from "@/components/ui/badge";
 import { Star, MapPin, Quote } from "lucide-react";
 import { Trainer } from "@/components/TrainerCard";
 import { getTrainerDisplayPrice } from "@/lib/priceUtils";
+import { useContentVisibility } from '@/hooks/useContentVisibility';
+import { useEngagementStage } from '@/hooks/useEngagementStage';
+import { VisibilityAwareImage } from '@/components/ui/VisibilityAwareImage';
 
 interface ClientTransformationViewProps {
   trainer: Trainer;
@@ -58,6 +61,16 @@ const getTransformationData = (trainer: Trainer) => {
 export const ClientTransformationView = ({ trainer, children, testimonialIndex = 0 }: ClientTransformationViewProps) => {
   const transformationData = getTransformationData(trainer);
   
+  // Add visibility logic
+  const { stage } = useEngagementStage(trainer.id);
+  const { getVisibility, loading: visibilityLoading } = useContentVisibility({
+    trainerId: trainer.id,
+    engagementStage: stage || 'browsing'
+  });
+
+  const beforeAfterVisibility = getVisibility('before_after_images');
+  const testimonialVisibility = getVisibility('testimonial_images');
+
   // If no transformations available, show placeholder
   if (transformationData.transformations.length === 0) {
     return (
@@ -122,35 +135,45 @@ export const ClientTransformationView = ({ trainer, children, testimonialIndex =
         {/* Interactive elements overlay */}
         {children}
         
-        {/* Current testimonial - Before/After Split */}
+        {/* Current testimonial - Before/After Split with Visibility */}
         <div className="aspect-square relative">
           <div className="grid grid-cols-2 gap-1 h-full">
             {/* Before Image */}
             <div className="relative overflow-hidden">
-              <img
+              <VisibilityAwareImage
                 src={currentTransformation.before}
                 alt="Before transformation"
                 className="w-full h-full object-cover"
-              />
-              <div className="absolute top-3 left-3">
-                <Badge className="text-sm bg-black/70 text-white border-0 px-3 py-1">
-                  Before
-                </Badge>
-              </div>
+                visibilityState={beforeAfterVisibility}
+                lockMessage="Before photos unlock with engagement"
+              >
+                {beforeAfterVisibility === 'visible' && (
+                  <div className="absolute top-3 left-3">
+                    <Badge className="text-sm bg-black/70 text-white border-0 px-3 py-1">
+                      Before
+                    </Badge>
+                  </div>
+                )}
+              </VisibilityAwareImage>
             </div>
             
             {/* After Image */}
             <div className="relative overflow-hidden">
-              <img
+              <VisibilityAwareImage
                 src={currentTransformation.after}
                 alt="After transformation"
                 className="w-full h-full object-cover"
-              />
-              <div className="absolute top-3 right-3">
-                <Badge className="text-sm bg-success text-white border-0 px-3 py-1">
-                  After
-                </Badge>
-              </div>
+                visibilityState={beforeAfterVisibility}
+                lockMessage="After photos unlock with engagement"
+              >
+                {beforeAfterVisibility === 'visible' && (
+                  <div className="absolute top-3 right-3">
+                    <Badge className="text-sm bg-success text-white border-0 px-3 py-1">
+                      After
+                    </Badge>
+                  </div>
+                )}
+              </VisibilityAwareImage>
             </div>
           </div>
           
@@ -196,25 +219,54 @@ export const ClientTransformationView = ({ trainer, children, testimonialIndex =
             </div>
           </div>
 
-          {/* Current Testimonial */}
-          <div className="bg-black/30 backdrop-blur-sm rounded-lg p-3 border border-white/20">
-            <div className="flex items-start gap-2">
-              <Quote className="h-3 w-3 text-white/70 flex-shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <p className="text-sm text-white/90 italic mb-1 leading-relaxed">
-                  "{currentTransformation.testimonial}"
-                </p>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-white/70">
-                    - {currentTransformation.clientName}
-                  </span>
-                  <Badge className="text-xs bg-success/20 text-success-foreground border-success/30">
-                    {currentTransformation.achievement}
-                  </Badge>
+          {/* Current Testimonial with Visibility */}
+          {testimonialVisibility === 'visible' ? (
+            <div className="bg-black/30 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+              <div className="flex items-start gap-2">
+                <Quote className="h-3 w-3 text-white/70 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm text-white/90 italic mb-1 leading-relaxed">
+                    "{currentTransformation.testimonial}"
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-white/70">
+                      - {currentTransformation.clientName}
+                    </span>
+                    <Badge className="text-xs bg-success/20 text-success-foreground border-success/30">
+                      {currentTransformation.achievement}
+                    </Badge>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          ) : testimonialVisibility === 'blurred' ? (
+            <div className="bg-black/30 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+              <div className="flex items-start gap-2">
+                <Quote className="h-3 w-3 text-white/70 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm text-white/90 italic mb-1 leading-relaxed blur-sm">
+                    "{currentTransformation.testimonial}"
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-white/70 blur-sm">
+                      - {currentTransformation.clientName}
+                    </span>
+                    <Badge className="text-xs bg-success/20 text-success-foreground border-success/30 blur-sm">
+                      {currentTransformation.achievement}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-black/30 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+              <div className="flex items-center justify-center">
+                <span className="text-xs text-white/70">
+                  Client testimonials unlock as you engage
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
