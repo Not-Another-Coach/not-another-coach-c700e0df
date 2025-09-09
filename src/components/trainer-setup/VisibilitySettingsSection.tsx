@@ -11,8 +11,16 @@ import { toast } from 'sonner';
 
 const contentTypeLabels: Record<ContentType, string> = {
   profile_image: 'Profile Image',
+  basic_information: 'Basic Information',
   testimonial_images: 'Testimonial Before/After Photos',
-  gallery_images: 'Gallery Images'
+  gallery_images: 'Gallery Images',
+  specializations: 'Specializations',
+  pricing_discovery_call: 'Pricing & Discovery Call',
+  stats_ratings: 'Stats & Ratings',
+  description_bio: 'Description & Bio',
+  certifications_qualifications: 'Certifications & Qualifications',
+  professional_journey: 'Professional Journey',
+  professional_milestones: 'Professional Milestones'
 };
 
 const engagementStageLabels: Record<EngagementStage, string> = {
@@ -44,10 +52,13 @@ export const VisibilitySettingsSection = () => {
   const [hasInitialized, setHasInitialized] = useState(false);
   const [previewStage, setPreviewStage] = useState<EngagementStage | null>(null);
 
-  const contentTypes: ContentType[] = [
+  // Only show admin-controllable content types in trainer setup
+  const adminControllableTypes: ContentType[] = [
     'profile_image',
+    'basic_information',
     'testimonial_images',
-    'gallery_images'
+    'gallery_images',
+    'pricing_discovery_call'
   ];
 
   const engagementStages: EngagementStage[] = [
@@ -163,7 +174,7 @@ export const VisibilitySettingsSection = () => {
               </tr>
             </thead>
             <tbody>
-              {contentTypes.map(contentType => (
+              {adminControllableTypes.map(contentType => (
                 <tr key={contentType} className="border-b">
                   <td className="p-2 font-medium text-sm">
                     {contentTypeLabels[contentType]}

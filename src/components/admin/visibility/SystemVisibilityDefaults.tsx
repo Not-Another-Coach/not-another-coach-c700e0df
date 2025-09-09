@@ -9,8 +9,16 @@ import { toast } from 'sonner';
 
 const contentTypeLabels: Record<ContentType, string> = {
   profile_image: 'Profile Image',
+  basic_information: 'Basic Information',
   testimonial_images: 'Testimonial Before/After Photos',
-  gallery_images: 'Gallery Images'
+  gallery_images: 'Gallery Images',
+  specializations: 'Specializations',
+  pricing_discovery_call: 'Pricing & Discovery Call',
+  stats_ratings: 'Stats & Ratings',
+  description_bio: 'Description & Bio',
+  certifications_qualifications: 'Certifications & Qualifications',
+  professional_journey: 'Professional Journey',
+  professional_milestones: 'Professional Milestones'
 };
 
 const engagementStageLabels: Record<EngagementStage, string> = {
@@ -40,10 +48,33 @@ export function SystemVisibilityDefaults() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const contentTypes: ContentType[] = [
+  // Admin controllable content types
+  const adminControllableTypes: ContentType[] = [
     'profile_image',
+    'basic_information',
     'testimonial_images',
-    'gallery_images'
+    'gallery_images',
+    'pricing_discovery_call'
+  ];
+
+  // Default visible (not editable by admin)
+  const defaultVisibleTypes: ContentType[] = [
+    'specializations',
+    'description_bio',
+    'certifications_qualifications',
+    'professional_journey',
+    'professional_milestones'
+  ];
+
+  // Always visible (not amendable)
+  const alwaysVisibleTypes: ContentType[] = [
+    'stats_ratings'
+  ];
+
+  const allContentTypes: ContentType[] = [
+    ...adminControllableTypes,
+    ...defaultVisibleTypes,
+    ...alwaysVisibleTypes
   ];
 
   const engagementStages: EngagementStage[] = [
@@ -71,18 +102,25 @@ export function SystemVisibilityDefaults() {
     try {
       // For now, use hardcoded defaults - this will be replaced with API call
       const defaults: Record<string, VisibilityState> = {};
-      contentTypes.forEach(contentType => {
+      allContentTypes.forEach(contentType => {
         engagementStages.forEach(stage => {
           const key = `${contentType}_${stage}`;
-          // Set sensible defaults
-          if (stage === 'active_client') {
+          // Set sensible defaults based on content type category
+          if (alwaysVisibleTypes.includes(contentType)) {
             defaults[key] = 'visible';
-          } else if (stage === 'browsing') {
-            defaults[key] = contentType === 'profile_image' ? 'visible' : 'blurred';
-          } else if (['shortlisted', 'discovery_in_progress', 'discovery_completed'].includes(stage)) {
-            defaults[key] = contentType === 'testimonial_images' ? 'visible' : 'blurred';
-          } else {
-            defaults[key] = 'hidden';
+          } else if (defaultVisibleTypes.includes(contentType)) {
+            defaults[key] = 'visible';
+          } else if (adminControllableTypes.includes(contentType)) {
+            // Set engagement-based defaults for admin controllable types
+            if (stage === 'active_client') {
+              defaults[key] = 'visible';
+            } else if (stage === 'browsing') {
+              defaults[key] = ['profile_image', 'basic_information', 'pricing_discovery_call'].includes(contentType) ? 'visible' : 'blurred';
+            } else if (['shortlisted', 'discovery_in_progress', 'discovery_completed'].includes(stage)) {
+              defaults[key] = contentType === 'testimonial_images' ? 'visible' : 'blurred';
+            } else {
+              defaults[key] = 'hidden';
+            }
           }
         });
       });
@@ -168,10 +206,14 @@ export function SystemVisibilityDefaults() {
               </tr>
             </thead>
             <tbody>
-              {contentTypes.map(contentType => (
+              {/* Admin Controllable Content Types */}
+              {adminControllableTypes.map(contentType => (
                 <tr key={contentType} className="hover:bg-muted/50">
                   <td className="p-3 border-b font-medium">
-                    {contentTypeLabels[contentType]}
+                    <div className="flex items-center gap-2">
+                      {contentTypeLabels[contentType]}
+                      <Badge variant="outline" className="text-xs">Editable</Badge>
+                    </div>
                   </td>
                   {engagementStages.map(stage => {
                     const key = `${contentType}_${stage}`;
@@ -206,6 +248,46 @@ export function SystemVisibilityDefaults() {
                       </td>
                     );
                   })}
+                </tr>
+              ))}
+              
+              {/* Default Visible Content Types (Not Editable) */}
+              {defaultVisibleTypes.map(contentType => (
+                <tr key={contentType} className="bg-muted/20">
+                  <td className="p-3 border-b font-medium">
+                    <div className="flex items-center gap-2">
+                      {contentTypeLabels[contentType]}
+                      <Badge variant="secondary" className="text-xs">Default Visible</Badge>
+                    </div>
+                  </td>
+                  {engagementStages.map(stage => (
+                    <td key={stage} className="p-2 border-b text-center">
+                      <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
+                        <VisibilityIcon state="visible" />
+                        <span>Visible</span>
+                      </div>
+                    </td>
+                  ))}
+                </tr>
+              ))}
+              
+              {/* Always Visible Content Types (Not Amendable) */}
+              {alwaysVisibleTypes.map(contentType => (
+                <tr key={contentType} className="bg-green-50/50 dark:bg-green-950/20">
+                  <td className="p-3 border-b font-medium">
+                    <div className="flex items-center gap-2">
+                      {contentTypeLabels[contentType]}
+                      <Badge variant="default" className="text-xs bg-green-600">Always Visible</Badge>
+                    </div>
+                  </td>
+                  {engagementStages.map(stage => (
+                    <td key={stage} className="p-2 border-b text-center">
+                      <div className="flex items-center justify-center gap-1 text-xs text-green-600">
+                        <VisibilityIcon state="visible" />
+                        <span>Always</span>
+                      </div>
+                    </td>
+                  ))}
                 </tr>
               ))}
             </tbody>

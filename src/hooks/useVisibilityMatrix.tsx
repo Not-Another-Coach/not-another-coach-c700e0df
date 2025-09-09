@@ -4,8 +4,16 @@ import { useAuth } from '@/hooks/useAuth';
 
 export type ContentType = 
   | 'profile_image'
+  | 'basic_information'
   | 'testimonial_images'
-  | 'gallery_images';
+  | 'gallery_images'
+  | 'specializations'
+  | 'pricing_discovery_call'
+  | 'stats_ratings'
+  | 'description_bio'
+  | 'certifications_qualifications'
+  | 'professional_journey'
+  | 'professional_milestones';
 
 export type VisibilityState = 'hidden' | 'blurred' | 'visible';
 

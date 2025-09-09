@@ -7017,7 +7017,18 @@ export type Database = {
         | "coach_selected"
       client_status_enum: "open" | "waitlist" | "paused"
       coach_availability_status: "accepting" | "waitlist" | "unavailable"
-      content_type: "profile_image" | "testimonial_images" | "gallery_images"
+      content_type:
+        | "profile_image"
+        | "testimonial_images"
+        | "gallery_images"
+        | "basic_information"
+        | "specializations"
+        | "pricing_discovery_call"
+        | "stats_ratings"
+        | "description_bio"
+        | "certifications_qualifications"
+        | "professional_journey"
+        | "professional_milestones"
       ct_status: "to_do" | "doing" | "done" | "skipped" | "deferred"
       ct_type:
         | "outreach"
@@ -7258,7 +7269,19 @@ export const Constants = {
       ],
       client_status_enum: ["open", "waitlist", "paused"],
       coach_availability_status: ["accepting", "waitlist", "unavailable"],
-      content_type: ["profile_image", "testimonial_images", "gallery_images"],
+      content_type: [
+        "profile_image",
+        "testimonial_images",
+        "gallery_images",
+        "basic_information",
+        "specializations",
+        "pricing_discovery_call",
+        "stats_ratings",
+        "description_bio",
+        "certifications_qualifications",
+        "professional_journey",
+        "professional_milestones",
+      ],
       ct_status: ["to_do", "doing", "done", "skipped", "deferred"],
       ct_type: [
         "outreach",
