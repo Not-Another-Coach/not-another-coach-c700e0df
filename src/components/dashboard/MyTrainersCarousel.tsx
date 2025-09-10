@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Heart, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
+import { Heart, ChevronRight, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSavedTrainers } from '@/hooks/useSavedTrainers';
 import { useShortlistedTrainers } from '@/hooks/useShortlistedTrainers';
@@ -25,16 +25,7 @@ export function MyTrainersCarousel({ onTabChange }: MyTrainersCarouselProps) {
     shortlistedTrainers.some(shortlisted => shortlisted.trainer_id === trainer.id)
   ).slice(0, 6); // Limit to 6 for carousel
 
-  const scrollCarousel = (direction: 'left' | 'right') => {
-    const carousel = document.getElementById('trainers-carousel');
-    if (carousel) {
-      const scrollAmount = 280; // Width of card + gap
-      carousel.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth'
-      });
-    }
-  };
+  // Removed carousel scrolling logic - now using grid layout
 
   const handleViewProfile = (trainerId: string) => {
     navigate(`/trainer/${trainerId}`);
@@ -179,50 +170,36 @@ export function MyTrainersCarousel({ onTabChange }: MyTrainersCarouselProps) {
             <Eye className="h-4 w-4" />
           </Button>
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => scrollCarousel('left')}
-            className="rounded-full w-8 h-8 p-0"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => scrollCarousel('right')}
-            className="rounded-full w-8 h-8 p-0"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => onTabChange('my-trainers')}
+        >
+          View All
+        </Button>
       </div>
 
-      <div 
-        id="trainers-carousel"
-        className="flex gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-      >
-        {myTrainers.map((trainer) => (
-          <div key={trainer.id} onClick={() => handleViewProfile(trainer.id)}>
-            <EnhancedTrainerCard
-              trainer={trainer as AnyTrainer}
-              config="dashboardCarousel"
-              cardState={getCardState(trainer.id)}
-              onViewProfile={handleViewProfile}
-              // Remove all action buttons - only allow profile viewing
-              onStartConversation={undefined}
-              onBookDiscoveryCall={undefined}
-              trainerOffersDiscoveryCalls={false}
-              initialView="instagram"
-              // Hide bottom action bar completely
-              compactActions={true}
-              hideViewControls={false}
-            />
+      <Card className="p-4">
+        <CardContent className="p-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {myTrainers.map((trainer) => (
+              <EnhancedTrainerCard
+                key={trainer.id}
+                trainer={trainer as AnyTrainer}
+                config="grid"
+                cardState={getCardState(trainer.id)}
+                onViewProfile={handleViewProfile}
+                onStartConversation={handleMessage}
+                onBookDiscoveryCall={handleBookDiscoveryCall}
+                trainerOffersDiscoveryCalls={true}
+                initialView="instagram"
+                compactActions={false}
+                hideViewControls={true}
+              />
+            ))}
           </div>
-        ))}
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
