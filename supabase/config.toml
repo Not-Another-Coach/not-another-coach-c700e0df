@@ -33,7 +33,7 @@ jwt_expiry = 3600
 refresh_token_rotation_enabled = true
 security_update_password_required_for_email_change = true
 security_update_email_require_confirmation = true
-enable_confirmations = false
+enable_confirmations = true
 
 [functions.security-headers]
 verify_jwt = false
@@ -77,6 +77,9 @@ verify_jwt = true
 [edge-runtime]
 enabled = true
 port = 54329
+
+[functions.send-auth-emails]
+verify_jwt = false
 
 [analytics]
 enabled = false

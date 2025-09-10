@@ -33,7 +33,7 @@ export default function Auth() {
     confirmPassword: '',
     firstName: '',
     lastName: '',
-    userType: 'client' as 'client' | 'trainer' | 'admin'
+    userType: 'client' as 'client' | 'trainer'
   });
 
   const { signIn, signUp } = useAuth();
@@ -194,7 +194,7 @@ export default function Auth() {
       setActiveTab('login');
       toast({
         title: "Account created!",
-        description: "Please check your email to confirm your account, then log in below.",
+        description: "Please check your email to confirm your account with Not Another Coach, then log in below.",
       });
       // Clear signup form
       setSignupForm({
@@ -483,16 +483,15 @@ export default function Auth() {
                     
                     <div className="space-y-2">
                       <Label htmlFor="signup-usertype">I am a...</Label>
-                      <Select value={signupForm.userType} onValueChange={(value: 'client' | 'trainer' | 'admin') => setSignupForm({ ...signupForm, userType: value })}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="client">Client looking for a trainer</SelectItem>
-                          <SelectItem value="trainer">Personal trainer</SelectItem>
-                          <SelectItem value="admin">Administrator</SelectItem>
-                        </SelectContent>
-                      </Select>
+      <Select value={signupForm.userType} onValueChange={(value: 'client' | 'trainer') => setSignupForm({ ...signupForm, userType: value })}>
+        <SelectTrigger>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="client">Client looking for a coach</SelectItem>
+          <SelectItem value="trainer">Coach</SelectItem>
+        </SelectContent>
+      </Select>
                     </div>
                     
                     <div className="space-y-2">
