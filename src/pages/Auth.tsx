@@ -111,9 +111,19 @@ export default function Auth() {
     const { error } = await signIn(loginForm.email, loginForm.password);
     
     if (error) {
+      const msg = (error.message || '').toLowerCase();
+      const isUnconfirmed = msg.includes('email not confirmed') || msg.includes('email_not_confirmed');
+
+      if (isUnconfirmed) {
+        setConfirmationEmail(loginForm.email);
+        setShowResendConfirmation(true);
+      }
+
       toast({
-        title: "Login Failed",
-        description: error.message,
+        title: isUnconfirmed ? "Email not confirmed" : "Login Failed",
+        description: isUnconfirmed
+          ? "Please confirm your email. You can resend the confirmation below."
+          : error.message,
         variant: "destructive",
       });
     } else {
