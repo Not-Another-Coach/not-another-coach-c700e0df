@@ -3,7 +3,8 @@ import { Heart } from "lucide-react";
 import { useAnonymousSession } from "@/hooks/useAnonymousSession";
 import { SaveTrainerPrompt } from "./SaveTrainerPrompt";
 import { AuthPrompt } from "./AuthPrompt";
-import { UnifiedTrainerCard } from "@/components/shared/UnifiedTrainerCard";
+import { EnhancedTrainerCard } from "@/components/trainer-cards/EnhancedTrainerCard";
+import type { AnyTrainer } from "@/types/trainer";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -130,18 +131,34 @@ export const AnonymousBrowse = () => {
       )}
 
       {/* Trainers Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {trainers.map((trainer) => {
           console.log('🎯 Rendering trainer card for:', trainer.first_name, trainer.last_name);
+          
+          // Transform trainer data to match AnyTrainer interface
+          const enhancedTrainer: AnyTrainer = {
+            ...trainer,
+            name: `${trainer.first_name} ${trainer.last_name}`,
+            firstName: trainer.first_name,
+            lastName: trainer.last_name,
+            profilePhotoUrl: trainer.profile_photo_url,
+            totalRatings: trainer.total_ratings,
+            hourlyRate: trainer.hourly_rate,
+            freeDiscoveryCall: trainer.free_discovery_call
+          };
+          
           return (
-            <UnifiedTrainerCard
+            <EnhancedTrainerCard
               key={trainer.id}
-              trainer={trainer}
-              onSave={handleSaveClick}
-              onMessage={handleMessageClick}
-              onBook={handleBookClick}
-              isSaved={isTrainerSaved(trainer.id)}
-              isAuthenticated={false}
+              trainer={enhancedTrainer}
+              config="explore"
+              initialView="instagram"
+              onViewProfile={() => console.log('View profile:', trainer.id)}
+              onMessage={() => handleMessageClick(trainer.id)}
+              onBookDiscoveryCall={() => handleBookClick(trainer.id)}
+              cardState={isTrainerSaved(trainer.id) ? 'saved' : 'default'}
+              // Override save behavior for anonymous users to show prompt
+              onAddToShortlist={() => handleSaveClick(trainer.id)}
             />
           );
         })}
