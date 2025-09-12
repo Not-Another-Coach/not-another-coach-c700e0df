@@ -44,9 +44,15 @@ export const UnifiedTrainerCard = ({
   className = ""
 }: UnifiedTrainerCardProps) => {
   console.log('🎯 UnifiedTrainerCard rendering:', { trainer: trainer.first_name + ' ' + trainer.last_name, showMatchScore, className });
+  console.log('🎯 Trainer data:', { 
+    hourly_rate: trainer.hourly_rate, 
+    free_discovery_call: trainer.free_discovery_call,
+    specializations: trainer.specializations?.length,
+    rating: trainer.rating 
+  });
   
   return (
-    <Card className={`group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 ${className}`}>
+    <Card className={`group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-2 border-primary/20 ${className}`}>
       <CardContent className="p-6">
         {/* Header with Match Score */}
         {showMatchScore && trainer.match_score && (
