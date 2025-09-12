@@ -1,5 +1,6 @@
 import React from 'react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Link } from 'react-router-dom';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 
@@ -22,9 +23,12 @@ export function UserIntentModal({ isOpen, onSelectIntent, onDismiss }: UserInten
         </button>
         
         <div className="text-center py-6">
-          <h2 className="text-xl font-semibold mb-6">
+          <DialogTitle className="text-2xl font-bold mb-4">
             How can we help you today?
-          </h2>
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            Choose whether you want to find a coach or you are a coach.
+          </DialogDescription>
           
           <div className="space-y-4">
             <Button
@@ -35,13 +39,8 @@ export function UserIntentModal({ isOpen, onSelectIntent, onDismiss }: UserInten
               Find a Coach
             </Button>
             
-            <Button
-              onClick={() => onSelectIntent('trainer')}
-              variant="outline"
-              className="w-full h-14 text-lg font-semibold rounded-xl border-2"
-              size="lg"
-            >
-              I'm a Coach
+            <Button asChild variant="outline" className="w-full h-14 text-lg font-semibold rounded-xl border-2" size="lg">
+              <Link to="/trainer/demo" onClick={() => onSelectIntent('trainer')}>I'm a Coach</Link>
             </Button>
           </div>
         </div>
