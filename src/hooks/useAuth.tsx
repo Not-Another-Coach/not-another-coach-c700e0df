@@ -8,6 +8,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, userData?: any) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<{ error: any }>;
+  resendConfirmation: (email: string) => Promise<{ error: any }>;
   loading: boolean;
 }
 
@@ -86,12 +87,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error };
   };
 
+  const resendConfirmation = async (email: string) => {
+    const redirectUrl = `${window.location.origin}/auth/callback`;
+    
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+      options: {
+        emailRedirectTo: redirectUrl
+      }
+    });
+    return { error };
+  };
+
   const value = {
     user,
     session,
     signUp,
     signIn,
     signOut,
+    resendConfirmation,
     loading,
   };
 

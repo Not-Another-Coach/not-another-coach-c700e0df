@@ -21,6 +21,8 @@ export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [showPasswordReset, setShowPasswordReset] = useState(false);
+  const [showResendConfirmation, setShowResendConfirmation] = useState(false);
+  const [confirmationEmail, setConfirmationEmail] = useState('');
   const [resetEmail, setResetEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
@@ -36,7 +38,7 @@ export default function Auth() {
     userType: 'client' as 'client' | 'trainer'
   });
 
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, resendConfirmation } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -193,8 +195,10 @@ export default function Auth() {
         });
       }
     } else {
-      // Pre-populate login form with the email and switch to login tab
+      // Pre-populate login form with the email and set up resend confirmation
       setLoginForm({ email: signupForm.email, password: '' });
+      setConfirmationEmail(signupForm.email);
+      setShowResendConfirmation(true);
       setActiveTab('login');
       toast({
         title: "Account created!",
@@ -303,6 +307,34 @@ export default function Auth() {
       navigate('/auth', { replace: true });
     }
     
+    setIsLoading(false);
+  };
+
+  const handleResendConfirmation = async () => {
+    if (!confirmationEmail) {
+      toast({
+        title: "Error",
+        description: "No email address found for confirmation",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    const { error } = await resendConfirmation(confirmationEmail);
+    
+    if (error) {
+      toast({
+        title: "Resend Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Confirmation Email Sent!",
+        description: "Please check your email for the confirmation link.",
+      });
+    }
     setIsLoading(false);
   };
 
@@ -458,15 +490,33 @@ export default function Auth() {
                      </Button>
                   </form>
                   
-                  <div className="text-center">
-                    <Button
-                      variant="link"
-                      className="text-sm text-muted-foreground"
-                      onClick={() => setShowForgotPassword(true)}
-                    >
-                      Forgot your password?
-                    </Button>
-                  </div>
+                   <div className="text-center space-y-2">
+                     <Button
+                       variant="link"
+                       className="text-sm text-muted-foreground"
+                       onClick={() => setShowForgotPassword(true)}
+                     >
+                       Forgot your password?
+                     </Button>
+                     
+                     {showResendConfirmation && (
+                       <div className="pt-2 border-t">
+                         <p className="text-sm text-muted-foreground mb-2">
+                           Didn't receive your confirmation email?
+                         </p>
+                         <Button
+                           variant="outline"
+                           size="sm"
+                           onClick={handleResendConfirmation}
+                           disabled={isLoading}
+                           className="w-full"
+                         >
+                           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                           Resend Confirmation Email
+                         </Button>
+                       </div>
+                     )}
+                   </div>
                 </TabsContent>
                 
                 <TabsContent value="signup" className="space-y-4">
