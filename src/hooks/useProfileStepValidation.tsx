@@ -247,8 +247,12 @@ export const useProfileStepValidation = () => {
     
     // Special completion logic for specific steps
     if (step === 10) {
-      // Working Hours & New Client Availability - check availability_status
-      return formData.availability_status ? 'completed' : 'not_started';
+      // Working Hours & New Client Availability - check availability_status or availability_schedule
+      const hasAvailabilityStatus = formData.availability_status;
+      const hasAvailabilitySchedule = formData.availability_schedule && 
+        typeof formData.availability_schedule === 'object';
+      
+      return (hasAvailabilityStatus || hasAvailabilitySchedule) ? 'completed' : 'not_started';
     }
     
     if (step === 12) {
