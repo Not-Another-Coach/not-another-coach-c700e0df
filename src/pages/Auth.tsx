@@ -44,7 +44,8 @@ export default function Auth() {
 
   // Detect signup context from URL
   const signupContext = searchParams.get('signup');
-  const isContextualSignup = signupContext === 'client' || signupContext === 'trainer';
+  const intentContext = searchParams.get('intent');
+  const isContextualSignup = signupContext === 'client' || signupContext === 'trainer' || intentContext === 'trainer-signup';
   
   // Load saved email on component mount (secure - no password storage)
   useEffect(() => {
@@ -79,6 +80,7 @@ export default function Auth() {
   useEffect(() => {
     const type = searchParams.get('type');
     const signup = searchParams.get('signup');
+    const intent = searchParams.get('intent');
     
     if (type === 'recovery') {
       setShowPasswordReset(true);
@@ -87,11 +89,13 @@ export default function Auth() {
         title: "Password Reset",
         description: "Please enter your new password below.",
       });
-    } else if (signup === 'true' || signup === 'client' || signup === 'trainer') {
+    } else if (signup === 'true' || signup === 'client' || signup === 'trainer' || intent === 'trainer-signup') {
       setActiveTab('signup');
       // Set user type based on context
-      if (signup === 'client' || signup === 'trainer') {
-        setSignupForm(prev => ({ ...prev, userType: signup as 'client' | 'trainer' }));
+      if (signup === 'client') {
+        setSignupForm(prev => ({ ...prev, userType: 'client' }));
+      } else if (signup === 'trainer' || intent === 'trainer-signup') {
+        setSignupForm(prev => ({ ...prev, userType: 'trainer' }));
       }
     }
   }, [searchParams]);

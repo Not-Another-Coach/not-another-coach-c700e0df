@@ -17,6 +17,8 @@ import ClientJourney from "./pages/ClientJourney";
 import SavedTrainers from "./pages/SavedTrainers";
 import AnonymousSaved from "./pages/AnonymousSaved";
 import TrainerDashboard from "./pages/TrainerDashboard";
+import TrainerDemo from "./pages/TrainerDemo";
+import TrainerPreview from "./pages/TrainerPreview";
 import TrainerProfileSetup from "./pages/TrainerProfileSetup";
 import TrainerSettings from "./pages/TrainerSettings";
 import { AdminDashboard } from "./pages/AdminDashboard";
@@ -73,6 +75,8 @@ const App = () => (
                 <Route path="/client/journey" element={<ClientJourney />} />
                 <Route path="/saved" element={<SavedTrainers />} />
                 <Route path="/trainer/dashboard" element={<TrainerDashboard />} />
+                <Route path="/trainer/demo" element={<TrainerDemo />} />
+                <Route path="/trainer/preview" element={<TrainerPreview />} />
                 <Route path="/trainer/profile-setup" element={<TrainerProfileSetup />} />
                 <Route path="/trainer/settings" element={<TrainerSettings />} />
                 <Route path="/admin" element={<AdminDashboard />} />

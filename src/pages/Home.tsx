@@ -119,7 +119,7 @@ export default function Home() {
                 No signup required to start exploring.
               </p>
               
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button 
                   size="lg" 
                   onClick={() => {
@@ -145,6 +145,20 @@ export default function Home() {
                   <Search className="h-5 w-5 mr-2" />
                   Browse All Trainers
                 </Button>
+              </div>
+              
+              {/* Trainer CTA */}
+              <div className="mt-12 pt-8 border-t border-muted">
+                <div className="text-center">
+                  <h3 className="text-xl font-semibold mb-2">Are you a fitness professional?</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Join our platform and start building your coaching business
+                  </p>
+                  <Button variant="outline" size="lg" onClick={() => navigate('/trainer/demo')} className="text-lg px-8">
+                    Become a Coach
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
