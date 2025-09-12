@@ -158,13 +158,23 @@ export const useProfessionalDocumentsState = () => {
     let completedCount = 0;
     let partialCount = 0;
 
+    // Merge in latest localStorage flags so status reflects most recent selection
+    let storedFlags: Record<string, boolean> = {};
+    try {
+      if (user?.id) {
+        const saved = localStorage.getItem(`verification_not_applicable_${user.id}`);
+        if (saved) storedFlags = JSON.parse(saved);
+      }
+    } catch {}
+    const effectiveNotApplicable = { ...notApplicable, ...storedFlags };
+
     console.log('🔍 Prof Documents - Checking completion status');
     console.log('🔍 Prof Documents - Available checks:', checks);
-    console.log('🔍 Prof Documents - Not applicable:', notApplicable);
+    console.log('🔍 Prof Documents - Not applicable:', effectiveNotApplicable);
 
     checkTypes.forEach(checkType => {
       const existingCheck = checks.find(check => check.check_type === checkType);
-      const isNotApplicableSet = notApplicable[checkType];
+      const isNotApplicableSet = effectiveNotApplicable[checkType];
       const anyFieldFilled = isAnyFieldFilled(checkType);
 
       console.log(`🔍 Prof Documents - ${checkType}:`, { existingCheck: !!existingCheck, status: existingCheck?.status, isNotApplicableSet, anyFieldFilled });
