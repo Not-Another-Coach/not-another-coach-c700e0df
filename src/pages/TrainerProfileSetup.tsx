@@ -43,7 +43,7 @@ import { SimplifiedWaysOfWorkingSection } from "@/components/trainer-setup/Simpl
 import { ImageManagementSection } from "@/components/trainer-setup/ImageManagementSection";
 import { WorkingHoursAndAvailabilitySection } from "@/components/trainer-setup/WorkingHoursAndAvailabilitySection";
 import { TermsAndNotificationsSection } from "@/components/trainer-setup/TermsAndNotificationsSection";
-import { EnhancedVerificationSection } from "@/components/trainer-setup/EnhancedVerificationSection";
+import { ProfileSummarySection } from "@/components/trainer-setup/ProfileSummarySection";
 import { ProfessionalDocumentsSection } from "@/components/trainer-setup/ProfessionalDocumentsSection";
 import { PublishButton } from "@/components/trainer-setup/PublishButton";
 
@@ -798,7 +798,7 @@ const TrainerProfileSetup = () => {
       case 12:
         return <ProfessionalDocumentsSection />;
       case 13:
-        return <EnhancedVerificationSection />;
+        return <ProfileSummarySection />;
       default:
         return null;
     }

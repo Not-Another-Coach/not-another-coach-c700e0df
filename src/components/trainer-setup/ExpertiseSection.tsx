@@ -13,6 +13,7 @@ import { SectionHeader } from './SectionHeader';
 import { useSpecialties, useSpecialtyCategories, useTrainingTypes, useCustomSpecialtyRequests, useTrainerCustomSpecialtyRequests, useSpecialtyAnalytics } from '@/hooks/useSpecialties';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
+import { LocationAutocompleteField } from "@/components/ui/LocationAutocompleteField";
 
 interface ExpertiseSectionProps {
   formData: any;
@@ -431,19 +432,10 @@ export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionP
 
       {/* Location */}
       {Object.values(selectedTrainingTypeDelivery).some(formats => formats.includes('in-person')) && (
-        <div className="space-y-2">
-          <Label htmlFor="location">Location *</Label>
-          <div className="relative">
-            <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              id="location"
-              value={formData.location || ''}
-              onChange={(e) => updateFormData({ location: e.target.value })}
-              placeholder="Enter city, postcode, or area you serve"
-              className="pl-10"
-            />
-          </div>
-        </div>
+        <LocationAutocompleteField
+          value={formData.location || ''}
+          onChange={(value) => updateFormData({ location: value })}
+        />
       )}
 
       {/* Auto-generated description */}

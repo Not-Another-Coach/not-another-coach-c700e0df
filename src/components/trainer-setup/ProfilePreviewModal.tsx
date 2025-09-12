@@ -183,20 +183,8 @@ export const ProfilePreviewModal = ({
           </div>
 
           <div className="px-4 sm:px-6 py-3 sm:py-4 border-t flex-shrink-0">
-            <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
-              <Button onClick={handleMessage} className="w-full sm:flex-1 text-sm" disabled>
-                <MessageCircle className="w-4 h-4 mr-2" />
-                Send Message (Preview)
-              </Button>
-              {trainer.offers_discovery_call && (
-                <Button onClick={handleBookDiscovery} variant="outline" className="w-full sm:flex-1 text-sm" disabled>
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Book Discovery Call (Preview)
-                </Button>
-              )}
-            </div>
-            <p className="text-xs text-muted-foreground text-center mt-2">
-              Actions are disabled in preview mode
+            <p className="text-xs text-muted-foreground text-center">
+              This is how your profile will appear to potential clients
             </p>
           </div>
         </div>
