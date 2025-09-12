@@ -764,7 +764,7 @@ const TrainerProfileSetup = () => {
       // 'not_started' contributes 0
     }
     
-    const finalPercentage = Math.min(Math.round(totalWeightedCompletion), 100);
+    const finalPercentage = Math.min(Math.floor(totalWeightedCompletion), 100);
     
     console.log('🔍 Profile Setup - Step completions:', stepDetails);
     console.log('🔍 Profile Setup - Total weighted completion:', totalWeightedCompletion);
