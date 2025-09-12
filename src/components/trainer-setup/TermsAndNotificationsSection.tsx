@@ -21,63 +21,6 @@ export function TermsAndNotificationsSection({ formData, updateFormData }: Terms
         description="Configure your preferences and complete your profile setup"
       />
 
-      {/* Notification Preferences - Coming Soon */}
-      <Card className="border-muted bg-muted/20 relative">
-        <div className="absolute inset-0 bg-muted/50 rounded-lg flex items-center justify-center z-10">
-          <div className="bg-background px-4 py-2 rounded-md border shadow-sm">
-            <p className="text-sm font-medium text-muted-foreground">Coming Soon</p>
-          </div>
-        </div>
-        <CardContent className="p-6 space-y-4 opacity-50">
-          <div className="flex items-center gap-2 mb-4">
-            <Bell className="w-5 h-5 text-primary" />
-            <Label className="text-lg font-semibold">Notification Preferences</Label>
-          </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium">Profile Views</p>
-              <p className="text-sm text-muted-foreground">
-                Get notified when potential clients view your profile
-              </p>
-            </div>
-            <Switch
-              checked={formData.notify_profile_views || false}
-              onCheckedChange={(checked) => updateFormData({ notify_profile_views: checked })}
-              disabled
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium">New Messages</p>
-              <p className="text-sm text-muted-foreground">
-                Instant notifications for new client inquiries
-              </p>
-            </div>
-            <Switch
-              checked={formData.notify_messages || true}
-              onCheckedChange={(checked) => updateFormData({ notify_messages: checked })}
-              disabled
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium">Match Insights</p>
-              <p className="text-sm text-muted-foreground">
-                Weekly summary of profile performance and matches
-              </p>
-            </div>
-            <Switch
-              checked={formData.notify_insights || true}
-              onCheckedChange={(checked) => updateFormData({ notify_insights: checked })}
-              disabled
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-
       {/* Final Agreement */}
       <Card className="border-muted bg-muted/20">
         <CardContent className="p-6 space-y-4">

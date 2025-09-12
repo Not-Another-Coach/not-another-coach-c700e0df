@@ -844,30 +844,22 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
                   <input
-                    type="checkbox"
+                    type="radio"
+                    name="payment-mode-new"
                     id="payment-upfront"
                     checked={newPackage.customerPaymentModes.includes('upfront')}
-                    onChange={(e) => {
-                      const modes = e.target.checked 
-                        ? [...newPackage.customerPaymentModes, 'upfront' as const]
-                        : newPackage.customerPaymentModes.filter(m => m !== 'upfront');
-                      setNewPackage(prev => ({...prev, customerPaymentModes: modes.length > 0 ? modes : ['upfront' as const]}));
-                    }}
+                    onChange={() => setNewPackage(prev => ({...prev, customerPaymentModes: ['upfront']}))}
                     className="rounded"
                   />
                   <Label htmlFor="payment-upfront">Full Payment Upfront</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <input
-                    type="checkbox"
+                    type="radio"
+                    name="payment-mode-new"
                     id="payment-installments"
                     checked={newPackage.customerPaymentModes.includes('installments')}
-                    onChange={(e) => {
-                      const modes = e.target.checked 
-                        ? [...newPackage.customerPaymentModes, 'installments' as const]
-                        : newPackage.customerPaymentModes.filter(m => m !== 'installments');
-                      setNewPackage(prev => ({...prev, customerPaymentModes: modes.length > 0 ? modes : ['upfront' as const]}));
-                    }}
+                    onChange={() => setNewPackage(prev => ({...prev, customerPaymentModes: ['installments']}))}
                     className="rounded"
                   />
                   <Label htmlFor="payment-installments">Installment Payments</Label>
@@ -1109,30 +1101,22 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
                     <input
-                      type="checkbox"
+                      type="radio"
+                      name="payment-mode-edit"
                       id="edit-payment-upfront"
                       checked={editPackageData.customerPaymentModes.includes('upfront')}
-                      onChange={(e) => {
-                        const modes = e.target.checked 
-                          ? [...editPackageData.customerPaymentModes, 'upfront' as const]
-                          : editPackageData.customerPaymentModes.filter(m => m !== 'upfront');
-                        setEditPackageData(prev => ({...prev, customerPaymentModes: modes.length > 0 ? modes : ['upfront' as const]}));
-                      }}
+                      onChange={() => setEditPackageData(prev => ({...prev, customerPaymentModes: ['upfront']}))}
                       className="rounded"
                     />
                     <Label htmlFor="edit-payment-upfront">Full Payment Upfront</Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <input
-                      type="checkbox"
+                      type="radio"
+                      name="payment-mode-edit"
                       id="edit-payment-installments"
                       checked={editPackageData.customerPaymentModes.includes('installments')}
-                      onChange={(e) => {
-                        const modes = e.target.checked 
-                          ? [...editPackageData.customerPaymentModes, 'installments' as const]
-                          : editPackageData.customerPaymentModes.filter(m => m !== 'installments');
-                        setEditPackageData(prev => ({...prev, customerPaymentModes: modes.length > 0 ? modes : ['upfront' as const]}));
-                      }}
+                      onChange={() => setEditPackageData(prev => ({...prev, customerPaymentModes: ['installments']}))}
                       className="rounded"
                     />
                     <Label htmlFor="edit-payment-installments">Installment Payments</Label>

@@ -13,6 +13,7 @@ import { SectionHeader } from './SectionHeader';
 import { TestimonialAIHelper } from './TestimonialAIHelper';
 import { TestimonialEditModal } from './TestimonialEditModal';
 import { toast } from "@/hooks/use-toast";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
 
 interface TestimonialsSectionProps {
   formData: any;
@@ -287,36 +288,43 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
                           const updatedTags = (newTestimonial.outcomeTags || []).filter(t => t !== tag);
                           setNewTestimonial({ ...newTestimonial, outcomeTags: updatedTags });
                         }}
-                        className="text-xs hover:text-red-600"
+                        className="text-xs hover:text-destructive"
                       >
                         ×
                       </button>
                     </Badge>
                   ))}
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                  {outcomeTags.map((tag) => {
-                    const selected = (newTestimonial.outcomeTags || []).includes(tag);
-                    return (
-                      <Button
-                        key={tag}
-                        type="button"
-                        size="sm"
-                        variant={selected ? "default" : "outline"}
-                        onClick={() => {
-                          if (selected) {
-                            const updated = (newTestimonial.outcomeTags || []).filter(t => t !== tag);
-                            setNewTestimonial({ ...newTestimonial, outcomeTags: updated });
-                          } else {
-                            const updated = [...(newTestimonial.outcomeTags || []), tag];
-                            setNewTestimonial({ ...newTestimonial, outcomeTags: updated });
-                          }
-                        }}
-                      >
-                        {tag}
+                <div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button type="button" variant="outline" size="sm">
+                        Add outcome tags
                       </Button>
-                    );
-                  })}
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56">
+                      {outcomeTags.map((tag) => {
+                        const selected = (newTestimonial.outcomeTags || []).includes(tag);
+                        return (
+                          <DropdownMenuCheckboxItem
+                            key={tag}
+                            checked={selected}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                const updated = [...(newTestimonial.outcomeTags || []), tag];
+                                setNewTestimonial({ ...newTestimonial, outcomeTags: updated });
+                              } else {
+                                const updated = (newTestimonial.outcomeTags || []).filter(t => t !== tag);
+                                setNewTestimonial({ ...newTestimonial, outcomeTags: updated });
+                              }
+                            }}
+                          >
+                            {tag}
+                          </DropdownMenuCheckboxItem>
+                        );
+                      })}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
             </div>

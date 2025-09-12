@@ -40,7 +40,8 @@ export function AvailabilitySection({ formData, updateFormData, onAvailabilityCh
   // Initialize form state from availability settings
   useEffect(() => {
     if (availabilitySettings) {
-      setLocalAvailabilityStatus(availabilitySettings.availability_status || '');
+      // Do not prefill status in setup — require explicit selection
+      setLocalAvailabilityStatus('');
       setNextAvailableDate(availabilitySettings.next_available_date || '');
       setAllowDiscoveryCalls(availabilitySettings.allow_discovery_calls_on_waitlist ?? true);
       setAutoFollowUpDays(availabilitySettings.auto_follow_up_days || 14);

@@ -158,6 +158,41 @@ export const QualificationsSection: React.FC<QualificationsSectionProps> = ({
     handleFileUpload(files);
   };
 
+  const handleQualificationFileSelect = async (qualification: string, file: File) => {
+    if (!user?.id) {
+      toast.error('User not authenticated');
+      return;
+    }
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `${user.id}/${fileName}`;
+
+      const { error } = await supabase.storage
+        .from('trainer-documents')
+        .upload(filePath, file);
+
+      if (error) throw error;
+
+      const { data: urlData } = supabase.storage
+        .from('trainer-documents')
+        .getPublicUrl(filePath);
+
+      const currentCertificates = formData.certificates || [];
+      updateFormData({
+        certificates: [
+          ...currentCertificates,
+          { name: file.name, url: urlData.publicUrl, type: file.type, qualification }
+        ]
+      });
+      toast.success(`Certificate linked to ${qualification}`);
+    } catch (err) {
+      console.error('Upload failed:', err);
+      toast.error('Failed to upload certificate');
+    }
+  };
+
+
   const removeQualification = (qualification: string) => {
     const currentQualifications = formData.qualifications || [];
     updateFormData({ 
@@ -239,36 +274,51 @@ export const QualificationsSection: React.FC<QualificationsSectionProps> = ({
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
-              {/* Regular qualifications */}
               {formData.qualifications?.map((qualification: string) => {
                 const status = getVerificationStatus(qualification);
+                const inputId = `upload-${qualification.replace(/[^a-z0-9]/gi, '-').toLowerCase()}`;
                 return (
-                  <Badge
-                    key={qualification}
-                    variant="outline"
-                    className="flex items-center gap-2 px-3 py-1"
-                  >
-                    <span>{qualification}</span>
-                    {status === "verified" && (
-                      <CheckCircle className="w-3 h-3 text-green-600" />
-                    )}
-                    {status === "pending" && (
-                      <Clock className="w-3 h-3 text-amber-600" />
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeQualification(qualification)}
-                      className="h-auto p-0 ml-2 hover:bg-transparent"
+                  <div key={qualification} className="flex items-center gap-2">
+                    <Badge
+                      variant="outline"
+                      className="flex items-center gap-2 px-3 py-1"
                     >
-                      <X className="w-3 h-3" />
-                    </Button>
-                  </Badge>
+                      <span>{qualification}</span>
+                      {status === "verified" && (
+                        <CheckCircle className="w-3 h-3 text-green-600" />
+                      )}
+                      {status === "pending" && (
+                        <Clock className="w-3 h-3 text-amber-600" />
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeQualification(qualification)}
+                        className="h-auto p-0 ml-2 hover:bg-transparent"
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
+                    </Badge>
+                    <div className="flex items-center gap-1">
+                      <input
+                        id={inputId}
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleQualificationFileSelect(qualification, file);
+                        }}
+                      />
+                      <Button variant="outline" size="xs" onClick={() => document.getElementById(inputId)?.click()}>
+                        <Upload className="w-3 h-3 mr-1" />
+                        Upload cert
+                      </Button>
+                    </div>
+                  </div>
                 );
               })}
-
-              {/* Custom qualification requests */}
-              {customRequests.map((request) => (
+            </div>
                 <Badge
                   key={`custom-${request.id}`}
                   variant={
@@ -478,6 +528,9 @@ export const QualificationsSection: React.FC<QualificationsSectionProps> = ({
                         <FileText className="w-4 h-4 text-muted-foreground" />
                         <div>
                           <span className="text-sm font-medium">{file.name}</span>
+                          {file.qualification && (
+                            <Badge variant="secondary" className="text-xs ml-2">{file.qualification}</Badge>
+                          )}
                           <Badge variant="outline" className="text-xs ml-2">
                             <Clock className="w-3 h-3 mr-1" />
                             Pending Review

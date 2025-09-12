@@ -166,7 +166,7 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
                 </div>
                 <div className="flex gap-2">
                   <Badge variant="secondary">
-                    {uploadedImages.filter(img => img.is_selected_for_display).length} Uploaded
+                    {uploadedImages.length} Uploaded
                   </Badge>
                   <Badge variant="secondary">
                     {instagramSelections.filter(sel => sel.is_selected_for_display).length} Instagram
