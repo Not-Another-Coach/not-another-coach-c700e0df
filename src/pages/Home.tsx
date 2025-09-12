@@ -122,7 +122,15 @@ export default function Home() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button 
                   size="lg" 
-                  onClick={() => setShowQuiz(true)}
+                  onClick={() => {
+                    setShowQuiz(true);
+                    setTimeout(() => {
+                      document.getElementById('browse-trainers')?.scrollIntoView({ 
+                        behavior: 'smooth',
+                        block: 'start'
+                      });
+                    }, 100);
+                  }}
                   className="text-lg px-8"
                 >
                   <Sparkles className="h-5 w-5 mr-2" />
