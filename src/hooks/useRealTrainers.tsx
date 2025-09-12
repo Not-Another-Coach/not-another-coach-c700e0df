@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Trainer } from '@/components/TrainerCard';
+import { Trainer } from '@/types/trainer';
 import trainerAlex from "@/assets/trainer-alex.jpg";
 import trainerSarah from "@/assets/trainer-sarah.jpg";
 import trainerMike from "@/assets/trainer-mike.jpg";

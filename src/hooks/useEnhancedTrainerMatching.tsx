@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Trainer } from '@/components/TrainerCard';
+import { Trainer } from '@/types/trainer';
 import { Target, Dumbbell, MapPin, Clock, DollarSign, Heart, Users, Calendar } from 'lucide-react';
 
 interface QuizAnswers {

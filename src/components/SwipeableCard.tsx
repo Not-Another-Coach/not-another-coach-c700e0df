@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { Heart, X, Star, MapPin, Award, Bookmark, BookmarkCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Trainer } from '@/components/TrainerCard';
+import { Trainer } from '@/types/trainer';
 import { MatchBadge } from '@/components/MatchBadge';
 import { useSavedTrainers } from '@/hooks/useSavedTrainers';
 import { getTrainerDisplayPrice } from '@/lib/priceUtils';

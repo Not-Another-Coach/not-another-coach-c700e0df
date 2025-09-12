@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, Star, MapPin, Award, Clock, MessageCircle, Target, Heart } from 'lucide-react';
-import { Trainer } from '@/components/TrainerCard';
+import { Trainer } from '@/types/trainer';
 import { MatchBadge } from '@/components/MatchBadge';
 
 interface ComparisonViewProps {

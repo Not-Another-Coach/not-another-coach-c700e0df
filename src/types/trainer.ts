@@ -1,5 +1,41 @@
 // Consolidated trainer interface that merges all existing trainer types
-import { Trainer } from '@/components/TrainerCard';
+import { ReactNode } from 'react';
+
+export interface Trainer {
+  id: string;
+  firstName: string;
+  lastName: string;
+  name: string;
+  bio?: string;
+  profilePhotoUrl?: string;
+  location?: string;
+  rating?: number;
+  totalRatings?: number;
+  specializations?: string[];
+  trainingTypes?: string[];
+  deliveryFormat?: string[];
+  coachingStyle?: string[];
+  communicationStyle?: string[];
+  qualifications?: string[];
+  hourlyRate?: number;
+  freeDiscoveryCall?: boolean;
+  tagline?: string;
+  certifyingBody?: string;
+  
+  // Legacy fields for compatibility
+  image?: string;
+  specialties?: string[];
+  trainingType?: string[];
+  certifications?: string[];
+  reviews?: number;
+  experience?: string;
+  availability?: string;
+  offers_discovery_call?: boolean;
+  package_options?: any[];
+  description?: string;
+  profileImagePosition?: { x: number; y: number; scale: number };
+  professional_milestones?: any[];
+}
 
 export interface ConsolidatedTrainer {
   // Core identification
@@ -182,6 +218,13 @@ export const TRAINER_CARD_CONFIGS: Record<string, TrainerCardConfig> = {
     compactActions: true,
     hideViewControls: true,
     availableViews: ['features']
+  },
+  saved: {
+    layout: 'full',
+    allowViewSwitching: true,
+    showEngagementBadge: false,
+    compactActions: false,
+    hideViewControls: false
   },
   profile: {
     layout: 'full',

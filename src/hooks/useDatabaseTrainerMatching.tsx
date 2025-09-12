@@ -1,7 +1,7 @@
 import { useMemo, useEffect } from 'react';
 import { useSpecialties, useTrainingTypes } from '@/hooks/useSpecialties';
 import { supabase } from '@/integrations/supabase/client';
-import { Trainer } from '@/components/TrainerCard';
+import { Trainer } from '@/types/trainer';
 import { Target, Dumbbell, MapPin, Clock, DollarSign, Heart, Users, Calendar } from 'lucide-react';
 
 interface QuizAnswers {

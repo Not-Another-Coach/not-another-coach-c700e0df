@@ -4,7 +4,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Heart, X, MoreVertical, ChevronLeft, ChevronRight, MessageCircle, Calendar, Star, Eye } from "lucide-react";
-import { Trainer } from "@/components/TrainerCard";
+import { Trainer } from '@/types/trainer';
 import { InstagramGalleryView } from "./InstagramGalleryView";
 import { FeatureSummaryView } from "./FeatureSummaryView";
 import { ClientTransformationView } from "./ClientTransformationView";
