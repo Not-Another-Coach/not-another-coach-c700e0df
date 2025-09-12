@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Heart } from "lucide-react";
 import { useAnonymousSession } from "@/hooks/useAnonymousSession";
-import { SaveTrainerPrompt } from "./SaveTrainerPrompt";
 import { AuthPrompt } from "./AuthPrompt";
 import { EnhancedTrainerCard } from "@/components/trainer-cards/EnhancedTrainerCard";
 import type { AnyTrainer } from "@/types/trainer";
@@ -27,12 +26,11 @@ interface Trainer {
 export const AnonymousBrowse = () => {
   const [trainers, setTrainers] = useState<Trainer[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showSavePrompt, setShowSavePrompt] = useState(false);
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   const [selectedTrainerId, setSelectedTrainerId] = useState<string | null>(null);
-  const [actionType, setActionType] = useState<'save' | 'message' | 'book'>('save');
+  const [actionType, setActionType] = useState<'message' | 'book'>('message');
   
-  const { saveTrainer, isTrainerSaved, savedTrainersCount } = useAnonymousSession();
+  const { savedTrainersCount } = useAnonymousSession();
 
   useEffect(() => {
     fetchTrainers();
@@ -71,17 +69,6 @@ export const AnonymousBrowse = () => {
     }
   };
 
-  const handleSaveClick = (trainerId: string) => {
-    if (isTrainerSaved(trainerId)) {
-      // Already saved, show saved state
-      return;
-    }
-    
-    setSelectedTrainerId(trainerId);
-    setActionType('save');
-    setShowSavePrompt(true);
-  };
-
   const handleMessageClick = (trainerId: string) => {
     setSelectedTrainerId(trainerId);
     setActionType('message');
@@ -92,14 +79,6 @@ export const AnonymousBrowse = () => {
     setSelectedTrainerId(trainerId);
     setActionType('book');
     setShowAuthPrompt(true);
-  };
-
-  const handleSaveConfirm = () => {
-    if (selectedTrainerId) {
-      saveTrainer(selectedTrainerId);
-      setShowSavePrompt(false);
-      setSelectedTrainerId(null);
-    }
   };
 
   if (loading) {
@@ -156,22 +135,12 @@ export const AnonymousBrowse = () => {
               onViewProfile={() => console.log('View profile:', trainer.id)}
               onMessage={() => handleMessageClick(trainer.id)}
               onBookDiscoveryCall={() => handleBookClick(trainer.id)}
-              cardState={isTrainerSaved(trainer.id) ? 'saved' : 'default'}
-              // Override save behavior for anonymous users to show prompt
-              onAddToShortlist={() => handleSaveClick(trainer.id)}
             />
           );
         })}
       </div>
 
       {/* Conversion Prompts */}
-      <SaveTrainerPrompt
-        isOpen={showSavePrompt}
-        onClose={() => setShowSavePrompt(false)}
-        onConfirm={handleSaveConfirm}
-        trainerName={trainers.find(t => t.id === selectedTrainerId)?.first_name || ''}
-      />
-
       <AuthPrompt
         isOpen={showAuthPrompt}
         onClose={() => setShowAuthPrompt(false)}

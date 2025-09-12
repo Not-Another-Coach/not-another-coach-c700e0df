@@ -3,6 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useJourneyProgress } from '@/hooks/useJourneyProgress';
 import { useTrainerEngagement } from '@/hooks/useTrainerEngagement';
 import { useWaitlist } from '@/hooks/useWaitlist';
+import { useAnonymousSession } from '@/hooks/useAnonymousSession';
 import { toast } from 'sonner';
 
 export interface SavedTrainer {
@@ -22,26 +23,37 @@ export const useSavedTrainers = () => {
     getEngagementStage 
   } = useTrainerEngagement();
   const { removeFromWaitlist } = useWaitlist();
+  const anonymousSession = useAnonymousSession();
   
   const [loading, setLoading] = useState(true);
 
-  // Map engagement data to saved trainers format
-  const savedTrainers = getLikedTrainers().map(engagement => ({
-    id: engagement.trainerId,
-    trainer_id: engagement.trainerId,
-    saved_at: engagement.createdAt,
-    notes: engagement.notes
-  }));
+  // For authenticated users, use engagement data
+  // For anonymous users, use anonymous session data
+  const savedTrainers = user 
+    ? getLikedTrainers().map(engagement => ({
+        id: engagement.trainerId,
+        trainer_id: engagement.trainerId,
+        saved_at: engagement.createdAt,
+        notes: engagement.notes
+      }))
+    : (anonymousSession.session?.savedTrainers || []).map(trainerId => ({
+        id: trainerId,
+        trainer_id: trainerId,
+        saved_at: new Date().toISOString(),
+        notes: undefined
+      }));
 
   useEffect(() => {
     setLoading(false);
   }, []);
 
-  // Save a trainer using the engagement system
+  // Save a trainer - handles both authenticated and anonymous users
   const saveTrainer = async (trainerId: string, notes?: string) => {
     if (!user) {
-      toast.error("Please log in to save trainers");
-      return false;
+      // Anonymous user - use anonymous session
+      anonymousSession.saveTrainer(trainerId);
+      toast.success("Trainer saved! Create an account to keep them forever");
+      return true;
     }
 
     try {
@@ -66,9 +78,14 @@ export const useSavedTrainers = () => {
     }
   };
 
-  // Remove a saved trainer using the engagement system
+  // Remove a saved trainer - handles both authenticated and anonymous users
   const unsaveTrainer = async (trainerId: string) => {
-    if (!user) return false;
+    if (!user) {
+      // Anonymous user - use anonymous session
+      anonymousSession.unsaveTrainer(trainerId);
+      toast.success("Trainer removed from your saved trainers");
+      return true;
+    }
 
     try {
       console.log('Unsaving trainer:', trainerId);
@@ -88,8 +105,12 @@ export const useSavedTrainers = () => {
     }
   };
 
-  // Check if a trainer is saved (liked)
+  // Check if a trainer is saved - handles both authenticated and anonymous users
   const isTrainerSaved = (trainerId: string) => {
+    if (!user) {
+      // Anonymous user - check anonymous session
+      return anonymousSession.isTrainerSaved(trainerId);
+    }
     return getEngagementStage(trainerId) === 'liked';
   };
 
