@@ -107,6 +107,8 @@ export function useAnonymousSession() {
 
   // Save quiz results
   const saveQuizResults = useCallback((results: AnonymousSession['quizResults']) => {
+    console.log('💾 Saving anonymous quiz results:', results);
+    
     const currentSession = session || createSession();
     
     const updatedSession = {
@@ -114,8 +116,10 @@ export function useAnonymousSession() {
       quizResults: results,
     };
     
+    console.log('📝 Updating anonymous session with quiz results');
     setSession(updatedSession);
     localStorage.setItem(ANONYMOUS_SESSION_KEY, JSON.stringify(updatedSession));
+    console.log('✅ Anonymous quiz results saved successfully');
   }, [session, createSession]);
 
   // Clear session (on account creation)

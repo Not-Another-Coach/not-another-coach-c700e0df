@@ -14,13 +14,28 @@ export function useDataMigration() {
   const { saveTrainer } = useSavedTrainers();
   const { profile, updateProfile } = useClientProfile();
 
-  const migrateAnonymousData = useCallback(async () => {
-    if (!user) return;
+  const migrateAnonymousData = useCallback(async (retryCount = 0) => {
+    console.log('🔄 Starting anonymous data migration...', { user: !!user, retryCount });
+    
+    if (!user) {
+      console.log('❌ Migration aborted: No authenticated user');
+      return;
+    }
 
     const sessionData = getSessionData();
     const trainerSessionData = getTrainerSessionData();
     
-    if (!sessionData && !trainerSessionData) return;
+    console.log('📋 Anonymous session data found:', {
+      hasSessionData: !!sessionData,
+      hasTrainerSessionData: !!trainerSessionData,
+      savedTrainersCount: sessionData?.savedTrainers?.length || 0,
+      hasQuizResults: !!sessionData?.quizResults
+    });
+    
+    if (!sessionData && !trainerSessionData) {
+      console.log('✅ Migration complete: No anonymous data to migrate');
+      return;
+    }
 
     try {
       let migratedCount = 0;
@@ -43,33 +58,53 @@ export function useDataMigration() {
         }
 
         // Migrate quiz results to profile if client and quiz exists
-        if (sessionData.quizResults && profile && user) {
-          try {
-            // Map anonymous quiz results to client profile format
-            const quizData = {
-              quiz_completed: true,
-              quiz_answers: sessionData.quizResults,
-              quiz_completed_at: new Date().toISOString(),
-              // Map quiz results to survey fields for immediate use
-              primary_goals: sessionData.quizResults.goals || [],
-              training_location_preference: sessionData.quizResults.location || null,
-              preferred_coaching_style: sessionData.quizResults.coachingStyle || [],
-              preferred_training_frequency: sessionData.quizResults.availability || null,
-            };
-            
-            // Update profile with quiz results
-            await updateProfile(quizData);
-            console.log('Quiz results migrated to client profile successfully');
-          } catch (error) {
-            console.error('Error updating profile with quiz results:', error);
-          }
-        }
-
-        if (migratedCount > 0) {
-          messages.push(`${migratedCount} saved trainer${migratedCount > 1 ? 's' : ''}`);
-        }
         if (sessionData.quizResults) {
-          messages.push('your preferences');
+          console.log('🧠 Found quiz results to migrate:', sessionData.quizResults);
+          
+          if (!profile) {
+            console.log('⏳ Client profile not yet available, checking if we should retry...');
+            
+            // Retry logic for when profile hasn't been created yet
+            if (retryCount < 3) {
+              console.log(`🔄 Retrying migration in 2 seconds (attempt ${retryCount + 1}/3)...`);
+              setTimeout(() => {
+                migrateAnonymousData(retryCount + 1);
+              }, 2000);
+              return;
+            } else {
+              console.log('❌ Max retries reached, profile still not available');
+              messages.push('quiz preferences (will be restored on next login)');
+            }
+          } else {
+            try {
+              console.log('📝 Migrating quiz results to client profile...');
+              
+              // Map anonymous quiz results to client profile format
+              const quizData = {
+                quiz_completed: true,
+                quiz_answers: sessionData.quizResults,
+                quiz_completed_at: new Date().toISOString(),
+                // Map quiz results to survey fields for immediate use
+                primary_goals: sessionData.quizResults.goals || [],
+                training_location_preference: sessionData.quizResults.location || null,
+                preferred_coaching_style: sessionData.quizResults.coachingStyle || [],
+                preferred_training_frequency: sessionData.quizResults.availability || null,
+              };
+              
+              console.log('📤 Updating profile with quiz data:', quizData);
+              
+              // Update profile with quiz results
+              await updateProfile(quizData);
+              console.log('✅ Quiz results migrated to client profile successfully');
+              messages.push('your preferences');
+            } catch (error) {
+              console.error('❌ Error updating profile with quiz results:', error);
+              // Don't fail the whole migration for this
+              messages.push('quiz preferences (partially restored)');
+            }
+          }
+        } else {
+          console.log('ℹ️ No quiz results found in session data');
         }
       }
 
@@ -114,9 +149,10 @@ export function useDataMigration() {
   // Auto-migrate when user signs in/up
   useEffect(() => {
     if (user && (getSessionData() || getTrainerSessionData())) {
+      console.log('🚀 User authenticated with anonymous data available, starting migration...');
       // Small delay to ensure all hooks are ready
       setTimeout(() => {
-        migrateAnonymousData();
+        migrateAnonymousData(0);
       }, 1000);
     }
   }, [user, migrateAnonymousData, getSessionData, getTrainerSessionData]);

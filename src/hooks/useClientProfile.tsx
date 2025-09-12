@@ -89,7 +89,12 @@ export function useClientProfile() {
   }, [user, fetchProfile]);
 
   const updateProfile = useCallback(async (updates: Partial<ClientProfile>) => {
-    if (!user) return { error: 'No user logged in' };
+    if (!user) {
+      console.error('❌ No authenticated user for profile update');
+      return { error: 'No user logged in' };
+    }
+
+    console.log('📤 Starting profile update with:', updates);
 
     try {
       // Split updates between profiles and client_profiles tables
@@ -121,34 +126,45 @@ export function useClientProfile() {
         }
       });
 
+      console.log('🔄 Split updates:', { profileUpdates, clientUpdates });
+
       // Update profiles table if needed
       if (Object.keys(profileUpdates).length > 0) {
+        console.log('📝 Updating profiles table...');
         const { error: profileError } = await supabase
           .from('profiles')
           .update(profileUpdates)
           .eq('id', user.id);
 
         if (profileError) {
+          console.error('❌ Error updating profiles table:', profileError);
           return { error: profileError };
         }
+        console.log('✅ Profiles table updated successfully');
       }
 
       // Upsert client_profiles table if needed
       if (Object.keys(clientUpdates).length > 0) {
+        console.log('📝 Upserting client_profiles table...');
         const { error: clientError } = await supabase
           .from('client_profiles')
           .upsert({ id: user.id, ...clientUpdates })
           .eq('id', user.id);
 
         if (clientError) {
+          console.error('❌ Error updating client_profiles table:', clientError);
           return { error: clientError };
         }
+        console.log('✅ Client_profiles table updated successfully');
       }
 
       // Refetch the updated profile
+      console.log('🔄 Refetching profile after update...');
       await fetchProfile();
+      console.log('✅ Profile update complete');
       return { data: true };
     } catch (error) {
+      console.error('❌ Error updating profile:', error);
       return { error };
     }
   }, [user, fetchProfile]);
