@@ -58,7 +58,6 @@ export const AnonymousBrowse = () => {
           free_discovery_call
         `)
         .eq('profile_published', true)
-        .eq('is_verified', true)
         .not('specializations', 'is', null)
         .limit(12);
 
