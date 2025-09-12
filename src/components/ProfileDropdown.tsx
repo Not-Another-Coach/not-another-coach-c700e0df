@@ -150,13 +150,33 @@ export const ProfileDropdown = ({ profile }: ProfileDropdownProps) => {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         
-        <DropdownMenuItem 
-          className="cursor-pointer"
-          onClick={() => navigate(`/trainer/${user?.id || profile.first_name?.toLowerCase() || 'profile'}?from=dropdown`)}
-        >
-          <User className="mr-2 h-4 w-4" />
-          <span>View Public Profile</span>
-        </DropdownMenuItem>
+        {profile.user_type === 'trainer' && (
+          <>
+            <DropdownMenuItem 
+              className="cursor-pointer"
+              onClick={() => navigate(`/trainer/${user?.id || profile.first_name?.toLowerCase() || 'profile'}?from=dropdown`)}
+            >
+              <User className="mr-2 h-4 w-4" />
+              <span>View Public Profile</span>
+            </DropdownMenuItem>
+            
+            <DropdownMenuItem 
+              className="cursor-pointer"
+              onClick={() => navigate('/trainer/profile-setup')}
+            >
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Edit Profile</span>
+            </DropdownMenuItem>
+            
+            <DropdownMenuItem 
+              className="cursor-pointer"
+              onClick={() => navigate('/trainer/settings')}
+            >
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Settings</span>
+            </DropdownMenuItem>
+          </>
+        )}
         
         {profile.user_type === 'client' && (
           <>
@@ -178,30 +198,12 @@ export const ProfileDropdown = ({ profile }: ProfileDropdownProps) => {
           </>
         )}
         
-        {profile.user_type === 'trainer' && (
-          <DropdownMenuItem 
-            className="cursor-pointer"
-            onClick={() => navigate('/trainer/profile-setup')}
-          >
-            <Settings className="mr-2 h-4 w-4" />
-            <span>Edit Profile</span>
-          </DropdownMenuItem>
-        )}
-        
         <DropdownMenuItem 
           className="cursor-pointer"
           onClick={handleResetPassword}
         >
           <Key className="mr-2 h-4 w-4" />
           <span>Reset Password</span>
-        </DropdownMenuItem>
-        
-        <DropdownMenuItem 
-          className="cursor-pointer"
-          onClick={() => navigate('/trainer/settings')}
-        >
-          <Settings className="mr-2 h-4 w-4" />
-          <span>Settings</span>
         </DropdownMenuItem>
         
         <DropdownMenuSeparator />
