@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import { UserIntentProvider } from "@/hooks/useUserIntent";
 import { VisibilityConfigProvider } from "@/contexts/VisibilityConfigContext";
 import { SessionNotification } from "@/components/SessionNotification";
 import Home from "./pages/Home";
@@ -53,14 +54,15 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <VisibilityConfigProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <SessionNotification />
-          <BrowserRouter>
-            <DiagnosticsProvider>
-              <ErrorBoundary>
+      <UserIntentProvider>
+        <VisibilityConfigProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <SessionNotification />
+            <BrowserRouter>
+              <DiagnosticsProvider>
+                <ErrorBoundary>
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/auth" element={<Auth />} />
@@ -105,11 +107,12 @@ const App = () => (
                   <Route path="/payment-management" element={<PaymentManagement />} />
                   <Route path="*" element={<NotFound />} />
               </Routes>
-              </ErrorBoundary>
-            </DiagnosticsProvider>
-          </BrowserRouter>
-        </TooltipProvider>
-      </VisibilityConfigProvider>
+                </ErrorBoundary>
+              </DiagnosticsProvider>
+            </BrowserRouter>
+          </TooltipProvider>
+        </VisibilityConfigProvider>
+      </UserIntentProvider>
     </AuthProvider>
   </QueryClientProvider>
 );

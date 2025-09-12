@@ -16,6 +16,8 @@ import { InteractiveValueCards } from "@/components/homepage/InteractiveValueCar
 import { TrainerPreviewCarousel } from "@/components/homepage/TrainerPreviewCarousel";
 import { SocialProofSection } from "@/components/homepage/SocialProofSection";
 import { CoachRecruitmentSection } from "@/components/homepage/CoachRecruitmentSection";
+import { UserIntentModal } from "@/components/user-intent/UserIntentModal";
+import { useUserIntent } from "@/hooks/useUserIntent";
 import { Heart } from "lucide-react";
 
 export default function Home() {
@@ -23,6 +25,7 @@ export default function Home() {
   const { profile, loading: profileLoading, userType } = useProfileByType();
   const { user_type, loading: userTypeLoading } = useUserType();
   const { savedTrainersCount } = useAnonymousSession();
+  const { shouldShowModal, setUserIntent } = useUserIntent();
   const navigate = useNavigate();
   
   const [showQuiz, setShowQuiz] = useState(false);
@@ -59,6 +62,16 @@ export default function Home() {
     setShowMatches(true);
   };
 
+  const handleIntentSelection = (intent: 'client' | 'trainer' | 'browse') => {
+    setUserIntent(intent);
+    
+    // Navigate based on intent
+    if (intent === 'trainer') {
+      navigate('/trainer/demo');
+    }
+    // For 'client' and 'browse', stay on current page
+  };
+
   // Show loading only while checking auth status
   if (loading || (user && (profileLoading || userTypeLoading))) {
     return (
@@ -72,6 +85,11 @@ export default function Home() {
   if (!user) {
     return (
       <div className="min-h-screen bg-background">
+        {/* User Intent Modal */}
+        <UserIntentModal 
+          isOpen={shouldShowModal}
+          onSelectIntent={handleIntentSelection}
+        />
         {/* Header */}
         <header className="sticky top-0 z-50 bg-background border-b">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
