@@ -25,7 +25,7 @@ export default function Home() {
   const { profile, loading: profileLoading, userType } = useProfileByType();
   const { user_type, loading: userTypeLoading } = useUserType();
   const { savedTrainersCount } = useAnonymousSession();
-  const { shouldShowModal, setUserIntent } = useUserIntent();
+  const { shouldShowModal, setUserIntent, clearIntent } = useUserIntent();
   const navigate = useNavigate();
   
   const [showQuiz, setShowQuiz] = useState(false);
@@ -96,28 +96,38 @@ export default function Home() {
             <div className="flex items-center justify-between h-16">
               <AppLogo />
             
-            <div className="flex items-center gap-4">
-              {savedTrainersCount > 0 && (
-                <Button
-                  variant="ghost"
-                  onClick={() => navigate('/anonymous-saved')}
-                  className="gap-2"
+              <div className="flex items-center gap-4">
+                {savedTrainersCount > 0 && (
+                  <Button
+                    variant="ghost"
+                    onClick={() => navigate('/anonymous-saved')}
+                    className="gap-2"
+                  >
+                    <Heart className="h-4 w-4 fill-primary text-primary" />
+                    {savedTrainersCount} saved
+                  </Button>
+                )}
+                
+                {/* Reset Intent Button - for testing */}
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={clearIntent}
+                  className="text-xs"
                 >
-                  <Heart className="h-4 w-4 fill-primary text-primary" />
-                  {savedTrainersCount} saved
+                  Reset Intent
                 </Button>
-              )}
-              
-              <Button variant="ghost" onClick={() => navigate('/auth')}>
-                Sign In
-              </Button>
-              <Button onClick={() => navigate('/auth?signup=client')}>
-                 Create Account
-               </Button>
+                
+                <Button variant="ghost" onClick={() => navigate('/auth')}>
+                  Sign In
+                </Button>
+                <Button onClick={() => navigate('/auth?signup=client')}>
+                   Create Account
+                  </Button>
+              </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
         {/* Enhanced Hero Section */}
         <EnhancedHeroSection 
