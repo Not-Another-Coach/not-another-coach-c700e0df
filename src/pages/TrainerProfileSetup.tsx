@@ -373,8 +373,9 @@ const TrainerProfileSetup = () => {
       9: 7,   // Image Management (enhanced from 3% to 7%)
       10: 3,  // Working Hours (optional)
       11: 4,  // Terms & Notifications (compliance)
-      12: 7,  // Professional Documents (important for credibility)
-      13: 1   // Verification (final step, external dependency)
+      12: 1,  // Verification Preference (simple setting)
+      13: 6,  // Professional Documents (important for credibility)
+      14: 1   // Profile Summary (final step, display only)
     };
     return weights[step] || 0;
   };
