@@ -15,7 +15,8 @@ import { useProfileStepValidation } from "@/hooks/useProfileStepValidation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, Save, Eye, ExternalLink, CheckCircle, AlertCircle, Shield, Check } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { ArrowLeft, ArrowRight, Save, Eye, ExternalLink, CheckCircle, AlertCircle, Shield, Check, Info } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   AlertDialog,
@@ -55,7 +56,7 @@ const TrainerProfileSetup = () => {
   const { verificationRequest } = useTrainerVerification();
   const { getCheckByType } = useEnhancedTrainerVerification();
   const { settings: discoverySettings } = useDiscoveryCallSettings();
-  const { settings: availabilitySettings } = useCoachAvailability();
+  const { settings: availabilitySettings, refetch: refetchAvailability } = useCoachAvailability();
   const { getStepCompletion: getValidationStepCompletion } = useProfileStepValidation();
   const { getSelectedImagesCount, imagePreferences, getValidationStatus } = useTrainerImages();
   const { getCompletionStatus: getProfDocumentsStatus } = useProfessionalDocumentsState();
@@ -410,7 +411,9 @@ const TrainerProfileSetup = () => {
         
       case 6: // Discovery Calls
         console.log('🔍 Discovery Call Debug - Settings:', discoverySettings);
-        const offersDiscovery = !!discoverySettings?.offers_discovery_call;
+        const offersDiscoverySetting = discoverySettings?.offers_discovery_call;
+        const offersDiscoveryForm = typeof formData.free_discovery_call === 'boolean' ? formData.free_discovery_call : undefined;
+        const offersDiscovery = (offersDiscoverySetting ?? offersDiscoveryForm) ?? false;
         const hasCalendarLink = !!formData.calendar_link?.trim();
         const hasDcSlots = !!discoverySettings?.availability_schedule && 
           Object.values(discoverySettings.availability_schedule).some((d: any) => 
@@ -419,10 +422,10 @@ const TrainerProfileSetup = () => {
         
         console.log('🔍 Discovery Call Debug - Values:', { offersDiscovery, hasCalendarLink, hasDcSlots });
         
-        // Completed if discovery calls are offered and either a calendar link or in-app slots are configured
-        if (offersDiscovery && (hasCalendarLink || hasDcSlots)) return 'completed';
-        // If they explicitly don't offer discovery calls, consider the step complete
-        if (discoverySettings && !offersDiscovery) return 'completed';
+        // If discovery calls are switched off anywhere, mark as completed
+        if (!offersDiscovery) return 'completed';
+        // If discovery calls are on and either a calendar link or in-app slots are configured, completed
+        if (hasCalendarLink || hasDcSlots) return 'completed';
         // Otherwise partial if anything is set, else not started
         return (offersDiscovery || hasCalendarLink || hasDcSlots) ? 'partial' : 'not_started';
         
@@ -455,23 +458,22 @@ const TrainerProfileSetup = () => {
         
       case 10: // Working Hours & New Client Availability
         console.log('🔍 Availability Debug - Settings:', availabilitySettings);
-        if (!availabilitySettings) return 'not_started';
         
-        // Any valid availability status is considered configured (accepting, waitlist, or unavailable)
-        const hasAvailabilityStatus = availabilitySettings.availability_status && 
-          ['accepting', 'waitlist', 'unavailable'].includes(availabilitySettings.availability_status);
+        // Consider local pending selection as well to avoid stale state
+        const effectiveStatus = pendingAvailabilityChanges?.status || availabilitySettings?.availability_status;
+        const hasAvailabilityStatus = !!effectiveStatus && ['accepting', 'waitlist', 'unavailable'].includes(effectiveStatus as string);
         
-        const hasWorkingHours = availabilitySettings.availability_schedule && 
+        const hasWorkingHours = !!availabilitySettings?.availability_schedule && 
           Object.values(availabilitySettings.availability_schedule).some((day: any) => 
-            day?.enabled && day?.slots && day.slots.length > 0
+            day?.enabled && Array.isArray(day?.slots) && day.slots.length > 0
           );
         
-        console.log('🔍 Availability Debug - Values:', { hasAvailabilityStatus, hasWorkingHours });
+        console.log('🔍 Availability Debug - Values:', { hasAvailabilityStatus, hasWorkingHours, effectiveStatus });
         
-        const hasFullConfiguration = hasAvailabilityStatus && hasWorkingHours;
-        const hasPartialConfiguration = hasAvailabilityStatus || hasWorkingHours;
-        
-        return hasFullConfiguration ? 'completed' : (hasPartialConfiguration ? 'partial' : 'not_started');
+        // Mark completed if a status is selected; working hours are optional for completion
+        if (hasAvailabilityStatus) return 'completed';
+        if (hasWorkingHours) return 'partial';
+        return 'not_started';
         
       case 11: // Terms & Notifications
         return (formData.terms_agreed && formData.accuracy_confirmed) ? 'completed' : 'not_started';
@@ -667,7 +669,7 @@ const TrainerProfileSetup = () => {
         await updateProfile(completionData);
         toast({
           title: 'Profile saved',
-          description: 'Your profile is saved. Submit for admin review on this step to go live after approval.',
+          description: 'Your profile is saved.',
         });
         // Stay on the page so trainer can submit for review
       }
@@ -1011,28 +1013,43 @@ const TrainerProfileSetup = () => {
             </Button>
           )}
           
-           <Button 
-            onClick={handleNext}
-            disabled={isLoading}
-            className={currentStep === 1 ? "ml-auto" : ""}
-          >
-            {isLoading ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                {currentStep === totalSteps ? 'Saving...' : 'Saving...'}
-              </>
-            ) : currentStep === totalSteps ? (
-              <>
-                <CheckCircle className="h-4 w-4 mr-2" />
-                Save Profile
-              </>
-            ) : (
-              <>
-                Next
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </>
-            )}
-          </Button>
+           <div className={currentStep === 1 ? "ml-auto flex items-center" : "flex items-center"}>
+             <Button 
+               onClick={handleNext}
+               disabled={isLoading}
+             >
+               {isLoading ? (
+                 <>
+                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                   {currentStep === totalSteps ? 'Saving...' : 'Saving...'}
+                 </>
+               ) : currentStep === totalSteps ? (
+                 <>
+                   <CheckCircle className="h-4 w-4 mr-2" />
+                   Save Profile
+                 </>
+               ) : (
+                 <>
+                   Next
+                   <ArrowRight className="h-4 w-4 ml-2" />
+                 </>
+               )}
+             </Button>
+             {currentStep === totalSteps && (
+               <TooltipProvider>
+                 <Tooltip>
+                   <TooltipTrigger asChild>
+                     <button type="button" aria-label="Submission info" className="ml-2 inline-flex items-center">
+                       <Info className="h-4 w-4" />
+                     </button>
+                   </TooltipTrigger>
+                   <TooltipContent>
+                     <p>Once your profile is completed, you can submit it for admin review here.</p>
+                   </TooltipContent>
+                 </Tooltip>
+               </TooltipProvider>
+             )}
+           </div>
         </div>
       </div>
 

@@ -19,6 +19,17 @@ export const useProfessionalDocumentsState = () => {
   const [notApplicable, setNotApplicable] = useState<Record<string, boolean>>({});
   const [savingStatus, setSavingStatus] = useState<Record<string, boolean>>({});
 
+  // Initialize "not applicable" flags from existing checks so the choice is remembered
+  useEffect(() => {
+    if (!checks) return;
+    const flags: Record<string, boolean> = {};
+    checks.forEach((check: any) => {
+      flags[check.check_type] = check.status === 'not_applicable';
+    });
+    setNotApplicable(flags);
+  }, [checks]);
+
+
   // Create form state that can be accessed by validation
   const getDocumentsState = () => {
     return {
@@ -41,23 +52,28 @@ export const useProfessionalDocumentsState = () => {
     }));
   };
 
-  const updateNotApplicable = (checkType: string, isNotApplicable: boolean) => {
+  const updateNotApplicable = async (checkType: string, isNotApplicable: boolean) => {
     setNotApplicable(prev => ({
       ...prev,
       [checkType]: isNotApplicable,
     }));
     
-    // Clear form data when marking as not applicable
-    if (isNotApplicable) {
-      setFormData(prev => ({
-        ...prev,
-        [checkType]: { not_applicable: true },
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [checkType]: { not_applicable: false },
-      }));
+    // Reflect in local form data immediately
+    setFormData(prev => ({
+      ...prev,
+      [checkType]: { ...(prev[checkType] || {}), not_applicable: isNotApplicable },
+    }));
+
+    // Persist the choice so it's remembered across sessions
+    try {
+      if (isNotApplicable) {
+        await submitVerificationCheck(checkType as any, { not_applicable: true }, false, true);
+      } else {
+        // Revert to a draft state when unsetting not applicable
+        await submitVerificationCheck(checkType as any, { not_applicable: false }, true, true);
+      }
+    } catch (error) {
+      console.error('Error updating not_applicable flag:', error);
     }
   };
 
