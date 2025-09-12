@@ -48,6 +48,18 @@ export default function AuthCallback() {
             }
 
             if (data.user) {
+              // Send welcome email after successful verification
+              try {
+                await supabase.functions.invoke('send-welcome-email', {
+                  body: { 
+                    user: data.user,
+                    userType: data.user.user_metadata?.user_type
+                  }
+                });
+              } catch (error) {
+                console.error('Failed to send welcome email:', error);
+              }
+
               toast({
                 title: "Email Verified!",
                 description: "Your email has been verified successfully. Welcome!",

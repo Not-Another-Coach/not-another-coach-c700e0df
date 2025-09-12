@@ -81,5 +81,8 @@ port = 54329
 [functions.send-auth-emails]
 verify_jwt = false
 
+[functions.send-welcome-email]
+verify_jwt = false
+
 [analytics]
 enabled = false

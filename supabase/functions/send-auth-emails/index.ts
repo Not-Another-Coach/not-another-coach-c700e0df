@@ -215,25 +215,7 @@ serve(async (req: Request): Promise<Response> => {
 
       console.log('Confirmation email sent successfully:', confirmationResult.data?.id);
 
-      // Schedule welcome email for after confirmation (using setTimeout in production you'd use a proper queue)
-      setTimeout(async () => {
-        try {
-          const welcomeResult = await resend.emails.send({
-            from: 'Not Another Coach <noreply@resend.dev>',
-            to: [user.email],
-            subject: `Welcome to Not Another Coach${firstName ? `, ${firstName}` : ''}! 🎉`,
-            html: createWelcomeEmailHTML(firstName, userType),
-          });
-
-          if (welcomeResult.error) {
-            console.error('Error sending welcome email:', welcomeResult.error);
-          } else {
-            console.log('Welcome email sent successfully:', welcomeResult.data?.id);
-          }
-        } catch (error) {
-          console.error('Error sending welcome email:', error);
-        }
-      }, 2000); // Delay welcome email by 2 seconds
+      console.log('Confirmation email sent successfully. Welcome email will be sent after email verification.');
     }
 
     return new Response(

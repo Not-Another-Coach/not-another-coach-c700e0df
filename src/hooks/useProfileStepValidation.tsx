@@ -260,9 +260,25 @@ export const useProfileStepValidation = () => {
       return getProfessionalDocumentsCompletion(formData);
     }
     
-    // Steps 6, 7, 9, 13 are always completed (optional or handled separately)
+    // Steps 6, 7, 9, 13 have special completion logic - don't auto-complete
     if ([6, 7, 9, 13].includes(step)) {
-      return 'completed';
+      // Check if these steps actually have content
+      if (step === 6) {
+        // Discovery calls - check if settings are configured
+        return formData.free_discovery_call !== undefined ? 'completed' : 'not_started';
+      }
+      if (step === 7) {
+        // Testimonials - check if any exist
+        return (formData.testimonials && formData.testimonials.length > 0) ? 'completed' : 'not_started';
+      }
+      if (step === 9) {
+        // Image Management - check if profile photo exists
+        return formData.profile_photo_url ? 'completed' : 'not_started';
+      }
+      if (step === 13) {
+        // Verification - check verification status
+        return formData.verification_status === 'verified' ? 'completed' : 'not_started';
+      }
     }
 
     // Step 8 (Ways of Working) - check both completion flag and activities
