@@ -11,6 +11,9 @@ import { ClientTransformationView } from "./ClientTransformationView";
 import { MatchBadge } from "@/components/MatchBadge";
 import { Badge } from "@/components/ui/badge";
 import { useSavedTrainers } from "@/hooks/useSavedTrainers";
+import { useAnonymousSession } from "@/hooks/useAnonymousSession";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useContentVisibility } from '@/hooks/useContentVisibility';
 import { useEngagementStage } from '@/hooks/useEngagementStage';
@@ -61,6 +64,27 @@ export const EnhancedTrainerCard = memo(({
 }: EnhancedTrainerCardProps) => {
   const navigate = useNavigate();
   const { isTrainerSaved, saveTrainer, unsaveTrainer } = useSavedTrainers();
+  const { canSaveMoreTrainers, saveTrainer: anonymousSave } = useAnonymousSession();
+  const { user } = useAuth();
+
+  const handleSaveClick = async () => {
+    if (!user) {
+      // Anonymous user - use anonymous session with limit
+      const success = anonymousSave(trainer.id);
+      if (!success) {
+        if (!canSaveMoreTrainers) {
+          toast({
+            title: "Limit Reached", 
+            description: "You can only save 5 trainers. Create a free account to save unlimited trainers.",
+            variant: "destructive"
+          });
+        }
+      }
+    } else {
+      // Authenticated user - use regular save
+      saveTrainer(trainer.id);
+    }
+  };
   
   // Use trainer-specific saved state
   const isSaved = isTrainerSaved(trainer.id);
@@ -126,14 +150,15 @@ export const EnhancedTrainerCard = memo(({
   const handleToggleSave = useCallback(async (e: React.MouseEvent) => {
     e.stopPropagation();
     try {
-      const success = isSaved 
-        ? await unsaveTrainer(trainer.id)
-        : await saveTrainer(trainer.id);
-      console.log(`Save/unsave result for ${trainer.id}:`, success);
+      if (isSaved) {
+        await unsaveTrainer(trainer.id);
+      } else {
+        handleSaveClick();
+      }
     } catch (error) {
       console.error('Error in handleToggleSave:', error);
     }
-  }, [isSaved, unsaveTrainer, saveTrainer, trainer.id]);
+  }, [isSaved, unsaveTrainer, trainer.id]);
 
   const handleComparisonClick = useCallback((checked: boolean) => {
     if (onComparisonToggle) {

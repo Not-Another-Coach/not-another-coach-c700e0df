@@ -25,7 +25,7 @@ interface Trainer {
   free_discovery_call: boolean;
 }
 
-export default function AnonymousShortlist() {
+export default function AnonymousSaved() {
   const navigate = useNavigate();
   const { session, unsaveTrainer, savedTrainersCount } = useAnonymousSession();
   const [trainers, setTrainers] = useState<Trainer[]>([]);

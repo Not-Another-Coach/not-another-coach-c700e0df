@@ -72,15 +72,24 @@ export function useAnonymousSession() {
   const saveTrainer = useCallback((trainerId: string) => {
     const currentSession = session || createSession();
     
-    if (!currentSession.savedTrainers.includes(trainerId)) {
-      const updatedSession = {
-        ...currentSession,
-        savedTrainers: [...currentSession.savedTrainers, trainerId],
-      };
-      
-      setSession(updatedSession);
-      localStorage.setItem(ANONYMOUS_SESSION_KEY, JSON.stringify(updatedSession));
+    // Check if trainer is already saved
+    if (currentSession.savedTrainers.includes(trainerId)) {
+      return false;
     }
+    
+    // Check 5-trainer limit for anonymous users
+    if (currentSession.savedTrainers.length >= 5) {
+      return false;
+    }
+    
+    const updatedSession = {
+      ...currentSession,
+      savedTrainers: [...currentSession.savedTrainers, trainerId],
+    };
+    
+    setSession(updatedSession);
+    localStorage.setItem(ANONYMOUS_SESSION_KEY, JSON.stringify(updatedSession));
+    return true;
   }, [session, createSession]);
 
   // Remove trainer from anonymous session
@@ -125,6 +134,8 @@ export function useAnonymousSession() {
     loading,
     createSession,
     saveTrainer,
+    canSaveMoreTrainers: session ? session.savedTrainers.length < 5 : true,
+    savedTrainerIds: session?.savedTrainers || [],
     unsaveTrainer,
     saveQuizResults,
     clearSession,
