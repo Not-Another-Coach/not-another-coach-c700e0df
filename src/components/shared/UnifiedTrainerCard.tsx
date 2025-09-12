@@ -1,10 +1,11 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
-import { Heart, MapPin, Star, Users, Calendar, MessageCircle, Award } from "lucide-react";
+import { Heart, MapPin, Star, Users, Calendar, MessageCircle, Award, Eye } from "lucide-react";
 
 interface UnifiedTrainer {
   id: string;
@@ -43,6 +44,8 @@ export const UnifiedTrainerCard = ({
   showMatchScore = false,
   className = ""
 }: UnifiedTrainerCardProps) => {
+  const navigate = useNavigate();
+  
   console.log('🎯 UnifiedTrainerCard rendering:', { trainer: trainer.first_name + ' ' + trainer.last_name, showMatchScore, className });
   console.log('🎯 Trainer data:', { 
     hourly_rate: trainer.hourly_rate, 
@@ -50,6 +53,10 @@ export const UnifiedTrainerCard = ({
     specializations: trainer.specializations?.length,
     rating: trainer.rating 
   });
+
+  const handleViewProfile = () => {
+    navigate(`/trainer/${trainer.id}`);
+  };
   
   return (
     <Card className={`group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-2 border-primary/20 ${className}`}>
@@ -161,6 +168,14 @@ export const UnifiedTrainerCard = ({
           >
             <Heart className={`h-4 w-4 mr-2 ${isSaved ? 'fill-current' : ''}`} />
             {isSaved ? 'Saved' : 'Save'}
+          </Button>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleViewProfile}
+          >
+            <Eye className="h-4 w-4" />
           </Button>
           
           <Button

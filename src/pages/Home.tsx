@@ -10,12 +10,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAnonymousSession } from "@/hooks/useAnonymousSession";
+import { AppLogo } from "@/components/ui/app-logo";
 import { 
   Search, 
   Users, 
   Star, 
   Clock, 
-  Target,
   MessageCircle,
   Calendar,
   ArrowRight,
@@ -81,33 +81,30 @@ export default function Home() {
         <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
-              <div className="flex items-center gap-2">
-                <Target className="h-8 w-8 text-primary" />
-                <span className="font-bold text-xl">NAC</span>
-              </div>
+              <AppLogo />
+            
+            <div className="flex items-center gap-4">
+              {savedTrainersCount > 0 && (
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate('/anonymous-shortlist')}
+                  className="gap-2"
+                >
+                  <Heart className="h-4 w-4 fill-primary text-primary" />
+                  {savedTrainersCount} saved
+                </Button>
+              )}
               
-              <div className="flex items-center gap-4">
-                {savedTrainersCount > 0 && (
-                  <Button
-                    variant="ghost"
-                    onClick={() => navigate('/anonymous-shortlist')}
-                    className="gap-2"
-                  >
-                    <Heart className="h-4 w-4 fill-primary text-primary" />
-                    {savedTrainersCount} saved
-                  </Button>
-                )}
-                
-                <Button variant="ghost" onClick={() => navigate('/auth')}>
-                  Sign In
-                </Button>
-                <Button onClick={() => navigate('/auth?signup=true')}>
-                  Join Free
-                </Button>
-              </div>
+              <Button variant="ghost" onClick={() => navigate('/auth')}>
+                Sign In
+              </Button>
+              <Button onClick={() => navigate('/auth?signup=true')}>
+                Join Free
+              </Button>
             </div>
           </div>
-        </header>
+        </div>
+      </header>
 
         {/* Hero Section */}
         <section className="bg-gradient-to-b from-background to-muted/20 py-16">
