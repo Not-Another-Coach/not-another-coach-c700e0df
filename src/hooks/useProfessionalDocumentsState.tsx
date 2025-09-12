@@ -16,19 +16,38 @@ interface DocumentFormData {
 
 export const useProfessionalDocumentsState = () => {
   const { checks, submitVerificationCheck } = useEnhancedTrainerVerification();
+  const { user } = useAuth();
   const [formData, setFormData] = useState<Record<string, DocumentFormData>>({});
   const [notApplicable, setNotApplicable] = useState<Record<string, boolean>>({});
   const [savingStatus, setSavingStatus] = useState<Record<string, boolean>>({});
 
-  // Initialize "not applicable" flags from existing checks so the choice is remembered
+  // Initialize not_applicable flags from checks and localStorage
   useEffect(() => {
-    if (!checks) return;
     const flags: Record<string, boolean> = {};
-    checks.forEach((check: any) => {
-      flags[check.check_type] = check.status === 'not_applicable';
-    });
-    setNotApplicable(flags);
-  }, [checks]);
+    if (checks) {
+      checks.forEach((check: any) => {
+        if (check?.status === 'not_applicable') {
+          flags[check.check_type] = true;
+        }
+      });
+    }
+
+    // Merge in any locally saved preferences
+    try {
+      const key = user?.id ? `verification_not_applicable_${user.id}` : null;
+      if (key) {
+        const saved = localStorage.getItem(key);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          Object.assign(flags, parsed);
+        }
+      }
+    } catch {}
+
+    if (Object.keys(flags).length > 0) {
+      setNotApplicable(prev => ({ ...prev, ...flags }));
+    }
+  }, [checks, user?.id]);
 
 
   // Create form state that can be accessed by validation
@@ -54,10 +73,19 @@ export const useProfessionalDocumentsState = () => {
   };
 
   const updateNotApplicable = (checkType: string, isNotApplicable: boolean) => {
-    setNotApplicable(prev => ({
-      ...prev,
-      [checkType]: isNotApplicable,
-    }));
+    setNotApplicable(prev => {
+      const updated = { ...prev, [checkType]: isNotApplicable };
+      // Persist locally per-user so it's remembered
+      try {
+        if (user?.id) {
+          localStorage.setItem(
+            `verification_not_applicable_${user.id}`,
+            JSON.stringify(updated)
+          );
+        }
+      } catch {}
+      return updated;
+    });
     
     // Reflect in local form data immediately
     setFormData(prev => ({

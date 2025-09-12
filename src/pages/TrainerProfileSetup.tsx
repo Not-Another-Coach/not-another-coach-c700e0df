@@ -752,7 +752,7 @@ const TrainerProfileSetup = () => {
     
     for (let i = 1; i <= totalSteps; i++) {
       const stepWeight = getStepWeight(i);
-      const stepCompletion = getValidationStepCompletion(profile, i);
+      const stepCompletion = getStepCompletion(i);
       
       stepDetails[`step${i}`] = { weight: stepWeight, completion: stepCompletion };
       
@@ -929,7 +929,7 @@ const TrainerProfileSetup = () => {
             <ResponsiveBreadcrumb className="px-4">
               {stepTitles.map((title, index) => {
                 const stepNumber = index + 1;
-                const completion = getValidationStepCompletion(profile, stepNumber);
+                const completion = getStepCompletion(stepNumber);
                 const isCurrent = stepNumber === currentStep;
                 
                 return (
@@ -957,7 +957,7 @@ const TrainerProfileSetup = () => {
             <div className="flex justify-between gap-1 overflow-x-auto scrollbar-hide pb-2">
               {stepTitles.map((title, index) => {
                 const stepNumber = index + 1;
-                const completion = getValidationStepCompletion(profile, stepNumber);
+                const completion = getStepCompletion(stepNumber);
                 const isCurrent = stepNumber === currentStep;
                 
                 return (
