@@ -179,23 +179,13 @@ export const ProfileDropdown = ({ profile }: ProfileDropdownProps) => {
         )}
         
         {profile.user_type === 'client' && (
-          <>
-            <DropdownMenuItem 
-              className="cursor-pointer"
-              onClick={handleUpdatePreferences}
-            >
-              <Edit className="mr-2 h-4 w-4" />
-              <span>Update Preferences</span>
-            </DropdownMenuItem>
-            
-            <DropdownMenuItem 
-              className="cursor-pointer"
-              onClick={() => navigate('/client/payments')}
-            >
-              <CreditCard className="mr-2 h-4 w-4" />
-              <span>Payments</span>
-            </DropdownMenuItem>
-          </>
+          <DropdownMenuItem 
+            className="cursor-pointer"
+            onClick={() => navigate('/client/payments')}
+          >
+            <CreditCard className="mr-2 h-4 w-4" />
+            <span>Payments</span>
+          </DropdownMenuItem>
         )}
         
         <DropdownMenuItem 
