@@ -128,7 +128,7 @@ export const AnonymousBrowse = () => {
       )}
 
       {/* Trainers Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {trainers.map((trainer) => {
           console.log('🎯 Rendering trainer card for:', trainer.first_name, trainer.last_name);
           
@@ -145,15 +145,15 @@ export const AnonymousBrowse = () => {
           };
           
           return (
-            <EnhancedTrainerCard
-              key={trainer.id}
-              trainer={enhancedTrainer}
-              config="explore"
-              initialView="instagram"
-              onViewProfile={() => handleViewProfileClick(trainer.id)}
-              onMessage={() => handleMessageClick(trainer.id)}
-              onBookDiscoveryCall={() => handleBookClick(trainer.id)}
-            />
+                <EnhancedTrainerCard
+                  key={trainer.id}
+                  trainer={enhancedTrainer}
+                  config="grid"
+                  initialView="instagram"
+                  onViewProfile={() => handleViewProfileClick(trainer.id)}
+                  onMessage={() => handleMessageClick(trainer.id)}
+                  onBookDiscoveryCall={() => handleBookClick(trainer.id)}
+                />
           );
         })}
       </div>

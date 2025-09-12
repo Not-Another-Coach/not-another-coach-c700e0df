@@ -177,7 +177,7 @@ export default function AnonymousSaved() {
             </div>
 
             {/* Trainers Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               {trainers.map((trainer) => {
                 // Transform trainer data to match AnyTrainer interface
                 const enhancedTrainer: AnyTrainer = {
@@ -195,7 +195,7 @@ export default function AnonymousSaved() {
                   <EnhancedTrainerCard
                     key={trainer.id}
                     trainer={enhancedTrainer}
-                    config="saved"
+                    config="grid"
                     initialView="instagram"
                     onViewProfile={() => handleViewProfileClick(trainer.id)}
                     onMessage={() => handleMessageClick(trainer.id)}
