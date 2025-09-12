@@ -207,62 +207,6 @@ export const ProfileSummarySection = () => {
         </CardContent>
       </Card>
 
-      {/* Next Steps */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Next Steps</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {overallStatus.status === 'completed' ? (
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">
-                🎉 <strong>Congratulations!</strong> Your profile verification is complete.
-              </p>
-              <ul className="text-sm text-muted-foreground space-y-1 ml-4">
-                <li>• Your "Verified Coach" badge is now active</li>
-                <li>• Your profile has increased visibility in search results</li>
-                <li>• You have access to all premium features</li>
-                <li>• Clients can see your verified status, building trust</li>
-              </ul>
-            </div>
-          ) : overallStatus.status === 'attention' ? (
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">
-                Please review and resubmit any rejected documents:
-              </p>
-              <ul className="text-sm text-muted-foreground space-y-1 ml-4">
-                <li>• Check the "Professional Documents" tab for specific feedback</li>
-                <li>• Update your information based on admin notes</li>
-                <li>• Resubmit corrected documents for review</li>
-              </ul>
-            </div>
-          ) : overallStatus.status === 'pending' ? (
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">
-                Your documents are being reviewed by our admin team:
-              </p>
-              <ul className="text-sm text-muted-foreground space-y-1 ml-4">
-                <li>• Review typically takes 2-5 business days</li>
-                <li>• You'll receive an email notification when complete</li>
-                <li>• No further action needed from you at this time</li>
-              </ul>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">
-                Complete your professional document verification:
-              </p>
-              <ul className="text-sm text-muted-foreground space-y-1 ml-4">
-                <li>• Go back to the "Professional Documents" tab</li>
-                <li>• Upload required certificates and documentation</li>
-                <li>• Submit all documents for admin review</li>
-                <li>• Once verified, your profile will display the "Verified Coach" badge</li>
-              </ul>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
       {/* Verification Benefits Reminder */}
       <Card>
         <CardContent className="p-6">
