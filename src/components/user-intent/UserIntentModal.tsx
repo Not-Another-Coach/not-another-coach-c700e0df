@@ -39,8 +39,19 @@ export function UserIntentModal({ isOpen, onSelectIntent, onDismiss }: UserInten
               Find a Coach
             </Button>
             
-            <Button asChild variant="outline" className="w-full h-14 text-lg font-semibold rounded-xl border-2" size="lg">
-              <Link to="/trainer/demo" onClick={() => onSelectIntent('trainer')}>I'm a Coach</Link>
+            <Button
+              onClick={() => {
+                onSelectIntent('trainer');
+                // Force navigation after intent is set
+                setTimeout(() => {
+                  window.location.href = '/trainer/demo';
+                }, 100);
+              }}
+              variant="outline"
+              className="w-full h-14 text-lg font-semibold rounded-xl border-2"
+              size="lg"
+            >
+              I'm a Coach
             </Button>
           </div>
         </div>
