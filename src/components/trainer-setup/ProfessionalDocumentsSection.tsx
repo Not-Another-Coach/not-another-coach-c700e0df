@@ -69,7 +69,8 @@ export const ProfessionalDocumentsSection = () => {
   const { 
     checks, 
     uploadDocument,
-    isExpiringWithin14Days
+    isExpiringWithin14Days,
+    overview
   } = useEnhancedTrainerVerification();
   
   const [uploadingFiles, setUploadingFiles] = useState<Record<string, boolean>>({});
@@ -120,18 +121,26 @@ export const ProfessionalDocumentsSection = () => {
       }
     }
 
-    try {
-      await submitForReview(checkType);
-      
-      // Determine message based on context
-      const check = checks.find(c => c.check_type === checkType);
-      const isResubmission = check && check.status === 'rejected';
-      
-      toast({
-        title: isResubmission ? "Resubmitted for Review" : "Submitted for Review",
-        description: `Your ${config.title} has been ${isResubmission ? 'resubmitted' : 'submitted'} for admin review.`,
-      });
-    } catch (error) {
+      try {
+        await submitForReview(checkType);
+        
+        // Check if trainer wants verification
+        const wantsVerification = overview?.display_preference === 'verified_allowed' || overview?.display_preference === undefined;
+        
+        // Determine message based on context and preference
+        const check = checks.find(c => c.check_type === checkType);
+        const isResubmission = check && check.status === 'rejected';
+        
+        const title = isResubmission ? "Resubmitted for Review" : (wantsVerification ? "Submitted for Review" : "Document Saved");
+        const description = wantsVerification 
+          ? `Your ${config.title} has been ${isResubmission ? 'resubmitted' : 'submitted'} for admin review.`
+          : `Your ${config.title} has been saved. Since verification is disabled, it won't be sent to admin for review.`;
+        
+        toast({
+          title,
+          description,
+        });
+      } catch (error) {
       toast({
         variant: "destructive",
         title: "Submission Failed",

@@ -52,36 +52,29 @@ export const TrainerProfilePreviewModal = ({
     
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      // Use the v_trainers view directly without complex joins
+      const { data: profileData, error: profileError } = await supabase
         .from('v_trainers')
-        .select(`
-          *,
-          trainer_specializations!inner(specialty:specialties(name)),
-          trainer_qualifications!inner(qualification:popular_qualifications(name)),
-          trainer_training_types!inner(training_type:training_types(name))
-        `)
+        .select('*')
         .eq('id', trainerId)
         .single();
 
-      if (error) {
-        console.error('Error fetching from v_trainers:', error);
-        // Fallback to basic profile data
-        const { data: basicData, error: basicError } = await supabase
+      if (profileError) {
+        console.error('Error fetching v_trainers profile:', profileError);
+        // Fallback to basic profile
+        const { data: fallbackData, error: fallbackError } = await supabase
           .from('profiles')
-          .select(`
-            *,
-            trainer_profiles(*),
-            trainer_specializations(specialties(name)),
-            trainer_qualifications(popular_qualifications(name)),
-            trainer_training_types(training_types(name))
-          `)
+          .select('*')
           .eq('id', trainerId)
           .single();
           
-        if (basicError) throw basicError;
-        setProfile(basicData);
+        if (fallbackError) {
+          throw fallbackError;
+        }
+        
+        setProfile(fallbackData);
       } else {
-        setProfile(data);
+        setProfile(profileData);
       }
     } catch (error) {
       console.error('Error fetching trainer profile:', error);

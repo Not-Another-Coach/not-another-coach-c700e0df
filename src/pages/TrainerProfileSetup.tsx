@@ -46,6 +46,7 @@ import { WorkingHoursAndAvailabilitySection } from "@/components/trainer-setup/W
 import { TermsAndNotificationsSection } from "@/components/trainer-setup/TermsAndNotificationsSection";
 import { ProfileSummarySection } from "@/components/trainer-setup/ProfileSummarySection";
 import { ProfessionalDocumentsSection } from "@/components/trainer-setup/ProfessionalDocumentsSection";
+import { VerificationPreferenceSection } from "@/components/trainer-setup/VerificationPreferenceSection";
 import { PublishButton } from "@/components/trainer-setup/PublishButton";
 
 const TrainerProfileSetup = () => {
@@ -146,7 +147,7 @@ const TrainerProfileSetup = () => {
     max_clients: null as number | null,
   });
 
-  const totalSteps = 13;
+  const totalSteps = 14;
 
   const stepTitles = [
     "Basic Info",
@@ -160,8 +161,9 @@ const TrainerProfileSetup = () => {
     "Image Management",
     "Working Hours & New Client Availability",
     "T&Cs and Notifications",
+    "Verification Preference",
     "Professional Documents",
-    "Verification"
+    "Profile Summary"
   ];
 
   // Redirect if not trainer - using simple check
@@ -478,11 +480,15 @@ const TrainerProfileSetup = () => {
       case 11: // Terms & Notifications
         return (formData.terms_agreed && formData.accuracy_confirmed) ? 'completed' : 'not_started';
         
-      case 12: // Professional Documents
+      case 12: // Verification Preference
+        // Always mark as completed since it's just a preference setting
+        return 'completed';
+        
+      case 13: // Professional Documents
         console.log('🔍 Prof Documents Debug - Status:', getProfDocumentsStatus());
         return getProfDocumentsStatus();
         
-      case 13: // Verification
+      case 14: // Profile Summary (Verification)
         // Check verification checks using enhanced verification system
         const checkTypes = ['cimspa_membership', 'insurance_proof', 'first_aid_certification'];
         const verificationChecks = checkTypes.map(type => getCheckByType(type as any)).filter(Boolean);
@@ -813,8 +819,10 @@ const TrainerProfileSetup = () => {
       case 11:
         return <TermsAndNotificationsSection {...commonProps} />;
       case 12:
-        return <ProfessionalDocumentsSection />;
+        return <VerificationPreferenceSection />;
       case 13:
+        return <ProfessionalDocumentsSection />;
+      case 14:
         return <ProfileSummarySection />;
       default:
         return null;
