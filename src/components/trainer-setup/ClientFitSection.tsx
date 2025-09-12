@@ -26,7 +26,6 @@ const idealClientTypes = [
   "Women Only",
   "Men Only",
   "LGBTQ+ Friendly",
-  "Postpartum Mothers",
   "Pre/Postnatal",
   "Teenagers",
   "Body Positive Focus"
@@ -283,7 +282,7 @@ export function ClientFitSection({ formData, updateFormData }: ClientFitSectionP
           max="200"
         />
         <p className="text-xs text-muted-foreground">
-          This helps manage your workload and can create urgency for potential clients
+          Describe the personality traits of clients you work best with
         </p>
       </div>
 

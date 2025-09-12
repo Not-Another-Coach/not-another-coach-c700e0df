@@ -354,7 +354,8 @@ export const ProfessionalDocumentsSection = () => {
                     )}
                   </Button>
                   
-                  {isReadyForSubmission(checkType) && (
+                  {/* Only show submit button if already rejected or expiring - not during initial profile setup */}
+                  {isReadyForSubmission(checkType) && (finalDisplayStatus === 'rejected' || isExpiringSoon) && (
                     <Button
                       onClick={() => handleSubmitForReview(checkType)}
                       disabled={savingStatus[checkType]}

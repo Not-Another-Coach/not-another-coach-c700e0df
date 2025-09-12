@@ -339,106 +339,85 @@ export const QualificationsSection: React.FC<QualificationsSectionProps> = ({
               ))}
             </div>
 
-            <div className="space-y-3">
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Enter custom qualification"
-                  value={customQualification}
-                  onChange={(e) => setCustomQualification(e.target.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      handleAddCustomQualification();
-                    }
-                  }}
-                />
-                <Button 
-                  onClick={handleAddCustomQualification}
-                  className="shrink-0"
-                >
-                  <Plus className="w-4 h-4" />
-                </Button>
-              </div>
-
-              <div className="flex justify-center">
-                <Dialog open={requestDialogOpen} onOpenChange={setRequestDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" size="sm" className="text-sm">
-                      <Send className="w-4 h-4 mr-2" />
-                      Request New Qualification
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-md">
-                    <DialogHeader>
-                      <DialogTitle>Request New Qualification</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="new-qualification-name">Qualification Name *</Label>
-                        <Input
-                          id="new-qualification-name"
-                          value={newRequestData.qualification_name}
-                          onChange={(e) => setNewRequestData({
-                            ...newRequestData,
-                            qualification_name: e.target.value
-                          })}
-                          placeholder="e.g., Advanced Nutrition Specialist"
-                        />
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor="new-qualification-category">Category</Label>
-                        <Select
-                          value={newRequestData.category}
-                          onValueChange={(value) => setNewRequestData({
-                            ...newRequestData,
-                            category: value
-                          })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select category" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {CATEGORIES.map((cat) => (
-                              <SelectItem key={cat.value} value={cat.value}>
-                                {cat.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div>
-                        <Label htmlFor="new-qualification-description">Description (Optional)</Label>
-                        <Textarea
-                          id="new-qualification-description"
-                          value={newRequestData.description}
-                          onChange={(e) => setNewRequestData({
-                            ...newRequestData,
-                            description: e.target.value
-                          })}
-                          placeholder="Brief description of this qualification"
-                          rows={3}
-                        />
-                      </div>
-
-                      <div className="flex justify-end space-x-2">
-                        <Button
-                          variant="outline"
-                          onClick={() => setRequestDialogOpen(false)}
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          onClick={handleSubmitCustomRequest}
-                          disabled={createCustomRequest.isPending}
-                        >
-                          Submit Request
-                        </Button>
-                      </div>
+            <div className="flex justify-center">
+              <Dialog open={requestDialogOpen} onOpenChange={setRequestDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="text-sm">
+                    <Send className="w-4 h-4 mr-2" />
+                    Request New Qualification
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Request New Qualification</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="new-qualification-name">Qualification Name *</Label>
+                      <Input
+                        id="new-qualification-name"
+                        value={newRequestData.qualification_name}
+                        onChange={(e) => setNewRequestData({
+                          ...newRequestData,
+                          qualification_name: e.target.value
+                        })}
+                        placeholder="e.g., Advanced Nutrition Specialist"
+                      />
                     </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
+                    
+                    <div>
+                      <Label htmlFor="new-qualification-category">Category</Label>
+                      <Select
+                        value={newRequestData.category}
+                        onValueChange={(value) => setNewRequestData({
+                          ...newRequestData,
+                          category: value
+                        })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {CATEGORIES.map((cat) => (
+                            <SelectItem key={cat.value} value={cat.value}>
+                              {cat.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="new-qualification-description">Description (Optional)</Label>
+                      <Textarea
+                        id="new-qualification-description"
+                        value={newRequestData.description}
+                        onChange={(e) => setNewRequestData({
+                          ...newRequestData,
+                          description: e.target.value
+                        })}
+                        placeholder="Brief description of this qualification"
+                        rows={3}
+                      />
+                    </div>
+
+                    <div className="flex justify-end space-x-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => setRequestDialogOpen(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={handleSubmitCustomRequest}
+                        disabled={createCustomRequest.isPending}
+                      >
+                        Submit Request
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         </CardContent>

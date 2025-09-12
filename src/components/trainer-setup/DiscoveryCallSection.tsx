@@ -167,7 +167,15 @@ export function DiscoveryCallSection({ formData, updateFormData, errors }: Disco
                     <Textarea
                       placeholder="What should clients know before the call? What should they prepare?"
                       value={discoverySettings.prep_notes || ''}
-                      onChange={(e) => updateSettings({ prep_notes: e.target.value })}
+                      onChange={(e) => {
+                        // Debounce the update to avoid saving after every keystroke
+                        const newValue = e.target.value;
+                        // Use a timeout to delay the update
+                        clearTimeout((window as any).prepNotesTimeout);
+                        (window as any).prepNotesTimeout = setTimeout(() => {
+                          updateSettings({ prep_notes: newValue });
+                        }, 1000); // Wait 1 second after user stops typing
+                      }}
                       className="min-h-[100px]"
                     />
                     <p className="text-xs text-muted-foreground">

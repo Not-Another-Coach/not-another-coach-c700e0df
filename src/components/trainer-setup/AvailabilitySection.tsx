@@ -31,16 +31,16 @@ export function AvailabilitySection({ formData, updateFormData, onAvailabilityCh
   const [showWaitlistPrompt, setShowWaitlistPrompt] = useState(false);
   const [pendingAvailabilityChange, setPendingAvailabilityChange] = useState<string | null>(null);
   
-  // Local state for the currently selected availability status
-  const [localAvailabilityStatus, setLocalAvailabilityStatus] = useState<string>('accepting');
+  // Local state for the currently selected availability status  
+  const [localAvailabilityStatus, setLocalAvailabilityStatus] = useState<string>('');
 
   // Get current availability status from local state or hook's state
-  const availabilityStatus = localAvailabilityStatus || availabilitySettings?.availability_status || 'accepting';
+  const availabilityStatus = localAvailabilityStatus || availabilitySettings?.availability_status || '';
 
   // Initialize form state from availability settings
   useEffect(() => {
     if (availabilitySettings) {
-      setLocalAvailabilityStatus(availabilitySettings.availability_status || 'accepting');
+      setLocalAvailabilityStatus(availabilitySettings.availability_status || '');
       setNextAvailableDate(availabilitySettings.next_available_date || '');
       setAllowDiscoveryCalls(availabilitySettings.allow_discovery_calls_on_waitlist ?? true);
       setAutoFollowUpDays(availabilitySettings.auto_follow_up_days || 14);
@@ -201,10 +201,10 @@ export function AvailabilitySection({ formData, updateFormData, onAvailabilityCh
         };
       default:
         return {
-          label: 'Unknown',
-          description: '',
+          label: 'Please Select Status',
+          description: 'Choose your availability status to continue',
           color: 'text-muted-foreground',
-          bgColor: 'bg-muted',
+          bgColor: 'bg-muted/50 border-muted',
           icon: Pause
         };
     }
@@ -250,7 +250,12 @@ export function AvailabilitySection({ formData, updateFormData, onAvailabilityCh
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-4">
-            <Label>Select your current availability status</Label>
+            <Label>Select your current availability status *</Label>
+            {!availabilityStatus && (
+              <p className="text-sm text-muted-foreground">
+                Please select your availability status to complete this step
+              </p>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Accepting Clients */}
               <div

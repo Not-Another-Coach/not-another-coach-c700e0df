@@ -231,9 +231,10 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
             variant="outline"
             size="sm"
             onClick={() => setTaglineAIHelperOpen(!taglineAIHelperOpen)}
+            disabled={!formData.tagline?.trim()}
           >
             <Sparkles className="h-4 w-4 mr-2" />
-            AI Helper
+            {formData.tagline?.trim() ? 'Improve' : 'AI Helper'}
           </Button>
         </div>
         
@@ -282,9 +283,10 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
             variant="outline"
             size="sm"
             onClick={() => setHowStartedAIHelperOpen(!howStartedAIHelperOpen)}
+            disabled={!formData.how_started?.trim()}
           >
             <Sparkles className="h-4 w-4 mr-2" />
-            AI Helper
+            {formData.how_started?.trim() ? 'Improve' : 'AI Helper'}
           </Button>
         </div>
         
@@ -328,9 +330,10 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
             variant="outline"
             size="sm"
             onClick={() => setPhilosophyAIHelperOpen(!philosophyAIHelperOpen)}
+            disabled={!formData.philosophy?.trim()}
           >
             <Sparkles className="h-4 w-4 mr-2" />
-            AI Helper
+            {formData.philosophy?.trim() ? 'Improve' : 'AI Helper'}
           </Button>
         </div>
         
@@ -374,9 +377,10 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
             variant="outline"
             size="sm"
             onClick={() => setBioAIHelperOpen(!bioAIHelperOpen)}
+            disabled={!formData.bio?.trim()}
           >
             <Sparkles className="h-4 w-4 mr-2" />
-            AI Helper
+            {formData.bio?.trim() ? 'Improve' : 'AI Helper'}
           </Button>
         </div>
         
