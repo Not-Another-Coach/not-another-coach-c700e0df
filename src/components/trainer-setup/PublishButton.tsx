@@ -26,7 +26,6 @@ import {
   Shield
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { useProfessionalDocumentsState } from '@/hooks/useProfessionalDocumentsState';
 
 interface PublishButtonProps {
   profile: any;
@@ -35,10 +34,9 @@ interface PublishButtonProps {
 export const PublishButton = ({ profile }: PublishButtonProps) => {
   const { currentRequest, loading, requestPublication, isProfileReadyToPublish } = useProfilePublication();
   const stepValidation = useProfileStepValidation();
-  const { getCompletionStatus: getDocsStatus } = useProfessionalDocumentsState();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
-  const readyToPublish = isProfileReadyToPublish(profile, stepValidation); // Now respects local doc status
+  const readyToPublish = isProfileReadyToPublish(profile, stepValidation);
   const isPublished = profile?.profile_published === true;
 
   // Get incomplete steps for tooltip
@@ -61,16 +59,11 @@ export const PublishButton = ({ profile }: PublishButtonProps) => {
     };
     
     const incompleteSteps: string[] = [];
-    const requiredSteps = [1, 2, 3, 4, 5, 6, 8, 10, 11, 12];
+    const requiredSteps = [1, 2, 3, 4, 5, 6, 8, 10, 11];
     requiredSteps.forEach(step => {
-      if (step === 12) {
-        const docsComplete = getDocsStatus() === 'completed';
-        if (!docsComplete) incompleteSteps.push(stepTitles[step - 1]);
-        return;
-      }
       const completion = stepValidation.getStepCompletion(profile, step);
       if (completion !== 'completed') {
-        incompleteSteps.push(stepTitles[step - 1]);
+        incompleteSteps.push(stepTitles[step]);
       }
     });
     
