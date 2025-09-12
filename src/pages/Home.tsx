@@ -11,17 +11,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAnonymousSession } from "@/hooks/useAnonymousSession";
 import { AppLogo } from "@/components/ui/app-logo";
-import { 
-  Search, 
-  Users, 
-  Star, 
-  Clock, 
-  MessageCircle,
-  Calendar,
-  ArrowRight,
-  Sparkles,
-  Heart
-} from "lucide-react";
+import { EnhancedHeroSection } from "@/components/homepage/EnhancedHeroSection";
+import { InteractiveValueCards } from "@/components/homepage/InteractiveValueCards";
+import { TrainerPreviewCarousel } from "@/components/homepage/TrainerPreviewCarousel";
+import { SocialProofSection } from "@/components/homepage/SocialProofSection";
+import { CoachRecruitmentSection } from "@/components/homepage/CoachRecruitmentSection";
+import { Heart } from "lucide-react";
 
 export default function Home() {
   const { user, loading } = useAuth();
@@ -106,106 +101,31 @@ export default function Home() {
         </div>
       </header>
 
-        {/* Hero Section */}
-        <section className="bg-gradient-to-b from-background to-muted/20 py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div className="max-w-3xl mx-auto">
-              <h1 className="text-4xl md:text-6xl font-bold mb-6">
-                Find Your Perfect
-                <span className="text-primary block">Personal Trainer</span>
-              </h1>
-              <p className="text-xl text-muted-foreground mb-8">
-                Browse verified trainers, compare coaching styles, and book your perfect match. 
-                No signup required to start exploring.
-              </p>
-              
-               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button 
-                  size="lg" 
-                  onClick={() => {
-                    setShowQuiz(true);
-                    setTimeout(() => {
-                      document.getElementById('browse-trainers')?.scrollIntoView({ 
-                        behavior: 'smooth',
-                        block: 'start'
-                      });
-                    }, 100);
-                  }}
-                  className="text-lg px-8"
-                >
-                  <Sparkles className="h-5 w-5 mr-2" />
-                  Find My Match
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="lg"
-                  onClick={() => document.getElementById('browse-trainers')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="text-lg px-8"
-                >
-                  <Search className="h-5 w-5 mr-2" />
-                  Browse All Trainers
-                </Button>
-              </div>
-              
-              {/* Trainer CTA */}
-              <div className="mt-12 pt-8 border-t border-muted">
-                <div className="text-center">
-                  <h3 className="text-xl font-semibold mb-2">Are you a fitness professional?</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Join our platform and start building your coaching business
-                  </p>
-                  <Button variant="outline" size="lg" onClick={() => navigate('/trainer/demo')} className="text-lg px-8">
-                    Become a Coach
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* Enhanced Hero Section */}
+        <EnhancedHeroSection 
+          onFindMatch={() => {
+            setShowQuiz(true);
+            setTimeout(() => {
+              document.getElementById('browse-trainers')?.scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+              });
+            }, 100);
+          }}
+          onBrowseAll={() => document.getElementById('browse-trainers')?.scrollIntoView({ behavior: 'smooth' })}
+        />
 
-        {/* Features */}
-        <section className="py-16 bg-background">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <div className="bg-primary/10 p-3 rounded-full w-fit mx-auto mb-4">
-                    <Users className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="font-semibold text-lg mb-2">Verified Trainers</h3>
-                  <p className="text-muted-foreground">
-                    All trainers are background checked and professionally certified
-                  </p>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <div className="bg-primary/10 p-3 rounded-full w-fit mx-auto mb-4">
-                    <MessageCircle className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="font-semibold text-lg mb-2">Direct Messaging</h3>
-                  <p className="text-muted-foreground">
-                    Chat directly with trainers to find your perfect match
-                  </p>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <div className="bg-primary/10 p-3 rounded-full w-fit mx-auto mb-4">
-                    <Calendar className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="font-semibold text-lg mb-2">Easy Booking</h3>
-                  <p className="text-muted-foreground">
-                    Book sessions and discovery calls with just a few clicks
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
+        {/* Interactive Value Cards */}
+        <InteractiveValueCards />
+
+        {/* Featured Trainers Preview */}
+        <TrainerPreviewCarousel onViewAll={() => document.getElementById('browse-trainers')?.scrollIntoView({ behavior: 'smooth' })} />
+
+        {/* Social Proof Section */}
+        <SocialProofSection />
+
+        {/* Coach Recruitment Section */}
+        <CoachRecruitmentSection onBecomeCoach={() => navigate('/trainer/demo')} />
 
         {/* Browse Trainers Section */}
         <section id="browse-trainers" className="py-16 bg-muted/20">
