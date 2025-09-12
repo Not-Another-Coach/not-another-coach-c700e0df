@@ -52,7 +52,7 @@ export const EnhancedHeroSection = ({ onFindMatch, onBrowseAll }: EnhancedHeroSe
               onClick={onBrowseAll}
               variant="outline"
               size="lg"
-              className="border-2 border-white/50 text-white hover:bg-white/10 hover:border-white px-8 py-4 text-lg backdrop-blur-sm transition-all duration-300"
+              className="border-2 border-white bg-white/10 text-white hover:bg-white hover:text-primary backdrop-blur-sm px-8 py-4 text-lg font-semibold transition-all duration-300 hover:shadow-lg"
             >
               Browse All Trainers
             </Button>

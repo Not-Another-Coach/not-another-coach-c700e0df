@@ -89,53 +89,38 @@ export const InteractiveValueCards = () => {
           </p>
         </div>
         
-        {/* Scrollable cards container */}
-        <div className="overflow-x-auto scrollbar-hide">
-          <div className="flex gap-6 pb-4 min-w-max">
-            {features.map((feature, index) => {
-              const IconComponent = feature.icon;
-              return (
-                <Card 
-                  key={index}
-                  className={`min-w-[280px] group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer ${feature.colorClasses.border} bg-gradient-card`}
-                >
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-4">
-                      <div className={`p-3 rounded-full ${feature.colorClasses.bg} transition-colors duration-300`}>
-                        <IconComponent className={`h-6 w-6 ${feature.colorClasses.text}`} />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-2">
-                          <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors duration-300">
-                            {feature.title}
-                          </h3>
-                          <span className={`text-xs font-medium px-2 py-1 rounded-full ${feature.colorClasses.badge}`}>
-                            {feature.stats}
-                          </span>
-                        </div>
-                        <p className="text-sm text-muted-foreground leading-relaxed">
-                          {feature.description}
-                        </p>
-                      </div>
+        {/* Two-row grid layout for better screen optimization */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          {features.map((feature, index) => {
+            const IconComponent = feature.icon;
+            return (
+              <Card 
+                key={index}
+                className={`group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer border-l-4 ${feature.colorClasses.border} bg-gradient-card`}
+              >
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className={`p-3 rounded-full ${feature.colorClasses.bg} transition-colors duration-300`}>
+                      <IconComponent className={`h-6 w-6 ${feature.colorClasses.text}`} />
                     </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
-        
-        {/* Scroll indicator */}
-        <div className="flex justify-center mt-6">
-          <div className="flex space-x-2">
-            {[...Array(3)].map((_, i) => (
-              <div 
-                key={i}
-                className="w-2 h-2 rounded-full bg-gray-300 animate-pulse"
-                style={{ animationDelay: `${i * 0.2}s` }}
-              />
-            ))}
-          </div>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors duration-300">
+                          {feature.title}
+                        </h3>
+                        <span className={`text-xs font-medium px-2 py-1 rounded-full ${feature.colorClasses.badge}`}>
+                          {feature.stats}
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {feature.description}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </div>
     </div>
