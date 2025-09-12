@@ -310,7 +310,7 @@ export const QualificationsSection: React.FC<QualificationsSectionProps> = ({
                           if (file) handleQualificationFileSelect(qualification, file);
                         }}
                       />
-                      <Button variant="outline" size="xs" onClick={() => document.getElementById(inputId)?.click()}>
+                      <Button variant="outline" size="sm" onClick={() => document.getElementById(inputId)?.click()}>
                         <Upload className="w-3 h-3 mr-1" />
                         Upload cert
                       </Button>
@@ -319,6 +319,8 @@ export const QualificationsSection: React.FC<QualificationsSectionProps> = ({
                 );
               })}
             </div>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {customRequests.map((request: any) => (
                 <Badge
                   key={`custom-${request.id}`}
                   variant={
