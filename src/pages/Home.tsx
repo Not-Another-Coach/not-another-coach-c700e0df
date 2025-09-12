@@ -68,8 +68,15 @@ export default function Home() {
     // Navigate based on intent
     if (intent === 'trainer') {
       navigate('/trainer/demo');
+    } else if (intent === 'client') {
+      // Scroll to browse trainers section for clients
+      setTimeout(() => {
+        document.getElementById('browse-trainers')?.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }, 100);
     }
-    // For 'client', stay on current page
   };
 
   // Show loading only while checking auth status
