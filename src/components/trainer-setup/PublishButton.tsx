@@ -59,7 +59,8 @@ export const PublishButton = ({ profile }: PublishButtonProps) => {
     };
     
     const incompleteSteps: string[] = [];
-    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].forEach(step => {
+    const requiredSteps = [1, 2, 3, 4, 5, 6, 8, 10, 11, 12];
+    requiredSteps.forEach(step => {
       const completion = stepValidation.getStepCompletion(profile, step);
       if (completion !== 'completed') {
         incompleteSteps.push(stepTitles[step]);

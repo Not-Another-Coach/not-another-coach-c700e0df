@@ -1047,8 +1047,9 @@ const TrainerProfileSetup = () => {
                     <TooltipContent>
                       <p className="max-w-xs text-sm">
                         {(() => {
-                          const steps = [1,2,3,4,5,6,7,8,9,10,11,12];
-                          const incomplete = steps.filter(s => getValidationStepCompletion(profile, s) !== 'completed')
+                          const requiredSteps = [1,2,3,4,5,6,8,10,11,12];
+                          const incomplete = requiredSteps
+                            .filter(s => getValidationStepCompletion(formData, s) !== 'completed')
                             .map(s => stepTitles[s-1]);
                           return incomplete.length
                             ? `Complete these before submitting: ${incomplete.join(', ')}`

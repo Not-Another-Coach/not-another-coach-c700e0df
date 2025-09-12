@@ -80,9 +80,8 @@ export const useProfilePublication = () => {
   const isProfileReadyToPublish = (profile: any, stepValidation: any) => {
     if (!profile || !stepValidation) return false;
     
-    // All steps should be green except Instagram (step 9 removed) and verification (step 13)
-    // Note: Verification happens AFTER admin approval, not before
-    const requiredSteps = [1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12];
+    // Required steps (excluding optional Testimonials (7), Image Management (9), and Verification (13))
+    const requiredSteps = [1, 2, 3, 4, 5, 6, 8, 10, 11, 12];
     
     return requiredSteps.every(step => {
       const completion = stepValidation.getStepCompletion(profile, step);
