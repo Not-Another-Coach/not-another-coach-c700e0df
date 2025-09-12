@@ -14,7 +14,7 @@ import { MessageCircle, Calendar, Lock, Users, Star, Zap } from "lucide-react";
 interface AuthPromptProps {
   isOpen: boolean;
   onClose: () => void;
-  actionType: 'message' | 'book' | 'save';
+  actionType: 'message' | 'book' | 'save' | 'profile';
   trainerName: string;
 }
 
@@ -39,6 +39,12 @@ export const AuthPrompt = ({
           icon: Calendar,
           title: `Book with ${trainerName}`,
           description: "Schedule your discovery call or first session to get started on your fitness journey.",
+        };
+      case 'profile':
+        return {
+          icon: Star,
+          title: `View ${trainerName}'s Profile`,
+          description: "Access their full profile with detailed experience, certifications, and client reviews.",
         };
       default:
         return {

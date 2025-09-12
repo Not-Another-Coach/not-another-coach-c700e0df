@@ -7,6 +7,7 @@ import type { AnyTrainer } from "@/types/trainer";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 interface Trainer {
   id: string;
@@ -28,9 +29,10 @@ export const AnonymousBrowse = () => {
   const [loading, setLoading] = useState(true);
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   const [selectedTrainerId, setSelectedTrainerId] = useState<string | null>(null);
-  const [actionType, setActionType] = useState<'message' | 'book'>('message');
+  const [actionType, setActionType] = useState<'message' | 'book' | 'profile'>('message');
   
   const { savedTrainersCount } = useAnonymousSession();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchTrainers();
@@ -81,6 +83,12 @@ export const AnonymousBrowse = () => {
     setShowAuthPrompt(true);
   };
 
+  const handleViewProfileClick = (trainerId: string) => {
+    setSelectedTrainerId(trainerId);
+    setActionType('profile');
+    setShowAuthPrompt(true);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -102,7 +110,11 @@ export const AnonymousBrowse = () => {
                 You've saved {savedTrainersCount} coach{savedTrainersCount > 1 ? 'es' : ''} — create an account to keep them.
               </span>
             </div>
-            <Button variant="outline" size="sm">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => navigate('/auth?signup=true')}
+            >
               Create Account
             </Button>
           </div>
@@ -132,7 +144,7 @@ export const AnonymousBrowse = () => {
               trainer={enhancedTrainer}
               config="explore"
               initialView="instagram"
-              onViewProfile={() => console.log('View profile:', trainer.id)}
+              onViewProfile={() => handleViewProfileClick(trainer.id)}
               onMessage={() => handleMessageClick(trainer.id)}
               onBookDiscoveryCall={() => handleBookClick(trainer.id)}
             />
