@@ -25,7 +25,7 @@ export default function Home() {
   const { profile, loading: profileLoading, userType } = useProfileByType();
   const { user_type, loading: userTypeLoading } = useUserType();
   const { savedTrainersCount } = useAnonymousSession();
-  const { shouldShowModal, setUserIntent, clearIntent } = useUserIntent();
+  const { shouldShowModal, setUserIntent, clearIntent, dismissModal } = useUserIntent();
   const navigate = useNavigate();
   
   const [showQuiz, setShowQuiz] = useState(false);
@@ -62,14 +62,14 @@ export default function Home() {
     setShowMatches(true);
   };
 
-  const handleIntentSelection = (intent: 'client' | 'trainer' | 'browse') => {
+  const handleIntentSelection = (intent: 'client' | 'trainer') => {
     setUserIntent(intent);
     
     // Navigate based on intent
     if (intent === 'trainer') {
       navigate('/trainer/demo');
     }
-    // For 'client' and 'browse', stay on current page
+    // For 'client', stay on current page
   };
 
   // Show loading only while checking auth status
@@ -89,6 +89,7 @@ export default function Home() {
         <UserIntentModal 
           isOpen={shouldShowModal}
           onSelectIntent={handleIntentSelection}
+          onDismiss={dismissModal}
         />
         {/* Header */}
         <header className="sticky top-0 z-50 bg-background border-b">

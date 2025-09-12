@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-type UserIntent = 'client' | 'trainer' | 'browse' | null;
+type UserIntent = 'client' | 'trainer' | null;
 
 interface UserIntentContextType {
   userIntent: UserIntent;
@@ -8,6 +8,7 @@ interface UserIntentContextType {
   hasShownIntentModal: boolean;
   shouldShowModal: boolean;
   clearIntent: () => void;
+  dismissModal: () => void;
 }
 
 const UserIntentContext = createContext<UserIntentContextType | undefined>(undefined);
@@ -25,7 +26,7 @@ export function UserIntentProvider({ children }: { children: ReactNode }) {
       const savedIntent = localStorage.getItem(INTENT_STORAGE_KEY) as UserIntent;
       const hasShown = localStorage.getItem(INTENT_SHOWN_KEY) === 'true';
       
-      if (savedIntent && ['client', 'trainer', 'browse'].includes(savedIntent)) {
+      if (savedIntent && ['client', 'trainer'].includes(savedIntent)) {
         setUserIntentState(savedIntent);
       }
       
@@ -51,6 +52,16 @@ export function UserIntentProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const dismissModal = () => {
+    setHasShownIntentModal(true);
+    
+    try {
+      localStorage.setItem(INTENT_SHOWN_KEY, 'true');
+    } catch (error) {
+      console.error('Error saving intent modal dismissed state:', error);
+    }
+  };
+
   const clearIntent = () => {
     setUserIntentState(null);
     setHasShownIntentModal(false);
@@ -73,6 +84,7 @@ export function UserIntentProvider({ children }: { children: ReactNode }) {
         hasShownIntentModal,
         shouldShowModal,
         clearIntent,
+        dismissModal,
       }}
     >
       {children}
