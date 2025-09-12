@@ -154,25 +154,12 @@ export default function AnonymousSaved() {
         ) : (
           <>
             {/* Session Warning */}
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-8">
-              <div className="flex items-start gap-3">
-                <div className="bg-amber-100 p-2 rounded-full">
-                  <Heart className="h-5 w-5 text-amber-600" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-medium text-amber-800">Temporary Storage</h3>
-                  <p className="text-sm text-amber-700 mt-1">
-                    Your saved trainers are stored locally for 7 days. Create a free account to keep them forever and unlock messaging & booking.
-                  </p>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="mt-3 border-amber-300 text-amber-700 hover:bg-amber-100"
-                    onClick={() => navigate('/auth?signup=true')}
-                  >
-                    Create Free Account
-                  </Button>
-                </div>
+            <div className="bg-muted/30 border border-muted rounded-lg p-3 mb-6">
+              <div className="flex items-center gap-2">
+                <Heart className="h-4 w-4 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">
+                  Your saved trainers are stored locally for 7 days. Create a free account to keep them forever.
+                </p>
               </div>
             </div>
 
