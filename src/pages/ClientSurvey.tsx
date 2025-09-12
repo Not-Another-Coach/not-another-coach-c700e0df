@@ -4,8 +4,9 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useClientProfile } from "@/hooks/useClientProfile";
 import { useUserTypeChecks } from "@/hooks/useUserType";
+import { useAnonymousSession } from "@/hooks/useAnonymousSession";
 import { useToast } from "@/hooks/use-toast";
-import { ClientHeader } from "@/components/ClientHeader";
+import { ClientCustomHeader } from "@/components/layout/ClientCustomHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -26,6 +27,7 @@ const ClientSurvey = () => {
   const { user, loading } = useAuth();
   const { profile, loading: profileLoading, updateProfile } = useClientProfile();
   const { isClient } = useUserTypeChecks();
+  const { session: anonymousSession } = useAnonymousSession();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -129,11 +131,11 @@ const ClientSurvey = () => {
     }
   }, [user, loading, navigate]);
 
-  // Initialize form data from profile
+  // Initialize form data from profile and anonymous session
   useEffect(() => {
     if (profile && profile.id) {
-      setFormData(prev => ({
-        ...prev,
+      // Start with profile data
+      const initialData = {
         primary_goals: profile.primary_goals || [],
         secondary_goals: profile.secondary_goals || [],
         training_location_preference: profile.training_location_preference || null,
@@ -159,12 +161,25 @@ const ClientSurvey = () => {
         budget_flexibility: profile.budget_flexibility || "flexible",
         waitlist_preference: profile.waitlist_preference || null,
         flexible_scheduling: profile.flexible_scheduling ?? false,
-      }));
+        client_survey_completed: false,
+      };
+      
+      // If profile is empty but we have anonymous session data, pre-populate from it
+      if (anonymousSession?.quizResults && !profile.primary_goals?.length) {
+        const quizResults = anonymousSession.quizResults;
+        // Map quiz results to survey format
+        initialData.primary_goals = quizResults.goals || [];
+        initialData.training_location_preference = quizResults.location || null;
+        initialData.preferred_coaching_style = quizResults.coachingStyle || [];
+        // Add other mappings as needed based on available quiz data
+      }
+      
+      setFormData(initialData);
       
       // Set current step to continue from where left off, or start from step 1
       setCurrentStep(1);
     }
-  }, [profile?.id]);
+  }, [profile?.id, anonymousSession?.quizResults]);
 
   // Stable update function
   const updateFormData = (updates: Partial<typeof formData>) => {
@@ -434,10 +449,11 @@ const ClientSurvey = () => {
     <div className="min-h-screen bg-background">
       {/* Header with Navigation */}
       {profile && (
-        <ClientHeader 
-          profile={profile} 
-          activeTab="preferences"
-          showNavigation={true}
+        <ClientCustomHeader
+          currentPage="dashboard"
+          profile={profile}
+          onMessagingOpen={() => {}}
+          showJourneyProgress={false}
         />
       )}
 
