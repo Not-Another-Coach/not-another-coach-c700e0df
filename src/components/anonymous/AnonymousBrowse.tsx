@@ -131,17 +131,20 @@ export const AnonymousBrowse = () => {
 
       {/* Trainers Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {trainers.map((trainer) => (
-          <UnifiedTrainerCard
-            key={trainer.id}
-            trainer={trainer}
-            onSave={handleSaveClick}
-            onMessage={handleMessageClick}
-            onBook={handleBookClick}
-            isSaved={isTrainerSaved(trainer.id)}
-            isAuthenticated={false}
-          />
-        ))}
+        {trainers.map((trainer) => {
+          console.log('🎯 Rendering trainer card for:', trainer.first_name, trainer.last_name);
+          return (
+            <UnifiedTrainerCard
+              key={trainer.id}
+              trainer={trainer}
+              onSave={handleSaveClick}
+              onMessage={handleMessageClick}
+              onBook={handleBookClick}
+              isSaved={isTrainerSaved(trainer.id)}
+              isAuthenticated={false}
+            />
+          );
+        })}
       </div>
 
       {/* Conversion Prompts */}
