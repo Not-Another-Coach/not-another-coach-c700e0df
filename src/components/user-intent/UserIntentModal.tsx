@@ -26,22 +26,22 @@ export function UserIntentModal({ isOpen, onSelectIntent, onDismiss }: UserInten
             How can we help you today?
           </h2>
           
-          <div className="space-y-3">
+          <div className="space-y-4">
             <Button
               onClick={() => onSelectIntent('client')}
-              className="w-full h-12 text-base font-medium"
+              className="w-full h-14 text-lg font-semibold rounded-xl"
               size="lg"
             >
-              🔹 Looking for a coach
+              Find a Coach
             </Button>
             
             <Button
               onClick={() => onSelectIntent('trainer')}
               variant="outline"
-              className="w-full h-12 text-base font-medium"
+              className="w-full h-14 text-lg font-semibold rounded-xl border-2"
               size="lg"
             >
-              🔹 I am a coach
+              I'm a Coach
             </Button>
           </div>
         </div>
