@@ -31,15 +31,24 @@ export default function TrainerDemo() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4">
+      <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border">
+        <div className="mx-auto px-6 lg:px-8 xl:px-12 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Link to="/" className="text-2xl font-bold text-primary">
                 NAC
               </Link>
-              <Badge variant="secondary">Demo Mode</Badge>
+              <div className="text-muted-foreground">Coach Demo</div>
+              
+              {/* Demo Mode Badge */}
+              <div className="flex items-center gap-2 ml-6 px-3 py-1 bg-muted/50 rounded-full">
+                <div className="w-2 h-2 rounded-full bg-warning animate-pulse" />
+                <div className="text-sm font-medium text-warning">
+                  Demo Mode
+                </div>
+              </div>
             </div>
+            
             <div className="flex items-center gap-3">
               <Button variant="outline" asChild>
                 <Link to="/">← Back to Homepage</Link>
@@ -51,7 +60,7 @@ export default function TrainerDemo() {
             </div>
           </div>
         </div>
-      </div>
+      </header>
 
       <div className="container mx-auto px-4 py-8">
         {/* Hero Section */}
