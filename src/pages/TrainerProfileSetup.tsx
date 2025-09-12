@@ -492,7 +492,7 @@ const TrainerProfileSetup = () => {
         
         const verifiedCount = verificationChecks.filter(check => check?.status === 'verified').length;
         const pendingCount = verificationChecks.filter(check => check?.status === 'pending').length;
-        const submittedCount = verificationChecks.filter(check => check?.status === 'pending' || check?.status === 'verified').length;
+        const submittedCount = verificationChecks.filter(check => ['pending','verified','not_applicable'].includes(check?.status)).length;
         
         console.log('🔍 Verification Debug - Counts:', { verifiedCount, pendingCount, submittedCount });
         
@@ -657,27 +657,19 @@ const TrainerProfileSetup = () => {
       if (currentStep < totalSteps) {
         setCurrentStep(currentStep + 1);
       } else {
-        // Step 14 is verification - don't complete profile, just show final message
-        if (currentStep === 14) {
-          toast({
-            title: "Profile Setup Complete!",
-            description: "Your profile is ready. Submit for verification to go live.",
-          });
-        } else {
-          // Convert form data for profile completion
-          const completionData = {
-            ...formData,
-            delivery_format: [formData.delivery_format],
-            communication_style: formData.communication_style.split(',').map(s => s.trim()).filter(s => s),
-            profile_setup_completed: true
-          };
-          await updateProfile(completionData);
-          toast({
-            title: "Profile completed!",
-            description: "Your trainer profile is now live and visible to clients.",
-          });
-        }
-        navigate('/trainer/dashboard');
+        // Final step: only save profile, do not claim publication
+        const completionData = {
+          ...formData,
+          delivery_format: [formData.delivery_format],
+          communication_style: formData.communication_style.split(',').map(s => s.trim()).filter(s => s),
+          profile_setup_completed: true
+        };
+        await updateProfile(completionData);
+        toast({
+          title: 'Profile saved',
+          description: 'Your profile is saved. Submit for admin review on this step to go live after approval.',
+        });
+        // Stay on the page so trainer can submit for review
       }
     } catch (error) {
       console.error('Error in handleNext:', error);
@@ -1027,12 +1019,12 @@ const TrainerProfileSetup = () => {
             {isLoading ? (
               <>
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                {currentStep === totalSteps ? 'Completing...' : 'Saving...'}
+                {currentStep === totalSteps ? 'Saving...' : 'Saving...'}
               </>
             ) : currentStep === totalSteps ? (
               <>
                 <CheckCircle className="h-4 w-4 mr-2" />
-                Complete Profile
+                Save Profile
               </>
             ) : (
               <>
