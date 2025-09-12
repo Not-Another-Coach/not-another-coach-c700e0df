@@ -121,7 +121,7 @@ export const AuthPrompt = ({
         {/* Trust signals */}
         <div className="text-center pt-2 border-t">
           <p className="text-xs text-muted-foreground">
-            Join 1,000+ clients who found their perfect trainer
+            Come and find your perfect coach!
           </p>
         </div>
       </DialogContent>
