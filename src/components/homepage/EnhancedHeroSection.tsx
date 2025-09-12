@@ -30,7 +30,7 @@ export const EnhancedHeroSection = ({ onFindMatch, onBrowseAll }: EnhancedHeroSe
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight animate-fade-in">
             Find Your Perfect
             <span className="block bg-gradient-to-r from-accent to-energy bg-clip-text text-transparent">
-              Personal Trainer
+              Coach
             </span>
           </h1>
           <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto mb-8 font-medium animate-fade-in [animation-delay:0.2s]">
