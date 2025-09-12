@@ -205,24 +205,6 @@ export default function Home() {
             )}
           </div>
         </section>
-
-        {/* CTA Section */}
-        <section className="py-16 bg-primary/5">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl font-bold mb-4">Ready to Start Your Fitness Journey?</h2>
-            <p className="text-xl text-muted-foreground mb-8">
-              Join thousands of clients who found their perfect trainer through NAC
-            </p>
-            <Button 
-              size="lg" 
-              onClick={() => navigate('/auth?signup=true')}
-              className="text-lg px-8"
-            >
-              Create Free Account
-              <ArrowRight className="h-5 w-5 ml-2" />
-            </Button>
-          </div>
-        </section>
       </div>
     );
   }
