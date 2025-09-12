@@ -1048,9 +1048,12 @@ const TrainerProfileSetup = () => {
                       <p className="max-w-xs text-sm">
                         {(() => {
                           const requiredSteps = [1,2,3,4,5,6,8,10,11,12];
-                          const incomplete = requiredSteps
-                            .filter(s => getValidationStepCompletion(formData, s) !== 'completed')
-                            .map(s => stepTitles[s-1]);
+                          const incomplete = requiredSteps.filter(s => {
+                            if (s === 12) {
+                              return getProfDocumentsStatus() !== 'completed';
+                            }
+                            return getValidationStepCompletion(formData, s) !== 'completed';
+                          }).map(s => stepTitles[s-1]);
                           return incomplete.length
                             ? `Complete these before submitting: ${incomplete.join(', ')}`
                             : 'All set! Click Publish to submit your profile for admin review.';

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from './useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from './use-toast';
+import { useProfessionalDocumentsState } from '@/hooks/useProfessionalDocumentsState';
 
 export interface PublicationRequest {
   id: string;
@@ -79,14 +80,20 @@ export const useProfilePublication = () => {
   // Check if profile is ready to publish
   const isProfileReadyToPublish = (profile: any, stepValidation: any) => {
     if (!profile || !stepValidation) return false;
+
+    // Professional documents completion from local state
+    const { getCompletionStatus } = useProfessionalDocumentsState();
+    const docsComplete = getCompletionStatus() === 'completed';
     
     // Required steps (excluding optional Testimonials (7), Image Management (9), and Verification (13))
-    const requiredSteps = [1, 2, 3, 4, 5, 6, 8, 10, 11, 12];
-    
-    return requiredSteps.every(step => {
+    const requiredSteps = [1, 2, 3, 4, 5, 6, 8, 10, 11];
+
+    const othersComplete = requiredSteps.every(step => {
       const completion = stepValidation.getStepCompletion(profile, step);
       return completion === 'completed';
     });
+
+    return othersComplete && docsComplete;
   };
 
   useEffect(() => {

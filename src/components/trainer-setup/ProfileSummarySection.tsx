@@ -120,6 +120,37 @@ export const ProfileSummarySection = () => {
         </CardContent>
       </Card>
 
+      {/* Qualification Certificates for Verification */}
+      {profile?.uploaded_certificates && Array.isArray(profile.uploaded_certificates) && profile.uploaded_certificates.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Qualification Certificates</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              The following qualification certificates have been uploaded and are awaiting admin verification:
+            </p>
+            {profile.uploaded_certificates.map((cert: any, index: number) => (
+              <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                <div className="flex items-center gap-3">
+                  <FileText className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <h4 className="font-medium">{cert.qualification || cert.name || `Certificate ${index + 1}`}</h4>
+                    <p className="text-sm text-muted-foreground">
+                      {cert.originalName || cert.file_name || cert.type || 'Uploaded certificate'}
+                    </p>
+                  </div>
+                </div>
+                <Badge className="bg-amber-100 text-amber-800 border-amber-200">
+                  <Clock className="h-3 w-3 mr-1" />
+                  Pending Review
+                </Badge>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Next Steps */}
       <Card>
         <CardHeader>
@@ -176,36 +207,61 @@ export const ProfileSummarySection = () => {
         </CardContent>
       </Card>
 
-      {/* Qualification Certificates for Verification */}
-      {profile?.uploaded_certificates && Array.isArray(profile.uploaded_certificates) && profile.uploaded_certificates.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Qualification Certificates</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <p className="text-sm text-muted-foreground">
-              The following qualification certificates have been uploaded and are awaiting admin verification:
-            </p>
-            {profile.uploaded_certificates.map((cert: any, index: number) => (
-              <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex items-center gap-3">
-                  <FileText className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <h4 className="font-medium">{cert.qualification || `Certificate ${index + 1}`}</h4>
-                    <p className="text-sm text-muted-foreground">
-                      {cert.originalName || cert.file_name || 'Uploaded certificate'}
-                    </p>
-                  </div>
-                </div>
-                <Badge className="bg-amber-100 text-amber-800 border-amber-200">
-                  <Clock className="h-3 w-3 mr-1" />
-                  Pending Review
-                </Badge>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
+      {/* Next Steps */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Next Steps</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {overallStatus.status === 'completed' ? (
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">
+                🎉 <strong>Congratulations!</strong> Your profile verification is complete.
+              </p>
+              <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+                <li>• Your "Verified Coach" badge is now active</li>
+                <li>• Your profile has increased visibility in search results</li>
+                <li>• You have access to all premium features</li>
+                <li>• Clients can see your verified status, building trust</li>
+              </ul>
+            </div>
+          ) : overallStatus.status === 'attention' ? (
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">
+                Please review and resubmit any rejected documents:
+              </p>
+              <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+                <li>• Check the "Professional Documents" tab for specific feedback</li>
+                <li>• Update your information based on admin notes</li>
+                <li>• Resubmit corrected documents for review</li>
+              </ul>
+            </div>
+          ) : overallStatus.status === 'pending' ? (
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">
+                Your documents are being reviewed by our admin team:
+              </p>
+              <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+                <li>• Review typically takes 2-5 business days</li>
+                <li>• You'll receive an email notification when complete</li>
+                <li>• No further action needed from you at this time</li>
+              </ul>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">
+                Complete your professional document verification:
+              </p>
+              <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+                <li>• Go back to the "Professional Documents" tab</li>
+                <li>• Upload required certificates and documentation</li>
+                <li>• Submit all documents for admin review</li>
+                <li>• Once verified, your profile will display the "Verified Coach" badge</li>
+              </ul>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Verification Benefits Reminder */}
       <Card>
