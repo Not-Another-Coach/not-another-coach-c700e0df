@@ -79,10 +79,13 @@ export function useWaitlist() {
     try {
       const { data, error } = await supabase
         .from('coach_availability_settings')
-        .upsert({
-          coach_id: user.id,
-          ...settings
-        })
+        .upsert(
+          {
+            coach_id: user.id,
+            ...settings
+          },
+          { onConflict: 'coach_id' }
+        )
         .select()
         .single();
 

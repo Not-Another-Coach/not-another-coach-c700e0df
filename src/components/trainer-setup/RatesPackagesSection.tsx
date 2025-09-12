@@ -813,25 +813,25 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">  
              <div>
                <Label htmlFor="duration-weeks">Duration (Weeks)</Label>
-               <Input
-                 id="duration-weeks"
-                 type="number"
-                 value={newPackage.durationWeeks}
-                 onChange={(e) => setNewPackage(prev => ({...prev, durationWeeks: e.target.value}))}
-                 placeholder="e.g., 12"
-                 className="text-sm"
-               />
+                <Input
+                  id="duration-weeks"
+                  type="number"
+                  value={newPackage.durationWeeks}
+                  onChange={(e) => setNewPackage(prev => ({...prev, durationWeeks: e.target.value, durationMonths: "" }))}
+                  placeholder="e.g., 12"
+                  className="text-sm"
+                />
              </div>
              <div>
                <Label htmlFor="duration-months">Duration (Months)</Label>
-               <Input
-                 id="duration-months"
-                 type="number"
-                 value={newPackage.durationMonths}
-                 onChange={(e) => setNewPackage(prev => ({...prev, durationMonths: e.target.value}))}
-                 placeholder="e.g., 3"
-                 className="text-sm"
-               />
+                <Input
+                  id="duration-months"
+                  type="number"
+                  value={newPackage.durationMonths}
+                  onChange={(e) => setNewPackage(prev => ({...prev, durationMonths: e.target.value, durationWeeks: "" }))}
+                  placeholder="e.g., 3"
+                  className="text-sm"
+                />
              </div>
            </div>
 
@@ -1074,7 +1074,7 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
                   id="edit-durationWeeks"
                   type="number"
                   value={editPackageData.durationWeeks}
-                  onChange={(e) => setEditPackageData(prev => ({...prev, durationWeeks: e.target.value}))}
+                  onChange={(e) => setEditPackageData(prev => ({...prev, durationWeeks: e.target.value, durationMonths: "" }))}
                   placeholder="e.g., 12"
                   className="text-sm"
                 />
@@ -1085,7 +1085,7 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
                   id="edit-durationMonths"
                   type="number"
                   value={editPackageData.durationMonths}
-                  onChange={(e) => setEditPackageData(prev => ({...prev, durationMonths: e.target.value}))}
+                  onChange={(e) => setEditPackageData(prev => ({...prev, durationMonths: e.target.value, durationWeeks: "" }))}
                   placeholder="e.g., 3"
                   className="text-sm"
                 />

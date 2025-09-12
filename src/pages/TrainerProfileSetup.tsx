@@ -409,9 +409,15 @@ const TrainerProfileSetup = () => {
         return hasPackages ? 'completed' : 'not_started';
         
       case 6: // Discovery Calls
-        const hasDiscoveryCallConfig = discoverySettings?.offers_discovery_call && formData.calendar_link?.trim();
-        const hasPartialDiscoveryCall = discoverySettings?.offers_discovery_call || formData.calendar_link?.trim();
-        return hasDiscoveryCallConfig ? 'completed' : (hasPartialDiscoveryCall ? 'partial' : 'not_started');
+        const offersDiscovery = !!discoverySettings?.offers_discovery_call;
+        const hasCalendarLink = !!formData.calendar_link?.trim();
+        const hasDcSlots = !!discoverySettings?.availability_schedule && Object.values(discoverySettings.availability_schedule).some((d: any) => d.enabled && Array.isArray(d.slots) && d.slots.length > 0);
+        // Completed if discovery calls are offered and either a calendar link or in-app slots are configured.
+        if (offersDiscovery && (hasCalendarLink || hasDcSlots)) return 'completed';
+        // If they explicitly don't offer discovery calls, consider the step complete.
+        if (!offersDiscovery) return 'completed';
+        // Otherwise partial if anything is set, else not started.
+        return (offersDiscovery || hasCalendarLink || hasDcSlots) ? 'partial' : 'not_started';
         
       case 7: // Testimonials & Case Studies
         const hasTestimonials = formData.testimonials?.length > 0;
