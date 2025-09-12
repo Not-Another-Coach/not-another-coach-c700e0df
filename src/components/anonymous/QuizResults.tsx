@@ -2,15 +2,9 @@ import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { useNavigate } from "react-router-dom";
 import { 
-  Heart, 
-  MapPin, 
-  Star, 
-  MessageCircle, 
-  Calendar, 
   ArrowLeft,
   Target,
   Sparkles,
@@ -20,6 +14,7 @@ import {
 import { useAnonymousSession } from "@/hooks/useAnonymousSession";
 import { SaveTrainerPrompt } from "./SaveTrainerPrompt";
 import { AuthPrompt } from "./AuthPrompt";
+import { UnifiedTrainerCard } from "@/components/shared/UnifiedTrainerCard";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 
@@ -287,92 +282,25 @@ export const QuizResults = ({ onBack }: QuizResultsProps) => {
         <h2 className="text-2xl font-semibold mb-6">Your Top 3 Matches</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {topMatches.map((trainer, index) => (
-            <Card key={trainer.id} className="relative overflow-hidden">
+            <div key={trainer.id} className="relative">
               {index === 0 && (
-                <div className="absolute top-4 right-4 z-10">
+                <div className="absolute top-2 right-2 z-20">
                   <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
                     Best Match
                   </Badge>
                 </div>
               )}
               
-              <CardContent className="p-6">
-                {/* Match Score */}
-                <div className="mb-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">Match Score</span>
-                    <span className="text-lg font-bold text-primary">
-                      {trainer.match_score}%
-                    </span>
-                  </div>
-                  <Progress value={trainer.match_score} className="h-2" />
-                </div>
-
-                {/* Trainer Info */}
-                <div className="text-center mb-4">
-                  <Avatar className="h-20 w-20 mx-auto mb-3">
-                    <AvatarImage src={trainer.profile_photo_url} />
-                    <AvatarFallback>
-                      {trainer.first_name?.[0]}{trainer.last_name?.[0]}
-                    </AvatarFallback>
-                  </Avatar>
-                  
-                  <h3 className="font-semibold text-lg">
-                    {trainer.first_name} {trainer.last_name}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    {trainer.tagline}
-                  </p>
-                  
-                  <div className="flex items-center justify-center gap-2 text-sm">
-                    <MapPin className="h-4 w-4" />
-                    <span>{trainer.location}</span>
-                  </div>
-                </div>
-
-                {/* Quick Stats */}
-                <div className="flex justify-between items-center mb-4 text-sm">
-                  <div className="flex items-center gap-1">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span>{trainer.rating?.toFixed(1) || 'New'}</span>
-                  </div>
-                  <div>
-                    <span className="font-semibold">£{trainer.hourly_rate}</span>
-                    <span className="text-muted-foreground">/hour</span>
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="space-y-2">
-                  <Button
-                    variant={isTrainerSaved(trainer.id) ? "default" : "outline"}
-                    size="sm"
-                    className="w-full"
-                    onClick={() => handleSaveClick(trainer.id)}
-                    disabled={isTrainerSaved(trainer.id)}
-                  >
-                    <Heart className={`h-4 w-4 mr-2 ${isTrainerSaved(trainer.id) ? 'fill-current' : ''}`} />
-                    {isTrainerSaved(trainer.id) ? 'Saved' : 'Save to Shortlist'}
-                  </Button>
-                  
-                  <div className="grid grid-cols-2 gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleMessageClick(trainer.id)}
-                    >
-                      <MessageCircle className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => handleBookClick(trainer.id)}
-                    >
-                      <Calendar className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+              <UnifiedTrainerCard
+                trainer={trainer}
+                onSave={handleSaveClick}
+                onMessage={handleMessageClick}
+                onBook={handleBookClick}
+                isSaved={isTrainerSaved(trainer.id)}
+                isAuthenticated={false}
+                showMatchScore={true}
+              />
+            </div>
           ))}
         </div>
       </div>
@@ -415,59 +343,26 @@ export const QuizResults = ({ onBack }: QuizResultsProps) => {
           <h2 className="text-2xl font-semibold mb-6">More Great Matches</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {trainers.slice(3).map((trainer) => (
-              <Card key={trainer.id} className="group hover:shadow-lg transition-shadow opacity-75">
-                <CardContent className="p-6">
-                  {/* Match Score */}
-                  <div className="mb-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">Match Score</span>
-                      <span className="text-lg font-bold text-primary">
-                        {trainer.match_score}%
-                      </span>
-                    </div>
-                    <Progress value={trainer.match_score} className="h-2" />
+              <div key={trainer.id} className="relative">
+                <UnifiedTrainerCard
+                  trainer={trainer}
+                  onSave={handleSaveClick}
+                  onMessage={handleMessageClick}
+                  onBook={handleBookClick}
+                  isSaved={isTrainerSaved(trainer.id)}
+                  isAuthenticated={false}
+                  showMatchScore={true}
+                  className="opacity-75"
+                />
+                
+                {/* Locked overlay */}
+                <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-lg">
+                  <div className="text-center">
+                    <Lock className="h-8 w-8 text-primary mx-auto mb-2" />
+                    <p className="text-sm font-medium text-primary">Create account to unlock</p>
                   </div>
-
-                  {/* Trainer basic info */}
-                  <div className="flex items-start gap-4 mb-4">
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage src={trainer.profile_photo_url} />
-                      <AvatarFallback>
-                        {trainer.first_name?.[0]}{trainer.last_name?.[0]}
-                      </AvatarFallback>
-                    </Avatar>
-                    
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold truncate">
-                        {trainer.first_name} {trainer.last_name}
-                      </h3>
-                      <p className="text-sm text-muted-foreground line-clamp-2">
-                        {trainer.tagline}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Locked overlay */}
-                  <div className="relative">
-                    <div className="blur-sm">
-                      <div className="flex justify-between items-center text-sm">
-                        <span>£{trainer.hourly_rate}/hour</span>
-                        <div className="flex items-center gap-1">
-                          <Star className="h-4 w-4" />
-                          <span>{trainer.rating?.toFixed(1) || 'New'}</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-center">
-                        <Lock className="h-6 w-6 text-primary mx-auto mb-2" />
-                        <p className="text-xs font-medium text-primary">Create account to unlock</p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ))}
           </div>
         </div>

@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Heart, MapPin, Star, Users, Calendar, MessageCircle } from "lucide-react";
+import { Heart } from "lucide-react";
 import { useAnonymousSession } from "@/hooks/useAnonymousSession";
 import { SaveTrainerPrompt } from "./SaveTrainerPrompt";
 import { AuthPrompt } from "./AuthPrompt";
+import { UnifiedTrainerCard } from "@/components/shared/UnifiedTrainerCard";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface Trainer {
   id: string;
@@ -132,115 +130,15 @@ export const AnonymousBrowse = () => {
       {/* Trainers Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {trainers.map((trainer) => (
-          <Card key={trainer.id} className="group hover:shadow-lg transition-shadow">
-            <CardContent className="p-6">
-              {/* Trainer Header */}
-              <div className="flex items-start gap-4 mb-4">
-                <Avatar className="h-16 w-16">
-                  <AvatarImage src={trainer.profile_photo_url} />
-                  <AvatarFallback>
-                    {trainer.first_name?.[0]}{trainer.last_name?.[0]}
-                  </AvatarFallback>
-                </Avatar>
-                
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-lg truncate">
-                    {trainer.first_name} {trainer.last_name}
-                  </h3>
-                  <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                    {trainer.tagline}
-                  </p>
-                  
-                  {/* Location and Rating */}
-                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <MapPin className="h-4 w-4" />
-                      <span className="truncate">{trainer.location}</span>
-                    </div>
-                    {trainer.rating > 0 && (
-                      <div className="flex items-center gap-1">
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        <span>{trainer.rating.toFixed(1)}</span>
-                        <span className="text-xs">({trainer.total_ratings})</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Specializations */}
-              <div className="mb-4">
-                <div className="flex flex-wrap gap-2">
-                  {trainer.specializations?.slice(0, 3).map((spec) => (
-                    <Badge key={spec} variant="secondary" className="text-xs">
-                      {spec}
-                    </Badge>
-                  ))}
-                  {trainer.specializations?.length > 3 && (
-                    <Badge variant="secondary" className="text-xs">
-                      +{trainer.specializations.length - 3} more
-                    </Badge>
-                  )}
-                </div>
-              </div>
-
-              {/* Coaching Style */}
-              {trainer.coaching_style?.length > 0 && (
-                <div className="mb-4">
-                  <p className="text-xs text-muted-foreground mb-1">Coaching Style:</p>
-                  <p className="text-sm">
-                    {trainer.coaching_style.slice(0, 2).join(', ')}
-                    {trainer.coaching_style.length > 2 && '...'}
-                  </p>
-                </div>
-              )}
-
-              {/* Pricing */}
-              <div className="mb-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <span className="font-semibold">£{trainer.hourly_rate}</span>
-                    <span className="text-sm text-muted-foreground">/hour</span>
-                  </div>
-                  {trainer.free_discovery_call && (
-                    <Badge variant="outline" className="text-xs">
-                      Free discovery call
-                    </Badge>
-                  )}
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-2">
-                <Button
-                  variant={isTrainerSaved(trainer.id) ? "default" : "outline"}
-                  size="sm"
-                  className="flex-1"
-                  onClick={() => handleSaveClick(trainer.id)}
-                  disabled={isTrainerSaved(trainer.id)}
-                >
-                  <Heart className={`h-4 w-4 mr-2 ${isTrainerSaved(trainer.id) ? 'fill-current' : ''}`} />
-                  {isTrainerSaved(trainer.id) ? 'Saved' : 'Save'}
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleMessageClick(trainer.id)}
-                >
-                  <MessageCircle className="h-4 w-4" />
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleBookClick(trainer.id)}
-                >
-                  <Calendar className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <UnifiedTrainerCard
+            key={trainer.id}
+            trainer={trainer}
+            onSave={handleSaveClick}
+            onMessage={handleMessageClick}
+            onBook={handleBookClick}
+            isSaved={isTrainerSaved(trainer.id)}
+            isAuthenticated={false}
+          />
         ))}
       </div>
 
