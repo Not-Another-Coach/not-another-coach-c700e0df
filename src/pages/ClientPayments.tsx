@@ -1,14 +1,22 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useClientProfile } from "@/hooks/useClientProfile";
-import { ClientHeader } from "@/components/ClientHeader";
+import { useClientJourneyProgress } from "@/hooks/useClientJourneyProgress";
+import { useDiscoveryCallNotifications } from "@/hooks/useDiscoveryCallNotifications";
+import { ClientCustomHeader } from "@/components/layout/ClientCustomHeader";
+import { MessagingPopup } from "@/components/MessagingPopup";
+import { FloatingMessageButton } from "@/components/FloatingMessageButton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CreditCard, DollarSign, Calendar, Clock, FileText } from "lucide-react";
+import { useState } from "react";
 
 export default function ClientPayments() {
   const { user, loading } = useAuth();
   const { profile, loading: profileLoading } = useClientProfile();
+  const { progress: journeyProgress } = useClientJourneyProgress();
+  const { notifications, upcomingCalls } = useDiscoveryCallNotifications();
+  const [isMessagingOpen, setIsMessagingOpen] = useState(false);
 
   if (loading || profileLoading) {
     return (
@@ -24,11 +32,14 @@ export default function ClientPayments() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header with Navigation */}
-      <ClientHeader 
-        profile={profile} 
-        activeTab="payments"
-        showNavigation={true}
+      {/* Enhanced Header */}
+      <ClientCustomHeader
+        currentPage="dashboard"
+        profile={profile}
+        journeyProgress={journeyProgress}
+        notifications={notifications}
+        upcomingCalls={upcomingCalls}
+        onMessagingOpen={() => setIsMessagingOpen(true)}
       />
 
       {/* Main Content */}
@@ -115,6 +126,15 @@ export default function ClientPayments() {
           </CardContent>
         </Card>
       </main>
+
+      {/* Floating Message Button */}
+      <FloatingMessageButton />
+
+      {/* Messaging Popup */}
+      <MessagingPopup 
+        isOpen={isMessagingOpen}
+        onClose={() => setIsMessagingOpen(false)}
+      />
     </div>
   );
 }
