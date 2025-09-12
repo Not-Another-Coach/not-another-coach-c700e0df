@@ -1044,9 +1044,18 @@ const TrainerProfileSetup = () => {
                        <Info className="h-4 w-4" />
                      </button>
                    </TooltipTrigger>
-                   <TooltipContent>
-                     <p>Once your profile is completed, you can submit it for admin review here.</p>
-                   </TooltipContent>
+                    <TooltipContent>
+                      <p className="max-w-xs text-sm">
+                        {(() => {
+                          const steps = [1,2,3,4,5,6,7,8,9,10,11,12];
+                          const incomplete = steps.filter(s => getValidationStepCompletion(profile, s) !== 'completed')
+                            .map(s => stepTitles[s-1]);
+                          return incomplete.length
+                            ? `Complete these before submitting: ${incomplete.join(', ')}`
+                            : 'All set! Click Publish to submit your profile for admin review.';
+                        })()}
+                      </p>
+                    </TooltipContent>
                  </Tooltip>
                </TooltipProvider>
              )}
