@@ -314,8 +314,17 @@ export default function Auth() {
         {/* Main Auth Card */}
         <Card className="w-full">
           <CardHeader className="text-center">
-            <div className="flex justify-center mb-4">
+            <div className="flex items-center justify-between mb-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/')}
+                className="p-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
               <AppLogo size="lg" showText={false} />
+              <div className="w-10"></div> {/* Spacer for centering */}
             </div>
             <CardDescription>Not another app. Not another coach. This is personal.</CardDescription>
           </CardHeader>
