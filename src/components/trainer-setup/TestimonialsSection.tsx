@@ -294,21 +294,30 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
                     </Badge>
                   ))}
                 </div>
-                <select
-                  value=""
-                  onChange={(e) => {
-                    if (e.target.value && !(newTestimonial.outcomeTags || []).includes(e.target.value)) {
-                      const updatedTags = [...(newTestimonial.outcomeTags || []), e.target.value];
-                      setNewTestimonial({ ...newTestimonial, outcomeTags: updatedTags });
-                    }
-                  }}
-                  className="w-full text-sm bg-transparent border-none outline-none"
-                >
-                  <option value="">Add outcome tag...</option>
-                  {outcomeTags.filter(tag => !(newTestimonial.outcomeTags || []).includes(tag)).map((tag) => (
-                    <option key={tag} value={tag}>{tag}</option>
-                  ))}
-                </select>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  {outcomeTags.map((tag) => {
+                    const selected = (newTestimonial.outcomeTags || []).includes(tag);
+                    return (
+                      <Button
+                        key={tag}
+                        type="button"
+                        size="sm"
+                        variant={selected ? "default" : "outline"}
+                        onClick={() => {
+                          if (selected) {
+                            const updated = (newTestimonial.outcomeTags || []).filter(t => t !== tag);
+                            setNewTestimonial({ ...newTestimonial, outcomeTags: updated });
+                          } else {
+                            const updated = [...(newTestimonial.outcomeTags || []), tag];
+                            setNewTestimonial({ ...newTestimonial, outcomeTags: updated });
+                          }
+                        }}
+                      >
+                        {tag}
+                      </Button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>

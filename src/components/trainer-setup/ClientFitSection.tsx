@@ -269,22 +269,6 @@ export function ClientFitSection({ formData, updateFormData }: ClientFitSectionP
         />
       </div>
 
-      {/* Max Clients */}
-      <div className="space-y-2">
-        <Label htmlFor="max_clients">Maximum Clients (Optional)</Label>
-        <Input
-          id="max_clients"
-          type="number"
-          value={formData.max_clients || ""}
-          onChange={(e) => updateFormData({ max_clients: e.target.value ? parseInt(e.target.value) : null })}
-          placeholder="e.g., 25"
-          min="1"
-          max="200"
-        />
-        <p className="text-xs text-muted-foreground">
-          Describe the personality traits of clients you work best with
-        </p>
-      </div>
 
     </div>
   );

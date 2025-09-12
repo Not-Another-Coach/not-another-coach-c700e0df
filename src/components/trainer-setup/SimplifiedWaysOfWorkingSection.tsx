@@ -408,35 +408,6 @@ export function SimplifiedWaysOfWorkingSection({
         </Card>
       )}
 
-      {/* Visibility Setting */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Visibility</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Control when clients can see this information
-          </p>
-        </CardHeader>
-        <CardContent>
-          <Select
-            value={formData.wow_visibility || "public"}
-            onValueChange={(value) => updateFormData({ wow_visibility: value })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select visibility" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="public">Public (visible during matching)</SelectItem>
-              <SelectItem value="post_match">Post-match only</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          {availablePackages.length === 0 && (
-            <p className="text-sm text-muted-foreground mt-4 p-3 bg-secondary/50 rounded-md">
-              No packages found. Please create packages in the Rates & Packages section first to enable package-specific Ways of Working assignment.
-            </p>
-          )}
-        </CardContent>
-      </Card>
 
       {/* Completion Checkbox */}
       <Card>

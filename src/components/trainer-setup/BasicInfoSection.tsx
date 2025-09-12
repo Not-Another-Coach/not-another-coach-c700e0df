@@ -244,6 +244,7 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
             selectedCoachingStyles={formData.coaching_styles || []}
             currentDescription={formData.tagline || ''}
             fieldType="tagline"
+            autoGenerate
             onSuggestionSelect={(suggestion) => {
               updateFormData({ tagline: suggestion });
               setTaglineAIHelperOpen(false);
@@ -296,6 +297,7 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
             selectedCoachingStyles={formData.coaching_styles || []}
             currentDescription={formData.how_started || ''}
             fieldType="how_started"
+            autoGenerate
             onSuggestionSelect={(suggestion) => {
               updateFormData({ how_started: suggestion });
               setHowStartedAIHelperOpen(false);
@@ -343,6 +345,7 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
             selectedCoachingStyles={formData.coaching_styles || []}
             currentDescription={formData.philosophy || ''}
             fieldType="philosophy"
+            autoGenerate
             onSuggestionSelect={(suggestion) => {
               updateFormData({ philosophy: suggestion });
               setPhilosophyAIHelperOpen(false);
@@ -390,6 +393,7 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
             selectedCoachingStyles={formData.coaching_styles || []}
             currentDescription={formData.bio || ''}
             fieldType="bio"
+            autoGenerate
             onSuggestionSelect={(suggestion) => {
               updateFormData({ bio: suggestion });
               setBioAIHelperOpen(false);

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +11,7 @@ interface AIDescriptionHelperProps {
   currentDescription: string;
   onSuggestionSelect: (suggestion: string) => void;
   fieldType?: 'tagline' | 'how_started' | 'philosophy' | 'bio';
+  autoGenerate?: boolean;
 }
 
 export function AIDescriptionHelper({ 
@@ -18,7 +19,8 @@ export function AIDescriptionHelper({
   selectedCoachingStyles, 
   currentDescription,
   onSuggestionSelect,
-  fieldType = 'bio'
+  fieldType = 'bio',
+  autoGenerate = false,
 }: AIDescriptionHelperProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -35,6 +37,13 @@ export function AIDescriptionHelper({
       setIsGenerating(false);
     }, 1500);
   };
+
+  // Auto-generate when helper opens in Improve mode
+  useEffect(() => {
+    if (autoGenerate && currentDescription.trim().length > 0 && suggestions.length === 0 && !isGenerating) {
+      generateSuggestions();
+    }
+  }, [autoGenerate]);
 
   const generatePersonalisedSuggestions = (clientTypes: string[], coachingStyles: string[], fieldType: string): string[] => {
     const suggestions = [];
