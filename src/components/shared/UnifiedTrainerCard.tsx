@@ -17,8 +17,8 @@ interface UnifiedTrainer {
   rating: number;
   total_ratings: number;
   profile_photo_url: string;
-  hourly_rate: number;
-  free_discovery_call: boolean;
+  hourly_rate: number | null;
+  free_discovery_call: boolean | null;
   match_score?: number;
 }
 
@@ -43,6 +43,8 @@ export const UnifiedTrainerCard = ({
   showMatchScore = false,
   className = ""
 }: UnifiedTrainerCardProps) => {
+  console.log('🎯 UnifiedTrainerCard rendering:', { trainer: trainer.first_name + ' ' + trainer.last_name, showMatchScore, className });
+  
   return (
     <Card className={`group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 ${className}`}>
       <CardContent className="p-6">
@@ -99,7 +101,9 @@ export const UnifiedTrainerCard = ({
 
           {/* Pricing */}
           <div className="text-right">
-            <div className="text-xl font-bold text-primary">£{trainer.hourly_rate}</div>
+            <div className="text-xl font-bold text-primary">
+              £{trainer.hourly_rate || 0}
+            </div>
             <div className="text-xs text-muted-foreground">/hour</div>
           </div>
         </div>
@@ -132,7 +136,7 @@ export const UnifiedTrainerCard = ({
         )}
 
         {/* Discovery Call Badge */}
-        {trainer.free_discovery_call && (
+        {trainer.free_discovery_call === true && (
           <div className="mb-4">
             <Badge variant="outline" className="text-xs">
               Free discovery call available

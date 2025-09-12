@@ -29,8 +29,8 @@ interface Trainer {
   rating: number;
   total_ratings: number;
   profile_photo_url: string;
-  hourly_rate: number;
-  free_discovery_call: boolean;
+  hourly_rate: number | null;
+  free_discovery_call: boolean | null;
   match_score?: number;
 }
 

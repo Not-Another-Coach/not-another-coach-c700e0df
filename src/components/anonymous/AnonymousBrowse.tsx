@@ -19,8 +19,8 @@ interface Trainer {
   rating: number;
   total_ratings: number;
   profile_photo_url: string;
-  hourly_rate: number;
-  free_discovery_call: boolean;
+  hourly_rate: number | null;
+  free_discovery_call: boolean | null;
 }
 
 export const AnonymousBrowse = () => {
@@ -38,6 +38,7 @@ export const AnonymousBrowse = () => {
   }, []);
 
   const fetchTrainers = async () => {
+    console.log('🔍 AnonymousBrowse: Fetching trainers...');
     try {
       const { data, error } = await supabase
         .from('v_trainers')
@@ -60,6 +61,7 @@ export const AnonymousBrowse = () => {
         .limit(12);
 
       if (error) throw error;
+      console.log('🔍 AnonymousBrowse: Fetched trainers:', data?.length || 0);
       setTrainers(data || []);
     } catch (error) {
       console.error('Error fetching trainers:', error);
