@@ -63,10 +63,12 @@ export default function Home() {
   };
 
   const handleIntentSelection = (intent: 'client' | 'trainer') => {
+    console.log('Intent selected:', intent);
     setUserIntent(intent);
     
     // Navigate based on intent
     if (intent === 'trainer') {
+      console.log('Navigating to /trainer/demo');
       navigate('/trainer/demo');
     } else if (intent === 'client') {
       // Scroll to browse trainers section for clients
