@@ -8,12 +8,14 @@ import { VisibilityConfigProvider } from "@/contexts/VisibilityConfigContext";
 import { SessionNotification } from "@/components/SessionNotification";
 import Home from "./pages/Home";
 import ClientDashboard from "./pages/ClientDashboard";
+import ClientExplore from "./pages/ClientExplore";
 import MyTrainers from "./pages/MyTrainers";
 import Auth from "./pages/Auth";
 import AuthCallback from "./pages/AuthCallback";
 import ClientSurvey from "./pages/ClientSurvey";
 import ClientJourney from "./pages/ClientJourney";
 import SavedTrainers from "./pages/SavedTrainers";
+import AnonymousShortlist from "./pages/AnonymousShortlist";
 import TrainerDashboard from "./pages/TrainerDashboard";
 import TrainerProfileSetup from "./pages/TrainerProfileSetup";
 import TrainerSettings from "./pages/TrainerSettings";
@@ -27,7 +29,6 @@ import { DiagnosticsProvider } from "@/diagnostics/DiagnosticsContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import AdminDiagnostics from "@/pages/AdminDiagnostics";
 import { PaymentManagement } from "./pages/PaymentManagement";
-import ClientExplore from "./pages/ClientExplore";
 import ClientPayments from "./pages/ClientPayments";
 
 // Admin pages
@@ -62,6 +63,7 @@ const App = () => (
                 <Route path="/" element={<Home />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/auth/callback" element={<AuthCallback />} />
+                <Route path="/anonymous-shortlist" element={<AnonymousShortlist />} />
                 <Route path="/client/dashboard" element={<ClientDashboard />} />
                 <Route path="/client/explore" element={<ClientExplore />} />
                 <Route path="/client/payments" element={<ClientPayments />} />

@@ -6,6 +6,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAnonymousSession } from "@/hooks/useAnonymousSession";
+import { QuizResults } from "./QuizResults";
 import { ChevronRight, Target, DollarSign, Users, MapPin, Calendar } from "lucide-react";
 
 interface QuizStep {
@@ -97,6 +98,7 @@ interface MatchQuizProps {
 export const MatchQuiz = ({ onComplete, onClose }: MatchQuizProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
+  const [showResults, setShowResults] = useState(false);
   const { saveQuizResults } = useAnonymousSession();
 
   const currentQuizStep = quizSteps[currentStep];
@@ -125,6 +127,7 @@ export const MatchQuiz = ({ onComplete, onClose }: MatchQuizProps) => {
       };
       
       saveQuizResults(quizResults);
+      setShowResults(true);
       onComplete(quizResults);
     } else {
       setCurrentStep(prev => prev + 1);
@@ -138,6 +141,12 @@ export const MatchQuiz = ({ onComplete, onClose }: MatchQuizProps) => {
   };
 
   const Icon = currentQuizStep.icon;
+
+  if (showResults) {
+    return (
+      <QuizResults onBack={() => setShowResults(false)} />
+    );
+  }
 
   return (
     <div className="max-w-2xl mx-auto">

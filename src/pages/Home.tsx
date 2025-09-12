@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfileByType } from "@/hooks/useProfileByType";
 import { useUserType } from "@/hooks/useUserType";
+import { useDataMigration } from "@/hooks/useDataMigration";
 import { AnonymousBrowse } from "@/components/anonymous/AnonymousBrowse";
 import { MatchQuiz } from "@/components/anonymous/MatchQuiz";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,8 @@ import {
   MessageCircle,
   Calendar,
   ArrowRight,
-  Sparkles
+  Sparkles,
+  Heart
 } from "lucide-react";
 
 export default function Home() {
@@ -30,6 +32,9 @@ export default function Home() {
   
   const [showQuiz, setShowQuiz] = useState(false);
   const [showMatches, setShowMatches] = useState(false);
+
+  // Initialize data migration hook
+  useDataMigration();
 
   useEffect(() => {
     // If user is authenticated, redirect to appropriate dashboard
@@ -83,10 +88,14 @@ export default function Home() {
               
               <div className="flex items-center gap-4">
                 {savedTrainersCount > 0 && (
-                  <Badge variant="secondary" className="gap-2">
-                    <Star className="h-4 w-4" />
+                  <Button
+                    variant="ghost"
+                    onClick={() => navigate('/anonymous-shortlist')}
+                    className="gap-2"
+                  >
+                    <Heart className="h-4 w-4 fill-primary text-primary" />
                     {savedTrainersCount} saved
-                  </Badge>
+                  </Button>
                 )}
                 
                 <Button variant="ghost" onClick={() => navigate('/auth')}>
