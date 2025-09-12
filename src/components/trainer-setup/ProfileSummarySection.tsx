@@ -1,8 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, Clock, AlertCircle, FileText, Award, Shield, Upload } from 'lucide-react';
+import { CheckCircle2, Clock, AlertCircle, FileText, Award, Shield, Upload, X } from 'lucide-react';
 import { useProfessionalDocumentsState } from '@/hooks/useProfessionalDocumentsState';
 import { useEnhancedTrainerVerification } from '@/hooks/useEnhancedTrainerVerification';
+import { useTrainerProfile } from '@/hooks/useTrainerProfile';
 
 const CheckTypeConfig = {
   cimspa_membership: {
@@ -28,15 +29,20 @@ const StatusConfig = {
   rejected: { icon: AlertCircle, color: 'bg-red-100 text-red-800 border-red-200', label: 'Rejected' },
   expired: { icon: AlertCircle, color: 'bg-gray-100 text-gray-800 border-gray-200', label: 'Expired' },
   not_started: { icon: Upload, color: 'bg-gray-100 text-gray-600 border-gray-200', label: 'Not Started' },
+  not_applicable: { icon: X, color: 'bg-slate-100 text-slate-700 border-slate-200', label: 'Not Applicable' },
 };
 
 export const ProfileSummarySection = () => {
-  const { getCompletionStatus } = useProfessionalDocumentsState();
+  const { getCompletionStatus, notApplicable } = useProfessionalDocumentsState();
   const { checks, getCheckByType } = useEnhancedTrainerVerification();
+  const { profile } = useTrainerProfile();
   
   const completionStatus = getCompletionStatus();
 
   const getDocumentStatus = (checkType: string) => {
+    // Check if marked as not applicable first
+    if (notApplicable[checkType]) return 'not_applicable';
+    
     const check = getCheckByType(checkType as any);
     if (!check) return 'not_started';
     return check.status;
@@ -169,6 +175,37 @@ export const ProfileSummarySection = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Qualification Certificates for Verification */}
+      {profile?.uploaded_certificates && Array.isArray(profile.uploaded_certificates) && profile.uploaded_certificates.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Qualification Certificates</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              The following qualification certificates have been uploaded and are awaiting admin verification:
+            </p>
+            {profile.uploaded_certificates.map((cert: any, index: number) => (
+              <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                <div className="flex items-center gap-3">
+                  <FileText className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <h4 className="font-medium">{cert.qualification || `Certificate ${index + 1}`}</h4>
+                    <p className="text-sm text-muted-foreground">
+                      {cert.originalName || cert.file_name || 'Uploaded certificate'}
+                    </p>
+                  </div>
+                </div>
+                <Badge className="bg-amber-100 text-amber-800 border-amber-200">
+                  <Clock className="h-3 w-3 mr-1" />
+                  Pending Review
+                </Badge>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Verification Benefits Reminder */}
       <Card>

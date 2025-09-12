@@ -127,15 +127,18 @@ export const useProfessionalDocumentsState = () => {
       const isNotApplicableSet = notApplicable[checkType];
       const anyFieldFilled = isAnyFieldFilled(checkType);
 
-      // Check if document is ready for submission (has data or is not applicable)
-      const isReadyForSubmission = existingCheck?.status === 'verified' || 
-                                  existingCheck?.status === 'pending' || 
-                                  isNotApplicableSet ||
-                                  (existingCheck && anyFieldFilled);
-
-      if (isReadyForSubmission) {
+      // Document is considered completed if:
+      // - It's verified or pending (submitted for review)
+      // - It's marked as not applicable
+      if (existingCheck?.status === 'verified' || 
+          existingCheck?.status === 'pending' || 
+          isNotApplicableSet) {
         completedCount++;
-      } else if (anyFieldFilled || existingCheck) {
+      } 
+      // Document is partial if:
+      // - There's form data filled but not submitted
+      // - There's an existing check in draft or rejected state
+      else if (anyFieldFilled || (existingCheck && ['draft', 'rejected'].includes(existingCheck.status))) {
         partialCount++;
       }
     });
