@@ -69,9 +69,11 @@ export default function Auth() {
     }
   }, []);
 
-  // Check if this is a password recovery URL
+  // Check if this is a password recovery URL or signup URL
   useEffect(() => {
     const type = searchParams.get('type');
+    const signup = searchParams.get('signup');
+    
     if (type === 'recovery') {
       setShowPasswordReset(true);
       setShowForgotPassword(false);
@@ -79,6 +81,8 @@ export default function Auth() {
         title: "Password Reset",
         description: "Please enter your new password below.",
       });
+    } else if (signup === 'true') {
+      setActiveTab('signup');
     }
   }, [searchParams]);
 
