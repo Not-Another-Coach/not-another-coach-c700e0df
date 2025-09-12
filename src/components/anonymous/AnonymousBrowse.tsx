@@ -120,7 +120,7 @@ export const AnonymousBrowse = () => {
             <div className="flex items-center gap-2">
               <Heart className="h-5 w-5 fill-primary text-primary" />
               <span className="font-medium">
-                You've shortlisted {savedTrainersCount} trainer{savedTrainersCount > 1 ? 's' : ''}
+                You've saved {savedTrainersCount} trainer{savedTrainersCount > 1 ? 's' : ''}
               </span>
             </div>
             <Button variant="outline" size="sm">
@@ -156,10 +156,9 @@ export const AnonymousBrowse = () => {
               onViewProfile={() => console.log('View profile:', trainer.id)}
               onMessage={() => handleMessageClick(trainer.id)}
               onBookDiscoveryCall={() => handleBookClick(trainer.id)}
-              cardState={isTrainerSaved(trainer.id) ? 'shortlisted' : 'default'}
-              // Use shortlist functionality for anonymous users
+              cardState={isTrainerSaved(trainer.id) ? 'saved' : 'default'}
+              // Override save behavior for anonymous users to show prompt
               onAddToShortlist={() => handleSaveClick(trainer.id)}
-              isShortlisted={isTrainerSaved(trainer.id)}
             />
           );
         })}

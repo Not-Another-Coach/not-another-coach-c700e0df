@@ -34,7 +34,7 @@ export const SaveTrainerPrompt = ({
             <DialogTitle>Save {trainerName} to your shortlist?</DialogTitle>
           </div>
           <DialogDescription className="text-left">
-            Keep track of trainers you're interested in. Your shortlisted trainers will be 
+            Keep track of trainers you're interested in. Your saved trainers will be 
             stored locally for 7 days.
           </DialogDescription>
         </DialogHeader>
@@ -57,7 +57,7 @@ export const SaveTrainerPrompt = ({
           </Button>
           <Button onClick={onConfirm} className="w-full sm:w-auto">
             <Heart className="h-4 w-4 mr-2" />
-            Add to Shortlist
+            Save Trainer
           </Button>
         </DialogFooter>
 
