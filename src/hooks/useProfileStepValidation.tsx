@@ -245,10 +245,6 @@ export const useProfileStepValidation = () => {
     
     const stepFields = stepFieldMapping[step] || [];
     
-    if (stepFields.length === 0) {
-      return 'completed'; // Steps with no required fields are considered completed
-    }
-
     // Special completion logic for specific steps
     if (step === 10) {
       // Working Hours & New Client Availability - check availability_status
@@ -264,8 +260,12 @@ export const useProfileStepValidation = () => {
     if ([6, 7, 9, 13].includes(step)) {
       // Check if these steps actually have content
       if (step === 6) {
-        // Discovery calls - check if settings are configured
-        return formData.free_discovery_call !== undefined ? 'completed' : 'not_started';
+        // Discovery calls - completed when calendar link is set AND discovery calls are offered
+        const hasCalendar = typeof formData.calendar_link === 'string' && formData.calendar_link.trim().length > 0;
+        const offersDiscovery = formData.free_discovery_call === true;
+        if (hasCalendar && offersDiscovery) return 'completed';
+        if (hasCalendar || offersDiscovery) return 'partial';
+        return 'not_started';
       }
       if (step === 7) {
         // Testimonials - check if any exist
@@ -290,6 +290,11 @@ export const useProfileStepValidation = () => {
       
       if (formData.wow_setup_completed === true) return 'completed';
       if (hasActivities) return 'partial';
+      return 'not_started';
+    }
+
+    // If no required fields for this step and no special content, treat as not started
+    if (stepFields.length === 0) {
       return 'not_started';
     }
 
