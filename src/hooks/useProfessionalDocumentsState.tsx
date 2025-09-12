@@ -122,10 +122,16 @@ export const useProfessionalDocumentsState = () => {
     let completedCount = 0;
     let partialCount = 0;
 
+    console.log('🔍 Prof Documents - Checking completion status');
+    console.log('🔍 Prof Documents - Available checks:', checks);
+    console.log('🔍 Prof Documents - Not applicable:', notApplicable);
+
     checkTypes.forEach(checkType => {
       const existingCheck = checks.find(check => check.check_type === checkType);
       const isNotApplicableSet = notApplicable[checkType];
       const anyFieldFilled = isAnyFieldFilled(checkType);
+
+      console.log(`🔍 Prof Documents - ${checkType}:`, { existingCheck: !!existingCheck, status: existingCheck?.status, isNotApplicableSet, anyFieldFilled });
 
       // Document is considered completed if:
       // - It's verified or pending (submitted for review)
@@ -143,9 +149,10 @@ export const useProfessionalDocumentsState = () => {
       }
     });
 
-    if (completedCount === checkTypes.length) return 'completed';
-    if (partialCount > 0 || completedCount > 0) return 'partial';
-    return 'not_started';
+    const result = completedCount === checkTypes.length ? 'completed' : (partialCount > 0 || completedCount > 0) ? 'partial' : 'not_started';
+    console.log('🔍 Prof Documents - Final status:', result, { completedCount, partialCount });
+    
+    return result;
   };
 
   const canSubmitForReview = () => {

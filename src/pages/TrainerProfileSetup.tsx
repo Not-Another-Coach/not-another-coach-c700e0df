@@ -409,12 +409,15 @@ const TrainerProfileSetup = () => {
         return hasPackages ? 'completed' : 'not_started';
         
       case 6: // Discovery Calls
+        console.log('🔍 Discovery Call Debug - Settings:', discoverySettings);
         const offersDiscovery = !!discoverySettings?.offers_discovery_call;
         const hasCalendarLink = !!formData.calendar_link?.trim();
         const hasDcSlots = !!discoverySettings?.availability_schedule && 
           Object.values(discoverySettings.availability_schedule).some((d: any) => 
             d?.enabled === true && Array.isArray(d?.slots) && d.slots.length > 0
           );
+        
+        console.log('🔍 Discovery Call Debug - Values:', { offersDiscovery, hasCalendarLink, hasDcSlots });
         
         // Completed if discovery calls are offered and either a calendar link or in-app slots are configured
         if (offersDiscovery && (hasCalendarLink || hasDcSlots)) return 'completed';
@@ -451,6 +454,7 @@ const TrainerProfileSetup = () => {
         return 'not_started';
         
       case 10: // Working Hours & New Client Availability
+        console.log('🔍 Availability Debug - Settings:', availabilitySettings);
         if (!availabilitySettings) return 'not_started';
         
         // Any valid availability status is considered configured (accepting, waitlist, or unavailable)
@@ -458,9 +462,11 @@ const TrainerProfileSetup = () => {
           ['accepting', 'waitlist', 'unavailable'].includes(availabilitySettings.availability_status);
         
         const hasWorkingHours = availabilitySettings.availability_schedule && 
-          Object.values(availabilitySettings.availability_schedule).some(day => 
-            day.enabled && day.slots && day.slots.length > 0
+          Object.values(availabilitySettings.availability_schedule).some((day: any) => 
+            day?.enabled && day?.slots && day.slots.length > 0
           );
+        
+        console.log('🔍 Availability Debug - Values:', { hasAvailabilityStatus, hasWorkingHours });
         
         const hasFullConfiguration = hasAvailabilityStatus && hasWorkingHours;
         const hasPartialConfiguration = hasAvailabilityStatus || hasWorkingHours;
@@ -471,6 +477,7 @@ const TrainerProfileSetup = () => {
         return (formData.terms_agreed && formData.accuracy_confirmed) ? 'completed' : 'not_started';
         
       case 12: // Professional Documents
+        console.log('🔍 Prof Documents Debug - Status:', getProfDocumentsStatus());
         return getProfDocumentsStatus();
         
       case 13: // Verification
@@ -478,11 +485,16 @@ const TrainerProfileSetup = () => {
         const checkTypes = ['cimspa_membership', 'insurance_proof', 'first_aid_certification'];
         const verificationChecks = checkTypes.map(type => getCheckByType(type as any)).filter(Boolean);
         
+        console.log('🔍 Verification Debug - Checks found:', verificationChecks.length);
+        console.log('🔍 Verification Debug - Check details:', verificationChecks);
+        
         if (verificationChecks.length === 0) return 'not_started';
         
         const verifiedCount = verificationChecks.filter(check => check?.status === 'verified').length;
         const pendingCount = verificationChecks.filter(check => check?.status === 'pending').length;
         const submittedCount = verificationChecks.filter(check => check?.status === 'pending' || check?.status === 'verified').length;
+        
+        console.log('🔍 Verification Debug - Counts:', { verifiedCount, pendingCount, submittedCount });
         
         // All checks verified = completed (green)
         if (verifiedCount === checkTypes.length) return 'completed';
