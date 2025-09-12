@@ -471,24 +471,24 @@ const ClientSurvey = () => {
               <p className="text-xs sm:text-sm text-muted-foreground">
                 {isFullyComplete() 
                   ? 'Manage your fitness preferences' 
-                  : `Step ${currentStep} of ${totalSteps}: ${stepTitles[currentStep - 1]}`
+                  : 'Tell us about your fitness goals and preferences'
                 }
               </p>
             </div>
-          </div>
-          <div className="flex items-center justify-between sm:justify-end gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/')}
-              className="sm:hidden"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => handleSave()}>
-              <Save className="h-4 w-4 sm:mr-2" />
-              <span className="hidden sm:inline">Save Progress</span>
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/')}
+                className="sm:hidden"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => handleSave()}>
+                <Save className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Save Progress</span>
+              </Button>
+            </div>
           </div>
         </div>
       </div>
