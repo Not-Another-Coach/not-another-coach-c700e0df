@@ -63,8 +63,7 @@ export default function AnonymousSaved() {
           free_discovery_call
         `)
         .in('id', session.savedTrainers)
-        .eq('profile_published', true)
-        .eq('is_verified', true);
+        .eq('profile_published', true);
 
       if (error) throw error;
       setTrainers(data || []);

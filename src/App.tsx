@@ -64,6 +64,7 @@ const App = () => (
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/auth/callback" element={<AuthCallback />} />
                 <Route path="/anonymous-saved" element={<AnonymousSaved />} />
+                <Route path="/anonymous-shortlist" element={<AnonymousSaved />} />
                 <Route path="/client/dashboard" element={<ClientDashboard />} />
                 <Route path="/client/explore" element={<ClientExplore />} />
                 <Route path="/client/payments" element={<ClientPayments />} />

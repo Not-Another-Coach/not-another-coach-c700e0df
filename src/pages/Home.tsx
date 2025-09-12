@@ -87,7 +87,7 @@ export default function Home() {
               {savedTrainersCount > 0 && (
                 <Button
                   variant="ghost"
-                  onClick={() => navigate('/anonymous-shortlist')}
+                  onClick={() => navigate('/anonymous-saved')}
                   className="gap-2"
                 >
                   <Heart className="h-4 w-4 fill-primary text-primary" />
