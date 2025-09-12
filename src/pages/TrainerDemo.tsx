@@ -6,6 +6,7 @@ import { EarningsCalculator } from '@/components/trainer-demo/EarningsCalculator
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { AppLogo } from '@/components/ui/app-logo';
 import { ArrowRight, MessageSquare, Users, TrendingUp, Star, Shield, Zap } from 'lucide-react';
 
 export default function TrainerDemo() {
@@ -35,9 +36,7 @@ export default function TrainerDemo() {
         <div className="mx-auto px-6 lg:px-8 xl:px-12 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Link to="/" className="text-2xl font-bold text-primary">
-                NAC
-              </Link>
+              <AppLogo onClick={() => navigate('/')} />
               <div className="text-muted-foreground">Coach Demo</div>
               
               {/* Demo Mode Badge */}
