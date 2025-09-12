@@ -6,14 +6,16 @@ import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/ui/password-input';
 import { PasswordCriteria } from '@/components/ui/password-criteria';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from '@/hooks/use-toast';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { AppLogo } from '@/components/ui/app-logo';
+import { EnhancedAuthLayout } from '@/components/auth/EnhancedAuthLayout';
+import { MotivationalHeader } from '@/components/auth/MotivationalHeader';
+import { BrandedFormField } from '@/components/auth/BrandedFormField';
+import { SocialLoginPlaceholder } from '@/components/auth/SocialLoginPlaceholder';
 
 
 export default function Auth() {
@@ -380,252 +382,257 @@ export default function Auth() {
 
   console.log('About to render Auth component UI');
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md mx-auto">
-        {/* Main Auth Card */}
-        <Card className="w-full">
-          <CardHeader className="text-center">
-            <div className="flex items-center justify-between mb-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate('/')}
-                className="p-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-              <AppLogo size="lg" showText={false} />
-              <div className="w-10"></div> {/* Spacer for centering */}
-            </div>
-            <CardDescription>Not another app. Not another coach. This is personal.</CardDescription>
-          </CardHeader>
-          <CardContent>
+    <EnhancedAuthLayout>
             {showPasswordReset ? (
-              <div className="space-y-4">
-                <div className="text-center mb-4">
-                  <h3 className="text-lg font-semibold">Set New Password</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Enter your new password below
-                  </p>
-                </div>
+              <div className="space-y-6">
+                <MotivationalHeader context="reset" />
 
                 <form onSubmit={handleUpdatePassword} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="new-password">New Password</Label>
-                    <PasswordInput
-                      id="new-password"
-                      placeholder="Enter your new password"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      required
-                    />
-                    {newPassword && (
-                      <PasswordCriteria password={newPassword} className="mt-2" />
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="confirm-new-password">Confirm New Password</Label>
-                    <PasswordInput
-                      id="confirm-new-password"
-                      placeholder="Confirm your new password"
-                      value={confirmNewPassword}
-                      onChange={(e) => setConfirmNewPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
+                  <BrandedFormField
+                    id="new-password"
+                    name="newPassword"
+                    type="password"
+                    label="New Password"
+                    placeholder="Enter your new password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                  />
+                  {newPassword && (
+                    <PasswordCriteria password={newPassword} className="mt-2" />
+                  )}
+                  
+                  <BrandedFormField
+                    id="confirm-new-password"
+                    name="confirmNewPassword"
+                    type="password"
+                    label="Confirm New Password"
+                    placeholder="Confirm your new password"
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                    required
+                  />
+                  
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-gradient-primary hover:shadow-primary transition-all duration-200" 
+                    disabled={isLoading}
+                    size="lg"
+                  >
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Update Password
                   </Button>
                 </form>
               </div>
             ) : showForgotPassword ? (
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div className="flex items-center gap-2 mb-4">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowForgotPassword(false)}
-                    className="p-0 h-auto"
+                    className="p-0 h-auto text-card-foreground/70 hover:text-card-foreground"
                   >
                     <ArrowLeft className="h-4 w-4 mr-1" />
                     Back to Login
                   </Button>
                 </div>
                 
-                <div className="text-center mb-4">
-                  <h3 className="text-lg font-semibold">Reset Your Password</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Enter your email address and we'll send you a reset link
-                  </p>
-                </div>
+                <MotivationalHeader context="forgot" />
 
                 <form onSubmit={handlePasswordReset} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="reset-email">Email</Label>
-                    <Input
-                      id="reset-email"
-                      type="email"
-                      placeholder="Enter your email address"
-                      value={resetEmail}
-                      onChange={(e) => setResetEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
+                  <BrandedFormField
+                    id="reset-email"
+                    name="resetEmail"
+                    type="email"
+                    label="Email"
+                    placeholder="Enter your email address"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    required
+                  />
+                  
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-gradient-primary hover:shadow-primary transition-all duration-200" 
+                    disabled={isLoading}
+                    size="lg"
+                  >
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Send Reset Link
                   </Button>
                 </form>
               </div>
             ) : (
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="login">Login</TabsTrigger>
-                  <TabsTrigger value="signup">Sign Up</TabsTrigger>
-                </TabsList>
+              <div className="space-y-6">
+                <MotivationalHeader 
+                  context={activeTab === 'login' ? 'login' : 'signup'} 
+                  userType={signupForm.userType}
+                />
                 
-                <TabsContent value="login" className="space-y-4">
-                  <form onSubmit={handleLogin} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="login-email">Email</Label>
-                      <Input
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                  <TabsList className="grid w-full grid-cols-2 bg-white/10 border border-white/20">
+                    <TabsTrigger 
+                      value="login" 
+                      className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                    >
+                      Login
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="signup"
+                      className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                    >
+                      Sign Up
+                    </TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="login" className="space-y-6 mt-6">
+                    <form onSubmit={handleLogin} className="space-y-4">
+                      <BrandedFormField
                         id="login-email"
+                        name="email"
                         type="email"
+                        label="Email"
                         placeholder="Enter your email"
                         value={loginForm.email}
                         onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
                         required
                       />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="login-password">Password</Label>
-                      <PasswordInput
+                      <BrandedFormField
                         id="login-password"
+                        name="password"
+                        type="password"
+                        label="Password"
                         placeholder="Enter your password"
                         value={loginForm.password}
                         onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
                         required
-                       />
-                     </div>
-                     
-                     <div className="flex items-center space-x-2">
-                       <Checkbox 
-                         id="remember-me"
-                         checked={rememberMe}
-                         onCheckedChange={(checked) => setRememberMe(checked as boolean)}
-                       />
-                       <Label 
-                         htmlFor="remember-me" 
-                         className="text-sm font-normal cursor-pointer"
-                       >
-                         Remember me
-                       </Label>
-                     </div>
-                     
-                     <Button type="submit" className="w-full" disabled={isLoading}>
-                       {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                       Login
-                     </Button>
-                  </form>
-                  
-                   <div className="text-center space-y-2">
-                     <Button
-                       variant="link"
-                       className="text-sm text-muted-foreground"
-                       onClick={() => setShowForgotPassword(true)}
-                     >
-                       Forgot your password?
-                     </Button>
-                     
-                     {showResendConfirmation && (
-                       <div className="pt-2 border-t">
-                         <p className="text-sm text-muted-foreground mb-2">
-                           Didn't receive your confirmation email?
-                         </p>
-                         <Button
-                           variant="outline"
-                           size="sm"
-                           onClick={handleResendConfirmation}
-                           disabled={isLoading}
-                           className="w-full"
-                         >
-                           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                           Resend Confirmation Email
-                         </Button>
-                       </div>
-                     )}
-                   </div>
+                      />
+                      
+                      <div className="flex items-center space-x-2">
+                        <Checkbox 
+                          id="remember-me"
+                          checked={rememberMe}
+                          onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                        />
+                        <Label 
+                          htmlFor="remember-me" 
+                          className="text-sm font-normal cursor-pointer"
+                        >
+                          Remember me
+                        </Label>
+                      </div>
+                      
+                      <Button 
+                        type="submit" 
+                        className="w-full bg-gradient-primary hover:shadow-primary transition-all duration-200" 
+                        disabled={isLoading}
+                        size="lg"
+                      >
+                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Login
+                      </Button>
+                    </form>
+                    
+                    <div className="text-center space-y-2">
+                      <Button
+                        variant="link"
+                        className="text-sm text-card-foreground/70 hover:text-card-foreground"
+                        onClick={() => setShowForgotPassword(true)}
+                      >
+                        Forgot your password?
+                      </Button>
+                      
+                      {showResendConfirmation && (
+                        <div className="pt-4 border-t border-white/20">
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Didn't receive your confirmation email?
+                          </p>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleResendConfirmation}
+                            disabled={isLoading}
+                            className="w-full bg-white/5 border-white/20 hover:bg-white/10"
+                          >
+                            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Resend Confirmation Email
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <SocialLoginPlaceholder />
                 </TabsContent>
                 
-                 <TabsContent value="signup" className="space-y-4">
-                   <form onSubmit={handleSignup} className="space-y-4">
-                     {/* Show name fields and user type only for non-contextual signup */}
-                     {!isContextualSignup && (
-                       <>
-                         <div className="grid grid-cols-2 gap-4">
-                           <div className="space-y-2">
-                             <Label htmlFor="signup-firstname">First Name</Label>
-                             <Input
-                               id="signup-firstname"
-                               placeholder="First name"
-                               value={signupForm.firstName}
-                               onChange={(e) => setSignupForm({ ...signupForm, firstName: e.target.value })}
-                               required
-                             />
-                           </div>
-                           <div className="space-y-2">
-                             <Label htmlFor="signup-lastname">Last Name</Label>
-                             <Input
-                               id="signup-lastname"
-                               placeholder="Last name"
-                               value={signupForm.lastName}
-                               onChange={(e) => setSignupForm({ ...signupForm, lastName: e.target.value })}
-                               required
-                             />
-                           </div>
-                         </div>
-                         
-                         <div className="space-y-2">
-                           <Label htmlFor="signup-usertype">I am a...</Label>
-                           <Select value={signupForm.userType} onValueChange={(value: 'client' | 'trainer') => setSignupForm({ ...signupForm, userType: value })}>
-                             <SelectTrigger>
-                               <SelectValue />
-                             </SelectTrigger>
-                             <SelectContent>
-                               <SelectItem value="client">Client looking for a coach</SelectItem>
-                               <SelectItem value="trainer">Coach</SelectItem>
-                             </SelectContent>
-                           </Select>
-                         </div>
-                       </>
-                     )}
+                  <TabsContent value="signup" className="space-y-6 mt-6">
+                    <form onSubmit={handleSignup} className="space-y-4">
+                      {/* Show name fields and user type only for non-contextual signup */}
+                      {!isContextualSignup && (
+                        <>
+                          <div className="grid grid-cols-2 gap-4">
+                            <BrandedFormField
+                              id="signup-firstname"
+                              name="firstName"
+                              type="text"
+                              label="First Name"
+                              placeholder="First name"
+                              value={signupForm.firstName}
+                              onChange={(e) => setSignupForm({ ...signupForm, firstName: e.target.value })}
+                              required
+                            />
+                            <BrandedFormField
+                              id="signup-lastname"
+                              name="lastName"
+                              type="text"
+                              label="Last Name"
+                              placeholder="Last name"
+                              value={signupForm.lastName}
+                              onChange={(e) => setSignupForm({ ...signupForm, lastName: e.target.value })}
+                              required
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="signup-usertype" className="text-sm font-medium">I am a...</Label>
+                            <Select value={signupForm.userType} onValueChange={(value: 'client' | 'trainer') => setSignupForm({ ...signupForm, userType: value })}>
+                              <SelectTrigger className="rounded-lg border-2 hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="client">Client looking for a coach</SelectItem>
+                                <SelectItem value="trainer">Coach</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </>
+                      )}
+                      
+                      {/* Show user type indicator for contextual signup */}
+                      {isContextualSignup && (
+                        <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
+                          <p className="text-sm text-primary font-medium">
+                            Signing up as: {signupContext === 'client' ? 'Client looking for a coach' : 'Coach'}
+                          </p>
+                        </div>
+                      )}
                      
-                     {/* Show user type indicator for contextual signup */}
-                     {isContextualSignup && (
-                       <div className="p-3 bg-primary/10 rounded-lg">
-                         <p className="text-sm text-primary font-medium">
-                           Signing up as: {signupContext === 'client' ? 'Client looking for a coach' : 'Coach'}
-                         </p>
-                       </div>
-                     )}
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-email">Email</Label>
-                      <Input
+                      <BrandedFormField
                         id="signup-email"
+                        name="email"
                         type="email"
+                        label="Email"
                         placeholder="Enter your email"
                         value={signupForm.email}
                         onChange={(e) => setSignupForm({ ...signupForm, email: e.target.value })}
                         required
                       />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-password">Password</Label>
-                      <PasswordInput
+                     
+                      <BrandedFormField
                         id="signup-password"
+                        name="password"
+                        type="password"
+                        label="Password"
                         placeholder="Create a password"
                         value={signupForm.password}
                         onChange={(e) => setSignupForm({ ...signupForm, password: e.target.value })}
@@ -634,30 +641,34 @@ export default function Auth() {
                       {signupForm.password && (
                         <PasswordCriteria password={signupForm.password} className="mt-2" />
                       )}
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-confirm">Confirm Password</Label>
-                      <PasswordInput
+                     
+                      <BrandedFormField
                         id="signup-confirm"
+                        name="confirmPassword"
+                        type="password"
+                        label="Confirm Password"
                         placeholder="Confirm your password"
                         value={signupForm.confirmPassword}
                         onChange={(e) => setSignupForm({ ...signupForm, confirmPassword: e.target.value })}
                         required
                       />
-                    </div>
+                     
+                      <Button 
+                        type="submit" 
+                        className="w-full bg-gradient-primary hover:shadow-primary transition-all duration-200" 
+                        disabled={isLoading}
+                        size="lg"
+                      >
+                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Create Account
+                      </Button>
+                    </form>
                     
-                    <Button type="submit" className="w-full" disabled={isLoading}>
-                      {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Create Account
-                    </Button>
-                  </form>
-                </TabsContent>
-              </Tabs>
+                    <SocialLoginPlaceholder />
+                  </TabsContent>
+                </Tabs>
+              </div>
             )}
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+        </EnhancedAuthLayout>
   );
 }
