@@ -148,7 +148,7 @@ export const AnonymousBrowse = () => {
                 <EnhancedTrainerCard
                   key={trainer.id}
                   trainer={enhancedTrainer}
-                  config="grid"
+                  config="anonymous"
                   initialView="instagram"
                   onViewProfile={() => handleViewProfileClick(trainer.id)}
                   onMessage={() => handleMessageClick(trainer.id)}

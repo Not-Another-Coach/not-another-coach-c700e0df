@@ -219,6 +219,14 @@ export const TRAINER_CARD_CONFIGS: Record<string, TrainerCardConfig> = {
     hideViewControls: true,
     availableViews: ['features']
   },
+  anonymous: {
+    layout: 'grid',
+    allowViewSwitching: true,
+    showEngagementBadge: false,
+    compactActions: true,
+    hideViewControls: false,
+    availableViews: ['instagram', 'features']
+  },
   grid: {
     layout: 'grid',
     allowViewSwitching: false,
