@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { LocationAutocompleteField } from "@/components/ui/LocationAutocompleteField";
 import { useAnonymousSession } from "@/hooks/useAnonymousSession";
 import { QuizResults } from "./QuizResults";
 import { ChevronRight, Target, DollarSign, Users, MapPin, Calendar } from "lucide-react";
@@ -14,7 +16,7 @@ interface QuizStep {
   title: string;
   icon: React.ComponentType<any>;
   question: string;
-  type: 'single' | 'multiple';
+  type: 'single' | 'multiple' | 'location_input';
   options: { value: string; label: string; description?: string }[];
 }
 
@@ -38,13 +40,13 @@ const quizSteps: QuizStep[] = [
     id: 'budget',
     title: 'Budget',
     icon: DollarSign,
-    question: 'What\'s your budget for personal training?',
+    question: 'What\'s your monthly budget for personal training?',
     type: 'single',
     options: [
-      { value: '0-50', label: '£0-50/session', description: 'Budget-friendly options' },
-      { value: '50-80', label: '£50-80/session', description: 'Mid-range investment' },
-      { value: '80-120', label: '£80-120/session', description: 'Premium training' },
-      { value: '120+', label: '£120+/session', description: 'Luxury coaching' },
+      { value: '0-200', label: '£0-200/month', description: 'Budget-friendly options' },
+      { value: '200-400', label: '£200-400/month', description: 'Mid-range investment' },
+      { value: '400-600', label: '£400-600/month', description: 'Premium training' },
+      { value: '600+', label: '£600+/month', description: 'Luxury coaching' },
     ]
   },
   {
@@ -79,14 +81,8 @@ const quizSteps: QuizStep[] = [
     title: 'Location',
     icon: MapPin,
     question: 'Where would you like to train?',
-    type: 'single',
-    options: [
-      { value: 'london', label: 'London', description: 'Central London and surrounding areas' },
-      { value: 'manchester', label: 'Manchester', description: 'Manchester and Greater Manchester' },
-      { value: 'birmingham', label: 'Birmingham', description: 'Birmingham and West Midlands' },
-      { value: 'online', label: 'Online Only', description: 'Virtual training sessions' },
-      { value: 'other', label: 'Other UK Location', description: 'Specify your area' },
-    ]
+    type: 'location_input',
+    options: []
   }
 ];
 
@@ -99,6 +95,7 @@ export const MatchQuiz = ({ onComplete, onClose }: MatchQuizProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
   const [showResults, setShowResults] = useState(false);
+  const [isOnlineSelected, setIsOnlineSelected] = useState(false);
   const { saveQuizResults } = useAnonymousSession();
 
   const currentQuizStep = quizSteps[currentStep];
@@ -182,7 +179,39 @@ export const MatchQuiz = ({ onComplete, onClose }: MatchQuizProps) => {
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {currentQuizStep.type === 'single' ? (
+          {currentQuizStep.type === 'location_input' ? (
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="online-training"
+                  checked={isOnlineSelected}
+                  onCheckedChange={(checked) => {
+                    setIsOnlineSelected(checked as boolean);
+                    if (checked) {
+                      handleAnswer(currentQuizStep.id, 'online');
+                    } else {
+                      handleAnswer(currentQuizStep.id, '');
+                    }
+                  }}
+                />
+                <Label htmlFor="online-training" className="text-sm font-medium">
+                  I prefer online training only
+                </Label>
+              </div>
+              
+              {!isOnlineSelected && (
+                <div>
+                  <Label htmlFor="location-input" className="text-sm font-medium">
+                    Enter your city or location
+                  </Label>
+                  <LocationAutocompleteField
+                    value={answers[currentQuizStep.id] as string || ''}
+                    onChange={(value) => handleAnswer(currentQuizStep.id, value)}
+                  />
+                </div>
+              )}
+            </div>
+          ) : currentQuizStep.type === 'single' ? (
             <RadioGroup
               value={answers[currentQuizStep.id] as string || ''}
               onValueChange={(value) => handleAnswer(currentQuizStep.id, value)}
