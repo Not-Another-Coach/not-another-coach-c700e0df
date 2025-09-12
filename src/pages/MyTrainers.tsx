@@ -403,16 +403,17 @@ export default function MyTrainers() {
                              onMoveToSaved={handleSaveTrainer}
                              onRemoveCompletely={handleRemoveFromShortlist}
                            />
-                         {!showComparison && (
-                           <div className="absolute top-2 right-2">
-                             <input
-                               type="checkbox"
-                               checked={selectedForComparison.includes(trainer.id)}
-                               onChange={() => handleComparisonToggle(trainer.id)}
-                               className="rounded"
-                             />
-                           </div>
-                         )}
+                          {!showComparison && (
+                            <div className="absolute top-2 right-2 z-10">
+                              <input
+                                type="checkbox"
+                                checked={selectedForComparison.includes(trainer.id)}
+                                onChange={() => handleComparisonToggle(trainer.id)}
+                                className="h-4 w-4 rounded border border-input bg-background text-primary focus:ring-2 focus:ring-primary focus:ring-offset-2 cursor-pointer"
+                                disabled={!selectedForComparison.includes(trainer.id) && selectedForComparison.length >= 4}
+                              />
+                            </div>
+                          )}
                        </div>
                      ))
                   ) : (

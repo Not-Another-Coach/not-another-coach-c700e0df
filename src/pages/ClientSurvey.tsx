@@ -116,9 +116,11 @@ const ClientSurvey = () => {
         return;
       }
       
-      // Only redirect if both survey completion flags are true to avoid loops
+      // Only redirect if both survey completion flags are true to avoid loops  
+      // BUT allow users to return to edit their preferences even after completion
       if (profile.client_survey_completed && profile.quiz_completed) {
-        navigate('/client/dashboard');
+        // Allow editing preferences - don't redirect back to dashboard
+        // Users can access this page to modify their survey responses
         return;
       }
     }
