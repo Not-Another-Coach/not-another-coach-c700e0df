@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useEnhancedTrainerVerification } from './useEnhancedTrainerVerification';
+import { useAuth } from './useAuth';
 
 interface DocumentFormData {
   provider?: string;
@@ -52,7 +53,7 @@ export const useProfessionalDocumentsState = () => {
     }));
   };
 
-  const updateNotApplicable = async (checkType: string, isNotApplicable: boolean) => {
+  const updateNotApplicable = (checkType: string, isNotApplicable: boolean) => {
     setNotApplicable(prev => ({
       ...prev,
       [checkType]: isNotApplicable,
@@ -64,17 +65,8 @@ export const useProfessionalDocumentsState = () => {
       [checkType]: { ...(prev[checkType] || {}), not_applicable: isNotApplicable },
     }));
 
-    // Persist the choice so it's remembered across sessions
-    try {
-      if (isNotApplicable) {
-        await submitVerificationCheck(checkType as any, { not_applicable: true }, false, true);
-      } else {
-        // Revert to a draft state when unsetting not applicable
-        await submitVerificationCheck(checkType as any, { not_applicable: false }, true, true);
-      }
-    } catch (error) {
-      console.error('Error updating not_applicable flag:', error);
-    }
+    // Do NOT persist to DB as a status; the DB enum doesn't support 'not_applicable'
+    // This avoids submission errors and keeps the flag local for completion logic.
   };
 
   const isAnyFieldFilled = (checkType: string): boolean => {

@@ -653,6 +653,7 @@ const TrainerProfileSetup = () => {
           pendingAvailabilityChanges.status,
           pendingAvailabilityChanges.settings
         );
+        await refetchAvailability?.();
         setPendingAvailabilityChanges(null);
       }
       
