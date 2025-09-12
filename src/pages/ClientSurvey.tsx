@@ -479,7 +479,7 @@ const ClientSurvey = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => navigate('/')}
+                onClick={currentStep === 1 ? () => navigate('/client/dashboard') : handlePrevious}
                 className="sm:hidden"
               >
                 <ArrowLeft className="h-4 w-4" />

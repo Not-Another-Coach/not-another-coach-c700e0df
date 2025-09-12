@@ -12,7 +12,7 @@ export function useDataMigration() {
   const { getSessionData, clearSession } = useAnonymousSession();
   const { getSessionData: getTrainerSessionData, clearSession: clearTrainerSession } = useAnonymousTrainerSession();
   const { saveTrainer } = useSavedTrainers();
-  const { profile } = useClientProfile();
+  const { profile, updateProfile } = useClientProfile();
 
   const migrateAnonymousData = useCallback(async () => {
     if (!user) return;
@@ -45,10 +45,21 @@ export function useDataMigration() {
         // Migrate quiz results to profile if client and quiz exists
         if (sessionData.quizResults && profile && user) {
           try {
-            // For now, we'll skip storing quiz results in profile 
-            // since the profile structure doesn't have a metadata field
-            // This can be enhanced later by adding a preferences table
-            console.log('Quiz results migration skipped - no metadata field available');
+            // Map anonymous quiz results to client profile format
+            const quizData = {
+              quiz_completed: true,
+              quiz_answers: sessionData.quizResults,
+              quiz_completed_at: new Date().toISOString(),
+              // Map quiz results to survey fields for immediate use
+              primary_goals: sessionData.quizResults.goals || [],
+              training_location_preference: sessionData.quizResults.location || null,
+              preferred_coaching_style: sessionData.quizResults.coachingStyle || [],
+              preferred_training_frequency: sessionData.quizResults.availability || null,
+            };
+            
+            // Update profile with quiz results
+            await updateProfile(quizData);
+            console.log('Quiz results migrated to client profile successfully');
           } catch (error) {
             console.error('Error updating profile with quiz results:', error);
           }
@@ -98,7 +109,7 @@ export function useDataMigration() {
         variant: "destructive",
       });
     }
-  }, [user, getSessionData, getTrainerSessionData, clearSession, clearTrainerSession, saveTrainer, profile]);
+  }, [user, getSessionData, getTrainerSessionData, clearSession, clearTrainerSession, saveTrainer, profile, updateProfile]);
 
   // Auto-migrate when user signs in/up
   useEffect(() => {
