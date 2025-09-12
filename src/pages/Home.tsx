@@ -98,9 +98,9 @@ export default function Home() {
               <Button variant="ghost" onClick={() => navigate('/auth')}>
                 Sign In
               </Button>
-              <Button onClick={() => navigate('/auth?signup=true')}>
-                Join Free
-              </Button>
+              <Button onClick={() => navigate('/auth?signup=client')}>
+                 Join Free
+               </Button>
             </div>
           </div>
         </div>
@@ -119,33 +119,25 @@ export default function Home() {
                 No signup required to start exploring.
               </p>
               
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button 
-                  size="lg" 
-                  onClick={() => {
-                    setShowQuiz(true);
-                    setTimeout(() => {
-                      document.getElementById('browse-trainers')?.scrollIntoView({ 
-                        behavior: 'smooth',
-                        block: 'start'
-                      });
-                    }, 100);
-                  }}
-                  className="text-lg px-8"
-                >
-                  <Sparkles className="h-5 w-5 mr-2" />
-                  Find My Match
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="lg"
-                  onClick={() => document.getElementById('browse-trainers')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="text-lg px-8"
-                >
-                  <Search className="h-5 w-5 mr-2" />
-                  Browse All Trainers
-                </Button>
-              </div>
+               <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                 <Button 
+                   size="lg" 
+                   onClick={() => navigate('/auth?signup=client')}
+                   className="text-lg px-8"
+                 >
+                   <Sparkles className="h-5 w-5 mr-2" />
+                   Find My Match
+                 </Button>
+                 <Button 
+                   variant="outline" 
+                   size="lg"
+                   onClick={() => document.getElementById('browse-trainers')?.scrollIntoView({ behavior: 'smooth' })}
+                   className="text-lg px-8"
+                 >
+                   <Search className="h-5 w-5 mr-2" />
+                   Browse All Trainers
+                 </Button>
+               </div>
             </div>
           </div>
         </section>

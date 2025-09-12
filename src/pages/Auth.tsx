@@ -42,6 +42,10 @@ export default function Auth() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
+  // Detect signup context from URL
+  const signupContext = searchParams.get('signup');
+  const isContextualSignup = signupContext === 'client' || signupContext === 'trainer';
+  
   // Load saved email on component mount (secure - no password storage)
   useEffect(() => {
     const savedEmail = localStorage.getItem('savedEmail'); 
@@ -83,8 +87,12 @@ export default function Auth() {
         title: "Password Reset",
         description: "Please enter your new password below.",
       });
-    } else if (signup === 'true') {
+    } else if (signup === 'true' || signup === 'client' || signup === 'trainer') {
       setActiveTab('signup');
+      // Set user type based on context
+      if (signup === 'client' || signup === 'trainer') {
+        setSignupForm(prev => ({ ...prev, userType: signup as 'client' | 'trainer' }));
+      }
     }
   }, [searchParams]);
 
@@ -134,13 +142,26 @@ export default function Auth() {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!signupForm.email || !signupForm.password || !signupForm.firstName || !signupForm.lastName) {
-      toast({
-        title: "Error",
-        description: "Please fill in all required fields",
-        variant: "destructive",
-      });
-      return;
+    // For contextual signup, only require email and password
+    if (isContextualSignup) {
+      if (!signupForm.email || !signupForm.password) {
+        toast({
+          title: "Error",
+          description: "Please fill in all required fields",
+          variant: "destructive",
+        });
+        return;
+      }
+    } else {
+      // For regular signup, require all fields
+      if (!signupForm.email || !signupForm.password || !signupForm.firstName || !signupForm.lastName) {
+        toast({
+          title: "Error",
+          description: "Please fill in all required fields",
+          variant: "destructive",
+        });
+        return;
+      }
     }
 
     if (signupForm.password !== signupForm.confirmPassword) {
@@ -162,11 +183,15 @@ export default function Auth() {
     }
 
     setIsLoading(true);
-    const { error } = await signUp(signupForm.email, signupForm.password, {
-      first_name: signupForm.firstName,
-      last_name: signupForm.lastName,
+    const userData: any = {
       user_type: signupForm.userType
-    });
+    };
+    
+    // Only include names if provided (for non-contextual signup)
+    if (signupForm.firstName) userData.first_name = signupForm.firstName;
+    if (signupForm.lastName) userData.last_name = signupForm.lastName;
+    
+    const { error } = await signUp(signupForm.email, signupForm.password, userData);
     
     if (error) {
       if (error.message.includes('already registered')) {
@@ -519,43 +544,57 @@ export default function Auth() {
                    </div>
                 </TabsContent>
                 
-                <TabsContent value="signup" className="space-y-4">
-                  <form onSubmit={handleSignup} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="signup-firstname">First Name</Label>
-                        <Input
-                          id="signup-firstname"
-                          placeholder="First name"
-                          value={signupForm.firstName}
-                          onChange={(e) => setSignupForm({ ...signupForm, firstName: e.target.value })}
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="signup-lastname">Last Name</Label>
-                        <Input
-                          id="signup-lastname"
-                          placeholder="Last name"
-                          value={signupForm.lastName}
-                          onChange={(e) => setSignupForm({ ...signupForm, lastName: e.target.value })}
-                          required
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-usertype">I am a...</Label>
-      <Select value={signupForm.userType} onValueChange={(value: 'client' | 'trainer') => setSignupForm({ ...signupForm, userType: value })}>
-        <SelectTrigger>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="client">Client looking for a coach</SelectItem>
-          <SelectItem value="trainer">Coach</SelectItem>
-        </SelectContent>
-      </Select>
-                    </div>
+                 <TabsContent value="signup" className="space-y-4">
+                   <form onSubmit={handleSignup} className="space-y-4">
+                     {/* Show name fields and user type only for non-contextual signup */}
+                     {!isContextualSignup && (
+                       <>
+                         <div className="grid grid-cols-2 gap-4">
+                           <div className="space-y-2">
+                             <Label htmlFor="signup-firstname">First Name</Label>
+                             <Input
+                               id="signup-firstname"
+                               placeholder="First name"
+                               value={signupForm.firstName}
+                               onChange={(e) => setSignupForm({ ...signupForm, firstName: e.target.value })}
+                               required
+                             />
+                           </div>
+                           <div className="space-y-2">
+                             <Label htmlFor="signup-lastname">Last Name</Label>
+                             <Input
+                               id="signup-lastname"
+                               placeholder="Last name"
+                               value={signupForm.lastName}
+                               onChange={(e) => setSignupForm({ ...signupForm, lastName: e.target.value })}
+                               required
+                             />
+                           </div>
+                         </div>
+                         
+                         <div className="space-y-2">
+                           <Label htmlFor="signup-usertype">I am a...</Label>
+                           <Select value={signupForm.userType} onValueChange={(value: 'client' | 'trainer') => setSignupForm({ ...signupForm, userType: value })}>
+                             <SelectTrigger>
+                               <SelectValue />
+                             </SelectTrigger>
+                             <SelectContent>
+                               <SelectItem value="client">Client looking for a coach</SelectItem>
+                               <SelectItem value="trainer">Coach</SelectItem>
+                             </SelectContent>
+                           </Select>
+                         </div>
+                       </>
+                     )}
+                     
+                     {/* Show user type indicator for contextual signup */}
+                     {isContextualSignup && (
+                       <div className="p-3 bg-primary/10 rounded-lg">
+                         <p className="text-sm text-primary font-medium">
+                           Signing up as: {signupContext === 'client' ? 'Client looking for a coach' : 'Coach'}
+                         </p>
+                       </div>
+                     )}
                     
                     <div className="space-y-2">
                       <Label htmlFor="signup-email">Email</Label>
