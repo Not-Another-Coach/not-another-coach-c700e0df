@@ -99,11 +99,11 @@ export const AnonymousBrowse = () => {
             <div className="flex items-center gap-2">
               <Heart className="h-5 w-5 fill-primary text-primary" />
               <span className="font-medium">
-                You've saved {savedTrainersCount} trainer{savedTrainersCount > 1 ? 's' : ''}
+                You've saved {savedTrainersCount} coach{savedTrainersCount > 1 ? 'es' : ''} — create an account to keep them.
               </span>
             </div>
             <Button variant="outline" size="sm">
-              Create account to keep them
+              Create Account
             </Button>
           </div>
         </div>
