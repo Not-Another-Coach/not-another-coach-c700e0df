@@ -73,7 +73,7 @@ export default function Home() {
     return (
       <div className="min-h-screen bg-background">
         {/* Header */}
-        <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+        <header className="sticky top-0 z-50 bg-background border-b">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <AppLogo />
