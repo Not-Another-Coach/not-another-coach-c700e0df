@@ -31,7 +31,7 @@ export const AnonymousBrowse = () => {
   const [selectedTrainerId, setSelectedTrainerId] = useState<string | null>(null);
   const [actionType, setActionType] = useState<'message' | 'book' | 'profile'>('message');
   
-  const { savedTrainersCount, savedTrainerIds } = useAnonymousSession();
+  const { savedTrainerIds } = useAnonymousSession();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -64,12 +64,7 @@ export const AnonymousBrowse = () => {
       if (error) throw error;
       console.log('🔍 AnonymousBrowse: Fetched trainers:', data?.length || 0);
       
-      // Filter out saved trainers for anonymous users
-      const filteredTrainers = (data || []).filter(trainer => 
-        !savedTrainerIds.includes(trainer.id)
-      );
-      
-      setTrainers(filteredTrainers);
+      setTrainers((data || []) as Trainer[]);
     } catch (error) {
       console.error('Error fetching trainers:', error);
     } finally {

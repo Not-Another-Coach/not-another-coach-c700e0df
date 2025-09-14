@@ -16,6 +16,7 @@ interface AnonymousSession {
 
 const ANONYMOUS_SESSION_KEY = 'nac_anonymous_session';
 const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days
+const SESSION_EVENT = 'anonymous-session-updated';
 
 export function useAnonymousSession() {
   const [session, setSession] = useState<AnonymousSession | null>(null);
@@ -50,6 +51,29 @@ export function useAnonymousSession() {
     setLoading(false);
   }, []);
 
+  // Sync across multiple hook instances using a custom event and storage listener
+  useEffect(() => {
+    const handleSessionSync = () => {
+      try {
+        const saved = localStorage.getItem(ANONYMOUS_SESSION_KEY);
+        if (saved) {
+          const parsed: AnonymousSession = JSON.parse(saved);
+          setSession(parsed);
+        } else {
+          setSession(null);
+        }
+      } catch (e) {
+        console.error('Error syncing anonymous session:', e);
+      }
+    };
+    window.addEventListener(SESSION_EVENT, handleSessionSync as EventListener);
+    window.addEventListener('storage', handleSessionSync as EventListener);
+    return () => {
+      window.removeEventListener(SESSION_EVENT, handleSessionSync as EventListener);
+      window.removeEventListener('storage', handleSessionSync as EventListener);
+    };
+  }, []);
+
   // Create new anonymous session
   const createSession = useCallback(() => {
     const now = new Date();
@@ -64,6 +88,7 @@ export function useAnonymousSession() {
 
     setSession(newSession);
     localStorage.setItem(ANONYMOUS_SESSION_KEY, JSON.stringify(newSession));
+    window.dispatchEvent(new CustomEvent(SESSION_EVENT));
     
     return newSession;
   }, []);
@@ -89,6 +114,7 @@ export function useAnonymousSession() {
     
     setSession(updatedSession);
     localStorage.setItem(ANONYMOUS_SESSION_KEY, JSON.stringify(updatedSession));
+    window.dispatchEvent(new CustomEvent(SESSION_EVENT));
     return true;
   }, [session, createSession]);
 
@@ -103,6 +129,7 @@ export function useAnonymousSession() {
     
     setSession(updatedSession);
     localStorage.setItem(ANONYMOUS_SESSION_KEY, JSON.stringify(updatedSession));
+    window.dispatchEvent(new CustomEvent(SESSION_EVENT));
   }, [session]);
 
   // Save quiz results
@@ -119,6 +146,7 @@ export function useAnonymousSession() {
     console.log('📝 Updating anonymous session with quiz results');
     setSession(updatedSession);
     localStorage.setItem(ANONYMOUS_SESSION_KEY, JSON.stringify(updatedSession));
+    window.dispatchEvent(new CustomEvent(SESSION_EVENT));
     console.log('✅ Anonymous quiz results saved successfully');
   }, [session, createSession]);
 
@@ -126,6 +154,7 @@ export function useAnonymousSession() {
   const clearSession = useCallback(() => {
     setSession(null);
     localStorage.removeItem(ANONYMOUS_SESSION_KEY);
+    window.dispatchEvent(new CustomEvent(SESSION_EVENT));
   }, []);
 
   // Get session data for account migration
