@@ -10,7 +10,7 @@ export const MotivationalHeader: React.FC<MotivationalHeaderProps> = ({ context,
   const getHeadline = () => {
     switch (context) {
       case 'login':
-        return "Welcome back, champion";
+        return "Welcome back";
       case 'signup':
         return userType === 'trainer' ? "Ready to change lives?" : "Your transformation starts here";
       case 'trainer-signup':
@@ -27,7 +27,7 @@ export const MotivationalHeader: React.FC<MotivationalHeaderProps> = ({ context,
   const getSubtext = () => {
     switch (context) {
       case 'login':
-        return "Continue your fitness journey";
+        return "Good to see you again";
       case 'signup':
         return userType === 'trainer' ? "Start inspiring others today" : "Find your perfect trainer match";
       case 'trainer-signup':
