@@ -153,14 +153,11 @@ export default function Home() {
           onBrowseAll={() => document.getElementById('browse-trainers')?.scrollIntoView({ behavior: 'smooth' })}
         />
 
-        {/* Interactive Value Cards */}
-        <InteractiveValueCards />
-
-        {/* Featured Trainers Preview */}
+        {/* Featured Trainers Preview - moved after hero */}
         <TrainerPreviewCarousel onViewAll={() => document.getElementById('browse-trainers')?.scrollIntoView({ behavior: 'smooth' })} />
 
-        {/* Social Proof Section */}
-        <SocialProofSection />
+        {/* Why Choose Our Platform */}
+        <InteractiveValueCards />
 
         {/* Coach Recruitment Section */}
         <CoachRecruitmentSection onBecomeCoach={() => navigate('/trainer/demo')} />
