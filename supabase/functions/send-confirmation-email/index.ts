@@ -129,28 +129,58 @@ serve(async (req: Request) => {
     const html = buildEmailHTML(actionLink, first_name);
 
     // Use the verified domain for sending emails
-    const fromAddress = (Deno.env.get('RESEND_FROM') as string) || 'onboarding@resend.dev';
+    
 
-    try {
-      const sendResult = await resend.emails.send({
-        from: `Not Another Coach <${fromAddress}>`,
+    // Attempt send with env RESEND_FROM if provided; on domain validation error, fallback to sandbox
+    const brandFrom = Deno.env.get('RESEND_FROM') as string | undefined;
+    const makeFromHeader = (addr: string) => `Not Another Coach <${addr}>`;
+
+    async function sendWith(fromAddr: string) {
+      return await resend.emails.send({
+        from: makeFromHeader(fromAddr),
         to: [email],
         subject: '👉 Welcome to Not Another Coach — please confirm your email',
         html,
       });
+    }
 
-      if (sendResult.error) {
-        console.error('Resend API error:', sendResult.error);
+    try {
+      let primary = brandFrom || 'onboarding@resend.dev';
+      let result = await sendWith(primary);
+
+      if (result.error) {
+        const errMsg = (result.error as any)?.message || String(result.error);
+        const errName = (result.error as any)?.name || 'resend_error';
+        console.error('Resend API error:', result.error);
+
+        // If using a custom domain and it is not verified, retry with sandbox
+        const isDomainValidation = errMsg?.toLowerCase().includes('domain is not verified') || errName === 'validation_error';
+        const isCustomDomain = primary && !primary.endsWith('@resend.dev');
+
+        if (isDomainValidation && isCustomDomain) {
+          console.log('Retrying send via sandbox domain onboarding@resend.dev');
+          primary = 'onboarding@resend.dev';
+          result = await sendWith(primary);
+
+          if (!result.error) {
+            return new Response(JSON.stringify({ success: true, email_id: result.data?.id, used_sandbox_domain: true }), {
+              status: 200,
+              headers: { 'Content-Type': 'application/json', ...corsHeaders },
+            });
+          }
+        }
+
         return new Response(JSON.stringify({ 
-          error: sendResult.error.message,
-          code: (sendResult.error as any).name || 'resend_error'
+          error: errMsg || 'Resend API error',
+          code: errName,
+          hint: isDomainValidation ? 'Verify your sending domain at https://resend.com/domains or omit RESEND_FROM to use sandbox.' : undefined
         }), {
           status: 500,
           headers: { 'Content-Type': 'application/json', ...corsHeaders },
         });
       }
 
-      return new Response(JSON.stringify({ success: true, email_id: sendResult.data?.id }), {
+      return new Response(JSON.stringify({ success: true, email_id: result.data?.id }), {
         status: 200,
         headers: { 'Content-Type': 'application/json', ...corsHeaders },
       });
@@ -158,7 +188,8 @@ serve(async (req: Request) => {
       console.error('Exception when sending via Resend:', e);
       return new Response(JSON.stringify({ 
         error: e?.message || 'Failed to send email',
-        hint: 'Verify RESEND_API_KEY and domain verification for notanothercoach.com'
+        code: e?.name || 'exception',
+        hint: 'Check RESEND_API_KEY and network connectivity'
       }), {
         status: 500,
         headers: { 'Content-Type': 'application/json', ...corsHeaders },
