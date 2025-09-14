@@ -131,59 +131,55 @@ serve(async (req: Request) => {
     // Use the verified domain for sending emails
     
 
-    // Attempt send with env RESEND_FROM if provided; on domain validation error, fallback to sandbox
+    // Enforce sending from verified NotAnotherCoach domain only
     const brandFrom = Deno.env.get('RESEND_FROM') as string | undefined;
     const makeFromHeader = (addr: string) => `Not Another Coach <${addr}>`;
 
-    async function sendWith(fromAddr: string) {
-      return await resend.emails.send({
-        from: makeFromHeader(fromAddr),
-        to: [email],
-        subject: '👉 Welcome to Not Another Coach — please confirm your email',
-        html,
-      });
+    if (!brandFrom) {
+      return new Response(
+        JSON.stringify({
+          error: 'Missing RESEND_FROM secret',
+          hint: 'Set RESEND_FROM to a verified sender like noreply@notanothercoach.com in Resend and Supabase Edge Function secrets',
+        }),
+        { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+      );
+    }
+
+    const fromDomain = brandFrom.split('@')[1] || '';
+    if (!fromDomain.toLowerCase().endsWith('notanothercoach.com')) {
+      return new Response(
+        JSON.stringify({
+          error: 'Invalid sender domain',
+          hint: 'RESEND_FROM must use the notanothercoach.com domain (e.g. noreply@notanothercoach.com)',
+        }),
+        { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+      );
     }
 
     try {
-      let primary = brandFrom || 'onboarding@resend.dev';
-      let result = await sendWith(primary);
+      const result = await resend.emails.send({
+        from: makeFromHeader(brandFrom),
+        to: [email],
+        subject: '👉 Welcome to Not Another Coach — please confirm your email',
+        html,
+        reply_to: brandFrom,
+      });
 
       if (result.error) {
         const errMsg = (result.error as any)?.message || String(result.error);
         const errName = (result.error as any)?.name || 'resend_error';
         console.error('Resend API error:', result.error);
-
-        // If using a custom domain and it is not verified, retry with sandbox
-        const isDomainValidation = errMsg?.toLowerCase().includes('domain is not verified') || errName === 'validation_error';
-        const isCustomDomain = primary && !primary.endsWith('@resend.dev');
-
-        if (isDomainValidation && isCustomDomain) {
-          console.log('Retrying send via sandbox domain onboarding@resend.dev');
-          primary = 'onboarding@resend.dev';
-          result = await sendWith(primary);
-
-          if (!result.error) {
-            return new Response(JSON.stringify({ success: true, email_id: result.data?.id, used_sandbox_domain: true }), {
-              status: 200,
-              headers: { 'Content-Type': 'application/json', ...corsHeaders },
-            });
-          }
-        }
-
-        return new Response(JSON.stringify({ 
-          error: errMsg || 'Resend API error',
-          code: errName,
-          hint: isDomainValidation ? 'Verify your sending domain at https://resend.com/domains or omit RESEND_FROM to use sandbox.' : undefined
-        }), {
-          status: 500,
-          headers: { 'Content-Type': 'application/json', ...corsHeaders },
-        });
+        return new Response(
+          JSON.stringify({ error: errMsg || 'Resend API error', code: errName, hint: 'Verify domain and DNS at https://resend.com/domains and ensure the sender address is verified.' }),
+          { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+        );
       }
 
-      return new Response(JSON.stringify({ success: true, email_id: result.data?.id }), {
+      return new Response(JSON.stringify({ success: true, email_id: result.data?.id, from: brandFrom }), {
         status: 200,
         headers: { 'Content-Type': 'application/json', ...corsHeaders },
       });
+
     } catch (e: any) {
       console.error('Exception when sending via Resend:', e);
       return new Response(JSON.stringify({ 
