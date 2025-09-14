@@ -32,7 +32,11 @@ export const InstagramIntegration = () => {
       setError(null);
       
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {
+        // Silently handle no user case
+        setConnection(null);
+        return;
+      }
 
       const { data, error } = await supabase
         .from('instagram_connections')
@@ -47,7 +51,10 @@ export const InstagramIntegration = () => {
       
     } catch (err: any) {
       console.error('Error fetching Instagram connection:', err);
-      setError(err.message || 'Failed to fetch Instagram connection');
+      // Only set error for actual database/connection issues, not missing connections
+      if (err.message?.includes('network') || err.code) {
+        setError(err.message || 'Failed to fetch Instagram connection');
+      }
     } finally {
       setLoading(false);
     }
