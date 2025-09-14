@@ -92,6 +92,14 @@ serve(async (req: Request) => {
 
     const redirect = redirect_to || `${Deno.env.get('SUPABASE_URL') || ''}`;
 
+    if (!Deno.env.get('RESEND_API_KEY')) {
+      console.error('Missing RESEND_API_KEY secret in edge function environment');
+      return new Response(JSON.stringify({ error: 'Email service not configured: RESEND_API_KEY missing' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      });
+    }
+
     // Generate a fresh confirmation link using admin API
     const { data, error } = await supabase.auth.admin.generateLink({
       type: 'signup',
@@ -123,25 +131,39 @@ serve(async (req: Request) => {
     // Use the verified domain for sending emails
     const fromAddress = 'noreply@notanothercoach.com';
 
-    const sendResult = await resend.emails.send({
-      from: fromAddress,
-      to: [email],
-      subject: '👉 Welcome to Not Another Coach — please confirm your email',
-      html,
-    });
+    try {
+      const sendResult = await resend.emails.send({
+        from: `Not Another Coach <${fromAddress}>`,
+        to: [email],
+        subject: '👉 Welcome to Not Another Coach — please confirm your email',
+        html,
+      });
 
-    if (sendResult.error) {
-      console.error('Error sending confirmation email via Resend:', sendResult.error);
-      return new Response(JSON.stringify({ error: sendResult.error.message }), {
+      if (sendResult.error) {
+        console.error('Resend API error:', sendResult.error);
+        return new Response(JSON.stringify({ 
+          error: sendResult.error.message,
+          code: (sendResult.error as any).name || 'resend_error'
+        }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
+      }
+
+      return new Response(JSON.stringify({ success: true, email_id: sendResult.data?.id }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      });
+    } catch (e: any) {
+      console.error('Exception when sending via Resend:', e);
+      return new Response(JSON.stringify({ 
+        error: e?.message || 'Failed to send email',
+        hint: 'Verify RESEND_API_KEY and domain verification for notanothercoach.com'
+      }), {
         status: 500,
         headers: { 'Content-Type': 'application/json', ...corsHeaders },
       });
     }
-
-    return new Response(JSON.stringify({ success: true, email_id: sendResult.data?.id }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json', ...corsHeaders },
-    });
   } catch (error: any) {
     console.error('Error in send-confirmation-email function:', error);
     return new Response(JSON.stringify({ error: error.message || 'Internal error' }), {
