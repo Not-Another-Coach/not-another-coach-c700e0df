@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from './useAuth';
 import { useAnonymousSession } from './useAnonymousSession';
 import { useAnonymousTrainerSession } from './useAnonymousTrainerSession';
@@ -13,14 +13,21 @@ export function useDataMigration() {
   const { getSessionData: getTrainerSessionData, clearSession: clearTrainerSession } = useAnonymousTrainerSession();
   const { saveTrainer } = useSavedTrainers();
   const { profile, updateProfile } = useClientProfile();
+  
+  // Track migration state to prevent race conditions
+  const [isMigrating, setIsMigrating] = useState(false);
+  const [migrationCompleted, setMigrationCompleted] = useState(false);
 
   const migrateAnonymousData = useCallback(async (retryCount = 0) => {
     console.log('🔄 Starting anonymous data migration...', { user: !!user, retryCount });
     
     if (!user) {
       console.log('❌ Migration aborted: No authenticated user');
+      setMigrationCompleted(true);
       return;
     }
+    
+    setIsMigrating(true);
 
     const sessionData = getSessionData();
     const trainerSessionData = getTrainerSessionData();
@@ -34,6 +41,8 @@ export function useDataMigration() {
     
     if (!sessionData && !trainerSessionData) {
       console.log('✅ Migration complete: No anonymous data to migrate');
+      setIsMigrating(false);
+      setMigrationCompleted(true);
       return;
     }
 
@@ -133,10 +142,22 @@ export function useDataMigration() {
       }
 
       // Clear anonymous sessions after successful migration
-      if (sessionData) clearSession();
-      if (trainerSessionData) clearTrainerSession();
+      if (sessionData) {
+        console.log('🗑️ Clearing anonymous client session...');
+        clearSession();
+      }
+      if (trainerSessionData) {
+        console.log('🗑️ Clearing anonymous trainer session...');
+        clearTrainerSession();
+      }
+      
+      setIsMigrating(false);
+      setMigrationCompleted(true);
+      console.log('✅ Migration fully completed');
 
     } catch (error) {
+      setIsMigrating(false);
+      setMigrationCompleted(true);
       console.error('Error during data migration:', error);
       toast({
         title: "Migration incomplete",
@@ -145,6 +166,14 @@ export function useDataMigration() {
       });
     }
   }, [user, getSessionData, getTrainerSessionData, clearSession, clearTrainerSession, saveTrainer, profile, updateProfile]);
+
+  // Reset migration state when user changes
+  useEffect(() => {
+    if (!user) {
+      setIsMigrating(false);
+      setMigrationCompleted(false);
+    }
+  }, [user]);
 
   // Auto-migrate when user signs in/up
   useEffect(() => {
@@ -159,5 +188,7 @@ export function useDataMigration() {
 
   return {
     migrateAnonymousData,
+    isMigrating,
+    migrationCompleted,
   };
 }

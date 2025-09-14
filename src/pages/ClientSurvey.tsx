@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useClientProfile } from "@/hooks/useClientProfile";
 import { useUserTypeChecks } from "@/hooks/useUserType";
 import { useAnonymousSession } from "@/hooks/useAnonymousSession";
+import { useDataMigration } from "@/hooks/useDataMigration";
 import { useToast } from "@/hooks/use-toast";
 import { ClientCustomHeader } from "@/components/layout/ClientCustomHeader";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,7 @@ const ClientSurvey = () => {
   const { profile, loading: profileLoading, updateProfile } = useClientProfile();
   const { isClient } = useUserTypeChecks();
   const { session: anonymousSession } = useAnonymousSession();
+  const { isMigrating, migrationCompleted } = useDataMigration();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -134,8 +136,9 @@ const ClientSurvey = () => {
   }, [user, loading, navigate]);
 
   // Initialize form data from profile and anonymous session
+  // Wait for migration to complete before initializing to get migrated data
   useEffect(() => {
-    if (profile && profile.id) {
+    if (profile && profile.id && !isMigrating && migrationCompleted) {
       // Start with profile data
       const initialData = {
         primary_goals: profile.primary_goals || [],
@@ -181,7 +184,7 @@ const ClientSurvey = () => {
       // Set current step to continue from where left off, or start from step 1
       setCurrentStep(1);
     }
-  }, [profile?.id, anonymousSession?.quizResults]);
+  }, [profile?.id, migrationCompleted, isMigrating]);
 
   // Stable update function
   const updateFormData = (updates: Partial<typeof formData>) => {
