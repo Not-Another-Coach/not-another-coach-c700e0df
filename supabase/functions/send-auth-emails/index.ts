@@ -35,29 +35,23 @@ const createConfirmationEmailHTML = (token: string, token_hash: string, site_url
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Confirm Your Email - Not Another Coach</title>
+  <title>👉 Welcome to Not Another Coach — please confirm your email</title>
 </head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
   <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; text-align: center; border-radius: 10px 10px 0 0;">
-    <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 700;">Not Another Coach</h1>
+    <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 700;">👋 Welcome to Not Another Coach!</h1>
     <p style="color: #f8f9ff; margin: 10px 0 0 0; font-size: 16px;">Not another app. Not another coach. This is personal.</p>
   </div>
   
   <div style="background: white; padding: 40px 30px; border-radius: 0 0 10px 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-    <h2 style="color: #333; margin: 0 0 20px 0; font-size: 24px;">Welcome${firstName ? ` ${firstName}` : ''}!</h2>
-    
     <p style="margin: 0 0 25px 0; font-size: 16px; color: #555;">
-      Thank you for joining Not Another Coach. We're excited to help you on your fitness journey with a truly personal approach.
-    </p>
-    
-    <p style="margin: 0 0 30px 0; font-size: 16px; color: #555;">
-      Please confirm your email address by clicking the button below:
+      Thanks for joining our community of trainers and clients${firstName ? `, ${firstName}` : ''}. To get started, please confirm your email address.
     </p>
     
     <div style="text-align: center; margin: 30px 0;">
       <a href="${site_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}" 
          style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">
-        Confirm Email Address
+        🔑 Confirm My Email
       </a>
     </div>
     
@@ -69,14 +63,16 @@ const createConfirmationEmailHTML = (token: string, token_hash: string, site_url
       ${site_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}
     </div>
     
-    <p style="margin: 0 0 20px 0; font-size: 14px; color: #777;">
-      This link will expire in 24 hours for security reasons.
-    </p>
-    
     <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
     
-    <p style="margin: 0; font-size: 12px; color: #999; text-align: center;">
-      If you didn't create an account with Not Another Coach, you can safely ignore this email.
+    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
+      <p style="margin: 0 0 10px 0; font-size: 14px; color: #555; font-weight: 600;">This helps us keep your account secure.</p>
+      <p style="margin: 0 0 10px 0; font-size: 14px; color: #777;">Takes less than 30 seconds.</p>
+      <p style="margin: 0; font-size: 12px; color: #999;">If you didn't create an account, you can safely ignore this email.</p>
+    </div>
+    
+    <p style="margin: 20px 0 0 0; font-size: 14px; color: #667eea; text-align: center; font-weight: 500;">
+      — The Not Another Coach Team
     </p>
   </div>
 </body>
@@ -197,7 +193,7 @@ serve(async (req: Request): Promise<Response> => {
       const confirmationResult = await resend.emails.send({
         from: 'Not Another Coach <noreply@resend.dev>',
         to: [user.email],
-        subject: 'Confirm your email - Not Another Coach',
+        subject: '👉 Welcome to Not Another Coach — please confirm your email',
         html: createConfirmationEmailHTML(
           token, 
           token_hash, 
