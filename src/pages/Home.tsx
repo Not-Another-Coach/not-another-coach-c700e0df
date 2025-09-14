@@ -14,7 +14,7 @@ import { InteractiveValueCards } from "@/components/homepage/InteractiveValueCar
 
 import { UserIntentModal } from "@/components/user-intent/UserIntentModal";
 import { useUserIntent } from "@/hooks/useUserIntent";
-import { Heart } from "lucide-react";
+import { Heart, ArrowRight } from "lucide-react";
 
 export default function Home() {
   const { user, loading } = useAuth();
@@ -154,6 +154,26 @@ export default function Home() {
 
         {/* Why Choose Our Platform */}
         <InteractiveValueCards />
+
+        {/* Simple Coach Recruitment Section */}
+        <section className="py-20 bg-muted/30">
+          <div className="max-w-4xl mx-auto px-6 text-center">
+            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+              Are You a Coach? Grow Your Business With Us
+            </h2>
+            <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
+              Join the platform that connects you with serious clients and helps you build the coaching business you've always wanted.
+            </p>
+            <Button 
+              size="lg" 
+              onClick={() => navigate('/trainer/demo')}
+              className="bg-gradient-primary hover:opacity-90 text-white font-semibold px-8 py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              Become a Coach Today
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+          </div>
+        </section>
 
         {/* Quiz Modal */}
         <MatchQuizModal 
