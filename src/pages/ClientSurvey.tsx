@@ -37,6 +37,10 @@ const ClientSurvey = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   
+  // Track initialization to prevent preferences from being wiped
+  const hasInitialized = useRef(false);
+  const lastUserId = useRef<string | null>(null);
+  
 
   const [formData, setFormData] = useState({
     // Goals and preferences
@@ -135,10 +139,20 @@ const ClientSurvey = () => {
     }
   }, [user, loading, navigate]);
 
+  // Reset initialization flag when user changes
+  useEffect(() => {
+    if (user?.id !== lastUserId.current) {
+      hasInitialized.current = false;
+      lastUserId.current = user?.id || null;
+    }
+  }, [user?.id]);
+
   // Initialize form data from profile and anonymous session
   // Wait for migration to complete before initializing to get migrated data
   useEffect(() => {
-    if (profile && profile.id && !isMigrating && migrationCompleted) {
+    if (profile && profile.id && !isMigrating && migrationCompleted && !hasInitialized.current) {
+      hasInitialized.current = true;
+      
       // Start with profile data
       const initialData = {
         primary_goals: profile.primary_goals || [],

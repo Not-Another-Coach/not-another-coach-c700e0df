@@ -48,11 +48,15 @@ export const useSavedTrainers = () => {
   }, []);
 
   // Save a trainer - handles both authenticated and anonymous users
-  const saveTrainer = async (trainerId: string, notes?: string) => {
+  const saveTrainer = async (trainerId: string, notes?: string, options?: { silent?: boolean }) => {
+    const silent = options?.silent || false;
+    
     if (!user) {
       // Anonymous user - use anonymous session
       anonymousSession.saveTrainer(trainerId);
-      toast.success("Trainer saved! Create an account to keep them forever");
+      if (!silent) {
+        toast.success("Trainer saved! Create an account to keep them forever");
+      }
       return true;
     }
 
@@ -61,19 +65,23 @@ export const useSavedTrainers = () => {
       await engagementLikeTrainer(trainerId);
       
       // Track progress - first save advances to shortlisting stage
-      if (savedTrainers.length === 0) {
+      if (savedTrainers.length === 0 && !silent) {
         await advanceToStage('shortlisting');
         await updateProgress('shortlisting', 'first_save', { trainerId });
-      } else {
+      } else if (!silent) {
         await updateProgress('shortlisting', 'save_trainer', { trainerId });
       }
       
-      toast.success("Trainer saved! Added to your saved trainers list");
+      if (!silent) {
+        toast.success("Trainer saved! Added to your saved trainers list");
+      }
       console.log('Trainer saved successfully:', trainerId);
       return true;
     } catch (error) {
       console.error('Error saving trainer:', error);
-      toast.error("Failed to save trainer");
+      if (!silent) {
+        toast.error("Failed to save trainer");
+      }
       return false;
     }
   };

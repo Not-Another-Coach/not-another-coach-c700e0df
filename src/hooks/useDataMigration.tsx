@@ -69,11 +69,11 @@ export function useDataMigration() {
 
       // Migrate client session data
       if (sessionData) {
-        // Migrate saved trainers
+        // Migrate saved trainers silently
         if (sessionData.savedTrainers.length > 0) {
           for (const trainerId of sessionData.savedTrainers) {
             try {
-              const success = await saveTrainer(trainerId, 'Migrated from anonymous session');
+              const success = await saveTrainer(trainerId, 'Migrated from anonymous session', { silent: true });
               if (success) {
                 migratedCount++;
               }
@@ -150,13 +150,7 @@ export function useDataMigration() {
         }
       }
 
-      // Show success message if any data was migrated
-      if (messages.length > 0) {
-        toast({
-          title: "Welcome back!",
-          description: `We've restored ${messages.join(' and ')} to your account.`,
-        });
-      }
+      // Migration completed silently - no toasts to prevent spam
 
       // Clear anonymous sessions after successful migration
       if (sessionData) {
@@ -177,11 +171,7 @@ export function useDataMigration() {
       setIsMigrating(false);
       setMigrationCompleted(true);
       console.error('Error during data migration:', error);
-      toast({
-        title: "Migration incomplete",
-        description: "Some of your data couldn't be transferred. Don't worry, you can save your information again.",
-        variant: "destructive",
-      });
+      // Silent migration - no error toasts to prevent spam
     }
   }, [user, getSessionData, getTrainerSessionData, clearSession, clearTrainerSession, saveTrainer, profile, updateProfile, isClient, migratedUserId]);
 
