@@ -36,7 +36,7 @@ export const useSavedTrainers = () => {
         saved_at: engagement.createdAt,
         notes: engagement.notes
       }))
-    : (anonymousSession.session?.savedTrainers || []).map(trainerId => ({
+    : (anonymousSession.savedTrainerIds || []).map(trainerId => ({
         id: trainerId,
         trainer_id: trainerId,
         saved_at: new Date().toISOString(),
@@ -108,8 +108,8 @@ export const useSavedTrainers = () => {
   // Check if a trainer is saved - handles both authenticated and anonymous users
   const isTrainerSaved = (trainerId: string) => {
     if (!user) {
-      // Anonymous user - check anonymous session
-      return anonymousSession.isTrainerSaved(trainerId);
+      // Anonymous user - check anonymous session using reactive savedTrainerIds
+      return anonymousSession.savedTrainerIds.includes(trainerId);
     }
     return getEngagementStage(trainerId) === 'liked';
   };
