@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Calendar, Lock, Users, Star, Zap } from "lucide-react";
+import { MessageCircle, Calendar, Lock, Users, Star, Zap, EyeOff, Check } from "lucide-react";
 
 interface AuthPromptProps {
   isOpen: boolean;
@@ -32,25 +32,25 @@ export const AuthPrompt = ({
         return {
           icon: MessageCircle,
           title: `Message ${trainerName}`,
-          description: "Start a conversation to discuss your fitness goals and see if you're a good match.",
+          description: "Get instant access to direct messaging and start planning your fitness journey together!",
         };
       case 'book':
         return {
           icon: Calendar,
           title: `Book with ${trainerName}`,
-          description: "Schedule your discovery call or first session to get started on your fitness journey.",
+          description: "Unlock booking capabilities and schedule your discovery call in seconds!",
         };
       case 'profile':
         return {
-          icon: Star,
-          title: `View ${trainerName}'s Profile`,
-          description: "Access their full profile with detailed experience, certifications, and client reviews.",
+          icon: EyeOff,
+          title: "🔒 Profiles are locked for members only",
+          description: "👀 No peeking! Full trainer details are for members only — unlock free.",
         };
       default:
         return {
           icon: Lock,
-          title: "Take the next step",
-          description: "Create your account to unlock full trainer profiles and booking capabilities.",
+          title: "Unlock full trainer profiles & reviews",
+          description: "Get instant access to trainer bios, reviews, and discovery calls. Don't miss out!",
         };
     }
   };
@@ -84,27 +84,26 @@ export const AuthPrompt = ({
         {/* Account Benefits */}
         <div className="space-y-3 py-4">
           <div className="flex items-center gap-3 text-sm">
-            <MessageCircle className="h-4 w-4 text-muted-foreground" />
-            <span>Direct messaging with trainers</span>
+            <Check className="h-4 w-4 text-primary" />
+            <span>Direct message trainers</span>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-            <span>Book discovery calls and sessions</span>
+            <Check className="h-4 w-4 text-primary" />
+            <span>Book sessions instantly</span>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <Star className="h-4 w-4 text-muted-foreground" />
-            <span>Access full trainer profiles & reviews</span>
+            <Check className="h-4 w-4 text-primary" />
+            <span>Read client reviews</span>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <Users className="h-4 w-4 text-muted-foreground" />
-            <span>Personalized trainer recommendations</span>
+            <Check className="h-4 w-4 text-primary" />
+            <span>Get personalized matches</span>
           </div>
         </div>
 
         <DialogFooter className="flex-col gap-3">
-          <Button onClick={handleCreateAccount} className="w-full">
-            <Zap className="h-4 w-4 mr-2" />
-            Create Free Account
+          <Button onClick={handleCreateAccount} className="w-full animate-pulse">
+            🔑 Unlock My Free Account
           </Button>
           
           <div className="flex items-center gap-2 w-full">
@@ -121,7 +120,7 @@ export const AuthPrompt = ({
         {/* Trust signals */}
         <div className="text-center pt-2 border-t">
           <p className="text-xs text-muted-foreground">
-            Come and find your perfect coach!
+            Takes 30 seconds. No credit card needed.
           </p>
         </div>
       </DialogContent>
