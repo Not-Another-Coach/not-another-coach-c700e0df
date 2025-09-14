@@ -106,30 +106,10 @@ export const AnonymousBrowse = () => {
 
   return (
     <div className="space-y-8">
-      {/* Header with saved count */}
-      {savedTrainersCount > 0 && (
-        <div className="bg-card border rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Heart className="h-5 w-5 fill-primary text-primary" />
-              <span className="font-medium">
-                You've saved {savedTrainersCount} coach{savedTrainersCount > 1 ? 'es' : ''} — create an account to keep them.
-              </span>
-            </div>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => navigate('/auth?signup=true')}
-            >
-              Create Account
-            </Button>
-          </div>
-        </div>
-      )}
-
       {/* Trainers Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {trainers.map((trainer) => {
+      {trainers.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {trainers.map((trainer) => {
           console.log('🎯 Rendering trainer card for:', trainer.first_name, trainer.last_name);
           
           // Transform trainer data to match AnyTrainer interface
@@ -154,9 +134,35 @@ export const AnonymousBrowse = () => {
                   onMessage={() => handleMessageClick(trainer.id)}
                   onBookDiscoveryCall={() => handleBookClick(trainer.id)}
                 />
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      ) : (
+        /* Animated placeholder when no coaches available */
+        <div className="flex flex-col items-center justify-center py-16 animate-fade-in">
+          <div className="relative">
+            <div className="animate-pulse">
+              <Heart className="h-16 w-16 text-primary/20 mb-4" />
+            </div>
+            <div className="absolute inset-0 animate-ping">
+              <Heart className="h-16 w-16 text-primary/10" />
+            </div>
+          </div>
+          <h3 className="text-2xl font-semibold text-muted-foreground mb-2 animate-fade-in" style={{animationDelay: '0.2s'}}>
+            All coaches discovered!
+          </h3>
+          <p className="text-muted-foreground text-center max-w-md animate-fade-in" style={{animationDelay: '0.4s'}}>
+            You've seen all available coaches. Create an account to save your favorites and get matched with more trainers.
+          </p>
+          <Button 
+            className="mt-6 animate-scale-in hover-scale" 
+            style={{animationDelay: '0.6s'}}
+            onClick={() => navigate('/auth?signup=true')}
+          >
+            Create Account to See More
+          </Button>
+        </div>
+      )}
 
       {/* Conversion Prompts */}
       <AuthPrompt

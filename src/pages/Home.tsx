@@ -102,10 +102,13 @@ export default function Home() {
                   <Button
                     variant="ghost"
                     onClick={() => navigate('/anonymous-saved')}
-                    className="gap-2"
+                    className="gap-2 animate-scale-in hover-scale"
+                    key={savedTrainersCount} // Force re-render for animation
                   >
-                    <Heart className="h-4 w-4 fill-primary text-primary" />
-                    {savedTrainersCount} saved
+                    <Heart className="h-4 w-4 fill-primary text-primary animate-pulse" />
+                    <span className="animate-fade-in">
+                      {savedTrainersCount} saved
+                    </span>
                   </Button>
                 )}
                 
