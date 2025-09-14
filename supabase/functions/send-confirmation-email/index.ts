@@ -129,7 +129,7 @@ serve(async (req: Request) => {
     const html = buildEmailHTML(actionLink, first_name);
 
     // Use the verified domain for sending emails
-    const fromAddress = 'noreply@notanothercoach.com';
+    const fromAddress = (Deno.env.get('RESEND_FROM') as string) || 'onboarding@resend.dev';
 
     try {
       const sendResult = await resend.emails.send({
