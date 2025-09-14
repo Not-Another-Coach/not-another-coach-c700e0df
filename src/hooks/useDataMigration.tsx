@@ -4,6 +4,7 @@ import { useAnonymousSession } from './useAnonymousSession';
 import { useAnonymousTrainerSession } from './useAnonymousTrainerSession';
 import { useSavedTrainers } from './useSavedTrainers';
 import { useClientProfile } from './useClientProfile';
+import { useUserTypeChecks } from './useUserType';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -13,16 +14,32 @@ export function useDataMigration() {
   const { getSessionData: getTrainerSessionData, clearSession: clearTrainerSession } = useAnonymousTrainerSession();
   const { saveTrainer } = useSavedTrainers();
   const { profile, updateProfile } = useClientProfile();
+  const { isClient } = useUserTypeChecks();
   
   // Track migration state to prevent race conditions
   const [isMigrating, setIsMigrating] = useState(false);
   const [migrationCompleted, setMigrationCompleted] = useState(false);
+  const [migratedUserId, setMigratedUserId] = useState<string | null>(null);
 
   const migrateAnonymousData = useCallback(async (retryCount = 0) => {
-    console.log('🔄 Starting anonymous data migration...', { user: !!user, retryCount });
+    console.log('🔄 Starting anonymous data migration...', { user: !!user, retryCount, isClient: isClient() });
     
     if (!user) {
       console.log('❌ Migration aborted: No authenticated user');
+      setMigrationCompleted(true);
+      return;
+    }
+
+    // Only migrate for client users
+    if (!isClient()) {
+      console.log('❌ Migration skipped: User is not a client');
+      setMigrationCompleted(true);
+      return;
+    }
+
+    // Prevent multiple migrations for the same user
+    if (migratedUserId === user.id) {
+      console.log('❌ Migration skipped: Already migrated for this user');
       setMigrationCompleted(true);
       return;
     }
@@ -153,6 +170,7 @@ export function useDataMigration() {
       
       setIsMigrating(false);
       setMigrationCompleted(true);
+      setMigratedUserId(user.id);
       console.log('✅ Migration fully completed');
 
     } catch (error) {
@@ -165,13 +183,14 @@ export function useDataMigration() {
         variant: "destructive",
       });
     }
-  }, [user, getSessionData, getTrainerSessionData, clearSession, clearTrainerSession, saveTrainer, profile, updateProfile]);
+  }, [user, getSessionData, getTrainerSessionData, clearSession, clearTrainerSession, saveTrainer, profile, updateProfile, isClient, migratedUserId]);
 
   // Reset migration state when user changes
   useEffect(() => {
     if (!user) {
       setIsMigrating(false);
       setMigrationCompleted(false);
+      setMigratedUserId(null);
     }
   }, [user]);
 
