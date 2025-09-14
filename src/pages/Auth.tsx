@@ -15,7 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { EnhancedAuthLayout } from '@/components/auth/EnhancedAuthLayout';
 import { MotivationalHeader } from '@/components/auth/MotivationalHeader';
 import { BrandedFormField } from '@/components/auth/BrandedFormField';
-import { SocialLoginPlaceholder } from '@/components/auth/SocialLoginPlaceholder';
+
 
 
 export default function Auth() {
@@ -562,8 +562,6 @@ export default function Auth() {
                         </div>
                       )}
                     </div>
-                    
-                    <SocialLoginPlaceholder />
                 </TabsContent>
                 
                   <TabsContent value="signup" className="space-y-6 mt-6">
@@ -664,8 +662,6 @@ export default function Auth() {
                         Create Account
                       </Button>
                     </form>
-                    
-                    <SocialLoginPlaceholder />
                   </TabsContent>
                 </Tabs>
               </div>
