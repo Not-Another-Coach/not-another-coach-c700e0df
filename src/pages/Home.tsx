@@ -150,23 +150,13 @@ export default function Home() {
               });
             }, 100);
           }}
-          onBrowseAll={() => document.getElementById('browse-trainers')?.scrollIntoView({ behavior: 'smooth' })}
         />
 
-        {/* Featured Trainers Preview - moved after hero */}
-        <TrainerPreviewCarousel onViewAll={() => document.getElementById('browse-trainers')?.scrollIntoView({ behavior: 'smooth' })} />
-
-        {/* Why Choose Our Platform */}
-        <InteractiveValueCards />
-
-        {/* Coach Recruitment Section */}
-        <CoachRecruitmentSection onBecomeCoach={() => navigate('/trainer/demo')} />
-
-        {/* Browse Trainers Section */}
+        {/* Meet Our Trainers Section */}
         <section id="browse-trainers" className="py-16 bg-muted/20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4">Browse Trainers</h2>
+              <h2 className="text-3xl font-bold mb-4">Meet Our Trainers</h2>
               <p className="text-xl text-muted-foreground">
                 Discover your perfect training match
               </p>
@@ -182,6 +172,11 @@ export default function Home() {
                 </CardContent>
               </Card>
             )}
+
+            {/* Featured Trainers Preview */}
+            <div className="mb-8">
+              <TrainerPreviewCarousel />
+            </div>
             
             {showQuiz ? (
               <MatchQuiz 
@@ -193,6 +188,12 @@ export default function Home() {
             )}
           </div>
         </section>
+
+        {/* Why Choose Our Platform */}
+        <InteractiveValueCards />
+
+        {/* Coach Recruitment Section */}
+        <CoachRecruitmentSection onBecomeCoach={() => navigate('/trainer/demo')} />
       </div>
     );
   }

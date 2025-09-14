@@ -4,10 +4,9 @@ import heroImage from "@/assets/hero-fitness-lifestyle.jpg";
 
 interface EnhancedHeroSectionProps {
   onFindMatch: () => void;
-  onBrowseAll: () => void;
 }
 
-export const EnhancedHeroSection = ({ onFindMatch, onBrowseAll }: EnhancedHeroSectionProps) => {
+export const EnhancedHeroSection = ({ onFindMatch }: EnhancedHeroSectionProps) => {
   return (
     <div className="relative min-h-[60vh] flex items-center justify-center overflow-hidden">
       {/* Background Image with Overlay */}
@@ -37,8 +36,8 @@ export const EnhancedHeroSection = ({ onFindMatch, onBrowseAll }: EnhancedHeroSe
             Discover expert trainers, compare coaching styles, and book your perfect match — no signup needed.
           </p>
           
-          {/* CTA Buttons with Hierarchy */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12 animate-fade-in [animation-delay:0.4s]">
+          {/* CTA Button */}
+          <div className="flex justify-center animate-fade-in [animation-delay:0.4s]">
             <Button
               onClick={onFindMatch}
               variant="hero"
@@ -48,36 +47,6 @@ export const EnhancedHeroSection = ({ onFindMatch, onBrowseAll }: EnhancedHeroSe
               Find My Match
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
-            <Button
-              onClick={onBrowseAll}
-              variant="outline"
-              size="lg"
-              className="border-2 border-white bg-white/10 text-white hover:bg-white hover:text-primary backdrop-blur-sm px-8 py-4 text-lg font-semibold transition-all duration-300 hover:shadow-lg"
-            >
-              Browse All Trainers
-            </Button>
-          </div>
-          
-          {/* Feature highlights with animations */}
-          <div className="flex flex-wrap justify-center gap-8 text-white/80 animate-fade-in [animation-delay:0.6s]">
-            <div className="flex items-center gap-3 hover:text-white transition-colors duration-300">
-              <div className="p-2 bg-white/10 rounded-full backdrop-blur-sm">
-                <Target className="h-5 w-5" />
-              </div>
-              <span className="text-sm font-medium">Personalized Matching</span>
-            </div>
-            <div className="flex items-center gap-3 hover:text-white transition-colors duration-300">
-              <div className="p-2 bg-white/10 rounded-full backdrop-blur-sm">
-                <Dumbbell className="h-5 w-5" />
-              </div>
-              <span className="text-sm font-medium">Certified Professionals</span>
-            </div>
-            <div className="flex items-center gap-3 hover:text-white transition-colors duration-300">
-              <div className="p-2 bg-white/10 rounded-full backdrop-blur-sm">
-                <Users className="h-5 w-5" />
-              </div>
-              <span className="text-sm font-medium">Trusted by 1000+ Users</span>
-            </div>
           </div>
         </div>
       </div>

@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 interface TrainerPreviewCarouselProps {
-  onViewAll: () => void;
+  onViewAll?: () => void;
 }
 
 export const TrainerPreviewCarousel = ({ onViewAll }: TrainerPreviewCarouselProps) => {
@@ -76,14 +76,16 @@ export const TrainerPreviewCarousel = ({ onViewAll }: TrainerPreviewCarouselProp
               Discover expert trainers ready to guide your fitness journey
             </p>
           </div>
-          <Button
-            onClick={onViewAll}
-            variant="outline"
-            className="hidden sm:flex items-center gap-2 hover:bg-primary hover:text-white transition-all duration-300"
-          >
-            View All Trainers
-            <ArrowRight className="h-4 w-4" />
-          </Button>
+          {onViewAll && (
+            <Button
+              onClick={onViewAll}
+              variant="outline"
+              className="hidden sm:flex items-center gap-2 hover:bg-primary hover:text-white transition-all duration-300"
+            >
+              View All Trainers
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          )}
         </div>
         
         {/* Trainer Cards */}
@@ -171,16 +173,18 @@ export const TrainerPreviewCarousel = ({ onViewAll }: TrainerPreviewCarouselProp
         </div>
         
         {/* Mobile View All Button */}
-        <div className="sm:hidden mt-8 text-center">
-          <Button
-            onClick={onViewAll}
-            variant="outline"
-            className="w-full items-center gap-2 hover:bg-primary hover:text-white transition-all duration-300"
-          >
-            View All Trainers
-            <ArrowRight className="h-4 w-4" />
-          </Button>
-        </div>
+        {onViewAll && (
+          <div className="sm:hidden mt-8 text-center">
+            <Button
+              onClick={onViewAll}
+              variant="outline"
+              className="w-full items-center gap-2 hover:bg-primary hover:text-white transition-all duration-300"
+            >
+              View All Trainers
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
