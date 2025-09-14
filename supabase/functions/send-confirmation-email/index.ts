@@ -120,8 +120,8 @@ serve(async (req: Request) => {
     // Build and send the branded email
     const html = buildEmailHTML(actionLink, first_name);
 
-    // Use a from address that works in test mode
-    const fromAddress = 'onboarding@resend.dev'; // This works in Resend test mode
+    // Use the verified domain for sending emails
+    const fromAddress = 'noreply@notanothercoach.com';
 
     const sendResult = await resend.emails.send({
       from: fromAddress,
