@@ -11,7 +11,7 @@ import { useAnonymousSession } from "@/hooks/useAnonymousSession";
 import { AppLogo } from "@/components/ui/app-logo";
 import { EnhancedHeroSection } from "@/components/homepage/EnhancedHeroSection";
 import { InteractiveValueCards } from "@/components/homepage/InteractiveValueCards";
-import { CoachRecruitmentSection } from "@/components/homepage/CoachRecruitmentSection";
+
 import { UserIntentModal } from "@/components/user-intent/UserIntentModal";
 import { useUserIntent } from "@/hooks/useUserIntent";
 import { Heart } from "lucide-react";
@@ -154,9 +154,6 @@ export default function Home() {
 
         {/* Why Choose Our Platform */}
         <InteractiveValueCards />
-
-        {/* Coach Recruitment Section */}
-        <CoachRecruitmentSection onBecomeCoach={() => navigate('/trainer/demo')} />
 
         {/* Quiz Modal */}
         <MatchQuizModal 

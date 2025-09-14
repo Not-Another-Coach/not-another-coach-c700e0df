@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AppLogo } from '@/components/ui/app-logo';
+import { CoachRecruitmentSection } from '@/components/homepage/CoachRecruitmentSection';
 import { ArrowRight, MessageSquare, Users, TrendingUp, Star, Shield, Zap } from 'lucide-react';
 
 export default function TrainerDemo() {
@@ -215,6 +216,11 @@ export default function TrainerDemo() {
             </Card>
           </div>
         </div>
+
+        {/* Coach Recruitment Section */}
+        <CoachRecruitmentSection 
+          onBecomeCoach={handleCreateProfile}
+        />
 
         {/* Call to Action */}
         <div className="mt-12 text-center bg-primary/5 rounded-lg p-8">
