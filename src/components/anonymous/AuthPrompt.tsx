@@ -43,7 +43,7 @@ export const AuthPrompt = ({
       case 'profile':
         return {
           icon: EyeOff,
-          title: "🔒 Profiles are locked for members only",
+          title: "Profiles are locked for members only",
           description: "👀 No peeking! Full trainer details are for members only — unlock free.",
         };
       default:
@@ -69,14 +69,16 @@ export const AuthPrompt = ({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="bg-primary/10 p-2 rounded-full">
-              <Icon className="h-5 w-5 text-primary" />
+        <DialogHeader className="text-center space-y-4">
+          <div className="flex items-center justify-between mb-2">
+            <EyeOff className="h-6 w-6 text-muted-foreground" />
+            <div className="bg-yellow-400 p-3 rounded-full">
+              <Lock className="h-6 w-6 text-yellow-900" />
             </div>
-            <DialogTitle>{config.title}</DialogTitle>
+            <div></div>
           </div>
-          <DialogDescription className="text-left">
+          <DialogTitle className="text-2xl font-bold text-center">{config.title}</DialogTitle>
+          <DialogDescription className="text-center text-base">
             {config.description}
           </DialogDescription>
         </DialogHeader>
@@ -102,7 +104,7 @@ export const AuthPrompt = ({
         </div>
 
         <DialogFooter className="flex-col gap-3">
-          <Button onClick={handleCreateAccount} className="w-full animate-pulse">
+          <Button onClick={handleCreateAccount} className="w-full bg-slate-800 hover:bg-slate-700 text-white">
             🔑 Unlock My Free Account
           </Button>
           
