@@ -47,7 +47,7 @@ export default function Auth() {
   // Detect signup context from URL
   const signupContext = searchParams.get('signup');
   const intentContext = searchParams.get('intent');
-  const isContextualSignup = signupContext === 'client' || signupContext === 'trainer' || intentContext === 'trainer-signup';
+  const isContextualSignup = signupContext === 'true' || signupContext === 'client' || signupContext === 'trainer' || intentContext === 'trainer-signup';
   
   // Load saved email on component mount (secure - no password storage)
   useEffect(() => {
@@ -93,8 +93,8 @@ export default function Auth() {
       });
     } else if (signup === 'true' || signup === 'client' || signup === 'trainer' || intent === 'trainer-signup') {
       setActiveTab('signup');
-      // Set user type based on context
-      if (signup === 'client') {
+      // Set user type based on context - default to client for generic signup
+      if (signup === 'client' || signup === 'true') {
         setSignupForm(prev => ({ ...prev, userType: 'client' }));
       } else if (signup === 'trainer' || intent === 'trainer-signup') {
         setSignupForm(prev => ({ ...prev, userType: 'trainer' }));
@@ -610,9 +610,9 @@ export default function Auth() {
                       {/* Show user type indicator for contextual signup */}
                       {isContextualSignup && (
                         <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
-                          <p className="text-sm text-primary font-medium">
-                            Signing up as: {signupContext === 'client' ? 'Client looking for a coach' : 'Coach'}
-                          </p>
+                           <p className="text-sm text-primary font-medium">
+                             Signing up as: {signupContext === 'client' || signupContext === 'true' ? 'Client looking for a coach' : 'Coach'}
+                           </p>
                         </div>
                       )}
                      
