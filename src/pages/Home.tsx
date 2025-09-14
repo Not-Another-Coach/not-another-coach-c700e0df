@@ -152,30 +152,14 @@ export default function Home() {
           }}
         />
 
-        {/* Meet Our Trainers Section */}
+        {/* Meet The Coaches Section */}
         <section id="browse-trainers" className="py-16 bg-muted/20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4">Meet Our Trainers</h2>
+              <h2 className="text-3xl font-bold mb-4">Meet The Coaches</h2>
               <p className="text-xl text-muted-foreground">
                 Discover your perfect training match
               </p>
-            </div>
-            
-            {savedTrainersCount > 0 && (
-              <Card className="mb-6">
-                <CardContent className="flex flex-col sm:flex-row items-center justify-between gap-3 py-4">
-                  <div className="text-sm sm:text-base">
-                    You have {savedTrainersCount} saved {savedTrainersCount === 1 ? 'trainer' : 'trainers'}. Create an account to keep them forever.
-                  </div>
-                  <Button onClick={() => navigate('/auth?signup=client')}>Create Account</Button>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Featured Trainers Preview */}
-            <div className="mb-8">
-              <TrainerPreviewCarousel />
             </div>
             
             {showQuiz ? (
