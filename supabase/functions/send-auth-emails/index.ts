@@ -191,7 +191,7 @@ serve(async (req: Request): Promise<Response> => {
     if (email_action_type === 'signup') {
       // Send confirmation email
       const confirmationResult = await resend.emails.send({
-        from: 'Not Another Coach <noreply@notanothercoach.com>',
+        from: 'Not Another Coach <noreply@resend.dev>',
         to: [user.email],
         subject: '👉 Welcome to Not Another Coach — please confirm your email',
         html: createConfirmationEmailHTML(

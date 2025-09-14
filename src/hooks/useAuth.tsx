@@ -89,15 +89,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const resendConfirmation = async (email: string) => {
     const redirectUrl = `${window.location.origin}/auth/callback`;
-
-    const { data, error } = await supabase.functions.invoke('send-confirmation-email', {
-      body: {
-        email,
-        first_name: user?.user_metadata?.first_name,
-        redirect_to: redirectUrl,
+    
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+      options: {
+        emailRedirectTo: redirectUrl
       }
     });
-
     return { error };
   };
 

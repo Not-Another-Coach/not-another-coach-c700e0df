@@ -38,28 +38,6 @@ export const InstagramMediaPicker = () => {
       setLoading(true);
       setError(null);
       
-      // First check if user has an active Instagram connection
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setError('Please log in to view Instagram media');
-        return;
-      }
-
-      const { data: connectionData } = await supabase
-        .from('instagram_connections')
-        .select('id, is_active')
-        .eq('trainer_id', user.id)
-        .eq('is_active', true)
-        .maybeSingle();
-
-      if (!connectionData) {
-        // No Instagram connection - set empty state without error
-        setMedia([]);
-        setConnection(null);
-        setSelectedMedia([]);
-        return;
-      }
-      
       const { data, error } = await supabase.functions.invoke('instagram-media');
       
       if (error) throw error;
@@ -77,16 +55,12 @@ export const InstagramMediaPicker = () => {
       
     } catch (err: any) {
       console.error('Error fetching Instagram media:', err);
-      // Only show error toast for actual connection issues, not missing connections
-      const isConnectionIssue = err.message?.includes('connection') || err.message?.includes('token');
-      if (isConnectionIssue) {
-        setError(err.message || 'Failed to fetch Instagram media');
-        toast({
-          title: 'Instagram Connection Issue',
-          description: 'Please reconnect your Instagram account in settings',
-          variant: 'destructive',
-        });
-      }
+      setError(err.message || 'Failed to fetch Instagram media');
+      toast({
+        title: 'Error',
+        description: err.message || 'Failed to fetch Instagram media',
+        variant: 'destructive',
+      });
     } finally {
       setLoading(false);
     }
@@ -208,27 +182,6 @@ export const InstagramMediaPicker = () => {
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-6 w-6 animate-spin" />
             <span className="ml-2">Loading your Instagram posts...</span>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  // Show empty state instead of error when no connection exists
-  if (!connection && !error) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Instagram className="h-5 w-5" />
-            Instagram Media Picker
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8 text-muted-foreground">
-            <Instagram className="h-12 w-12 mx-auto mb-3 opacity-30" />
-            <p>No Instagram account connected</p>
-            <p className="text-sm">Connect your Instagram account to select posts for your profile</p>
           </div>
         </CardContent>
       </Card>

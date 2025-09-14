@@ -662,24 +662,6 @@ export default function Auth() {
                         Create Account
                       </Button>
                     </form>
-
-                    {showResendConfirmation && (
-                      <div className="pt-4 border-t border-white/20">
-                        <p className="text-sm text-muted-foreground mb-2">
-                          Didn't receive your confirmation email?
-                        </p>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={handleResendConfirmation}
-                          disabled={isLoading}
-                          className="w-full bg-white/5 border-white/20 hover:bg-white/10"
-                        >
-                          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                          Resend Confirmation Email
-                        </Button>
-                      </div>
-                    )}
                   </TabsContent>
                 </Tabs>
               </div>
