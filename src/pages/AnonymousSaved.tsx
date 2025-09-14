@@ -6,6 +6,7 @@ import { Heart, ArrowLeft, Loader2 } from "lucide-react";
 import { useAnonymousSession } from "@/hooks/useAnonymousSession";
 import { AuthPrompt } from "@/components/anonymous/AuthPrompt";
 import { EnhancedTrainerCard } from "@/components/trainer-cards/EnhancedTrainerCard";
+import { AppLogo } from "@/components/ui/app-logo";
 import { supabase } from "@/integrations/supabase/client";
 import type { AnyTrainer } from "@/types/trainer";
 
@@ -112,19 +113,11 @@ export default function AnonymousSaved() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+      <header className="sticky top-0 z-50 bg-background border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate('/')}
-                className="gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Back to Browse
-              </Button>
+              <AppLogo />
               <div className="flex items-center gap-2">
                 <Heart className="h-5 w-5 text-primary" />
                 <span className="font-semibold">Your Saved Trainers</span>
@@ -132,9 +125,19 @@ export default function AnonymousSaved() {
               </div>
             </div>
             
-            <Button onClick={() => navigate('/auth?signup=true')}>
-              Create Account to Keep Forever
-            </Button>
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                onClick={() => navigate('/')}
+                className="gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to Browse
+              </Button>
+              <Button onClick={() => navigate('/auth?signup=true')}>
+                Create Account
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -153,16 +156,6 @@ export default function AnonymousSaved() {
           </div>
         ) : (
           <>
-            {/* Session Warning */}
-            <div className="bg-muted/30 border border-muted rounded-lg p-3 mb-6">
-              <div className="flex items-center gap-2">
-                <Heart className="h-4 w-4 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">
-                  Your saved trainers are stored locally for 7 days. Create a free account to keep them forever.
-                </p>
-              </div>
-            </div>
-
             {/* Trainers Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               {trainers.map((trainer) => {
