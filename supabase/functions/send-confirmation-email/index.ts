@@ -120,8 +120,11 @@ serve(async (req: Request) => {
     // Build and send the branded email
     const html = buildEmailHTML(actionLink, first_name);
 
+    // Use a from address that works in test mode
+    const fromAddress = 'onboarding@resend.dev'; // This works in Resend test mode
+
     const sendResult = await resend.emails.send({
-      from: 'Not Another Coach <onboarding@resend.dev>',
+      from: fromAddress,
       to: [email],
       subject: '👉 Welcome to Not Another Coach — please confirm your email',
       html,
