@@ -117,7 +117,12 @@ export default function AnonymousSaved() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
-              <AppLogo />
+              <button 
+                onClick={() => navigate('/')}
+                className="hover:opacity-75 transition-opacity"
+              >
+                <AppLogo />
+              </button>
               <div className="flex items-center gap-2">
                 <Heart className="h-5 w-5 text-primary" />
                 <span className="font-semibold">Your Saved Trainers</span>

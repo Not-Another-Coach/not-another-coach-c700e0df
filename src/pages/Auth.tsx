@@ -385,7 +385,7 @@ export default function Auth() {
     <EnhancedAuthLayout>
             {showPasswordReset ? (
               <div className="space-y-6">
-                <MotivationalHeader context="reset" />
+                <MotivationalHeader context="reset" onTaglineClick={() => navigate('/')} />
 
                 <form onSubmit={handleUpdatePassword} className="space-y-4">
                   <BrandedFormField
@@ -438,7 +438,7 @@ export default function Auth() {
                   </Button>
                 </div>
                 
-                <MotivationalHeader context="forgot" />
+                <MotivationalHeader context="forgot" onTaglineClick={() => navigate('/')} />
 
                 <form onSubmit={handlePasswordReset} className="space-y-4">
                   <BrandedFormField
@@ -468,6 +468,7 @@ export default function Auth() {
                 <MotivationalHeader 
                   context={activeTab === 'login' ? 'login' : 'signup'} 
                   userType={signupForm.userType}
+                  onTaglineClick={() => navigate('/')}
                 />
                 
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

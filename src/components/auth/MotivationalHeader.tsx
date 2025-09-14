@@ -3,9 +3,10 @@ import React from 'react';
 interface MotivationalHeaderProps {
   context: 'login' | 'signup' | 'trainer-signup' | 'forgot' | 'reset';
   userType?: 'client' | 'trainer';
+  onTaglineClick?: () => void;
 }
 
-export const MotivationalHeader: React.FC<MotivationalHeaderProps> = ({ context, userType }) => {
+export const MotivationalHeader: React.FC<MotivationalHeaderProps> = ({ context, userType, onTaglineClick }) => {
   const getHeadline = () => {
     switch (context) {
       case 'login':
@@ -47,7 +48,12 @@ export const MotivationalHeader: React.FC<MotivationalHeaderProps> = ({ context,
   return (
     <div className="text-center mb-8">
       {/* Main Tagline - Hero Style */}
-      <h1 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">
+      <h1 
+        className={`text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2 ${
+          onTaglineClick ? 'cursor-pointer hover:opacity-75 transition-opacity' : ''
+        }`}
+        onClick={onTaglineClick}
+      >
         {getTagline()}
       </h1>
       
