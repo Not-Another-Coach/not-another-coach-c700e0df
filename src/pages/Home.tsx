@@ -5,16 +5,12 @@ import { useProfileByType } from "@/hooks/useProfileByType";
 import { useUserType } from "@/hooks/useUserType";
 import { useDataMigration } from "@/hooks/useDataMigration";
 import { AnonymousBrowse } from "@/components/anonymous/AnonymousBrowse";
-import { MatchQuiz } from "@/components/anonymous/MatchQuiz";
+import { MatchQuizModal } from "@/components/anonymous/MatchQuizModal";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { useAnonymousSession } from "@/hooks/useAnonymousSession";
 import { AppLogo } from "@/components/ui/app-logo";
 import { EnhancedHeroSection } from "@/components/homepage/EnhancedHeroSection";
 import { InteractiveValueCards } from "@/components/homepage/InteractiveValueCards";
-import { TrainerPreviewCarousel } from "@/components/homepage/TrainerPreviewCarousel";
-import { SocialProofSection } from "@/components/homepage/SocialProofSection";
 import { CoachRecruitmentSection } from "@/components/homepage/CoachRecruitmentSection";
 import { UserIntentModal } from "@/components/user-intent/UserIntentModal";
 import { useUserIntent } from "@/hooks/useUserIntent";
@@ -28,8 +24,7 @@ export default function Home() {
   const { shouldShowModal, setUserIntent, clearIntent, dismissModal } = useUserIntent();
   const navigate = useNavigate();
   
-  const [showQuiz, setShowQuiz] = useState(false);
-  const [showMatches, setShowMatches] = useState(false);
+  const [showQuizModal, setShowQuizModal] = useState(false);
 
   // Initialize data migration hook
   useDataMigration();
@@ -58,26 +53,21 @@ export default function Home() {
   }, [user, profile, loading, profileLoading, userTypeLoading, user_type, navigate]);
 
   const handleQuizComplete = (results: any) => {
-    setShowQuiz(false);
-    setShowMatches(true);
+    setShowQuizModal(false);
+    // Scroll to browse trainers section to show filtered results
+    setTimeout(() => {
+      const browseSection = document.getElementById('browse-trainers');
+      if (browseSection) {
+        browseSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 100);
   };
 
   const handleIntentSelection = (intent: 'client' | 'trainer') => {
-    console.log('Intent selected:', intent);
-    setUserIntent(intent);
-    
-    // Navigate based on intent
-    if (intent === 'trainer') {
-      console.log('Navigating to /trainer/demo');
+    if (intent === 'client') {
+      setShowQuizModal(true);
+    } else {
       navigate('/trainer/demo');
-    } else if (intent === 'client') {
-      // Scroll to browse trainers section for clients
-      setTimeout(() => {
-        document.getElementById('browse-trainers')?.scrollIntoView({ 
-          behavior: 'smooth',
-          block: 'start'
-        });
-      }, 100);
     }
   };
 
@@ -100,6 +90,7 @@ export default function Home() {
           onSelectIntent={handleIntentSelection}
           onDismiss={dismissModal}
         />
+        
         {/* Header */}
         <header className="sticky top-0 z-50 bg-background border-b">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -141,15 +132,7 @@ export default function Home() {
 
         {/* Enhanced Hero Section */}
         <EnhancedHeroSection 
-          onFindMatch={() => {
-            setShowQuiz(true);
-            setTimeout(() => {
-              document.getElementById('browse-trainers')?.scrollIntoView({ 
-                behavior: 'smooth',
-                block: 'start'
-              });
-            }, 100);
-          }}
+          onFindMatch={() => setShowQuizModal(true)}
         />
 
         {/* Meet The Coaches Section */}
@@ -162,14 +145,7 @@ export default function Home() {
               </p>
             </div>
             
-            {showQuiz ? (
-              <MatchQuiz 
-                onComplete={handleQuizComplete}
-                onClose={() => setShowQuiz(false)}
-              />
-            ) : (
-              <AnonymousBrowse />
-            )}
+            <AnonymousBrowse />
           </div>
         </section>
 
@@ -178,14 +154,16 @@ export default function Home() {
 
         {/* Coach Recruitment Section */}
         <CoachRecruitmentSection onBecomeCoach={() => navigate('/trainer/demo')} />
+
+        {/* Quiz Modal */}
+        <MatchQuizModal 
+          isOpen={showQuizModal}
+          onComplete={handleQuizComplete}
+          onClose={() => setShowQuizModal(false)}
+        />
       </div>
     );
   }
 
-  // Fallback for authenticated users (shouldn't reach here due to useEffect redirect)
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-lg">Redirecting...</div>
-    </div>
-  );
+  return <div>Redirecting...</div>;
 }
