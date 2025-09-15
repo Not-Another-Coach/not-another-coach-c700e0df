@@ -2,6 +2,20 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@4.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+const fromEmail = Deno.env.get("FROM_EMAIL") || 'Not Another Coach <onboarding@resend.dev>';
+
+// Retry utility for Resend API calls
+const retryResendCall = async (fn: () => Promise<any>, maxRetries = 3, delay = 1000) => {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await fn();
+    } catch (error: any) {
+      console.warn(`Attempt ${i + 1} failed:`, error.message);
+      if (i === maxRetries - 1) throw error;
+      await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
+    }
+  }
+};
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -125,19 +139,25 @@ serve(async (req: Request): Promise<Response> => {
     
     console.log('Sending welcome email to:', user.email, 'Type:', userType);
 
-    const welcomeResult = await resend.emails.send({
-      from: 'Not Another Coach <noreply@resend.dev>',
-      to: [user.email],
-      subject: `Welcome to Not Another Coach${firstName ? `, ${firstName}` : ''}! 🎉`,
-      html: createWelcomeEmailHTML(firstName, userType),
-    });
+    const welcomeResult = await retryResendCall(() => 
+      resend.emails.send({
+        from: fromEmail,
+        to: [user.email],
+        subject: `Welcome to Not Another Coach${firstName ? `, ${firstName}` : ''}! 🎉`,
+        html: createWelcomeEmailHTML(firstName, userType),
+      })
+    );
 
     if (welcomeResult.error) {
       console.error('Error sending welcome email:', welcomeResult.error);
-      throw welcomeResult.error;
+      throw new Error(`Failed to send welcome email: ${welcomeResult.error.message}`);
     }
 
-    console.log('Welcome email sent successfully:', welcomeResult.data?.id);
+    console.log('Welcome email sent successfully:', {
+      id: welcomeResult.data?.id,
+      to: user.email,
+      subject: `Welcome to Not Another Coach${firstName ? `, ${firstName}` : ''}! 🎉`
+    });
 
     return new Response(
       JSON.stringify({ 

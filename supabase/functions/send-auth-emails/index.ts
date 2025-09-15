@@ -5,6 +5,20 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY") as string);
 const hookSecret = Deno.env.get("SEND_AUTH_EMAILS_HOOK_SECRET") as string;
+const fromEmail = Deno.env.get("FROM_EMAIL") || 'Not Another Coach <onboarding@resend.dev>';
+
+// Retry utility for Resend API calls
+const retryResendCall = async (fn: () => Promise<any>, maxRetries = 3, delay = 1000) => {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await fn();
+    } catch (error: any) {
+      console.warn(`Attempt ${i + 1} failed:`, error.message);
+      if (i === maxRetries - 1) throw error;
+      await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
+    }
+  }
+};
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -189,29 +203,37 @@ serve(async (req: Request): Promise<Response> => {
 
     // Handle email confirmation
     if (email_action_type === 'signup') {
-      // Send confirmation email
-      const confirmationResult = await resend.emails.send({
-        from: 'Not Another Coach <noreply@resend.dev>',
-        to: [user.email],
-        subject: '👉 Welcome to Not Another Coach — please confirm your email',
-        html: createConfirmationEmailHTML(
-          token, 
-          token_hash, 
-          Deno.env.get('SUPABASE_URL') || '', 
-          redirect_to, 
-          email_action_type,
-          firstName
-        ),
-      });
+      console.log('Sending confirmation email for user:', user.email);
+      
+      // Send confirmation email with retry logic
+      const confirmationResult = await retryResendCall(() => 
+        resend.emails.send({
+          from: fromEmail,
+          to: [user.email],
+          subject: '👉 Welcome to Not Another Coach — please confirm your email',
+          html: createConfirmationEmailHTML(
+            token, 
+            token_hash, 
+            Deno.env.get('SUPABASE_URL') || '', 
+            redirect_to, 
+            email_action_type,
+            firstName
+          ),
+        })
+      );
 
       if (confirmationResult.error) {
         console.error('Error sending confirmation email:', confirmationResult.error);
-        throw confirmationResult.error;
+        throw new Error(`Failed to send confirmation email: ${confirmationResult.error.message}`);
       }
 
-      console.log('Confirmation email sent successfully:', confirmationResult.data?.id);
-
-      console.log('Confirmation email sent successfully. Welcome email will be sent after email verification.');
+      console.log('Confirmation email sent successfully:', {
+        id: confirmationResult.data?.id,
+        to: user.email,
+        subject: '👉 Welcome to Not Another Coach — please confirm your email'
+      });
+    } else {
+      console.log('Skipping confirmation email - action type:', email_action_type);
     }
 
     return new Response(
