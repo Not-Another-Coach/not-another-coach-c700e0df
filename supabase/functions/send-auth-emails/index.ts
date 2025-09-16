@@ -228,7 +228,7 @@ serve(async (req: Request): Promise<Response> => {
 
     // Handle email confirmation
     if (email_action_type === 'signup') {
-      console.log('Sending confirmation email for user:', user.email);
+      console.log('Sending confirmation email for user:', user.email, 'from:', fromEmail);
       
       // Send confirmation email with retry logic
       const subject = '👉 Welcome to Not Another Coach — please confirm your email';
@@ -250,7 +250,10 @@ serve(async (req: Request): Promise<Response> => {
       );
 
       if (confirmationResult.error) {
-        throw new Error(`Failed to send confirmation email: ${confirmationResult.error.message}`);
+        const e = confirmationResult.error;
+        const message = typeof e === 'string' ? e : (e?.message || e?.name || JSON.stringify(e));
+        console.error('Resend send error:', e);
+        throw new Error(`Failed to send confirmation email: ${message}`);
       }
 
       console.log('Confirmation email sent successfully:', {
