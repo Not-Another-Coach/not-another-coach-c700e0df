@@ -4,10 +4,17 @@ import { Webhook } from "https://esm.sh/standardwebhooks@1.0.0";
 import { Resend } from "npm:resend@4.0.0";
 
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY") as string);
+const resendApiKey = Deno.env.get("RESEND_API_KEY") as string;
+const resend = new Resend(resendApiKey);
 const hookSecret = Deno.env.get("SEND_EMAIL_HOOK_SECRET") as string;
 const DEFAULT_FROM = 'Not Another Coach <onboarding@resend.dev>';
 const RAW_FROM = Deno.env.get("FROM_EMAIL")?.trim();
+const TEST_FROM = Deno.env.get("TEST_FROM_EMAIL")?.trim();
+
+// Log API key status (masked for security)
+const maskedApiKey = resendApiKey ? `${resendApiKey.substring(0, 6)}...` : 'NOT_SET';
+console.log('RESEND_API_KEY status:', maskedApiKey);
+
 const stripWrappingQuotes = (val?: string) => (val ? val.replace(/^['"]|['"]$/g, '') : '');
 const isValidFrom = (val: string) => {
   const v = stripWrappingQuotes(val).trim();
@@ -15,9 +22,25 @@ const isValidFrom = (val: string) => {
   const namedPattern = /^[^<>]+<\s*[^\s@]+@[^\s@]+\.[^\s@]+\s*>$/;
   return emailPattern.test(v) || namedPattern.test(v);
 };
+
 const fromEmail = (() => {
+  // Check for test override first
+  if (TEST_FROM) {
+    const candidate = stripWrappingQuotes(TEST_FROM);
+    if (isValidFrom(candidate)) {
+      console.log("Using TEST_FROM_EMAIL override:", candidate);
+      return candidate;
+    } else {
+      console.warn("TEST_FROM_EMAIL invalid format, ignoring:", TEST_FROM);
+    }
+  }
+  
+  // Use regular FROM_EMAIL
   const candidate = stripWrappingQuotes(RAW_FROM);
-  if (candidate && isValidFrom(candidate)) return candidate;
+  if (candidate && isValidFrom(candidate)) {
+    console.log("Using FROM_EMAIL:", candidate);
+    return candidate;
+  }
   console.warn("FROM_EMAIL secret missing or invalid; falling back to default sender. Received value:", RAW_FROM);
   return DEFAULT_FROM;
 })();
@@ -251,8 +274,27 @@ serve(async (req: Request): Promise<Response> => {
 
       if (confirmationResult.error) {
         const e = confirmationResult.error;
-        const message = typeof e === 'string' ? e : (e?.message || e?.name || JSON.stringify(e));
-        console.error('Resend send error:', e);
+        
+        // Enhanced error logging - capture full error details
+        console.error('Resend API error details:', {
+          message: e?.message,
+          name: e?.name,
+          code: e?.code,
+          status: e?.status,
+          response: e?.response,
+          fullError: JSON.stringify(e, Object.getOwnPropertyNames(e))
+        });
+        
+        // Create comprehensive error message
+        const errorParts = [
+          e?.message,
+          e?.name,
+          e?.code && `Code: ${e.code}`,
+          e?.status && `Status: ${e.status}`,
+          typeof e === 'string' ? e : null
+        ].filter(Boolean);
+        
+        const message = errorParts.length > 0 ? errorParts.join(' | ') : JSON.stringify(e);
         throw new Error(`Failed to send confirmation email: ${message}`);
       }
 
