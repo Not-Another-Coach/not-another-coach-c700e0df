@@ -6,7 +6,21 @@ import { Resend } from "npm:resend@4.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY") as string);
 const hookSecret = Deno.env.get("SEND_EMAIL_HOOK_SECRET") as string;
-const fromEmail = Deno.env.get("FROM_EMAIL") || 'Not Another Coach <onboarding@resend.dev>';
+const DEFAULT_FROM = 'Not Another Coach <onboarding@resend.dev>';
+const RAW_FROM = Deno.env.get("FROM_EMAIL")?.trim();
+const stripWrappingQuotes = (val?: string) => (val ? val.replace(/^['"]|['"]$/g, '') : '');
+const isValidFrom = (val: string) => {
+  const v = stripWrappingQuotes(val).trim();
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const namedPattern = /^[^<>]+<\s*[^\s@]+@[^\s@]+\.[^\s@]+\s*>$/;
+  return emailPattern.test(v) || namedPattern.test(v);
+};
+const fromEmail = (() => {
+  const candidate = stripWrappingQuotes(RAW_FROM);
+  if (candidate && isValidFrom(candidate)) return candidate;
+  console.warn("FROM_EMAIL secret missing or invalid; falling back to default sender. Received value:", RAW_FROM);
+  return DEFAULT_FROM;
+})();
 
 // Retry utility for Resend API calls
 const retryResendCall = async (fn: () => Promise<any>, maxRetries = 3, delay = 1000) => {
