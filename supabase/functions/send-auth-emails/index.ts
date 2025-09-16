@@ -110,117 +110,116 @@ const fetchAppLogo = async () => {
   };
 }
 
-const createConfirmationEmailHTML = (token: string, token_hash: string, site_url: string, redirect_to: string, email_action_type: string, firstName?: string, logoSettings?: any) => {
-  const logoSection = logoSettings?.logo_url 
-    ? `<img src="${logoSettings.logo_url}" alt="${logoSettings.app_name || 'Not Another Coach'}" style="height: 50px; margin-bottom: 15px; border-radius: 8px;">`
-    : '';
-  
+// Create confirmation email HTML with enhanced branding
+const createConfirmationEmailHTML = (
+  token: string, 
+  token_hash: string, 
+  site_url: string, 
+  redirect_to: string, 
+  email_action_type: string, 
+  firstName?: string, 
+  logoSettings?: any
+) => {
+  const displayName = firstName || 'there';
   const appName = logoSettings?.app_name || 'Not Another Coach';
+  const confirmationUrl = `${site_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}`;
   
-  return `
-<!DOCTYPE html>
-<html>
+  return `<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>👉 Welcome to ${appName} — please confirm your email</title>
-  <style>
-    @media only screen and (max-width: 600px) {
-      .email-container { width: 100% !important; padding: 10px !important; }
-      .header-content { padding: 30px 15px !important; }
-      .body-content { padding: 30px 20px !important; }
-      .cta-button { padding: 12px 20px !important; font-size: 14px !important; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="x-apple-disable-message-reformatting">
+    <title>Confirm Your Email - ${appName}</title>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            .bg { background: #0c1523 !important; }
+            .card { background: #101a2b !important; border-color: #2a3754 !important; }
+            .text, .muted, .h1 { color: #f3f6fb !important; }
+            .btn { background: #2a74c0 !important; }
+            .rule { border-color: #2a3754 !important; }
+        }
+        a { text-decoration: none; }
+    </style>
 </head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; line-height: 1.6; color: #334155; margin: 0; padding: 0; background-color: #f8fafc;">
-  <div class="email-container" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);">
-    
-    <!-- Header with brand gradient -->
-    <div class="header-content" style="background: linear-gradient(135deg, hsl(220, 91%, 75%) 0%, hsl(262, 52%, 60%) 100%); padding: 40px 30px; text-align: center; position: relative;">
-      ${logoSection}
-      <h1 style="color: #ffffff; margin: 0; font-size: 32px; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        👋 Welcome to the ${appName} community!
-      </h1>
-      <p style="color: rgba(255, 255, 255, 0.9); margin: 15px 0 0 0; font-size: 18px; font-weight: 400;">
-        Where fitness gets personal, not generic.
-      </p>
+<body style="margin:0;padding:0;background:#f6f8fb;">
+<center style="width:100%;background:#f6f8fb;">
+    <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">
+        You're almost in! Confirm your email to start your fitness journey.
     </div>
-    
-    <!-- Main content -->
-    <div class="body-content" style="padding: 40px 30px;">
-      <h2 style="margin: 0 0 20px 0; font-size: 24px; color: #1e293b; font-weight: 600;">
-        You're just one click away${firstName ? ` ${firstName}` : ''}!
-      </h2>
-      
-      <p style="margin: 0 0 30px 0; font-size: 16px; color: #475569; line-height: 1.6;">
-        Thanks for joining our community of passionate trainers and dedicated clients. To complete your registration and start your personalized fitness journey, please confirm your email address below.
-      </p>
-      
-      <!-- CTA Button -->
-      <div style="text-align: center; margin: 35px 0;">
-        <a href="${site_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}" 
-           class="cta-button"
-           style="display: inline-block; 
-                  background: linear-gradient(135deg, hsl(220, 91%, 75%) 0%, hsl(262, 52%, 60%) 100%); 
-                  color: #ffffff; 
-                  padding: 16px 40px; 
-                  text-decoration: none; 
-                  border-radius: 10px; 
-                  font-weight: 600; 
-                  font-size: 16px; 
-                  box-shadow: 0 6px 20px hsla(220, 91%, 75%, 0.4);
-                  transition: all 0.2s ease-in-out;
-                  border: none;
-                  cursor: pointer;">
-          🔑 Confirm My Email
-        </a>
-      </div>
-      
-      <!-- Alternative link section -->
-      <div style="background: #f1f5f9; padding: 25px; border-radius: 10px; margin: 30px 0; border-left: 4px solid hsl(220, 91%, 75%);">
-        <p style="margin: 0 0 15px 0; font-size: 14px; color: #64748b; font-weight: 500;">
-          Having trouble with the button? Copy and paste this link into your browser:
-        </p>
-        <p style="margin: 0; padding: 12px; background: #ffffff; border-radius: 6px; font-family: 'SFMono-Regular', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace; font-size: 12px; color: #475569; word-break: break-all; border: 1px solid #e2e8f0;">
-          <a href="${site_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}" style="color: #475569; text-decoration: none;">
-            ${site_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}
-          </a>
-        </p>
-      </div>
-      
-      <!-- Security notice -->
-      <div style="background: linear-gradient(135deg, #fef3c7 0%, #fbbf24 100%); padding: 20px; border-radius: 10px; margin: 30px 0; text-align: center;">
-        <h3 style="margin: 0 0 8px 0; font-size: 16px; color: #92400e; font-weight: 600;">
-          🛡️ This keeps your account secure
-        </h3>
-        <p style="margin: 0 0 8px 0; font-size: 14px; color: #b45309;">
-          Takes less than 30 seconds to complete.
-        </p>
-        <p style="margin: 0; font-size: 13px; color: #a16207; font-style: italic;">
-          If you didn't create an account, you can safely ignore this email.
-        </p>
-      </div>
-      
-      <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 40px 0;">
-      
-      <!-- Footer -->
-      <div style="text-align: center;">
-        <p style="margin: 0 0 15px 0; font-size: 16px; color: hsl(220, 91%, 75%); font-weight: 600;">
-          — The ${appName} Team
-        </p>
-        <p style="margin: 0 0 10px 0; font-size: 14px; color: #64748b;">
-          Need help? <a href="mailto:support@notanother.coach" style="color: hsl(220, 91%, 75%); text-decoration: none;">Contact our support team</a>
-        </p>
-        <p style="margin: 0; font-size: 12px; color: #94a3b8;">
-          © 2025 ${appName}. Where fitness gets personal.
-        </p>
-      </div>
-    </div>
-  </div>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="bg" style="background:#f6f8fb;">
+        <tr><td align="center" style="padding:32px 16px;">
+            <table role="presentation" width="600" style="max-width:600px;width:100%;">
+                <!-- Logo -->
+                <tr>
+                    <td align="center" style="padding:0 8px 24px;">
+                        ${logoSettings?.logo_url ? 
+                            `<img src="${logoSettings.logo_url}" width="180" height="auto" alt="${appName}" style="display:block;border:0;max-width:180px;">` : 
+                            `<div style="font:700 32px/1 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#113a5d;">${appName}</div>`
+                        }
+                    </td>
+                </tr>
+                <!-- Card -->
+                <tr>
+                    <td class="card" style="background:#ffffff;border:1px solid #e7ecf5;border-radius:14px;padding:32px;">
+                        <h1 class="h1" style="margin:0 0 8px;font:700 28px/1.25 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#0d1b2a;text-align:center;">
+                            You're almost in! 🎉
+                        </h1>
+                        <p class="text" style="margin:0 0 24px;font:16px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#1c2b3a;text-align:center;">
+                            Hi ${displayName}, welcome to <strong>${appName}</strong>. One quick click confirms your email and unlocks your fitness journey.
+                        </p>
+                        
+                        <!-- CTA Button -->
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
+                            <tr><td align="center">
+                                <table role="presentation" cellpadding="0" cellspacing="0">
+                                    <tr><td class="btn" style="background:#113a5d;border-radius:10px;">
+                                        <a href="${confirmationUrl}" target="_blank"
+                                           style="display:inline-block;padding:16px 32px;font:600 16px -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#ffffff;background:#113a5d;border-radius:10px;text-decoration:none;">
+                                           🔑 Confirm My Email
+                                        </a>
+                                    </td></tr>
+                                </table>
+                            </td></tr>
+                        </table>
+                        
+                        <!-- Security Note -->
+                        <div style="background:#f0f9ff;border:1px solid #dde7fb;border-radius:8px;padding:16px;margin:0 0 20px;">
+                            <p class="muted" style="margin:0;font:14px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#425066;">
+                                <strong>🛡️ Quick & Secure:</strong> Takes 30 seconds and keeps your account safe. If you didn't create this account, you can safely ignore this email.
+                            </p>
+                        </div>
+                        
+                        <!-- Backup Link -->
+                        <p class="muted" style="margin:0 0 8px;font:13px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#6b778c;">
+                            <strong>Button not working?</strong> Copy and paste this link into your browser:
+                        </p>
+                        
+                        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:12px;margin:0 0 20px;">
+                            <a href="${confirmationUrl}" style="color:#113a5d;word-break:break-all;font:13px -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;text-decoration:none;">
+                                ${confirmationUrl}
+                            </a>
+                        </div>
+                        
+                        <hr class="rule" style="border:none;border-top:1px solid #e7ecf5;margin:20px 0 16px">
+                        <p class="muted" style="margin:0;font:12px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#8a95a6;text-align:center;">
+                            Need help? <a href="mailto:support@notanother.coach" style="color:#113a5d;">Contact support</a> • We're here for you
+                        </p>
+                    </td>
+                </tr>
+                
+                <!-- Footer -->
+                <tr><td align="center" style="padding:20px 8px;">
+                    <p class="muted" style="margin:0;font:12px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#8a95a6;">
+                        © ${new Date().getFullYear()} ${appName} • Where fitness gets personal
+                    </p>
+                </td></tr>
+            </table>
+        </td></tr>
+    </table>
+</center>
 </body>
-</html>
-`;
+</html>`;
 };
 
 const createWelcomeEmailHTML = (firstName?: string, userType?: string) => `

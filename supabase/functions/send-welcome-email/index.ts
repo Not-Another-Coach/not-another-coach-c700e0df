@@ -22,98 +22,239 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const createWelcomeEmailHTML = (firstName?: string, userType?: string) => `
-<!DOCTYPE html>
+const createWelcomeEmailHTML = (firstName?: string, userType?: string) => {
+  const displayName = firstName || 'there';
+  const appUrl = Deno.env.get('SUPABASE_URL')?.replace('/v1', '') || 'https://notanothercoach.com';
+  
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="x-apple-disable-message-reformatting">
     <title>Welcome to Not Another Coach!</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background: #f8f9fa; margin: 0; padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .header { text-align: center; margin-bottom: 30px; }
-        .logo { font-size: 28px; font-weight: bold; color: #2563eb; margin-bottom: 10px; }
-        .title { font-size: 24px; color: #1f2937; margin-bottom: 10px; }
-        .subtitle { color: #6b7280; font-size: 16px; }
-        .content { margin: 30px 0; }
-        .highlight { background: #f0f9ff; padding: 20px; border-radius: 8px; border-left: 4px solid #2563eb; margin: 20px 0; }
-        .cta { text-align: center; margin: 30px 0; }
-        .button { display: inline-block; background: #2563eb; color: white; text-decoration: none; padding: 15px 30px; border-radius: 8px; font-weight: 600; }
-        .footer { text-align: center; color: #6b7280; font-size: 14px; margin-top: 40px; border-top: 1px solid #e5e7eb; padding-top: 20px; }
+        @media (prefers-color-scheme: dark) {
+            .bg { background: #0c1523 !important; }
+            .card { background: #101a2b !important; border-color: #2a3754 !important; }
+            .text, .muted, .h1 { color: #f3f6fb !important; }
+            .chip { background: #1b2a44 !important; border-color: #2a3754 !important; color: #e8eef9 !important; }
+            .btn { background: #2a74c0 !important; }
+            .rule { border-color: #2a3754 !important; }
+        }
+        a { text-decoration: none; }
     </style>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <div class="logo">Not Another Coach</div>
-            <div class="title">Welcome${firstName ? `, ${firstName}` : ''}! 🎉</div>
-            <div class="subtitle">Your fitness journey starts here</div>
-        </div>
-
-        <div class="content">
-            <p>Thank you for confirming your email and joining Not Another Coach! We're excited to have you on board.</p>
-            
-            ${userType === 'trainer' ? `
-            <div class="highlight">
-                <h3>🏋️ Ready to Transform Lives?</h3>
-                <p>As a coach on our platform, you'll be able to:</p>
-                <ul>
-                    <li>Connect with motivated clients looking for expert guidance</li>
-                    <li>Build your coaching business with our powerful tools</li>
-                    <li>Create personalized training programs and track progress</li>
-                    <li>Establish meaningful relationships with your clients</li>
-                </ul>
-            </div>
-            
-            <p><strong>Next steps:</strong></p>
-            <ol>
-                <li>Complete your coach profile setup</li>
-                <li>Add your qualifications and experience</li>
-                <li>Set your availability and rates</li>
-                <li>Start connecting with potential clients!</li>
-            </ol>
-            ` : `
-            <div class="highlight">
-                <h3>🎯 Ready to Transform Your Fitness?</h3>
-                <p>As a client on our platform, you'll be able to:</p>
-                <ul>
-                    <li>Find qualified coaches who match your goals</li>
-                    <li>Get personalized training programs</li>
-                    <li>Track your progress with expert guidance</li>
-                    <li>Achieve sustainable results</li>
-                </ul>
-            </div>
-            
-            <p><strong>Next steps:</strong></p>
-            <ol>
-                <li>Complete your fitness assessment</li>
-                <li>Browse our verified coaches</li>
-                <li>Schedule discovery calls with potential coaches</li>
-                <li>Start your transformation journey!</li>
-            </ol>
-            `}
-
-            <div class="cta">
-                <a href="${Deno.env.get('SUPABASE_URL')?.replace('/v1', '') || 'https://notanothercoach.com'}" class="button">
-                    Get Started Now
-                </a>
-            </div>
-
-            <p>If you have any questions or need help getting started, don't hesitate to reach out to our support team.</p>
-        </div>
-
-        <div class="footer">
-            <p>Welcome to the Not Another Coach community!</p>
-            <p><strong>The Not Another Coach Team</strong></p>
-            <p style="margin-top: 20px; font-size: 12px;">
-                If you didn't create this account, please ignore this email.
-            </p>
-        </div>
+<body style="margin:0;padding:0;background:#f6f8fb;">
+<center style="width:100%;background:#f6f8fb;">
+    <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">
+        Your journey awaits: survey, browse, shortlist, chat, choose, begin! 🚀
     </div>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="bg">
+        <tr><td align="center" style="padding:32px 16px;">
+            <table role="presentation" width="640" style="max-width:640px;width:100%;">
+                <!-- Logo -->
+                <tr>
+                    <td align="center" style="padding:0 8px 20px;">
+                        <div style="font:700 32px/1 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#113a5d;">
+                            Not Another Coach
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- Card -->
+                <tr>
+                    <td class="card" style="background:#ffffff;border:1px solid #e7ecf5;border-radius:14px;padding:32px;">
+                        <h1 class="h1" style="margin:0 0 8px;font:700 28px/1.25 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#0d1b2a;text-align:center;">
+                            Welcome, ${displayName}! 🎉
+                        </h1>
+                        <p class="text" style="margin:0 0 20px;font:16px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#1c2b3a;text-align:center;">
+                            ${userType === 'trainer' ? 
+                                'You\'re in! Ready to transform lives and build your coaching business?' : 
+                                'You\'re in! Here\'s your quick path to finding the perfect coach and getting results.'
+                            }
+                        </p>
+
+                        <!-- Primary CTA -->
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
+                            <tr><td align="center">
+                                <table role="presentation" cellpadding="0" cellspacing="0">
+                                    <tr><td class="btn" style="background:#113a5d;border-radius:10px;">
+                                        <a href="${appUrl}" target="_blank"
+                                           style="display:inline-block;padding:16px 32px;font:600 16px -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#ffffff;background:#113a5d;border-radius:10px;">
+                                           ${userType === 'trainer' ? '🚀 Complete My Profile' : '📝 Start My 60-Second Survey'}
+                                        </a>
+                                    </td></tr>
+                                </table>
+                            </td></tr>
+                        </table>
+
+                        ${userType === 'trainer' ? `
+                        <!-- Trainer Journey -->
+                        <h3 style="margin:0 0 16px;font:600 18px -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#0d1b2a;">Your Coach Journey:</h3>
+                        
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:8px 0 24px;">
+                            <tr><td style="padding:0 0 8px;">
+                                <div class="chip" style="background:#f0f5ff;border:1px solid #dde7fb;border-radius:10px;padding:14px;">
+                                    <div style="display:flex;align-items:center;">
+                                        <span style="font-size:20px;margin-right:12px;">✨</span>
+                                        <div>
+                                            <div style="font:600 15px -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#0d1b2a;">Complete Your Profile</div>
+                                            <div style="font:14px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#425066;">Add qualifications, experience, and specializations</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td></tr>
+                            
+                            <tr><td style="padding:8px 0;">
+                                <div class="chip" style="background:#f0fff6;border:1px solid #d9f2e5;border-radius:10px;padding:14px;">
+                                    <div style="display:flex;align-items:center;">
+                                        <span style="font-size:20px;margin-right:12px;">📋</span>
+                                        <div>
+                                            <div style="font:600 15px -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#0d1b2a;">Verify Credentials</div>
+                                            <div style="font:14px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#425066;">Upload certifications and get verified</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td></tr>
+                            
+                            <tr><td style="padding:8px 0;">
+                                <div class="chip" style="background:#fff8ef;border:1px solid #ffe0bf;border-radius:10px;padding:14px;">
+                                    <div style="display:flex;align-items:center;">
+                                        <span style="font-size:20px;margin-right:12px;">💰</span>
+                                        <div>
+                                            <div style="font:600 15px -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#0d1b2a;">Set Your Rates</div>
+                                            <div style="font:14px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#425066;">Configure packages and availability</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td></tr>
+                            
+                            <tr><td style="padding:8px 0 0;">
+                                <div class="chip" style="background:#eef6ff;border:1px solid #d8e8ff;border-radius:10px;padding:14px;">
+                                    <div style="display:flex;align-items:center;">
+                                        <span style="font-size:20px;margin-right:12px;">🎯</span>
+                                        <div>
+                                            <div style="font:600 15px -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#0d1b2a;">Connect with Clients</div>
+                                            <div style="font:14px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#425066;">Start receiving inquiries and discovery calls</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td></tr>
+                        </table>
+                        ` : `
+                        <!-- Client Journey Timeline -->
+                        <h3 style="margin:0 0 16px;font:600 18px -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#0d1b2a;">Your Fitness Journey:</h3>
+                        
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:8px 0 24px;">
+                            <tr><td style="padding:0 0 8px;">
+                                <div class="chip" style="background:#f0f5ff;border:1px solid #dde7fb;border-radius:10px;padding:14px;">
+                                    <div style="display:flex;align-items:center;">
+                                        <span style="font-size:20px;margin-right:12px;">📝</span>
+                                        <div>
+                                            <div style="font:600 15px -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#0d1b2a;">Quick Survey</div>
+                                            <div style="font:14px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#425066;">Tell us your goals, budget, and availability</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td></tr>
+                            
+                            <tr><td style="padding:8px 0;">
+                                <div class="chip" style="background:#f0fff6;border:1px solid #d9f2e5;border-radius:10px;padding:14px;">
+                                    <div style="display:flex;align-items:center;">
+                                        <span style="font-size:20px;margin-right:12px;">🔎</span>
+                                        <div>
+                                            <div style="font:600 15px -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#0d1b2a;">Browse Trainers</div>
+                                            <div style="font:14px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#425066;">Explore verified profiles that match your needs</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td></tr>
+                            
+                            <tr><td style="padding:8px 0;">
+                                <div class="chip" style="background:#fff8ef;border:1px solid #ffe0bf;border-radius:10px;padding:14px;">
+                                    <div style="display:flex;align-items:center;">
+                                        <span style="font-size:20px;margin-right:12px;">⭐</span>
+                                        <div>
+                                            <div style="font:600 15px -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#0d1b2a;">Shortlist Favorites</div>
+                                            <div style="font:14px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#425066;">Save top picks to compare side-by-side</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td></tr>
+                            
+                            <tr><td style="padding:8px 0;">
+                                <div class="chip" style="background:#eef6ff;border:1px solid #d8e8ff;border-radius:10px;padding:14px;">
+                                    <div style="display:flex;align-items:center;">
+                                        <span style="font-size:20px;margin-right:12px;">💬</span>
+                                        <div>
+                                            <div style="font:600 15px -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#0d1b2a;">Chat & Engage</div>
+                                            <div style="font:14px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#425066;">Message coaches or book discovery calls</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td></tr>
+                            
+                            <tr><td style="padding:8px 0;">
+                                <div class="chip" style="background:#f5f0ff;border:1px solid #e4d9ff;border-radius:10px;padding:14px;">
+                                    <div style="display:flex;align-items:center;">
+                                        <span style="font-size:20px;margin-right:12px;">✅</span>
+                                        <div>
+                                            <div style="font:600 15px -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#0d1b2a;">Choose Your Coach</div>
+                                            <div style="font:14px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#425066;">Pick based on expertise, style & availability</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td></tr>
+                            
+                            <tr><td style="padding:8px 0 0;">
+                                <div class="chip" style="background:#effafc;border:1px solid #cfeaf2;border-radius:10px;padding:14px;">
+                                    <div style="display:flex;align-items:center;">
+                                        <span style="font-size:20px;margin-right:12px;">🚀</span>
+                                        <div>
+                                            <div style="font:600 15px -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#0d1b2a;">Start Your Journey</div>
+                                            <div style="font:14px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#425066;">Set goals together and begin your program</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td></tr>
+                        </table>
+                        `}
+
+                        <!-- Secondary CTA -->
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
+                            <tr><td align="center">
+                                <table role="presentation" cellpadding="0" cellspacing="0">
+                                    <tr><td style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;">
+                                        <a href="${appUrl}" target="_blank"
+                                           style="display:inline-block;padding:12px 24px;font:600 14px -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#113a5d;text-decoration:none;">
+                                           ${userType === 'trainer' ? 'Browse the Platform' : 'Explore Verified Trainers'}
+                                        </a>
+                                    </td></tr>
+                                </table>
+                            </td></tr>
+                        </table>
+
+                        <hr class="rule" style="border:none;border-top:1px solid #e7ecf5;margin:20px 0 16px">
+                        <p class="muted" style="margin:0;font:12px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#8a95a6;text-align:center;">
+                            Need help getting started? <a href="mailto:support@notanother.coach" style="color:#113a5d;">Contact our support team</a>
+                        </p>
+                    </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr><td align="center" style="padding:20px 8px;">
+                    <p class="muted" style="margin:0;font:12px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#8a95a6;">
+                        © ${new Date().getFullYear()} Not Another Coach • Where fitness gets personal
+                    </p>
+                </td></tr>
+            </table>
+        </td></tr>
+    </table>
+</center>
 </body>
-</html>
-`;
+</html>`;
+};
 
 serve(async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
