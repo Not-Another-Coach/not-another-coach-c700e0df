@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
+import { Webhook } from "https://esm.sh/standardwebhooks@1.0.0";
 import { Resend } from "npm:resend@4.0.0";
 
 
@@ -175,44 +176,33 @@ serve(async (req: Request): Promise<Response> => {
 
   try {
     const payload = await req.text();
+    const headers = Object.fromEntries(req.headers);
 
-    // Validate Authorization: Bearer <SEND_EMAIL_HOOK_SECRET>
+    // Verify webhook signature using Standard Webhooks (Supabase Auth Hooks default)
     let webhookData: { user: AuthUser; email_data: AuthEmailData };
     if (hookSecret) {
-      const authHeader = req.headers.get('authorization') ?? req.headers.get('Authorization');
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        console.warn('Missing or invalid Authorization header');
-        return new Response(
-          JSON.stringify({ error: 'Unauthorized: missing Authorization header' }),
-          { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } }
-        );
-      }
-      
-      const token = authHeader.split(' ')[1];
-      
-      // Extract base64 part from v1,whsec_<base64> format
-      let expectedSecret = hookSecret;
-      if (hookSecret.startsWith('v1,whsec_')) {
-        expectedSecret = hookSecret.substring('v1,whsec_'.length);
-      }
-      
-      if (token !== expectedSecret) {
-        console.warn('Invalid webhook secret token');
+      const secret = hookSecret.replace("v1,whsec_", "");
+      const wh = new Webhook(secret);
+      try {
+        webhookData = wh.verify(payload, headers) as {
+          user: AuthUser;
+          email_data: AuthEmailData;
+        };
+        console.log('Webhook signature verified');
+      } catch (error: any) {
+        console.warn('Webhook verification failed', error?.message || error);
         return new Response(
           JSON.stringify({ error: 'Unauthorized: invalid signature' }),
           { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } }
         );
       }
-      console.log('Webhook authorized');
     } else {
-      console.warn('SEND_EMAIL_HOOK_SECRET not set; skipping authorization check');
+      console.warn('SEND_EMAIL_HOOK_SECRET not set; parsing payload without verification');
+      webhookData = JSON.parse(payload) as {
+        user: AuthUser;
+        email_data: AuthEmailData;
+      };
     }
-
-    // Parse Supabase Auth Hook payload
-    webhookData = JSON.parse(payload) as {
-      user: AuthUser;
-      email_data: AuthEmailData;
-    };
 
     const { user, email_data } = webhookData;
     const { token, token_hash, redirect_to, email_action_type } = email_data;
