@@ -80,9 +80,9 @@ const createWelcomeEmailHTML = (firstName?: string, userType?: string) => {
                             <tr><td align="center">
                                 <table role="presentation" cellpadding="0" cellspacing="0">
                                     <tr><td class="btn" style="background:#113a5d;border-radius:10px;">
-                                        <a href="${appUrl}" target="_blank"
+                                         <a href="${userType === 'trainer' ? appUrl : `${appUrl}/client-survey`}" target="_blank"
                                            style="display:inline-block;padding:16px 32px;font:600 16px -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#ffffff;background:#113a5d;border-radius:10px;">
-                                           ${userType === 'trainer' ? '🚀 Complete My Profile' : '📝 Start My 60-Second Survey'}
+                                            ${userType === 'trainer' ? '🚀 Complete My Profile' : '📝 Complete the Quick Survey to Find Your Matches'}
                                         </a>
                                     </td></tr>
                                 </table>
