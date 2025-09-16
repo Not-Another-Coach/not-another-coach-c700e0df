@@ -4,7 +4,7 @@ import { Resend } from "npm:resend@4.0.0";
 
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY") as string);
-const hookSecret = Deno.env.get("SEND_AUTH_EMAILS_HOOK_SECRET") as string;
+const hookSecret = Deno.env.get("SEND_EMAIL_HOOK_SECRET") as string;
 const fromEmail = Deno.env.get("FROM_EMAIL") || 'Not Another Coach <onboarding@resend.dev>';
 
 // Retry utility for Resend API calls
@@ -176,7 +176,7 @@ serve(async (req: Request): Promise<Response> => {
   try {
     const payload = await req.text();
 
-    // Validate Authorization: Bearer <SEND_AUTH_EMAILS_HOOK_SECRET>
+    // Validate Authorization: Bearer <SEND_EMAIL_HOOK_SECRET>
     let webhookData: { user: AuthUser; email_data: AuthEmailData };
     if (hookSecret) {
       const authHeader = req.headers.get('authorization') ?? req.headers.get('Authorization');
@@ -187,8 +187,16 @@ serve(async (req: Request): Promise<Response> => {
           { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } }
         );
       }
+      
       const token = authHeader.split(' ')[1];
-      if (token !== hookSecret) {
+      
+      // Extract base64 part from v1,whsec_<base64> format
+      let expectedSecret = hookSecret;
+      if (hookSecret.startsWith('v1,whsec_')) {
+        expectedSecret = hookSecret.substring('v1,whsec_'.length);
+      }
+      
+      if (token !== expectedSecret) {
         console.warn('Invalid webhook secret token');
         return new Response(
           JSON.stringify({ error: 'Unauthorized: invalid signature' }),
@@ -197,7 +205,7 @@ serve(async (req: Request): Promise<Response> => {
       }
       console.log('Webhook authorized');
     } else {
-      console.warn('SEND_AUTH_EMAILS_HOOK_SECRET not set; skipping authorization check');
+      console.warn('SEND_EMAIL_HOOK_SECRET not set; skipping authorization check');
     }
 
     // Parse Supabase Auth Hook payload
