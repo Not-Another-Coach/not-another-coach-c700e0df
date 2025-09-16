@@ -116,28 +116,31 @@ const ClientSurvey = () => {
 
   // Redirect if not client or if survey is already completed
   useEffect(() => {
-    if (!loading && !profileLoading && user && profile) {
-      if (!isClient()) {
-        navigate('/');
-        return;
-      }
-      
-      // Only redirect if both survey completion flags are true to avoid loops  
-      // BUT allow users to return to edit their preferences even after completion
-      if (profile.client_survey_completed && profile.quiz_completed) {
-        // Allow editing preferences - don't redirect back to dashboard
-        // Users can access this page to modify their survey responses
-        return;
-      }
+    // Wait for all loading to complete before making navigation decisions
+    if (loading || profileLoading) {
+      return;
     }
-  }, [user, profile, loading, profileLoading, navigate, isClient]);
 
-  // Redirect to auth if not logged in
-  useEffect(() => {
-    if (!loading && !user) {
+    // If not logged in, redirect to auth
+    if (!user) {
       navigate('/auth');
+      return;
     }
-  }, [user, loading, navigate]);
+
+    // If we have user but no profile yet, wait for profile to load
+    if (!profile) {
+      return;
+    }
+
+    // Check if user is a client
+    if (!isClient()) {
+      navigate('/');
+      return;
+    }
+    
+    // Allow users to access this page even after completion to edit their preferences
+    // Only redirect to dashboard if they explicitly complete the survey flow
+  }, [user, profile, loading, profileLoading, navigate, isClient]);
 
   // Reset initialization flag when user changes
   useEffect(() => {

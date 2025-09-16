@@ -30,24 +30,27 @@ export default function Home() {
   useDataMigration();
 
   useEffect(() => {
+    // Only navigate when all loading states are false and we have the necessary data
+    if (loading || profileLoading || userTypeLoading) {
+      return; // Still loading, don't navigate yet
+    }
+
     // If user is authenticated, redirect to appropriate dashboard
-    if (!loading && !profileLoading && !userTypeLoading && user) {
-      if (profile && user_type) {
-        if (user_type === 'trainer') {
-          if (profile.profile_setup_completed && profile.terms_agreed) {
-            navigate('/trainer/dashboard');
-          } else {
-            navigate('/trainer/profile-setup');
-          }
-        } else if (user_type === 'client') {
-          if (!profile.client_survey_completed) {
-            navigate('/client-survey');
-          } else {
-            navigate('/client/dashboard');
-          }
-        } else if (user_type === 'admin') {
-          navigate('/admin');
+    if (user && profile && user_type) {
+      if (user_type === 'trainer') {
+        if (profile.profile_setup_completed && profile.terms_agreed) {
+          navigate('/trainer/dashboard');
+        } else {
+          navigate('/trainer/profile-setup');
         }
+      } else if (user_type === 'client') {
+        if (!profile.client_survey_completed) {
+          navigate('/client-survey');
+        } else {
+          navigate('/client/dashboard');
+        }
+      } else if (user_type === 'admin') {
+        navigate('/admin');
       }
     }
   }, [user, profile, loading, profileLoading, userTypeLoading, user_type, navigate]);
