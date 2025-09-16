@@ -10,7 +10,7 @@ import { toast } from '@/hooks/use-toast';
 
 export function useDataMigration() {
   const { user } = useAuth();
-  const { getSessionData, clearSession } = useAnonymousSession();
+  const { getSessionData, clearSession, loadSessionById } = useAnonymousSession();
   const { getSessionData: getTrainerSessionData, clearSession: clearTrainerSession } = useAnonymousTrainerSession();
   const { saveTrainer } = useSavedTrainers();
   const { profile, updateProfile } = useClientProfile();
@@ -21,8 +21,32 @@ export function useDataMigration() {
   const [migrationCompleted, setMigrationCompleted] = useState(false);
   const [migratedUserId, setMigratedUserId] = useState<string | null>(null);
 
-  const migrateAnonymousData = useCallback(async (retryCount = 0) => {
-    console.log('🔄 Starting anonymous data migration...', { user: !!user, retryCount, isClient: isClient() });
+  // Check for session ID in URL (from email confirmation)
+  const checkForSessionIdInUrl = useCallback(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session_id') || urlParams.get('anonymous_session');
+    
+    if (sessionId) {
+      console.log('🔗 Found session ID in URL:', sessionId);
+      // Remove from URL to prevent re-processing
+      urlParams.delete('session_id');
+      urlParams.delete('anonymous_session');
+      const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '') + window.location.hash;
+      window.history.replaceState({}, document.title, newUrl);
+      
+      return sessionId;
+    }
+    
+    return null;
+  }, []);
+
+  const migrateAnonymousData = useCallback(async (retryCount = 0, urlSessionId?: string) => {
+    console.log('🔄 Starting anonymous data migration...', { 
+      user: !!user, 
+      retryCount, 
+      isClient: isClient(),
+      urlSessionId: !!urlSessionId 
+    });
     
     if (!user) {
       console.log('❌ Migration aborted: No authenticated user');
@@ -49,14 +73,32 @@ export function useDataMigration() {
     const sessionData = getSessionData();
     const trainerSessionData = getTrainerSessionData();
     
+    // If we have a session ID from URL (cross-device scenario), try to load that session
+    let crossDeviceSessionData = null;
+    if (urlSessionId) {
+      try {
+        console.log('🔄 Loading cross-device session data...');
+        crossDeviceSessionData = await loadSessionById(urlSessionId);
+        if (crossDeviceSessionData) {
+          console.log('✅ Cross-device session data loaded successfully');
+        }
+      } catch (error) {
+        console.error('Error loading cross-device session:', error);
+      }
+    }
+    
+    // Use cross-device data if available, otherwise use local data
+    const effectiveSessionData = crossDeviceSessionData || sessionData;
+    
     console.log('📋 Anonymous session data found:', {
-      hasSessionData: !!sessionData,
+      hasLocalSessionData: !!sessionData,
+      hasCrossDeviceSessionData: !!crossDeviceSessionData,
       hasTrainerSessionData: !!trainerSessionData,
-      savedTrainersCount: sessionData?.savedTrainers?.length || 0,
-      hasQuizResults: !!sessionData?.quizResults
+      savedTrainersCount: effectiveSessionData?.savedTrainers?.length || 0,
+      hasQuizResults: !!effectiveSessionData?.quizResults
     });
     
-    if (!sessionData && !trainerSessionData) {
+    if (!effectiveSessionData && !trainerSessionData) {
       console.log('✅ Migration complete: No anonymous data to migrate');
       setIsMigrating(false);
       setMigrationCompleted(true);
@@ -68,10 +110,15 @@ export function useDataMigration() {
       const messages = [];
 
       // Migrate client session data
-      if (sessionData) {
+      if (effectiveSessionData) {
+        // Show success message for cross-device migration
+        if (crossDeviceSessionData) {
+          messages.push('your data from the other device');
+        }
+        
         // Migrate saved trainers silently
-        if (sessionData.savedTrainers.length > 0) {
-          for (const trainerId of sessionData.savedTrainers) {
+        if (effectiveSessionData.savedTrainers.length > 0) {
+          for (const trainerId of effectiveSessionData.savedTrainers) {
             try {
               const success = await saveTrainer(trainerId, 'Migrated from anonymous session', { silent: true });
               if (success) {
@@ -84,8 +131,8 @@ export function useDataMigration() {
         }
 
         // Migrate quiz results to profile if client and quiz exists
-        if (sessionData.quizResults) {
-          console.log('🧠 Found quiz results to migrate:', sessionData.quizResults);
+        if (effectiveSessionData.quizResults) {
+          console.log('🧠 Found quiz results to migrate:', effectiveSessionData.quizResults);
           
           if (!profile) {
             console.log('⏳ Client profile not yet available, checking if we should retry...');
@@ -108,13 +155,13 @@ export function useDataMigration() {
               // Map anonymous quiz results to client profile format
               const quizData = {
                 quiz_completed: true,
-                quiz_answers: sessionData.quizResults,
+                quiz_answers: effectiveSessionData.quizResults,
                 quiz_completed_at: new Date().toISOString(),
                 // Map quiz results to survey fields for immediate use
-                primary_goals: sessionData.quizResults.goals || [],
-                training_location_preference: sessionData.quizResults.location || null,
-                preferred_coaching_style: sessionData.quizResults.coachingStyle || [],
-                preferred_training_frequency: sessionData.quizResults.availability || null,
+                primary_goals: effectiveSessionData.quizResults.goals || [],
+                training_location_preference: effectiveSessionData.quizResults.location || null,
+                preferred_coaching_style: effectiveSessionData.quizResults.coachingStyle || [],
+                preferred_training_frequency: effectiveSessionData.quizResults.availability || null,
               };
               
               console.log('📤 Updating profile with quiz data:', quizData);
@@ -153,9 +200,23 @@ export function useDataMigration() {
       // Migration completed silently - no toasts to prevent spam
 
       // Clear anonymous sessions after successful migration
-      if (sessionData) {
+      if (effectiveSessionData) {
         console.log('🗑️ Clearing anonymous client session...');
-        clearSession();
+        // If we used cross-device data, clear the server session
+        if (crossDeviceSessionData) {
+          try {
+            await supabase
+              .from('anonymous_sessions')
+              .delete()
+              .eq('session_id', crossDeviceSessionData.sessionId);
+            console.log('🗑️ Cross-device session cleared from server');
+          } catch (error) {
+            console.error('Error clearing cross-device session:', error);
+          }
+        } else {
+          // Clear local session normally
+          clearSession();
+        }
       }
       if (trainerSessionData) {
         console.log('🗑️ Clearing anonymous trainer session...');
@@ -173,7 +234,7 @@ export function useDataMigration() {
       console.error('Error during data migration:', error);
       // Silent migration - no error toasts to prevent spam
     }
-  }, [user, getSessionData, getTrainerSessionData, clearSession, clearTrainerSession, saveTrainer, profile, updateProfile, isClient, migratedUserId]);
+  }, [user, getSessionData, getTrainerSessionData, clearSession, clearTrainerSession, saveTrainer, profile, updateProfile, isClient, migratedUserId, loadSessionById]);
 
   // Reset migration state when user changes
   useEffect(() => {
@@ -188,12 +249,16 @@ export function useDataMigration() {
   useEffect(() => {
     if (user && (getSessionData() || getTrainerSessionData())) {
       console.log('🚀 User authenticated with anonymous data available, starting migration...');
+      
+      // Check for session ID in URL first (cross-device scenario)
+      const urlSessionId = checkForSessionIdInUrl();
+      
       // Small delay to ensure all hooks are ready
       setTimeout(() => {
-        migrateAnonymousData(0);
+        migrateAnonymousData(0, urlSessionId);
       }, 1000);
     }
-  }, [user, migrateAnonymousData, getSessionData, getTrainerSessionData]);
+  }, [user, migrateAnonymousData, getSessionData, getTrainerSessionData, checkForSessionIdInUrl]);
 
   return {
     migrateAnonymousData,

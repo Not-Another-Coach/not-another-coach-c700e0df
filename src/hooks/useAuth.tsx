@@ -1,6 +1,7 @@
 import { useState, useEffect, createContext, useContext } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { useAnonymousSession } from './useAnonymousSession';
 
 interface AuthContextType {
   user: User | null;
@@ -18,6 +19,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const { session: anonymousSession } = useAnonymousSession();
 
   useEffect(() => {
     // Set up auth state listener
@@ -41,7 +43,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signUp = async (email: string, password: string, userData?: any) => {
-    const redirectUrl = `${window.location.origin}/auth/callback`;
+    let redirectUrl = `${window.location.origin}/auth/callback`;
+    
+    // Include anonymous session ID in redirect URL for cross-device data migration
+    if (anonymousSession?.sessionId) {
+      const params = new URLSearchParams({ session_id: anonymousSession.sessionId });
+      redirectUrl += `?${params.toString()}`;
+      console.log('🔗 Including anonymous session in redirect URL for cross-device migration');
+    }
     
     const { error } = await supabase.auth.signUp({
       email,
@@ -88,7 +97,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const resendConfirmation = async (email: string) => {
-    const redirectUrl = `${window.location.origin}/auth/callback`;
+    let redirectUrl = `${window.location.origin}/auth/callback`;
+    
+    // Include anonymous session ID in redirect URL for cross-device data migration
+    if (anonymousSession?.sessionId) {
+      const params = new URLSearchParams({ session_id: anonymousSession.sessionId });
+      redirectUrl += `?${params.toString()}`;
+      console.log('🔗 Including anonymous session in resend confirmation URL');
+    }
     
     const { error } = await supabase.auth.resend({
       type: 'signup',

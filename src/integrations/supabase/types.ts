@@ -233,6 +233,36 @@ export type Database = {
         }
         Relationships: []
       }
+      anonymous_sessions: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          quiz_results: Json | null
+          saved_trainers: Json
+          session_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          quiz_results?: Json | null
+          saved_trainers?: Json
+          session_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          quiz_results?: Json | null
+          saved_trainers?: Json
+          session_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       app_settings: {
         Row: {
           created_at: string | null
@@ -6640,6 +6670,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      cleanup_expired_anonymous_sessions: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       client_can_view_trainer_images: {
         Args: { p_trainer_id: string }
         Returns: boolean
@@ -6803,11 +6837,7 @@ export type Database = {
               p_content_type: Database["public"]["Enums"]["content_type"]
               p_stage_group: Database["public"]["Enums"]["engagement_stage_group"]
             }
-        Returns: {
-          content_type: string
-          stage_group: string
-          visibility_state: string
-        }[]
+        Returns: Database["public"]["Enums"]["visibility_state"]
       }
       get_trainer_membership_details: {
         Args: { p_trainer_id: string }
