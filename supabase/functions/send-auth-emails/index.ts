@@ -6,7 +6,7 @@ import { Resend } from "npm:resend@4.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY") as string);
 const hookSecret = Deno.env.get("SEND_EMAIL_HOOK_SECRET") as string;
-const fromEmail = 'Not Another Coach <onboarding@resend.dev>';
+const fromEmail = Deno.env.get("FROM_EMAIL") || 'Not Another Coach <onboarding@resend.dev>';
 
 // Retry utility for Resend API calls
 const retryResendCall = async (fn: () => Promise<any>, maxRetries = 3, delay = 1000) => {
