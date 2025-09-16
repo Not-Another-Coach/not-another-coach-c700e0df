@@ -6,7 +6,7 @@ import { Resend } from "npm:resend@4.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY") as string);
 const hookSecret = Deno.env.get("SEND_EMAIL_HOOK_SECRET") as string;
-const fromEmail = Deno.env.get("FROM_EMAIL") || 'Not Another Coach <onboarding@resend.dev>';
+const fromEmail = 'Not Another Coach <onboarding@resend.dev>';
 
 // Retry utility for Resend API calls
 const retryResendCall = async (fn: () => Promise<any>, maxRetries = 3, delay = 1000) => {
@@ -216,41 +216,24 @@ serve(async (req: Request): Promise<Response> => {
     if (email_action_type === 'signup') {
       console.log('Sending confirmation email for user:', user.email);
       
-      // Send confirmation email with retry logic and fallback sender if domain not verified
+      // Send confirmation email with retry logic
       const subject = '👉 Welcome to Not Another Coach — please confirm your email';
-      const primaryFrom = fromEmail;
-      const fallbackFrom = 'Not Another Coach <onboarding@resend.dev>';
 
-      const attemptSend = async (fromAddr: string) =>
-        retryResendCall(() =>
-          resend.emails.send({
-            from: fromAddr,
-            to: [user.email],
-            subject,
-            html: createConfirmationEmailHTML(
-              token,
-              token_hash,
-              Deno.env.get('SUPABASE_URL') || '',
-              redirect_to,
-              email_action_type,
-              firstName
-            ),
-            // Preserve brand as reply-to even if we must fallback sender
-            reply_to: primaryFrom,
-          })
-        );
-
-      let confirmationResult = await attemptSend(primaryFrom);
-
-      if (confirmationResult.error) {
-        const err: any = confirmationResult.error;
-        console.error('Error sending confirmation email:', err);
-        const msg = (err?.error || err?.message || '').toString();
-        if (err?.statusCode === 403 && /Not authorized to send emails from/i.test(msg)) {
-          console.warn('Falling back to verified sender domain (resend.dev) due to unverified from domain');
-          confirmationResult = await attemptSend(fallbackFrom);
-        }
-      }
+      const confirmationResult = await retryResendCall(() =>
+        resend.emails.send({
+          from: fromEmail,
+          to: [user.email],
+          subject,
+          html: createConfirmationEmailHTML(
+            token,
+            token_hash,
+            Deno.env.get('SUPABASE_URL') || '',
+            redirect_to,
+            email_action_type,
+            firstName
+          ),
+        })
+      );
 
       if (confirmationResult.error) {
         throw new Error(`Failed to send confirmation email: ${confirmationResult.error.message}`);
