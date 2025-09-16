@@ -216,32 +216,50 @@ serve(async (req: Request): Promise<Response> => {
     if (email_action_type === 'signup') {
       console.log('Sending confirmation email for user:', user.email);
       
-      // Send confirmation email with retry logic
-      const confirmationResult = await retryResendCall(() => 
-        resend.emails.send({
-          from: fromEmail,
-          to: [user.email],
-          subject: '👉 Welcome to Not Another Coach — please confirm your email',
-          html: createConfirmationEmailHTML(
-            token, 
-            token_hash, 
-            Deno.env.get('SUPABASE_URL') || '', 
-            redirect_to, 
-            email_action_type,
-            firstName
-          ),
-        })
-      );
+      // Send confirmation email with retry logic and fallback sender if domain not verified
+      const subject = '👉 Welcome to Not Another Coach — please confirm your email';
+      const primaryFrom = fromEmail;
+      const fallbackFrom = 'Not Another Coach <onboarding@resend.dev>';
+
+      const attemptSend = async (fromAddr: string) =>
+        retryResendCall(() =>
+          resend.emails.send({
+            from: fromAddr,
+            to: [user.email],
+            subject,
+            html: createConfirmationEmailHTML(
+              token,
+              token_hash,
+              Deno.env.get('SUPABASE_URL') || '',
+              redirect_to,
+              email_action_type,
+              firstName
+            ),
+            // Preserve brand as reply-to even if we must fallback sender
+            reply_to: primaryFrom,
+          })
+        );
+
+      let confirmationResult = await attemptSend(primaryFrom);
 
       if (confirmationResult.error) {
-        console.error('Error sending confirmation email:', confirmationResult.error);
+        const err: any = confirmationResult.error;
+        console.error('Error sending confirmation email:', err);
+        const msg = (err?.error || err?.message || '').toString();
+        if (err?.statusCode === 403 && /Not authorized to send emails from/i.test(msg)) {
+          console.warn('Falling back to verified sender domain (resend.dev) due to unverified from domain');
+          confirmationResult = await attemptSend(fallbackFrom);
+        }
+      }
+
+      if (confirmationResult.error) {
         throw new Error(`Failed to send confirmation email: ${confirmationResult.error.message}`);
       }
 
       console.log('Confirmation email sent successfully:', {
         id: confirmationResult.data?.id,
         to: user.email,
-        subject: '👉 Welcome to Not Another Coach — please confirm your email'
+        subject
       });
     } else {
       console.log('Skipping confirmation email - action type:', email_action_type);
