@@ -48,7 +48,6 @@ export const ChooseCoachModal = ({
   const [step, setStep] = useState<'select' | 'confirm'>('select');
   
   const { getVisibility } = useContentVisibility({
-    trainerId: trainer.id,
     engagementStage: 'browsing'
   });
 

@@ -95,7 +95,6 @@ export const EnhancedTrainerCard = memo(({
   const isAnonymousMode = config === 'anonymous';
   const { stage, isGuest } = useEngagementStage(trainer.id, isAnonymousMode);
   const { canViewContent, loading: visibilityLoading } = useContentVisibility({
-    trainerId: trainer.id,
     engagementStage: stage || 'browsing',
     isGuest: isGuest || isAnonymousMode
   });

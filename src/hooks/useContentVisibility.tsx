@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from 'react';
 import { useVisibilityMatrix, ContentType, VisibilityState, EngagementStage, EngagementStageGroup } from './useVisibilityMatrix';
 
 interface UseContentVisibilityProps {
-  trainerId: string;
   engagementStage: EngagementStage;
   isGuest?: boolean;
 }
@@ -21,8 +20,8 @@ interface ContentVisibilityMap {
   professional_milestones: VisibilityState;
 }
 
-export function useContentVisibility({ trainerId, engagementStage, isGuest = false }: UseContentVisibilityProps) {
-  const { getContentVisibility, getContentVisibilityByGroup } = useVisibilityMatrix();
+export function useContentVisibility({ engagementStage, isGuest = false }: UseContentVisibilityProps) {
+  const { getContentVisibilityByGroup } = useVisibilityMatrix();
   const [visibilityMap, setVisibilityMap] = useState<ContentVisibilityMap>({
     profile_image: 'hidden',
     basic_information: 'hidden',
@@ -66,20 +65,19 @@ export function useContentVisibility({ trainerId, engagementStage, isGuest = fal
 
   useEffect(() => {
     const fetchVisibilityStates = async () => {
-      if (!trainerId || !engagementStage) return;
+      if (!engagementStage) return;
       
       setLoading(true);
       try {
         const stageGroup = getStageGroup(engagementStage, isGuest);
         
         const visibilityPromises = contentTypes.map(async (contentType) => {
-          // Use group-based visibility check for better performance
-          const visibility = await getContentVisibilityByGroup(trainerId, contentType, stageGroup);
+          // Use system-wide visibility configuration
+          const visibility = await getContentVisibilityByGroup(contentType, stageGroup);
           
           // Debug visibility fetching
           if (contentType === 'gallery_images') {
             console.log('useContentVisibility Debug - Gallery Images:', {
-              trainerId,
               contentType,
               stageGroup,
               engagementStage,
@@ -119,7 +117,7 @@ export function useContentVisibility({ trainerId, engagementStage, isGuest = fal
     };
 
     fetchVisibilityStates();
-  }, [trainerId, engagementStage, isGuest, getContentVisibilityByGroup]);
+  }, [engagementStage, isGuest, getContentVisibilityByGroup]);
 
   // Helper functions for common visibility checks
   const canViewContent = useMemo(() => ({

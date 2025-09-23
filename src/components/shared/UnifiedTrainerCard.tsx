@@ -52,7 +52,6 @@ export const UnifiedTrainerCard = ({
   // Add visibility logic for basic information
   const { stage, isGuest } = useEngagementStage(trainer.id);
   const { getVisibility } = useContentVisibility({
-    trainerId: trainer.id,
     engagementStage: stage || 'browsing',
     isGuest
   });

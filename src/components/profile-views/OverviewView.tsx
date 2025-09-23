@@ -16,7 +16,6 @@ interface OverviewViewProps {
 
 export const OverviewView = ({ trainer, onMessage, onBookDiscovery }: OverviewViewProps) => {
   const { getVisibility } = useContentVisibility({
-    trainerId: trainer.id,
     engagementStage: 'browsing' // Default stage for overview
   });
   // Generate initials from trainer name

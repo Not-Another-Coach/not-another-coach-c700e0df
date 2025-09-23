@@ -64,9 +64,8 @@ const visibilityStateLabels: Record<VisibilityState, { label: string; icon: any;
 
 export const VisibilitySettingsSection = () => {
   const { profile } = useTrainerProfile();
-  const { updateVisibilityByGroup, initializeDefaults, loading } = useVisibilityMatrix();
+  const { loading } = useVisibilityMatrix();
   const [settings, setSettings] = useState<Record<string, VisibilityState>>({});
-  const [hasInitialized, setHasInitialized] = useState(false);
   const [previewStage, setPreviewStage] = useState<EngagementStageGroup | null>(null);
 
   // Only show admin-controllable content types in trainer setup
@@ -87,46 +86,8 @@ export const VisibilitySettingsSection = () => {
     'rejected'
   ];
 
-  const initializeSettings = async () => {
-    if (!profile?.id || hasInitialized) return;
-
-    const { error } = await initializeDefaults(profile.id);
-    if (error) {
-      toast.error('Failed to initialize visibility settings');
-    } else {
-      setHasInitialized(true);
-      toast.success('Visibility settings initialized with defaults');
-    }
-  };
-
-  const handleVisibilityChange = async (
-    contentType: ContentType,
-    stageGroup: EngagementStageGroup,
-    newVisibility: VisibilityState
-  ) => {
-    if (!profile?.id) return;
-
-    const key = `${contentType}-${stageGroup}`;
-    setSettings(prev => ({ ...prev, [key]: newVisibility }));
-
-    const { error } = await updateVisibilityByGroup(
-      profile.id, 
-      contentType, 
-      stageGroup, 
-      newVisibility
-    );
-
-    if (error) {
-      toast.error('Failed to update visibility setting');
-      // Revert the change on error
-      setSettings(prev => {
-        const updated = { ...prev };
-        delete updated[key];
-        return updated;
-      });
-    } else {
-      toast.success('Visibility setting updated');
-    }
+  const handleVisibilityChange = () => {
+    // This function is no longer needed as visibility is system-managed
   };
 
   const VisibilityIcon = ({ state }: { state: VisibilityState }) => {
@@ -152,16 +113,16 @@ export const VisibilitySettingsSection = () => {
           </p>
         </CardHeader>
         <CardContent className="space-y-6">
-          {!hasInitialized && (
-            <div className="bg-muted/50 rounded-lg p-4 text-center">
-              <Button onClick={initializeSettings} disabled={loading}>
-                Initialize Default Settings
-              </Button>
-              <p className="text-sm text-muted-foreground mt-2">
-                This will set up recommended visibility settings for each engagement stage group
+          <div className="bg-muted/50 rounded-lg p-4 text-center">
+            <div className="space-y-2">
+              <h4 className="font-medium">System-Wide Visibility Configuration</h4>
+              <p className="text-sm text-muted-foreground">
+                Visibility settings are now configured system-wide by administrators.
+                All trainer profiles follow the same visibility rules based on client engagement stages.
               </p>
+              <Badge variant="secondary">Consistent Experience</Badge>
             </div>
-          )}
+          </div>
 
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
@@ -204,42 +165,16 @@ export const VisibilitySettingsSection = () => {
                   <td className="p-2 font-medium text-sm">
                     {contentTypeLabels[contentType]}
                   </td>
-                  {stageGroups.map(stageGroup => {
-                    const key = `${contentType}-${stageGroup}`;
-                    const currentValue = settings[key] || 'hidden';
-                    
-                    return (
-                      <td key={stageGroup} className="p-2 text-center">
-                        <Select
-                          value={currentValue}
-                          onValueChange={(value: VisibilityState) => 
-                            handleVisibilityChange(contentType, stageGroup, value)
-                          }
-                        >
-                          <SelectTrigger className="w-28 h-8">
-                            <SelectValue>
-                              <div className="flex items-center gap-1">
-                                <VisibilityIcon state={currentValue} />
-                                <span className="text-xs">
-                                  {visibilityStateLabels[currentValue].label}
-                                </span>
-                              </div>
-                            </SelectValue>
-                          </SelectTrigger>
-                          <SelectContent>
-                            {Object.entries(visibilityStateLabels).map(([value, config]) => (
-                              <SelectItem key={value} value={value}>
-                                <div className="flex items-center gap-2">
-                                  <config.icon className={`w-4 h-4 ${config.color}`} />
-                                  {config.label}
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </td>
-                    );
-                  })}
+                   {stageGroups.map(stageGroup => {
+                     return (
+                       <td key={stageGroup} className="p-2 text-center">
+                         <Badge variant="outline" className="flex items-center gap-1">
+                           <Lock className="w-3 h-3 text-muted-foreground" />
+                           <span className="text-xs">System Managed</span>
+                         </Badge>
+                       </td>
+                     );
+                   })}
                 </tr>
               ))}
             </tbody>

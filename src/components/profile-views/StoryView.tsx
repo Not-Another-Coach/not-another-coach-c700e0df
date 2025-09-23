@@ -28,7 +28,6 @@ export const StoryView = ({ trainer }: StoryViewProps) => {
   // Get visibility state for testimonial images/content
   const { stage: engagementStage, isGuest } = useEngagementStage((trainer as any).id || '');
   const { getVisibility } = useContentVisibility({
-    trainerId: (trainer as any).id || '',
     engagementStage,
     isGuest
   });

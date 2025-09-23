@@ -5880,58 +5880,6 @@ export type Database = {
           },
         ]
       }
-      trainer_visibility_settings: {
-        Row: {
-          content_type: Database["public"]["Enums"]["content_type"]
-          created_at: string | null
-          engagement_stage: Database["public"]["Enums"]["engagement_stage"]
-          id: string
-          trainer_id: string
-          updated_at: string | null
-          visibility_state: Database["public"]["Enums"]["visibility_state"]
-        }
-        Insert: {
-          content_type: Database["public"]["Enums"]["content_type"]
-          created_at?: string | null
-          engagement_stage: Database["public"]["Enums"]["engagement_stage"]
-          id?: string
-          trainer_id: string
-          updated_at?: string | null
-          visibility_state?: Database["public"]["Enums"]["visibility_state"]
-        }
-        Update: {
-          content_type?: Database["public"]["Enums"]["content_type"]
-          created_at?: string | null
-          engagement_stage?: Database["public"]["Enums"]["engagement_stage"]
-          id?: string
-          trainer_id?: string
-          updated_at?: string | null
-          visibility_state?: Database["public"]["Enums"]["visibility_state"]
-        }
-        Relationships: [
-          {
-            foreignKeyName: "trainer_visibility_settings_trainer_id_fkey"
-            columns: ["trainer_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "trainer_visibility_settings_trainer_id_fkey"
-            columns: ["trainer_id"]
-            isOneToOne: false
-            referencedRelation: "v_clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "trainer_visibility_settings_trainer_id_fkey"
-            columns: ["trainer_id"]
-            isOneToOne: false
-            referencedRelation: "v_trainers"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       training_type_usage_analytics: {
         Row: {
           client_matched_count: number | null
@@ -6913,10 +6861,6 @@ export type Database = {
         }
         Returns: undefined
       }
-      initialize_trainer_visibility_defaults: {
-        Args: { p_trainer_id: string }
-        Returns: undefined
-      }
       is_activity_acknowledged: {
         Args: { p_alert_id: string }
         Returns: boolean
@@ -7077,15 +7021,6 @@ export type Database = {
       update_user_email_for_admin: {
         Args: { new_email: string; target_user_id: string }
         Returns: boolean
-      }
-      update_visibility_for_group: {
-        Args: {
-          p_content_type: Database["public"]["Enums"]["content_type"]
-          p_stage_group: Database["public"]["Enums"]["engagement_stage_group"]
-          p_trainer_id: string
-          p_visibility_state: Database["public"]["Enums"]["visibility_state"]
-        }
-        Returns: undefined
       }
       update_workflow_progress: {
         Args: {

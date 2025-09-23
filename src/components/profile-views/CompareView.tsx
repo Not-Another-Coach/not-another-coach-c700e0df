@@ -28,7 +28,6 @@ const comparisonCategories = [
 export const CompareView = ({ trainers, onRemoveTrainer, onSelectTrainer }: CompareViewProps) => {
   // Use the first trainer's ID for visibility check (assuming same engagement for all in compare)
   const { getVisibility } = useContentVisibility({
-    trainerId: trainers[0]?.id || '',
     engagementStage: 'browsing'
   });
   if (trainers.length === 0) {

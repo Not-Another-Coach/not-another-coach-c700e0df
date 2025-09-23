@@ -31,7 +31,6 @@ export const SwipeableCard = ({ trainer, onSwipe, matchScore = 0, matchReasons =
   const isSaved = isTrainerSaved(trainer.id);
   
   const { getVisibility } = useContentVisibility({
-    trainerId: trainer.id,
     engagementStage: 'browsing'
   });
 
