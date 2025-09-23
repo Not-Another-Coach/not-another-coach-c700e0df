@@ -132,6 +132,7 @@ export const EnhancedTrainerCard = memo(({
   }, [initialView]);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [showDebugInfo, setShowDebugInfo] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
   // Available views in order - memoized to prevent recalculation
@@ -807,28 +808,43 @@ export const EnhancedTrainerCard = memo(({
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
-      {/* TEMPORARY DEBUG LABELS */}
+      {/* DEBUG INFO TOGGLE */}
       <div className="absolute top-0 right-0 z-50 flex flex-col gap-1 p-2">
-        <div className="flex flex-wrap gap-1">
-          {/* Config Label */}
-          <Badge className="text-xs bg-purple-500 text-white hover:bg-purple-600">
-            Config: {config || 'none'}
-          </Badge>
-          {/* Layout Label */}
-          <Badge className="text-xs bg-blue-500 text-white hover:bg-blue-600">
-            Layout: {finalLayout}
-          </Badge>
-        </div>
-        <div className="flex flex-wrap gap-1">
-          {/* View Switching Label */}
-          <Badge className="text-xs bg-green-500 text-white hover:bg-green-600">
-            ViewSwitch: {finalAllowViewSwitching ? 'yes' : 'no'}
-          </Badge>
-          {/* Current View Label */}
-          <Badge className="text-xs bg-orange-500 text-white hover:bg-orange-600">
-            View: {currentView}
-          </Badge>
-        </div>
+        {/* Toggle Button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setShowDebugInfo(!showDebugInfo)}
+          className="h-6 w-6 p-0 bg-black/20 hover:bg-black/40 text-white border border-white/20"
+        >
+          {showDebugInfo ? '×' : 'i'}
+        </Button>
+        
+        {/* Collapsible Debug Labels */}
+        {showDebugInfo && (
+          <>
+            <div className="flex flex-wrap gap-1">
+              {/* Config Label */}
+              <Badge className="text-xs bg-purple-500 text-white hover:bg-purple-600">
+                Config: {config || 'none'}
+              </Badge>
+              {/* Layout Label */}
+              <Badge className="text-xs bg-blue-500 text-white hover:bg-blue-600">
+                Layout: {finalLayout}
+              </Badge>
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {/* View Switching Label */}
+              <Badge className="text-xs bg-green-500 text-white hover:bg-green-600">
+                ViewSwitch: {finalAllowViewSwitching ? 'yes' : 'no'}
+              </Badge>
+              {/* Current View Label */}
+              <Badge className="text-xs bg-orange-500 text-white hover:bg-orange-600">
+                View: {currentView}
+              </Badge>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Enhanced Trainer Card */}
