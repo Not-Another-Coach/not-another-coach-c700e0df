@@ -13,6 +13,7 @@ import { StoryView } from '@/components/profile-views/StoryView';
 import { ContentView } from '@/components/profile-views/ContentView';
 import { CardsView } from '@/components/profile-views/CardsView';
 import { EnhancedTrainerCard } from '@/components/trainer-cards/EnhancedTrainerCard';
+import { AnonymousProfileCard } from '@/components/profile-cards/AnonymousProfileCard';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserTypeChecks } from '@/hooks/useUserType';
@@ -216,48 +217,34 @@ export const TrainerProfile = () => {
           </div>
         </div>
 
-        {/* Enhanced Trainer Card for anonymous/non-owner users */}
+        {/* Profile Card for non-owner users */}
         {!isOwnProfile && (
           <div className="mb-6">
-            {/* Labels for anonymous users */}
-            {!user && (
-              <div className="mb-4 p-4 bg-muted/50 rounded-lg border">
-                <h3 className="font-semibold text-sm mb-2">How to interact with this profile:</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                  <div className="flex items-center gap-2">
-                    <Heart className="h-3 w-3 text-primary" />
-                    <span><strong>Save:</strong> Remember this trainer</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MessageCircle className="h-3 w-3 text-primary" />
-                    <span><strong>Message:</strong> Chat with trainer</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-3 w-3 text-primary" />
-                    <span><strong>Book Call:</strong> Schedule discovery call</span>
-                  </div>
-                </div>
-                <p className="text-xs text-muted-foreground mt-2">
-                  💡 Sign in to save trainers, send messages, and book calls
-                </p>
-              </div>
+            {!user ? (
+              // Anonymous users get the specialized anonymous profile card
+              <AnonymousProfileCard
+                trainer={trainer}
+                onMessage={() => navigate('/auth')}
+                onBookDiscovery={() => navigate('/auth')}
+              />
+            ) : (
+              // Authenticated users get the enhanced trainer card
+              <EnhancedTrainerCard
+                trainer={trainer}
+                layout="full"
+                initialView="instagram"
+                allowViewSwitching={true}
+                showEngagementBadge={false}
+                compactActions={false}
+                hideViewControls={false}
+                onViewProfile={() => {}} // Already on profile page
+                onMessage={handleMessage}
+                onAddToShortlist={() => console.log('Add to shortlist')}
+                onStartConversation={handleMessage}
+                onBookDiscoveryCall={handleBookDiscovery}
+                trainerOffersDiscoveryCalls={trainer.offers_discovery_call || false}
+              />
             )}
-
-            <EnhancedTrainerCard
-              trainer={trainer}
-              layout="full"
-              initialView="instagram"
-              allowViewSwitching={true}
-              showEngagementBadge={false}
-              compactActions={false}
-              hideViewControls={false}
-              onViewProfile={() => {}} // Already on profile page
-              onMessage={user ? handleMessage : () => navigate('/auth')}
-              onAddToShortlist={() => console.log('Add to shortlist')}
-              onStartConversation={user ? handleMessage : () => navigate('/auth')}
-              onBookDiscoveryCall={user ? handleBookDiscovery : () => navigate('/auth')}
-              trainerOffersDiscoveryCalls={trainer.offers_discovery_call || false}
-            />
           </div>
         )}
 
