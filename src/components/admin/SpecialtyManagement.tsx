@@ -10,9 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Edit, Trash2, Eye, Check, X, Users, Target, Dumbbell, Heart, Trophy, Brain, Activity } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, Check, X, Users, Target, Dumbbell, Heart, Trophy, Brain, Activity, Crown, Sparkles } from 'lucide-react';
 import { useSpecialties, useSpecialtyCategories, useTrainingTypes, useCustomSpecialtyRequests } from '@/hooks/useSpecialties';
 import { useSpecialtyCategoryAdmin, useSpecialtyAdmin, useTrainingTypeAdmin, useCustomSpecialtyRequestAdmin } from '@/hooks/useSpecialtyAdmin';
+import { HighlightBadge } from '@/components/ui/highlight-badge';
 
 const ICON_OPTIONS = [
   { value: 'Dumbbell', label: 'Dumbbell', icon: Dumbbell },
@@ -67,7 +68,8 @@ export function SpecialtyManagement() {
     category_id: '',
     description: '',
     requires_qualification: false,
-    matching_keywords: ''
+    matching_keywords: '',
+    highlight_type: null as 'popular' | 'specialist' | null
   });
 
   // Training type form state
@@ -76,7 +78,8 @@ export function SpecialtyManagement() {
     description: '',
     delivery_formats: ['in-person', 'online'],
     min_participants: 1,
-    max_participants: ''
+    max_participants: '',
+    highlight_type: null as 'popular' | 'specialist' | null
   });
 
   const handleCreateCategory = async () => {
@@ -120,6 +123,7 @@ export function SpecialtyManagement() {
         description: specialtyForm.description || null,
         requires_qualification: specialtyForm.requires_qualification,
         matching_keywords: keywordsArray,
+        highlight_type: specialtyForm.highlight_type,
         display_order: specialties.filter(s => s.category_id === specialtyForm.category_id).length + 1,
         is_active: true
       });
@@ -130,7 +134,8 @@ export function SpecialtyManagement() {
         category_id: '',
         description: '',
         requires_qualification: false,
-        matching_keywords: ''
+        matching_keywords: '',
+        highlight_type: null
       });
       refetchSpecialties();
     } catch (error) {
@@ -146,6 +151,7 @@ export function SpecialtyManagement() {
         delivery_formats: trainingTypeForm.delivery_formats,
         min_participants: trainingTypeForm.min_participants,
         max_participants: trainingTypeForm.max_participants ? parseInt(trainingTypeForm.max_participants) : null,
+        highlight_type: trainingTypeForm.highlight_type,
         display_order: trainingTypes.length + 1,
         is_active: true
       });
@@ -156,7 +162,8 @@ export function SpecialtyManagement() {
         description: '',
         delivery_formats: ['in-person', 'online'],
         min_participants: 1,
-        max_participants: ''
+        max_participants: '',
+        highlight_type: null
       });
       refetchTrainingTypes();
     } catch (error) {
@@ -416,6 +423,35 @@ export function SpecialtyManagement() {
                         placeholder="weight loss, fat loss, body transformation"
                       />
                     </div>
+                    <div>
+                      <Label htmlFor="highlight">Highlight Type</Label>
+                      <Select 
+                        value={specialtyForm.highlight_type || ''} 
+                        onValueChange={(value) => setSpecialtyForm({
+                          ...specialtyForm, 
+                          highlight_type: value === '' ? null : value as 'popular' | 'specialist'
+                        })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="No highlight" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">No highlight</SelectItem>
+                          <SelectItem value="popular">
+                            <div className="flex items-center gap-2">
+                              <Crown className="w-4 h-4 text-yellow-600" />
+                              Popular
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="specialist">
+                            <div className="flex items-center gap-2">
+                              <Sparkles className="w-4 h-4 text-purple-600" />
+                              Specialist
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                     <div className="flex justify-end gap-2">
                       <Button variant="outline" onClick={() => setShowSpecialtyDialog(false)}>
                         Cancel
@@ -451,7 +487,10 @@ export function SpecialtyManagement() {
                             <Card key={specialty.id} className="p-4">
                               <div className="flex items-start justify-between">
                                 <div>
-                                  <h4 className="font-medium">{specialty.name}</h4>
+                                  <div className="flex items-center gap-2">
+                                    <h4 className="font-medium">{specialty.name}</h4>
+                                    <HighlightBadge type={specialty.highlight_type} />
+                                  </div>
                                   {specialty.description && (
                                     <p className="text-sm text-muted-foreground mt-1">{specialty.description}</p>
                                   )}
@@ -565,6 +604,35 @@ export function SpecialtyManagement() {
                         />
                       </div>
                     </div>
+                    <div>
+                      <Label htmlFor="highlight">Highlight Type</Label>
+                      <Select 
+                        value={trainingTypeForm.highlight_type || ''} 
+                        onValueChange={(value) => setTrainingTypeForm({
+                          ...trainingTypeForm, 
+                          highlight_type: value === '' ? null : value as 'popular' | 'specialist'
+                        })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="No highlight" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">No highlight</SelectItem>
+                          <SelectItem value="popular">
+                            <div className="flex items-center gap-2">
+                              <Crown className="w-4 h-4 text-yellow-600" />
+                              Popular
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="specialist">
+                            <div className="flex items-center gap-2">
+                              <Sparkles className="w-4 h-4 text-purple-600" />
+                              Specialist
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                     <div className="flex justify-end gap-2">
                       <Button variant="outline" onClick={() => setShowTrainingTypeDialog(false)}>
                         Cancel
@@ -586,7 +654,10 @@ export function SpecialtyManagement() {
                     <Card key={type.id} className="p-4">
                       <div className="flex items-start justify-between">
                         <div>
-                          <h4 className="font-medium">{type.name}</h4>
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-medium">{type.name}</h4>
+                            <HighlightBadge type={type.highlight_type} />
+                          </div>
                           {type.description && (
                             <p className="text-sm text-muted-foreground mt-1">{type.description}</p>
                           )}

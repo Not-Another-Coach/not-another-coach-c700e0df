@@ -23,6 +23,7 @@ export interface Specialty {
   requires_qualification: boolean;
   matching_keywords?: string[];
   description?: string;
+  highlight_type?: 'popular' | 'specialist' | null;
   created_at: string;
   updated_at: string;
   category?: SpecialtyCategory;
@@ -37,6 +38,7 @@ export interface TrainingType {
   delivery_formats: string[];
   min_participants?: number;
   max_participants?: number;
+  highlight_type?: 'popular' | 'specialist' | null;
   created_at: string;
   updated_at: string;
 }

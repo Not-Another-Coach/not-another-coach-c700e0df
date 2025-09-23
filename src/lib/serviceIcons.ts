@@ -127,7 +127,18 @@ export const getServiceIcon = (serviceName: string): LucideIcon => {
 };
 
 // Determine if a service should be highlighted
-export const getServiceHighlight = (serviceName: string, allServices: string[]): 'popular' | 'specialist' | null => {
+// Now prioritizes database highlight_type over keyword matching
+export const getServiceHighlight = (
+  serviceName: string, 
+  allServices: string[] = [], 
+  databaseHighlightType?: 'popular' | 'specialist' | null
+): 'popular' | 'specialist' | null => {
+  // Prioritize database value if available
+  if (databaseHighlightType) {
+    return databaseHighlightType;
+  }
+  
+  // Fallback to keyword-based logic for backward compatibility
   const normalized = serviceName.toLowerCase().trim();
   
   // Popular services (common, foundational)

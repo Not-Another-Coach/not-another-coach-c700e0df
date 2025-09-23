@@ -4553,6 +4553,7 @@ export type Database = {
           created_by: string | null
           description: string | null
           display_order: number
+          highlight_type: Database["public"]["Enums"]["highlight_type"] | null
           id: string
           is_active: boolean
           matching_keywords: string[] | null
@@ -4566,6 +4567,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           display_order?: number
+          highlight_type?: Database["public"]["Enums"]["highlight_type"] | null
           id?: string
           is_active?: boolean
           matching_keywords?: string[] | null
@@ -4579,6 +4581,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           display_order?: number
+          highlight_type?: Database["public"]["Enums"]["highlight_type"] | null
           id?: string
           is_active?: boolean
           matching_keywords?: string[] | null
@@ -5922,6 +5925,7 @@ export type Database = {
           delivery_formats: string[] | null
           description: string | null
           display_order: number
+          highlight_type: Database["public"]["Enums"]["highlight_type"] | null
           id: string
           is_active: boolean
           max_participants: number | null
@@ -5935,6 +5939,7 @@ export type Database = {
           delivery_formats?: string[] | null
           description?: string | null
           display_order?: number
+          highlight_type?: Database["public"]["Enums"]["highlight_type"] | null
           id?: string
           is_active?: boolean
           max_participants?: number | null
@@ -5948,6 +5953,7 @@ export type Database = {
           delivery_formats?: string[] | null
           description?: string | null
           display_order?: number
+          highlight_type?: Database["public"]["Enums"]["highlight_type"] | null
           id?: string
           is_active?: boolean
           max_participants?: number | null
@@ -7133,6 +7139,7 @@ export type Database = {
         | "content"
         | "ops"
         | "learning"
+      highlight_type: "popular" | "specialist"
       kb_article_status: "draft" | "published" | "archived" | "staging"
       kb_content_type:
         | "feature"
@@ -7393,6 +7400,7 @@ export const Constants = {
       ],
       goal_timeframe: ["weekly", "monthly", "quarterly", "yearly"],
       goal_type: ["coaching", "sales", "program", "content", "ops", "learning"],
+      highlight_type: ["popular", "specialist"],
       kb_article_status: ["draft", "published", "archived", "staging"],
       kb_content_type: [
         "feature",
