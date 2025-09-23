@@ -18,15 +18,18 @@ interface EngagementData {
   updated_at: string;
 }
 
-export function useEngagementStage(trainerId: string) {
+export function useEngagementStage(trainerId: string, forceGuestMode: boolean = false) {
   const { user } = useAuth();
   const [stage, setStage] = useState<EngagementStage>('browsing');
   const [engagementData, setEngagementData] = useState<EngagementData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isGuest, setIsGuest] = useState(false);
 
   const fetchEngagementStage = useCallback(async () => {
-    if (!user || !trainerId) {
-      setStage('browsing');
+    if (!user || !trainerId || forceGuestMode) {
+      // Anonymous users or forced guest mode should be treated as guests
+      setStage('browsing'); // Keep stage as browsing for internal logic
+      setIsGuest(!user || forceGuestMode); // But track guest status separately
       setLoading(false);
       return;
     }
@@ -62,14 +65,14 @@ export function useEngagementStage(trainerId: string) {
     } finally {
       setLoading(false);
     }
-  }, [user, trainerId]);
+  }, [user, trainerId, forceGuestMode]);
 
   useEffect(() => {
     fetchEngagementStage();
   }, [fetchEngagementStage]);
 
   const updateEngagementStage = useCallback(async (newStage: EngagementStage) => {
-    if (!user || !trainerId) return { error: 'No user or trainer ID' };
+    if (!user || !trainerId || forceGuestMode) return { error: 'No user or trainer ID' };
 
     try {
       const { data, error } = await supabase.rpc('update_engagement_stage', {
@@ -90,7 +93,7 @@ export function useEngagementStage(trainerId: string) {
       console.error('Error updating engagement stage:', error);
       return { error };
     }
-  }, [user, trainerId, fetchEngagementStage]);
+  }, [user, trainerId, forceGuestMode, fetchEngagementStage]);
 
   const canViewContent = useCallback((requiredStage: EngagementStage) => {
     const stageOrder: EngagementStage[] = ['browsing', 'liked', 'shortlisted', 'getting_to_know_your_coach', 'discovery_in_progress', 'discovery_completed', 'agreed', 'payment_pending', 'active_client'];
@@ -105,6 +108,7 @@ export function useEngagementStage(trainerId: string) {
     loading,
     updateEngagementStage,
     canViewContent,
-    refetch: fetchEngagementStage
+    refetch: fetchEngagementStage,
+    isGuest
   };
 }

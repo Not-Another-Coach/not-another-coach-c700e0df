@@ -90,10 +90,12 @@ export const EnhancedTrainerCard = memo(({
   const isSaved = isTrainerSaved(trainer.id);
 
   // Add visibility context - this will be passed to sub-components through their own hooks
-  const { stage } = useEngagementStage(trainer.id);
+  const isAnonymousMode = config === 'anonymous';
+  const { stage, isGuest } = useEngagementStage(trainer.id, isAnonymousMode);
   const { canViewContent, loading: visibilityLoading } = useContentVisibility({
     trainerId: trainer.id,
-    engagementStage: stage || 'browsing'
+    engagementStage: stage || 'browsing',
+    isGuest: isGuest || isAnonymousMode
   });
 
   // Apply configuration if provided

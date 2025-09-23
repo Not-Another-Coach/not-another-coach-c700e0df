@@ -16,10 +16,11 @@ interface FeatureSummaryViewProps {
 }
 
 export const FeatureSummaryView = ({ trainer, children }: FeatureSummaryViewProps) => {
-  const { stage: engagementStage } = useEngagementStage(trainer.id);
+  const { stage: engagementStage, isGuest } = useEngagementStage(trainer.id);
   const { canViewContent, getVisibility } = useContentVisibility({
     trainerId: trainer.id,
-    engagementStage
+    engagementStage,
+    isGuest
   });
   
   // Get and standardize specialties for feature cards

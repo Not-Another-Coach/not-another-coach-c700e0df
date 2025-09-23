@@ -50,10 +50,11 @@ export const UnifiedTrainerCard = ({
   const navigate = useNavigate();
   
   // Add visibility logic for basic information
-  const { stage } = useEngagementStage(trainer.id);
+  const { stage, isGuest } = useEngagementStage(trainer.id);
   const { getVisibility } = useContentVisibility({
     trainerId: trainer.id,
-    engagementStage: stage || 'browsing'
+    engagementStage: stage || 'browsing',
+    isGuest
   });
   
   console.log('🎯 UnifiedTrainerCard rendering:', { trainer: trainer.first_name + ' ' + trainer.last_name, showMatchScore, className });

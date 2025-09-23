@@ -4,6 +4,7 @@ import { useVisibilityMatrix, ContentType, VisibilityState, EngagementStage, Eng
 interface UseContentVisibilityProps {
   trainerId: string;
   engagementStage: EngagementStage;
+  isGuest?: boolean;
 }
 
 interface ContentVisibilityMap {
@@ -20,7 +21,7 @@ interface ContentVisibilityMap {
   professional_milestones: VisibilityState;
 }
 
-export function useContentVisibility({ trainerId, engagementStage }: UseContentVisibilityProps) {
+export function useContentVisibility({ trainerId, engagementStage, isGuest = false }: UseContentVisibilityProps) {
   const { getContentVisibility, getContentVisibilityByGroup } = useVisibilityMatrix();
   const [visibilityMap, setVisibilityMap] = useState<ContentVisibilityMap>({
     profile_image: 'hidden',
@@ -38,7 +39,10 @@ export function useContentVisibility({ trainerId, engagementStage }: UseContentV
   const [loading, setLoading] = useState(true);
 
   // Map individual stages to groups
-  const getStageGroup = (stage: EngagementStage): EngagementStageGroup => {
+  const getStageGroup = (stage: EngagementStage, isGuestUser: boolean = false): EngagementStageGroup => {
+    // Anonymous users should always use 'guest' stage group regardless of passed stage
+    if (isGuestUser) return 'guest';
+    
     if (stage === 'browsing') return 'browsing';
     if (stage === 'liked') return 'liked';
     if (stage === 'shortlisted') return 'shortlisted';
@@ -66,7 +70,7 @@ export function useContentVisibility({ trainerId, engagementStage }: UseContentV
       
       setLoading(true);
       try {
-        const stageGroup = getStageGroup(engagementStage);
+        const stageGroup = getStageGroup(engagementStage, isGuest);
         
         const visibilityPromises = contentTypes.map(async (contentType) => {
           // Use group-based visibility check for better performance
@@ -115,7 +119,7 @@ export function useContentVisibility({ trainerId, engagementStage }: UseContentV
     };
 
     fetchVisibilityStates();
-  }, [trainerId, engagementStage, getContentVisibilityByGroup]);
+  }, [trainerId, engagementStage, isGuest, getContentVisibilityByGroup]);
 
   // Helper functions for common visibility checks
   const canViewContent = useMemo(() => ({

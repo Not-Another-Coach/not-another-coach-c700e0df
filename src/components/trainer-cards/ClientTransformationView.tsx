@@ -62,10 +62,11 @@ export const ClientTransformationView = ({ trainer, children, testimonialIndex =
   const transformationData = getTransformationData(trainer);
   
   // Add visibility logic
-  const { stage } = useEngagementStage(trainer.id);
+  const { stage, isGuest } = useEngagementStage(trainer.id);
   const { getVisibility, loading: visibilityLoading } = useContentVisibility({
     trainerId: trainer.id,
-    engagementStage: stage || 'browsing'
+    engagementStage: stage || 'browsing',
+    isGuest
   });
 
   const testimonialVisibility = getVisibility('testimonial_images');

@@ -70,10 +70,11 @@ export const SwipeableInstagramCard = ({
   const cardRef = useRef<HTMLDivElement>(null);
 
   // Add visibility logic
-  const { stage } = useEngagementStage(trainer.id);
+  const { stage, isGuest } = useEngagementStage(trainer.id);
   const { getVisibility, loading: visibilityLoading } = useContentVisibility({
     trainerId: trainer.id,
-    engagementStage: stage || 'browsing'
+    engagementStage: stage || 'browsing',
+    isGuest
   });
 
   const galleryVisibility = getVisibility('gallery_images');
