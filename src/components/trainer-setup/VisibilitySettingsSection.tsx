@@ -26,6 +26,10 @@ const contentTypeLabels: Record<ContentType, string> = {
 };
 
 const stageGroupLabels: Record<EngagementStageGroup, { label: string; tooltip: string }> = {
+  guest: { 
+    label: 'Guest', 
+    tooltip: 'Anonymous visitors and users without completed profiles' 
+  },
   browsing: { 
     label: 'Browsing', 
     tooltip: 'When clients are browsing trainer profiles' 

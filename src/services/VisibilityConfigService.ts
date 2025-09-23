@@ -58,10 +58,21 @@ class VisibilityConfigServiceClass {
     const cachedValue = cache.get(key);
     if (cachedValue) return cachedValue;
     
-    // For gallery_images, default to visible for all browsing scenarios
+    // For gallery_images, default to visible for browsing scenarios (but hidden for guests)
     if (contentType === 'gallery_images' && ['browsing', 'liked', 'shortlisted'].includes(stageGroup)) {
       console.log('VisibilityConfigService: Using visible default for gallery_images', { contentType, stageGroup });
       return 'visible';
+    }
+    
+    // For guest users, provide more restrictive defaults
+    if (stageGroup === 'guest') {
+      if (['profile_image', 'basic_information'].includes(contentType)) {
+        return 'visible';
+      }
+      if (contentType === 'pricing_discovery_call') {
+        return 'blurred';
+      }
+      return 'hidden';
     }
     
     return 'hidden'; // Safe default for other cases

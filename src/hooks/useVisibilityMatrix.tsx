@@ -34,6 +34,7 @@ export type EngagementStage =
   | 'declined_dismissed';
 
 export type EngagementStageGroup =
+  | 'guest'
   | 'browsing'
   | 'liked'
   | 'shortlisted'
@@ -74,6 +75,7 @@ export function useVisibilityMatrix(): VisibilityMatrixHook {
 
   // Stage group mapping
   const stageGroupMapping: Record<EngagementStageGroup, EngagementStage[]> = {
+    guest: [], // Guests don't have a direct engagement stage
     browsing: ['browsing'],
     liked: ['liked'],
     shortlisted: ['shortlisted'],
