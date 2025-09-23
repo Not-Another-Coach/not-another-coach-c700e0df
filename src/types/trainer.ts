@@ -220,11 +220,11 @@ export const TRAINER_CARD_CONFIGS: Record<string, TrainerCardConfig> = {
     availableViews: ['instagram']
   },
   anonymous: {
-    layout: 'carousel',
+    layout: 'grid',
     allowViewSwitching: true,
     showEngagementBadge: false,
     compactActions: true,
     hideViewControls: false,
-    availableViews: ['instagram', 'features']
+    availableViews: ['instagram', 'features', 'transformations']
   }
 };

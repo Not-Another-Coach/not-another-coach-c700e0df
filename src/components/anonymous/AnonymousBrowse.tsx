@@ -125,6 +125,7 @@ export const AnonymousBrowse = () => {
                   trainer={enhancedTrainer}
                   config="anonymous"
                   initialView="instagram"
+                  showComparisonCheckbox={false}
                   onViewProfile={() => handleViewProfileClick(trainer.id)}
                   onMessage={() => handleMessageClick(trainer.id)}
                   onBookDiscoveryCall={() => handleBookClick(trainer.id)}
