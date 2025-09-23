@@ -96,6 +96,7 @@ export function SystemVisibilityDefaults() {
   ];
 
   const stageGroups: EngagementStageGroup[] = [
+    'guest',
     'browsing',
     'liked',
     'shortlisted',
