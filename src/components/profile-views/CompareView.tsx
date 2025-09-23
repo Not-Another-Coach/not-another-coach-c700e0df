@@ -3,7 +3,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Star, MapPin, Award, Users, Clock, CheckCircle, X } from 'lucide-react';
 import { AnyTrainer } from '@/types/trainer';
-import { getTrainerDisplayPrice } from '@/lib/priceUtils';
+import { getTrainerDisplayPrice, getVisibilityAwarePrice } from '@/lib/priceUtils';
+import { useContentVisibility } from '@/hooks/useContentVisibility';
+import { VisibilityAwarePricing } from '@/components/ui/VisibilityAwarePricing';
 
 interface CompareViewProps {
   trainers: AnyTrainer[];
@@ -24,6 +26,11 @@ const comparisonCategories = [
 ];
 
 export const CompareView = ({ trainers, onRemoveTrainer, onSelectTrainer }: CompareViewProps) => {
+  // Use the first trainer's ID for visibility check (assuming same engagement for all in compare)
+  const { getVisibility } = useContentVisibility({
+    trainerId: trainers[0]?.id || '',
+    engagementStage: 'browsing'
+  });
   if (trainers.length === 0) {
     return (
       <Card>
@@ -78,7 +85,10 @@ export const CompareView = ({ trainers, onRemoveTrainer, onSelectTrainer }: Comp
       case 'price':
         return (
           <div className={`font-semibold ${isBest ? 'text-success' : ''}`}>
-            {getTrainerDisplayPrice(trainer)}
+            <VisibilityAwarePricing
+              pricing={getTrainerDisplayPrice(trainer)}
+              visibilityState={getVisibility('pricing_discovery_call')}
+            />
             {isBest && <CheckCircle className="h-4 w-4 text-success inline ml-1" />}
           </div>
         );
@@ -170,9 +180,11 @@ export const CompareView = ({ trainers, onRemoveTrainer, onSelectTrainer }: Comp
             <CardContent className="pt-0">
               <div className="space-y-3">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">
-                    {getTrainerDisplayPrice(trainer)}
-                  </div>
+                  <VisibilityAwarePricing
+                    pricing={getTrainerDisplayPrice(trainer)}
+                    visibilityState={getVisibility('pricing_discovery_call')}
+                    className="text-2xl font-bold text-primary"
+                  />
                   <div className="text-xs text-muted-foreground">package pricing</div>
                 </div>
                 
@@ -252,9 +264,12 @@ export const CompareView = ({ trainers, onRemoveTrainer, onSelectTrainer }: Comp
                 ).name}
               </p>
               <p className="text-sm text-muted-foreground">
-                {getTrainerDisplayPrice(trainers.reduce((prev, current) => 
-                  prev.hourlyRate < current.hourlyRate ? prev : current
-                ))}
+                <VisibilityAwarePricing
+                  pricing={getTrainerDisplayPrice(trainers.reduce((prev, current) => 
+                    prev.hourlyRate < current.hourlyRate ? prev : current
+                  ))}
+                  visibilityState={getVisibility('pricing_discovery_call')}
+                />
               </p>
             </div>
             

@@ -8,6 +8,8 @@ import { Trainer } from '@/types/trainer';
 import { MatchBadge } from '@/components/MatchBadge';
 import { useSavedTrainers } from '@/hooks/useSavedTrainers';
 import { getTrainerDisplayPrice } from '@/lib/priceUtils';
+import { useContentVisibility } from '@/hooks/useContentVisibility';
+import { VisibilityAwarePricing } from '@/components/ui/VisibilityAwarePricing';
 
 interface SwipeableCardProps {
   trainer: Trainer;
@@ -25,6 +27,11 @@ export const SwipeableCard = ({ trainer, onSwipe, matchScore = 0, matchReasons =
   
   const { isTrainerSaved, saveTrainer, unsaveTrainer } = useSavedTrainers();
   const isSaved = isTrainerSaved(trainer.id);
+  
+  const { getVisibility } = useContentVisibility({
+    trainerId: trainer.id,
+    engagementStage: 'browsing'
+  });
 
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -177,7 +184,12 @@ export const SwipeableCard = ({ trainer, onSwipe, matchScore = 0, matchReasons =
           <div className="flex justify-between items-start">
             <div>
               <p className="text-muted-foreground text-sm">{trainer.experience} experience</p>
-              <div className="text-2xl font-bold text-primary">{getTrainerDisplayPrice(trainer)}</div>
+              <div className="text-2xl font-bold text-primary">
+                <VisibilityAwarePricing
+                  pricing={getTrainerDisplayPrice(trainer)}
+                  visibilityState={getVisibility('pricing_discovery_call')}
+                />
+              </div>
             </div>
             <div className="text-right">
               <p className="text-sm text-muted-foreground">Availability</p>

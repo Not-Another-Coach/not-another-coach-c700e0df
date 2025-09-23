@@ -5,6 +5,8 @@ import { PositionedAvatar } from '@/components/ui/positioned-avatar';
 import { Star, MapPin, Clock, Award, Users, MessageCircle, Calendar, User } from 'lucide-react';
 import { AnyTrainer } from '@/types/trainer';
 import { getTrainerDisplayPrice } from '@/lib/priceUtils';
+import { useContentVisibility } from '@/hooks/useContentVisibility';
+import { VisibilityAwarePricing } from '@/components/ui/VisibilityAwarePricing';
 
 interface OverviewViewProps {
   trainer: AnyTrainer;
@@ -13,6 +15,10 @@ interface OverviewViewProps {
 }
 
 export const OverviewView = ({ trainer, onMessage, onBookDiscovery }: OverviewViewProps) => {
+  const { getVisibility } = useContentVisibility({
+    trainerId: trainer.id,
+    engagementStage: 'browsing' // Default stage for overview
+  });
   // Generate initials from trainer name
   const getInitials = (name: string) => {
     return name
@@ -78,9 +84,13 @@ export const OverviewView = ({ trainer, onMessage, onBookDiscovery }: OverviewVi
             </div>
             
             <div className="text-center sm:text-right min-w-0 w-full sm:w-auto">
-              <div className="text-xl sm:text-2xl font-bold text-primary mb-1 break-words">
-                {getTrainerDisplayPrice(trainer)}
-              </div>
+              <VisibilityAwarePricing 
+                pricing={getTrainerDisplayPrice(trainer)}
+                visibilityState={getVisibility('pricing_discovery_call')}
+                className="text-xl sm:text-2xl font-bold text-primary mb-1 break-words"
+                showEngagementPrompt={true}
+                engagementPromptText="Pricing available after shortlisting"
+              />
               <div className="text-xs sm:text-sm text-muted-foreground">package pricing</div>
             </div>
           </div>

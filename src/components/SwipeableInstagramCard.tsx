@@ -14,6 +14,7 @@ import { useEffect } from 'react';
 import { useContentVisibility } from '@/hooks/useContentVisibility';
 import { useEngagementStage } from '@/hooks/useEngagementStage';
 import { VisibilityAwareGallery } from '@/components/ui/VisibilityAwareGallery';
+import { VisibilityAwarePricing } from '@/components/ui/VisibilityAwarePricing';
 import { getRecommendedGridSizeForCount } from '@/hooks/useTrainerImages';
 
 interface SwipeableInstagramCardProps {
@@ -324,9 +325,11 @@ export const SwipeableInstagramCard = ({
                 
                 {/* Price */}
                 <div className="text-right">
-                  <div className="text-2xl font-bold text-white drop-shadow-lg">
-                    {getTrainerDisplayPrice(trainer)}
-                  </div>
+                  <VisibilityAwarePricing
+                    pricing={getTrainerDisplayPrice(trainer)}
+                    visibilityState={getVisibility('pricing_discovery_call')}
+                    className="text-2xl font-bold text-white drop-shadow-lg"
+                  />
                   <div className="text-sm text-white/80">{trainer.experience}</div>
                 </div>
               </div>

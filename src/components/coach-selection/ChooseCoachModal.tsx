@@ -7,6 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Heart, MessageCircle, DollarSign, Clock, CheckCircle } from 'lucide-react';
 import { useCoachSelection } from '@/hooks/useCoachSelection';
 import { useUserTypeChecks } from '@/hooks/useUserType';
+import { useContentVisibility } from '@/hooks/useContentVisibility';
+import { VisibilityAwarePricing } from '@/components/ui/VisibilityAwarePricing';
 import { toast } from 'sonner';
 
 interface Package {
@@ -44,6 +46,11 @@ export const ChooseCoachModal = ({
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
   const [clientMessage, setClientMessage] = useState('');
   const [step, setStep] = useState<'select' | 'confirm'>('select');
+  
+  const { getVisibility } = useContentVisibility({
+    trainerId: trainer.id,
+    engagementStage: 'browsing'
+  });
 
   const trainerName = trainer.name || `${trainer.firstName || ''} ${trainer.lastName || ''}`.trim();
   const packages = trainer.package_options || [];
@@ -137,7 +144,10 @@ export const ChooseCoachModal = ({
                           <div className="text-right">
                             <div className="flex items-center gap-1 text-lg font-bold">
                               <DollarSign className="w-4 h-4" />
-                              {pkg.price}
+                              <VisibilityAwarePricing
+                                pricing={pkg.price.toString()}
+                                visibilityState={getVisibility('pricing_discovery_call')}
+                              />
                             </div>
                             <div className="flex items-center gap-1 text-sm text-muted-foreground">
                               <Clock className="w-3 h-3" />
@@ -191,7 +201,11 @@ export const ChooseCoachModal = ({
                 </CardHeader>
                 <CardContent>
                   <div className="flex justify-between items-center mb-3">
-                    <span className="text-lg font-bold">${selectedPackage.price}</span>
+                    <VisibilityAwarePricing
+                      pricing={`$${selectedPackage.price}`}
+                      visibilityState={getVisibility('pricing_discovery_call')}
+                      className="text-lg font-bold"
+                    />
                     <span className="text-sm text-muted-foreground">{selectedPackage.duration}</span>
                   </div>
                   {selectedPackage.description && (

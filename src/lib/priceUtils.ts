@@ -73,6 +73,21 @@ export function getTrainerDisplayPrice(trainer: any): string {
 }
 
 /**
+ * Gets the display price based on visibility state
+ * @param trainer - Trainer object with package_options
+ * @param visibilityState - Current visibility state for pricing
+ * @returns Formatted price string or "TBC" for restricted access
+ */
+export function getVisibilityAwarePrice(trainer: any, visibilityState: 'visible' | 'blurred' | 'hidden'): string {
+  if (visibilityState === 'blurred' || visibilityState === 'hidden') {
+    return 'TBC';
+  }
+  
+  const priceRange = calculatePriceRange(trainer.package_options);
+  return formatPriceRange(priceRange);
+}
+
+/**
  * Checks if a promotional package is currently active
  * @param pkg - Package with promotional dates
  * @returns Boolean indicating if promotion is active
