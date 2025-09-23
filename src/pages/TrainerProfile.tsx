@@ -115,6 +115,18 @@ export const TrainerProfile = () => {
   };
 
   const renderCurrentView = () => {
+    // Prevent anonymous users from accessing content view
+    if (!user && currentView === 'content') {
+      setCurrentView('overview');
+      return (
+        <OverviewView 
+          trainer={trainer} 
+          onMessage={!isOwnProfile ? handleMessage : undefined}
+          onBookDiscovery={!isOwnProfile && trainer.offers_discovery_call ? handleBookDiscovery : undefined}
+        />
+      );
+    }
+
     switch (currentView) {
       case 'overview':
         return (
@@ -129,7 +141,14 @@ export const TrainerProfile = () => {
       case 'story':
         return <StoryView trainer={trainer} />;
       case 'content':
-        return <ContentView trainer={trainer} />;
+        // Only show content view to authenticated users
+        return user ? <ContentView trainer={trainer} /> : (
+          <OverviewView 
+            trainer={trainer} 
+            onMessage={!isOwnProfile ? handleMessage : undefined}
+            onBookDiscovery={!isOwnProfile && trainer.offers_discovery_call ? handleBookDiscovery : undefined}
+          />
+        );
       case 'compare':
         // For individual profile, show message about comparison
         return (
@@ -249,23 +268,21 @@ export const TrainerProfile = () => {
           </div>
         )}
 
-        {/* Profile View Selector - Only for authenticated users */}
-        {user && (
-          <div className="mb-6">
-            <ProfileViewSelector
-              currentView={currentView}
-              onViewChange={setCurrentView}
-              isMobile={isMobile}
-              hideCardsView={isClient()}
-              hideCompareView={true}
-              hideDescriptions={true}
-              hideViewingBadge={true}
-            />
-          </div>
-        )}
+        {/* Profile View Selector - Available for all users */}
+        <div className="mb-6">
+          <ProfileViewSelector
+            currentView={currentView}
+            onViewChange={setCurrentView}
+            isMobile={isMobile}
+            hideCardsView={true} // Always hide cards view for non-owners
+            hideCompareView={true}
+            hideDescriptions={true}
+            hideViewingBadge={true}
+          />
+        </div>
 
-        {/* Dynamic Content Based on View - Only for authenticated users */}
-        {user && renderCurrentView()}
+        {/* Dynamic Content Based on View - Available for all users */}
+        {renderCurrentView()}
 
         {/* Messaging Popup */}
         <MessagingPopup 
