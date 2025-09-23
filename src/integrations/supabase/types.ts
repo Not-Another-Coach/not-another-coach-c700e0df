@@ -7182,6 +7182,7 @@ export type Database = {
         | "discovery_process"
         | "committed"
         | "rejected"
+        | "guest"
       goal_status:
         | "not_started"
         | "in_progress"
@@ -7445,6 +7446,7 @@ export const Constants = {
         "discovery_process",
         "committed",
         "rejected",
+        "guest",
       ],
       goal_status: [
         "not_started",
