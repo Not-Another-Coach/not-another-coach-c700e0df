@@ -3,6 +3,12 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Trophy, TrendingUp, Target, Users, Calendar, Zap } from 'lucide-react';
 import { AnyTrainer } from '@/types/trainer';
+import { useContentVisibility } from '@/hooks/useContentVisibility';
+import { useEngagementStage } from '@/hooks/useEngagementStage';
+import { VisibilityAwareImage } from '@/components/ui/VisibilityAwareImage';
+import { VisibilityAwareTestimonialSection } from '@/components/ui/VisibilityAwareTestimonialSection';
+import { VisibilityAwareTestimonialContent } from '@/components/ui/VisibilityAwareTestimonialContent';
+import { VisibilityAwareTestimonialStats } from '@/components/ui/VisibilityAwareTestimonialStats';
 
 interface Testimonial {
   id: string;
@@ -77,6 +83,16 @@ const processTestimonialsData = (testimonials: Testimonial[] = []) => {
 export const ResultsView = ({ trainer }: ResultsViewProps) => {
   const testimonials = (trainer as any).testimonials || [];
   const resultsData = processTestimonialsData(testimonials);
+  
+  // Get visibility state for testimonial images/content
+  const { stage: engagementStage, isGuest } = useEngagementStage((trainer as any).id || '');
+  const { getVisibility } = useContentVisibility({
+    trainerId: (trainer as any).id || '',
+    engagementStage,
+    isGuest
+  });
+  
+  const testimonialVisibility = getVisibility('testimonial_images');
 
   if (testimonials.length === 0) {
     return (
@@ -106,56 +122,75 @@ export const ResultsView = ({ trainer }: ResultsViewProps) => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-6">
-              {resultsData.beforeAfterImages.map((transformation) => (
-                <div key={transformation.id} className="border rounded-lg p-4 bg-muted/30">
-                  <div className="grid md:grid-cols-2 gap-4 mb-4">
-                    <div className="space-y-2">
-                      <h4 className="font-medium">Before</h4>
-                      <div className="relative">
-                        <img
-                          src={transformation.before}
-                          alt="Before transformation"
-                          className="w-full h-48 object-cover rounded-lg bg-muted"
-                        />
-                        <Badge className="absolute top-2 left-2 bg-red-500">Before</Badge>
+            <VisibilityAwareTestimonialSection
+              visibilityState={testimonialVisibility}
+              title="Client Transformations"
+              itemCount={resultsData.beforeAfterImages.length}
+              lockMessage="Connect with trainer to see transformation photos"
+            >
+              <div className="grid gap-6">
+                {resultsData.beforeAfterImages.map((transformation) => (
+                  <div key={transformation.id} className="border rounded-lg p-4 bg-muted/30">
+                    <div className="grid md:grid-cols-2 gap-4 mb-4">
+                      <div className="space-y-2">
+                        <h4 className="font-medium">Before</h4>
+                        <div className="relative">
+                          <VisibilityAwareImage
+                            src={transformation.before}
+                            alt="Before transformation"
+                            visibilityState={testimonialVisibility}
+                            className="w-full h-48 object-cover rounded-lg"
+                            lockMessage="Engage to see before photo"
+                          />
+                          {testimonialVisibility === 'visible' && (
+                            <Badge className="absolute top-2 left-2 bg-red-500">Before</Badge>
+                          )}
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <h4 className="font-medium">After</h4>
+                        <div className="relative">
+                          <VisibilityAwareImage
+                            src={transformation.after}
+                            alt="After transformation"
+                            visibilityState={testimonialVisibility}
+                            className="w-full h-48 object-cover rounded-lg"
+                            lockMessage="Engage to see after photo"
+                          />
+                          {testimonialVisibility === 'visible' && (
+                            <Badge className="absolute top-2 left-2 bg-success">After</Badge>
+                          )}
+                        </div>
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <h4 className="font-medium">After</h4>
-                      <div className="relative">
-                        <img
-                          src={transformation.after}
-                          alt="After transformation"
-                          className="w-full h-48 object-cover rounded-lg bg-muted"
-                        />
-                        <Badge className="absolute top-2 left-2 bg-success">After</Badge>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between text-sm mb-2">
-                    <div className="flex items-center gap-2">
-                      <Users className="h-4 w-4" />
-                      <span className="font-medium">{transformation.clientName}</span>
-                    </div>
-                    {transformation.outcomeTags && transformation.outcomeTags.length > 0 && (
-                      <div className="flex flex-wrap gap-1">
-                        {transformation.outcomeTags.map(tag => (
-                          <Badge key={tag} variant="secondary" className="text-xs">
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
+                    
+                    {testimonialVisibility === 'visible' && (
+                      <>
+                        <div className="flex items-center justify-between text-sm mb-2">
+                          <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4" />
+                            <span className="font-medium">{transformation.clientName}</span>
+                          </div>
+                          {transformation.outcomeTags && transformation.outcomeTags.length > 0 && (
+                            <div className="flex flex-wrap gap-1">
+                              {transformation.outcomeTags.map(tag => (
+                                <Badge key={tag} variant="secondary" className="text-xs">
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="text-sm text-muted-foreground">
+                          <strong>Achievement:</strong> {transformation.achievement}
+                        </div>
+                      </>
                     )}
                   </div>
-                  
-                  <div className="text-sm text-muted-foreground">
-                    <strong>Achievement:</strong> {transformation.achievement}
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            </VisibilityAwareTestimonialSection>
           </CardContent>
         </Card>
       )}
@@ -170,23 +205,12 @@ export const ResultsView = ({ trainer }: ResultsViewProps) => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {Object.entries(resultsData.specializedOutcomes).map(([outcome, count]) => (
-                <div key={outcome} className="p-4 border rounded-lg">
-                  <h4 className="font-semibold mb-2">{outcome}</h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span>Clients achieved:</span>
-                      <span className="font-medium">{count}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Success rate:</span>
-                      <span className="font-medium">100%</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <VisibilityAwareTestimonialStats
+              stats={resultsData.specializedOutcomes}
+              visibilityState={testimonialVisibility}
+              title="Specialized Outcomes"
+              lockMessage="Connect with trainer to see detailed outcome statistics"
+            />
           </CardContent>
         </Card>
       )}
@@ -200,28 +224,24 @@ export const ResultsView = ({ trainer }: ResultsViewProps) => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {testimonials.map((testimonial: Testimonial) => (
-              <div key={testimonial.id} className="border-l-4 border-primary pl-4 py-2">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="font-medium text-sm">{testimonial.clientName}</span>
-                  <div className="flex flex-wrap gap-1">
-                    {(testimonial.outcomeTags || (testimonial.outcomeTag ? [testimonial.outcomeTag] : [])).map((tag) => (
-                      <Badge key={tag} variant="outline" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  <strong>Achievement:</strong> {testimonial.achievement}
-                </p>
-                <blockquote className="text-sm italic text-muted-foreground mt-1">
-                  "{testimonial.clientQuote}"
-                </blockquote>
-              </div>
-            ))}
-          </div>
+          <VisibilityAwareTestimonialSection
+            visibilityState={testimonialVisibility}
+            title="Client Achievements"
+            itemCount={testimonials.length}
+            lockMessage="Connect with trainer to see detailed client testimonials"
+          >
+            <div className="space-y-4">
+              {testimonials.map((testimonial: Testimonial) => (
+                <VisibilityAwareTestimonialContent
+                  key={testimonial.id}
+                  testimonial={testimonial}
+                  visibilityState={testimonialVisibility}
+                  className="border-l-4 border-primary"
+                  lockMessage="Engage with trainer to see testimonial details"
+                />
+              ))}
+            </div>
+          </VisibilityAwareTestimonialSection>
         </CardContent>
       </Card>
     </div>
