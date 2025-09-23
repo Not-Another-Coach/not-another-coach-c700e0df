@@ -143,6 +143,68 @@ export function SpecialtyManagement() {
     }
   };
 
+  const handleUpdateSpecialty = async () => {
+    if (!editingSpecialty) return;
+    
+    try {
+      const keywordsArray = specialtyForm.matching_keywords
+        ? specialtyForm.matching_keywords.split(',').map(k => k.trim()).filter(k => k)
+        : [];
+
+      await updateSpecialty(editingSpecialty.id, {
+        name: specialtyForm.name,
+        category_id: specialtyForm.category_id || null,
+        description: specialtyForm.description || null,
+        requires_qualification: specialtyForm.requires_qualification,
+        matching_keywords: keywordsArray,
+        highlight_type: specialtyForm.highlight_type
+      });
+      
+      setEditingSpecialty(null);
+      setShowSpecialtyDialog(false);
+      setSpecialtyForm({
+        name: '',
+        category_id: '',
+        description: '',
+        requires_qualification: false,
+        matching_keywords: '',
+        highlight_type: null
+      });
+      refetchSpecialties();
+    } catch (error) {
+      console.error('Error updating specialty:', error);
+    }
+  };
+
+  const handleUpdateTrainingType = async () => {
+    if (!editingTrainingType) return;
+    
+    try {
+      await updateTrainingType(editingTrainingType.id, {
+        name: trainingTypeForm.name,
+        description: trainingTypeForm.description || null,
+        delivery_formats: trainingTypeForm.delivery_formats,
+        min_participants: trainingTypeForm.min_participants,
+        max_participants: trainingTypeForm.max_participants ? parseInt(trainingTypeForm.max_participants) : null,
+        highlight_type: trainingTypeForm.highlight_type
+      });
+
+      setEditingTrainingType(null);
+      setShowTrainingTypeDialog(false);
+      setTrainingTypeForm({
+        name: '',
+        description: '',
+        delivery_formats: ['in-person', 'online'],
+        min_participants: 1,
+        max_participants: '',
+        highlight_type: null
+      });
+      refetchTrainingTypes();
+    } catch (error) {
+      console.error('Error updating training type:', error);
+    }
+  };
+
   const handleCreateTrainingType = async () => {
     try {
       await createTrainingType({
@@ -371,16 +433,31 @@ export function SpecialtyManagement() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Specialties</CardTitle>
-              <Dialog open={showSpecialtyDialog} onOpenChange={setShowSpecialtyDialog}>
+              <Dialog open={showSpecialtyDialog} onOpenChange={(open) => {
+                setShowSpecialtyDialog(open);
+                if (!open) {
+                  setEditingSpecialty(null);
+                  setSpecialtyForm({
+                    name: '',
+                    category_id: '',
+                    description: '',
+                    requires_qualification: false,
+                    matching_keywords: '',
+                    highlight_type: null
+                  });
+                }
+              }}>
                 <DialogTrigger asChild>
-                  <Button>
+                  <Button onClick={() => setEditingSpecialty(null)}>
                     <Plus className="w-4 h-4 mr-2" />
                     Add Specialty
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Create Specialty</DialogTitle>
+                    <DialogTitle>
+                      {editingSpecialty ? 'Edit Specialty' : 'Create Specialty'}
+                    </DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4">
                     <div>
@@ -426,17 +503,17 @@ export function SpecialtyManagement() {
                     <div>
                       <Label htmlFor="highlight">Highlight Type</Label>
                       <Select 
-                        value={specialtyForm.highlight_type || ''} 
+                        value={specialtyForm.highlight_type || 'none'} 
                         onValueChange={(value) => setSpecialtyForm({
                           ...specialtyForm, 
-                          highlight_type: value === '' ? null : value as 'popular' | 'specialist'
+                          highlight_type: value === 'none' ? null : value as 'popular' | 'specialist'
                         })}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="No highlight" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">No highlight</SelectItem>
+                          <SelectItem value="none">No highlight</SelectItem>
                           <SelectItem value="popular">
                             <div className="flex items-center gap-2">
                               <Crown className="w-4 h-4 text-yellow-600" />
@@ -456,8 +533,8 @@ export function SpecialtyManagement() {
                       <Button variant="outline" onClick={() => setShowSpecialtyDialog(false)}>
                         Cancel
                       </Button>
-                      <Button onClick={handleCreateSpecialty}>
-                        Create
+                      <Button onClick={editingSpecialty ? handleUpdateSpecialty : handleCreateSpecialty}>
+                        {editingSpecialty ? 'Update' : 'Create'}
                       </Button>
                     </div>
                   </div>
@@ -504,13 +581,33 @@ export function SpecialtyManagement() {
                                     </div>
                                   )}
                                 </div>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => setDeleteConfirmId(specialty.id)}
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
+                                <div className="flex gap-1">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                      setEditingSpecialty(specialty);
+                                      setSpecialtyForm({
+                                        name: specialty.name,
+                                        category_id: specialty.category_id || '',
+                                        description: specialty.description || '',
+                                        requires_qualification: specialty.requires_qualification,
+                                        matching_keywords: specialty.matching_keywords?.join(', ') || '',
+                                        highlight_type: specialty.highlight_type
+                                      });
+                                      setShowSpecialtyDialog(true);
+                                    }}
+                                  >
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => setDeleteConfirmId(specialty.id)}
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </div>
                               </div>
                             </Card>
                           ))}
@@ -528,16 +625,31 @@ export function SpecialtyManagement() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Training Types</CardTitle>
-              <Dialog open={showTrainingTypeDialog} onOpenChange={setShowTrainingTypeDialog}>
+              <Dialog open={showTrainingTypeDialog} onOpenChange={(open) => {
+                setShowTrainingTypeDialog(open);
+                if (!open) {
+                  setEditingTrainingType(null);
+                  setTrainingTypeForm({
+                    name: '',
+                    description: '',
+                    delivery_formats: ['in-person', 'online'],
+                    min_participants: 1,
+                    max_participants: '',
+                    highlight_type: null
+                  });
+                }
+              }}>
                 <DialogTrigger asChild>
-                  <Button>
+                  <Button onClick={() => setEditingTrainingType(null)}>
                     <Plus className="w-4 h-4 mr-2" />
                     Add Training Type
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Create Training Type</DialogTitle>
+                    <DialogTitle>
+                      {editingTrainingType ? 'Edit Training Type' : 'Create Training Type'}
+                    </DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4">
                     <div>
@@ -607,17 +719,17 @@ export function SpecialtyManagement() {
                     <div>
                       <Label htmlFor="highlight">Highlight Type</Label>
                       <Select 
-                        value={trainingTypeForm.highlight_type || ''} 
-                        onValueChange={(value) => setTrainingTypeForm({
-                          ...trainingTypeForm, 
-                          highlight_type: value === '' ? null : value as 'popular' | 'specialist'
-                        })}
+                         value={trainingTypeForm.highlight_type || 'none'} 
+                         onValueChange={(value) => setTrainingTypeForm({
+                           ...trainingTypeForm, 
+                           highlight_type: value === 'none' ? null : value as 'popular' | 'specialist'
+                         })}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="No highlight" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">No highlight</SelectItem>
+                          <SelectItem value="none">No highlight</SelectItem>
                           <SelectItem value="popular">
                             <div className="flex items-center gap-2">
                               <Crown className="w-4 h-4 text-yellow-600" />
@@ -637,8 +749,8 @@ export function SpecialtyManagement() {
                       <Button variant="outline" onClick={() => setShowTrainingTypeDialog(false)}>
                         Cancel
                       </Button>
-                      <Button onClick={handleCreateTrainingType}>
-                        Create
+                      <Button onClick={editingTrainingType ? handleUpdateTrainingType : handleCreateTrainingType}>
+                        {editingTrainingType ? 'Update' : 'Create'}
                       </Button>
                     </div>
                   </div>
@@ -672,13 +784,33 @@ export function SpecialtyManagement() {
                             Participants: {type.min_participants}{type.max_participants ? `-${type.max_participants}` : '+'}
                           </p>
                         </div>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setDeleteConfirmId(type.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                        <div className="flex gap-1">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setEditingTrainingType(type);
+                              setTrainingTypeForm({
+                                name: type.name,
+                                description: type.description || '',
+                                delivery_formats: type.delivery_formats,
+                                min_participants: type.min_participants || 1,
+                                max_participants: type.max_participants?.toString() || '',
+                                highlight_type: type.highlight_type
+                              });
+                              setShowTrainingTypeDialog(true);
+                            }}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setDeleteConfirmId(type.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
                     </Card>
                   ))}
