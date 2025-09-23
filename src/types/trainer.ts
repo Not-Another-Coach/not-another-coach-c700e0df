@@ -117,7 +117,7 @@ export interface ConsolidatedTrainer {
 export interface UnifiedTrainer extends ConsolidatedTrainer {}
 
 // Layout modes for trainer cards
-export type TrainerCardLayout = 'full' | 'carousel' | 'grid' | 'compact';
+export type TrainerCardLayout = 'full' | 'carousel' | 'grid';
 
 // View modes for trainer card content - updated to support dynamic transformations
 export type TrainerCardViewMode = 'instagram' | 'features' | 'transformations' | (string & {});
@@ -196,15 +196,7 @@ export const TRAINER_CARD_CONFIGS: Record<string, TrainerCardConfig> = {
     hideViewControls: false,
     availableViews: ['instagram', 'features']
   },
-  dashboardCarousel: {
-    layout: 'carousel',
-    allowViewSwitching: true,
-    showEngagementBadge: true,
-    compactActions: true,
-    hideViewControls: false,
-    availableViews: ['instagram', 'features']
-  },
-  explore: {
+  fullLayout: {
     layout: 'full',
     allowViewSwitching: true,
     showEngagementBadge: false,
@@ -234,19 +226,5 @@ export const TRAINER_CARD_CONFIGS: Record<string, TrainerCardConfig> = {
     compactActions: true,
     hideViewControls: true,
     availableViews: ['instagram']
-  },
-  saved: {
-    layout: 'full',
-    allowViewSwitching: true,
-    showEngagementBadge: false,
-    compactActions: false,
-    hideViewControls: false
-  },
-  profile: {
-    layout: 'full',
-    allowViewSwitching: true,
-    showEngagementBadge: false,
-    compactActions: false,
-    hideViewControls: false
   }
 };

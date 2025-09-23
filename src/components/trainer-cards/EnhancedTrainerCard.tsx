@@ -785,8 +785,7 @@ export const EnhancedTrainerCard = memo(({
       className={cn(
         "relative select-none",
         finalLayout === 'carousel' && "min-w-[260px] max-w-[260px]",
-        finalLayout === 'grid' && "w-full",
-        finalLayout === 'compact' && "w-full max-w-sm"
+        finalLayout === 'grid' && "w-full"
       )}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
