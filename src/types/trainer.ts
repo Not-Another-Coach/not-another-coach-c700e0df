@@ -225,6 +225,6 @@ export const TRAINER_CARD_CONFIGS: Record<string, TrainerCardConfig> = {
     showEngagementBadge: false,
     compactActions: true,
     hideViewControls: false,
-    availableViews: ['instagram', 'features', 'transformations']
+    availableViews: ['instagram', 'features']
   }
 };
