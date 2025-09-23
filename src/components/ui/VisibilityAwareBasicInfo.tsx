@@ -1,7 +1,8 @@
 import React from 'react';
 import { Lock, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { VisibilityState } from '@/hooks/useVisibilityMatrix';
+import { VisibilityState, EngagementStage } from '@/hooks/useVisibilityMatrix';
+import { getDisplayNameByEngagement, getDisplayNameByVisibility, TrainerNameData } from '@/utils/nameVisibility';
 
 interface VisibilityAwareBasicInfoProps {
   name?: string;
@@ -11,6 +12,9 @@ interface VisibilityAwareBasicInfoProps {
   className?: string;
   showLockIcon?: boolean;
   variant?: 'default' | 'overlay'; // overlay for white text on dark backgrounds
+  // New props for progressive name visibility
+  trainer?: TrainerNameData;
+  engagementStage?: EngagementStage;
 }
 
 export const VisibilityAwareBasicInfo = ({
@@ -20,12 +24,21 @@ export const VisibilityAwareBasicInfo = ({
   visibilityState,
   className,
   showLockIcon = true,
-  variant = 'default'
+  variant = 'default',
+  trainer,
+  engagementStage
 }: VisibilityAwareBasicInfoProps) => {
   const isOverlay = variant === 'overlay';
   const textColor = isOverlay ? 'text-white' : 'text-foreground';
   const mutedTextColor = isOverlay ? 'text-white/90' : 'text-muted-foreground';
   const lockBgColor = isOverlay ? 'bg-black/20' : 'bg-background/80';
+  
+  // Determine display name using progressive visibility
+  const displayName = trainer && engagementStage 
+    ? getDisplayNameByEngagement(trainer, engagementStage, visibilityState)
+    : trainer 
+    ? getDisplayNameByVisibility(trainer, visibilityState)
+    : name; // Fallback to original name prop
 
   if (visibilityState === 'hidden') {
     return (
@@ -40,7 +53,7 @@ export const VisibilityAwareBasicInfo = ({
     return (
       <div className={cn("relative", className)}>
         <div className="blur-sm select-none">
-          {name && <h3 className={cn("font-semibold text-lg", textColor)}>{name}</h3>}
+          {displayName && <h3 className={cn("font-semibold text-lg", textColor)}>{displayName}</h3>}
           {tagline && <p className={cn("text-sm line-clamp-2 mb-2", mutedTextColor)}>{tagline}</p>}
           {location && (
             <div className={cn("flex items-center gap-1 text-sm", mutedTextColor)}>
@@ -60,7 +73,7 @@ export const VisibilityAwareBasicInfo = ({
 
   return (
     <div className={className}>
-      {name && <h3 className={cn("font-semibold text-lg", textColor)}>{name}</h3>}
+      {displayName && <h3 className={cn("font-semibold text-lg", textColor)}>{displayName}</h3>}
       {tagline && <p className={cn("text-sm line-clamp-2 mb-2", mutedTextColor)}>{tagline}</p>}
       {location && (
         <div className={cn("flex items-center gap-1 text-sm", mutedTextColor)}>

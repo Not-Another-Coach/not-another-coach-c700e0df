@@ -19,6 +19,8 @@ import { useContentVisibility } from '@/hooks/useContentVisibility';
 import { useEngagementStage } from '@/hooks/useEngagementStage';
 import { AnyTrainer, TrainerCardLayout, UnifiedTrainerCardProps, TRAINER_CARD_CONFIGS, TrainerCardViewMode } from '@/types/trainer';
 import { cn } from '@/lib/utils';
+import { VisibilityAwareName } from '@/components/ui/VisibilityAwareName';
+import { useProgressiveNameVisibility } from '@/hooks/useProgressiveNameVisibility';
 
 // Extended interface that merges UnifiedTrainerCardProps with specific props
 interface EnhancedTrainerCardProps extends Omit<UnifiedTrainerCardProps, 'trainer'> {
@@ -96,6 +98,19 @@ export const EnhancedTrainerCard = memo(({
     trainerId: trainer.id,
     engagementStage: stage || 'browsing',
     isGuest: isGuest || isAnonymousMode
+  });
+
+  // Get visibility-aware trainer name
+  const basicInfoVisibility = canViewContent.basicInformation ? 'visible' : 'hidden';
+  const { displayName } = useProgressiveNameVisibility({
+    trainer: {
+      id: trainer.id,
+      first_name: (trainer as any).firstName || (trainer as any).first_name,
+      last_name: (trainer as any).lastName || (trainer as any).last_name,
+      name: trainer.name
+    },
+    visibilityState: basicInfoVisibility,
+    engagementStage: stage || 'browsing'
   });
 
   // Apply configuration if provided
@@ -691,7 +706,7 @@ export const EnhancedTrainerCard = memo(({
 
             {/* Bottom Info Overlay */}
             <div className="absolute bottom-3 left-3 right-3 text-white">
-              <h3 className="font-semibold text-lg mb-1 truncate">{trainer.name}</h3>
+              <h3 className="font-semibold text-lg mb-1 truncate">{displayName}</h3>
               {((trainer as any).specializations || trainer.specialties) && ((trainer as any).specializations || trainer.specialties)!.length > 0 && (
                 <p className="text-sm text-white/80 truncate">
                   {((trainer as any).specializations || trainer.specialties)![0]}

@@ -8,6 +8,8 @@ import { Trainer } from '@/types/trainer';
 import { MatchBadge } from '@/components/MatchBadge';
 import { useSavedTrainers } from '@/hooks/useSavedTrainers';
 import { getTrainerDisplayPrice } from '@/lib/priceUtils';
+import { useProgressiveNameVisibility } from '@/hooks/useProgressiveNameVisibility';
+import { useEngagementStage } from '@/hooks/useEngagementStage';
 import { useContentVisibility } from '@/hooks/useContentVisibility';
 import { VisibilityAwarePricing } from '@/components/ui/VisibilityAwarePricing';
 
@@ -31,6 +33,19 @@ export const SwipeableCard = ({ trainer, onSwipe, matchScore = 0, matchReasons =
   const { getVisibility } = useContentVisibility({
     trainerId: trainer.id,
     engagementStage: 'browsing'
+  });
+
+  // Add engagement stage and name visibility for swipeable cards (anonymous browsing)
+  const { stage } = useEngagementStage(trainer.id, true); // forceGuestMode = true for swipe cards
+  const { displayName } = useProgressiveNameVisibility({
+    trainer: {
+      id: trainer.id,
+      first_name: trainer.firstName,
+      last_name: trainer.lastName,
+      name: trainer.name
+    },
+    visibilityState: 'hidden', // Swipe cards start with hidden visibility
+    engagementStage: stage || 'browsing'
   });
 
   const cardRef = useRef<HTMLDivElement>(null);
@@ -159,7 +174,7 @@ export const SwipeableCard = ({ trainer, onSwipe, matchScore = 0, matchReasons =
           {/* Basic info overlay */}
           <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
             <div className="flex items-center gap-2 mb-2">
-              <h2 className="text-3xl font-bold">{trainer.name}</h2>
+              <h2 className="text-3xl font-bold">{displayName}</h2>
               <div className="bg-green-500 rounded-full p-1">
                 <Award className="h-4 w-4 text-white" />
               </div>
