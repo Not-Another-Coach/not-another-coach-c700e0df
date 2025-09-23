@@ -26,16 +26,12 @@ export const VisibilityAwareRating = ({
 
   const starSize = sizeClasses[size];
   
-  if (visibilityState === 'hidden') {
-    return (
-      <div className={cn("flex items-center gap-1 text-muted-foreground", className)}>
-        <Lock className="h-3 w-3" />
-        <span className="text-sm">Rating hidden</span>
-      </div>
-    );
+  // For hidden or blurred states, don't render anything for anonymous users
+  if (visibilityState === 'hidden' || visibilityState === 'blurred') {
+    return null;
   }
 
-  const content = (
+  return (
     <div className={cn("flex items-center gap-1", className)}>
       <div className="flex items-center">
         {[1, 2, 3, 4, 5].map((star) => (
@@ -58,19 +54,4 @@ export const VisibilityAwareRating = ({
       )}
     </div>
   );
-
-  if (visibilityState === 'blurred') {
-    return (
-      <div className={cn("relative", className)}>
-        <div className="blur-sm select-none">{content}</div>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="bg-background/80 backdrop-blur-sm rounded px-2 py-1">
-            <Lock className="h-3 w-3 text-muted-foreground" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return content;
 };

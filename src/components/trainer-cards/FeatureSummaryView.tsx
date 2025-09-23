@@ -231,15 +231,17 @@ export const FeatureSummaryView = ({ trainer, children }: FeatureSummaryViewProp
                   className="mb-2"
                 />
                 
-                <div className="flex items-center gap-3 text-white/90 text-sm mb-2">
-                  <VisibilityAwareRating
-                    rating={trainer.rating}
-                    reviewCount={trainer.reviews}
-                    visibilityState={getVisibility('stats_ratings')}
-                    size="sm"
-                    className="text-white/90"
-                  />
-                </div>
+                {getVisibility('stats_ratings') !== 'hidden' && getVisibility('stats_ratings') !== 'blurred' && (
+                  <div className="flex items-center gap-3 text-white/90 text-sm mb-2">
+                    <VisibilityAwareRating
+                      rating={trainer.rating}
+                      reviewCount={trainer.reviews}
+                      visibilityState={getVisibility('stats_ratings')}
+                      size="sm"
+                      className="text-white/90"
+                    />
+                  </div>
+                )}
                 
                 <Badge variant="secondary" className="text-xs bg-white/20 text-white border-white/30 backdrop-blur-sm">
                   {trainer.experience}

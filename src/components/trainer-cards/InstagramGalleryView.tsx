@@ -10,6 +10,7 @@ import { useEngagementStage } from '@/hooks/useEngagementStage';
 import { VisibilityAwareGallery } from '@/components/ui/VisibilityAwareGallery';
 import { getRecommendedGridSizeForCount } from '@/hooks/useTrainerImages';
 import { VisibilityAwareBasicInfo } from "@/components/ui/VisibilityAwareBasicInfo";
+import { VisibilityAwareRating } from "@/components/ui/VisibilityAwareRating";
 
 const getGridClasses = (actualImageCount: number): string => {
   // Use actual image count to determine the best grid layout
@@ -258,12 +259,18 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
                 className="mb-2"
               />
               
-              <div className="flex items-center gap-3 text-white/90 text-sm mb-2">
-                <div className="flex items-center gap-1">
-                  <Star className="h-3 w-3 fill-current" />
-                  <span className="font-medium">{trainer.rating}</span>
+              
+              {getVisibility('stats_ratings') !== 'hidden' && getVisibility('stats_ratings') !== 'blurred' && (
+                <div className="flex items-center gap-3 text-white/90 text-sm mb-2">
+                  <VisibilityAwareRating
+                    rating={trainer.rating}
+                    reviewCount={trainer.reviews}
+                    visibilityState={getVisibility('stats_ratings')}
+                    size="sm"
+                    className="text-white/90"
+                  />
                 </div>
-              </div>
+              )}
               
               {/* Top specialties */}
               <div className="flex gap-1 flex-wrap">
