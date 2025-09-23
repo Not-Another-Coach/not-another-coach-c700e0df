@@ -8,6 +8,7 @@ import { useEngagementStage } from '@/hooks/useEngagementStage';
 import { useContentVisibility } from '@/hooks/useContentVisibility';
 import { VisibilityAwareRating } from "@/components/ui/VisibilityAwareRating";
 import { VisibilityAwareText } from "@/components/ui/VisibilityAwareText";
+import { VisibilityAwareBasicInfo } from "@/components/ui/VisibilityAwareBasicInfo";
 
 interface FeatureSummaryViewProps {
   trainer: AnyTrainer;
@@ -222,9 +223,13 @@ export const FeatureSummaryView = ({ trainer, children }: FeatureSummaryViewProp
           <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
             <div className="flex items-end justify-between">
               <div className="flex-1">
-                <h3 className="font-bold text-lg mb-1 text-white drop-shadow-sm">
-                  {trainer.name}
-                </h3>
+                <VisibilityAwareBasicInfo
+                  name={trainer.name}
+                  location={trainer.location}
+                  visibilityState={getVisibility('basic_information')}
+                  variant="overlay"
+                  className="mb-2"
+                />
                 
                 <div className="flex items-center gap-3 text-white/90 text-sm mb-2">
                   <VisibilityAwareRating
@@ -234,10 +239,6 @@ export const FeatureSummaryView = ({ trainer, children }: FeatureSummaryViewProp
                     size="sm"
                     className="text-white/90"
                   />
-                  <div className="flex items-center gap-1">
-                    <MapPin className="h-3 w-3" />
-                    <span>{trainer.location}</span>
-                  </div>
                 </div>
                 
                 <Badge variant="secondary" className="text-xs bg-white/20 text-white border-white/30 backdrop-blur-sm">

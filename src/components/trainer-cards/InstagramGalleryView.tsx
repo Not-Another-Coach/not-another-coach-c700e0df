@@ -9,6 +9,7 @@ import { useContentVisibility } from '@/hooks/useContentVisibility';
 import { useEngagementStage } from '@/hooks/useEngagementStage';
 import { VisibilityAwareGallery } from '@/components/ui/VisibilityAwareGallery';
 import { getRecommendedGridSizeForCount } from '@/hooks/useTrainerImages';
+import { VisibilityAwareBasicInfo } from "@/components/ui/VisibilityAwareBasicInfo";
 
 const getGridClasses = (actualImageCount: number): string => {
   // Use actual image count to determine the best grid layout
@@ -249,18 +250,18 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
         <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
           <div className="flex items-end justify-between">
             <div className="flex-1">
-              <h3 className="font-bold text-lg mb-1 text-white drop-shadow-sm">
-                {trainer.name}
-              </h3>
+              <VisibilityAwareBasicInfo
+                name={trainer.name}
+                location={trainer.location}
+                visibilityState={getVisibility('basic_information')}
+                variant="overlay"
+                className="mb-2"
+              />
               
               <div className="flex items-center gap-3 text-white/90 text-sm mb-2">
                 <div className="flex items-center gap-1">
                   <Star className="h-3 w-3 fill-current" />
                   <span className="font-medium">{trainer.rating}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <MapPin className="h-3 w-3" />
-                  <span>{trainer.location}</span>
                 </div>
               </div>
               
