@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Heart } from "lucide-react";
 import { useAnonymousSession } from "@/hooks/useAnonymousSession";
 import { AuthPrompt } from "./AuthPrompt";
-import { EnhancedTrainerCard } from "@/components/trainer-cards/EnhancedTrainerCard";
+import { AnonymousProfileCard } from "@/components/profile-cards/AnonymousProfileCard";
 import type { AnyTrainer } from "@/types/trainer";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
@@ -103,31 +103,27 @@ export const AnonymousBrowse = () => {
     <div className="space-y-8">
       {/* Trainers Grid */}
       {trainers.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {trainers.map((trainer) => {
           console.log('🎯 Rendering trainer card for:', trainer.first_name, trainer.last_name);
           
-          // Transform trainer data to match AnyTrainer interface
-          const enhancedTrainer: AnyTrainer = {
+          // Transform trainer data to match AnonymousProfileCard interface
+          const profileTrainer = {
             ...trainer,
             name: `${trainer.first_name} ${trainer.last_name}`,
-            firstName: trainer.first_name,
-            lastName: trainer.last_name,
-            profilePhotoUrl: trainer.profile_photo_url,
-            totalRatings: trainer.total_ratings,
-            hourlyRate: trainer.hourly_rate,
-            freeDiscoveryCall: trainer.free_discovery_call
+            bio: trainer.tagline,
+            offers_discovery_call: trainer.free_discovery_call,
+            years_experience: 5, // Default fallback
+            client_count: 50, // Default fallback
+            transformation_specialties: trainer.specializations
           };
           
           return (
-                <EnhancedTrainerCard
+                <AnonymousProfileCard
                   key={trainer.id}
-                  trainer={enhancedTrainer}
-                  config="anonymous"
-                  initialView="instagram"
-                  onViewProfile={() => handleViewProfileClick(trainer.id)}
+                  trainer={profileTrainer}
                   onMessage={() => handleMessageClick(trainer.id)}
-                  onBookDiscoveryCall={() => handleBookClick(trainer.id)}
+                  onBookDiscovery={() => handleBookClick(trainer.id)}
                 />
             );
           })}
