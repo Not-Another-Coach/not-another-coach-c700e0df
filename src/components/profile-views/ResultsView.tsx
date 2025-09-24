@@ -230,15 +230,23 @@ export const ResultsView = ({ trainer }: ResultsViewProps) => {
             lockMessage="Connect with trainer to see detailed client testimonials"
           >
             <div className="space-y-4">
-              {testimonials.map((testimonial: Testimonial) => (
-                <VisibilityAwareTestimonialContent
-                  key={testimonial.id}
-                  testimonial={testimonial}
-                  visibilityState={testimonialVisibility}
-                  className="border-l-4 border-primary"
-                  lockMessage="Engage with trainer to see testimonial details"
-                />
-              ))}
+              {testimonials.map((testimonial: Testimonial, index: number) => {
+                // For anonymous users: show 1 visible testimonial when set to visible, blur the rest
+                let itemVisibility = testimonialVisibility;
+                if (isGuest && testimonialVisibility === 'visible' && index > 0) {
+                  itemVisibility = 'blurred';
+                }
+                
+                return (
+                  <VisibilityAwareTestimonialContent
+                    key={testimonial.id}
+                    testimonial={testimonial}
+                    visibilityState={itemVisibility}
+                    className="border-l-4 border-primary"
+                    lockMessage="Engage with trainer to see testimonial details"
+                  />
+                );
+              })}
             </div>
           </VisibilityAwareTestimonialSection>
         </CardContent>
