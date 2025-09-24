@@ -71,6 +71,12 @@ export const ClientTransformationView = ({ trainer, children, testimonialIndex =
 
   const testimonialVisibility = getVisibility('testimonial_images');
 
+  // Compute effective visibility for transformations
+  const isFirstGuest = isGuest && testimonialIndex === 0;
+  const isSecondaryGuest = isGuest && testimonialIndex > 0;
+  // Force first transformation visible for guests; blur subsequent ones
+  const effectiveVisibility = isFirstGuest ? 'visible' : (isSecondaryGuest ? 'blurred' : testimonialVisibility);
+  
   // DEBUG: Log visibility states for first transformation debugging
   console.log(`🔍 ClientTransformationView Debug - Trainer: ${trainer.name}`, {
     trainerId: trainer.id,
@@ -78,9 +84,10 @@ export const ClientTransformationView = ({ trainer, children, testimonialIndex =
     stage,
     isGuest,
     testimonialVisibility,
-    visibilityLoading,
-    shouldShowFirstUnblurred: testimonialIndex === 0 && isGuest && testimonialVisibility === 'visible',
-    shouldBlurForSecondaryGuest: testimonialIndex > 0 && isGuest
+    effectiveVisibility,
+    isFirstGuest,
+    isSecondaryGuest,
+    visibilityLoading
   });
 
   // If no transformations available, show placeholder
@@ -164,10 +171,10 @@ export const ClientTransformationView = ({ trainer, children, testimonialIndex =
                 src={currentTransformation.before}
                 alt="Before transformation"
                 className="w-full h-full object-cover"
-                visibilityState={testimonialIndex > 0 && isGuest ? 'blurred' : testimonialVisibility}
-                lockMessage={testimonialIndex > 0 && isGuest ? "Sign up to see more transformations" : "Before photos unlock with engagement"}
+                visibilityState={effectiveVisibility}
+                lockMessage={isSecondaryGuest ? "Sign up to see more transformations" : "Before photos unlock with engagement"}
               >
-                {((testimonialIndex === 0 && testimonialVisibility === 'visible') || (testimonialIndex > 0 && !isGuest && testimonialVisibility === 'visible')) && (
+                {effectiveVisibility === 'visible' && (
                   <div className="absolute top-3 left-3">
                     <Badge className="text-sm bg-black/70 text-white border-0 px-3 py-1">
                       Before
@@ -183,10 +190,10 @@ export const ClientTransformationView = ({ trainer, children, testimonialIndex =
                 src={currentTransformation.after}
                 alt="After transformation"
                 className="w-full h-full object-cover"
-                visibilityState={testimonialIndex > 0 && isGuest ? 'blurred' : testimonialVisibility}
-                lockMessage={testimonialIndex > 0 && isGuest ? "Sign up to see more transformations" : "After photos unlock with engagement"}
+                visibilityState={effectiveVisibility}
+                lockMessage={isSecondaryGuest ? "Sign up to see more transformations" : "After photos unlock with engagement"}
               >
-                {((testimonialIndex === 0 && testimonialVisibility === 'visible') || (testimonialIndex > 0 && !isGuest && testimonialVisibility === 'visible')) && (
+                {effectiveVisibility === 'visible' && (
                   <div className="absolute top-3 right-3">
                     <Badge className="text-sm bg-success text-white border-0 px-3 py-1">
                       After
