@@ -64,13 +64,27 @@ class VisibilityConfigServiceClass {
       return 'visible';
     }
     
-    // For guest users, provide more restrictive defaults
+    // Default visible content types (not admin-editable, always visible)
+    if (['stats_ratings'].includes(contentType)) {
+      return 'visible';
+    }
+
+    // Content that should be visible by default for better UX
+    if (['description_bio', 'specializations', 'certifications_qualifications', 'professional_journey', 'professional_milestones'].includes(contentType)) {
+      return 'visible';
+    }
+    
+    // For guest users, provide appropriate defaults
     if (stageGroup === 'guest') {
       if (['profile_image', 'basic_information'].includes(contentType)) {
         return 'visible';
       }
       if (contentType === 'pricing_discovery_call') {
         return 'blurred';
+      }
+      // Gallery images and testimonials can be visible for guests if admin sets them
+      if (['gallery_images', 'testimonial_images'].includes(contentType)) {
+        return 'visible'; // Let admin override this in DB
       }
       return 'hidden';
     }

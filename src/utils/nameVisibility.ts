@@ -37,7 +37,20 @@ export function getDisplayNameByEngagement(
   const lastName = trainer.last_name || '';
   const fullName = trainer.name || `${firstName} ${lastName}`.trim();
 
-  // If visibility is completely hidden, show anonymous ID
+  // PRIORITY 1: Honor visibility state first
+  if (visibilityState === 'visible') {
+    // Show full name when visibility is explicitly set to visible
+    return fullName || `${firstName} ${lastName}`.trim() || generateAnonymousId(trainer.id);
+  }
+
+  if (visibilityState === 'blurred') {
+    // Show first name + last initial when blurred
+    if (firstName && lastName) {
+      return `${firstName} ${lastName.charAt(0)}.`;
+    }
+    return firstName || fullName.split(' ')[0] || generateAnonymousId(trainer.id);
+  }
+
   if (visibilityState === 'hidden') {
     return generateAnonymousId(trainer.id);
   }
@@ -47,7 +60,7 @@ export function getDisplayNameByEngagement(
     return generateAnonymousId(trainer.id);
   }
 
-  // Progressive disclosure based on engagement stage
+  // PRIORITY 2: Progressive disclosure based on engagement stage (fallback)
   switch (engagementStage) {
     case 'browsing':
       // Anonymous guests see anonymous ID

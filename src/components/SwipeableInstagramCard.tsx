@@ -15,6 +15,7 @@ import { useContentVisibility } from '@/hooks/useContentVisibility';
 import { useEngagementStage } from '@/hooks/useEngagementStage';
 import { VisibilityAwareGallery } from '@/components/ui/VisibilityAwareGallery';
 import { VisibilityAwarePricing } from '@/components/ui/VisibilityAwarePricing';
+import { VisibilityAwareName } from '@/components/ui/VisibilityAwareName';
 import { getRecommendedGridSizeForCount } from '@/hooks/useTrainerImages';
 
 interface SwipeableInstagramCardProps {
@@ -306,7 +307,12 @@ export const SwipeableInstagramCard = ({
               <div className="flex items-end justify-between">
                 <div className="flex-1">
                   <h3 className="font-bold text-2xl mb-1 text-white drop-shadow-lg">
-                    {trainer.name}
+                    <VisibilityAwareName 
+                      trainer={trainer}
+                      visibilityState={getVisibility('basic_information')}
+                      engagementStage={stage}
+                      variant="overlay"
+                    />
                   </h3>
                   
                   <div className="flex items-center gap-3 text-white/90 text-sm mb-3">
