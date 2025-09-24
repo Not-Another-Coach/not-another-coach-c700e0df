@@ -24,6 +24,7 @@ export default function Home() {
   const { user_type, loading: userTypeLoading } = useUserType();
   const { savedTrainersCount } = useAnonymousSession();
   const { shouldShowModal, setUserIntent, clearIntent, dismissModal, userIntent } = useUserIntent();
+  const { isMigrating, migrationCompleted, migrationState } = useDataMigration();
   const navigate = useNavigate();
   
   const [showQuizModal, setShowQuizModal] = useState(false);
@@ -34,6 +35,12 @@ export default function Home() {
   useEffect(() => {
     // Don't redirect if user is in the process of logging out
     if (isLoggingOut) {
+      return;
+    }
+
+    // Don't navigate during migration to prevent flashing
+    if (isMigrating || migrationState !== 'idle') {
+      console.log('⏸️ Navigation blocked during migration:', { isMigrating, migrationState });
       return;
     }
 
@@ -60,7 +67,7 @@ export default function Home() {
         navigate('/admin');
       }
     }
-  }, [user, profile, loading, profileLoading, userTypeLoading, user_type, navigate, isLoggingOut]);
+  }, [user, profile, loading, profileLoading, userTypeLoading, user_type, navigate, isLoggingOut, isMigrating, migrationState]);
 
   const handleQuizComplete = (results: any) => {
     console.log('🎯 Quiz completed in Home component:', results);
@@ -84,11 +91,13 @@ export default function Home() {
     }
   };
 
-  // Show loading only while checking auth status
-  if (loading || (user && (profileLoading || userTypeLoading))) {
+  // Show loading while checking auth status or during migration
+  if (loading || (user && (profileLoading || userTypeLoading)) || isMigrating) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
+        <div className="text-lg">
+          {isMigrating ? 'Setting up your profile...' : 'Loading...'}
+        </div>
       </div>
     );
   }

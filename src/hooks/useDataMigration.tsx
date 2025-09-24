@@ -16,10 +16,15 @@ export function useDataMigration() {
   const { profile, updateProfile } = useClientProfile();
   const { isClient } = useUserTypeChecks();
   
-  // Track migration state to prevent race conditions
-  const [isMigrating, setIsMigrating] = useState(false);
-  const [migrationCompleted, setMigrationCompleted] = useState(false);
+  // Enhanced migration state tracking
+  const [migrationState, setMigrationState] = useState<'idle' | 'preparing' | 'migrating-data' | 'updating-profile' | 'finalizing' | 'completed'>('idle');
+  const [migrationProgress, setMigrationProgress] = useState(0);
+  const [migrationMessage, setMigrationMessage] = useState('');
   const [migratedUserId, setMigratedUserId] = useState<string | null>(null);
+  
+  // Legacy compatibility
+  const isMigrating = migrationState !== 'idle' && migrationState !== 'completed';
+  const migrationCompleted = migrationState === 'completed';
 
   // Check for session ID in URL (from email confirmation)
   const checkForSessionIdInUrl = useCallback(() => {
@@ -50,25 +55,27 @@ export function useDataMigration() {
     
     if (!user) {
       console.log('❌ Migration aborted: No authenticated user');
-      setMigrationCompleted(true);
+      setMigrationState('completed');
       return;
     }
 
     // Only migrate for client users
     if (!isClient()) {
       console.log('❌ Migration skipped: User is not a client');
-      setMigrationCompleted(true);
+      setMigrationState('completed');
       return;
     }
 
     // Prevent multiple migrations for the same user
     if (migratedUserId === user.id) {
       console.log('❌ Migration skipped: Already migrated for this user');
-      setMigrationCompleted(true);
+      setMigrationState('completed');
       return;
     }
     
-    setIsMigrating(true);
+    setMigrationState('preparing');
+    setMigrationProgress(10);
+    setMigrationMessage('Preparing to sync your data...');
 
     const sessionData = getSessionData();
     const trainerSessionData = getTrainerSessionData();
@@ -100,12 +107,16 @@ export function useDataMigration() {
     
     if (!effectiveSessionData && !trainerSessionData) {
       console.log('✅ Migration complete: No anonymous data to migrate');
-      setIsMigrating(false);
-      setMigrationCompleted(true);
+      setMigrationState('completed');
+      setMigrationProgress(100);
       return;
     }
 
     try {
+      setMigrationState('migrating-data');
+      setMigrationProgress(30);
+      setMigrationMessage('Transferring your saved data...');
+      
       let migratedCount = 0;
       const messages = [];
 
@@ -133,6 +144,10 @@ export function useDataMigration() {
         // Migrate quiz results to profile if client and quiz exists
         if (effectiveSessionData.quizResults) {
           console.log('🧠 Found quiz results to migrate:', effectiveSessionData.quizResults);
+          
+          setMigrationState('updating-profile');
+          setMigrationProgress(60);
+          setMigrationMessage('Setting up your preferences...');
           
           if (!profile) {
             console.log('⏳ Client profile not yet available, checking if we should retry...');
@@ -230,6 +245,10 @@ export function useDataMigration() {
       }
 
       // Migration completed silently - no toasts to prevent spam
+      
+      setMigrationState('finalizing');
+      setMigrationProgress(90);
+      setMigrationMessage('Finalizing your setup...');
 
       // Clear anonymous sessions after successful migration
       if (effectiveSessionData) {
@@ -255,14 +274,16 @@ export function useDataMigration() {
         clearTrainerSession();
       }
       
-      setIsMigrating(false);
-      setMigrationCompleted(true);
+      setMigrationState('completed');
+      setMigrationProgress(100);
+      setMigrationMessage('Migration complete!');
       setMigratedUserId(user.id);
       console.log('✅ Migration fully completed');
 
     } catch (error) {
-      setIsMigrating(false);
-      setMigrationCompleted(true);
+      setMigrationState('completed');
+      setMigrationProgress(100);
+      setMigrationMessage('Migration completed with errors');
       console.error('Error during data migration:', error);
       // Silent migration - no error toasts to prevent spam
     }
@@ -271,8 +292,9 @@ export function useDataMigration() {
   // Reset migration state when user changes
   useEffect(() => {
     if (!user) {
-      setIsMigrating(false);
-      setMigrationCompleted(false);
+      setMigrationState('idle');
+      setMigrationProgress(0);
+      setMigrationMessage('');
       setMigratedUserId(null);
     }
   }, [user]);
@@ -296,5 +318,8 @@ export function useDataMigration() {
     migrateAnonymousData,
     isMigrating,
     migrationCompleted,
+    migrationState,
+    migrationProgress,
+    migrationMessage,
   };
 }
