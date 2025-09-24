@@ -319,9 +319,6 @@ export default function ClientDashboard() {
               </CardContent>
             </Card>
 
-            {/* Today's Highlights */}
-            <HighlightsCarousel />
-
             {/* Live Activity Feed */}
             <div id="live-activity-tracker">
               <ClientActivityFeed />
