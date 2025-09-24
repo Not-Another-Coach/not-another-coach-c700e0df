@@ -152,10 +152,10 @@ export const ClientTransformationView = ({ trainer, children, testimonialIndex =
                 src={currentTransformation.before}
                 alt="Before transformation"
                 className="w-full h-full object-cover"
-                visibilityState={testimonialVisibility}
-                lockMessage="Before photos unlock with engagement"
+                visibilityState={testimonialIndex > 0 && isGuest ? 'blurred' : testimonialVisibility}
+                lockMessage={testimonialIndex > 0 && isGuest ? "Sign up to see more transformations" : "Before photos unlock with engagement"}
               >
-                {testimonialVisibility === 'visible' && (
+                {((testimonialIndex === 0 && testimonialVisibility === 'visible') || (testimonialIndex > 0 && !isGuest && testimonialVisibility === 'visible')) && (
                   <div className="absolute top-3 left-3">
                     <Badge className="text-sm bg-black/70 text-white border-0 px-3 py-1">
                       Before
@@ -165,16 +165,16 @@ export const ClientTransformationView = ({ trainer, children, testimonialIndex =
               </VisibilityAwareImage>
             </div>
             
-            {/* After Image - Blurred for guests even when testimonials are "visible" to encourage signup */}
+            {/* After Image */}
             <div className="relative overflow-hidden">
               <VisibilityAwareImage
                 src={currentTransformation.after}
                 alt="After transformation"
                 className="w-full h-full object-cover"
-                visibilityState={testimonialVisibility === 'visible' && isGuest ? 'blurred' : testimonialVisibility}
-                lockMessage="Sign up to see full transformations"
+                visibilityState={testimonialIndex > 0 && isGuest ? 'blurred' : testimonialVisibility}
+                lockMessage={testimonialIndex > 0 && isGuest ? "Sign up to see more transformations" : "After photos unlock with engagement"}
               >
-                {(testimonialVisibility === 'visible' || (testimonialVisibility === 'blurred' && !isGuest)) && (
+                {((testimonialIndex === 0 && testimonialVisibility === 'visible') || (testimonialIndex > 0 && !isGuest && testimonialVisibility === 'visible')) && (
                   <div className="absolute top-3 right-3">
                     <Badge className="text-sm bg-success text-white border-0 px-3 py-1">
                       After
