@@ -129,25 +129,90 @@ export const OnboardingHeroCard = ({
               </div>
             </div>
 
-            {/* Progress Section */}
-            <div className="space-y-2">
+            {/* Progress Section with Visual Stepper */}
+            <div className="space-y-4">
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
                   <span className="font-medium">{trainerName}</span>
                   <span className="text-primary-200">•</span>
-                  <span className="text-primary-200">Step {currentStep} of {totalSteps}</span>
+                  <span className="text-primary-200">{templateName}</span>
                 </div>
                 <span className="font-bold">{completionPercentage}%</span>
               </div>
-              <Progress 
-                value={completionPercentage} 
-                className="h-2 bg-white/20"
-              />
-              {templateName && (
-                <p className="text-xs text-primary-200 mt-1">
-                  Following: {templateName}
-                </p>
-              )}
+              
+              {/* Visual Progress Stepper */}
+              <div className="space-y-3">
+                <Progress 
+                  value={completionPercentage} 
+                  className="h-2 bg-white/20"
+                />
+                
+                {/* Desktop horizontal stepper */}
+                <div className="hidden md:block">
+                  <div className="flex items-center justify-between">
+                    {steps.slice(0, 5).map((step, index) => {
+                      const StatusIcon = getStatusIcon(step.status);
+                      const ActivityIcon = getActivityIcon(step.activity_type);
+                      const isActive = index === currentStep - 1;
+                      
+                      return (
+                        <div key={step.id} className="flex flex-col items-center flex-1 relative">
+                          <div 
+                            className={`w-8 h-8 rounded-full border-2 flex items-center justify-center cursor-pointer transition-all ${
+                              step.status === 'completed' 
+                                ? 'bg-white/20 border-white text-white' 
+                                : isActive 
+                                  ? 'bg-white border-white text-primary-600' 
+                                  : 'bg-white/10 border-white/30 text-white/60'
+                            }`}
+                            onClick={() => onStepClick(step)}
+                          >
+                            {step.status === 'completed' ? (
+                              <CheckCircle className="h-4 w-4" />
+                            ) : (
+                              <ActivityIcon className="h-3 w-3" />
+                            )}
+                          </div>
+                          <div className="text-center mt-1 max-w-16">
+                            <p className={`text-xs font-medium truncate ${
+                              isActive ? 'text-white' : 'text-white/70'
+                            }`}>
+                              {step.activity_name}
+                            </p>
+                          </div>
+                          {index < Math.min(steps.length - 1, 4) && (
+                            <div className={`absolute top-4 left-8 w-full h-0.5 ${
+                              step.status === 'completed' ? 'bg-white/40' : 'bg-white/20'
+                            }`} />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Mobile compact stepper */}
+                <div className="md:hidden flex items-center justify-center space-x-2">
+                  {steps.slice(0, 5).map((step, index) => {
+                    const isActive = index === currentStep - 1;
+                    return (
+                      <div
+                        key={step.id}
+                        className={`w-2 h-2 rounded-full transition-all ${
+                          step.status === 'completed'
+                            ? 'bg-white'
+                            : isActive
+                              ? 'bg-white/80 scale-125'
+                              : 'bg-white/30'
+                        }`}
+                      />
+                    );
+                  })}
+                  {steps.length > 5 && (
+                    <span className="text-xs text-white/60 ml-2">+{steps.length - 5}</span>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -194,87 +259,6 @@ export const OnboardingHeroCard = ({
             </div>
           </div>
 
-          {/* Progress Stepper */}
-          <div className="mt-6 pt-6 border-t border-muted/50">
-            <div className="flex items-center gap-2 mb-4">
-              <Clock className="h-4 w-4 text-primary" />
-              <h3 className="font-medium text-foreground">Your Progress</h3>
-            </div>
-            
-            {/* Desktop horizontal stepper */}
-            <div className="hidden md:block">
-              <div className="flex items-center justify-between">
-                {steps.slice(0, 5).map((step, index) => {
-                  const StatusIcon = getStatusIcon(step.status);
-                  const ActivityIcon = getActivityIcon(step.activity_type);
-                  
-                  return (
-                    <div key={step.id} className="flex flex-col items-center flex-1">
-                      <div 
-                        className={`w-10 h-10 rounded-full border-2 flex items-center justify-center cursor-pointer transition-all ${getStepColor(step.status, index, activeIndex)}`}
-                        onClick={() => onStepClick(step)}
-                      >
-                        {step.status === 'completed' ? (
-                          <CheckCircle className="h-5 w-5 text-success-600" />
-                        ) : (
-                          <ActivityIcon className="h-4 w-4" />
-                        )}
-                      </div>
-                      <div className="text-center mt-2 max-w-16">
-                        <p className="text-xs font-medium text-foreground truncate">
-                          {step.activity_name}
-                        </p>
-                        <Badge variant="outline" className={`text-xs mt-1 ${getStatusColor(step.status)}`}>
-                          {step.status.replace('_', ' ')}
-                        </Badge>
-                      </div>
-                      {index < Math.min(steps.length - 1, 4) && (
-                        <div className="w-full h-0.5 bg-muted absolute mt-5 ml-5" />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Mobile vertical list */}
-            <div className="md:hidden space-y-2">
-              {steps.slice(0, 3).map((step, index) => {
-                const StatusIcon = getStatusIcon(step.status);
-                const ActivityIcon = getActivityIcon(step.activity_type);
-                
-                return (
-                  <div 
-                    key={step.id}
-                    className={`flex items-center gap-3 p-2 rounded-lg border cursor-pointer transition-all ${getStepColor(step.status, index, activeIndex)}`}
-                    onClick={() => onStepClick(step)}
-                  >
-                    <div className="flex-shrink-0">
-                      {step.status === 'completed' ? (
-                        <CheckCircle className="h-5 w-5 text-success-600" />
-                      ) : (
-                        <ActivityIcon className="h-4 w-4 text-primary" />
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-foreground">{step.activity_name}</p>
-                    </div>
-                    <Badge variant="outline" className={`text-xs ${getStatusColor(step.status)}`}>
-                      {step.status.replace('_', ' ')}
-                    </Badge>
-                  </div>
-                );
-              })}
-            </div>
-
-            {steps.length > 5 && (
-              <div className="text-center pt-3">
-                <p className="text-xs text-muted-foreground">
-                  +{steps.length - 5} more steps to complete
-                </p>
-              </div>
-            )}
-          </div>
 
           {/* Trainer Info */}
           <div className="mt-4 pt-4 border-t border-muted/50">
