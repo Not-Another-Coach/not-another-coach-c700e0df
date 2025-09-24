@@ -137,11 +137,6 @@ export const EnhancedTrainerCard = memo(({
 
   // Available views in order - memoized to prevent recalculation
   const getAvailableViews = useCallback((): TrainerCardViewMode[] => {
-    // Use restricted views if provided in config
-    if (appliedConfig?.availableViews) {
-      return appliedConfig.availableViews;
-    }
-    
     const baseViews: TrainerCardViewMode[] = ['instagram', 'features'];
     
     // Get testimonials for this trainer (memoized)
@@ -156,6 +151,24 @@ export const EnhancedTrainerCard = memo(({
     } else {
       // If no testimonials, still add one transformations view
       baseViews.push('transformations');
+    }
+    
+    // Use restricted views if provided in config, but replace 'transformations' with actual transformation views
+    if (appliedConfig?.availableViews) {
+      const configViews = appliedConfig.availableViews;
+      const finalViews: TrainerCardViewMode[] = [];
+      
+      configViews.forEach(view => {
+        if (view === 'transformations') {
+          // Replace 'transformations' with the actual transformation views we generated
+          const transformationViews = baseViews.filter(v => v.startsWith('transformations'));
+          finalViews.push(...transformationViews);
+        } else {
+          finalViews.push(view);
+        }
+      });
+      
+      return finalViews;
     }
     
     return baseViews;
