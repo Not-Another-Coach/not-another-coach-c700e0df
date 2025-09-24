@@ -25,7 +25,7 @@ export const VisibilityAwareImage = ({
   const getVisibilityClasses = () => {
     switch (visibilityState) {
       case 'blurred':
-        return 'blur-sm';
+        return 'blur-md';
       case 'hidden':
         return 'bg-muted';
       case 'visible':
@@ -61,7 +61,7 @@ export const VisibilityAwareImage = ({
         
         {/* Blur overlay for blurred state */}
         {visibilityState === 'blurred' && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-[1px]">
+          <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-md">
             <div className="bg-black/70 rounded-full p-2">
               <EyeOff className="h-4 w-4 text-white" />
             </div>

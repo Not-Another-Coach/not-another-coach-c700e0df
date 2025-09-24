@@ -260,16 +260,16 @@ export const ClientTransformationView = ({ trainer, children, testimonialIndex =
               <div className="flex items-start gap-2">
                 <Quote className="h-3 w-3 text-white/70 flex-shrink-0 mt-0.5" />
                 <div className="flex-1">
-                  <p className="text-sm text-white/90 italic mb-1 leading-relaxed blur-sm">
-                    "{currentTransformation.testimonial}"
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-white/70 blur-sm">
-                      - {currentTransformation.clientName}
-                    </span>
-                    <Badge className="text-xs bg-success/20 text-success-foreground border-success/30 blur-sm">
-                      {currentTransformation.achievement}
-                    </Badge>
+                   <p className="text-sm text-white/90 italic mb-1 leading-relaxed blur-md">
+                     "{currentTransformation.testimonial}"
+                   </p>
+                   <div className="flex items-center justify-between">
+                     <span className="text-xs text-white/70 blur-md">
+                       - {currentTransformation.clientName}
+                     </span>
+                     <Badge className="text-xs bg-success/20 text-success-foreground border-success/30 blur-md">
+                       {currentTransformation.achievement}
+                     </Badge>
                   </div>
                 </div>
               </div>
