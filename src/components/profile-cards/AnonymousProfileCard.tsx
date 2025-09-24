@@ -5,6 +5,9 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Heart, MessageCircle, Calendar, MapPin, Star, Users, Award, Target } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useContentVisibility } from '@/hooks/useContentVisibility';
+import { VisibilityAwareName } from '@/components/ui/VisibilityAwareName';
+import { useProgressiveNameVisibility } from '@/hooks/useProgressiveNameVisibility';
 
 interface Trainer {
   id: string;
@@ -34,13 +37,32 @@ export const AnonymousProfileCard: React.FC<AnonymousProfileCardProps> = ({
 }) => {
   const navigate = useNavigate();
 
+  // Use visibility system for anonymous users
+  const { canViewContent } = useContentVisibility({
+    engagementStage: 'browsing',
+    isGuest: true
+  });
+
+  // Get visibility-aware trainer name
+  const basicInfoVisibility = canViewContent.basicInformation ? 'visible' : 'hidden';
+  const { displayName } = useProgressiveNameVisibility({
+    trainer: {
+      id: trainer.id,
+      first_name: (trainer as any).first_name || (trainer as any).firstName,
+      last_name: (trainer as any).last_name || (trainer as any).lastName,
+      name: trainer.name
+    },
+    visibilityState: basicInfoVisibility,
+    engagementStage: 'browsing'
+  });
+
   return (
     <div className="space-y-6">
       {/* Call-to-action banner */}
       <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-background p-6 rounded-lg border">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
-            <h3 className="text-lg font-semibold mb-2">Connect with {trainer.name}</h3>
+            <h3 className="text-lg font-semibold mb-2">Connect with {displayName}</h3>
             <p className="text-sm text-muted-foreground">
               Sign up to message trainers, book calls, and access exclusive content
             </p>
@@ -63,17 +85,27 @@ export const AnonymousProfileCard: React.FC<AnonymousProfileCardProps> = ({
           <div className="bg-gradient-to-br from-primary/20 to-primary/5 p-6">
             <div className="flex items-start gap-4">
               <Avatar className="h-20 w-20 border-4 border-background shadow-lg">
-                <AvatarImage src={trainer.profile_photo_url} alt={trainer.name} />
+                <AvatarImage src={trainer.profile_photo_url} alt={displayName} />
                 <AvatarFallback className="text-lg">
-                  {trainer.name.charAt(0)}
+                  {displayName.charAt(0)}
                 </AvatarFallback>
               </Avatar>
               
               <div className="flex-1 min-w-0">
-                <h1 className="text-2xl font-bold mb-2">{trainer.name}</h1>
+                <VisibilityAwareName
+                  trainer={{
+                    id: trainer.id,
+                    first_name: (trainer as any).first_name || (trainer as any).firstName,
+                    last_name: (trainer as any).last_name || (trainer as any).lastName,
+                    name: trainer.name
+                  }}
+                  visibilityState={basicInfoVisibility}
+                  engagementStage="browsing"
+                  className="text-2xl font-bold mb-2 block"
+                />
                 
                 <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3 flex-wrap">
-                  {trainer.location && (
+                  {trainer.location && canViewContent.basicInformation && (
                     <div className="flex items-center gap-1">
                       <MapPin className="h-4 w-4" />
                       <span>{trainer.location}</span>
