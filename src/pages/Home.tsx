@@ -58,6 +58,8 @@ export default function Home() {
   const handleQuizComplete = (results: any) => {
     console.log('🎯 Quiz completed in Home component:', results);
     setShowQuizModal(false);
+    // Set user intent to 'client' to prevent intent modal from showing again
+    setUserIntent('client');
     // Scroll to browse trainers section to show filtered results
     setTimeout(() => {
       const browseSection = document.getElementById('browse-trainers');
