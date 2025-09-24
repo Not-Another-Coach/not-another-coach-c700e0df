@@ -22,6 +22,7 @@ interface Trainer {
   profile_photo_url: string;
   hourly_rate: number | null;
   free_discovery_call: boolean | null;
+  testimonials: any[];
 }
 
 export const AnonymousBrowse = () => {
@@ -55,7 +56,8 @@ export const AnonymousBrowse = () => {
           total_ratings,
           profile_photo_url,
           hourly_rate,
-          free_discovery_call
+          free_discovery_call,
+          testimonials
         `)
         .eq('profile_published', true)
         .not('specializations', 'is', null)
@@ -117,7 +119,8 @@ export const AnonymousBrowse = () => {
             profilePhotoUrl: trainer.profile_photo_url,
             totalRatings: trainer.total_ratings,
             hourlyRate: trainer.hourly_rate,
-            freeDiscoveryCall: trainer.free_discovery_call
+            freeDiscoveryCall: trainer.free_discovery_call,
+            testimonials: trainer.testimonials || []
           };
           
           return (
