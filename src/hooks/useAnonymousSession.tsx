@@ -37,53 +37,101 @@ export function useAnonymousSession() {
 
   // Generate new session ID
   const generateSessionId = () => {
-    return 'anon_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+    const sessionId = 'anon_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+    console.log('🆔 Generated new session ID:', sessionId);
+    return sessionId;
   };
 
   // Sync session data to server
   const syncToServer = useCallback(async (sessionData: AnonymousSession) => {
+    console.log('🔄 SYNC: Starting syncToServer for session:', sessionData.sessionId);
+    console.log('🔄 SYNC: Session data to sync:', {
+      sessionId: sessionData.sessionId,
+      trainersCount: sessionData.savedTrainers.length,
+      hasQuizResults: !!sessionData.quizResults,
+      expiresAt: sessionData.expiresAt
+    });
+    
     try {
       const expiresAt = new Date(sessionData.expiresAt);
+      console.log('🔄 SYNC: Parsed expires date:', expiresAt.toISOString());
       
-      await supabase
+      const payload = {
+        session_id: sessionData.sessionId,
+        saved_trainers: sessionData.savedTrainers,
+        quiz_results: sessionData.quizResults || null,
+        expires_at: expiresAt.toISOString(),
+      };
+      console.log('🔄 SYNC: Supabase payload:', payload);
+      
+      const { data, error } = await supabase
         .from('anonymous_sessions')
-        .upsert({
-          session_id: sessionData.sessionId,
-          saved_trainers: sessionData.savedTrainers,
-          quiz_results: sessionData.quizResults || null,
-          expires_at: expiresAt.toISOString(),
-        }, {
+        .upsert(payload, {
           onConflict: 'session_id'
         });
+      
+      if (error) {
+        console.error('🔄 SYNC: Supabase error:', error);
+        throw error;
+      }
+      
+      console.log('✅ SYNC: Successfully synced to server:', data);
     } catch (error) {
-      console.error('Error syncing anonymous session to server:', error);
+      console.error('❌ SYNC: Error syncing anonymous session to server:', error);
+      console.error('❌ SYNC: Error details:', {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint
+      });
       // Don't throw - this is a background sync, localStorage is the primary storage
     }
   }, []);
 
   // Load session data from server
   const loadFromServer = useCallback(async (sessionId: string) => {
+    console.log('🔍 LOAD: Attempting to load session from server:', sessionId);
+    
     try {
+      const currentTime = new Date().toISOString();
+      console.log('🔍 LOAD: Current time for expiry check:', currentTime);
+      
       const { data, error } = await supabase
         .from('anonymous_sessions')
         .select('*')
         .eq('session_id', sessionId)
-        .gt('expires_at', new Date().toISOString())
+        .gt('expires_at', currentTime)
         .single();
 
-      if (error || !data) {
+      console.log('🔍 LOAD: Supabase response:', { data, error });
+
+      if (error) {
+        console.log('🔍 LOAD: Query error or no data found:', error);
+        return null;
+      }
+      
+      if (!data) {
+        console.log('🔍 LOAD: No data returned from query');
         return null;
       }
 
-      return {
+      const sessionData = {
         sessionId: data.session_id,
         savedTrainers: data.saved_trainers || [],
         quizResults: data.quiz_results,
         createdAt: data.created_at,
         expiresAt: data.expires_at,
       } as AnonymousSession;
+      
+      console.log('✅ LOAD: Successfully loaded session from server:', sessionData);
+      return sessionData;
     } catch (error) {
-      console.error('Error loading anonymous session from server:', error);
+      console.error('❌ LOAD: Error loading anonymous session from server:', error);
+      console.error('❌ LOAD: Error details:', {
+        message: error.message,
+        code: error.code,
+        details: error.details
+      });
       return null;
     }
   }, []);
@@ -91,33 +139,54 @@ export function useAnonymousSession() {
   // Initialize or load existing session
   useEffect(() => {
     const initializeSession = async () => {
+      console.log('🚀 INIT: Initializing anonymous session');
       const savedSession = localStorage.getItem(ANONYMOUS_SESSION_KEY);
+      console.log('🚀 INIT: localStorage data:', savedSession ? 'FOUND' : 'NOT FOUND');
       
       if (savedSession) {
         try {
           const parsed: AnonymousSession = JSON.parse(savedSession);
+          console.log('🚀 INIT: Parsed session from localStorage:', {
+            sessionId: parsed.sessionId,
+            hasQuizResults: !!parsed.quizResults,
+            trainersCount: parsed.savedTrainers?.length || 0,
+            expiresAt: parsed.expiresAt
+          });
           
           // Check if session is expired
-          if (new Date(parsed.expiresAt) > new Date()) {
+          const now = new Date();
+          const expiresAt = new Date(parsed.expiresAt);
+          console.log('🚀 INIT: Expiry check - now:', now.toISOString(), 'expires:', expiresAt.toISOString());
+          
+          if (expiresAt > now) {
+            console.log('🚀 INIT: Session is valid, checking server for updates');
             // Try to load more recent data from server
             const serverSession = await loadFromServer(parsed.sessionId);
             if (serverSession) {
-              console.log('🔄 Loaded updated session data from server');
+              console.log('🔄 INIT: Loaded updated session data from server');
               setSession(serverSession);
               localStorage.setItem(ANONYMOUS_SESSION_KEY, JSON.stringify(serverSession));
             } else {
+              console.log('🔄 INIT: No server data found, using localStorage session');
               setSession(parsed);
             }
           } else {
+            console.log('🚀 INIT: Session expired, cleaning up');
             // Clean up expired session
             localStorage.removeItem(ANONYMOUS_SESSION_KEY);
+            setSession(null);
           }
         } catch (error) {
-          console.error('Error parsing anonymous session:', error);
+          console.error('❌ INIT: Error parsing anonymous session:', error);
           localStorage.removeItem(ANONYMOUS_SESSION_KEY);
+          setSession(null);
         }
+      } else {
+        console.log('🚀 INIT: No existing session found');
+        setSession(null);
       }
       
+      console.log('🚀 INIT: Initialization complete, setting loading to false');
       setLoading(false);
     };
 
@@ -127,21 +196,34 @@ export function useAnonymousSession() {
   // Sync across multiple hook instances using a custom event and storage listener
   useEffect(() => {
     const handleSessionSync = () => {
+      console.log('🔄 EVENT: Session sync event triggered');
       try {
         const saved = localStorage.getItem(ANONYMOUS_SESSION_KEY);
+        console.log('🔄 EVENT: localStorage content:', saved ? 'FOUND' : 'NOT FOUND');
+        
         if (saved) {
           const parsed: AnonymousSession = JSON.parse(saved);
+          console.log('🔄 EVENT: Parsed session from sync:', {
+            sessionId: parsed.sessionId,
+            hasQuizResults: !!parsed.quizResults,
+            trainersCount: parsed.savedTrainers?.length || 0
+          });
           setSession(parsed);
         } else {
+          console.log('🔄 EVENT: No session data found, setting to null');
           setSession(null);
         }
       } catch (e) {
-        console.error('Error syncing anonymous session:', e);
+        console.error('❌ EVENT: Error syncing anonymous session:', e);
       }
     };
+    
+    console.log('🔄 EVENT: Setting up session event listeners');
     window.addEventListener(SESSION_EVENT, handleSessionSync as EventListener);
     window.addEventListener('storage', handleSessionSync as EventListener);
+    
     return () => {
+      console.log('🔄 EVENT: Cleaning up session event listeners');
       window.removeEventListener(SESSION_EVENT, handleSessionSync as EventListener);
       window.removeEventListener('storage', handleSessionSync as EventListener);
     };
@@ -149,23 +231,37 @@ export function useAnonymousSession() {
 
   // Create new anonymous session
   const createSession = useCallback(() => {
+    console.log('🆕 CREATE: Creating new anonymous session');
+    
     const now = new Date();
     const expiresAt = new Date(now.getTime() + SESSION_DURATION);
+    const sessionId = generateSessionId();
+    
+    console.log('🆕 CREATE: Session details:', {
+      sessionId,
+      createdAt: now.toISOString(),
+      expiresAt: expiresAt.toISOString(),
+      sessionDuration: SESSION_DURATION
+    });
     
     const newSession: AnonymousSession = {
-      sessionId: generateSessionId(),
+      sessionId,
       savedTrainers: [],
       createdAt: now.toISOString(),
       expiresAt: expiresAt.toISOString(),
     };
 
+    console.log('🆕 CREATE: Setting session in state and localStorage');
     setSession(newSession);
     localStorage.setItem(ANONYMOUS_SESSION_KEY, JSON.stringify(newSession));
+    console.log('🆕 CREATE: Dispatching session event');
     window.dispatchEvent(new CustomEvent(SESSION_EVENT));
     
     // Sync to server in background
+    console.log('🆕 CREATE: Initiating background sync to server');
     syncToServer(newSession);
     
+    console.log('✅ CREATE: Session created successfully:', sessionId);
     return newSession;
   }, [syncToServer]);
 
@@ -217,24 +313,52 @@ export function useAnonymousSession() {
 
   // Save quiz results
   const saveQuizResults = useCallback((results: any) => {
-    console.log('💾 Saving anonymous quiz results:', results);
+    console.log('💾 QUIZ: Starting saveQuizResults with data:', results);
+    console.log('💾 QUIZ: Current session state:', session ? {
+      sessionId: session.sessionId,
+      hasQuizResults: !!session.quizResults,
+      trainersCount: session.savedTrainers.length
+    } : 'NO SESSION');
     
-    const currentSession = session || createSession();
+    let currentSession = session;
+    if (!currentSession) {
+      console.log('💾 QUIZ: No existing session, creating new one');
+      currentSession = createSession();
+    } else {
+      console.log('💾 QUIZ: Using existing session:', currentSession.sessionId);
+    }
     
     const updatedSession = {
       ...currentSession,
       quizResults: results,
     };
     
-    console.log('📝 Updating anonymous session with quiz results');
+    console.log('💾 QUIZ: Updated session object:', {
+      sessionId: updatedSession.sessionId,
+      quizResultsKeys: Object.keys(updatedSession.quizResults || {}),
+      trainersCount: updatedSession.savedTrainers.length,
+      expiresAt: updatedSession.expiresAt
+    });
+    
+    console.log('💾 QUIZ: Setting session in state');
     setSession(updatedSession);
-    localStorage.setItem(ANONYMOUS_SESSION_KEY, JSON.stringify(updatedSession));
+    
+    console.log('💾 QUIZ: Saving to localStorage');
+    try {
+      localStorage.setItem(ANONYMOUS_SESSION_KEY, JSON.stringify(updatedSession));
+      console.log('✅ QUIZ: Successfully saved to localStorage');
+    } catch (error) {
+      console.error('❌ QUIZ: Error saving to localStorage:', error);
+    }
+    
+    console.log('💾 QUIZ: Dispatching session update event');
     window.dispatchEvent(new CustomEvent(SESSION_EVENT));
     
     // Sync to server in background
+    console.log('💾 QUIZ: Starting background sync to server');
     syncToServer(updatedSession);
     
-    console.log('✅ Anonymous quiz results saved successfully');
+    console.log('✅ QUIZ: saveQuizResults completed successfully');
   }, [session, createSession, syncToServer]);
 
   // Clear session (on account creation)

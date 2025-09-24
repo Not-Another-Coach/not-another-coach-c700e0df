@@ -167,9 +167,12 @@ export const MatchQuizModal = ({ isOpen, onComplete, onClose }: MatchQuizModalPr
   };
 
   const handleNext = () => {
-    console.log('🎯 HandleNext called - isLastStep:', isLastStep, 'currentStep:', currentStep);
+    console.log('🎯 MODAL: HandleNext called - isLastStep:', isLastStep, 'currentStep:', currentStep);
+    console.log('🎯 MODAL: Current answers state:', answers);
     
     if (isLastStep) {
+      console.log('🎯 MODAL: Processing final step - transforming quiz data');
+      
       // Transform budget data to match client survey format
       const budgetMapping: Record<string, { min: number; max: number | null }> = {
         'budget_0_50': { min: 0, max: 50 },
@@ -180,6 +183,10 @@ export const MatchQuizModal = ({ isOpen, onComplete, onClose }: MatchQuizModalPr
       };
 
       const budgetRange = budgetMapping[answers.budget as string];
+      console.log('🎯 MODAL: Budget mapping result:', { 
+        originalBudget: answers.budget, 
+        mappedRange: budgetRange 
+      });
       
       // Complete quiz and show summary first - maintain old format for compatibility
       const quizResults = {
@@ -202,18 +209,32 @@ export const MatchQuizModal = ({ isOpen, onComplete, onClose }: MatchQuizModalPr
         open_to_virtual_coaching: false,
       };
       
-      console.log('🎯 Quiz completion data:', quizResults);
+      console.log('🎯 MODAL: Final quiz results object:', quizResults);
+      console.log('🎯 MODAL: Quiz results structure validation:', {
+        hasGoals: !!quizResults.goals,
+        goalCount: quizResults.goals?.length,
+        hasBudget: !!quizResults.budget,
+        hasCoachingStyle: !!quizResults.coachingStyle,
+        coachingStyleCount: quizResults.coachingStyle?.length,
+        hasFrequency: !!quizResults.preferred_training_frequency,
+        hasTimeSlots: !!quizResults.preferred_time_slots,
+        timeSlotsCount: quizResults.preferred_time_slots?.length
+      });
+      
+      console.log('🎯 MODAL: Calling saveQuizResults...');
       saveQuizResults(quizResults);
+      console.log('🎯 MODAL: saveQuizResults call completed, showing summary');
       setShowSummary(true);
       
       // After showing summary, proceed to results with longer matching experience
       setTimeout(() => {
-        console.log('🎯 Showing results and calling onComplete');
+        console.log('🎯 MODAL: Summary timeout completed, showing results and calling onComplete');
         setShowSummary(false);
         setShowResults(true);
         onComplete(quizResults);
       }, 4500); // Increased from 2000ms to 4500ms for better UX
     } else {
+      console.log('🎯 MODAL: Not final step, advancing to next step');
       setCurrentStep(prev => prev + 1);
     }
   };
