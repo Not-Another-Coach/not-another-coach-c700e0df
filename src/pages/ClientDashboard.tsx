@@ -264,6 +264,47 @@ export default function ClientDashboard() {
               <ClientActivityFeed />
             </div>
           </>
+        ) : isActiveClient && !enhancedOnboardingData ? (
+          <>
+            {/* Placeholder for Active Client with No Template Assigned */}
+            <Card className="border-primary-200 bg-gradient-to-br from-primary-50 to-primary-100">
+              <CardContent className="p-8 text-center">
+                <div className="space-y-4">
+                  <div className="mx-auto w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center">
+                    <CheckSquare className="h-8 w-8 text-primary-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-foreground mb-2">
+                      Welcome, {profile?.first_name || "there"}!
+                    </h3>
+                    <p className="text-muted-foreground mb-4">
+                      Your trainer is preparing your personalized onboarding plan. 
+                      You'll see your next steps here once they've set up your program.
+                    </p>
+                    <p className="text-sm text-primary-700 bg-primary-50 rounded-lg p-3 inline-block">
+                      💡 In the meantime, feel free to explore the platform and check out today's highlights below.
+                    </p>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setIsMessagingOpen(true)}
+                    className="mt-4"
+                  >
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    Message Your Trainer
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Today's Highlights */}
+            <HighlightsCarousel />
+
+            {/* Live Activity Feed */}
+            <div id="live-activity-tracker">
+              <ClientActivityFeed />
+            </div>
+          </>
         ) : (
           <>
             {/* Exploration-Focused Dashboard for Non-Active Clients */}
