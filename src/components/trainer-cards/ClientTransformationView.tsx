@@ -71,6 +71,18 @@ export const ClientTransformationView = ({ trainer, children, testimonialIndex =
 
   const testimonialVisibility = getVisibility('testimonial_images');
 
+  // DEBUG: Log visibility states for first transformation debugging
+  console.log(`🔍 ClientTransformationView Debug - Trainer: ${trainer.name}`, {
+    trainerId: trainer.id,
+    testimonialIndex,
+    stage,
+    isGuest,
+    testimonialVisibility,
+    visibilityLoading,
+    shouldShowFirstUnblurred: testimonialIndex === 0 && isGuest && testimonialVisibility === 'visible',
+    shouldBlurForSecondaryGuest: testimonialIndex > 0 && isGuest
+  });
+
   // If no transformations available, show placeholder
   if (transformationData.transformations.length === 0) {
     return (

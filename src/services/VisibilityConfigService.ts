@@ -56,6 +56,15 @@ class VisibilityConfigServiceClass {
     const key = this.getCacheKey(contentType, stageGroup);
     
     const cachedValue = cache.get(key);
+    
+    // DEBUG: Log cache lookups for troubleshooting
+    console.log(`VisibilityConfigService Debug: ${contentType} for ${stageGroup}`, {
+      key,
+      cachedValue,
+      cacheSize: cache.size,
+      allCacheKeys: Array.from(cache.keys())
+    });
+    
     if (cachedValue) return cachedValue;
     
     // For gallery_images, default to visible for browsing scenarios (but hidden for guests)
@@ -82,13 +91,11 @@ class VisibilityConfigServiceClass {
       if (contentType === 'pricing_discovery_call') {
         return 'blurred';
       }
-      // Gallery images can be visible by default; testimonials default to blurred for guests
+      // Gallery images can be visible by default; testimonials should use database config
       if (contentType === 'gallery_images') {
         return 'visible';
       }
-      if (contentType === 'testimonial_images') {
-        return 'blurred';
-      }
+      // Remove hardcoded testimonial_images default - let database config control this
       return 'hidden';
     }
     
@@ -108,3 +115,6 @@ class VisibilityConfigServiceClass {
 }
 
 export const VisibilityConfigService = new VisibilityConfigServiceClass();
+
+// Force cache refresh for debugging
+VisibilityConfigService.invalidateCache();
