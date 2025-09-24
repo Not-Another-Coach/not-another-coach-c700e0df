@@ -81,7 +81,7 @@ export const TodaysNextSteps = ({ steps, onTaskClick }: TodaysNextStepsProps) =>
       
       return 0;
     })
-    .slice(0, 5); // Show top 5 priority tasks
+    .slice(0, 3); // Show top 3 priority tasks - less overwhelming
 
   if (prioritizedTasks.length === 0) {
     return (
@@ -108,8 +108,11 @@ export const TodaysNextSteps = ({ steps, onTaskClick }: TodaysNextStepsProps) =>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <CheckSquare className="h-5 w-5 text-primary" />
-          Today's Next Steps
+          Your Focus Tasks
         </CardTitle>
+        <p className="text-sm text-muted-foreground mt-1">
+          Top {Math.min(prioritizedTasks.length, 3)} priority actions for today
+        </p>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">

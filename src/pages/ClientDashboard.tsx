@@ -23,12 +23,11 @@ import { MyTrainersCarousel } from "@/components/dashboard/MyTrainersCarousel";
 import { ActivityCompletionInterface } from "@/components/client/ActivityCompletionInterface";
 import { ExploreSection } from "@/components/dashboard/ExploreSection";
 import { ClientCustomHeader } from "@/components/layout/ClientCustomHeader";
-import { OnboardingWelcomeBanner } from "@/components/onboarding/OnboardingWelcomeBanner";
-import { TrainerSnapshotCard } from "@/components/onboarding/TrainerSnapshotCard";
+import { OnboardingHeroCard } from "@/components/onboarding/OnboardingHeroCard";
 import { OnboardingProgressTracker } from "@/components/onboarding/OnboardingProgressTracker";
 import { TodaysNextSteps } from "@/components/onboarding/TodaysNextSteps";
 import { QuickActionsBar } from "@/components/onboarding/QuickActionsBar";
-import { GettingStartedStats } from "@/components/onboarding/GettingStartedStats";
+import { SetupChecklist } from "@/components/onboarding/SetupChecklist";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
@@ -239,64 +238,55 @@ export default function ClientDashboard() {
         {/* Onboarding-Focused Dashboard for Active Clients */}
         {isActiveClient && onboardingData ? (
           <>
-            {/* Welcome Banner */}
-            <OnboardingWelcomeBanner
+            {/* Hero Card - Merged Welcome + Progress + Trainer */}
+            <OnboardingHeroCard
               clientName={profile?.first_name || "there"}
               trainerName={onboardingData.trainerName}
+              trainerPhoto={null} // Would need to fetch from trainer profile
+              trainerTagline="Your Personal Trainer" // Could be dynamic
               currentStep={onboardingData.completedCount + 1}
               totalSteps={onboardingData.totalCount}
               completionPercentage={onboardingData.percentageComplete}
               nextAction={onboardingData.steps.find(s => s.status === 'pending')?.step_name || "Continue onboarding"}
+              templateName={onboardingData.templateName}
               onNextActionClick={handleNextAction}
-            />
-
-            {/* Trainer Snapshot */}
-            <TrainerSnapshotCard
-              trainerName={onboardingData.trainerName}
-              trainerPhoto={null} // Would need to fetch from trainer profile
-              trainerTagline="Your Personal Trainer" // Could be dynamic
               onMessage={() => handleQuickAction('message')}
               onBookSession={() => handleQuickAction('book')}
             />
 
-            {/* Quick Actions */}
-            <QuickActionsBar
-              onBookSession={() => handleQuickAction('book')}
-              onUploadPhoto={() => handleQuickAction('upload')}
-              onSyncApp={() => handleQuickAction('sync')}
-              onMessage={() => handleQuickAction('message')}
-              hasAppointmentActivity={onboardingData.steps.some(s => s.requires_file_upload)}
-              hasUploadActivity={onboardingData.steps.some(s => s.requires_file_upload)}
-            />
-
-            {/* Today's Next Steps */}
+            {/* Focus Tasks - Streamlined Next Steps */}
             <TodaysNextSteps
               steps={adaptStepsForTodaysNextSteps(onboardingData.steps)}
               onTaskClick={handleStepClick}
             />
 
-            {/* Onboarding Progress Tracker */}
+            {/* Setup Progress - Milestone-based */}
+            <SetupChecklist
+              completedSteps={onboardingData.completedCount}
+              totalSteps={onboardingData.totalCount}
+              sessionsBooked={0} // Would calculate from appointments
+              photosUploaded={onboardingData.steps.filter(s => s.requires_file_upload && s.status === 'completed').length}
+              formsCompleted={onboardingData.steps.filter(s => s.step_type === 'mandatory' && s.status === 'completed').length}
+              totalForms={onboardingData.steps.filter(s => s.step_type === 'mandatory').length}
+              onMilestoneClick={handleStatClick}
+            />
+
+            {/* Full Progress Tracker - Detailed View */}
             <OnboardingProgressTracker
               steps={adaptStepsForProgressTracker(onboardingData.steps)}
               onStepClick={handleStepClick}
             />
 
-            {/* Getting Started Stats */}
-            <GettingStartedStats
-              sessionsBooked={0} // Would calculate from appointments
-              photosUploaded={onboardingData.steps.filter(s => s.requires_file_upload && s.status === 'completed').length}
-              formsCompleted={onboardingData.steps.filter(s => s.step_type === 'mandatory' && s.status === 'completed').length}
-              totalForms={onboardingData.steps.filter(s => s.step_type === 'mandatory').length}
-              syncsConnected={0} // Would track app integrations
-              completedSteps={onboardingData.completedCount}
-              totalSteps={onboardingData.totalCount}
-              onStatClick={handleStatClick}
-            />
+            {/* Curated Content - From Your Trainer */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold text-foreground">From Your Trainer</h2>
+                <p className="text-sm text-muted-foreground">Curated for you</p>
+              </div>
+              <HighlightsCarousel />
+            </div>
 
-            {/* Today's Highlights */}
-            <HighlightsCarousel />
-
-            {/* Live Activity Feed */}
+            {/* Live Activity Feed - Hidden when empty */}
             <div id="live-activity-tracker">
               <ClientActivityFeed />
             </div>
