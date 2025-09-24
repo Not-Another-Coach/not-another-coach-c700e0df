@@ -11,6 +11,8 @@ import { useAnonymousSession } from "@/hooks/useAnonymousSession";
 import { AppLogo } from "@/components/ui/app-logo";
 import { EnhancedHeroSection } from "@/components/homepage/EnhancedHeroSection";
 import { InteractiveValueCards } from "@/components/homepage/InteractiveValueCards";
+import { QuickResetMenu } from "@/components/ui/QuickResetMenu";
+import { ResetOptionsButton } from "@/components/ui/ResetOptionsButton";
 
 import { UserIntentModal } from "@/components/user-intent/UserIntentModal";
 import { useUserIntent } from "@/hooks/useUserIntent";
@@ -21,7 +23,7 @@ export default function Home() {
   const { profile, loading: profileLoading, userType } = useProfileByType();
   const { user_type, loading: userTypeLoading } = useUserType();
   const { savedTrainersCount } = useAnonymousSession();
-  const { shouldShowModal, setUserIntent, clearIntent, dismissModal } = useUserIntent();
+  const { shouldShowModal, setUserIntent, clearIntent, dismissModal, userIntent } = useUserIntent();
   const navigate = useNavigate();
   
   const [showQuizModal, setShowQuizModal] = useState(false);
@@ -118,15 +120,14 @@ export default function Home() {
                   </Button>
                 )}
                 
-                {/* Reset Intent Button - for testing */}
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={clearIntent}
-                  className="text-xs"
-                >
-                  Reset Intent
-                </Button>
+                {/* Reset Options Menu */}
+                {userIntent && (
+                  <QuickResetMenu 
+                    variant="ghost" 
+                    size="sm"
+                    className="text-xs"
+                  />
+                )}
                 
                 <Button variant="ghost" onClick={() => navigate('/auth')}>
                   Sign In

@@ -8,6 +8,7 @@ import { UserIntentProvider } from "@/hooks/useUserIntent";
 import { VisibilityConfigProvider } from "@/contexts/VisibilityConfigContext";
 import { SessionNotification } from "@/components/SessionNotification";
 import Home from "./pages/Home";
+import ResetDemo from "./pages/ResetDemo";
 import ClientDashboard from "./pages/ClientDashboard";
 import ClientExplore from "./pages/ClientExplore";
 import MyTrainers from "./pages/MyTrainers";
@@ -103,6 +104,7 @@ const App = () => (
                 <Route path="/trainer/:trainerId" element={<TrainerProfile />} />
                 <Route path="/messages/:trainerId?" element={<Messaging />} />
                 <Route path="/documentation" element={<Documentation />} />
+                <Route path="/reset-demo" element={<ResetDemo />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="/payment-management" element={<PaymentManagement />} />
                   <Route path="*" element={<NotFound />} />
