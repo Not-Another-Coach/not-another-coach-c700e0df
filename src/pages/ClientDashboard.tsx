@@ -23,6 +23,12 @@ import { MyTrainersCarousel } from "@/components/dashboard/MyTrainersCarousel";
 import { ActivityCompletionInterface } from "@/components/client/ActivityCompletionInterface";
 import { ExploreSection } from "@/components/dashboard/ExploreSection";
 import { ClientCustomHeader } from "@/components/layout/ClientCustomHeader";
+import { OnboardingWelcomeBanner } from "@/components/onboarding/OnboardingWelcomeBanner";
+import { TrainerSnapshotCard } from "@/components/onboarding/TrainerSnapshotCard";
+import { OnboardingProgressTracker } from "@/components/onboarding/OnboardingProgressTracker";
+import { TodaysNextSteps } from "@/components/onboarding/TodaysNextSteps";
+import { QuickActionsBar } from "@/components/onboarding/QuickActionsBar";
+import { GettingStartedStats } from "@/components/onboarding/GettingStartedStats";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
@@ -40,6 +46,9 @@ export default function ClientDashboard() {
     markStepComplete: markEnhancedStepComplete, 
     scheduleAppointment
   } = useClientOnboardingEnhanced();
+  
+  // Additional state for onboarding interactions
+  const [selectedStep, setSelectedStep] = useState<any>(null);
   
   // Check if client is an active client with any trainer
   const isActiveClient = engagements.some(engagement => engagement.stage === 'active_client');
@@ -107,6 +116,61 @@ export default function ClientDashboard() {
     }
   };
 
+  // Onboarding interaction handlers
+  const handleStepClick = (step: any) => {
+    setSelectedStep(step);
+    // You could open a modal or navigate to specific step
+  };
+
+  const handleNextAction = () => {
+    if (enhancedOnboardingData?.steps) {
+      const nextStep = enhancedOnboardingData.steps.find(
+        step => step.status === 'pending' || step.status === 'in_progress'
+      );
+      if (nextStep) {
+        handleStepClick(nextStep);
+      }
+    }
+  };
+
+  const handleQuickAction = (action: string) => {
+    switch (action) {
+      case 'book':
+        // Navigate to booking or open appointment modal
+        toast({ title: "Booking", description: "Opening appointment booking..." });
+        break;
+      case 'upload':
+        // Open file upload
+        toast({ title: "Upload", description: "Opening file upload..." });
+        break;
+      case 'sync':
+        // Open app sync
+        toast({ title: "Sync", description: "Opening app sync..." });
+        break;
+      case 'message':
+        setIsMessagingOpen(true);
+        break;
+    }
+  };
+
+  const handleStatClick = (statType: string) => {
+    // Navigate or filter based on stat type
+    switch (statType) {
+      case 'sessions':
+        toast({ title: "Sessions", description: "Viewing your booked sessions..." });
+        break;
+      case 'photos':
+        toast({ title: "Photos", description: "Viewing your uploaded photos..." });
+        break;
+      case 'forms':
+        toast({ title: "Forms", description: "Viewing your forms..." });
+        break;
+      case 'progress':
+        toast({ title: "Progress", description: "Viewing your overall progress..." });
+        break;
+    }
+  };
+
   if (loading || profileLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -132,71 +196,142 @@ export default function ClientDashboard() {
         onMessagingOpen={() => setIsMessagingOpen(true)}
       />
 
-      {/* Main Content - Scrollable Sections */}
+      {/* Main Content - Conditional Layout */}
       <main className="mx-auto px-6 lg:px-8 xl:px-12 py-6 space-y-8">
         
-        {/* Active Client Onboarding Section (Priority) */}
-        {isActiveClient && enhancedOnboardingData && (
-          <Card className="border-primary-200 bg-gradient-to-br from-primary-50 to-primary-100">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CheckSquare className="h-5 w-5 text-primary-600" />
-                Your Onboarding with {enhancedOnboardingData.trainer_name}
-              </CardTitle>
-              <div className="flex items-center gap-4">
-                <Progress 
-                  value={enhancedOnboardingData.completion_percentage} 
-                  className="flex-1" 
-                />
-                <span className="text-sm font-medium text-primary-700">
-                  {enhancedOnboardingData.completed_steps}/{enhancedOnboardingData.total_steps} Complete ({enhancedOnboardingData.completion_percentage}%)
-                </span>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {enhancedOnboardingData.steps.slice(0, 3).map((step) => (
-                <ActivityCompletionInterface
-                  key={step.id}
-                  activity={step}
-                  onComplete={(completionData) => markEnhancedStepComplete(step.id, completionData)}
-                  onScheduleAppointment={step.activity_type === 'appointment' ? 
-                    (appointmentData) => scheduleAppointment(step.id, appointmentData) : undefined
-                  }
-                />
-              ))}
-              
-              {enhancedOnboardingData.steps.length > 3 && (
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={() => navigate('/onboarding')}
-                >
-                  View All Onboarding Steps ({enhancedOnboardingData.steps.length})
-                </Button>
-              )}
-            </CardContent>
-          </Card>
+        {/* Onboarding-Focused Dashboard for Active Clients */}
+        {isActiveClient && enhancedOnboardingData ? (
+          <>
+            {/* Welcome Banner */}
+            <OnboardingWelcomeBanner
+              clientName={profile?.first_name || "there"}
+              trainerName={enhancedOnboardingData.trainer_name}
+              currentStep={enhancedOnboardingData.total_steps - enhancedOnboardingData.steps.filter(s => s.status === 'pending').length}
+              totalSteps={enhancedOnboardingData.total_steps}
+              completionPercentage={enhancedOnboardingData.completion_percentage}
+              nextAction={enhancedOnboardingData.steps.find(s => s.status === 'pending')?.activity_name || "Continue onboarding"}
+              onNextActionClick={handleNextAction}
+            />
+
+            {/* Trainer Snapshot */}
+            <TrainerSnapshotCard
+              trainerName={enhancedOnboardingData.trainer_name}
+              trainerPhoto={null} // Would need to fetch from trainer profile
+              trainerTagline="Your Personal Trainer" // Could be dynamic
+              onMessage={() => handleQuickAction('message')}
+              onBookSession={() => handleQuickAction('book')}
+            />
+
+            {/* Quick Actions */}
+            <QuickActionsBar
+              onBookSession={() => handleQuickAction('book')}
+              onUploadPhoto={() => handleQuickAction('upload')}
+              onSyncApp={() => handleQuickAction('sync')}
+              onMessage={() => handleQuickAction('message')}
+              hasAppointmentActivity={enhancedOnboardingData.steps.some(s => s.activity_type === 'appointment')}
+              hasUploadActivity={enhancedOnboardingData.steps.some(s => s.activity_type === 'file_upload')}
+            />
+
+            {/* Today's Next Steps */}
+            <TodaysNextSteps
+              steps={enhancedOnboardingData.steps}
+              onTaskClick={handleStepClick}
+            />
+
+            {/* Onboarding Progress Tracker */}
+            <OnboardingProgressTracker
+              steps={enhancedOnboardingData.steps}
+              onStepClick={handleStepClick}
+            />
+
+            {/* Getting Started Stats */}
+            <GettingStartedStats
+              sessionsBooked={0} // Would calculate from appointments
+              photosUploaded={enhancedOnboardingData.steps.filter(s => s.activity_type === 'file_upload' && s.status === 'completed').length}
+              formsCompleted={enhancedOnboardingData.steps.filter(s => s.activity_type === 'survey' && s.status === 'completed').length}
+              totalForms={enhancedOnboardingData.steps.filter(s => s.activity_type === 'survey').length}
+              syncsConnected={0} // Would track app integrations
+              completedSteps={enhancedOnboardingData.completed_steps}
+              totalSteps={enhancedOnboardingData.total_steps}
+              onStatClick={handleStatClick}
+            />
+
+            {/* Today's Highlights */}
+            <HighlightsCarousel />
+
+            {/* Live Activity Feed */}
+            <div id="live-activity-tracker">
+              <ClientActivityFeed />
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Exploration-Focused Dashboard for Non-Active Clients */}
+            
+            {/* Active Client Onboarding Section (Priority) - Compact Version */}
+            {isActiveClient && enhancedOnboardingData && (
+              <Card className="border-primary-200 bg-gradient-to-br from-primary-50 to-primary-100">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <CheckSquare className="h-5 w-5 text-primary-600" />
+                    Your Onboarding with {enhancedOnboardingData.trainer_name}
+                  </CardTitle>
+                  <div className="flex items-center gap-4">
+                    <Progress 
+                      value={enhancedOnboardingData.completion_percentage} 
+                      className="flex-1" 
+                    />
+                    <span className="text-sm font-medium text-primary-700">
+                      {enhancedOnboardingData.completed_steps}/{enhancedOnboardingData.total_steps} Complete ({enhancedOnboardingData.completion_percentage}%)
+                    </span>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {enhancedOnboardingData.steps.slice(0, 3).map((step) => (
+                    <ActivityCompletionInterface
+                      key={step.id}
+                      activity={step}
+                      onComplete={(completionData) => markEnhancedStepComplete(step.id, completionData)}
+                      onScheduleAppointment={step.activity_type === 'appointment' ? 
+                        (appointmentData) => scheduleAppointment(step.id, appointmentData) : undefined
+                      }
+                    />
+                  ))}
+                  
+                  {enhancedOnboardingData.steps.length > 3 && (
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={() => navigate('/onboarding')}
+                    >
+                      View All Onboarding Steps ({enhancedOnboardingData.steps.length})
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Section 1: Today's Highlights */}
+            <HighlightsCarousel />
+
+            {/* Section 2: My Snapshot (Metrics) - for exploration phase */}
+            <MetricsSnapshot onTabChange={handleTabChange} />
+
+            {/* Section 3: My Trainers Carousel */}
+            <MyTrainersCarousel onTabChange={handleTabChange} />
+
+            {/* Section 4: Enhanced Explore Section with Swipeable Trainers */}
+            <ExploreSection 
+              isActiveClient={isActiveClient}
+              journeyProgress={journeyProgress}
+            />
+
+            {/* Section 5: Live Activity Feed */}
+            <div id="live-activity-tracker">
+              <ClientActivityFeed />
+            </div>
+          </>
         )}
-
-        {/* Section 1: Today's Highlights */}
-        <HighlightsCarousel />
-
-        {/* Section 2: My Snapshot (Metrics) */}
-        <MetricsSnapshot onTabChange={handleTabChange} />
-
-        {/* Section 3: My Trainers Carousel */}
-        <MyTrainersCarousel onTabChange={handleTabChange} />
-
-        {/* Section 4: Enhanced Explore Section with Swipeable Trainers */}
-        <ExploreSection 
-          isActiveClient={isActiveClient}
-          journeyProgress={journeyProgress}
-        />
-
-        {/* Section 5: Live Activity Feed */}
-        <div id="live-activity-tracker">
-          <ClientActivityFeed />
-        </div>
 
         {/* Spacer for floating button */}
         <div className="h-20" />
