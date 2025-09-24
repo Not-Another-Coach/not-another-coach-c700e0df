@@ -195,17 +195,6 @@ export const FeatureSummaryView = ({ trainer, children }: FeatureSummaryViewProp
               </div>
             </div>
 
-            {/* Description */}
-            <VisibilityAwareText
-              visibilityState={getVisibility('description_bio')}
-              className="bg-gradient-to-br from-muted/30 to-muted/50 rounded-xl p-4 border border-muted-foreground/10 backdrop-blur-sm"
-              placeholder="Bio unlocks as you engage"
-            >
-              <p className="text-sm text-muted-foreground line-clamp-4 leading-relaxed">
-                {trainer.description}
-              </p>
-            </VisibilityAwareText>
-
             {/* Additional specialties if any */}
             {((trainer as any).specializations || (trainer as any).specialties || []).length > 3 && (
               <div className="mt-3 flex justify-center">
@@ -214,6 +203,17 @@ export const FeatureSummaryView = ({ trainer, children }: FeatureSummaryViewProp
                 </Badge>
               </div>
             )}
+
+            {/* Description */}
+            <VisibilityAwareText
+              visibilityState={getVisibility('description_bio')}
+              className="bg-gradient-to-br from-muted/30 to-muted/50 rounded-xl p-4 border border-muted-foreground/10 backdrop-blur-sm mt-3"
+              placeholder="Bio unlocks as you engage"
+            >
+              <p className="text-sm text-muted-foreground line-clamp-4 leading-relaxed">
+                {trainer.description}
+              </p>
+            </VisibilityAwareText>
           </div>
           
           {/* Gradient overlay for text readability */}
