@@ -151,18 +151,28 @@ const ClientSurvey = () => {
   }, [user?.id]);
 
   // Initialize form data from profile and anonymous session
-  // Wait for migration to complete before initializing to get migrated data
+  // More resilient initialization that handles migration states better
   useEffect(() => {
-    if (profile && profile.id && !isMigrating && migrationCompleted && !hasInitialized.current) {
+    console.log('🔄 Form initialization check:', {
+      hasProfile: !!profile?.id,
+      isMigrating,
+      migrationCompleted,
+      hasInitialized: hasInitialized.current,
+      profileGoalsLength: profile?.primary_goals?.length || 0
+    });
+
+    // Initialize when we have a profile and either migration is done OR we're not migrating
+    if (profile && profile.id && (!isMigrating || migrationCompleted) && !hasInitialized.current) {
       hasInitialized.current = true;
+      console.log('✅ Initializing form with profile data');
       
-      // Start with profile data
+      // Start with profile data - use comprehensive mapping
       const initialData = {
         primary_goals: profile.primary_goals || [],
         secondary_goals: profile.secondary_goals || [],
         training_location_preference: profile.training_location_preference || null,
         open_to_virtual_coaching: profile.open_to_virtual_coaching ?? false,
-        preferred_training_frequency: profile.preferred_training_frequency,
+        preferred_training_frequency: profile.preferred_training_frequency || null,
         preferred_time_slots: profile.preferred_time_slots || [],
         start_timeline: profile.start_timeline || null,
         preferred_coaching_style: profile.preferred_coaching_style || [],
@@ -178,30 +188,64 @@ const ClientSurvey = () => {
         specific_event_details: (profile as any).specific_event_details || null,
         specific_event_date: (profile as any).specific_event_date ? new Date((profile as any).specific_event_date) : null,
         preferred_package_type: profile.preferred_package_type || null,
-        budget_range_min: profile.budget_range_min,
-        budget_range_max: profile.budget_range_max,
+        budget_range_min: profile.budget_range_min || null,
+        budget_range_max: profile.budget_range_max || null,
         budget_flexibility: profile.budget_flexibility || "flexible",
-        waitlist_preference: profile.waitlist_preference || null,
+        waitlist_preference: profile.waitlist_preference ?? null,
         flexible_scheduling: profile.flexible_scheduling ?? false,
         client_survey_completed: false,
       };
       
-      // If profile is empty but we have anonymous session data, pre-populate from it
+      // Fallback: If profile is empty but we have anonymous session data, use it
       if (anonymousSession?.quizResults && !profile.primary_goals?.length) {
+        console.log('📋 Using anonymous session data as fallback');
         const quizResults = anonymousSession.quizResults;
-        // Map quiz results to survey format
-        initialData.primary_goals = quizResults.goals || [];
-        initialData.training_location_preference = quizResults.location || null;
-        initialData.preferred_coaching_style = quizResults.coachingStyle || [];
-        // Add other mappings as needed based on available quiz data
+        
+        // Map from quiz to form using only properties that exist
+        if (quizResults.primary_goals || quizResults.goals) {
+          initialData.primary_goals = quizResults.primary_goals || quizResults.goals || [];
+        }
+        if (quizResults.secondary_goals) {
+          initialData.secondary_goals = quizResults.secondary_goals || [];
+        }
+        if (quizResults.training_location_preference || quizResults.location) {
+          initialData.training_location_preference = quizResults.training_location_preference || quizResults.location || null;
+        }
+        if (quizResults.open_to_virtual_coaching !== undefined) {
+          initialData.open_to_virtual_coaching = quizResults.open_to_virtual_coaching || false;
+        }
+        if (quizResults.preferred_training_frequency || quizResults.availability) {
+          const frequencyValue = quizResults.preferred_training_frequency || 
+            (typeof quizResults.availability === 'number' ? String(quizResults.availability) : quizResults.availability) || null;
+          initialData.preferred_training_frequency = typeof frequencyValue === 'string' ? frequencyValue : null;
+        }
+        if (quizResults.preferred_time_slots) {
+          initialData.preferred_time_slots = quizResults.preferred_time_slots || [];
+        }
+        if (quizResults.start_timeline) {
+          initialData.start_timeline = quizResults.start_timeline || null;
+        }
+        if (quizResults.preferred_coaching_style || quizResults.coachingStyle) {
+          initialData.preferred_coaching_style = quizResults.preferred_coaching_style || quizResults.coachingStyle || [];
+        }
+        if (quizResults.budget_range_min) {
+          initialData.budget_range_min = quizResults.budget_range_min || null;
+        }
+        if (quizResults.budget_range_max) {
+          initialData.budget_range_max = quizResults.budget_range_max || null;
+        }
+        if (quizResults.budget_flexibility) {
+          initialData.budget_flexibility = quizResults.budget_flexibility || "flexible";
+        }
       }
       
+      console.log('📝 Setting form data:', initialData);
       setFormData(initialData);
       
       // Set current step to continue from where left off, or start from step 1
       setCurrentStep(1);
     }
-  }, [profile?.id, migrationCompleted, isMigrating]);
+  }, [profile?.id, migrationCompleted, isMigrating, anonymousSession]);
 
   // Stable update function
   const updateFormData = (updates: Partial<typeof formData>) => {
@@ -459,10 +503,20 @@ const ClientSurvey = () => {
     }
   };
 
-  if (loading || profileLoading) {
+  // Comprehensive loading state to prevent flashing
+  if (loading || profileLoading || isMigrating || (!profile && user)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
+        <div className="text-center space-y-2">
+          <div className="text-lg">
+            {isMigrating ? 'Syncing your data...' : 'Loading...'}
+          </div>
+          {isMigrating && (
+            <div className="text-sm text-muted-foreground">
+              Transferring your preferences from anonymous session
+            </div>
+          )}
+        </div>
       </div>
     );
   }

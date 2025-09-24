@@ -151,17 +151,49 @@ export function useDataMigration() {
           } else {
             try {
               console.log('📝 Migrating quiz results to client profile...');
+              console.log('📋 Raw quiz results:', effectiveSessionData.quizResults);
               
-              // Map anonymous quiz results to client profile format
+              // Map anonymous quiz results to client profile format with comprehensive mapping
+              const quizResults = effectiveSessionData.quizResults;
               const quizData = {
                 quiz_completed: true,
-                quiz_answers: effectiveSessionData.quizResults,
+                quiz_answers: quizResults,
                 quiz_completed_at: new Date().toISOString(),
-                // Map quiz results to survey fields for immediate use
-                primary_goals: effectiveSessionData.quizResults.goals || [],
-                training_location_preference: effectiveSessionData.quizResults.location || null,
-                preferred_coaching_style: effectiveSessionData.quizResults.coachingStyle || [],
-                preferred_training_frequency: effectiveSessionData.quizResults.availability || null,
+                
+                // Goals - use both original and mapped properties
+                primary_goals: quizResults.primary_goals || quizResults.goals || [],
+                secondary_goals: quizResults.secondary_goals || [],
+                
+                // Location and format
+                training_location_preference: quizResults.training_location_preference || quizResults.location || null,
+                open_to_virtual_coaching: quizResults.open_to_virtual_coaching || false,
+                
+                // Scheduling and timing
+                preferred_training_frequency: quizResults.preferred_training_frequency || 
+                  (quizResults.availability ? String(quizResults.availability) : null),
+                preferred_time_slots: quizResults.preferred_time_slots || [],
+                start_timeline: quizResults.start_timeline || null,
+                
+                // Coaching style and motivation
+                preferred_coaching_style: quizResults.preferred_coaching_style || quizResults.coachingStyle || [],
+                motivation_factors: quizResults.motivation_factors || [],
+                
+                // Personal attributes
+                client_personality_type: quizResults.client_personality_type || [],
+                experience_level: quizResults.experience_level || 'beginner',
+                
+                // Budget - handle both string format and numeric format
+                budget_range_min: quizResults.budget_range_min || null,
+                budget_range_max: quizResults.budget_range_max || null,
+                budget_flexibility: quizResults.budget_flexibility || 'flexible',
+                
+                // Equipment and lifestyle
+                fitness_equipment_access: quizResults.fitness_equipment_access || [],
+                lifestyle_description: quizResults.lifestyle_description || [],
+                
+                // Availability preferences
+                waitlist_preference: quizResults.waitlist_preference ?? null,
+                flexible_scheduling: quizResults.flexible_scheduling || false,
               };
               
               console.log('📤 Updating profile with quiz data:', quizData);
