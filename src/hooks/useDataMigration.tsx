@@ -137,12 +137,12 @@ export function useDataMigration() {
           if (!profile) {
             console.log('⏳ Client profile not yet available, checking if we should retry...');
             
-            // Retry logic for when profile hasn't been created yet
-            if (retryCount < 3) {
-              console.log(`🔄 Retrying migration in 2 seconds (attempt ${retryCount + 1}/3)...`);
+            // Retry logic for when profile hasn't been created yet - reduce retries and delay
+            if (retryCount < 1) { // Reduce from 3 to 1 retry
+              console.log(`🔄 Retrying migration in 500ms (attempt ${retryCount + 1}/1)...`);
               setTimeout(() => {
                 migrateAnonymousData(retryCount + 1);
-              }, 2000);
+              }, 500); // Reduce from 2000ms to 500ms
               return;
             } else {
               console.log('❌ Max retries reached, profile still not available');
@@ -285,10 +285,10 @@ export function useDataMigration() {
       // Check for session ID in URL first (cross-device scenario)
       const urlSessionId = checkForSessionIdInUrl();
       
-      // Small delay to ensure all hooks are ready
+      // Reduce delay and add debouncing to prevent multiple calls
       setTimeout(() => {
         migrateAnonymousData(0, urlSessionId);
-      }, 1000);
+      }, 100);
     }
   }, [user, migrateAnonymousData, getSessionData, getTrainerSessionData, checkForSessionIdInUrl]);
 

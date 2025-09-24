@@ -86,7 +86,7 @@ export function useClientProfile() {
       setProfile(null);
       setLoading(false);
     }
-  }, [user, fetchProfile]);
+  }, [user]); // Remove fetchProfile from dependencies to prevent loops
 
   const updateProfile = useCallback(async (updates: Partial<ClientProfile>) => {
     if (!user) {

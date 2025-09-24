@@ -316,8 +316,13 @@ export const useClientJourneyProgress = () => {
     }
   };
 
+  // Add debouncing to prevent excessive calls
   useEffect(() => {
-    fetchProgress();
+    const timeoutId = setTimeout(() => {
+      fetchProgress();
+    }, 200);
+
+    return () => clearTimeout(timeoutId);
   }, [user]);
 
   return {

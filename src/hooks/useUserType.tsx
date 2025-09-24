@@ -49,7 +49,7 @@ export function useUserType(): UserTypeInfo {
 
   useEffect(() => {
     fetchUserType();
-  }, [fetchUserType]);
+  }, [user]); // Use user directly instead of fetchUserType to prevent loops
 
   return {
     user_type: userType,

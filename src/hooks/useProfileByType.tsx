@@ -52,7 +52,7 @@ function useAdminProfile() {
       setProfile(null);
       setLoading(false);
     }
-  }, [user, fetchProfile]);
+  }, [user]); // Remove fetchProfile from dependencies to prevent loops
 
   const updateProfile = useCallback(async (updates: Partial<BaseSharedProfile>) => {
     if (!user) return { error: 'No user logged in' };
