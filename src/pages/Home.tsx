@@ -56,6 +56,7 @@ export default function Home() {
   }, [user, profile, loading, profileLoading, userTypeLoading, user_type, navigate]);
 
   const handleQuizComplete = (results: any) => {
+    console.log('🎯 Quiz completed in Home component:', results);
     setShowQuizModal(false);
     // Scroll to browse trainers section to show filtered results
     setTimeout(() => {

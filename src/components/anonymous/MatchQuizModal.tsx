@@ -143,10 +143,17 @@ export const MatchQuizModal = ({ isOpen, onComplete, onClose }: MatchQuizModalPr
 
   // Auto-advance for single-choice questions
   useEffect(() => {
-    if (currentQuizStep.type === 'single' && canProceed && currentStep < quizSteps.length - 1) {
+    if (currentQuizStep?.type === 'single' && canProceed) {
       const timer = setTimeout(() => {
-        setCurrentStep(prev => prev + 1);
-      }, 800); // Short delay for better UX
+        if (currentStep < quizSteps.length - 1) {
+          // Normal advancement
+          setCurrentStep(prev => prev + 1);
+        } else {
+          // Last step - automatically complete the quiz
+          console.log('🎯 Auto-completing quiz on final step');
+          handleNext();
+        }
+      }, 1200); // Slightly longer delay for final step
       
       return () => clearTimeout(timer);
     }
@@ -160,6 +167,8 @@ export const MatchQuizModal = ({ isOpen, onComplete, onClose }: MatchQuizModalPr
   };
 
   const handleNext = () => {
+    console.log('🎯 HandleNext called - isLastStep:', isLastStep, 'currentStep:', currentStep);
+    
     if (isLastStep) {
       // Transform budget data to match client survey format
       const budgetMapping: Record<string, { min: number; max: number | null }> = {
@@ -193,10 +202,13 @@ export const MatchQuizModal = ({ isOpen, onComplete, onClose }: MatchQuizModalPr
         open_to_virtual_coaching: false,
       };
       
+      console.log('🎯 Quiz completion data:', quizResults);
       saveQuizResults(quizResults);
       setShowSummary(true);
+      
       // After showing summary, proceed to results
       setTimeout(() => {
+        console.log('🎯 Showing results and calling onComplete');
         setShowSummary(false);
         setShowResults(true);
         onComplete(quizResults);
