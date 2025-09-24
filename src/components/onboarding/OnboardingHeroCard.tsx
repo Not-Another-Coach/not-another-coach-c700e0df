@@ -166,7 +166,7 @@ export const OnboardingHeroCard = ({
                               <ActivityIcon className="h-3 w-3" />
                             )}
                           </div>
-                          <div className="text-center mt-1 max-w-20">
+                          <div className="text-center mt-1 max-w-24">
                             <p className={`text-xs font-medium ${
                               isActive ? 'text-white' : 'text-white/70'
                             }`} style={{ lineHeight: '1.2', wordWrap: 'break-word' }}>
@@ -174,7 +174,7 @@ export const OnboardingHeroCard = ({
                             </p>
                           </div>
                           {index < Math.min(steps.length - 1, 4) && (
-                            <div className={`absolute top-4 left-8 w-full h-0.5 ${
+                            <div className={`absolute top-4 left-1/2 w-1/2 h-0.5 ${
                               step.status === 'completed' ? 'bg-white/40' : 'bg-white/20'
                             }`} />
                           )}
