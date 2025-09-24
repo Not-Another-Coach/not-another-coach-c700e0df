@@ -255,6 +255,15 @@ export default function ClientDashboard() {
               onStepClick={handleStepClick}
             />
 
+            {/* Today's Highlights */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold text-foreground">Today's Highlights</h2>
+                <p className="text-sm text-muted-foreground">Curated for you</p>
+              </div>
+              <HighlightsCarousel />
+            </div>
+
             {/* Focus Tasks - Streamlined Next Steps */}
             <TodaysNextSteps
               steps={adaptStepsForTodaysNextSteps(onboardingData.steps)}
@@ -271,16 +280,6 @@ export default function ClientDashboard() {
               totalForms={onboardingData.steps.filter(s => s.step_type === 'mandatory').length}
               onMilestoneClick={handleStatClick}
             />
-
-
-            {/* Curated Content - From Your Trainer */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold text-foreground">From Your Trainer</h2>
-                <p className="text-sm text-muted-foreground">Curated for you</p>
-              </div>
-              <HighlightsCarousel />
-            </div>
 
             {/* Live Activity Feed - Hidden when empty */}
             <div id="live-activity-tracker">
