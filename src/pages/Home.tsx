@@ -19,7 +19,7 @@ import { useUserIntent } from "@/hooks/useUserIntent";
 import { Heart, ArrowRight } from "lucide-react";
 
 export default function Home() {
-  const { user, loading } = useAuth();
+  const { user, loading, isLoggingOut } = useAuth();
   const { profile, loading: profileLoading, userType } = useProfileByType();
   const { user_type, loading: userTypeLoading } = useUserType();
   const { savedTrainersCount } = useAnonymousSession();
@@ -32,6 +32,11 @@ export default function Home() {
   useDataMigration();
 
   useEffect(() => {
+    // Don't redirect if user is in the process of logging out
+    if (isLoggingOut) {
+      return;
+    }
+
     // Only navigate when all loading states are false and we have the necessary data
     if (loading || profileLoading || userTypeLoading) {
       return; // Still loading, don't navigate yet
@@ -55,7 +60,7 @@ export default function Home() {
         navigate('/admin');
       }
     }
-  }, [user, profile, loading, profileLoading, userTypeLoading, user_type, navigate]);
+  }, [user, profile, loading, profileLoading, userTypeLoading, user_type, navigate, isLoggingOut]);
 
   const handleQuizComplete = (results: any) => {
     console.log('🎯 Quiz completed in Home component:', results);

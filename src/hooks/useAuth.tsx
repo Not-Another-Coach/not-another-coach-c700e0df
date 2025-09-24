@@ -11,6 +11,7 @@ interface AuthContextType {
   signOut: () => Promise<{ error: any }>;
   resendConfirmation: (email: string) => Promise<{ error: any }>;
   loading: boolean;
+  isLoggingOut: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -19,6 +20,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { session: anonymousSession } = useAnonymousSession();
 
   useEffect(() => {
@@ -72,6 +74,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
+    // Set logging out flag to prevent redirect conflicts
+    setIsLoggingOut(true);
+    
     // Clear any saved credentials
     localStorage.removeItem('savedCredentials');
     localStorage.removeItem('rememberMe');
@@ -88,10 +93,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // because the user wants to be logged out
     }
     
-    // Always redirect to auth page regardless of error
-    setTimeout(() => {
-      window.location.href = '/auth';
-    }, 100);
+    // Use window.location for immediate, clean redirect
+    window.location.href = '/auth';
     
     return { error };
   };
@@ -124,6 +127,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signOut,
     resendConfirmation,
     loading,
+    isLoggingOut,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
