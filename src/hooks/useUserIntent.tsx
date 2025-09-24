@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useAnonymousSession } from './useAnonymousSession';
 
 type UserIntent = 'client' | 'trainer' | null;
 
@@ -9,6 +10,7 @@ interface UserIntentContextType {
   shouldShowModal: boolean;
   clearIntent: () => void;
   dismissModal: () => void;
+  resetIntentAndCreateNewSession: () => void;
 }
 
 const UserIntentContext = createContext<UserIntentContextType | undefined>(undefined);
@@ -19,6 +21,7 @@ const INTENT_SHOWN_KEY = 'intent-modal-shown';
 export function UserIntentProvider({ children }: { children: ReactNode }) {
   const [userIntent, setUserIntentState] = useState<UserIntent>(null);
   const [hasShownIntentModal, setHasShownIntentModal] = useState(false);
+  const { clearSession, createSession } = useAnonymousSession();
 
   useEffect(() => {
     // Load from localStorage on mount
@@ -63,6 +66,7 @@ export function UserIntentProvider({ children }: { children: ReactNode }) {
   };
 
   const clearIntent = () => {
+    console.log('🔄 INTENT: Clearing user intent only');
     setUserIntentState(null);
     setHasShownIntentModal(false);
     
@@ -74,10 +78,33 @@ export function UserIntentProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const resetIntentAndCreateNewSession = () => {
+    console.log('🔄 INTENT: Resetting intent and creating new anonymous session');
+    
+    // Clear the current anonymous session (saved trainers, quiz results, etc.)
+    clearSession();
+    
+    // Clear user intent
+    setUserIntentState(null);
+    setHasShownIntentModal(false);
+    
+    try {
+      localStorage.removeItem(INTENT_STORAGE_KEY);
+      localStorage.removeItem(INTENT_SHOWN_KEY);
+    } catch (error) {
+      console.error('Error clearing user intent from localStorage:', error);
+    }
+    
+    // Create a fresh anonymous session
+    createSession();
+    
+    console.log('✅ INTENT: Fresh start - new session created and intent reset');
+  };
+
   const shouldShowModal = !hasShownIntentModal && userIntent === null;
 
   return (
-    <UserIntentContext.Provider
+    <UserIntentContext.Provider 
       value={{
         userIntent,
         setUserIntent,
@@ -85,6 +112,7 @@ export function UserIntentProvider({ children }: { children: ReactNode }) {
         shouldShowModal,
         clearIntent,
         dismissModal,
+        resetIntentAndCreateNewSession,
       }}
     >
       {children}
