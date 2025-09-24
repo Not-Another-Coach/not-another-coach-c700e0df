@@ -257,10 +257,7 @@ export default function ClientDashboard() {
 
             {/* Today's Highlights */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold text-foreground">Today's Highlights</h2>
-                <p className="text-sm text-muted-foreground">Curated for you</p>
-              </div>
+              <h2 className="text-xl font-semibold text-foreground">Today's Highlights</h2>
               <HighlightsCarousel />
             </div>
 

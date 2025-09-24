@@ -108,7 +108,7 @@ export const OnboardingHeroCard = ({
                   Welcome back, {clientName}!
                 </h1>
                 <p className="text-primary-100 text-sm">
-                  {getProgressMessage()}
+                  {templateName} • {getProgressMessage()}
                 </p>
               </div>
               
@@ -130,28 +130,15 @@ export const OnboardingHeroCard = ({
                 </Button>
                 <Badge variant="secondary" className="text-xs bg-white/20 text-white border-white/30">
                   <Star className="h-3 w-3 mr-1" />
-                  Trainer
+                  {trainerName}
                 </Badge>
               </div>
             </div>
 
             {/* Progress Section with Visual Stepper */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium">{trainerName}</span>
-                  <span className="text-primary-200">•</span>
-                  <span className="text-primary-200">{templateName}</span>
-                </div>
-                <span className="font-bold">{completionPercentage}%</span>
-              </div>
-              
               {/* Visual Progress Stepper */}
               <div className="space-y-3">
-                <Progress 
-                  value={completionPercentage} 
-                  className="h-2 bg-white/20"
-                />
                 
                 {/* Desktop horizontal stepper */}
                 <div className="hidden md:block">
@@ -179,10 +166,10 @@ export const OnboardingHeroCard = ({
                               <ActivityIcon className="h-3 w-3" />
                             )}
                           </div>
-                          <div className="text-center mt-1 max-w-16">
-                            <p className={`text-xs font-medium truncate ${
+                          <div className="text-center mt-1 max-w-20">
+                            <p className={`text-xs font-medium ${
                               isActive ? 'text-white' : 'text-white/70'
-                            }`}>
+                            }`} style={{ lineHeight: '1.2', wordWrap: 'break-word' }}>
                               {step.activity_name}
                             </p>
                           </div>
