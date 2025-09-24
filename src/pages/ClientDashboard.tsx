@@ -264,22 +264,23 @@ export default function ClientDashboard() {
               <HighlightsCarousel />
             </div>
 
-            {/* Focus Tasks - Streamlined Next Steps */}
-            <TodaysNextSteps
-              steps={adaptStepsForTodaysNextSteps(onboardingData.steps)}
-              onTaskClick={handleStepClick}
-            />
-
-            {/* Setup Progress - Milestone-based */}
-            <SetupChecklist
-              completedSteps={onboardingData.completedCount}
-              totalSteps={onboardingData.totalCount}
-              sessionsBooked={0} // Would calculate from appointments
-              photosUploaded={onboardingData.steps.filter(s => s.requires_file_upload && s.status === 'completed').length}
-              formsCompleted={onboardingData.steps.filter(s => s.step_type === 'mandatory' && s.status === 'completed').length}
-              totalForms={onboardingData.steps.filter(s => s.step_type === 'mandatory').length}
-              onMilestoneClick={handleStatClick}
-            />
+            {/* Focus Tasks & Setup Progress - Side by Side */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <TodaysNextSteps
+                steps={adaptStepsForTodaysNextSteps(onboardingData.steps)}
+                onTaskClick={handleStepClick}
+              />
+              
+              <SetupChecklist
+                completedSteps={onboardingData.completedCount}
+                totalSteps={onboardingData.totalCount}
+                sessionsBooked={0} // Would calculate from appointments
+                photosUploaded={onboardingData.steps.filter(s => s.requires_file_upload && s.status === 'completed').length}
+                formsCompleted={onboardingData.steps.filter(s => s.step_type === 'mandatory' && s.status === 'completed').length}
+                totalForms={onboardingData.steps.filter(s => s.step_type === 'mandatory').length}
+                onMilestoneClick={handleStatClick}
+              />
+            </div>
 
             {/* Live Activity Feed - Hidden when empty */}
             <div id="live-activity-tracker">
