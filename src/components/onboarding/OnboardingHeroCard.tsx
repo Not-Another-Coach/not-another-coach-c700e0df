@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Star, MessageCircle, Calendar, ArrowRight, Clock, Upload, FileText, Link as LinkIcon, Circle } from 'lucide-react';
+import { CheckCircle, Star, MessageCircle, Calendar, ArrowRight, Clock, Upload, FileText, Link as LinkIcon, Circle, ChevronRight } from 'lucide-react';
 
 interface OnboardingStep {
   id: string;
@@ -142,41 +142,45 @@ export const OnboardingHeroCard = ({
                 
                 {/* Desktop horizontal stepper */}
                 <div className="hidden md:block">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-center">
                     {steps.slice(0, 5).map((step, index) => {
                       const StatusIcon = getStatusIcon(step.status);
                       const ActivityIcon = getActivityIcon(step.activity_type);
                       const isActive = index === currentStep - 1;
                       
                       return (
-                        <div key={step.id} className="flex flex-col items-center flex-1 relative">
-                          <div 
-                            className={`w-8 h-8 rounded-full border-2 flex items-center justify-center cursor-pointer transition-all ${
-                              step.status === 'completed' 
-                                ? 'bg-white/20 border-white text-white' 
-                                : isActive 
-                                  ? 'bg-white border-white text-primary-600' 
-                                  : 'bg-white/10 border-white/30 text-white/60'
-                            }`}
-                            onClick={() => onStepClick(step)}
-                          >
-                            {step.status === 'completed' ? (
-                              <CheckCircle className="h-4 w-4" />
-                            ) : (
-                              <ActivityIcon className="h-3 w-3" />
-                            )}
+                        <div key={step.id} className="flex items-center">
+                          <div className="flex flex-col items-center">
+                            <div 
+                              className={`w-8 h-8 rounded-full border-2 flex items-center justify-center cursor-pointer transition-all ${
+                                step.status === 'completed' 
+                                  ? 'bg-white/20 border-white text-white' 
+                                  : isActive 
+                                    ? 'bg-white border-white text-primary-600' 
+                                    : 'bg-white/10 border-white/30 text-white/60'
+                              }`}
+                              onClick={() => onStepClick(step)}
+                            >
+                              {step.status === 'completed' ? (
+                                <CheckCircle className="h-4 w-4" />
+                              ) : (
+                                <ActivityIcon className="h-3 w-3" />
+                              )}
+                            </div>
+                            <div className="text-center mt-1 max-w-24">
+                              <p className={`text-xs font-medium ${
+                                isActive ? 'text-white' : 'text-white/70'
+                              }`} style={{ lineHeight: '1.2', wordWrap: 'break-word' }}>
+                                {step.activity_name}
+                              </p>
+                            </div>
                           </div>
-                          <div className="text-center mt-1 max-w-24">
-                            <p className={`text-xs font-medium ${
-                              isActive ? 'text-white' : 'text-white/70'
-                            }`} style={{ lineHeight: '1.2', wordWrap: 'break-word' }}>
-                              {step.activity_name}
-                            </p>
-                          </div>
+                          
+                          {/* Arrow between steps */}
                           {index < Math.min(steps.length - 1, 4) && (
-                            <div className={`absolute top-4 left-1/2 w-1/2 h-0.5 ${
-                              step.status === 'completed' ? 'bg-white/40' : 'bg-white/20'
-                            }`} />
+                            <div className="flex items-center justify-center px-4">
+                              <ChevronRight className="h-4 w-4 text-white/60" />
+                            </div>
                           )}
                         </div>
                       );
