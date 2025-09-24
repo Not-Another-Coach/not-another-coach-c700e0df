@@ -5,7 +5,7 @@ import { useClientProfile } from "@/hooks/useClientProfile";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { useClientJourneyProgress } from "@/hooks/useClientJourneyProgress";
 import { useTrainerEngagement } from "@/hooks/useTrainerEngagement";
-import { useClientOnboardingEnhanced } from "@/hooks/useClientOnboardingEnhanced";
+import { useClientOnboarding } from "@/hooks/useClientOnboarding";
 import { useDiscoveryCallNotifications } from "@/hooks/useDiscoveryCallNotifications";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -42,13 +42,47 @@ export default function ClientDashboard() {
   const [activeTab, setActiveTab] = useState("summary"); // Keep for compatibility with MetricsSnapshot
   const [isMessagingOpen, setIsMessagingOpen] = useState(false);
   const { 
-    onboardingData: enhancedOnboardingData, 
-    markStepComplete: markEnhancedStepComplete, 
-    scheduleAppointment
-  } = useClientOnboardingEnhanced();
+    onboardingData, 
+    markStepComplete,
+    loading: onboardingLoading
+  } = useClientOnboarding();
   
-  // Additional state for onboarding interactions
-  const [selectedStep, setSelectedStep] = useState<any>(null);
+  // Helper functions to adapt data structures for components
+  const adaptStepsForTodaysNextSteps = (steps: import("@/hooks/useClientOnboarding").OnboardingStep[]) => {
+    return steps.map(step => ({
+      id: step.id,
+      activity_name: step.step_name,
+      activity_type: step.requires_file_upload ? 'file_upload' as const : 'task' as const,
+      status: step.status,
+      due_at: step.completed_at,
+      description: step.description
+    }));
+  };
+
+  const adaptStepsForProgressTracker = (steps: import("@/hooks/useClientOnboarding").OnboardingStep[]) => {
+    return steps.map(step => ({
+      id: step.id,
+      activity_name: step.step_name,
+      activity_type: step.requires_file_upload ? 'file_upload' as const : 'task' as const,
+      status: step.status,
+      due_at: step.completed_at,
+      description: step.description
+    }));
+  };
+
+  const adaptStepForActivityCompletion = (step: import("@/hooks/useClientOnboarding").OnboardingStep) => {
+    return {
+      id: step.id,
+      activity_name: step.step_name,
+      description: step.description,
+      activity_type: step.requires_file_upload ? 'file_upload' as const : 'task' as const,
+      status: step.status,
+      instructions: step.instructions,
+      completion_method: step.completion_method,
+      requires_file_upload: step.requires_file_upload,
+      upload_config: step.requires_file_upload ? { max_files: 5 } : undefined
+    };
+  };
   
   // Check if client is an active client with any trainer
   const isActiveClient = engagements.some(engagement => engagement.stage === 'active_client');
@@ -69,6 +103,9 @@ export default function ClientDashboard() {
       default: return 'Getting Started';
     }
   };
+
+  // Additional state for onboarding interactions
+  const [selectedStep, setSelectedStep] = useState<any>(null);
 
   // Redirect if not logged in
   useEffect(() => {
@@ -123,9 +160,9 @@ export default function ClientDashboard() {
   };
 
   const handleNextAction = () => {
-    if (enhancedOnboardingData?.steps) {
-      const nextStep = enhancedOnboardingData.steps.find(
-        step => step.status === 'pending' || step.status === 'in_progress'
+    if (onboardingData?.steps) {
+      const nextStep = onboardingData.steps.find(
+        step => step.status === 'pending'
       );
       if (nextStep) {
         handleStepClick(nextStep);
@@ -200,22 +237,22 @@ export default function ClientDashboard() {
       <main className="mx-auto px-6 lg:px-8 xl:px-12 py-6 space-y-8">
         
         {/* Onboarding-Focused Dashboard for Active Clients */}
-        {isActiveClient && enhancedOnboardingData ? (
+        {isActiveClient && onboardingData ? (
           <>
             {/* Welcome Banner */}
             <OnboardingWelcomeBanner
               clientName={profile?.first_name || "there"}
-              trainerName={enhancedOnboardingData.trainer_name}
-              currentStep={enhancedOnboardingData.total_steps - enhancedOnboardingData.steps.filter(s => s.status === 'pending').length}
-              totalSteps={enhancedOnboardingData.total_steps}
-              completionPercentage={enhancedOnboardingData.completion_percentage}
-              nextAction={enhancedOnboardingData.steps.find(s => s.status === 'pending')?.activity_name || "Continue onboarding"}
+              trainerName={onboardingData.trainerName}
+              currentStep={onboardingData.completedCount + 1}
+              totalSteps={onboardingData.totalCount}
+              completionPercentage={onboardingData.percentageComplete}
+              nextAction={onboardingData.steps.find(s => s.status === 'pending')?.step_name || "Continue onboarding"}
               onNextActionClick={handleNextAction}
             />
 
             {/* Trainer Snapshot */}
             <TrainerSnapshotCard
-              trainerName={enhancedOnboardingData.trainer_name}
+              trainerName={onboardingData.trainerName}
               trainerPhoto={null} // Would need to fetch from trainer profile
               trainerTagline="Your Personal Trainer" // Could be dynamic
               onMessage={() => handleQuickAction('message')}
@@ -228,31 +265,31 @@ export default function ClientDashboard() {
               onUploadPhoto={() => handleQuickAction('upload')}
               onSyncApp={() => handleQuickAction('sync')}
               onMessage={() => handleQuickAction('message')}
-              hasAppointmentActivity={enhancedOnboardingData.steps.some(s => s.activity_type === 'appointment')}
-              hasUploadActivity={enhancedOnboardingData.steps.some(s => s.activity_type === 'file_upload')}
+              hasAppointmentActivity={onboardingData.steps.some(s => s.requires_file_upload)}
+              hasUploadActivity={onboardingData.steps.some(s => s.requires_file_upload)}
             />
 
             {/* Today's Next Steps */}
             <TodaysNextSteps
-              steps={enhancedOnboardingData.steps}
+              steps={adaptStepsForTodaysNextSteps(onboardingData.steps)}
               onTaskClick={handleStepClick}
             />
 
             {/* Onboarding Progress Tracker */}
             <OnboardingProgressTracker
-              steps={enhancedOnboardingData.steps}
+              steps={adaptStepsForProgressTracker(onboardingData.steps)}
               onStepClick={handleStepClick}
             />
 
             {/* Getting Started Stats */}
             <GettingStartedStats
               sessionsBooked={0} // Would calculate from appointments
-              photosUploaded={enhancedOnboardingData.steps.filter(s => s.activity_type === 'file_upload' && s.status === 'completed').length}
-              formsCompleted={enhancedOnboardingData.steps.filter(s => s.activity_type === 'survey' && s.status === 'completed').length}
-              totalForms={enhancedOnboardingData.steps.filter(s => s.activity_type === 'survey').length}
+              photosUploaded={onboardingData.steps.filter(s => s.requires_file_upload && s.status === 'completed').length}
+              formsCompleted={onboardingData.steps.filter(s => s.step_type === 'mandatory' && s.status === 'completed').length}
+              totalForms={onboardingData.steps.filter(s => s.step_type === 'mandatory').length}
               syncsConnected={0} // Would track app integrations
-              completedSteps={enhancedOnboardingData.completed_steps}
-              totalSteps={enhancedOnboardingData.total_steps}
+              completedSteps={onboardingData.completedCount}
+              totalSteps={onboardingData.totalCount}
               onStatClick={handleStatClick}
             />
 
@@ -264,7 +301,7 @@ export default function ClientDashboard() {
               <ClientActivityFeed />
             </div>
           </>
-        ) : isActiveClient && !enhancedOnboardingData ? (
+        ) : isActiveClient && !onboardingData ? (
           <>
             {/* Placeholder for Active Client with No Template Assigned */}
             <Card className="border-primary-200 bg-gradient-to-br from-primary-50 to-primary-100">
@@ -310,42 +347,39 @@ export default function ClientDashboard() {
             {/* Exploration-Focused Dashboard for Non-Active Clients */}
             
             {/* Active Client Onboarding Section (Priority) - Compact Version */}
-            {isActiveClient && enhancedOnboardingData && (
+            {isActiveClient && onboardingData && (
               <Card className="border-primary-200 bg-gradient-to-br from-primary-50 to-primary-100">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <CheckSquare className="h-5 w-5 text-primary-600" />
-                    Your Onboarding with {enhancedOnboardingData.trainer_name}
+                    Your Onboarding with {onboardingData.trainerName}
                   </CardTitle>
                   <div className="flex items-center gap-4">
                     <Progress 
-                      value={enhancedOnboardingData.completion_percentage} 
+                      value={onboardingData.percentageComplete} 
                       className="flex-1" 
                     />
                     <span className="text-sm font-medium text-primary-700">
-                      {enhancedOnboardingData.completed_steps}/{enhancedOnboardingData.total_steps} Complete ({enhancedOnboardingData.completion_percentage}%)
+                      {onboardingData.completedCount}/{onboardingData.totalCount} Complete ({onboardingData.percentageComplete}%)
                     </span>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {enhancedOnboardingData.steps.slice(0, 3).map((step) => (
+                  {onboardingData.steps.slice(0, 3).map((step) => (
                     <ActivityCompletionInterface
                       key={step.id}
-                      activity={step}
-                      onComplete={(completionData) => markEnhancedStepComplete(step.id, completionData)}
-                      onScheduleAppointment={step.activity_type === 'appointment' ? 
-                        (appointmentData) => scheduleAppointment(step.id, appointmentData) : undefined
-                      }
+                      activity={adaptStepForActivityCompletion(step)}
+                      onComplete={(completionData) => markStepComplete(step.id, completionData)}
                     />
                   ))}
                   
-                  {enhancedOnboardingData.steps.length > 3 && (
+                  {onboardingData.steps.length > 3 && (
                     <Button 
                       variant="outline" 
                       className="w-full"
                       onClick={() => navigate('/onboarding')}
                     >
-                      View All Onboarding Steps ({enhancedOnboardingData.steps.length})
+                      View All Onboarding Steps ({onboardingData.steps.length})
                     </Button>
                   )}
                 </CardContent>
