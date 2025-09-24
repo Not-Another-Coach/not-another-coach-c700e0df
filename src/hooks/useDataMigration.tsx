@@ -174,8 +174,8 @@ export function useDataMigration() {
                 preferred_time_slots: quizResults.preferred_time_slots || [],
                 start_timeline: quizResults.start_timeline || null,
                 
-                // Coaching style - clear quiz values, let user select fresh from actual survey options
-                preferred_coaching_style: [], // Clear old quiz values to use actual survey options
+                // Coaching style - now using standardized IDs, can migrate properly
+                preferred_coaching_style: quizResults.preferred_coaching_style || [],
                 motivation_factors: quizResults.motivation_factors || [],
                 
                 // Personal attributes

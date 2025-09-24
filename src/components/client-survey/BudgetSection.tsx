@@ -119,7 +119,10 @@ export function BudgetSection({ formData, updateFormData, errors, clearFieldErro
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {budgetRanges.map((range, index) => {
-            const isSelected = formData.budget_range_min === range.min && formData.budget_range_max === range.max;
+            // Handle budget matching more flexibly - treat null min as 0 for comparison
+            const formMin = formData.budget_range_min ?? 0;
+            const rangeMin = range.min ?? 0;
+            const isSelected = formMin === rangeMin && formData.budget_range_max === range.max;
             
             return (
               <Card 

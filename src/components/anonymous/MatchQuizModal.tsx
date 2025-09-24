@@ -59,11 +59,12 @@ const quizSteps: QuizStep[] = [
     question: 'What coaching style works best for you?',
     type: 'multiple',
     options: [
-      { value: 'motivational', label: 'Motivational', description: 'High energy and encouraging' },
-      { value: 'analytical', label: 'Data-Driven', description: 'Focuses on metrics and progress tracking' },
-      { value: 'gentle', label: 'Gentle & Patient', description: 'Supportive and understanding approach' },
-      { value: 'challenging', label: 'Challenging', description: 'Pushes you to exceed your limits' },
-      { value: 'educational', label: 'Educational', description: 'Teaches you the why behind exercises' },
+      { value: 'nurturing', label: 'Nurturing & Supportive', description: 'Gentle encouragement, patience, and emotional support' },
+      { value: 'tough_love', label: 'Tough Love', description: 'Direct feedback, high standards, and accountability' },
+      { value: 'high_energy', label: 'High Energy', description: 'Enthusiastic, motivating, and energetic approach' },
+      { value: 'analytical', label: 'Technical & Analytical', description: 'Data-driven, precise form correction, and detailed explanations' },
+      { value: 'social', label: 'Social & Fun', description: 'Interactive, social, and makes fitness enjoyable' },
+      { value: 'calm', label: 'Calm & Mindful', description: 'Peaceful approach focusing on mind-body connection' },
     ]
   },
   {
