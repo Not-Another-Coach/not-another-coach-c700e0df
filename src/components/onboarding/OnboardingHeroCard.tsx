@@ -27,7 +27,6 @@ interface OnboardingHeroCardProps {
   steps: OnboardingStep[];
   onNextActionClick: () => void;
   onMessage: () => void;
-  onBookSession: () => void;
   onStepClick: (step: OnboardingStep) => void;
 }
 
@@ -44,7 +43,6 @@ export const OnboardingHeroCard = ({
   steps,
   onNextActionClick,
   onMessage,
-  onBookSession,
   onStepClick
 }: OnboardingHeroCardProps) => {
   const getInitials = (name: string) => {
@@ -114,7 +112,7 @@ export const OnboardingHeroCard = ({
                 </p>
               </div>
               
-              {/* Trainer Avatar */}
+              {/* Trainer Avatar with Message Button */}
               <div className="flex flex-col items-center">
                 <Avatar className="h-12 w-12 border-2 border-white/30 mb-1">
                   <AvatarImage src={trainerPhoto || undefined} alt={trainerName} />
@@ -122,10 +120,19 @@ export const OnboardingHeroCard = ({
                     {getInitials(trainerName)}
                   </AvatarFallback>
                 </Avatar>
-                <Badge variant="secondary" className="text-xs bg-white/20 text-white border-white/30">
+                <Badge variant="secondary" className="text-xs bg-white/20 text-white border-white/30 mb-2">
                   <Star className="h-3 w-3 mr-1" />
                   Trainer
                 </Badge>
+                <Button 
+                  onClick={onMessage}
+                  variant="outline" 
+                  size="sm"
+                  className="bg-white/10 border-white/30 text-white hover:bg-white/20 text-xs"
+                >
+                  <MessageCircle className="h-3 w-3 mr-1" />
+                  Message
+                </Button>
               </div>
             </div>
 
@@ -234,45 +241,6 @@ export const OnboardingHeroCard = ({
                 Continue Onboarding
                 <ArrowRight className="h-4 w-4 ml-1" />
               </Button>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="flex flex-col gap-2 ml-4">
-              <Button 
-                onClick={onMessage}
-                variant="outline" 
-                size="sm"
-                className="flex items-center gap-2 text-xs"
-              >
-                <MessageCircle className="h-3 w-3" />
-                Message
-              </Button>
-              <Button 
-                onClick={onBookSession}
-                variant="outline"
-                size="sm" 
-                className="flex items-center gap-2 text-xs"
-              >
-                <Calendar className="h-3 w-3" />
-                Book Call
-              </Button>
-            </div>
-          </div>
-
-
-          {/* Trainer Info */}
-          <div className="mt-4 pt-4 border-t border-muted/50">
-            <div className="flex items-center gap-3">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={trainerPhoto || undefined} alt={trainerName} />
-                <AvatarFallback className="bg-muted text-muted-foreground text-sm">
-                  {getInitials(trainerName)}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="font-medium text-sm text-foreground">{trainerName}</p>
-                <p className="text-xs text-muted-foreground">{trainerTagline}</p>
-              </div>
             </div>
           </div>
         </div>

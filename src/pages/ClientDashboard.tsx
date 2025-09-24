@@ -252,7 +252,6 @@ export default function ClientDashboard() {
               steps={adaptStepsForProgressTracker(onboardingData.steps)}
               onNextActionClick={handleNextAction}
               onMessage={() => handleQuickAction('message')}
-              onBookSession={() => handleQuickAction('book')}
               onStepClick={handleStepClick}
             />
 
