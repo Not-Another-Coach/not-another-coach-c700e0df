@@ -100,7 +100,7 @@ export const useClientJourneyProgress = () => {
           currentStage = 'exploring_coaches';
         }
       } else {
-        // Map RPC result to our stage types
+        // Map RPC result to our stage types, but we'll check onboarding for active_client below
         const stageMap: Record<string, ClientJourneyStage> = {
           'profile_setup': 'preferences_identified',
           'exploring_coaches': 'exploring_coaches', 
@@ -111,7 +111,7 @@ export const useClientJourneyProgress = () => {
           'discovery_call_booked': 'getting_to_know_your_coach',
           'discovery_completed': 'coach_chosen',
           'waitlist': 'coach_chosen',
-          'active_client': 'on_your_journey'
+          'active_client': 'onboarding_in_progress' // Default to onboarding, we'll check completion below
         };
         currentStage = stageMap[journeyStage] || 'preferences_identified';
       }
@@ -173,18 +173,18 @@ export const useClientJourneyProgress = () => {
       const completedOnboardingSteps = onboardingProgress?.filter(step => step.status === 'completed').length || 0;
       const onboardingCompletionPercentage = totalOnboardingSteps > 0 ? (completedOnboardingSteps / totalOnboardingSteps) * 100 : 0;
 
-      // Auto-advance to "on_your_journey" if onboarding is 100% complete
-      if (currentStage === 'onboarding_in_progress' && onboardingCompletionPercentage === 100) {
-        currentStage = 'on_your_journey';
-        
-        // Update the engagement to mark as active_client
-        const primaryTrainer = engagements?.[0]?.trainer_id;
-        if (primaryTrainer) {
-          await supabase.rpc('update_engagement_stage', {
-            client_uuid: user.id,
-            trainer_uuid: primaryTrainer,
-            new_stage: 'active_client'
-          });
+      // For active clients, determine stage based on onboarding completion
+      if (journeyStage === 'active_client') {
+        if (totalOnboardingSteps > 0) {
+          // Has onboarding tasks - check completion
+          if (onboardingCompletionPercentage === 100) {
+            currentStage = 'on_your_journey';
+          } else {
+            currentStage = 'onboarding_in_progress';
+          }
+        } else {
+          // No onboarding tasks - they're on their journey
+          currentStage = 'on_your_journey';
         }
       }
 
@@ -202,9 +202,10 @@ export const useClientJourneyProgress = () => {
         const hasLikedCoaches = engagements?.some(e => e.liked_at) || (engagements?.length || 0) > 0;
         const hasDiscoveryCall = engagements?.some(e => e.matched_at) || discoveryCalls?.some(dc => dc.status === 'scheduled');
         const hasChosenCoach = engagements?.some(e => e.discovery_completed_at);
-        // Fix onboarding logic: should be based on actual onboarding progress, not just engagement status
+        // Check onboarding/active client status based on actual progress, not just engagement
         const isOnboarding = totalOnboardingSteps > 0 && onboardingCompletionPercentage < 100;
-        const isActiveClient = engagements?.some(e => e.became_client_at) && (totalOnboardingSteps === 0 || onboardingCompletionPercentage === 100);
+        const isActiveClient = (engagements?.some(e => e.became_client_at) && totalOnboardingSteps === 0) || 
+                              (engagements?.some(e => e.became_client_at) && onboardingCompletionPercentage === 100);
 
         if (stageKey === 'preferences_identified') {
           hasData = true; // Always has data if we're showing the progress
