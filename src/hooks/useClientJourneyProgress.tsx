@@ -62,7 +62,7 @@ const CLIENT_JOURNEY_STAGES: Record<ClientJourneyStage, {
     tooltip: 'You\'re completing your coach onboarding and getting ready to start!'
   },
   on_your_journey: {
-    title: 'On Your Journey',
+    title: '🎉 On Your Journey',
     description: 'Training active',
     tooltip: 'Congratulations! Your fitness journey with your coach is now active and your package has commenced.'
   }
@@ -202,8 +202,9 @@ export const useClientJourneyProgress = () => {
         const hasLikedCoaches = engagements?.some(e => e.liked_at) || (engagements?.length || 0) > 0;
         const hasDiscoveryCall = engagements?.some(e => e.matched_at) || discoveryCalls?.some(dc => dc.status === 'scheduled');
         const hasChosenCoach = engagements?.some(e => e.discovery_completed_at);
-        const isOnboarding = engagements?.some(e => e.became_client_at && !e.discovery_completed_at);
-        const isActiveClient = engagements?.some(e => e.became_client_at && e.discovery_completed_at);
+        // Fix onboarding logic: should be based on actual onboarding progress, not just engagement status
+        const isOnboarding = totalOnboardingSteps > 0 && onboardingCompletionPercentage < 100;
+        const isActiveClient = engagements?.some(e => e.became_client_at) && (totalOnboardingSteps === 0 || onboardingCompletionPercentage === 100);
 
         if (stageKey === 'preferences_identified') {
           hasData = true; // Always has data if we're showing the progress
@@ -272,7 +273,7 @@ export const useClientJourneyProgress = () => {
           nextAction = 'Finish onboarding and start your training';
           break;
         case 'on_your_journey':
-          nextAction = 'Continue your fitness journey with your coach';
+          nextAction = ''; // No next action for final celebratory stage
           break;
       }
 
@@ -282,7 +283,8 @@ export const useClientJourneyProgress = () => {
         totalStages,
         percentage,
         steps,
-        nextAction
+        nextAction,
+        showCelebration: currentStage === 'on_your_journey'
       });
 
     } catch (error) {

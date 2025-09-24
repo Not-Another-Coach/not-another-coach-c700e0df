@@ -28,6 +28,7 @@ interface OnboardingHeroCardProps {
   onNextActionClick: () => void;
   onMessage: () => void;
   onStepClick: (step: OnboardingStep) => void;
+  showCelebration?: boolean;
 }
 
 export const OnboardingHeroCard = ({
@@ -43,7 +44,8 @@ export const OnboardingHeroCard = ({
   steps,
   onNextActionClick,
   onMessage,
-  onStepClick
+  onStepClick,
+  showCelebration = false
 }: OnboardingHeroCardProps) => {
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
@@ -214,24 +216,41 @@ export const OnboardingHeroCard = ({
           </div>
         </div>
 
-        {/* Next Step Inline CTA */}
-        <div className="p-6">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex-1">
-              <p className="text-sm text-muted-foreground">
-                Next up: <span className="font-medium text-foreground">{nextAction}</span>
+        {/* Next Step Inline CTA - Hide for celebration mode */}
+        {!showCelebration && nextAction && (
+          <div className="p-6">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex-1">
+                <p className="text-sm text-muted-foreground">
+                  Next up: <span className="font-medium text-foreground">{nextAction}</span>
+                </p>
+              </div>
+              <Button 
+                onClick={onNextActionClick}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground flex-shrink-0"
+                size="sm"
+              >
+                Continue
+                <ArrowRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Celebratory message for final stage */}
+        {showCelebration && (
+          <div className="p-6 text-center">
+            <div className="space-y-3">
+              <div className="text-4xl">🎉</div>
+              <h3 className="text-xl font-semibold text-foreground">
+                Congratulations, {clientName}!
+              </h3>
+              <p className="text-muted-foreground">
+                Your fitness journey with {trainerName} is now active. Your training package has commenced!
               </p>
             </div>
-            <Button 
-              onClick={onNextActionClick}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground flex-shrink-0"
-              size="sm"
-            >
-              Continue
-              <ArrowRight className="h-4 w-4 ml-1" />
-            </Button>
           </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );

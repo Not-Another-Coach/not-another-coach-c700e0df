@@ -253,6 +253,7 @@ export default function ClientDashboard() {
               onNextActionClick={handleNextAction}
               onMessage={() => handleQuickAction('message')}
               onStepClick={handleStepClick}
+              showCelebration={journeyProgress?.showCelebration || false}
             />
 
             {/* Today's Highlights */}
