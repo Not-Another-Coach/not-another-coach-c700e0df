@@ -10,6 +10,18 @@ interface AnonymousSession {
     coachingStyle: string[];
     availability: string;
     location: string;
+    // Extended fields for client survey compatibility
+    primary_goals?: string[];
+    secondary_goals?: string[];
+    budget_range_min?: number | null;
+    budget_range_max?: number | null;
+    budget_flexibility?: string;
+    preferred_coaching_style?: string[];
+    preferred_training_frequency?: number;
+    preferred_time_slots?: string[];
+    start_timeline?: string;
+    training_location_preference?: string;
+    open_to_virtual_coaching?: boolean;
   };
   createdAt: string;
   expiresAt: string;
@@ -204,7 +216,7 @@ export function useAnonymousSession() {
   }, [session, syncToServer]);
 
   // Save quiz results
-  const saveQuizResults = useCallback((results: AnonymousSession['quizResults']) => {
+  const saveQuizResults = useCallback((results: any) => {
     console.log('💾 Saving anonymous quiz results:', results);
     
     const currentSession = session || createSession();

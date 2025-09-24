@@ -4,14 +4,14 @@ import { Check } from 'lucide-react';
 
 interface QuizOptionCardProps {
   option: {
-    value: string;
+    value: string | number;
     label: string;
     description?: string;
     icon?: React.ComponentType<any>;
   };
   isSelected: boolean;
   onSelect: () => void;
-  type: 'single' | 'multiple' | 'location_input';
+  type: 'single' | 'multiple';
 }
 
 export const QuizOptionCard = ({ option, isSelected, onSelect, type }: QuizOptionCardProps) => {

@@ -9,7 +9,7 @@ import { useAnonymousSession } from "@/hooks/useAnonymousSession";
 import { QuizResults } from "./QuizResults";
 import { QuizOptionCard } from "./QuizOptionCard";
 import { 
-  ChevronRight, ChevronLeft, Target, DollarSign, Users, MapPin, Calendar,
+  ChevronRight, ChevronLeft, Target, DollarSign, Users, MapPin, Calendar, Clock,
   Scale, Dumbbell, Heart, Trophy, Activity, Cross, X, Sparkles
 } from "lucide-react";
 
@@ -18,8 +18,8 @@ interface QuizStep {
   title: string;
   icon: React.ComponentType<any>;
   question: string;
-  type: 'single' | 'multiple' | 'location_input';
-  options: { value: string; label: string; description?: string; icon?: React.ComponentType<any> }[];
+  type: 'single' | 'multiple';
+  options: { value: string | number; label: string; description?: string; icon?: React.ComponentType<any> }[];
 }
 
 const quizSteps: QuizStep[] = [
@@ -45,10 +45,11 @@ const quizSteps: QuizStep[] = [
     question: 'What\'s your monthly budget for personal training?',
     type: 'single',
     options: [
-      { value: '0-200', label: '£0-200/month', description: 'Budget-friendly options' },
-      { value: '200-400', label: '£200-400/month', description: 'Mid-range investment' },
-      { value: '400-600', label: '£400-600/month', description: 'Premium training' },
-      { value: '600+', label: '£600+/month', description: 'Luxury coaching' },
+      { value: 'budget_0_50', label: 'Under £50/month', description: 'Budget-friendly options' },
+      { value: 'budget_50_100', label: '£50-100/month', description: 'Most popular range' },
+      { value: 'budget_100_200', label: '£100-200/month', description: 'Premium options' },
+      { value: 'budget_200_500', label: '£200-500/month', description: 'High-end coaching' },
+      { value: 'budget_500_plus', label: '£500+/month', description: 'Luxury tier' },
     ]
   },
   {
@@ -66,25 +67,57 @@ const quizSteps: QuizStep[] = [
     ]
   },
   {
-    id: 'availability',
-    title: 'Availability',
+    id: 'trainingFrequency',
+    title: 'Training Frequency',
     icon: Calendar,
-    question: 'When do you prefer to train?',
+    question: 'How often would you like to train?',
     type: 'single',
     options: [
-      { value: 'morning', label: 'Morning (6-10 AM)', description: 'Early bird sessions' },
-      { value: 'afternoon', label: 'Afternoon (12-5 PM)', description: 'Midday workouts' },
-      { value: 'evening', label: 'Evening (6-9 PM)', description: 'After work sessions' },
-      { value: 'flexible', label: 'Flexible', description: 'Can adapt to trainer\'s schedule' },
+      { value: 1, label: '1 day per week', description: 'Light commitment' },
+      { value: 2, label: '2 days per week', description: 'Good for beginners' },
+      { value: 3, label: '3 days per week', description: 'Most popular choice' },
+      { value: 4, label: '4 days per week', description: 'Serious commitment' },
+      { value: 5, label: '5+ days per week', description: 'High intensity' },
+    ]
+  },
+  {
+    id: 'timeSlots',
+    title: 'Available Times',
+    icon: Clock,
+    question: 'When are you usually available? (Select all that apply)',
+    type: 'multiple',
+    options: [
+      { value: 'early_morning', label: 'Early Morning', description: '6:00 - 9:00 AM' },
+      { value: 'morning', label: 'Morning', description: '9:00 AM - 12:00 PM' },
+      { value: 'lunch', label: 'Lunch Time', description: '12:00 - 2:00 PM' },
+      { value: 'afternoon', label: 'Afternoon', description: '2:00 - 6:00 PM' },
+      { value: 'evening', label: 'Evening', description: '6:00 - 9:00 PM' },
+      { value: 'weekend', label: 'Weekends', description: 'Flexible timing' },
+    ]
+  },
+  {
+    id: 'startTimeline',
+    title: 'Start Timeline',
+    icon: Calendar,
+    question: 'When would you like to start?',
+    type: 'single',
+    options: [
+      { value: 'urgent', label: 'ASAP', description: 'I want to start within the next week' },
+      { value: 'next_month', label: 'Within a month', description: 'I\'m ready to start soon but not rushing' },
+      { value: 'flexible', label: 'I\'m flexible', description: 'I\'ll wait for the right trainer match' },
     ]
   },
   {
     id: 'location',
-    title: 'Location',
+    title: 'Training Location',
     icon: MapPin,
     question: 'Where would you like to train?',
-    type: 'location_input',
-    options: []
+    type: 'single',
+    options: [
+      { value: 'in-person', label: 'In-Person Training', description: 'Meet at gym or outdoor location' },
+      { value: 'online', label: 'Online Training', description: 'Train from home via video calls' },
+      { value: 'hybrid', label: 'Hybrid (Both)', description: 'Mix of in-person and online sessions' },
+    ]
   }
 ];
 
@@ -96,9 +129,8 @@ interface MatchQuizModalProps {
 
 export const MatchQuizModal = ({ isOpen, onComplete, onClose }: MatchQuizModalProps) => {
   const [currentStep, setCurrentStep] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
+  const [answers, setAnswers] = useState<Record<string, string | string[] | number>>({});
   const [showResults, setShowResults] = useState(false);
-  const [isOnlineSelected, setIsOnlineSelected] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
   const { saveQuizResults } = useAnonymousSession();
 
@@ -120,7 +152,7 @@ export const MatchQuizModal = ({ isOpen, onComplete, onClose }: MatchQuizModalPr
     }
   }, [answers[currentQuizStep?.id], currentQuizStep?.type, canProceed, currentStep]);
 
-  const handleAnswer = (stepId: string, value: string | string[]) => {
+  const handleAnswer = (stepId: string, value: string | string[] | number) => {
     setAnswers(prev => ({
       ...prev,
       [stepId]: value
@@ -129,13 +161,36 @@ export const MatchQuizModal = ({ isOpen, onComplete, onClose }: MatchQuizModalPr
 
   const handleNext = () => {
     if (isLastStep) {
-      // Complete quiz and show summary first
+      // Transform budget data to match client survey format
+      const budgetMapping: Record<string, { min: number; max: number | null }> = {
+        'budget_0_50': { min: 0, max: 50 },
+        'budget_50_100': { min: 50, max: 100 },
+        'budget_100_200': { min: 100, max: 200 },
+        'budget_200_500': { min: 200, max: 500 },
+        'budget_500_plus': { min: 500, max: null },
+      };
+
+      const budgetRange = budgetMapping[answers.budget as string];
+      
+      // Complete quiz and show summary first - maintain old format for compatibility
       const quizResults = {
         goals: answers.goals as string[],
         budget: answers.budget as string,
         coachingStyle: answers.coachingStyle as string[],
-        availability: answers.availability as string,
+        availability: `${answers.trainingFrequency} days/week`,
         location: answers.location as string,
+        // Extended data that matches client survey format
+        primary_goals: answers.goals ? [(answers.goals as string[])[0]] : [],
+        secondary_goals: answers.goals ? (answers.goals as string[]).slice(1) : [],
+        budget_range_min: budgetRange?.min || null,
+        budget_range_max: budgetRange?.max || null,
+        budget_flexibility: 'flexible',
+        preferred_coaching_style: answers.coachingStyle as string[] || [],
+        preferred_training_frequency: answers.trainingFrequency as number,
+        preferred_time_slots: answers.timeSlots as string[] || [],
+        start_timeline: answers.startTimeline as string,
+        training_location_preference: answers.location as string,
+        open_to_virtual_coaching: false,
       };
       
       saveQuizResults(quizResults);
@@ -163,7 +218,6 @@ export const MatchQuizModal = ({ isOpen, onComplete, onClose }: MatchQuizModalPr
     setAnswers({});
     setShowResults(false);
     setShowSummary(false);
-    setIsOnlineSelected(false);
     onClose();
   };
 
@@ -176,8 +230,11 @@ export const MatchQuizModal = ({ isOpen, onComplete, onClose }: MatchQuizModalPr
     ).filter(Boolean).join(', ');
     
     const budgetLabel = quizSteps[1].options.find(opt => opt.value === answers.budget)?.label;
-    const availabilityLabel = quizSteps[3].options.find(opt => opt.value === answers.availability)?.label;
-    const location = answers.location === 'online' ? 'Online Training' : answers.location;
+    const frequencyLabel = quizSteps[3].options.find(opt => opt.value === answers.trainingFrequency)?.label;
+    const timeSlotsLabels = (answers.timeSlots as string[] || []).map(slot => 
+      quizSteps[4].options.find(opt => opt.value === slot)?.label
+    ).filter(Boolean).join(', ');
+    const locationLabel = quizSteps[6].options.find(opt => opt.value === answers.location)?.label;
 
     return (
       <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -195,8 +252,9 @@ export const MatchQuizModal = ({ isOpen, onComplete, onClose }: MatchQuizModalPr
               <div className="space-y-2">
                 <div><span className="font-medium">Goals:</span> {goalLabels}</div>
                 <div><span className="font-medium">Budget:</span> {budgetLabel}</div>
-                <div><span className="font-medium">Available:</span> {availabilityLabel}</div>
-                <div><span className="font-medium">Location:</span> {location}</div>
+                <div><span className="font-medium">Frequency:</span> {frequencyLabel}</div>
+                <div><span className="font-medium">Available:</span> {timeSlotsLabels}</div>
+                <div><span className="font-medium">Location:</span> {locationLabel}</div>
               </div>
             </div>
             
@@ -267,72 +325,38 @@ export const MatchQuizModal = ({ isOpen, onComplete, onClose }: MatchQuizModalPr
 
           {/* Content */}
           <div className="space-y-6">
-            {currentQuizStep.type === 'location_input' ? (
-              <div className="space-y-6">
-                <div className="flex items-center space-x-3 p-4 rounded-lg border bg-accent/20">
-                  <Checkbox
-                    id="online-training"
-                    checked={isOnlineSelected}
-                    onCheckedChange={(checked) => {
-                      setIsOnlineSelected(checked as boolean);
-                      if (checked) {
-                        handleAnswer(currentQuizStep.id, 'online');
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {currentQuizStep.options.map((option) => {
+                const isSelected = currentQuizStep.type === 'single' 
+                  ? answers[currentQuizStep.id] === option.value
+                  : (answers[currentQuizStep.id] as (string | number)[] || []).includes(option.value);
+                
+                return (
+                  <QuizOptionCard
+                    key={String(option.value)}
+                    option={option}
+                    isSelected={isSelected}
+                    type={currentQuizStep.type}
+                    onSelect={() => {
+                      if (currentQuizStep.type === 'single') {
+                        handleAnswer(currentQuizStep.id, option.value);
                       } else {
-                        handleAnswer(currentQuizStep.id, '');
+                        const currentAnswers = (answers[currentQuizStep.id] as (string | number)[]) || [];
+                        let newAnswers;
+                        
+                        if (isSelected) {
+                          newAnswers = currentAnswers.filter(a => a !== option.value);
+                        } else {
+                          newAnswers = [...currentAnswers, option.value];
+                        }
+                        
+                        handleAnswer(currentQuizStep.id, newAnswers);
                       }
                     }}
                   />
-                  <Label htmlFor="online-training" className="text-base font-medium">
-                    I prefer online training only
-                  </Label>
-                </div>
-                
-                {!isOnlineSelected && (
-                  <div>
-                    <Label htmlFor="location-input" className="text-base font-medium mb-3 block">
-                      Enter your city or location
-                    </Label>
-                    <LocationAutocompleteField
-                      value={answers[currentQuizStep.id] as string || ''}
-                      onChange={(value) => handleAnswer(currentQuizStep.id, value)}
-                    />
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {currentQuizStep.options.map((option) => {
-                  const isSelected = currentQuizStep.type === 'single' 
-                    ? answers[currentQuizStep.id] === option.value
-                    : (answers[currentQuizStep.id] as string[] || []).includes(option.value);
-                  
-                  return (
-                    <QuizOptionCard
-                      key={option.value}
-                      option={option}
-                      isSelected={isSelected}
-                      type={currentQuizStep.type}
-                      onSelect={() => {
-                        if (currentQuizStep.type === 'single') {
-                          handleAnswer(currentQuizStep.id, option.value);
-                        } else {
-                          const currentAnswers = (answers[currentQuizStep.id] as string[]) || [];
-                          let newAnswers;
-                          
-                          if (isSelected) {
-                            newAnswers = currentAnswers.filter(a => a !== option.value);
-                          } else {
-                            newAnswers = [...currentAnswers, option.value];
-                          }
-                          
-                          handleAnswer(currentQuizStep.id, newAnswers);
-                        }
-                      }}
-                    />
-                  );
-                })}
-              </div>
-            )}
+                );
+              })}
+            </div>
 
             {/* Navigation */}
             <div className="flex justify-between pt-8">
@@ -345,8 +369,8 @@ export const MatchQuizModal = ({ isOpen, onComplete, onClose }: MatchQuizModalPr
                 {currentStep === 0 ? 'Skip Quiz' : 'Back'}
               </Button>
               
-              {/* Only show Next button for multi-choice and location steps */}
-              {(currentQuizStep.type === 'multiple' || currentQuizStep.type === 'location_input') && (
+              {/* Only show Next button for multi-choice steps */}
+              {currentQuizStep.type === 'multiple' && (
                 <Button
                   onClick={handleNext}
                   disabled={!canProceed}
