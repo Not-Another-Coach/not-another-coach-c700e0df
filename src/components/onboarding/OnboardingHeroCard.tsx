@@ -112,27 +112,26 @@ export const OnboardingHeroCard = ({
                 </p>
               </div>
               
-              {/* Trainer Avatar with Message Button */}
-              <div className="flex flex-col items-center">
+              {/* Trainer Avatar with Message Icon */}
+              <div className="flex flex-col items-center relative">
                 <Avatar className="h-12 w-12 border-2 border-white/30 mb-1">
                   <AvatarImage src={trainerPhoto || undefined} alt={trainerName} />
                   <AvatarFallback className="bg-white/20 text-white font-semibold">
                     {getInitials(trainerName)}
                   </AvatarFallback>
                 </Avatar>
-                <Badge variant="secondary" className="text-xs bg-white/20 text-white border-white/30 mb-2">
+                <Button
+                  onClick={onMessage}
+                  size="icon"
+                  variant="outline"
+                  className="absolute -top-1 -right-1 h-6 w-6 bg-white/10 border-white/30 text-white hover:bg-white/20 rounded-full"
+                >
+                  <MessageCircle className="h-3 w-3" />
+                </Button>
+                <Badge variant="secondary" className="text-xs bg-white/20 text-white border-white/30">
                   <Star className="h-3 w-3 mr-1" />
                   Trainer
                 </Badge>
-                <Button 
-                  onClick={onMessage}
-                  variant="outline" 
-                  size="sm"
-                  className="bg-white/10 border-white/30 text-white hover:bg-white/20 text-xs"
-                >
-                  <MessageCircle className="h-3 w-3 mr-1" />
-                  Message
-                </Button>
               </div>
             </div>
 
@@ -224,9 +223,23 @@ export const OnboardingHeroCard = ({
           </div>
         </div>
 
-        {/* Action Section - Removed Next up duplicate */}
+        {/* Next Step Inline CTA */}
         <div className="p-6">
-          {/* Empty for now since Next up was duplicate of Focus Tasks */}
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex-1">
+              <p className="text-sm text-muted-foreground">
+                Next up: <span className="font-medium text-foreground">{nextAction}</span>
+              </p>
+            </div>
+            <Button 
+              onClick={onNextActionClick}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground flex-shrink-0"
+              size="sm"
+            >
+              Continue
+              <ArrowRight className="h-4 w-4 ml-1" />
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>

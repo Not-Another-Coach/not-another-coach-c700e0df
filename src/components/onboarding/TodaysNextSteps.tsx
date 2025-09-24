@@ -111,7 +111,7 @@ export const TodaysNextSteps = ({ steps, onTaskClick }: TodaysNextStepsProps) =>
           Your Focus Tasks
         </CardTitle>
         <p className="text-sm text-muted-foreground mt-1">
-          Top {Math.min(prioritizedTasks.length, 3)} priority actions for today
+          Your most important tasks - not just today's schedule
         </p>
       </CardHeader>
       <CardContent>
