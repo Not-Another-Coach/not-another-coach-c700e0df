@@ -22,6 +22,7 @@ interface Trainer {
   profile_photo_url: string;
   hourly_rate: number | null;
   free_discovery_call: boolean | null;
+  bio?: string;
   testimonials: any[];
 }
 
@@ -57,6 +58,7 @@ export const AnonymousBrowse = () => {
           profile_photo_url,
           hourly_rate,
           free_discovery_call,
+          bio,
           testimonials
         `)
         .eq('profile_published', true)
@@ -120,7 +122,8 @@ export const AnonymousBrowse = () => {
             totalRatings: trainer.total_ratings,
             hourlyRate: trainer.hourly_rate,
             freeDiscoveryCall: trainer.free_discovery_call,
-            testimonials: trainer.testimonials || []
+            testimonials: trainer.testimonials || [],
+            description: trainer.bio || ''
           };
           
           return (

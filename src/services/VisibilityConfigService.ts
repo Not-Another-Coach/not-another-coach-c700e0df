@@ -82,9 +82,12 @@ class VisibilityConfigServiceClass {
       if (contentType === 'pricing_discovery_call') {
         return 'blurred';
       }
-      // Gallery images and testimonials can be visible for guests if admin sets them
-      if (['gallery_images', 'testimonial_images'].includes(contentType)) {
-        return 'visible'; // Let admin override this in DB
+      // Gallery images can be visible by default; testimonials default to blurred for guests
+      if (contentType === 'gallery_images') {
+        return 'visible';
+      }
+      if (contentType === 'testimonial_images') {
+        return 'blurred';
       }
       return 'hidden';
     }
