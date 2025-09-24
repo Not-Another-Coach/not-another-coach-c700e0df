@@ -249,9 +249,11 @@ export default function ClientDashboard() {
               completionPercentage={onboardingData.percentageComplete}
               nextAction={onboardingData.steps.find(s => s.status === 'pending')?.step_name || "Continue onboarding"}
               templateName={onboardingData.templateName}
+              steps={adaptStepsForProgressTracker(onboardingData.steps)}
               onNextActionClick={handleNextAction}
               onMessage={() => handleQuickAction('message')}
               onBookSession={() => handleQuickAction('book')}
+              onStepClick={handleStepClick}
             />
 
             {/* Focus Tasks - Streamlined Next Steps */}
@@ -271,11 +273,6 @@ export default function ClientDashboard() {
               onMilestoneClick={handleStatClick}
             />
 
-            {/* Full Progress Tracker - Detailed View */}
-            <OnboardingProgressTracker
-              steps={adaptStepsForProgressTracker(onboardingData.steps)}
-              onStepClick={handleStepClick}
-            />
 
             {/* Curated Content - From Your Trainer */}
             <div className="space-y-4">
