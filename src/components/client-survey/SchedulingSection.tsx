@@ -2,7 +2,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, Zap } from "lucide-react";
+
 
 interface SchedulingSectionProps {
   formData: any;
@@ -28,26 +28,6 @@ const timeSlotOptions = [
   { id: "weekend", label: "Weekends", time: "Flexible timing", icon: "🏖️" },
 ];
 
-const startTimelineOptions = [
-  { 
-    id: "urgent", 
-    label: "ASAP", 
-    description: "I want to start within the next week",
-    icon: <Zap className="h-5 w-5" />
-  },
-  { 
-    id: "next_month", 
-    label: "Within a month", 
-    description: "I'm ready to start soon but not rushing",
-    icon: <Calendar className="h-5 w-5" />
-  },
-  { 
-    id: "flexible", 
-    label: "I'm flexible", 
-    description: "I'll wait for the right trainer match",
-    icon: <Clock className="h-5 w-5" />
-  },
-];
 
 export function SchedulingSection({ formData, updateFormData, errors, clearFieldError }: SchedulingSectionProps) {
   const handleFrequencyChange = (frequency: number) => {
@@ -64,16 +44,13 @@ export function SchedulingSection({ formData, updateFormData, errors, clearField
     clearFieldError?.('preferred_time_slots');
   };
 
-  const handleStartTimelineChange = (timeline: string) => {
-    updateFormData({ start_timeline: timeline });
-  };
 
   return (
     <div className="space-y-8">
       <div className="text-center space-y-2">
         <h2 className="text-2xl font-bold">Let's plan your training schedule</h2>
         <p className="text-muted-foreground">
-          Help us understand your availability and commitment level
+          Help us understand your training frequency and preferred times
         </p>
       </div>
 
@@ -157,43 +134,6 @@ export function SchedulingSection({ formData, updateFormData, errors, clearField
         </div>
       </div>
 
-      {/* Start Timeline */}
-      <div className="space-y-4">
-        <div>
-          <Label className="text-base font-semibold">When would you like to start?</Label>
-          <p className="text-sm text-muted-foreground">
-            This helps us prioritize trainer availability
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {startTimelineOptions.map((option) => {
-            const isSelected = formData.start_timeline === option.id;
-            
-            return (
-              <Card 
-                key={option.id}
-                className={`cursor-pointer transition-all hover:shadow-md ${
-                  isSelected ? 'border-primary bg-primary/5' : ''
-                }`}
-                onClick={() => handleStartTimelineChange(option.id)}
-              >
-                <CardContent className="p-4 text-center space-y-3">
-                  <div className="flex justify-center text-primary">
-                    {option.icon}
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">{option.label}</h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {option.description}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      </div>
 
       {/* Schedule Summary */}
       {formData.preferred_training_frequency && formData.preferred_time_slots?.length > 0 && (
@@ -213,12 +153,6 @@ export function SchedulingSection({ formData, updateFormData, errors, clearField
                   return slot?.label;
                 }).join(", ")}
               </div>
-              {formData.start_timeline && (
-                <div>
-                  <span className="font-medium">Start date:</span>{" "}
-                  {startTimelineOptions.find(opt => opt.id === formData.start_timeline)?.label}
-                </div>
-              )}
             </div>
           </CardContent>
         </Card>

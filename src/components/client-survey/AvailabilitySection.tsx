@@ -1,7 +1,7 @@
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Calendar, Clock, Users } from "lucide-react";
+import { Calendar, Clock, Users, Zap } from "lucide-react";
 
 interface AvailabilitySectionProps {
   formData: any;
@@ -27,6 +27,27 @@ const waitlistOptions = [
   }
 ];
 
+const startTimelineOptions = [
+  { 
+    id: "urgent", 
+    label: "ASAP", 
+    description: "I want to start within the next week",
+    icon: <Zap className="h-5 w-5" />
+  },
+  { 
+    id: "next_month", 
+    label: "Within a month", 
+    description: "I'm ready to start soon but not rushing",
+    icon: <Calendar className="h-5 w-5" />
+  },
+  { 
+    id: "flexible", 
+    label: "I'm flexible", 
+    description: "I'll wait for the right trainer match",
+    icon: <Clock className="h-5 w-5" />
+  },
+];
+
 export function AvailabilitySection({ formData, updateFormData, errors, clearFieldError }: AvailabilitySectionProps) {
   const handleWaitlistPreferenceChange = (preference: "asap" | "quality_over_speed") => {
     // Convert string values to boolean for database compatibility
@@ -48,6 +69,10 @@ export function AvailabilitySection({ formData, updateFormData, errors, clearFie
     updateFormData({ flexible_scheduling: checked });
   };
 
+  const handleStartTimelineChange = (timeline: string) => {
+    updateFormData({ start_timeline: timeline });
+  };
+
   return (
     <div className="space-y-6">
       <div className="text-center space-y-2">
@@ -58,6 +83,44 @@ export function AvailabilitySection({ formData, updateFormData, errors, clearFie
       </div>
 
       {/* Start Timeline */}
+      <div className="space-y-4">
+        <div>
+          <Label className="text-base font-semibold">When would you like to start?</Label>
+          <p className="text-sm text-muted-foreground">
+            This helps us prioritize trainer availability for you
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {startTimelineOptions.map((option) => {
+            const isSelected = formData.start_timeline === option.id;
+            
+            return (
+              <Card 
+                key={option.id}
+                className={`cursor-pointer transition-all hover:shadow-md ${
+                  isSelected ? 'border-primary bg-primary/5' : ''
+                }`}
+                onClick={() => handleStartTimelineChange(option.id)}
+              >
+                <CardContent className="p-4 text-center space-y-3">
+                  <div className="flex justify-center text-primary">
+                    {option.icon}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">{option.label}</h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {option.description}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Waitlist Preference */}
       <div className="space-y-4">
         <div>
           <Label className="text-base font-semibold">If your ideal trainer isn't immediately available</Label>

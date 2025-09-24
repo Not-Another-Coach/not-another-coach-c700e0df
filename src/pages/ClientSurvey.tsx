@@ -52,7 +52,7 @@ const ClientSurvey = () => {
     open_to_virtual_coaching: false,
     
     // Training frequency and scheduling
-    preferred_training_frequency: null as string | null,
+    preferred_training_frequency: null as number | null,
     preferred_time_slots: [] as string[],
     start_timeline: null as string | null,
     
@@ -93,7 +93,7 @@ const ClientSurvey = () => {
   const stepTitles = [
     "Your Goals",
     "Training Location",
-    "Scheduling Preferences", 
+    "Training Schedule", 
     "Coaching Style",
     "About You",
     "Lifestyle & Health",
@@ -172,7 +172,7 @@ const ClientSurvey = () => {
         secondary_goals: profile.secondary_goals || [],
         training_location_preference: profile.training_location_preference || null,
         open_to_virtual_coaching: profile.open_to_virtual_coaching ?? false,
-        preferred_training_frequency: profile.preferred_training_frequency || null,
+        preferred_training_frequency: profile.preferred_training_frequency ? parseInt(profile.preferred_training_frequency) : null,
         preferred_time_slots: profile.preferred_time_slots || [],
         start_timeline: profile.start_timeline || null,
         preferred_coaching_style: profile.preferred_coaching_style || [],
@@ -215,9 +215,9 @@ const ClientSurvey = () => {
           initialData.open_to_virtual_coaching = quizResults.open_to_virtual_coaching || false;
         }
         if (quizResults.preferred_training_frequency || quizResults.availability) {
-          const frequencyValue = quizResults.preferred_training_frequency || 
-            (typeof quizResults.availability === 'number' ? String(quizResults.availability) : quizResults.availability) || null;
-          initialData.preferred_training_frequency = typeof frequencyValue === 'string' ? frequencyValue : null;
+          const frequencyValue = quizResults.preferred_training_frequency || quizResults.availability || null;
+          initialData.preferred_training_frequency = typeof frequencyValue === 'number' ? frequencyValue : 
+            (typeof frequencyValue === 'string' ? parseInt(frequencyValue) : null);
         }
         if (quizResults.preferred_time_slots) {
           initialData.preferred_time_slots = quizResults.preferred_time_slots || [];
@@ -373,6 +373,8 @@ const ClientSurvey = () => {
       // Update survey completion without step tracking
       const dataToSave = {
         ...formData,
+        // Convert number to string for database compatibility
+        preferred_training_frequency: formData.preferred_training_frequency ? String(formData.preferred_training_frequency) : null,
       };
       
       const result = await updateProfile(dataToSave);
@@ -423,6 +425,7 @@ const ClientSurvey = () => {
       } else {
         await updateProfile({ 
           ...formData, 
+          preferred_training_frequency: formData.preferred_training_frequency ? String(formData.preferred_training_frequency) : null,
           client_survey_completed: true,
           quiz_completed: true
         });
