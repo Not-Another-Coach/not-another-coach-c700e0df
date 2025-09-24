@@ -206,13 +206,13 @@ export const MatchQuizModal = ({ isOpen, onComplete, onClose }: MatchQuizModalPr
       saveQuizResults(quizResults);
       setShowSummary(true);
       
-      // After showing summary, proceed to results
+      // After showing summary, proceed to results with longer matching experience
       setTimeout(() => {
         console.log('🎯 Showing results and calling onComplete');
         setShowSummary(false);
         setShowResults(true);
         onComplete(quizResults);
-      }, 2000);
+      }, 4500); // Increased from 2000ms to 4500ms for better UX
     } else {
       setCurrentStep(prev => prev + 1);
     }
@@ -257,22 +257,43 @@ export const MatchQuizModal = ({ isOpen, onComplete, onClose }: MatchQuizModalPr
               <Sparkles className="w-8 h-8 text-primary animate-pulse" />
             </div>
             
-            <h2 className="text-2xl font-bold mb-4">Perfect! Finding your matches...</h2>
+            <h2 className="text-2xl font-bold mb-6">Perfect! Finding your matches...</h2>
             
-            <div className="space-y-3 text-left bg-background/50 rounded-lg p-4 mb-6">
+            <div className="space-y-4 text-left bg-background/50 rounded-lg p-4 mb-6">
               <p className="text-sm text-muted-foreground">Here's what we found for you:</p>
               <div className="space-y-2">
-                <div><span className="font-medium">Goals:</span> {goalLabels}</div>
-                <div><span className="font-medium">Budget:</span> {budgetLabel}</div>
-                <div><span className="font-medium">Frequency:</span> {frequencyLabel}</div>
-                <div><span className="font-medium">Available:</span> {timeSlotsLabels}</div>
-                <div><span className="font-medium">Location:</span> {locationLabel}</div>
+                <div className="animate-fade-in" style={{animationDelay: '0.2s'}}><span className="font-medium">Goals:</span> {goalLabels}</div>
+                <div className="animate-fade-in" style={{animationDelay: '0.4s'}}><span className="font-medium">Budget:</span> {budgetLabel}</div>
+                <div className="animate-fade-in" style={{animationDelay: '0.6s'}}><span className="font-medium">Frequency:</span> {frequencyLabel}</div>
+                <div className="animate-fade-in" style={{animationDelay: '0.8s'}}><span className="font-medium">Available:</span> {timeSlotsLabels}</div>
+                <div className="animate-fade-in" style={{animationDelay: '1.0s'}}><span className="font-medium">Location:</span> {locationLabel}</div>
               </div>
             </div>
             
-            <div className="animate-pulse">
-              <div className="h-2 bg-primary rounded-full animate-pulse"></div>
-              <p className="text-sm text-muted-foreground mt-2">Matching you with perfect coaches...</p>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between text-sm text-muted-foreground animate-fade-in" style={{animationDelay: '1.5s'}}>
+                <span>🔍 Analyzing your preferences...</span>
+                <span>✓</span>
+              </div>
+              <div className="flex items-center justify-between text-sm text-muted-foreground animate-fade-in" style={{animationDelay: '2.0s'}}>
+                <span>💪 Finding compatible trainers...</span>
+                <span>✓</span>
+              </div>
+              <div className="flex items-center justify-between text-sm text-muted-foreground animate-fade-in" style={{animationDelay: '2.5s'}}>
+                <span>🎯 Matching experience levels...</span>
+                <span>✓</span>
+              </div>
+              <div className="flex items-center justify-between text-sm text-muted-foreground animate-fade-in" style={{animationDelay: '3.0s'}}>
+                <span>🌟 Ranking your best matches...</span>
+                <span>✓</span>
+              </div>
+              
+              <div className="mt-6 animate-fade-in" style={{animationDelay: '3.5s'}}>
+                <div className="h-2 bg-muted rounded-full overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-primary to-secondary rounded-full animate-pulse" style={{width: '100%'}}></div>
+                </div>
+                <p className="text-sm text-muted-foreground mt-2 text-center">Almost there! Preparing your personalized results...</p>
+              </div>
             </div>
           </div>
         </DialogContent>
