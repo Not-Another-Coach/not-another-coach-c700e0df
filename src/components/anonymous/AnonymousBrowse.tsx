@@ -105,12 +105,13 @@ export const AnonymousBrowse = () => {
       {trainers.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {trainers.map((trainer) => {
-          console.log('🎯 Rendering trainer card for:', trainer.first_name, trainer.last_name);
+          console.log('🎯 Rendering trainer card for anonymized view');
           
           // Transform trainer data to match AnyTrainer interface
+          // Note: Don't construct the name directly - let visibility system handle it
           const enhancedTrainer: AnyTrainer = {
             ...trainer,
-            name: `${trainer.first_name} ${trainer.last_name}`,
+            name: `${trainer.first_name} ${trainer.last_name}`, // This will be overridden by visibility system
             firstName: trainer.first_name,
             lastName: trainer.last_name,
             profilePhotoUrl: trainer.profile_photo_url,
