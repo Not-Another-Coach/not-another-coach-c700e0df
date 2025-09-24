@@ -165,16 +165,16 @@ export const ClientTransformationView = ({ trainer, children, testimonialIndex =
               </VisibilityAwareImage>
             </div>
             
-            {/* After Image */}
+            {/* After Image - Blurred for guests even when testimonials are "visible" to encourage signup */}
             <div className="relative overflow-hidden">
               <VisibilityAwareImage
                 src={currentTransformation.after}
                 alt="After transformation"
                 className="w-full h-full object-cover"
-                visibilityState={testimonialVisibility}
-                lockMessage="After photos unlock with engagement"
+                visibilityState={testimonialVisibility === 'visible' && isGuest ? 'blurred' : testimonialVisibility}
+                lockMessage="Sign up to see full transformations"
               >
-                {testimonialVisibility === 'visible' && (
+                {(testimonialVisibility === 'visible' || (testimonialVisibility === 'blurred' && !isGuest)) && (
                   <div className="absolute top-3 right-3">
                     <Badge className="text-sm bg-success text-white border-0 px-3 py-1">
                       After
