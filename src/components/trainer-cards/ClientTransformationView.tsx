@@ -6,6 +6,7 @@ import { getTrainerDisplayPrice } from "@/lib/priceUtils";
 import { useContentVisibility } from '@/hooks/useContentVisibility';
 import { useEngagementStage } from '@/hooks/useEngagementStage';
 import { VisibilityAwareImage } from '@/components/ui/VisibilityAwareImage';
+import { VisibilityAwareName } from '@/components/ui/VisibilityAwareName';
 
 interface ClientTransformationViewProps {
   trainer: AnyTrainer;
@@ -94,9 +95,17 @@ export const ClientTransformationView = ({ trainer, children, testimonialIndex =
             <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
               <div className="flex items-end justify-between">
                 <div className="flex-1">
-                  <h3 className="font-bold text-lg mb-1 text-white drop-shadow-sm">
-                    {trainer.name}
-                  </h3>
+                  <VisibilityAwareName
+                    trainer={{
+                      id: trainer.id,
+                      first_name: (trainer as any).firstName || (trainer as any).first_name,
+                      last_name: (trainer as any).lastName || (trainer as any).last_name,
+                      name: trainer.name
+                    }}
+                    visibilityState="visible"  // Will be controlled by parent visibility logic
+                    variant="overlay"
+                    className="font-bold text-lg mb-1 text-white drop-shadow-sm"
+                  />
                   
                   <div className="flex items-center gap-3 text-white/90 text-sm mb-2">
                     <div className="flex items-center gap-1">
@@ -193,9 +202,17 @@ export const ClientTransformationView = ({ trainer, children, testimonialIndex =
         <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
           <div className="flex items-start justify-between mb-3">
             <div className="flex-1 min-w-0">
-              <h3 className="font-bold text-lg mb-1 text-white drop-shadow-sm">
-                {trainer.name}
-              </h3>
+              <VisibilityAwareName
+                trainer={{
+                  id: trainer.id,
+                  first_name: (trainer as any).firstName || (trainer as any).first_name,
+                  last_name: (trainer as any).lastName || (trainer as any).last_name,
+                  name: trainer.name
+                }}
+                visibilityState="visible"  // Will be controlled by parent visibility logic
+                variant="overlay"
+                className="font-bold text-lg mb-1 text-white drop-shadow-sm"
+              />
               
               <div className="flex items-center gap-3 text-white/90 text-sm mb-2">
                 <div className="flex items-center gap-1">

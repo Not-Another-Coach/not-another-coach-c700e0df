@@ -229,6 +229,13 @@ export const FeatureSummaryView = ({ trainer, children }: FeatureSummaryViewProp
                   visibilityState={getVisibility('basic_information')}
                   variant="overlay"
                   className="mb-2"
+                  trainer={{
+                    id: trainer.id,
+                    first_name: (trainer as any).firstName || (trainer as any).first_name,
+                    last_name: (trainer as any).lastName || (trainer as any).last_name,
+                    name: trainer.name
+                  }}
+                  engagementStage="browsing"
                 />
                 
                 {getVisibility('stats_ratings') !== 'hidden' && getVisibility('stats_ratings') !== 'blurred' && (

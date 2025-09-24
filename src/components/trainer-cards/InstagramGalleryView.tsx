@@ -227,7 +227,7 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
             <div className="aspect-square relative">
               <img
                 src={(trainer as any).profilePhotoUrl || trainer.image}
-                alt={trainer.name}
+                 alt={trainer.name}
                 className="w-full h-full object-cover"
               />
             </div>
@@ -257,6 +257,13 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
                 visibilityState={getVisibility('basic_information')}
                 variant="overlay"
                 className="mb-2"
+                trainer={{
+                  id: trainer.id,
+                  first_name: (trainer as any).firstName || (trainer as any).first_name,
+                  last_name: (trainer as any).lastName || (trainer as any).last_name,
+                  name: trainer.name
+                }}
+                engagementStage={stage || 'browsing'}
               />
               
               
