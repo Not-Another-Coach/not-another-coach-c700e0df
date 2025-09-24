@@ -13,7 +13,7 @@ interface AvailabilitySectionProps {
 const waitlistOptions = [
   {
     id: "asap",
-    label: "I need to start ASAP",
+    label: "suggest alternatives",
     icon: <Clock className="h-6 w-6" />,
     description: "I'll take the first available trainer who's a good match",
     benefit: "Get started quickly with an available trainer"
