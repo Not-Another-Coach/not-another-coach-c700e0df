@@ -116,26 +116,35 @@ export const TodaysNextSteps = ({ steps, onTaskClick }: TodaysNextStepsProps) =>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {prioritizedTasks.map((step) => {
+          {/* Next step priority highlighting */}
+          {prioritizedTasks.map((step, index) => {
             const Icon = getActivityIcon(step.activity_type);
             const isOverdue = step.due_at && isPast(new Date(step.due_at));
             const isDueToday = step.due_at && isToday(new Date(step.due_at));
+            const isNext = index === 0; // Highlight the first (most priority) task
             
             return (
               <div
                 key={step.id}
-                className={`flex items-center gap-3 p-4 border-l-4 rounded-lg cursor-pointer hover:shadow-sm transition-all ${getPriorityColor(step)}`}
+                className={`flex items-center gap-3 p-4 border-l-4 rounded-lg cursor-pointer hover:shadow-sm transition-all ${
+                  isNext 
+                    ? 'border-l-primary bg-primary/10 ring-2 ring-primary/20' 
+                    : getPriorityColor(step)
+                }`}
                 onClick={() => onTaskClick(step)}
               >
                 <div className="flex-shrink-0">
-                  <Icon className="h-5 w-5 text-primary" />
+                  <Icon className={`h-5 w-5 ${isNext ? 'text-primary' : 'text-muted-foreground'}`} />
                 </div>
                 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <h4 className="font-medium text-foreground truncate">
+                    <h4 className={`font-medium truncate ${isNext ? 'text-primary' : 'text-foreground'}`}>
                       {step.activity_name}
                     </h4>
+                    {isNext && (
+                      <Badge className="text-xs bg-primary text-primary-foreground">Next</Badge>
+                    )}
                     {isOverdue && (
                       <Badge variant="destructive" className="text-xs">Overdue</Badge>
                     )}
@@ -162,7 +171,7 @@ export const TodaysNextSteps = ({ steps, onTaskClick }: TodaysNextStepsProps) =>
                 </div>
                 
                 <div className="flex items-center gap-2">
-                  <Button size="sm" variant="outline">
+                  <Button size="sm" variant={isNext ? "default" : "outline"}>
                     {getActionText(step.activity_type)}
                   </Button>
                   <ChevronRight className="h-4 w-4 text-muted-foreground" />

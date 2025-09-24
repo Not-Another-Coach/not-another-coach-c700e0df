@@ -224,25 +224,9 @@ export const OnboardingHeroCard = ({
           </div>
         </div>
 
-        {/* Action Section */}
+        {/* Action Section - Removed Next up duplicate */}
         <div className="p-6">
-          <div className="flex items-center justify-between">
-            {/* Next Action */}
-            <div className="flex-1">
-              <p className="text-sm text-muted-foreground mb-2">Next up:</p>
-              <p className="font-medium text-foreground mb-3 truncate pr-4">
-                {nextAction}
-              </p>
-              <Button 
-                onClick={onNextActionClick}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                size="sm"
-              >
-                Continue Onboarding
-                <ArrowRight className="h-4 w-4 ml-1" />
-              </Button>
-            </div>
-          </div>
+          {/* Empty for now since Next up was duplicate of Focus Tasks */}
         </div>
       </CardContent>
     </Card>
