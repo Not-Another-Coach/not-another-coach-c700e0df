@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { X, Upload, FileText, Eye, Trash2, Plus, Send, Search, CheckCircle, Clock } from 'lucide-react';
 import { SectionHeader } from './SectionHeader';
-import { supabase } from '@/integrations/supabase/client';
+import { FileUploadService } from '@/services';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { 
@@ -114,19 +114,19 @@ export const QualificationsSection: React.FC<QualificationsSectionProps> = ({
         const fileName = `${Math.random()}.${fileExt}`;
         const filePath = `${user.id}/${fileName}`;
 
-        const { data, error } = await supabase.storage
-          .from('trainer-documents')
-          .upload(filePath, file);
+        const uploadResult = await FileUploadService.uploadFile(
+          'documents',
+          filePath,
+          file
+        );
 
-        if (error) throw error;
-
-        const { data: urlData } = supabase.storage
-          .from('trainer-documents')
-          .getPublicUrl(filePath);
+        if (!uploadResult.success) {
+          throw new Error(uploadResult.error?.message || 'Upload failed');
+        }
 
         return {
           name: file.name,
-          url: urlData.publicUrl,
+          url: uploadResult.data.publicUrl,
           type: file.type,
           qualification: '', // Will be linked to specific qualification later
         };
@@ -168,21 +168,21 @@ export const QualificationsSection: React.FC<QualificationsSectionProps> = ({
       const fileName = `${Math.random()}.${fileExt}`;
       const filePath = `${user.id}/${fileName}`;
 
-      const { error } = await supabase.storage
-        .from('trainer-documents')
-        .upload(filePath, file);
+      const uploadResult = await FileUploadService.uploadFile(
+        'documents',
+        filePath,
+        file
+      );
 
-      if (error) throw error;
-
-      const { data: urlData } = supabase.storage
-        .from('trainer-documents')
-        .getPublicUrl(filePath);
+      if (!uploadResult.success) {
+        throw new Error(uploadResult.error?.message || 'Upload failed');
+      }
 
       const currentCertificates = formData.certificates || [];
       updateFormData({
         certificates: [
           ...currentCertificates,
-          { name: file.name, url: urlData.publicUrl, type: file.type, qualification }
+          { name: file.name, url: uploadResult.data.publicUrl, type: file.type, qualification }
         ]
       });
       toast.success(`Certificate linked to ${qualification}`);

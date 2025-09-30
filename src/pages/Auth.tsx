@@ -273,14 +273,15 @@ export default function Auth() {
 
     setIsLoading(true);
     
-    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-      redirectTo: `${window.location.origin}/auth?type=recovery`,
-    });
+    const result = await AuthService.requestPasswordReset(
+      { email: resetEmail },
+      `${window.location.origin}/auth?type=recovery`
+    );
 
-    if (error) {
+    if (result.error) {
       toast({
         title: "Reset Failed",
-        description: error.message,
+        description: result.error.message,
         variant: "destructive",
       });
     } else {

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { AuthService } from '@/services';
 
 export interface TestUser {
   id: string;
@@ -27,10 +28,9 @@ export const useTestUsers = (shouldLoad: boolean = true) => {
       );
       
       // If not authenticated, return demo users immediately
-      const sessionPromise = supabase.auth.getSession();
-      const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]) as any;
+      const sessionResult = await AuthService.getSession();
       
-      if (!session) {
+      if (!sessionResult.success || !sessionResult.data) {
         console.log('TestUsers: No session, using default users');
         setTestUsers(getDefaultTestUsers());
         return;

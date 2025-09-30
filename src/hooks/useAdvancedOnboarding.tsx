@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { FileUploadService } from '@/services';
 import { toast } from 'sonner';
 
 // Types for advanced features
@@ -230,17 +231,17 @@ export function useAdvancedOnboarding() {
     try {
       const fileName = `${user.id}/${templateId}/${folder}/${Date.now()}-${file.name}`;
       
-      const { error: uploadError } = await supabase.storage
-        .from('onboarding-attachments')
-        .upload(fileName, file);
+      const uploadResult = await FileUploadService.uploadFile(
+        'onboarding-public',
+        fileName,
+        file
+      );
 
-      if (uploadError) throw uploadError;
+      if (!uploadResult.success) {
+        throw new Error(uploadResult.error?.message || 'Upload failed');
+      }
 
-      const { data } = supabase.storage
-        .from('onboarding-attachments')
-        .getPublicUrl(fileName);
-
-      return data.publicUrl;
+      return uploadResult.data.publicUrl;
     } catch (err) {
       console.error('Error uploading attachment:', err);
       throw err;
@@ -251,11 +252,11 @@ export function useAdvancedOnboarding() {
     if (!user) throw new Error('No user');
 
     try {
-      const { error } = await supabase.storage
-        .from('onboarding-attachments')
-        .remove([filePath]);
+      const deleteResult = await FileUploadService.deleteFile('onboarding-public', filePath);
 
-      if (error) throw error;
+      if (!deleteResult.success) {
+        throw new Error(deleteResult.error?.message || 'Delete failed');
+      }
       toast.success('Attachment deleted successfully');
     } catch (err) {
       console.error('Error deleting attachment:', err);

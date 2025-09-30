@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { FileUploadService } from '@/services';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
@@ -160,15 +161,18 @@ export const useEnhancedTrainerVerification = () => {
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/${checkType}_${Date.now()}.${fileExt}`;
-      const filePath = `trainer-verification-documents/${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from('trainer-verification-documents')
-        .upload(fileName, file);
+      const uploadResult = await FileUploadService.uploadFile(
+        'verification-documents',
+        fileName,
+        file
+      );
 
-      if (uploadError) throw uploadError;
+      if (!uploadResult.success) {
+        throw new Error(uploadResult.error?.message || 'Upload failed');
+      }
 
-      return filePath;
+      return uploadResult.data.path;
     } catch (error) {
       console.error('Error uploading document:', error);
       toast.error('Failed to upload document');

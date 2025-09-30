@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { FileUploadService } from '@/services';
 import { toast } from '@/hooks/use-toast';
 
 // Single source of truth for grid size calculation - exported for reuse
@@ -136,11 +137,15 @@ export const useTrainerImages = () => {
       const filePath = `${user.id}/${fileName}`;
 
       // Upload to Supabase storage
-      const { error: uploadError } = await supabase.storage
-        .from('trainer-images')
-        .upload(filePath, file);
+      const uploadResult = await FileUploadService.uploadFile(
+        'trainer-images',
+        filePath,
+        file
+      );
 
-      if (uploadError) throw uploadError;
+      if (uploadResult.error) {
+        throw new Error(uploadResult.error.message);
+      }
 
       // Save to database
       const { data, error: dbError } = await supabase
@@ -190,11 +195,14 @@ export const useTrainerImages = () => {
       if (!image) return;
 
       // Delete from storage
-      const { error: storageError } = await supabase.storage
-        .from('trainer-images')
-        .remove([image.file_path]);
+      const deleteResult = await FileUploadService.deleteFile(
+        'trainer-images',
+        image.file_path
+      );
 
-      if (storageError) throw storageError;
+      if (deleteResult.error) {
+        throw new Error(deleteResult.error.message);
+      }
 
       // Delete from database
       const { error: dbError } = await supabase
@@ -322,8 +330,9 @@ export const useTrainerImages = () => {
     }
   };
 
-  // Get public URL for uploaded image
+  // Get public URL for uploaded image (synchronous version for JSX usage)
   const getImageUrl = (filePath: string) => {
+    // Create the public URL directly without async call
     const { data } = supabase.storage
       .from('trainer-images')
       .getPublicUrl(filePath);

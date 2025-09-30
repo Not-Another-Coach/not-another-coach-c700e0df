@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAppLogo } from '@/hooks/useAppLogo';
-import { supabase } from '@/integrations/supabase/client';
+import { FileUploadService } from '@/services';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -52,9 +52,7 @@ export function LogoManagement() {
       if (logoSettings.logo_url) {
         const oldPath = logoSettings.logo_url.split('/').pop();
         if (oldPath) {
-          await supabase.storage
-            .from('logos')
-            .remove([oldPath]);
+          await FileUploadService.deleteFile('onboarding-public', oldPath);
         }
       }
 
@@ -62,23 +60,20 @@ export function LogoManagement() {
       const fileExt = file.name.split('.').pop();
       const fileName = `app-logo-${Date.now()}.${fileExt}`;
       
-      const { data, error } = await supabase.storage
-        .from('logos')
-        .upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
+      const uploadResult = await FileUploadService.uploadFile(
+        'onboarding-public',
+        fileName,
+        file,
+        { cacheControl: '3600', upsert: false }
+      );
 
-      if (error) throw error;
-
-      // Get public URL
-      const { data: publicUrlData } = supabase.storage
-        .from('logos')
-        .getPublicUrl(data.path);
+      if (!uploadResult.success) {
+        throw new Error(uploadResult.error?.message || 'Upload failed');
+      }
 
       const newSettings = {
         ...localSettings,
-        logo_url: publicUrlData.publicUrl
+        logo_url: uploadResult.data.publicUrl
       };
 
       const success = await updateLogoSettings(newSettings);
@@ -115,9 +110,10 @@ export function LogoManagement() {
       // Delete from storage
       const fileName = logoSettings.logo_url.split('/').pop();
       if (fileName) {
-        await supabase.storage
-          .from('logos')
-          .remove([fileName]);
+        const deleteResult = await FileUploadService.deleteFile('onboarding-public', fileName);
+        if (!deleteResult.success) {
+          throw new Error(deleteResult.error?.message || 'Delete failed');
+        }
       }
 
       // Update settings
