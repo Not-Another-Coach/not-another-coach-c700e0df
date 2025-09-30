@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { AuthService } from '@/services';
 
 export interface PopularQualification {
   id: string;
@@ -170,11 +171,16 @@ export const useCreateCustomQualificationRequest = () => {
   
   return useMutation({
     mutationFn: async (request: Omit<CustomQualificationRequest, 'id' | 'trainer_id' | 'status' | 'created_at' | 'updated_at'>) => {
+      const userResponse = await AuthService.getCurrentUser();
+      if (!userResponse.success || !userResponse.data) {
+        throw new Error('Not authenticated');
+      }
+
       const { data, error } = await supabase
         .from('custom_qualification_requests')
         .insert([{
           ...request,
-          trainer_id: (await supabase.auth.getUser()).data.user?.id,
+          trainer_id: userResponse.data.id,
         }])
         .select()
         .single();
@@ -263,12 +269,17 @@ export const useTrackQualificationUsage = () => {
       qualification_id: string; 
       qualification_type: 'popular' | 'custom';
     }) => {
+      const userResponse = await AuthService.getCurrentUser();
+      if (!userResponse.success || !userResponse.data) {
+        throw new Error('Not authenticated');
+      }
+
       const { data, error } = await supabase
         .from('qualification_usage_stats')
         .insert([{
           qualification_id,
           qualification_type,
-          trainer_id: (await supabase.auth.getUser()).data.user?.id,
+          trainer_id: userResponse.data.id,
         }])
         .select()
         .single();

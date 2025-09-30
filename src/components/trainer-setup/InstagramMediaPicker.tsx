@@ -5,6 +5,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { AuthService } from '@/services';
 import { Instagram, Loader2, AlertCircle, GripVertical, Play } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
@@ -70,14 +71,16 @@ export const InstagramMediaPicker = () => {
     try {
       setSaving(true);
       
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      const userResponse = await AuthService.getCurrentUser();
+      if (!userResponse.success || !userResponse.data) {
+        throw new Error('Not authenticated');
+      }
 
       // Get the user's Instagram connection to get connection_id
       const { data: connectionData, error: connectionError } = await supabase
         .from('instagram_connections')
         .select('id')
-        .eq('trainer_id', user.id)
+        .eq('trainer_id', userResponse.data.id)
         .eq('is_active', true)
         .maybeSingle();
 
@@ -88,12 +91,12 @@ export const InstagramMediaPicker = () => {
       await supabase
         .from('instagram_selected_media')
         .update({ is_active: false })
-        .eq('trainer_id', user.id);
+        .eq('trainer_id', userResponse.data.id);
 
       // Then insert new selections with display order
       if (selectedMedia.length > 0) {
         const insertData = selectedMedia.map((mediaItem, index) => ({
-          trainer_id: user.id,
+          trainer_id: userResponse.data.id,
           connection_id: connectionData.id,
           instagram_media_id: mediaItem.id,
           media_url: mediaItem.media_url,

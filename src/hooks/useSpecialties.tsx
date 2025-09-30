@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { AuthService } from '@/services';
 
 export interface SpecialtyCategory {
   id: string;
@@ -225,11 +226,16 @@ export function useCustomSpecialtyRequests() {
     justification?: string;
   }) => {
     try {
+      const userResponse = await AuthService.getCurrentUser();
+      if (!userResponse.success || !userResponse.data) {
+        throw new Error('Not authenticated');
+      }
+
       const { data, error } = await supabase
         .from('custom_specialty_requests')
         .insert([{
           ...requestData,
-          trainer_id: (await supabase.auth.getUser()).data.user?.id
+          trainer_id: userResponse.data.id
         }])
         .select()
         .single();
@@ -268,13 +274,13 @@ export function useTrainerCustomSpecialtyRequests() {
 
   const fetchRequests = async () => {
     try {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user?.id) return;
+      const userResponse = await AuthService.getCurrentUser();
+      if (!userResponse.success || !userResponse.data) return;
 
       const { data, error } = await supabase
         .from('custom_specialty_requests')
         .select('*')
-        .eq('trainer_id', userData.user.id)
+        .eq('trainer_id', userResponse.data.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;

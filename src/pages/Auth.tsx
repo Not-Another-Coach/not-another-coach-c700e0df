@@ -12,6 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from '@/hooks/use-toast';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { AuthService } from '@/services';
 import { EnhancedAuthLayout } from '@/components/auth/EnhancedAuthLayout';
 import { MotivationalHeader } from '@/components/auth/MotivationalHeader';
 import { BrandedFormField } from '@/components/auth/BrandedFormField';
@@ -326,14 +327,15 @@ export default function Auth() {
 
     setIsLoading(true);
     
-    const { error } = await supabase.auth.updateUser({
-      password: newPassword
+    const updateResult = await AuthService.updatePassword({ 
+      password: newPassword, 
+      confirmPassword: newPassword 
     });
 
-    if (error) {
+    if (!updateResult.success) {
       toast({
         title: "Update Failed",
-        description: error.message,
+        description: updateResult.error?.message || "Failed to update password",
         variant: "destructive",
       });
     } else {

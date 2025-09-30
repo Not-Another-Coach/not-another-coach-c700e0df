@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from './use-toast';
+import { AuthService } from '@/services';
 
 export const useTrainer4FixStatus = () => {
   const [loading, setLoading] = useState(false);
@@ -24,13 +25,15 @@ export const useTrainer4FixStatus = () => {
 
       // If no approved publication request, create one as admin
       if (!hasPublicationRequest) {
+        const userResponse = await AuthService.getCurrentUser();
+        
         // Create publication request
         const { error: requestError } = await supabase
           .from('profile_publication_requests')
           .insert({
             trainer_id: trainerId,
             status: 'approved',
-            reviewed_by: (await supabase.auth.getUser()).data.user?.id,
+            reviewed_by: userResponse.data?.id,
             reviewed_at: new Date().toISOString(),
             admin_notes: 'Auto-approved for trainer with completed verification'
           });

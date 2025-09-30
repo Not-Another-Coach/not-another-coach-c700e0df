@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { AuthService } from '@/services';
 import { Instagram, Eye, EyeOff, Loader2, AlertCircle } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
@@ -29,13 +30,15 @@ export const InstagramRevealSettings = () => {
       setLoading(true);
       setError(null);
       
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      const userResponse = await AuthService.getCurrentUser();
+      if (!userResponse.success || !userResponse.data) {
+        throw new Error('Not authenticated');
+      }
 
       const { data, error } = await supabase
         .from('instagram_connections')
         .select('*')
-        .eq('trainer_id', user.id)
+        .eq('trainer_id', userResponse.data.id)
         .eq('is_active', true)
         .maybeSingle();
 

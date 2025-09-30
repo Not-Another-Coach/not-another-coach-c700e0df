@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { AuthService } from '@/services';
 
 export const useManualPaymentCompletion = () => {
   const [loading, setLoading] = useState(false);
@@ -11,7 +12,7 @@ export const useManualPaymentCompletion = () => {
     
     try {
       // Get current user if clientId not provided
-      const currentClientId = clientId || (await supabase.auth.getUser()).data.user?.id;
+      const currentClientId = clientId || (await AuthService.getCurrentUser()).data?.id;
       
       if (!currentClientId) {
         throw new Error('No client ID found');

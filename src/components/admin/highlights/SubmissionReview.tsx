@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { AuthService } from "@/services";
 import { 
   CheckCircle, 
   XCircle, 
@@ -111,13 +112,18 @@ export function SubmissionReview() {
     setProcessing(true);
     try {
       // Update submission status
+      const userResponse = await AuthService.getCurrentUser();
+      if (!userResponse.success || !userResponse.data) {
+        throw new Error('Not authenticated');
+      }
+
       const { error: updateError } = await supabase
         .from('highlights_submissions')
         .update({
           submission_status: action === 'approve' ? 'approved' : 'rejected',
           admin_notes: adminNotes,
           reviewed_at: new Date().toISOString(),
-          reviewed_by: (await supabase.auth.getUser()).data.user?.id
+          reviewed_by: userResponse.data.id
         })
         .eq('id', submissionId);
 

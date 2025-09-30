@@ -20,6 +20,7 @@ import { useTrainerActivities } from '@/hooks/useTrainerActivities';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { supabase } from "@/integrations/supabase/client";
+import { FileUploadService } from "@/services";
 import { useAuth } from "@/hooks/useAuth";
 import { useEnhancedActivities } from '@/hooks/useEnhancedActivities';
 import { EnhancedActivityBuilder } from '@/components/onboarding/EnhancedActivityBuilder';
@@ -662,13 +663,16 @@ export function TemplateManagementTabs() {
                               const file = (input.files && input.files[0]) || null;
                               if (!file || !user?.id) return;
                               const path = `${user.id}/guidance/${crypto.randomUUID()}-${file.name}`;
-                              const { error } = await supabase.storage.from('onboarding-public').upload(path, file, { upsert: false });
-                              if (error) { toast.error('Image upload failed'); return; }
-                              const { data } = supabase.storage.from('onboarding-public').getPublicUrl(path);
+                              const uploadResult = await FileUploadService.uploadFile('onboarding-public', path, file);
+                              if (!uploadResult.success || !uploadResult.data) {
+                                toast.error('Image upload failed');
+                                return;
+                              }
+                              const publicUrl = FileUploadService.getPublicUrl('onboarding-public', path);
                               const quill = quillRef.current?.getEditor();
                               const range = quill?.getSelection(true);
                               if (quill && range) {
-                                quill.insertEmbed(range.index, 'image', data.publicUrl);
+                                quill.insertEmbed(range.index, 'image', publicUrl);
                                 quill.setSelection({ index: range.index + 1, length: 0 });
                               }
                             };

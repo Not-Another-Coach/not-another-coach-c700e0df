@@ -4,6 +4,7 @@ import { Star, MapPin, Instagram, Play, Image as ImageIcon } from "lucide-react"
 import { AnyTrainer } from "@/types/trainer";
 import { getTrainerDisplayPrice } from "@/lib/priceUtils";
 import { supabase } from "@/integrations/supabase/client";
+import { FileUploadService } from "@/services";
 import { useEffect, useState } from "react";
 import { useContentVisibility } from '@/hooks/useContentVisibility';
 import { useEngagementStage } from '@/hooks/useEngagementStage';
@@ -106,7 +107,7 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
           ...(uploadedImages || []).map(img => ({
             id: img.id,
             type: 'uploaded',
-            url: supabase.storage.from('trainer-images').getPublicUrl(img.file_path).data.publicUrl,
+            url: FileUploadService.getPublicUrl('trainer-images', img.file_path),
             displayOrder: img.display_order,
             mediaType: 'IMAGE'
           })),
@@ -129,7 +130,7 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
           allImages: allImages.map(img => ({
             id: img.id,
             type: img.type,
-            url: img.url.substring(0, 50) + '...'
+            url: typeof img.url === 'string' ? img.url.substring(0, 50) + '...' : '...'
           }))
         });
         setDisplayImages(slicedImages);

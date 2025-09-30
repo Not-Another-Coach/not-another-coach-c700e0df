@@ -10,6 +10,7 @@ import { MatchBadge } from '@/components/MatchBadge';
 import { useSavedTrainers } from '@/hooks/useSavedTrainers';
 import { getTrainerDisplayPrice } from '@/lib/priceUtils';
 import { supabase } from '@/integrations/supabase/client';
+import { FileUploadService } from '@/services';
 import { useEffect } from 'react';
 import { useContentVisibility } from '@/hooks/useContentVisibility';
 import { useEngagementStage } from '@/hooks/useEngagementStage';
@@ -118,7 +119,7 @@ export const SwipeableInstagramCard = ({
           ...(uploadedImages || []).map(img => ({
             id: img.id,
             type: 'uploaded',
-            url: supabase.storage.from('trainer-images').getPublicUrl(img.file_path).data.publicUrl,
+            url: FileUploadService.getPublicUrl('trainer-images', img.file_path),
             displayOrder: img.display_order,
             mediaType: 'IMAGE'
           })),

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { AuthService } from '@/services';
 import { Instagram, ExternalLink, Loader2, AlertCircle, Calendar, User } from 'lucide-react';
 
 interface RevealedHandle {
@@ -47,8 +48,10 @@ export const RevealedInstagramHandles: React.FC<RevealedInstagramHandlesProps> =
       setLoading(true);
       setError(null);
       
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      const userResponse = await AuthService.getCurrentUser();
+      if (!userResponse.success || !userResponse.data) {
+        throw new Error('Not authenticated');
+      }
 
       let query = supabase
         .from('instagram_handle_revelations')
@@ -60,8 +63,8 @@ export const RevealedInstagramHandles: React.FC<RevealedInstagramHandlesProps> =
       } else if (trainerId) {
         query = query.eq('trainer_id', trainerId);
       } else {
-        // Show handles for current user (either as client or trainer)
-        query = query.or(`client_id.eq.${user.id},trainer_id.eq.${user.id}`);
+        // Show handles relevant to current user (either as client or trainer)
+        query = query.or(`client_id.eq.${userResponse.data.id},trainer_id.eq.${userResponse.data.id}`);
       }
 
       const { data: revelations, error } = await query.order('revealed_at', { ascending: false });
