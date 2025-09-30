@@ -4,3 +4,4 @@
 
 export { ServiceError } from './ServiceError';
 export { ServiceResponseHelper } from './ServiceResponse';
+export { BaseService } from './BaseService';

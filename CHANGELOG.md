@@ -1,5 +1,18 @@
 # Changelog
 
+## [Step 3: Base Service Class] - 2025-09-30
+
+### Added
+- Created BaseService class with common functionality for all services
+- Supabase client access via protected `db` getter
+- User authentication helpers (getCurrentUserId, getCurrentUser)
+- Standardized query execution methods (executeQuery, executeMaybeQuery, executeListQuery)
+- Paginated query support (executePaginatedQuery)
+- Mutation execution with error handling (executeMutation)
+- Role checking utility (hasRole)
+- Field validation helper (validateRequired)
+- File upload/delete utilities for Supabase Storage
+
 ## [Step 2: Core Type Definitions] - 2025-09-30
 
 ### Added
