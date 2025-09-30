@@ -1,6 +1,6 @@
 import { useState, useEffect, createContext, useContext } from 'react';
 import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
+import { AuthService } from '@/services';
 import { useAnonymousSession } from './useAnonymousSession';
 
 interface AuthContextType {
@@ -24,24 +24,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { session: anonymousSession } = useAnonymousSession();
 
   useEffect(() => {
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log('Auth state change:', event, session?.user?.email);
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    );
-
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // Set up auth state listener using AuthService
+    const unsubscribe = AuthService.onAuthStateChange((event, session) => {
+      console.log('Auth state change:', event, session?.user?.email);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    // Check for existing session using AuthService
+    AuthService.getSession().then((response) => {
+      if (response.success) {
+        setSession(response.data);
+        setUser(response.data?.user ?? null);
+      }
+      setLoading(false);
+    });
+
+    return unsubscribe;
   }, []);
 
   const signUp = async (email: string, password: string, userData?: any) => {
@@ -54,23 +54,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('🔗 Including anonymous session in redirect URL for cross-device migration');
     }
     
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: userData
-      }
-    });
-    return { error };
+    const response = await AuthService.signUp(
+      {
+        email,
+        password,
+        firstName: userData?.firstName,
+        lastName: userData?.lastName,
+        userType: userData?.userType || 'client',
+      },
+      redirectUrl
+    );
+    
+    return { error: response.error || null };
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    const response = await AuthService.signIn({
       email,
       password,
     });
-    return { error };
+    return { error: response.error || null };
   };
 
   const signOut = async () => {
@@ -85,10 +88,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setSession(null);
     
-    const { error } = await supabase.auth.signOut();
+    const response = await AuthService.signOut();
     
-    if (error) {
-      console.error('Sign out error:', error);
+    if (response.error) {
+      console.error('Sign out error:', response.error);
       // Even if there's an error (like session missing), still redirect
       // because the user wants to be logged out
     }
@@ -96,7 +99,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Use window.location for immediate, clean redirect
     window.location.href = '/auth';
     
-    return { error };
+    return { error: response.error || null };
   };
 
   const resendConfirmation = async (email: string) => {
@@ -109,14 +112,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('🔗 Including anonymous session in resend confirmation URL');
     }
     
-    const { error } = await supabase.auth.resend({
-      type: 'signup',
-      email,
-      options: {
-        emailRedirectTo: redirectUrl
-      }
-    });
-    return { error };
+    const response = await AuthService.resendConfirmation(email, redirectUrl);
+    return { error: response.error || null };
   };
 
   const value = {

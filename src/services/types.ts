@@ -4,6 +4,7 @@
 
 // Re-export domain types for convenience
 export * from './auth/types';
+export * from './storage/types';
 export * from './profile/types';
 export * from './trainer/types';
 export * from './client/types';

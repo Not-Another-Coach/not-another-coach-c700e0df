@@ -4,6 +4,10 @@
  * Central export point for all service modules
  */
 
+// Authentication & Storage
+export { AuthService } from './auth';
+export { FileUploadService } from './storage';
+
 // Data Services
 export { ProfileService } from './profile';
 export { TrainerService } from './trainer';
