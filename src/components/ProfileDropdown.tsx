@@ -11,9 +11,9 @@ import { PositionedAvatar } from '@/components/ui/positioned-avatar';
 import { Badge } from "@/components/ui/badge";
 import { User, Settings, LogOut, Key, Edit, CreditCard } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { ProfileService } from "@/services/data";
 
 interface ProfileDropdownProps {
   profile?: {
@@ -49,8 +49,7 @@ export const ProfileDropdown = ({ profile }: ProfileDropdownProps) => {
   const handleResetPassword = async () => {
     try {
       // Get current user email
-      const { data: { user } } = await supabase.auth.getUser();
-      const email = user?.email;
+      const email = user?.email || profile?.email;
       
       if (!email) {
         toast({
@@ -61,20 +60,18 @@ export const ProfileDropdown = ({ profile }: ProfileDropdownProps) => {
         return;
       }
 
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth?mode=reset`
-      });
+      const result = await ProfileService.resetPassword(email);
       
-      if (error) {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
-      } else {
+      if (result.success) {
         toast({
           title: "Password Reset Email Sent",
           description: "Check your email for instructions to reset your password.",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: result.error?.message || "Failed to send password reset email.",
+          variant: "destructive",
         });
       }
     } catch (error) {

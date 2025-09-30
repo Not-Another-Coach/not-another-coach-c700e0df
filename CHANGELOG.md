@@ -1,5 +1,39 @@
 # Changelog
 
+## [Phase 3: Data Services Layer] - 2025-09-30
+
+### Added
+- **ProfileService** (`src/services/data/ProfileService.ts`)
+  - Centralized profile management and authentication operations
+  - Methods: `getCurrentUserProfile()`, `updateProfile()`, `uploadProfilePhoto()`, `resetPassword()`, `updateEmail()`, `getProfileById()`
+  - Integrated file upload validation and error handling
+
+- **EngagementService** (`src/services/data/EngagementService.ts`)
+  - Client-trainer engagement tracking and management
+  - Methods: `getEngagementStage()`, `updateEngagementStage()`, `getTrainerEngagements()`, `getClientEngagements()`, `getProspectSummary()`, `engagementExists()`
+  - Automated prospect summary aggregation for trainer dashboards
+
+- **TrainerService** (`src/services/data/TrainerService.ts`)
+  - Trainer discovery, search, and profile management
+  - Methods: `getPublishedTrainers()`, `getTrainerById()`, `searchTrainers()`, `getTrainerProfile()`, `getCompleteTrainerProfile()`, `updateTrainerProfile()`
+  - Advanced filtering and pagination support
+
+- Data services index (`src/services/data/index.ts`) for centralized exports
+
+### Changed
+- **ProfileDropdown.tsx**: Refactored to use ProfileService for password reset
+- **ProfileViewEdit.tsx**: Refactored to use ProfileService for profile updates and file uploads
+- **useEngagementStage.tsx**: Refactored to use EngagementService for all engagement operations
+- All direct Supabase calls in profile and engagement components replaced with service layer calls
+
+### Benefits
+- **Centralized Business Logic**: All data operations now go through a consistent service layer
+- **Improved Error Handling**: Leverages Phase 2 error handling infrastructure
+- **Better Type Safety**: Consistent response types across all data operations
+- **Easier Testing**: Services can be mocked and tested independently
+- **Code Reusability**: Single source of truth for data operations reduces duplication
+- **Maintainability**: Changes to data access patterns only need to be made in one place
+
 ## [Phase 2: Error Handling System] - 2025-09-30
 
 ### Added

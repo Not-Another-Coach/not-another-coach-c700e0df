@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import { EngagementService } from '@/services/data';
 
 export type EngagementStage = 'browsing' | 'liked' | 'shortlisted' | 'getting_to_know_your_coach' | 'discovery_in_progress' | 'discovery_completed' | 'agreed' | 'payment_pending' | 'active_client' | 'unmatched' | 'declined' | 'declined_dismissed';
 
@@ -35,17 +35,13 @@ export function useEngagementStage(trainerId: string, forceGuestMode: boolean = 
     }
 
     try {
-      const { data, error } = await supabase
-        .from('client_trainer_engagement')
-        .select('*')
-        .eq('client_id', user.id)
-        .eq('trainer_id', trainerId)
-        .maybeSingle();
+      const result = await EngagementService.getEngagementStage(trainerId, user.id);
 
-      if (error) {
-        console.error('Error fetching engagement stage:', error);
+      if (result.error) {
+        console.error('Error fetching engagement stage:', result.error);
         setStage('browsing');
       } else {
+        const data = result.data;
         // Convert old stages to new ones
         const normalizedStage = data?.stage === 'waitlist' ? 'browsing' : 
                                data?.stage === 'matched' ? 'agreed' : 
@@ -56,7 +52,7 @@ export function useEngagementStage(trainerId: string, forceGuestMode: boolean = 
           stage: normalizedStage as EngagementStage
         } : null;
         
-        setEngagementData(normalizedData);
+        setEngagementData(normalizedData as any);
         setStage(normalizedStage as EngagementStage);
       }
     } catch (error) {
@@ -75,15 +71,11 @@ export function useEngagementStage(trainerId: string, forceGuestMode: boolean = 
     if (!user || !trainerId || forceGuestMode) return { error: 'No user or trainer ID' };
 
     try {
-      const { data, error } = await supabase.rpc('update_engagement_stage', {
-        client_uuid: user.id,
-        trainer_uuid: trainerId,
-        new_stage: newStage as any // Type cast needed until Supabase regenerates types
-      });
+      const result = await EngagementService.updateEngagementStage(trainerId, newStage as any, user.id);
 
-      if (error) {
-        console.error('Error updating engagement stage:', error);
-        return { error };
+      if (result.error) {
+        console.error('Error updating engagement stage:', result.error);
+        return { error: result.error };
       }
 
       // Refresh engagement data

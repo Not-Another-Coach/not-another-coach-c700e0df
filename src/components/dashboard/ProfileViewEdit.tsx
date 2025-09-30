@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { ProfileService } from "@/services/data";
 import { 
   User, 
   Mail, 
@@ -62,50 +62,28 @@ export function ProfileViewEdit({ profile }: ProfileViewEditProps) {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Validate file type and size
-    if (!file.type.startsWith('image/')) {
-      toast({
-        title: "Invalid file type",
-        description: "Please upload an image file",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) { // 5MB limit
-      toast({
-        title: "File too large",
-        description: "Please upload an image smaller than 5MB",
-        variant: "destructive"
-      });
-      return;
-    }
-
     setIsUploading(true);
     
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user?.id}-${Date.now()}.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('client-photos')
-        .upload(fileName, file);
+      const result = await ProfileService.uploadProfilePhoto(file);
 
-      if (uploadError) throw uploadError;
+      if (result.success && result.data) {
+        setFormData(prev => ({
+          ...prev,
+          profile_photo_url: result.data || ''
+        }));
 
-      const { data: signed } = await supabase.storage
-        .from('client-photos')
-        .createSignedUrl(fileName, 60 * 60 * 24 * 7); // 7 days
-
-      setFormData(prev => ({
-        ...prev,
-        profile_photo_url: signed?.signedUrl || ''
-      }));
-
-      toast({
-        title: "Image uploaded successfully",
-        description: "Your profile photo has been updated"
-      });
+        toast({
+          title: "Image uploaded successfully",
+          description: "Your profile photo has been updated"
+        });
+      } else {
+        toast({
+          title: "Upload failed",
+          description: result.error?.message || "There was an error uploading your image",
+          variant: "destructive"
+        });
+      }
     } catch (error) {
       console.error('Image upload error:', error);
       toast({
@@ -120,16 +98,20 @@ export function ProfileViewEdit({ profile }: ProfileViewEditProps) {
 
   const handleEmailChange = async (newEmail: string) => {
     try {
-      const { error } = await supabase.auth.updateUser({
-        email: newEmail
-      });
+      const result = await ProfileService.updateEmail(newEmail);
 
-      if (error) throw error;
-
-      toast({
-        title: "Email update initiated",
-        description: "Please check both your old and new email for confirmation links",
-      });
+      if (result.success) {
+        toast({
+          title: "Email update initiated",
+          description: "Please check both your old and new email for confirmation links",
+        });
+      } else {
+        toast({
+          title: "Email update failed",
+          description: result.error?.message || "Failed to update email",
+          variant: "destructive"
+        });
+      }
     } catch (error: any) {
       toast({
         title: "Email update failed",
