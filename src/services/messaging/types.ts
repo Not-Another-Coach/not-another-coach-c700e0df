@@ -8,20 +8,20 @@ export interface Message {
   id: string;
   conversation_id: string;
   sender_id: string;
-  recipient_id: string;
   content: string;
-  status: MessageStatus;
+  message_type: string;
+  metadata?: any;
   created_at: string;
-  read_at?: string;
+  read_at?: string | null;
 }
 
 export interface Conversation {
   id: string;
   client_id: string;
   trainer_id: string;
-  last_message?: Message;
-  last_message_at?: string;
-  unread_count: number;
+  last_message_at?: string | null;
+  client_last_read_at?: string | null;
+  trainer_last_read_at?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -41,8 +41,8 @@ export interface ConversationParticipant {
 }
 
 export interface ConversationWithParticipants extends Conversation {
-  client: ConversationParticipant;
-  trainer: ConversationParticipant;
+  client?: ConversationParticipant;
+  trainer?: ConversationParticipant;
 }
 
 export interface MessageListParams {

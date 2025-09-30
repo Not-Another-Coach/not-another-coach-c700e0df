@@ -28,8 +28,8 @@ import {
   ExternalLink
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
+import { MessagingService } from "@/services/messaging";
 
 interface DashboardSummaryProps {
   profile: any;
@@ -78,26 +78,15 @@ export function DashboardSummary({ profile, onTabChange }: DashboardSummaryProps
     clientSurveyData
   );
 
-  // Load discovery calls data
+  // Load discovery calls data using MessagingService
   useEffect(() => {
     const loadDiscoveryCallsData = async () => {
       if (!user) return;
 
-      const { data, error } = await supabase
-        .from('discovery_calls')
-        .select('id, status')
-        .eq('client_id', user.id);
-
-      if (data && !error) {
-        const scheduled = data.filter(call => call.status === 'scheduled').length;
-        const completed = data.filter(call => call.status === 'completed').length;
-        const cancelled = data.filter(call => call.status === 'cancelled').length;
-        setDiscoveryCallsData({
-          scheduled,
-          completed,
-          cancelled,
-          total: data.length
-        });
+      const response = await MessagingService.getDiscoveryCallsSummary(user.id);
+      
+      if (response.success && response.data) {
+        setDiscoveryCallsData(response.data);
       }
     };
 
