@@ -12,6 +12,9 @@ export { FileUploadService } from './storage';
 export { ProfileService } from './profile';
 export { TrainerService } from './trainer';
 export { TemplateService } from './template';
+export { AdminService } from './admin';
+export { VerificationService } from './verification';
+export { ContentService } from './content';
 
 // Communication Services
 export { MessagingService } from './messaging';

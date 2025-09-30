@@ -1,56 +1,54 @@
 /**
- * Admin Types
+ * Admin Service Types
  */
 
-export interface AdminStats {
-  total_users: number;
-  total_trainers: number;
-  total_clients: number;
-  active_trainers: number;
-  pending_reviews: number;
-  total_revenue: number;
-  new_users_today: number;
-  new_users_this_week: number;
-  new_users_this_month: number;
-}
-
-export interface ReviewableProfile {
+export interface AdminAction {
   id: string;
-  trainer_id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  profile_photo_url?: string;
-  publication_requested_at: string;
-  profile_status: 'pending_review';
-  bio?: string;
-  specializations: string[];
-  qualifications: string[];
-}
-
-export interface ProfileReviewDecision {
-  profile_id: string;
-  approved: boolean;
-  rejection_reason?: string;
-  admin_notes?: string;
-}
-
-export interface ActivityLogEntry {
-  id: string;
-  user_id: string;
-  user_type: 'client' | 'trainer' | 'admin';
-  action: string;
-  entity_type: string;
-  entity_id?: string;
-  metadata?: Record<string, any>;
+  admin_id: string;
+  target_user_id: string;
+  action_type: string;
+  action_details: any;
+  reason?: string;
   created_at: string;
 }
 
-export interface SystemSettings {
-  platform_fee_percentage: number;
-  min_hourly_rate: number;
-  max_hourly_rate: number;
-  enable_notifications: boolean;
-  maintenance_mode: boolean;
-  [key: string]: any;
+export interface CleanupResult {
+  messages: number;
+  conversations: number;
+  feedback_responses: number;
+  feedback: number;
+  call_notifications: number;
+  feedback_notifications: number;
+  call_notes: number;
+  discovery_calls: number;
+  selection_requests: number;
+  waitlist_entries: number;
+  commitment_acknowledgments: number;
+  getting_started_progress: number;
+  onboarding_progress: number;
+  template_assignments: number;
+  ongoing_support_agreements: number;
+  conditional_evaluations: number;
+  goal_client_links: number;
+  instagram_revelations: number;
+  alerts: number;
+  engagement_records: number;
+  journey_stage_reset: number;
+}
+
+export interface UpdateEmailRequest {
+  targetUserId: string;
+  newEmail: string;
+}
+
+export interface UpdatePasswordRequest {
+  userIds: string[];
+  newPassword: string;
+}
+
+export interface UpdateVerificationRequest {
+  trainerId: string;
+  status: 'pending' | 'verified' | 'rejected';
+  adminNotes?: string;
+  rejectionReason?: string;
 }

@@ -13,6 +13,8 @@ export * from './messaging/types';
 export * from './payment/types';
 export * from './admin/types';
 export * from './notification/types';
+export * from './verification/types';
+export * from './content/types';
 
 export interface ServiceResponse<T> {
   success: boolean;
