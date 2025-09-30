@@ -13,11 +13,15 @@ export type VerificationCheckType =
 export interface VerificationRequest {
   id: string;
   trainer_id: string;
-  status: 'pending' | 'under_review' | 'approved' | 'rejected';
-  submitted_at: string;
+  status: string;
+  certificate_number?: string;
+  provider_name?: string;
+  expiry_date?: string;
+  documents_provided?: any;
+  evidence_metadata?: any;
+  submitted_at?: string;
   reviewed_at?: string;
   reviewed_by?: string;
-  documents: any[];
   admin_notes?: string;
   rejection_reason?: string;
   created_at: string;
@@ -41,7 +45,7 @@ export interface VerificationCheck {
 export interface VerificationOverview {
   trainer_id: string;
   overall_status: 'not_shown' | 'verified' | 'expired';
-  display_preference: 'visible' | 'hidden';
+  display_preference: 'hidden' | 'verified_allowed';
   last_computed_at: string;
   created_at: string;
   updated_at: string;

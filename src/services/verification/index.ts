@@ -158,7 +158,7 @@ class VerificationServiceClass extends BaseService {
    * Update verification display preference
    */
   async updateDisplayPreference(
-    preference: 'visible' | 'hidden'
+    preference: 'hidden' | 'verified_allowed'
   ): Promise<ServiceResponse<void>> {
     try {
       const user = (await supabase.auth.getUser()).data.user;

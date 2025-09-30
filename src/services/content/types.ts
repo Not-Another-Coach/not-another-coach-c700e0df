@@ -44,11 +44,11 @@ export interface HighlightContent {
   content_type: string;
   title: string;
   description?: string;
-  image_url?: string;
-  link_url?: string;
-  display_order: number;
+  media_urls?: string[];
+  trainer_id?: string;
+  engagement_score?: number;
+  featured_until?: string;
   is_active: boolean;
-  visibility_settings?: Record<string, any>;
   created_at: string;
   updated_at: string;
 }
@@ -56,9 +56,9 @@ export interface HighlightContent {
 export interface HighlightSubmission {
   id: string;
   trainer_id: string;
-  content_type: string;
-  submission_data: Record<string, any>;
-  status: 'pending' | 'approved' | 'rejected';
+  content_id?: string;
+  submitted_at?: string;
+  status: string;
   admin_notes?: string;
   reviewed_by?: string;
   reviewed_at?: string;
@@ -67,6 +67,5 @@ export interface HighlightSubmission {
 }
 
 export interface CreateHighlightSubmissionRequest {
-  content_type: string;
-  submission_data: Record<string, any>;
+  content_id?: string;
 }

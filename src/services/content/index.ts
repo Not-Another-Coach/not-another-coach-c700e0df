@@ -21,7 +21,7 @@ class ContentServiceClass extends BaseService {
    * Get alerts for current user
    */
   async getAlerts(activeOnly: boolean = true): Promise<ServiceResponse<Alert[]>> {
-    return BaseService.executeListQuery(async () => {
+    try {
       let query = supabase
         .from('alerts')
         .select('*')
@@ -32,8 +32,13 @@ class ContentServiceClass extends BaseService {
         query = query.eq('is_active', true);
       }
 
-      return await query;
-    });
+      const { data, error } = await query;
+      
+      if (error) throw error;
+      return { success: true, data: (data || []) as any };
+    } catch (error) {
+      return { success: false, error: { code: 'ERROR', message: String(error) } };
+    }
   }
 
   /**
@@ -154,8 +159,7 @@ class ContentServiceClass extends BaseService {
         .from('highlights_submissions')
         .insert({
           trainer_id: user.id,
-          content_type: request.content_type,
-          submission_data: request.submission_data,
+          content_id: request.content_id,
           status: 'pending'
         })
         .select()
