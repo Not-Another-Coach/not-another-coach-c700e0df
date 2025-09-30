@@ -7,6 +7,7 @@ export * from './auth/types';
 export * from './storage/types';
 export * from './profile/types';
 export * from './trainer/types';
+export * from './template/types';
 export * from './client/types';
 export * from './messaging/types';
 export * from './payment/types';

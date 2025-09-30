@@ -11,6 +11,7 @@ export { FileUploadService } from './storage';
 // Data Services
 export { ProfileService } from './profile';
 export { TrainerService } from './trainer';
+export { TemplateService } from './template';
 
 // Communication Services
 export { MessagingService } from './messaging';
