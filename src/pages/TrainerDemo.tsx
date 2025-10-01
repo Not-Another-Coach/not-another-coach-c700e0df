@@ -66,7 +66,7 @@ export default function TrainerDemo() {
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link to="/auth">Sign Up Free</Link>
+                <Link to="/auth?signup=trainer">Sign Up Free</Link>
               </Button>
             </div>
           </div>
