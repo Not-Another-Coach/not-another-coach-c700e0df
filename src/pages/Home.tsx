@@ -37,10 +37,47 @@ export default function Home() {
     document.title = "Home - Find Your Perfect Coach";
   }, []);
 
-  // Home is accessible to anyone; do not auto-redirect authenticated users
+  // Redirect authenticated users based on their role and profile completion
   useEffect(() => {
-    // no-op
-  }, []);
+    if (loading || profileLoading || userTypeLoading || isLoggingOut || isMigrating) {
+      return;
+    }
+
+    // Only redirect if user is authenticated
+    if (!user) {
+      return;
+    }
+
+    // Wait for migration to complete if in progress
+    if (isMigrating) {
+      return;
+    }
+
+    const currentUserType = userType || user_type;
+
+    // Redirect based on user type
+    if (currentUserType === 'trainer') {
+      // Check if trainer profile is complete
+      if (profile && 'bio' in profile) {
+        const trainerProfile = profile as any;
+        const isProfileComplete = trainerProfile.bio && 
+                                 trainerProfile.specializations && 
+                                 trainerProfile.specializations.length > 0;
+        
+        if (isProfileComplete) {
+          navigate('/trainer/dashboard', { replace: true });
+        } else {
+          navigate('/trainer/profile-setup', { replace: true });
+        }
+      } else {
+        navigate('/trainer/profile-setup', { replace: true });
+      }
+    } else if (currentUserType === 'client') {
+      navigate('/client/dashboard', { replace: true });
+    } else if (currentUserType === 'admin') {
+      navigate('/admin', { replace: true });
+    }
+  }, [user, loading, profileLoading, userTypeLoading, isLoggingOut, isMigrating, userType, user_type, profile, navigate]);
 
   const handleQuizComplete = (results: any) => {
     console.log('🎯 Quiz completed in Home component:', results);
