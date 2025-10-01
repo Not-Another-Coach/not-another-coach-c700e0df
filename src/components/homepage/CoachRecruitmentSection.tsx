@@ -46,7 +46,7 @@ export const CoachRecruitmentSection = ({ onBecomeCoach }: CoachRecruitmentSecti
             <div className="w-px h-12 bg-border"></div>
             <div className="text-center">
               <div className="text-2xl font-bold text-success">Secure</div>
-              <div className="text-sm text-muted-foreground">Instant Payments</div>
+              <div className="text-sm text-muted-foreground">Payments</div>
             </div>
           </div>
         </div>
