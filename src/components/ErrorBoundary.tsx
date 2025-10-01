@@ -1,4 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { NotAnotherCoachError } from '@/components/errors/NotAnotherCoachError';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
@@ -39,37 +40,15 @@ export class ErrorBoundary extends Component<Props, State> {
         return this.props.fallback;
       }
 
+      // Check if we're offline
+      const isOffline = typeof navigator !== 'undefined' && !navigator.onLine;
+
       return (
-        <Card className="w-full max-w-lg mx-auto mt-8">
-          <CardHeader className="text-center">
-            <div className="flex justify-center mb-4">
-              <AlertTriangle className="h-12 w-12 text-destructive" />
-            </div>
-            <CardTitle className="text-destructive">Something went wrong</CardTitle>
-          </CardHeader>
-          <CardContent className="text-center space-y-4">
-            <p className="text-muted-foreground">
-              An unexpected error occurred while loading the trainer data.
-            </p>
-            {this.state.error && (
-              <details className="text-left bg-muted p-3 rounded text-sm">
-                <summary className="cursor-pointer font-medium">Error details</summary>
-                <pre className="mt-2 whitespace-pre-wrap">
-                  {this.state.error.message}
-                </pre>
-              </details>
-            )}
-            <div className="flex gap-2 justify-center">
-              <Button onClick={this.handleRetry} variant="outline">
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Try again
-              </Button>
-              <Button onClick={() => window.location.reload()}>
-                Refresh page
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <NotAnotherCoachError
+          code={isOffline ? 'offline' : '500'}
+          homeHref="/"
+          onRetry={this.handleRetry}
+        />
       );
     }
 

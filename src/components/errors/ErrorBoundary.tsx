@@ -7,6 +7,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { errorLogger } from '@/services/errors/ErrorLogger';
 import { ErrorCategory, ErrorSeverity, ClassifiedError } from '@/services/errors/ErrorClassification';
+import { NotAnotherCoachError } from './NotAnotherCoachError';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
@@ -86,39 +87,45 @@ export class ErrorBoundary extends Component<Props, State> {
         return this.props.fallback;
       }
 
-      // Default error UI
+      // Determine if this is an auth error (403)
+      const classifiedError = this.state.error instanceof ClassifiedError 
+        ? this.state.error 
+        : null;
+      
+      const isAuthError = classifiedError?.metadata.category === ErrorCategory.AUTHENTICATION ||
+                         classifiedError?.metadata.category === ErrorCategory.AUTHORIZATION;
+
+      // Check if we're offline
+      const isOffline = typeof navigator !== 'undefined' && !navigator.onLine;
+
+      // Use branded error page
+      if (isAuthError) {
+        return (
+          <NotAnotherCoachError
+            code="403"
+            homeHref="/"
+            loginHref="/login"
+            supportHref="/contact"
+          />
+        );
+      }
+
+      if (isOffline) {
+        return (
+          <NotAnotherCoachError
+            code="offline"
+            homeHref="/"
+            onRetry={this.handleReset}
+          />
+        );
+      }
+
       return (
-        <div className="min-h-screen flex items-center justify-center p-4 bg-background">
-          <Card className="max-w-lg w-full">
-            <CardHeader>
-              <div className="flex items-center gap-2 text-destructive">
-                <AlertTriangle className="h-5 w-5" />
-                <CardTitle>Something went wrong</CardTitle>
-              </div>
-              <CardDescription>
-                We encountered an unexpected error. Please try refreshing the page.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {process.env.NODE_ENV === 'development' && this.state.error && (
-                <div className="p-4 rounded-lg bg-muted text-sm font-mono overflow-auto max-h-40">
-                  <p className="text-destructive font-semibold mb-2">Error Details:</p>
-                  <p>{this.state.error.message}</p>
-                </div>
-              )}
-              
-              <div className="flex gap-2">
-                <Button onClick={this.handleReset} variant="outline" className="flex-1">
-                  Try Again
-                </Button>
-                <Button onClick={this.handleReload} className="flex-1">
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Reload Page
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <NotAnotherCoachError
+          code="500"
+          homeHref="/"
+          onRetry={this.handleReset}
+        />
       );
     }
 
