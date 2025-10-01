@@ -231,16 +231,31 @@ export function useDataMigration() {
       // Migrate trainer session data
       if (trainerSessionData && trainerSessionData.trainerProfile) {
         try {
-          // Store trainer profile data temporarily for profile setup
+          console.log('👨‍🏫 Migrating trainer profile data...');
           const profileData = trainerSessionData.trainerProfile;
           
-          // You could store this in localStorage with a different key for trainer profile setup
+          // Store in localStorage for TrainerProfileSetup to pick up
           if (Object.keys(profileData).length > 0) {
-            localStorage.setItem('nac_trainer_profile_draft', JSON.stringify(profileData));
+            // Add timestamp for tracking
+            const draftWithMetadata = {
+              ...profileData,
+              migratedAt: new Date().toISOString(),
+              progressTracking: trainerSessionData.progressTracking || {},
+            };
+            
+            localStorage.setItem('nac_trainer_profile_draft', JSON.stringify(draftWithMetadata));
+            console.log('✅ Trainer profile draft stored for authenticated setup');
             messages.push('your trainer profile draft');
+            
+            // Show a specific toast for trainers
+            toast({
+              title: "Profile Draft Saved",
+              description: "Your profile information has been preserved and will be available when you set up your trainer profile.",
+              duration: 5000,
+            });
           }
         } catch (error) {
-          console.error('Error migrating trainer profile data:', error);
+          console.error('❌ Error migrating trainer profile data:', error);
         }
       }
 

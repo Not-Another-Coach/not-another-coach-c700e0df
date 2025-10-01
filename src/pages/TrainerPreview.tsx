@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowRight, Star, MapPin, Clock, Users, Eye, AlertCircle, X } from 'lucide-react';
+import { AnonymousProgressIndicator } from '@/components/trainer-setup/AnonymousProgressIndicator';
 
 export default function TrainerPreview() {
   const navigate = useNavigate();
@@ -23,6 +24,12 @@ export default function TrainerPreview() {
     location: trainerProfile.location || 'London, UK',
     bio: trainerProfile.bio || '',
     trainingTypes: trainerProfile.trainingTypes || ['In-Person', 'Online'],
+    qualifications: trainerProfile.qualifications || [],
+    deliveryFormat: trainerProfile.deliveryFormat || 'hybrid',
+    idealClientTypes: trainerProfile.idealClientTypes || [],
+    coachingStyle: trainerProfile.coachingStyle || [],
+    philosophy: trainerProfile.philosophy || '',
+    howStarted: trainerProfile.howStarted || '',
   });
 
   const [showPreview, setShowPreview] = useState(false);
@@ -91,15 +98,18 @@ export default function TrainerPreview() {
       <div className="container mx-auto px-4 py-8">
         {!showPreview ? (
           /* Profile Builder Form */
-          <div className="max-w-2xl mx-auto">
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold mb-4">
-                Create Your Coach Profile Preview
-              </h1>
-              <p className="text-muted-foreground">
-                Fill in these 3 essential fields to see how your profile would look to potential clients
-              </p>
-            </div>
+          <div className="max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Form Section */}
+              <div className="lg:col-span-2">
+                <div className="text-center mb-8">
+                  <h1 className="text-3xl font-bold mb-4">
+                    Create Your Coach Profile Preview
+                  </h1>
+                  <p className="text-muted-foreground">
+                    Fill in these 3 essential fields to see how your profile would look to potential clients
+                  </p>
+                </div>
 
             <Card>
               <CardHeader>
@@ -239,6 +249,13 @@ export default function TrainerPreview() {
               </CardContent>
             </Card>
           </div>
+          
+          {/* Progress Sidebar */}
+          <div className="lg:col-span-1">
+            <AnonymousProgressIndicator />
+          </div>
+        </div>
+      </div>
         ) : (
           /* Profile Preview */
           <div className="max-w-4xl mx-auto">

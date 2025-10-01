@@ -11,12 +11,25 @@ interface AnonymousTrainerSession {
     location?: string;
     bio?: string;
     trainingTypes?: string[];
+    qualifications?: string[];
+    deliveryFormat?: string;
+    idealClientTypes?: string[];
+    coachingStyle?: string[];
+    philosophy?: string;
+    howStarted?: string;
   };
   demoInteractions: {
     viewedDashboard: boolean;
     usedCalculator: boolean;
     createdPreview: boolean;
     attemptedPublish: boolean;
+  };
+  progressTracking: {
+    basicInfoComplete: boolean;
+    specializationsComplete: boolean;
+    ratesComplete: boolean;
+    previewGenerated: boolean;
+    lastUpdated: string;
   };
   createdAt: string;
   expiresAt: string;
@@ -72,6 +85,13 @@ export function useAnonymousTrainerSession() {
         createdPreview: false,
         attemptedPublish: false,
       },
+      progressTracking: {
+        basicInfoComplete: false,
+        specializationsComplete: false,
+        ratesComplete: false,
+        previewGenerated: false,
+        lastUpdated: now.toISOString(),
+      },
       createdAt: now.toISOString(),
       expiresAt: expiresAt.toISOString(),
     };
@@ -86,11 +106,25 @@ export function useAnonymousTrainerSession() {
   const updateTrainerProfile = useCallback((profileData: Partial<AnonymousTrainerSession['trainerProfile']>) => {
     const currentSession = session || createSession();
     
+    // Calculate progress
+    const updatedProfile = {
+      ...currentSession.trainerProfile,
+      ...profileData,
+    };
+    
+    const basicInfoComplete = !!(updatedProfile.firstName && updatedProfile.lastName && updatedProfile.tagline);
+    const specializationsComplete = !!(updatedProfile.specializations && updatedProfile.specializations.length > 0);
+    const ratesComplete = !!(updatedProfile.hourlyRate && updatedProfile.hourlyRate > 0);
+    
     const updatedSession = {
       ...currentSession,
-      trainerProfile: {
-        ...currentSession.trainerProfile,
-        ...profileData,
+      trainerProfile: updatedProfile,
+      progressTracking: {
+        ...currentSession.progressTracking,
+        basicInfoComplete,
+        specializationsComplete,
+        ratesComplete,
+        lastUpdated: new Date().toISOString(),
       },
     };
     
@@ -102,11 +136,21 @@ export function useAnonymousTrainerSession() {
   const trackInteraction = useCallback((interaction: keyof AnonymousTrainerSession['demoInteractions']) => {
     const currentSession = session || createSession();
     
+    // Update progress when preview is created
+    const progressUpdate = interaction === 'createdPreview' 
+      ? { previewGenerated: true }
+      : {};
+    
     const updatedSession = {
       ...currentSession,
       demoInteractions: {
         ...currentSession.demoInteractions,
         [interaction]: true,
+      },
+      progressTracking: {
+        ...currentSession.progressTracking,
+        ...progressUpdate,
+        lastUpdated: new Date().toISOString(),
       },
     };
     
@@ -133,6 +177,27 @@ export function useAnonymousTrainerSession() {
            session?.trainerProfile.specializations && 
            session?.trainerProfile.specializations.length > 0;
   }, [session]);
+  
+  // Calculate overall progress percentage
+  const getProgressPercentage = useCallback(() => {
+    if (!session) return 0;
+    
+    const progress = session.progressTracking;
+    const weights = {
+      basicInfoComplete: 40,
+      specializationsComplete: 30,
+      ratesComplete: 20,
+      previewGenerated: 10,
+    };
+    
+    let totalProgress = 0;
+    if (progress.basicInfoComplete) totalProgress += weights.basicInfoComplete;
+    if (progress.specializationsComplete) totalProgress += weights.specializationsComplete;
+    if (progress.ratesComplete) totalProgress += weights.ratesComplete;
+    if (progress.previewGenerated) totalProgress += weights.previewGenerated;
+    
+    return totalProgress;
+  }, [session]);
 
   return {
     session,
@@ -143,12 +208,20 @@ export function useAnonymousTrainerSession() {
     clearSession,
     getSessionData,
     hasBasicProfile,
+    getProgressPercentage,
     trainerProfile: session?.trainerProfile || {},
     demoInteractions: session?.demoInteractions || {
       viewedDashboard: false,
       usedCalculator: false,
       createdPreview: false,
       attemptedPublish: false,
+    },
+    progressTracking: session?.progressTracking || {
+      basicInfoComplete: false,
+      specializationsComplete: false,
+      ratesComplete: false,
+      previewGenerated: false,
+      lastUpdated: new Date().toISOString(),
     },
   };
 }
