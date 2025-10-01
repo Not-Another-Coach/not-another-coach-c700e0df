@@ -17,10 +17,17 @@ export function UserModeToggle() {
     if (intent === 'trainer') {
       navigate('/trainer/demo');
     } else {
-      // Scroll to browse section for clients
-      const browseSection = document.getElementById('browse-trainers');
-      if (browseSection) {
-        browseSection.scrollIntoView({ behavior: 'smooth' });
+      // Navigate to home page for client mode
+      const currentPath = window.location.pathname;
+      if (currentPath === '/' || currentPath === '') {
+        // Already on home page, scroll to browse section
+        const browseSection = document.getElementById('browse-trainers');
+        if (browseSection) {
+          browseSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      } else {
+        // Navigate to home page with client intent
+        navigate('/');
       }
     }
   };
