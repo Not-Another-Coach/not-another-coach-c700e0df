@@ -14,9 +14,9 @@ export const MotivationalHeader: React.FC<MotivationalHeaderProps> = ({ context,
         return userName ? `Welcome back, ${userName}` : "Welcome back";
       case 'signup':
         if (userType === 'trainer') {
-          return "Your transformation starts here";
+          return "Ready to grow your coaching business?";
         } else if (userType === 'client') {
-          return "Ready to transform your fitness?";
+          return "Your transformation starts here";
         }
         return null;
       case 'trainer-signup':
@@ -36,9 +36,9 @@ export const MotivationalHeader: React.FC<MotivationalHeaderProps> = ({ context,
         return null;
       case 'signup':
         if (userType === 'trainer') {
-          return "Find your perfect trainer match";
+          return "Build your profile and attract ideal clients";
         } else if (userType === 'client') {
-          return "Connect with coaches who understand your journey";
+          return "Find your perfect trainer match";
         }
         return null;
       case 'trainer-signup':
