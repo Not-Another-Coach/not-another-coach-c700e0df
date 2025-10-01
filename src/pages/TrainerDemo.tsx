@@ -78,14 +78,14 @@ export default function TrainerDemo() {
         </div>
 
         <div className="space-y-8">
-          {/* Your Coaching Calendar */}
-          <TrainerDemoCalendar />
+          {/* Calendar and Growth Tracker Side by Side */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <TrainerDemoCalendar />
+            <GrowthTracker />
+          </div>
 
           {/* Coach Profile Preview */}
           <DemoProfilePreview />
-
-          {/* Growth Tracker (replacing earnings calculator) */}
-          <GrowthTracker />
 
           {/* Coach Journey Infographic */}
           <CoachJourneyInfographic />
