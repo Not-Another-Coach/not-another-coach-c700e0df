@@ -29,30 +29,18 @@ export default function TrainerDemo() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="sticky top-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border">
-        <div className="mx-auto px-6 lg:px-8 xl:px-12 py-3">
-          <div className="flex items-center justify-between">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-3">
+          <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <AppLogo onClick={() => navigate('/')} />
-              <div className="text-muted-foreground">Coach Demo</div>
-              
-              {/* Demo Mode Badge */}
-              <div className="flex items-center gap-2 ml-6 px-3 py-1 bg-muted/50 rounded-full">
-                <div className="w-2 h-2 rounded-full bg-warning animate-pulse" />
-                <div className="text-sm font-medium text-warning">
-                  Demo Mode
-                </div>
-              </div>
+              <div className="text-muted-foreground hidden sm:block">Coach Demo</div>
             </div>
             
-            <div className="flex items-center gap-3">
-              <Button variant="outline" asChild>
-                <Link to="/">← Back to Homepage</Link>
-              </Button>
-              <Button onClick={handleCreateProfile}>
-                Create Your Profile
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
+            <Button onClick={handleCreateProfile} size="sm" className="sm:size-default">
+              <span className="hidden sm:inline">Create Your Profile</span>
+              <span className="sm:hidden">Create Profile</span>
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
           </div>
         </div>
       </div>
