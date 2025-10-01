@@ -6767,6 +6767,14 @@ export type Database = {
           trainer_name: string
         }[]
       }
+      get_all_system_visibility_defaults: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          content_type: Database["public"]["Enums"]["content_type"]
+          stage_group: Database["public"]["Enums"]["engagement_stage_group"]
+          visibility_state: Database["public"]["Enums"]["visibility_state"]
+        }[]
+      }
       get_client_journey_stage: {
         Args: { p_client_id: string }
         Returns: string

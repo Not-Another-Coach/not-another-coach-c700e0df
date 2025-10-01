@@ -26,7 +26,9 @@ class VisibilityConfigServiceClass {
     }
 
     try {
-      const { data, error } = await supabase.rpc('get_system_default_visibility');
+      // Call the new public function that returns ALL system defaults
+      // This function is accessible to all users (anonymous, clients, trainers)
+      const { data, error } = await supabase.rpc('get_all_system_visibility_defaults');
       
       if (error) {
         console.error('Error fetching system defaults:', error);
