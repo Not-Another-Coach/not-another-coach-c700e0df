@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Calendar, Star, TrendingUp } from 'lucide-react';
+import { Users, Calendar, TrendingUp } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
 export function GrowthTracker() {
@@ -23,16 +23,6 @@ export function GrowthTracker() {
       borderColor: 'border-success/20',
       progress: 75,
       change: '+4 this week',
-    },
-    {
-      title: 'Average Rating',
-      value: '4.9',
-      icon: Star,
-      color: 'text-warning',
-      bgColor: 'bg-warning/10',
-      borderColor: 'border-warning/20',
-      progress: 98,
-      change: 'Excellent',
     },
     {
       title: 'Monthly Growth',
