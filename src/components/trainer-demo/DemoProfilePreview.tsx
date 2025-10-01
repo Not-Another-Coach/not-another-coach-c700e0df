@@ -22,6 +22,58 @@ My qualifications include NASM-CPT, Precision Nutrition Level 1, and certificati
   totalRatings: 127,
   isVerified: true,
   status: 'accepting',
+  instagram_handle: '@alexjohnson_pt',
+  instagram_connected: true,
+  instagram_posts: [
+    {
+      id: 'demo-ig-1',
+      media_url: 'https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=600&h=600&fit=crop',
+      media_type: 'IMAGE',
+      caption: '💪 Client transformation alert! Sarah lost 15kg in 4 months and gained incredible strength. Consistency beats perfection every time! 🎯\n\n#transformation #fitnessmotivation #personaltrainer',
+      permalink: 'https://instagram.com/p/demo1',
+      timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'demo-ig-2',
+      media_url: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&h=600&fit=crop',
+      media_type: 'IMAGE',
+      caption: '🔥 Quick home workout you can do anywhere! No equipment needed - just your bodyweight and determination.\n\nSave this for later! 💾\n\n#homeworkout #fitnessjourney #trainwithme',
+      permalink: 'https://instagram.com/p/demo2',
+      timestamp: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'demo-ig-3',
+      media_url: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=600&h=600&fit=crop',
+      media_type: 'IMAGE',
+      caption: '🥗 Nutrition tip: You don\'t need to eat "clean" 100% of the time. Aim for balance, not perfection. Here\'s my go-to high-protein meal prep.\n\n#nutritioncoach #mealprep #healthyeating',
+      permalink: 'https://instagram.com/p/demo3',
+      timestamp: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'demo-ig-4',
+      media_url: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&h=600&fit=crop',
+      media_type: 'IMAGE',
+      caption: '🏋️ Form check: Deadlifts! This exercise is a game-changer for building full-body strength. Swipe for key technique cues.\n\n#deadlift #strengthtraining #formcheck',
+      permalink: 'https://instagram.com/p/demo4',
+      timestamp: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'demo-ig-5',
+      media_url: 'https://images.unsplash.com/photo-1549060279-7e168fcee0c2?w=600&h=600&fit=crop',
+      media_type: 'IMAGE',
+      caption: '✨ Mindset Monday: Your body can stand almost anything. It\'s your mind that you need to convince.\n\nWhat\'s your fitness goal for this week? 👇\n\n#mondaymotivation #fitnessmindset #goalsetting',
+      permalink: 'https://instagram.com/p/demo5',
+      timestamp: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'demo-ig-6',
+      media_url: 'https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?w=600&h=600&fit=crop',
+      media_type: 'IMAGE',
+      caption: '🎯 Taking on new clients for online and in-person training! Limited spots available. DM me to chat about your goals!\n\n#personaltrainer #londonpt #onlinecoaching',
+      permalink: 'https://instagram.com/p/demo6',
+      timestamp: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+    }
+  ],
   specializations: [
     'Weight Loss',
     'Strength Training',
