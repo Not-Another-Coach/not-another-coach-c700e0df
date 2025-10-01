@@ -133,7 +133,21 @@ export function usePaymentStatements() {
         .order('created_at', { ascending: false });
 
       console.log('🔥 usePaymentStatements: Query result:', { data, error });
-      if (error) throw error;
+      
+      if (error) {
+        // Handle permission errors gracefully
+        if (error.code === 'PGRST301' || error.message?.includes('row-level security')) {
+          console.warn('🔥 usePaymentStatements: Insufficient permissions to access payment packages');
+          setPackages([]);
+          toast({
+            title: "Access Denied",
+            description: "You don't have permission to view payment packages",
+            variant: "destructive",
+          });
+          return;
+        }
+        throw error;
+      }
       
       const packages = data || [];
       console.log('🔥 usePaymentStatements: Setting packages:', packages.length, 'items');

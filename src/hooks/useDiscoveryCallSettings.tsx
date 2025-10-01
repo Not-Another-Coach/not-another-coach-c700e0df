@@ -43,9 +43,22 @@ export function useDiscoveryCallSettings() {
         .eq('trainer_id', user.id)
         .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching discovery call settings:', error);
-        return;
+      if (error) {
+        // Handle permission errors gracefully
+        if (error.code === 'PGRST301' || error.message?.includes('row-level security')) {
+          console.warn('Insufficient permissions to access discovery call settings');
+          toast({
+            title: "Access Denied",
+            description: "You don't have permission to view these settings",
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
+        if (error.code !== 'PGRST116') {
+          console.error('Error fetching discovery call settings:', error);
+          return;
+        }
       }
 
       if (data) {
@@ -74,6 +87,11 @@ export function useDiscoveryCallSettings() {
       }
     } catch (error) {
       console.error('Error fetching discovery call settings:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load discovery call settings",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -101,6 +119,16 @@ export function useDiscoveryCallSettings() {
         .single();
 
       if (error) {
+        // Handle permission errors gracefully
+        if (error.code === 'PGRST301' || error.message?.includes('row-level security')) {
+          toast({
+            title: "Access Denied",
+            description: "You don't have permission to update these settings",
+            variant: "destructive",
+          });
+          setSaving(false);
+          return;
+        }
         console.error('Error updating discovery call settings:', error);
         toast({
           title: "Error",

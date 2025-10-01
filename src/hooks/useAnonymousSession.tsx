@@ -53,7 +53,13 @@ export function useAnonymousSession() {
     });
     
     try {
+      // Validate session before syncing
       const expiresAt = new Date(sessionData.expiresAt);
+      if (expiresAt < new Date()) {
+        console.warn('🔄 SYNC: Session expired, skipping sync');
+        return;
+      }
+      
       console.log('🔄 SYNC: Parsed expires date:', expiresAt.toISOString());
       
       const payload = {
@@ -71,6 +77,11 @@ export function useAnonymousSession() {
         });
       
       if (error) {
+        // Handle permission errors gracefully
+        if (error.code === 'PGRST301' || error.message?.includes('row-level security')) {
+          console.warn('🔄 SYNC: Session access denied, continuing with local storage only');
+          return;
+        }
         console.error('🔄 SYNC: Supabase error:', error);
         throw error;
       }
@@ -93,6 +104,12 @@ export function useAnonymousSession() {
     console.log('🔍 LOAD: Attempting to load session from server:', sessionId);
     
     try {
+      // Validate session ID format
+      if (!sessionId || sessionId.length < 10) {
+        console.warn('🔍 LOAD: Invalid session ID format');
+        return null;
+      }
+
       const currentTime = new Date().toISOString();
       console.log('🔍 LOAD: Current time for expiry check:', currentTime);
       
@@ -101,11 +118,16 @@ export function useAnonymousSession() {
         .select('*')
         .eq('session_id', sessionId)
         .gt('expires_at', currentTime)
-        .single();
+        .maybeSingle();
 
       console.log('🔍 LOAD: Supabase response:', { data, error });
 
       if (error) {
+        // Handle permission errors gracefully
+        if (error.code === 'PGRST301' || error.message?.includes('row-level security')) {
+          console.warn('🔍 LOAD: Session access denied, using local storage only');
+          return null;
+        }
         console.log('🔍 LOAD: Query error or no data found:', error);
         return null;
       }
