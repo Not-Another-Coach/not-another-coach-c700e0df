@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowRight, Star, MapPin, Clock, Users, Eye, AlertCircle } from 'lucide-react';
+import { ArrowRight, Star, MapPin, Clock, Users, Eye, AlertCircle, X } from 'lucide-react';
 
 export default function TrainerPreview() {
   const navigate = useNavigate();
@@ -76,17 +76,14 @@ export default function TrainerPreview() {
               </Link>
               <Badge variant="secondary">Profile Preview</Badge>
             </div>
-            <div className="flex items-center gap-3">
-              <Button variant="outline" asChild>
-                <Link to="/trainer/demo">← Back to Demo</Link>
-              </Button>
-              {showPreview && (
-                <Button onClick={handlePublishAttempt}>
-                  Publish Profile
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              )}
-            </div>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => navigate('/trainer/demo')}
+              className="h-8 w-8"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       </div>
@@ -391,15 +388,10 @@ export default function TrainerPreview() {
                 Your profile looks great! To publish it and start connecting with clients, 
                 you'll need to create your coach account and complete the verification process.
               </p>
-              <div className="flex justify-center gap-4">
-                <Button size="lg" onClick={handlePublishAttempt}>
-                  Create Coach Account
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-                <Button size="lg" variant="outline" asChild>
-                  <Link to="/trainer/demo">← Back to Demo</Link>
-                </Button>
-              </div>
+              <Button size="lg" onClick={handlePublishAttempt}>
+                Create Coach Account
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
             </div>
           </div>
         )}
