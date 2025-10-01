@@ -211,14 +211,18 @@ export default function Auth() {
     const { error } = await signUp(signupForm.email, signupForm.password, userData);
     
     if (error) {
-      if (error.message.includes('already registered')) {
+      const errorMsg = error.message?.toLowerCase() || '';
+      const isAlreadyRegistered = errorMsg.includes('already registered') || errorMsg.includes('user already registered');
+      
+      if (isAlreadyRegistered) {
         // Pre-populate login form with the email and switch to login tab
         setLoginForm({ email: signupForm.email, password: '' });
+        setConfirmationEmail(signupForm.email);
+        setShowResendConfirmation(true);
         setActiveTab('login');
         toast({
           title: "Account exists",
-          description: "An account with this email already exists. Please log in below.",
-          variant: "destructive",
+          description: "This email is already registered. Check your email for the confirmation link or click 'Resend Confirmation' below.",
         });
         // Clear signup form
         setSignupForm({

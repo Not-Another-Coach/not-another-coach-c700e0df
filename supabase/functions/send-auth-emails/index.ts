@@ -338,18 +338,26 @@ serve(async (req: Request): Promise<Response> => {
     const firstName = user.user_metadata?.first_name;
     const userType = user.user_metadata?.user_type;
     
-    console.log('Processing auth email for:', user.email, 'Type:', email_action_type);
+    console.log('Processing auth email for:', user.email, 'Type:', email_action_type, 'User ID:', user.id);
 
-    // Handle email confirmation
-    if (email_action_type === 'signup') {
-      console.log('Sending confirmation email for user:', user.email, 'from:', fromEmail);
+    // Handle email confirmation (both new signups and repeated signup attempts)
+    if (email_action_type === 'signup' || email_action_type === 'user_repeated_signup') {
+      // Log action type for debugging
+      if (email_action_type === 'user_repeated_signup') {
+        console.log('🔄 Handling repeated signup attempt - resending confirmation for:', user.email);
+      } else {
+        console.log('📧 Sending initial confirmation email for user:', user.email);
+      }
+      console.log('Using from address:', fromEmail);
       
       // Fetch logo settings
       const logoSettings = await fetchAppLogo();
       const appName = logoSettings?.app_name || 'Not Another Coach';
       
       // Send confirmation email with retry logic
-      const subject = `👉 Welcome to ${appName} — please confirm your email`;
+      const subject = email_action_type === 'user_repeated_signup' 
+        ? `🔑 Confirm your ${appName} email` 
+        : `👉 Welcome to ${appName} — please confirm your email`;
 
       const confirmationResult = await retryResendCall(() =>
         resend.emails.send({
@@ -394,13 +402,15 @@ serve(async (req: Request): Promise<Response> => {
         throw new Error(`Failed to send confirmation email: ${message}`);
       }
 
-      console.log('Confirmation email sent successfully:', {
+      console.log('✅ Confirmation email sent successfully:', {
         id: confirmationResult.data?.id,
         to: user.email,
-        subject
+        subject,
+        actionType: email_action_type,
+        isRepeatedSignup: email_action_type === 'user_repeated_signup'
       });
     } else {
-      console.log('Skipping confirmation email - action type:', email_action_type);
+      console.log('⏭️ Skipping confirmation email - action type:', email_action_type);
     }
 
     return new Response(
