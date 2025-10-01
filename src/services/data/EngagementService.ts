@@ -292,22 +292,43 @@ export class EngagementService extends BaseService {
   }
 
   /**
-   * Update engagement stage via RPC
+   * Update engagement stage via RPC (legacy support)
+   * Prefer using updateEngagementStage() for new code
    */
   static async updateEngagementStageRPC(
     clientId: string,
     trainerId: string,
     newStage: string
   ): Promise<ServiceResponse<void>> {
+    // Use the main updateEngagementStage method instead
+    const response = await this.updateEngagementStage(trainerId, newStage as any, clientId);
+    
+    if (!response.success) {
+      return ServiceResponseHelper.error(response.error!);
+    }
+    
+    return ServiceResponseHelper.success(undefined);
+  }
+
+  /**
+   * Complete coach selection payment
+   */
+  static async completeCoachSelectionPayment(
+    clientId: string,
+    trainerId: string,
+    paymentIntentId?: string,
+    paymentMethod?: string
+  ): Promise<ServiceResponse<any>> {
     try {
-      const { error } = await this.db.rpc('update_engagement_stage', {
-        client_uuid: clientId,
-        trainer_uuid: trainerId,
-        new_stage: newStage as any
+      const { data, error } = await this.db.rpc('complete_coach_selection_payment', {
+        p_client_id: clientId,
+        p_trainer_id: trainerId,
+        p_stripe_payment_intent_id: paymentIntentId,
+        p_payment_method: paymentMethod
       });
 
       if (error) throw error;
-      return ServiceResponseHelper.success(undefined);
+      return ServiceResponseHelper.success(data);
     } catch (error) {
       return ServiceResponseHelper.error(ServiceError.fromError(error));
     }

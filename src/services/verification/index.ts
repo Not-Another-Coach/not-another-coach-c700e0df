@@ -7,6 +7,8 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { BaseService } from '../base/BaseService';
+import { ServiceResponseHelper } from '../base/ServiceResponse';
+import { ServiceError } from '../base/ServiceError';
 import { ServiceResponse } from '../types';
 import type {
   VerificationRequest,
@@ -155,27 +157,109 @@ class VerificationServiceClass extends BaseService {
   }
 
   /**
-   * Update verification display preference
+   * Submit verification request
    */
-  async updateDisplayPreference(
-    preference: 'hidden' | 'verified_allowed'
-  ): Promise<ServiceResponse<void>> {
-    try {
-      const user = (await supabase.auth.getUser()).data.user;
-      if (!user) throw new Error('Not authenticated');
+  static async submitVerificationRequest(
+    documents: Record<string, string>
+  ): Promise<ServiceResponse<any>> {
+    const userIdResponse = await this.getCurrentUserId();
+    if (!userIdResponse.success || !userIdResponse.data) {
+      return ServiceResponseHelper.error(
+        ServiceError.unauthorized('User must be authenticated.')
+      );
+    }
 
-      const { error } = await supabase
-        .from('trainer_verification_overview')
-        .update({ display_preference: preference })
-        .eq('trainer_id', user.id);
+    return this.executeMutation(async () => {
+      return await this.db
+        .from('trainer_verification_requests')
+        .insert([{
+          trainer_id: userIdResponse.data!,
+          documents,
+          status: 'pending'
+        }])
+        .select()
+        .single();
+    });
+  }
+
+  /**
+   * Request trainer verification (RPC)
+   */
+  static async requestTrainerVerification(): Promise<ServiceResponse<any>> {
+    try {
+      const { data, error } = await this.db.rpc('request_trainer_verification', {});
 
       if (error) throw error;
-      return { success: true };
+      return ServiceResponseHelper.success(data);
     } catch (error) {
-      return { success: false, error: { code: 'ERROR', message: String(error) } };
+      return ServiceResponseHelper.error(ServiceError.fromError(error));
+    }
+  }
+
+  /**
+   * Update trainer verification status (admin only)
+   */
+  static async updateTrainerVerificationStatus(
+    trainerId: string,
+    status: 'pending' | 'verified' | 'rejected',
+    adminNotes?: string,
+    rejectionReason?: string
+  ): Promise<ServiceResponse<void>> {
+    try {
+      const { error } = await this.db.rpc('update_trainer_verification_status', {
+        p_trainer_id: trainerId,
+        p_status: status as any,
+        p_admin_notes: adminNotes || null,
+        p_rejection_reason: rejectionReason || null
+      });
+
+      if (error) throw error;
+      return ServiceResponseHelper.success(undefined);
+    } catch (error) {
+      return ServiceResponseHelper.error(ServiceError.fromError(error));
+    }
+  }
+
+  /**
+   * Admin update verification check
+   */
+  static async adminUpdateVerificationCheck(
+    checkId: string,
+    status: 'pending' | 'verified' | 'rejected' | 'expired',
+    notes?: string
+  ): Promise<ServiceResponse<any>> {
+    try {
+      const { data, error } = await this.db.rpc('admin_update_verification_check', {
+        p_check_id: checkId,
+        p_status: status,
+        p_admin_notes: notes || null
+      });
+
+      if (error) throw error;
+      return ServiceResponseHelper.success(data);
+    } catch (error) {
+      return ServiceResponseHelper.error(ServiceError.fromError(error));
+    }
+  }
+
+  /**
+   * Get admin verification activities
+   */
+  static async getAdminVerificationActivities(
+    filters?: Record<string, any>
+  ): Promise<ServiceResponse<any[]>> {
+    try {
+      const { data: rpcData, error: rpcError } = await this.db.rpc('get_admin_verification_activities', {
+        ...(filters || {})
+      });
+
+      if (rpcError) throw rpcError;
+      return ServiceResponseHelper.success(rpcData || []);
+    } catch (error) {
+      return ServiceResponseHelper.error(ServiceError.fromError(error));
     }
   }
 }
 
-export const VerificationService = new VerificationServiceClass();
+export const VerificationService = VerificationServiceClass;
 export { VerificationServiceClass };

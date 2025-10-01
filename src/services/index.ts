@@ -15,6 +15,17 @@ export { TemplateService } from './template';
 export { AdminService } from './admin';
 export { VerificationService } from './verification';
 export { ContentService } from './content';
+export { ClientService } from './client';
+export { PaymentService } from './payment';
+export { EngagementService } from './data/EngagementService';
+
+// Specialized Services
+export { ActivityService } from './activity';
+export { UserService } from './user';
+export { WaitlistService } from './waitlist';
+export { FeedbackService } from './feedback';
+export { StreakService } from './streak';
+export { PublicationService } from './publication';
 
 // Communication Services
 export { MessagingService } from './messaging';
@@ -28,3 +39,6 @@ export * from './types';
 
 // Monitoring
 export * from './monitoring';
+
+// Error Handling
+export * from './errors';
