@@ -290,4 +290,54 @@ export class EngagementService extends BaseService {
     const response = await this.getEngagementStage(trainerId, clientId);
     return ServiceResponseHelper.success(!!response.data);
   }
+
+  /**
+   * Update engagement stage via RPC
+   */
+  static async updateEngagementStageRPC(
+    clientId: string,
+    trainerId: string,
+    newStage: string
+  ): Promise<ServiceResponse<void>> {
+    try {
+      const { error } = await this.db.rpc('update_engagement_stage', {
+        client_uuid: clientId,
+        trainer_uuid: trainerId,
+        new_stage: newStage as any
+      });
+
+      if (error) throw error;
+      return ServiceResponseHelper.success(undefined);
+    } catch (error) {
+      return ServiceResponseHelper.error(ServiceError.fromError(error));
+    }
+  }
+
+  /**
+   * Create coach selection request via RPC
+   */
+  static async createCoachSelectionRequest(
+    trainerId: string,
+    packageId: string,
+    packageName: string,
+    packagePrice: number,
+    packageDuration: string,
+    clientMessage?: string
+  ): Promise<ServiceResponse<string>> {
+    try {
+      const { data, error } = await this.db.rpc('create_coach_selection_request', {
+        p_trainer_id: trainerId,
+        p_package_id: packageId,
+        p_package_name: packageName,
+        p_package_price: packagePrice,
+        p_package_duration: packageDuration,
+        p_client_message: clientMessage
+      });
+
+      if (error) throw error;
+      return ServiceResponseHelper.success(data as string);
+    } catch (error) {
+      return ServiceResponseHelper.error(ServiceError.fromError(error));
+    }
+  }
 }
