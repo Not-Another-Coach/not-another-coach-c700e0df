@@ -126,7 +126,7 @@ export const UnifiedTrainerCard = ({
           </div>
         </div>
 
-        {/* Specializations */}
+        {/* Specialisations */}
         <div className="mb-4">
           <div className="flex flex-wrap gap-2">
             {trainer.specializations?.slice(0, 3).map((spec) => (

@@ -107,7 +107,7 @@ export const TrainerProfilePreview = ({ formData }: TrainerProfilePreviewProps) 
                 })}
               </div>
 
-              {/* Specializations */}
+              {/* Specialisations */}
               {formData.specializations?.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {formData.specializations.map((spec: string) => (

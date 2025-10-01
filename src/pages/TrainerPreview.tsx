@@ -144,8 +144,8 @@ export default function TrainerPreview() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="specializations">Specializations *</Label>
-                  <Select 
+                  <Label htmlFor="specializations">Specialisations *</Label>
+                  <Select
                     value={formData.specializations[0] || ''} 
                     onValueChange={(value) => {
                       const newSpecs = formData.specializations.includes(value) 
@@ -183,7 +183,7 @@ export default function TrainerPreview() {
                     </div>
                   )}
                   <p className="text-xs text-muted-foreground">
-                    Select multiple specializations (click to remove)
+                    Select multiple specialisations (click to remove)
                   </p>
                 </div>
 
@@ -306,7 +306,7 @@ export default function TrainerPreview() {
                         )}
 
                         <div>
-                          <h3 className="font-semibold mb-2">Specializations</h3>
+                          <h3 className="font-semibold mb-2">Specialisations</h3>
                           <div className="flex flex-wrap gap-2">
                             {formData.specializations.map((spec) => (
                               <Badge key={spec} variant="outline">{spec}</Badge>

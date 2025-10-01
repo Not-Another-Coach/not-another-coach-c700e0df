@@ -15,7 +15,7 @@ const contentTypeLabels: Record<ContentType, string> = {
   basic_information: 'Basic Information',
   testimonial_images: 'Testimonial Before/After Photos',
   gallery_images: 'Gallery Images',
-  specializations: 'Specializations',
+  specializations: 'Specialisations',
   pricing_discovery_call: 'Pricing & Discovery Call',
   stats_ratings: 'Stats & Ratings',
   description_bio: 'Description & Bio',

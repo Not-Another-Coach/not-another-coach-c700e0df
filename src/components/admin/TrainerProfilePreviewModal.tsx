@@ -203,9 +203,9 @@ export const TrainerProfilePreviewModal = ({
                     <CardTitle>Services & Expertise</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {/* Specializations */}
+                    {/* Specialisations */}
                     <div>
-                      <label className="text-sm font-medium text-muted-foreground">Specializations</label>
+                      <label className="text-sm font-medium text-muted-foreground">Specialisations</label>
                       <div className="flex flex-wrap gap-2 mt-1">
                         {(profile.trainer_specializations || profile.specializations || []).map((item: any, index: number) => (
                           <Badge key={index} variant="outline">
@@ -213,7 +213,7 @@ export const TrainerProfilePreviewModal = ({
                           </Badge>
                         ))}
                         {(!profile.trainer_specializations?.length && !profile.specializations?.length) && (
-                          <p className="text-sm text-muted-foreground">No specializations added</p>
+                          <p className="text-sm text-muted-foreground">No specialisations added</p>
                         )}
                       </div>
                     </div>
