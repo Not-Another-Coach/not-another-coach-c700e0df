@@ -15,12 +15,14 @@ export default function TrainerPreview() {
   const { trainerProfile, updateTrainerProfile, trackInteraction } = useAnonymousTrainerSession();
   
   const [formData, setFormData] = useState({
-    name: trainerProfile.name || '',
+    firstName: trainerProfile.firstName || '',
+    lastName: trainerProfile.lastName || '',
     tagline: trainerProfile.tagline || '',
-    specialization: trainerProfile.specialization || '',
+    specializations: trainerProfile.specializations || [],
     hourlyRate: trainerProfile.hourlyRate || 50,
     location: trainerProfile.location || 'London, UK',
     bio: trainerProfile.bio || '',
+    trainingTypes: trainerProfile.trainingTypes || ['In-Person', 'Online'],
   });
 
   const [showPreview, setShowPreview] = useState(false);
@@ -42,14 +44,14 @@ export default function TrainerPreview() {
     'Group Training'
   ];
 
-  const handleInputChange = (field: string, value: string | number) => {
+  const handleInputChange = (field: string, value: string | number | string[]) => {
     const newData = { ...formData, [field]: value };
     setFormData(newData);
     updateTrainerProfile(newData);
   };
 
   const handleCreateProfile = () => {
-    if (!formData.name || !formData.tagline || !formData.specialization) {
+    if (!formData.firstName || !formData.lastName || !formData.tagline || formData.specializations.length === 0) {
       return;
     }
     setShowPreview(true);
@@ -60,7 +62,7 @@ export default function TrainerPreview() {
     navigate('/auth?intent=trainer-signup');
   };
 
-  const isFormValid = formData.name && formData.tagline && formData.specialization;
+  const isFormValid = formData.firstName && formData.lastName && formData.tagline && formData.specializations.length > 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -110,14 +112,25 @@ export default function TrainerPreview() {
                 </p>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Your Name *</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => handleInputChange('name', e.target.value)}
-                    placeholder="e.g., Sarah Johnson"
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="firstName">First Name *</Label>
+                    <Input
+                      id="firstName"
+                      value={formData.firstName}
+                      onChange={(e) => handleInputChange('firstName', e.target.value)}
+                      placeholder="e.g., Sarah"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName">Last Name *</Label>
+                    <Input
+                      id="lastName"
+                      value={formData.lastName}
+                      onChange={(e) => handleInputChange('lastName', e.target.value)}
+                      placeholder="e.g., Johnson"
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -134,10 +147,18 @@ export default function TrainerPreview() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="specialization">Primary Specialization *</Label>
-                  <Select value={formData.specialization} onValueChange={(value) => handleInputChange('specialization', value)}>
+                  <Label htmlFor="specializations">Specializations *</Label>
+                  <Select 
+                    value={formData.specializations[0] || ''} 
+                    onValueChange={(value) => {
+                      const newSpecs = formData.specializations.includes(value) 
+                        ? formData.specializations.filter(s => s !== value)
+                        : [...formData.specializations, value];
+                      handleInputChange('specializations', newSpecs);
+                    }}
+                  >
                     <SelectTrigger>
-                      <SelectValue placeholder="Choose your main area of expertise" />
+                      <SelectValue placeholder="Choose your areas of expertise" />
                     </SelectTrigger>
                     <SelectContent>
                       {specializations.map((spec) => (
@@ -147,6 +168,26 @@ export default function TrainerPreview() {
                       ))}
                     </SelectContent>
                   </Select>
+                  {formData.specializations.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {formData.specializations.map((spec) => (
+                        <Badge 
+                          key={spec} 
+                          variant="secondary"
+                          className="cursor-pointer"
+                          onClick={() => {
+                            const newSpecs = formData.specializations.filter(s => s !== spec);
+                            handleInputChange('specializations', newSpecs);
+                          }}
+                        >
+                          {spec} ×
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Select multiple specializations (click to remove)
+                  </p>
                 </div>
 
                 {/* Optional Fields */}
@@ -223,7 +264,7 @@ export default function TrainerPreview() {
                       <div className="absolute -bottom-12 left-6">
                         <div className="w-24 h-24 bg-primary/20 rounded-full border-4 border-background flex items-center justify-center">
                           <span className="text-2xl font-bold text-primary">
-                            {formData.name.split(' ').map(n => n[0]).join('')}
+                            {formData.firstName[0]}{formData.lastName[0]}
                           </span>
                         </div>
                       </div>
@@ -233,7 +274,7 @@ export default function TrainerPreview() {
                     <div className="pt-16 p-6">
                       <div className="space-y-4">
                         <div>
-                          <h2 className="text-2xl font-bold">{formData.name}</h2>
+                          <h2 className="text-2xl font-bold">{formData.firstName} {formData.lastName}</h2>
                           <p className="text-lg text-muted-foreground">{formData.tagline}</p>
                         </div>
 
@@ -252,8 +293,10 @@ export default function TrainerPreview() {
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2">
-                          <Badge variant="secondary">{formData.specialization}</Badge>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {formData.specializations.map((spec) => (
+                            <Badge key={spec} variant="secondary">{spec}</Badge>
+                          ))}
                           <Badge variant="outline">Verified Coach</Badge>
                           <Badge variant="outline">Available</Badge>
                         </div>
@@ -268,9 +311,13 @@ export default function TrainerPreview() {
                         <div>
                           <h3 className="font-semibold mb-2">Specializations</h3>
                           <div className="flex flex-wrap gap-2">
-                            <Badge variant="outline">{formData.specialization}</Badge>
+                            {formData.specializations.map((spec) => (
+                              <Badge key={spec} variant="outline">{spec}</Badge>
+                            ))}
                             <Badge variant="outline">Beginner Friendly</Badge>
-                            <Badge variant="outline">Online Sessions</Badge>
+                            {formData.trainingTypes.map((type) => (
+                              <Badge key={type} variant="outline">{type}</Badge>
+                            ))}
                           </div>
                         </div>
                       </div>

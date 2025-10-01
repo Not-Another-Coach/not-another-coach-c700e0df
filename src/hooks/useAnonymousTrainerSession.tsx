@@ -3,12 +3,14 @@ import { useState, useEffect, useCallback } from 'react';
 interface AnonymousTrainerSession {
   sessionId: string;
   trainerProfile: {
-    name?: string;
+    firstName?: string;
+    lastName?: string;
     tagline?: string;
-    specialization?: string;
+    specializations?: string[];
     hourlyRate?: number;
     location?: string;
     bio?: string;
+    trainingTypes?: string[];
   };
   demoInteractions: {
     viewedDashboard: boolean;
@@ -125,7 +127,11 @@ export function useAnonymousTrainerSession() {
 
   // Check if profile has basic info
   const hasBasicProfile = useCallback(() => {
-    return session?.trainerProfile.name && session?.trainerProfile.tagline && session?.trainerProfile.specialization;
+    return session?.trainerProfile.firstName && 
+           session?.trainerProfile.lastName && 
+           session?.trainerProfile.tagline && 
+           session?.trainerProfile.specializations && 
+           session?.trainerProfile.specializations.length > 0;
   }, [session]);
 
   return {
