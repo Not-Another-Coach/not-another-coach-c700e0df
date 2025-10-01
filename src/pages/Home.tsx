@@ -102,8 +102,8 @@ export default function Home() {
     );
   }
 
-  // Show anonymous experience for unauthenticated users
-  if (!user) {
+  // Show anonymous experience for unauthenticated users OR if profile data is missing
+  if (!user || !profile || !user_type) {
     return (
       <div className="min-h-screen bg-background">
         {/* User Intent Modal */}
@@ -206,5 +206,6 @@ export default function Home() {
     );
   }
 
-  return <div>Redirecting...</div>;
+  // This should never be reached, but keeping as fallback
+  return null;
 }
