@@ -59,12 +59,16 @@ export default function TrainerDemo() {
 
       <div className="container mx-auto px-4 py-8">
         {/* Hero Section with Profile Preview */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-          {/* Left: Hero Content */}
-          <div className="flex flex-col justify-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary via-secondary to-success bg-clip-text text-transparent">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+          {/* Left: Heading */}
+          <div className="lg:col-span-1 flex flex-col justify-center">
+            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary via-secondary to-success bg-clip-text text-transparent">
               Your Coaching Business, Supercharged.
             </h1>
+          </div>
+
+          {/* Middle: Description and Buttons */}
+          <div className="lg:col-span-1 flex flex-col justify-center">
             <p className="text-xl text-muted-foreground mb-6">
               Explore how NAC helps you attract clients, manage your schedule, and grow your income — all in one place.
             </p>
@@ -80,7 +84,7 @@ export default function TrainerDemo() {
           </div>
 
           {/* Right: Profile Preview */}
-          <div className="flex items-center">
+          <div className="lg:col-span-1 flex items-center">
             <DemoProfilePreview />
           </div>
         </div>

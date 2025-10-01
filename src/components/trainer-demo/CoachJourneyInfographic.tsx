@@ -84,14 +84,6 @@ export function CoachJourneyInfographic() {
             );
           })}
         </div>
-        
-        <div className="mt-6 p-4 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-lg border border-primary/20">
-          <div className="text-center">
-            <div className="font-semibold text-sm mb-1">Average Time to First Client</div>
-            <div className="text-2xl font-bold text-primary">7 days</div>
-            <div className="text-xs text-muted-foreground mt-1">Join 500+ successful coaches</div>
-          </div>
-        </div>
       </CardContent>
     </Card>
   );
