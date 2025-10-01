@@ -12,6 +12,7 @@ import { AppLogo } from '@/components/ui/app-logo';
 import { CoachRecruitmentSection } from '@/components/homepage/CoachRecruitmentSection';
 import { UserModeToggle } from '@/components/user-intent/UserModeToggle';
 import { ArrowRight, MessageSquare, Target, CreditCard, TrendingUp, Star } from 'lucide-react';
+import heroImage from '@/assets/hero-coach-success.jpg';
 
 export default function TrainerDemo() {
   const navigate = useNavigate();
@@ -59,36 +60,60 @@ export default function TrainerDemo() {
         </div>
       </div>
 
+      {/* Visual Hero Section */}
+      <div className="relative min-h-[50vh] flex items-center justify-center overflow-hidden mb-12">
+        {/* Background Image with Overlay */}
+        <div className="absolute inset-0">
+          <img 
+            src={heroImage}
+            alt="Successful fitness coach"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-success/90 via-success/70 to-primary/60" />
+        </div>
+        
+        {/* Floating decorative elements */}
+        <div className="absolute top-10 right-10 w-32 h-32 rounded-full bg-white/10 blur-xl animate-pulse" />
+        <div className="absolute bottom-10 left-10 w-24 h-24 rounded-full bg-accent/20 blur-xl animate-pulse [animation-delay:1s]" />
+        <div className="absolute top-1/3 left-1/4 w-16 h-16 rounded-full bg-secondary/20 blur-lg animate-pulse [animation-delay:2s]" />
+        
+        <div className="relative z-10 max-w-6xl mx-auto px-6 text-center">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight animate-fade-in">
+            Your Coaching Business,
+            <span className="block bg-gradient-to-r from-accent to-energy bg-clip-text text-transparent">
+              Supercharged
+            </span>
+          </h1>
+          <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto mb-8 font-medium animate-fade-in [animation-delay:0.2s]">
+            Attract clients, manage your schedule, and grow your income — all in one place.
+          </p>
+          
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in [animation-delay:0.4s]">
+            <Button 
+              size="lg" 
+              onClick={handleCreateProfile}
+              className="bg-accent hover:bg-accent/90 text-white font-semibold px-8 py-4 text-lg shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
+            >
+              Start Building Your Profile
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+            <Button 
+              size="lg" 
+              variant="outline" 
+              asChild
+              className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 font-semibold px-8 py-4 text-lg"
+            >
+              <Link to="/auth?signup=trainer">Sign Up Free</Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+
       <div className="container mx-auto px-4 py-8">
-        {/* Hero Section with Profile Preview */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-          {/* Left: Heading */}
-          <div className="lg:col-span-1 flex flex-col justify-center">
-            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary via-secondary to-success bg-clip-text text-transparent">
-              Your Coaching Business, Supercharged.
-            </h1>
-          </div>
-
-          {/* Middle: Description and Buttons */}
-          <div className="lg:col-span-1 flex flex-col justify-center">
-            <p className="text-xl text-muted-foreground mb-6">
-              Explore how NAC helps you attract clients, manage your schedule, and grow your income — all in one place.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" onClick={handleCreateProfile}>
-                Start Building Your Profile
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-              <Button size="lg" variant="outline" asChild>
-                <Link to="/auth?signup=trainer">Sign Up Free</Link>
-              </Button>
-            </div>
-          </div>
-
-          {/* Right: Profile Preview */}
-          <div className="lg:col-span-1 flex items-center">
-            <DemoProfilePreview />
-          </div>
+        {/* Profile Preview Section */}
+        <div className="mb-12 max-w-md mx-auto">
+          <DemoProfilePreview />
         </div>
 
         <div className="space-y-8">
