@@ -14,7 +14,7 @@ import { InteractiveValueCards } from "@/components/homepage/InteractiveValueCar
 import { QuickResetMenu } from "@/components/ui/QuickResetMenu";
 import { ResetOptionsButton } from "@/components/ui/ResetOptionsButton";
 
-import { UserIntentModal } from "@/components/user-intent/UserIntentModal";
+import { UserModeToggle } from "@/components/user-intent/UserModeToggle";
 import { useUserIntent } from "@/hooks/useUserIntent";
 import { Heart, ArrowRight } from "lucide-react";
 
@@ -23,7 +23,7 @@ export default function Home() {
   const { profile, loading: profileLoading, userType } = useProfileByType();
   const { user_type, loading: userTypeLoading } = useUserType();
   const { savedTrainersCount } = useAnonymousSession();
-  const { shouldShowModal, setUserIntent, clearIntent, dismissModal, userIntent } = useUserIntent();
+  const { setUserIntent, userIntent } = useUserIntent();
   const { isMigrating, migrationCompleted, migrationState } = useDataMigration();
   const navigate = useNavigate();
   
@@ -115,18 +115,16 @@ export default function Home() {
   // Render home page for everyone
   return (
     <div className="min-h-screen bg-background">
-      {/* User Intent Modal */}
-      <UserIntentModal 
-        isOpen={shouldShowModal}
-        onSelectIntent={handleIntentSelection}
-        onDismiss={dismissModal}
-      />
-      
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <AppLogo />
+            
+            {/* User Mode Toggle - Center */}
+            <div className="absolute left-1/2 -translate-x-1/2 hidden md:block">
+              <UserModeToggle />
+            </div>
           
             <div className="flex items-center gap-4">
               {savedTrainersCount > 0 && (
@@ -158,6 +156,13 @@ export default function Home() {
                 Create Account
               </Button>
             </div>
+          </div>
+        </div>
+        
+        {/* Mobile Toggle - Below header */}
+        <div className="md:hidden border-t py-2 px-4">
+          <div className="flex justify-center">
+            <UserModeToggle />
           </div>
         </div>
       </header>
