@@ -58,22 +58,30 @@ export default function TrainerDemo() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        {/* Hero Section */}
-        <div className="text-center max-w-4xl mx-auto mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary via-secondary to-success bg-clip-text text-transparent">
-            Your Coaching Business, Supercharged.
-          </h1>
-          <p className="text-xl text-muted-foreground mb-6">
-            Explore how NAC helps you attract clients, manage your schedule, and grow your income — all in one place.
-          </p>
-          <div className="flex justify-center gap-4">
-            <Button size="lg" onClick={handleCreateProfile}>
-              Start Building Your Profile
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-            <Button size="lg" variant="outline" asChild>
-              <Link to="/auth">Sign Up Free</Link>
-            </Button>
+        {/* Hero Section with Profile Preview */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+          {/* Left: Hero Content */}
+          <div className="flex flex-col justify-center">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary via-secondary to-success bg-clip-text text-transparent">
+              Your Coaching Business, Supercharged.
+            </h1>
+            <p className="text-xl text-muted-foreground mb-6">
+              Explore how NAC helps you attract clients, manage your schedule, and grow your income — all in one place.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button size="lg" onClick={handleCreateProfile}>
+                Start Building Your Profile
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+              <Button size="lg" variant="outline" asChild>
+                <Link to="/auth">Sign Up Free</Link>
+              </Button>
+            </div>
+          </div>
+
+          {/* Right: Profile Preview */}
+          <div className="flex items-center">
+            <DemoProfilePreview />
           </div>
         </div>
 
@@ -83,9 +91,6 @@ export default function TrainerDemo() {
             <TrainerDemoCalendar />
             <GrowthTracker />
           </div>
-
-          {/* Coach Profile Preview */}
-          <DemoProfilePreview />
 
           {/* Coach Journey Infographic */}
           <CoachJourneyInfographic />

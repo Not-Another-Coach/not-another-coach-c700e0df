@@ -54,40 +54,32 @@ export function CoachJourneyInfographic() {
         </p>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 overflow-x-auto pb-4">
           {steps.map((step, index) => {
             const Icon = step.icon;
             const isLast = index === steps.length - 1;
             
             return (
-              <div key={step.number} className="relative">
-                <div className="flex items-start gap-4">
-                  {/* Step number & icon */}
-                  <div className="flex flex-col items-center">
-                    <div className={`flex items-center justify-center w-12 h-12 rounded-xl ${step.bgColor} ${step.color} font-bold text-lg border-2 border-card shadow-md`}>
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    {!isLast && (
-                      <div className="w-0.5 h-12 bg-border mt-2" />
-                    )}
+              <div key={step.number} className="flex items-center gap-4">
+                {/* Step card */}
+                <div className="flex flex-col items-center min-w-[140px]">
+                  <div className={`flex items-center justify-center w-16 h-16 rounded-xl ${step.bgColor} ${step.color} font-bold text-lg border-2 border-card shadow-md mb-3`}>
+                    <Icon className="h-7 w-7" />
                   </div>
                   
-                  {/* Step content */}
-                  <div className="flex-1 pb-4">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className={`text-xs font-semibold ${step.color} bg-card px-2 py-0.5 rounded-full border`}>
-                        Step {step.number}
-                      </span>
-                    </div>
-                    <h3 className="font-semibold text-base mb-1">{step.title}</h3>
-                    <p className="text-sm text-muted-foreground">{step.description}</p>
+                  <div className="text-center">
+                    <span className={`text-xs font-semibold ${step.color} bg-card px-2 py-0.5 rounded-full border mb-2 inline-block`}>
+                      Step {step.number}
+                    </span>
+                    <h3 className="font-semibold text-sm mb-1">{step.title}</h3>
+                    <p className="text-xs text-muted-foreground">{step.description}</p>
                   </div>
-                  
-                  {/* Arrow for visual flow */}
-                  {!isLast && (
-                    <ArrowRight className="h-4 w-4 text-muted-foreground/50 mt-3" />
-                  )}
                 </div>
+                
+                {/* Arrow between steps */}
+                {!isLast && (
+                  <ArrowRight className="h-5 w-5 text-muted-foreground/50 flex-shrink-0 hidden md:block" />
+                )}
               </div>
             );
           })}
