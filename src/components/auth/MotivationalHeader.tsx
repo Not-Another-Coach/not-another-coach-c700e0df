@@ -3,16 +3,22 @@ import React from 'react';
 interface MotivationalHeaderProps {
   context: 'login' | 'signup' | 'trainer-signup' | 'forgot' | 'reset';
   userType?: 'client' | 'trainer';
+  userName?: string;
   onTaglineClick?: () => void;
 }
 
-export const MotivationalHeader: React.FC<MotivationalHeaderProps> = ({ context, userType, onTaglineClick }) => {
+export const MotivationalHeader: React.FC<MotivationalHeaderProps> = ({ context, userType, userName, onTaglineClick }) => {
   const getHeadline = () => {
     switch (context) {
       case 'login':
-        return "Welcome back, champion";
+        return userName ? `Welcome back, ${userName}` : "Welcome back";
       case 'signup':
-        return userType === 'trainer' ? "Ready to change lives?" : "Your transformation starts here";
+        if (userType === 'trainer') {
+          return "Your transformation starts here";
+        } else if (userType === 'client') {
+          return "Ready to transform your fitness?";
+        }
+        return null;
       case 'trainer-signup':
         return "Join our coaching community";
       case 'forgot':
@@ -20,16 +26,21 @@ export const MotivationalHeader: React.FC<MotivationalHeaderProps> = ({ context,
       case 'reset':
         return "Create your new beginning";
       default:
-        return "Your transformation starts here";
+        return null;
     }
   };
 
   const getSubtext = () => {
     switch (context) {
       case 'login':
-        return "Continue your fitness journey";
+        return null;
       case 'signup':
-        return userType === 'trainer' ? "Start inspiring others today" : "Find your perfect trainer match";
+        if (userType === 'trainer') {
+          return "Find your perfect trainer match";
+        } else if (userType === 'client') {
+          return "Connect with coaches who understand your journey";
+        }
+        return null;
       case 'trainer-signup':
         return "Help others achieve their fitness goals";
       case 'forgot':
@@ -37,13 +48,16 @@ export const MotivationalHeader: React.FC<MotivationalHeaderProps> = ({ context,
       case 'reset':
         return "Choose a strong password to secure your account";
       default:
-        return "Find your perfect trainer match";
+        return null;
     }
   };
 
   const getTagline = () => {
     return "Not another app. Not another coach. This is personal.";
   };
+
+  const headline = getHeadline();
+  const subtext = getSubtext();
 
   return (
     <div className="text-center mb-8">
@@ -58,14 +72,18 @@ export const MotivationalHeader: React.FC<MotivationalHeaderProps> = ({ context,
       </h1>
       
       {/* Context Headline */}
-      <h2 className="text-xl font-semibold text-card-foreground mb-2">
-        {getHeadline()}
-      </h2>
+      {headline && (
+        <h2 className="text-xl font-semibold text-card-foreground mb-2">
+          {headline}
+        </h2>
+      )}
       
       {/* Supporting Subtext */}
-      <p className="text-sm text-muted-foreground">
-        {getSubtext()}
-      </p>
+      {subtext && (
+        <p className="text-sm text-muted-foreground">
+          {subtext}
+        </p>
+      )}
     </div>
   );
 };
