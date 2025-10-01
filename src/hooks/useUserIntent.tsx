@@ -101,8 +101,8 @@ export function UserIntentProvider({ children }: { children: ReactNode }) {
     console.log('✅ INTENT: Fresh start - new session created and intent reset');
   };
 
-  // Show modal if user hasn't set an intent yet (ignore hasShownIntentModal to allow it to show again)
-  const shouldShowModal = userIntent === null;
+  // Show modal only if user hasn't set an intent AND hasn't dismissed it
+  const shouldShowModal = userIntent === null && !hasShownIntentModal;
 
   return (
     <UserIntentContext.Provider 
