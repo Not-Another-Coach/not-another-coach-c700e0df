@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AppLogo } from '@/components/ui/app-logo';
 import { CoachRecruitmentSection } from '@/components/homepage/CoachRecruitmentSection';
+import { UserModeToggle } from '@/components/user-intent/UserModeToggle';
 import { ArrowRight, MessageSquare, Target, CreditCard, TrendingUp, Star } from 'lucide-react';
 
 export default function TrainerDemo() {
@@ -31,17 +32,29 @@ export default function TrainerDemo() {
       {/* Header */}
       <div className="sticky top-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border">
         <div className="mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-3">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between gap-4 relative">
+            <div className="flex items-center gap-3 flex-shrink-0">
               <AppLogo onClick={() => navigate('/')} />
               <div className="text-muted-foreground hidden sm:block">Coach Demo</div>
             </div>
             
-            <Button onClick={handleCreateProfile} size="sm" className="sm:size-default">
+            {/* User Mode Toggle - Center */}
+            <div className="absolute left-1/2 -translate-x-1/2 hidden md:flex">
+              <UserModeToggle />
+            </div>
+            
+            <Button onClick={handleCreateProfile} size="sm" className="sm:size-default flex-shrink-0">
               <span className="hidden sm:inline">Create Your Profile</span>
               <span className="sm:hidden">Create Profile</span>
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
+          </div>
+        </div>
+        
+        {/* Mobile Toggle - Below header */}
+        <div className="md:hidden border-t py-2 px-4">
+          <div className="flex justify-center">
+            <UserModeToggle />
           </div>
         </div>
       </div>
