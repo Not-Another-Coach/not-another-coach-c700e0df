@@ -19,7 +19,7 @@ import { CoachSelectionRequests } from "@/components/coach-selection/CoachSelect
 import { ProspectsSection } from "@/components/coach/ProspectsSection";
 import { FloatingMessageButton } from "@/components/FloatingMessageButton";
 import { ClientProspectSummary } from "@/components/coach/ClientProspectSummary";
-import { UpcomingSessionsWidget } from "@/components/dashboard/UpcomingSessionsWidget";
+import { TrainerCalendar } from "@/components/dashboard/TrainerCalendar";
 import { CoachExclusivityEndedAlert } from "@/components/dashboard/CoachExclusivityEndedAlert";
 import { ClientOnboardingManagement } from "@/components/coach/ClientOnboardingManagement";
 import { OnboardingSummaryWidget } from "@/components/dashboard/OnboardingSummaryWidget";
@@ -598,11 +598,11 @@ const TrainerDashboard = () => {
             {/* 2b. Client Onboarding Summary */}
             <OnboardingSummaryWidget />
 
-            {/* 3. Upcoming Sessions and This Week's Goal - Side by Side */}
+            {/* 3. Coaching Calendar and This Week's Goal - Side by Side */}
             <div className="grid md:grid-cols-2 gap-6">
               
-              {/* Upcoming Sessions */}
-              <UpcomingSessionsWidget />
+              {/* Coaching Calendar */}
+              <TrainerCalendar />
 
               {/* Weekly Execution & Today's Tasks */}
               <WeeklyExecutionCard />
