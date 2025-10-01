@@ -2,13 +2,15 @@ import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAnonymousTrainerSession } from '@/hooks/useAnonymousTrainerSession';
 import { TrainerDemoCalendar } from '@/components/trainer-demo/TrainerDemoCalendar';
-import { EarningsCalculator } from '@/components/trainer-demo/EarningsCalculator';
+import { GrowthTracker } from '@/components/trainer-demo/GrowthTracker';
+import { CoachJourneyInfographic } from '@/components/trainer-demo/CoachJourneyInfographic';
+import { DemoProfilePreview } from '@/components/trainer-demo/DemoProfilePreview';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AppLogo } from '@/components/ui/app-logo';
 import { CoachRecruitmentSection } from '@/components/homepage/CoachRecruitmentSection';
-import { ArrowRight, MessageSquare, Users, TrendingUp, Star, Shield, Zap } from 'lucide-react';
+import { ArrowRight, MessageSquare, Target, CreditCard, TrendingUp, Star } from 'lucide-react';
 
 export default function TrainerDemo() {
   const navigate = useNavigate();
@@ -22,13 +24,6 @@ export default function TrainerDemo() {
     navigate('/trainer/preview');
   };
 
-  const handleEarningsInteraction = () => {
-    trackInteraction('usedCalculator');
-  };
-
-  const handleRateChange = (rate: number) => {
-    updateTrainerProfile({ hourlyRate: rate });
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -65,156 +60,133 @@ export default function TrainerDemo() {
       <div className="container mx-auto px-4 py-8">
         {/* Hero Section */}
         <div className="text-center max-w-4xl mx-auto mb-12">
-          <h1 className="text-4xl font-bold mb-4">
-            Welcome to Your Coaching Dashboard
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary via-secondary to-success bg-clip-text text-transparent">
+            Your Coaching Business, Supercharged.
           </h1>
           <p className="text-xl text-muted-foreground mb-6">
-            This is what your experience would be like as a coach on NAC. 
-            Explore the features, see potential earnings, and imagine building your coaching business.
+            Explore how NAC helps you attract clients, manage your schedule, and grow your income — all in one place.
           </p>
           <div className="flex justify-center gap-4">
             <Button size="lg" onClick={handleCreateProfile}>
               Start Building Your Profile
+              <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
             <Button size="lg" variant="outline" asChild>
-              <Link to="/auth">Sign Up Now</Link>
+              <Link to="/auth">Sign Up Free</Link>
             </Button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Left Column - Calendar & Management */}
-          <div className="space-y-6">
-            <TrainerDemoCalendar />
-            
-            {/* Client Communication Demo */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MessageSquare className="h-5 w-5 text-primary" />
-                  Client Messages
-                  <Badge variant="destructive" className="ml-auto">3 New</Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="p-3 bg-muted/50 rounded-lg blur-sm">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-8 h-8 bg-primary/20 rounded-full"></div>
-                    <div className="font-medium">Sarah M.</div>
-                    <div className="text-xs text-muted-foreground ml-auto">2 hours ago</div>
-                  </div>
-                  <div className="text-sm">Thank you for yesterday's session! I'm feeling much more confident about my form. Looking forward to our next meeting.</div>
-                </div>
-                <div className="p-3 bg-muted/50 rounded-lg blur-sm">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-8 h-8 bg-primary/20 rounded-full"></div>
-                    <div className="font-medium">Mike R.</div>
-                    <div className="text-xs text-muted-foreground ml-auto">5 hours ago</div>
-                  </div>
-                  <div className="text-sm">Can we reschedule tomorrow's session to 3 PM instead? Thanks!</div>
-                </div>
-                <Button disabled className="w-full opacity-50">
-                  View All Messages
-                </Button>
-                <div className="text-center text-xs text-muted-foreground">
-                  💬 Sign up to enable direct client messaging
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+        <div className="space-y-8">
+          {/* Your Coaching Calendar */}
+          <TrainerDemoCalendar />
 
-          {/* Right Column - Earnings & Growth */}
-          <div className="space-y-6">
-            <EarningsCalculator 
-              onInteraction={handleEarningsInteraction}
-              onRateChange={handleRateChange}
-            />
+          {/* Coach Profile Preview */}
+          <DemoProfilePreview />
 
-            {/* Platform Benefits */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Zap className="h-5 w-5 text-primary" />
-                  Why Coaches Choose NAC
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <Users className="h-5 w-5 text-green-500 mt-0.5" />
-                  <div>
-                    <div className="font-medium">Quality Client Matching</div>
-                    <div className="text-sm text-muted-foreground">
-                      Our smart matching system connects you with clients who truly fit your coaching style
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Shield className="h-5 w-5 text-blue-500 mt-0.5" />
-                  <div>
-                    <div className="font-medium">Secure Payments</div>
-                    <div className="text-sm text-muted-foreground">
-                      Automatic payment processing, transparent fees, weekly payouts
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <TrendingUp className="h-5 w-5 text-purple-500 mt-0.5" />
-                  <div>
-                    <div className="font-medium">Business Growth Tools</div>
-                    <div className="text-sm text-muted-foreground">
-                      Analytics, client management, automated scheduling, and marketing support
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Star className="h-5 w-5 text-yellow-500 mt-0.5" />
-                  <div>
-                    <div className="font-medium">Professional Recognition</div>
-                    <div className="text-sm text-muted-foreground">
-                      Verification system, client reviews, and showcase your expertise
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          {/* Growth Tracker (replacing earnings calculator) */}
+          <GrowthTracker />
 
-            {/* Success Stories */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Coach Success Stories</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="p-4 bg-muted/50 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center text-xs font-bold">
-                      JD
+          {/* Coach Journey Infographic */}
+          <CoachJourneyInfographic />
+
+          {/* Why Coaches Choose NAC - Updated 4-icon layout */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-center text-2xl">Why Coaches Choose NAC</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex items-start gap-4 p-4 rounded-lg bg-primary/5 border border-primary/10">
+                  <div className="p-3 rounded-lg bg-primary/10">
+                    <Target className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-lg mb-1">🎯 Smart Matching</div>
+                    <div className="text-sm text-muted-foreground">
+                      Find clients who truly fit your style
                     </div>
-                    <div className="font-medium">John D., Personal Trainer</div>
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    "I've grown from 3 clients to 15+ in just 6 months. The platform makes client management so much easier."
-                  </div>
-                  <div className="text-xs text-primary mt-2">
-                    Now earning £3,200/month
                   </div>
                 </div>
-                <div className="p-4 bg-muted/50 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center text-xs font-bold">
-                      AL
+                <div className="flex items-start gap-4 p-4 rounded-lg bg-success/5 border border-success/10">
+                  <div className="p-3 rounded-lg bg-success/10">
+                    <CreditCard className="h-6 w-6 text-success" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-lg mb-1">💳 Instant Payments</div>
+                    <div className="text-sm text-muted-foreground">
+                      Get paid fast, with no stress
                     </div>
-                    <div className="font-medium">Anna L., Nutrition Coach</div>
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    "The quality of clients is amazing. Everyone I work with is genuinely committed to their goals."
-                  </div>
-                  <div className="text-xs text-primary mt-2">
-                    4.9 star average rating
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+                <div className="flex items-start gap-4 p-4 rounded-lg bg-secondary/5 border border-secondary/10">
+                  <div className="p-3 rounded-lg bg-secondary/10">
+                    <TrendingUp className="h-6 w-6 text-secondary" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-lg mb-1">📈 Growth Tools</div>
+                    <div className="text-sm text-muted-foreground">
+                      Automate scheduling & track progress
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4 p-4 rounded-lg bg-warning/5 border border-warning/10">
+                  <div className="p-3 rounded-lg bg-warning/10">
+                    <Star className="h-6 w-6 text-warning" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-lg mb-1">⭐ Build Credibility</div>
+                    <div className="text-sm text-muted-foreground">
+                      Reviews & recognition
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Success Stories */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Coach Success Stories</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="p-4 bg-muted/50 rounded-lg border border-border">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center text-sm font-bold">
+                    JD
+                  </div>
+                  <div>
+                    <div className="font-medium">John D.</div>
+                    <div className="text-xs text-muted-foreground">Personal Trainer</div>
+                  </div>
+                </div>
+                <div className="text-sm text-muted-foreground mb-2">
+                  "I've grown from 3 clients to 15+ in just 6 months. The platform makes client management so much easier."
+                </div>
+                <div className="text-xs font-semibold text-primary">
+                  Now earning £3,200/month
+                </div>
+              </div>
+              <div className="p-4 bg-muted/50 rounded-lg border border-border">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-10 h-10 bg-secondary/20 rounded-full flex items-center justify-center text-sm font-bold">
+                    AL
+                  </div>
+                  <div>
+                    <div className="font-medium">Anna L.</div>
+                    <div className="text-xs text-muted-foreground">Nutrition Coach</div>
+                  </div>
+                </div>
+                <div className="text-sm text-muted-foreground mb-2">
+                  "The quality of clients is amazing. Everyone I work with is genuinely committed to their goals."
+                </div>
+                <div className="text-xs font-semibold text-secondary">
+                  4.9 star average rating
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Coach Recruitment Section */}
@@ -223,18 +195,19 @@ export default function TrainerDemo() {
         />
 
         {/* Call to Action */}
-        <div className="mt-12 text-center bg-primary/5 rounded-lg p-8">
-          <h2 className="text-2xl font-bold mb-4">Ready to Start Your Coaching Journey?</h2>
+        <div className="mt-12 text-center bg-gradient-to-r from-primary/10 via-secondary/10 to-success/10 rounded-lg p-8 border border-primary/20">
+          <h2 className="text-2xl md:text-3xl font-bold mb-4">Ready to Grow Your Coaching Business?</h2>
           <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
             Join hundreds of successful coaches who've built thriving businesses on NAC. 
             Create your profile in minutes and start connecting with clients today.
           </p>
-          <div className="flex justify-center gap-4">
-            <Button size="lg" onClick={handleCreateProfile}>
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <Button size="lg" onClick={handleCreateProfile} className="shadow-lg">
               Create Your Profile Preview
+              <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-            <Button size="lg" variant="outline" asChild>
-              <Link to="/auth">Sign Up & Get Started</Link>
+            <Button size="lg" variant="outline" asChild className="shadow-lg">
+              <Link to="/auth">Sign Up Free</Link>
             </Button>
           </div>
         </div>
