@@ -48,7 +48,19 @@ export const FeatureSummaryView = ({ trainer, children }: FeatureSummaryViewProp
         
         {/* Feature Cards Grid - Full Height */}
         <div className="relative aspect-square">
-          <div className="h-full p-4 pb-20">
+          {/* Background Image with Overlay */}
+          {(trainer as any).profile_photo_url && (
+            <div className="absolute inset-0">
+              <img 
+                src={(trainer as any).profile_photo_url} 
+                alt={trainer.name}
+                className="w-full h-full object-cover opacity-20"
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background/90" />
+            </div>
+          )}
+          
+          <div className="h-full p-4 pb-20 relative z-10">
             <div className="grid grid-cols-2 gap-3 mb-4">
               {/* Specialties Cards */}
               {topSpecialties.map((specialty, index) => {
