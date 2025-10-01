@@ -1,6 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Calendar, Clock, Users, Star } from 'lucide-react';
 
 export function TrainerDemoCalendar() {
@@ -134,19 +133,6 @@ export function TrainerDemoCalendar() {
         </Card>
       </div>
 
-      {/* Disabled Action Buttons */}
-      <div className="flex gap-3">
-        <Button disabled className="opacity-50">
-          Add New Availability
-        </Button>
-        <Button variant="outline" disabled className="opacity-50">
-          Sync with Google Calendar
-        </Button>
-        <Button variant="outline" disabled className="opacity-50">
-          View Monthly Report
-        </Button>
-      </div>
-      
       <div className="text-center text-sm text-muted-foreground mt-4">
         💡 Sign up to unlock full calendar management and client booking features
       </div>
