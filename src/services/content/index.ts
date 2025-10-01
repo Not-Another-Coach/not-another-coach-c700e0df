@@ -194,6 +194,34 @@ class ContentServiceClass extends BaseService {
       return { success: false, error: { code: 'ERROR', message: String(error) } };
     }
   }
+
+  /**
+   * Track highlight interaction
+   */
+  async trackHighlightInteraction(
+    highlightId: string,
+    interactionType: 'view' | 'like' | 'trainer_visited'
+  ): Promise<ServiceResponse<void>> {
+    try {
+      const user = (await supabase.auth.getUser()).data.user;
+      if (!user) {
+        return { success: true }; // Silently skip if not authenticated
+      }
+
+      const { error } = await supabase
+        .from('user_highlight_interactions')
+        .insert({
+          user_id: user.id,
+          highlight_id: highlightId,
+          interaction_type: interactionType
+        });
+
+      if (error) throw error;
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: { code: 'ERROR', message: String(error) } };
+    }
+  }
 }
 
 export const ContentService = new ContentServiceClass();

@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from './use-toast';
-import { AuthService } from '@/services';
+import { AuthService, ProfileService, NotificationService } from '@/services';
 
 export const useTrainer4FixStatus = () => {
   const [loading, setLoading] = useState(false);
@@ -56,16 +56,15 @@ export const useTrainer4FixStatus = () => {
         .single();
 
       if (verificationOverview?.overall_status === 'verified' && hasPublicationRequest && !profile?.profile_published) {
-        // Auto-publish the profile
-        const { error: publishError } = await supabase
-          .from('profiles')
-          .update({ profile_published: true })
-          .eq('id', trainerId);
+        // Auto-publish the profile using service
+        const publishResult = await ProfileService.updateProfile(trainerId, {
+          profile_published: true
+        });
 
-        if (publishError) throw publishError;
+        if (!publishResult.success) throw publishResult.error;
 
-        // Create success notification
-        await supabase.from('alerts').insert({
+        // Create success notification using service
+        const notificationResult = await NotificationService.createNotification({
           alert_type: 'profile_auto_published',
           title: 'Profile Published!',
           content: 'Your verification is complete and your trainer profile is now published and visible to clients!',
@@ -76,8 +75,12 @@ export const useTrainer4FixStatus = () => {
             auto_published_on_verification: true,
             fixed_by_admin: true
           },
-          is_active: true
+          priority: 1
         });
+
+        if (!notificationResult.success) {
+          console.error('Failed to send notification:', notificationResult.error);
+        }
 
         toast({
           title: "Profile Published",

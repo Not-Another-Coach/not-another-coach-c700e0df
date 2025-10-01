@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, Play, Pause, Heart, Star } from 'lucide-reac
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { ContentService } from '@/services/content';
 
 interface Highlight {
   id: string;
@@ -125,13 +126,9 @@ export function HighlightsCarousel() {
   };
 
   const handleViewTrainer = async (highlight: Highlight) => {
-    // Track interaction
+    // Track interaction using service
     if (user) {
-      await supabase.from('user_highlight_interactions').insert({
-        user_id: user.id,
-        highlight_id: highlight.id,
-        interaction_type: 'trainer_visited'
-      });
+      await ContentService.trackHighlightInteraction(highlight.id, 'trainer_visited');
     }
     
     navigate(`/trainer/${highlight.trainer_id}`);

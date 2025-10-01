@@ -25,6 +25,8 @@ import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautif
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { TemplateService } from '@/services/template';
+import { NotificationService } from '@/services/notification';
 
 interface CustomTask {
   id?: string;
@@ -76,19 +78,19 @@ export function ClientTemplateCustomizer({
   const loadTemplateData = async () => {
     setLoading(true);
     try {
-      // First, check if this template has sections data
-      const [gettingStartedRes, firstWeekRes, ongoingSupportRes, commitmentsRes] = await Promise.all([
-        supabase.from('onboarding_getting_started').select('*').eq('template_id', templateId).order('display_order'),
-        supabase.from('onboarding_first_week').select('*').eq('template_id', templateId).order('display_order'),
-        supabase.from('onboarding_ongoing_support').select('*').eq('template_id', templateId),
-        supabase.from('onboarding_commitments').select('*').eq('template_id', templateId).order('display_order')
-      ]);
+      // Load template sections using service
+      const sectionsResult = await TemplateService.getTemplateSections(templateId);
+      
+      if (!sectionsResult.success) {
+        throw new Error('Failed to load template sections');
+      }
 
+      const { gettingStarted, firstWeek, ongoingSupport, commitments } = sectionsResult.data;
       const allTasks: CustomTask[] = [];
 
       // Load Getting Started tasks
-      if (gettingStartedRes.data && gettingStartedRes.data.length > 0) {
-        allTasks.push(...gettingStartedRes.data.map(task => ({
+      if (gettingStarted && gettingStarted.length > 0) {
+        allTasks.push(...gettingStarted.map(task => ({
           id: task.id,
           task_name: task.task_name || 'Getting Started Task',
           description: task.description || '',
@@ -102,8 +104,8 @@ export function ClientTemplateCustomizer({
       }
 
       // Load First Week tasks
-      if (firstWeekRes.data && firstWeekRes.data.length > 0) {
-        allTasks.push(...firstWeekRes.data.map(task => ({
+      if (firstWeek && firstWeek.length > 0) {
+        allTasks.push(...firstWeek.map(task => ({
           id: task.id,
           task_name: task.task_name || 'First Week Task',
           description: task.description || '',
@@ -117,8 +119,8 @@ export function ClientTemplateCustomizer({
       }
 
       // Load Ongoing Support tasks
-      if (ongoingSupportRes.data && ongoingSupportRes.data.length > 0) {
-        allTasks.push(...ongoingSupportRes.data.map((task, index) => ({
+      if (ongoingSupport && ongoingSupport.length > 0) {
+        allTasks.push(...ongoingSupport.map((task, index) => ({
           id: task.id,
           task_name: task.check_in_frequency ? `${task.check_in_frequency.charAt(0).toUpperCase() + task.check_in_frequency.slice(1)} Check-in` : 'Ongoing Support',
           description: task.client_response_expectations || 'Regular check-in with client',
@@ -135,8 +137,8 @@ export function ClientTemplateCustomizer({
       }
 
       // Load Commitments tasks
-      if (commitmentsRes.data && commitmentsRes.data.length > 0) {
-        allTasks.push(...commitmentsRes.data.map(task => ({
+      if (commitments && commitments.length > 0) {
+        allTasks.push(...commitments.map(task => ({
           id: task.id,
           task_name: task.commitment_title || 'Commitment',
           description: task.commitment_description || '',
@@ -315,18 +317,21 @@ export function ClientTemplateCustomizer({
       );
 
       if (newProgressRecords.length > 0) {
-        const { error: progressError } = await supabase
-          .from('client_onboarding_progress')
-          .insert(newProgressRecords);
+        const progressResult = await TemplateService.createProgressSteps(
+          clientId,
+          user.id,
+          assignment.id,
+          newProgressRecords as any
+        );
 
-        if (progressError) throw progressError;
+        if (!progressResult.success) throw progressResult.error;
       }
 
       // Send notification to client
-      await supabase.from('alerts').insert({
+      const notificationResult = await NotificationService.createNotification({
+        alert_type: 'template_assigned',
         title: 'Customized Onboarding Template Assigned',
         content: `Your trainer has assigned you a customized onboarding template. Check your onboarding section to get started!`,
-        alert_type: 'template_assigned',
         priority: 1,
         target_audience: { clients: [clientId] },
         metadata: {
@@ -335,9 +340,12 @@ export function ClientTemplateCustomizer({
           template_name: customizedName,
           assignment_id: assignment.id,
           customized: true
-        },
-        created_by: user.id
+        }
       });
+
+      if (!notificationResult.success) {
+        console.error('Failed to send notification:', notificationResult.error);
+      }
 
       toast.success(`Customized template "${customizedName}" assigned successfully`);
       onClose();

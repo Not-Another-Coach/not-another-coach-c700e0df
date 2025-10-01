@@ -11,6 +11,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { ClientTemplateCustomizer } from './ClientTemplateCustomizer';
+import { TemplateService } from '@/services/template';
+import { NotificationService } from '@/services/notification';
 
 interface ClientTemplateAssignmentButtonsProps {
   clientId: string;
@@ -115,8 +117,6 @@ export function ClientTemplateAssignmentButtons({
       if (!existingProgress) {
         // Create progress record for the step
         const progressRecord = {
-          client_id: clientId,
-          trainer_id: user.id,
           template_step_id: template.id,
           step_name: template.step_name,
           step_type: template.step_type || 'mandatory',
@@ -125,21 +125,23 @@ export function ClientTemplateAssignmentButtons({
           requires_file_upload: template.requires_file_upload || false,
           completion_method: template.completion_method || 'client',
           display_order: 1,
-          status: 'pending'
+          status: 'pending' as const
         };
 
-        const { error: progressError } = await supabase
-          .from('client_onboarding_progress')
-          .insert([progressRecord]);
+        const progressResult = await TemplateService.createProgressRecord(
+          clientId,
+          user.id,
+          progressRecord as any
+        );
 
-        if (progressError) throw progressError;
+        if (!progressResult.success) throw progressResult.error;
       }
 
       // Send notification to client
-      await supabase.from('alerts').insert({
+      const notificationResult = await NotificationService.createNotification({
+        alert_type: 'template_assigned',
         title: 'New Onboarding Template Assigned',
         content: `Your trainer has assigned you new onboarding templates. Check your onboarding section to get started!`,
-        alert_type: 'template_assigned',
         priority: 1,
         target_audience: { clients: [clientId] },
         metadata: {
@@ -148,9 +150,12 @@ export function ClientTemplateAssignmentButtons({
           template_id: selectedTemplate,
           template_name: template.step_name,
           assignment_id: assignment.id
-        },
-        created_by: user.id
+        }
       });
+
+      if (!notificationResult.success) {
+        console.error('Failed to send notification:', notificationResult.error);
+      }
 
       toast.success(`Template "${template.step_name}" assigned successfully`);
       setShowAssignDialog(false);

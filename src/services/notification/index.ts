@@ -117,6 +117,28 @@ class NotificationServiceClass extends BaseService {
       };
     });
   }
+
+  /**
+   * Create notification/alert
+   */
+  static async createNotification(request: CreateNotificationRequest): Promise<ServiceResponse<void>> {
+    return this.executeMutation(async () => {
+      const currentUserId = await this.getCurrentUserId();
+      
+      return await this.db
+        .from('alerts')
+        .insert({
+          alert_type: request.alert_type,
+          title: request.title,
+          content: request.content,
+          target_audience: request.target_audience,
+          metadata: request.metadata,
+          priority: request.priority || 1,
+          created_by: currentUserId.data || undefined,
+          is_active: true,
+        });
+    });
+  }
 }
 
 export const NotificationService = NotificationServiceClass;

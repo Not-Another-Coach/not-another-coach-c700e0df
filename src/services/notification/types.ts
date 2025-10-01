@@ -38,11 +38,10 @@ export interface NotificationPreferences {
 }
 
 export interface CreateNotificationRequest {
-  user_id: string;
-  type: NotificationType;
-  priority: NotificationPriority;
+  alert_type: string;
   title: string;
-  message: string;
-  action_url?: string;
-  metadata?: Record<string, any>;
+  content: string;
+  target_audience?: any;
+  metadata?: any;
+  priority?: number;
 }

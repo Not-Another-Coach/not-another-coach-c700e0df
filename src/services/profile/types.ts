@@ -26,6 +26,11 @@ export interface ProfileUpdateData {
   profile_photo_url?: string;
   location?: string;
   timezone?: string;
+  profile_published?: boolean;
+  bio?: string;
+  tagline?: string;
+  verification_status?: string;
+  is_verified?: boolean;
 }
 
 export interface UserRole {

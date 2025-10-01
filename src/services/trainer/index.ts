@@ -10,7 +10,10 @@ import { ServiceResponseHelper } from '../base/ServiceResponse';
 import { ServiceError } from '../base/ServiceError';
 import type { ServiceResponse } from '../types';
 
-export const TrainerService = {
-  // Placeholder for trainer methods
-  // Will be implemented in subsequent steps
-};
+class TrainerServiceClass {
+  // Trainer methods can be implemented here as needed
+  // For now, using the data layer TrainerService
+}
+
+export const TrainerService = TrainerServiceClass;
+export { TrainerServiceClass };

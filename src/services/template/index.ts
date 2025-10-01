@@ -418,6 +418,70 @@ export const TemplateService = {
   },
 
   /**
+   * Create single progress record (for direct assignment)
+   */
+  async createProgressRecord(
+    clientId: string,
+    trainerId: string,
+    progressRecord: Omit<ClientOnboardingProgress, 'id' | 'client_id' | 'trainer_id' | 'created_at' | 'updated_at'>
+  ): Promise<ServiceResponse<void>> {
+    try {
+      const { error } = await supabase
+        .from('client_onboarding_progress')
+        .insert([{
+          ...progressRecord,
+          client_id: clientId,
+          trainer_id: trainerId,
+        } as any]);
+
+      if (error) {
+        return ServiceResponseHelper.error(
+          ServiceError.database('Failed to create progress record', error)
+        );
+      }
+
+      return ServiceResponseHelper.success(undefined);
+    } catch (error) {
+      return ServiceResponseHelper.error(ServiceError.fromError(error));
+    }
+  },
+
+  /**
+   * Get template sections (getting started, first week, ongoing support, commitments)
+   */
+  async getTemplateSections(
+    templateId: string
+  ): Promise<ServiceResponse<{
+    gettingStarted: any[];
+    firstWeek: any[];
+    ongoingSupport: any[];
+    commitments: any[];
+  }>> {
+    try {
+      const [gettingStartedRes, firstWeekRes, ongoingSupportRes, commitmentsRes] = await Promise.all([
+        supabase.from('onboarding_getting_started').select('*').eq('template_id', templateId).order('display_order'),
+        supabase.from('onboarding_first_week').select('*').eq('template_id', templateId).order('display_order'),
+        supabase.from('onboarding_ongoing_support').select('*').eq('template_id', templateId),
+        supabase.from('onboarding_commitments').select('*').eq('template_id', templateId).order('display_order')
+      ]);
+
+      if (gettingStartedRes.error) throw gettingStartedRes.error;
+      if (firstWeekRes.error) throw firstWeekRes.error;
+      if (ongoingSupportRes.error) throw ongoingSupportRes.error;
+      if (commitmentsRes.error) throw commitmentsRes.error;
+
+      return ServiceResponseHelper.success({
+        gettingStarted: gettingStartedRes.data || [],
+        firstWeek: firstWeekRes.data || [],
+        ongoingSupport: ongoingSupportRes.data || [],
+        commitments: commitmentsRes.data || []
+      });
+    } catch (error) {
+      return ServiceResponseHelper.error(ServiceError.fromError(error));
+    }
+  },
+
+  /**
    * Get template-package links
    */
   async getPackageLinks(
