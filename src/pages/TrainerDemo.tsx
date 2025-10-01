@@ -18,7 +18,8 @@ export default function TrainerDemo() {
 
   useEffect(() => {
     trackInteraction('viewedDashboard');
-  }, [trackInteraction]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleCreateProfile = () => {
     navigate('/trainer/preview');

@@ -18,7 +18,7 @@ export function DemoProfilePreview() {
           .eq('profile_published', true)
           .eq('is_verified', true)
           .limit(1)
-          .single();
+          .maybeSingle();
 
         if (error) {
           console.error('Error fetching demo trainer:', error);
