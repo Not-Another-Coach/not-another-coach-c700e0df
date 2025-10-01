@@ -106,25 +106,20 @@ export default function Home() {
                 </Button>
               )}
               
-              {/* Reset Options Menu */}
+              {/* Reset Options Menu - always show if intent is set */}
               {userIntent && (
-                <QuickResetMenu 
+                <ResetOptionsButton 
                   variant="ghost" 
                   size="sm"
-                  className="text-xs"
                 />
               )}
               
-              {!user && (
-                <>
-                  <Button variant="ghost" onClick={() => navigate('/auth')}>
-                    Sign In
-                  </Button>
-                  <Button onClick={() => navigate('/auth?signup=client')}>
-                    Create Account
-                  </Button>
-                </>
-              )}
+              <Button variant="ghost" onClick={() => navigate('/auth')}>
+                Sign In
+              </Button>
+              <Button onClick={() => navigate('/auth?signup=client')}>
+                Create Account
+              </Button>
             </div>
           </div>
         </div>
