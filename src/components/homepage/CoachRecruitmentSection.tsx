@@ -1,8 +1,9 @@
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 interface CoachRecruitmentSectionProps {
-  onBecomeCoach: () => void;
+  onBecomeCoach?: () => void;
 }
 
 export const CoachRecruitmentSection = ({ onBecomeCoach }: CoachRecruitmentSectionProps) => {
@@ -23,11 +24,13 @@ export const CoachRecruitmentSection = ({ onBecomeCoach }: CoachRecruitmentSecti
           </p>
           <Button 
             size="lg" 
-            onClick={onBecomeCoach}
+            asChild
             className="bg-gradient-primary hover:opacity-90 text-white font-semibold px-8 py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
           >
-            Become a Coach Today
-            <ArrowRight className="ml-2 h-5 w-5" />
+            <Link to="/auth">
+              Become a Coach Today
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Link>
           </Button>
         </div>
 
