@@ -1,30 +1,11 @@
-import { TrendingUp, Users, CreditCard, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 
 interface CoachRecruitmentSectionProps {
   onBecomeCoach: () => void;
 }
 
 export const CoachRecruitmentSection = ({ onBecomeCoach }: CoachRecruitmentSectionProps) => {
-  const benefits = [
-    {
-      icon: Users,
-      title: "Reach New Clients",
-      description: "Connect with motivated clients ready to transform their lives"
-    },
-    {
-      icon: TrendingUp,
-      title: "Earn More",
-      description: "Set competitive rates and build sustainable income"
-    },
-    {
-      icon: CreditCard,
-      title: "Instant Payments",
-      description: "Get paid immediately after every session with secure processing"
-    }
-  ];
-
   return (
     <section className="py-20 bg-muted/30 relative overflow-hidden">
       {/* Background decorative elements */}
@@ -48,30 +29,6 @@ export const CoachRecruitmentSection = ({ onBecomeCoach }: CoachRecruitmentSecti
             Become a Coach Today
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-          {benefits.map((benefit, index) => {
-            const IconComponent = benefit.icon;
-            return (
-              <Card 
-                key={index}
-                className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-2 bg-card border border-border/50"
-              >
-                <CardContent className="p-6 text-center">
-                  <div className="inline-flex p-4 rounded-full bg-primary/10 group-hover:bg-primary/20 mb-4 transition-all duration-300">
-                    <IconComponent className="h-8 w-8 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-foreground mb-3 group-hover:text-primary transition-colors duration-300">
-                    {benefit.title}
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    {benefit.description}
-                  </p>
-                </CardContent>
-              </Card>
-            );
-          })}
         </div>
 
         {/* Key stats */}
