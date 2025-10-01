@@ -208,7 +208,43 @@ export default function Auth() {
     if (signupForm.firstName) userData.first_name = signupForm.firstName;
     if (signupForm.lastName) userData.last_name = signupForm.lastName;
     
-    const { error } = await signUp(signupForm.email, signupForm.password, userData);
+    // Call signUp and check the response carefully for existing users
+    const signUpResult = await supabase.auth.signUp({
+      email: signupForm.email,
+      password: signupForm.password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        data: userData
+      }
+    });
+    
+    // Check if this is an existing confirmed user
+    // When user exists and is confirmed, identities array is empty
+    const isExistingConfirmedUser = signUpResult.data?.user && 
+      (!signUpResult.data.user.identities || signUpResult.data.user.identities.length === 0) &&
+      signUpResult.data.user.email_confirmed_at;
+    
+    if (isExistingConfirmedUser) {
+      console.log('Existing confirmed user detected:', signUpResult.data.user.email);
+      setLoginForm({ email: signupForm.email, password: '' });
+      setActiveTab('login');
+      toast({
+        title: "Account already exists",
+        description: "This email is already registered and confirmed. Please log in below.",
+      });
+      setSignupForm({
+        email: '',
+        password: '',
+        confirmPassword: '',
+        firstName: '',
+        lastName: '',
+        userType: signupContext === 'client' ? 'client' : 'trainer',
+      });
+      setIsLoading(false);
+      return;
+    }
+    
+    const error = signUpResult.error;
     
     if (error) {
       const errorMsg = error.message?.toLowerCase() || '';
@@ -231,7 +267,7 @@ export default function Auth() {
           confirmPassword: '',
           firstName: '',
           lastName: '',
-          userType: 'client'
+          userType: signupContext === 'client' ? 'client' : 'trainer',
         });
       } else {
         toast({
@@ -241,48 +277,24 @@ export default function Auth() {
         });
       }
     } else {
-      // Check if this was a repeated signup (user already confirmed)
-      // When a confirmed user tries to sign up again, Supabase returns success without error
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
-      
-      if (currentUser?.email_confirmed_at) {
-        // User already exists and is confirmed - redirect to login
-        console.log('User already confirmed, redirecting to login:', currentUser.email);
-        setLoginForm({ email: signupForm.email, password: '' });
-        setActiveTab('login');
-        toast({
-          title: "Account already confirmed",
-          description: "This email is already registered and confirmed. Please log in below.",
-        });
-        // Clear signup form
-        setSignupForm({
-          email: '',
-          password: '',
-          confirmPassword: '',
-          firstName: '',
-          lastName: '',
-          userType: 'client'
-        });
-      } else {
-        // New signup - Pre-populate login form with the email and set up resend confirmation
-        setLoginForm({ email: signupForm.email, password: '' });
-        setConfirmationEmail(signupForm.email);
-        setShowResendConfirmation(true);
-        setActiveTab('login');
-        toast({
-          title: "Account created!",
-          description: "Please check your email to confirm your account with Not Another Coach, then log in below.",
-        });
-        // Clear signup form
-        setSignupForm({
-          email: '',
-          password: '',
-          confirmPassword: '',
-          firstName: '',
-          lastName: '',
-          userType: 'client'
-        });
-      }
+      // New signup - Pre-populate login form with the email and set up resend confirmation
+      setLoginForm({ email: signupForm.email, password: '' });
+      setConfirmationEmail(signupForm.email);
+      setShowResendConfirmation(true);
+      setActiveTab('login');
+      toast({
+        title: "Account created!",
+        description: "Please check your email to confirm your account with Not Another Coach, then log in below.",
+      });
+      // Clear signup form
+      setSignupForm({
+        email: '',
+        password: '',
+        confirmPassword: '',
+        firstName: '',
+        lastName: '',
+        userType: signupContext === 'client' ? 'client' : 'trainer',
+      });
     }
     setIsLoading(false);
   };
