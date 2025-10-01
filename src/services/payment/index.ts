@@ -32,15 +32,15 @@ class PaymentServiceClass extends BaseService {
     }
 
     try {
-      const { data, error } = await supabase
+      const result = await (supabase as any)
         .from('payment_packages')
         .select('*')
         .eq('trainer_id', effectiveTrainerId)
         .eq('is_active', true)
         .order('price_value', { ascending: true });
       
-      if (error) throw error;
-      return ServiceResponseHelper.success(data || []);
+      if (result.error) throw result.error;
+      return ServiceResponseHelper.success(result.data || []);
     } catch (error) {
       return ServiceResponseHelper.error(ServiceError.fromError(error));
     }

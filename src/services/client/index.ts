@@ -151,13 +151,13 @@ class ClientServiceClass extends BaseService {
     }
 
     try {
-      const { data, error } = await supabase
+      const result = await (supabase as any)
         .from('v_clients')
         .select('*')
         .eq('trainer_id', effectiveTrainerId);
       
-      if (error) throw error;
-      return ServiceResponseHelper.success(data || []);
+      if (result.error) throw result.error;
+      return ServiceResponseHelper.success(result.data || []);
     } catch (error) {
       return ServiceResponseHelper.error(ServiceError.fromError(error));
     }
