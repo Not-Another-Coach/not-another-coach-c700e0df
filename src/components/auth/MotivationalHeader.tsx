@@ -18,7 +18,7 @@ export const MotivationalHeader: React.FC<MotivationalHeaderProps> = ({ context,
         } else if (userType === 'client') {
           return "Your transformation starts here";
         }
-        return null;
+        return "Start your fitness journey";
       case 'trainer-signup':
         return "Join our coaching community";
       case 'forgot':
@@ -40,7 +40,7 @@ export const MotivationalHeader: React.FC<MotivationalHeaderProps> = ({ context,
         } else if (userType === 'client') {
           return "Find your perfect trainer match";
         }
-        return null;
+        return "Connect with the right coach for you";
       case 'trainer-signup':
         return "Help others achieve their fitness goals";
       case 'forgot':
