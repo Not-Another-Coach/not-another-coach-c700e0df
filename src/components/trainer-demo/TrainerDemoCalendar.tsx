@@ -94,45 +94,6 @@ export function TrainerDemoCalendar() {
         </CardContent>
       </Card>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-blue-500" />
-              <div>
-                <div className="text-2xl font-bold">12</div>
-                <div className="text-sm text-muted-foreground">Active Clients</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-green-500" />
-              <div>
-                <div className="text-2xl font-bold">8</div>
-                <div className="text-sm text-muted-foreground">Sessions This Week</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Star className="h-5 w-5 text-yellow-500" />
-              <div>
-                <div className="text-2xl font-bold">4.9</div>
-                <div className="text-sm text-muted-foreground">Average Rating</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
       <div className="text-center text-sm text-muted-foreground mt-4">
         💡 Sign up to unlock full calendar management and client booking features
       </div>
