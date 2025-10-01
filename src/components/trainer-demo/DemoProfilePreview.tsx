@@ -216,14 +216,6 @@ export function DemoProfilePreview() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="text-center p-3 bg-primary/10 border border-primary/20 rounded-lg mb-4">
-          <p className="text-sm font-medium text-primary">
-            ✨ This is how your profile card appears to clients browsing on NAC
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Swipe or use arrows to see Instagram, Features, and Client Transformations views
-          </p>
-        </div>
         <div className="max-w-md mx-auto">
           <EnhancedTrainerCard
             trainer={trainerData}
