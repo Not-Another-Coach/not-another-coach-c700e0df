@@ -88,13 +88,23 @@ export function DemoProfilePreview() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="text-center p-4 bg-primary/10 border border-primary/20 rounded-lg">
-        <p className="text-sm font-medium text-primary">
-          ✨ This is how your profile will appear to clients on NAC
-        </p>
-      </div>
-      <TrainerProfilePreview formData={trainerData} />
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          <span>Your Profile Preview</span>
+          <span className="text-sm font-normal text-muted-foreground">
+            How clients see you
+          </span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="text-center p-3 bg-primary/10 border border-primary/20 rounded-lg">
+          <p className="text-sm font-medium text-primary">
+            ✨ This is how your profile will appear to clients on NAC
+          </p>
+        </div>
+        <TrainerProfilePreview formData={trainerData} />
+      </CardContent>
+    </Card>
   );
 }

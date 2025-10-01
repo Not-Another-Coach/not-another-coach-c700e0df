@@ -145,48 +145,6 @@ export default function TrainerDemo() {
             </CardContent>
           </Card>
 
-          {/* Success Stories */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Coach Success Stories</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="p-4 bg-muted/50 rounded-lg border border-border">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center text-sm font-bold">
-                    JD
-                  </div>
-                  <div>
-                    <div className="font-medium">John D.</div>
-                    <div className="text-xs text-muted-foreground">Personal Trainer</div>
-                  </div>
-                </div>
-                <div className="text-sm text-muted-foreground mb-2">
-                  "I've grown from 3 clients to 15+ in just 6 months. The platform makes client management so much easier."
-                </div>
-                <div className="text-xs font-semibold text-primary">
-                  Now earning £3,200/month
-                </div>
-              </div>
-              <div className="p-4 bg-muted/50 rounded-lg border border-border">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-10 h-10 bg-secondary/20 rounded-full flex items-center justify-center text-sm font-bold">
-                    AL
-                  </div>
-                  <div>
-                    <div className="font-medium">Anna L.</div>
-                    <div className="text-xs text-muted-foreground">Nutrition Coach</div>
-                  </div>
-                </div>
-                <div className="text-sm text-muted-foreground mb-2">
-                  "The quality of clients is amazing. Everyone I work with is genuinely committed to their goals."
-                </div>
-                <div className="text-xs font-semibold text-secondary">
-                  4.9 star average rating
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Coach Recruitment Section */}
@@ -194,23 +152,6 @@ export default function TrainerDemo() {
           onBecomeCoach={handleCreateProfile}
         />
 
-        {/* Call to Action */}
-        <div className="mt-12 text-center bg-gradient-to-r from-primary/10 via-secondary/10 to-success/10 rounded-lg p-8 border border-primary/20">
-          <h2 className="text-2xl md:text-3xl font-bold mb-4">Ready to Grow Your Coaching Business?</h2>
-          <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-            Join hundreds of successful coaches who've built thriving businesses on NAC. 
-            Create your profile in minutes and start connecting with clients today.
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button size="lg" onClick={handleCreateProfile} className="shadow-lg">
-              Create Your Profile Preview
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-            <Button size="lg" variant="outline" asChild className="shadow-lg">
-              <Link to="/auth">Sign Up Free</Link>
-            </Button>
-          </div>
-        </div>
       </div>
     </div>
   );
