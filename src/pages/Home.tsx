@@ -32,6 +32,11 @@ export default function Home() {
   // Initialize data migration hook
   useDataMigration();
 
+  // Set page title
+  useEffect(() => {
+    document.title = "Home - Find Your Perfect Coach";
+  }, []);
+
   useEffect(() => {
     // Don't redirect if user is in the process of logging out
     if (isLoggingOut) {
@@ -163,7 +168,15 @@ export default function Home() {
         <section id="browse-trainers" className="py-16 bg-muted/20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4">Meet The Coaches</h2>
+              <div className="flex items-center justify-center gap-4 mb-4">
+                <h2 className="text-3xl font-bold">Meet The Coaches</h2>
+                {userIntent && (
+                  <ResetOptionsButton 
+                    variant="outline" 
+                    size="sm"
+                  />
+                )}
+              </div>
               <p className="text-xl text-muted-foreground">
                 Discover your perfect training match
               </p>
