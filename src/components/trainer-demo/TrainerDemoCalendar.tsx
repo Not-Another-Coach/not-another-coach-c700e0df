@@ -93,10 +93,6 @@ export function TrainerDemoCalendar() {
           </div>
         </CardContent>
       </Card>
-
-      <div className="text-center text-sm text-muted-foreground mt-4">
-        💡 Sign up to unlock full calendar management and client booking features
-      </div>
     </div>
   );
 }
