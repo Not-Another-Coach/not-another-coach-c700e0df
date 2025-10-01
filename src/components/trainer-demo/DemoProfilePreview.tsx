@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { TrainerProfilePreview } from '@/components/TrainerProfilePreview';
+import { EnhancedTrainerCard } from '@/components/trainer-cards/EnhancedTrainerCard';
 import { Loader2 } from 'lucide-react';
+import type { AnyTrainer } from '@/types/trainer';
 
 // Hardcoded demo trainer profile for consistent demo experience
 const DEMO_TRAINER_DATA = {
+  id: 'demo-trainer-alex-johnson',
+  name: 'Alex Johnson',
   firstName: 'Alex',
   lastName: 'Johnson',
   profilePhotoUrl: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&h=400&fit=crop',
-  profileImagePosition: 'center',
+  profileImagePosition: { x: 50, y: 50, scale: 1 },
   tagline: 'Transform Your Body, Transform Your Life',
   bio: `With over 8 years of experience in personal training and nutrition coaching, I've helped hundreds of clients achieve their fitness goals and maintain lasting results. My approach combines evidence-based training methods with sustainable nutrition strategies tailored to your lifestyle.
 
@@ -161,13 +164,13 @@ My qualifications include NASM-CPT, Precision Nutrition Level 1, and certificati
 };
 
 export function DemoProfilePreview() {
-  const [trainerData, setTrainerData] = useState<any>(null);
+  const [trainerData, setTrainerData] = useState<AnyTrainer | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Simulate a brief loading state for better UX
     const timer = setTimeout(() => {
-      setTrainerData(DEMO_TRAINER_DATA);
+      setTrainerData(DEMO_TRAINER_DATA as AnyTrainer);
       setLoading(false);
     }, 300);
 
@@ -213,12 +216,26 @@ export function DemoProfilePreview() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="text-center p-3 bg-primary/10 border border-primary/20 rounded-lg">
+        <div className="text-center p-3 bg-primary/10 border border-primary/20 rounded-lg mb-4">
           <p className="text-sm font-medium text-primary">
-            ✨ This is how your profile will appear to clients on NAC
+            ✨ This is how your profile card appears to clients browsing on NAC
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Swipe or use arrows to see Instagram, Features, and Client Transformations views
           </p>
         </div>
-        <TrainerProfilePreview formData={trainerData} />
+        <div className="max-w-md mx-auto">
+          <EnhancedTrainerCard
+            trainer={trainerData}
+            config="anonymous"
+            initialView="instagram"
+            showComparisonCheckbox={false}
+            allowViewSwitching={true}
+            onViewProfile={() => {}}
+            onMessage={() => {}}
+            onBookDiscoveryCall={() => {}}
+          />
+        </div>
       </CardContent>
     </Card>
   );
