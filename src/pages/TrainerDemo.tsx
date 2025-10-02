@@ -80,8 +80,8 @@ export default function TrainerDemo() {
             Attract clients, manage your schedule, and grow your income — all in one place.
           </p>
           
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in [animation-delay:0.4s]">
+          {/* CTA Button */}
+          <div className="flex justify-center animate-fade-in [animation-delay:0.4s]">
             <Button 
               size="lg" 
               onClick={handleCreateProfile}
@@ -89,14 +89,6 @@ export default function TrainerDemo() {
             >
               Start Building Your Profile
               <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-            <Button 
-              size="lg" 
-              variant="outline" 
-              asChild
-              className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 font-semibold px-8 py-4 text-lg"
-            >
-              <Link to="/auth?signup=trainer">Sign Up Free</Link>
             </Button>
           </div>
         </div>
