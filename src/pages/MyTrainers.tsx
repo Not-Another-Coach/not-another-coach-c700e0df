@@ -169,8 +169,16 @@ export default function MyTrainers() {
     await joinWaitlist(trainerId);
   };
 
-  // Smart initial view selection based on trainer content
-  const getSmartInitialView = (trainer: any) => {
+  // Smart initial view selection based on trainer content and engagement stage
+  const getSmartInitialView = (trainer: any): 'instagram' | 'features' | 'transformations' => {
+    const engagementStage = trainer.engagementStage || 'browsing';
+    
+    // For saved/liked and shortlisted stages, prioritize gallery (instagram) view
+    // since these stages typically have gallery_images set to visible
+    if (engagementStage === 'liked' || engagementStage === 'shortlisted') {
+      return 'instagram';
+    }
+    
     // Check if trainer has testimonials with transformations
     const testimonials = trainer.testimonials || [];
     const hasTransformations = testimonials.some((t: any) => 
