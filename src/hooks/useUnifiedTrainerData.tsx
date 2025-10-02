@@ -493,7 +493,6 @@ export function useUnifiedTrainerData(): UnifiedTrainerState & TrainerActions {
         },
         () => {
           console.log('🔄 Engagement changed, refreshing trainer data...');
-          // Clear cache and refetch to get latest data
           cache.current.clear();
           fetchTrainerData();
         }
@@ -503,7 +502,7 @@ export function useUnifiedTrainerData(): UnifiedTrainerState & TrainerActions {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, fetchTrainerData]);
+  }, [user]);
 
   return {
     ...state,
