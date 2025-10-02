@@ -96,7 +96,7 @@ export default function TrainerDemo() {
 
       <div className="container mx-auto px-4 py-8">
         {/* Profile Preview Section */}
-        <div className="mb-12">
+        <div className="mb-12 max-w-md mx-auto">
           <DemoProfilePreview />
         </div>
 

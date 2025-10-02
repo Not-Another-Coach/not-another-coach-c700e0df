@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EnhancedTrainerCard } from '@/components/trainer-cards/EnhancedTrainerCard';
-import { DemoClientTransformations } from '@/components/trainer-demo/DemoClientTransformations';
 import { Loader2 } from 'lucide-react';
 import type { AnyTrainer } from '@/types/trainer';
 
@@ -143,16 +142,32 @@ My qualifications include NASM-CPT, Precision Nutrition Level 1, and certificati
     {
       id: 'demo-test-1',
       client_name: 'Sarah Mitchell',
+      clientName: 'Sarah M.',
       rating: 5,
       text: 'Alex completely transformed my relationship with fitness. Lost 15kg in 4 months and gained so much confidence. The nutrition advice was game-changing!',
-      created_at: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString()
+      clientQuote: 'The structured approach and constant support made all the difference. I finally found a sustainable way to reach my goals.',
+      achievement: 'Lost 15kg & gained confidence',
+      outcomeTag: '12 Week Transformation',
+      created_at: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
+      showImages: true,
+      consentGiven: true,
+      beforeImage: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600&h=800&fit=crop&crop=faces',
+      afterImage: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&h=800&fit=crop&crop=faces'
     },
     {
       id: 'demo-test-2',
       client_name: 'James Chen',
+      clientName: 'James T.',
       rating: 5,
       text: 'Best investment I\'ve made in myself. Alex\'s approach is practical and sustainable. Down 2 suit sizes and feeling stronger than ever.',
-      created_at: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString()
+      clientQuote: 'The personalized programming and nutrition guidance helped me break through plateaus I\'d been stuck at for years.',
+      achievement: 'Built muscle & strength',
+      outcomeTag: '16 Week Transformation',
+      created_at: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString(),
+      showImages: true,
+      consentGiven: true,
+      beforeImage: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&h=800&fit=crop&crop=faces',
+      afterImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=800&fit=crop&crop=faces'
     },
     {
       id: 'demo-test-3',
@@ -207,34 +222,29 @@ export function DemoProfilePreview() {
   }
 
   return (
-    <div className="space-y-8">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>Your Profile Preview</span>
-            <span className="text-sm font-normal text-muted-foreground">
-              How clients see you
-            </span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="max-w-md mx-auto">
-            <EnhancedTrainerCard
-              trainer={trainerData}
-              config="anonymous"
-              initialView="instagram"
-              showComparisonCheckbox={false}
-              allowViewSwitching={true}
-              onViewProfile={() => {}}
-              onMessage={() => {}}
-              onBookDiscoveryCall={() => {}}
-            />
-          </div>
-        </CardContent>
-      </Card>
-      
-      {/* Client Transformations Section */}
-      <DemoClientTransformations />
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          <span>Your Profile Preview</span>
+          <span className="text-sm font-normal text-muted-foreground">
+            How clients see you
+          </span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="max-w-md mx-auto">
+          <EnhancedTrainerCard
+            trainer={trainerData}
+            config="anonymous"
+            initialView="transformations"
+            showComparisonCheckbox={false}
+            allowViewSwitching={true}
+            onViewProfile={() => {}}
+            onMessage={() => {}}
+            onBookDiscoveryCall={() => {}}
+          />
+        </div>
+      </CardContent>
+    </Card>
   );
 }
