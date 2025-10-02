@@ -385,15 +385,15 @@ export default function MyTrainers() {
                         Retry
                       </Button>
                     </div>
-                  ) : filteredTrainers.length > 0 ? (
+                   ) : filteredTrainers.length > 0 ? (
                      filteredTrainers.map((trainer) => {
-                        const effectiveStage = (trainer as any).engagement?.stage || 'browsing';
+                        const effectiveStage = trainer.engagementStage || 'browsing';
                         
                         // Debug logging for visibility
                         console.log(`🔍 MyTrainers Card - ${trainer.name}:`, {
                           status: trainer.status,
                           engagementStage: effectiveStage,
-                          engagement: (trainer as any).engagement
+                          trainerEngagementStage: trainer.engagementStage
                         });
                         
                         return (
