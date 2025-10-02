@@ -477,6 +477,34 @@ export function useUnifiedTrainerData(): UnifiedTrainerState & TrainerActions {
     fetchTrainerData();
   }, [fetchTrainerData]);
 
+  // Real-time subscription for engagement changes
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('engagement-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'client_trainer_engagement',
+          filter: `client_id=eq.${user.id}`
+        },
+        () => {
+          console.log('🔄 Engagement changed, refreshing trainer data...');
+          // Clear cache and refetch to get latest data
+          cache.current.clear();
+          fetchTrainerData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, fetchTrainerData]);
+
   return {
     ...state,
     saveTrainer,
