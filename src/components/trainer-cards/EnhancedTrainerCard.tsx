@@ -63,6 +63,7 @@ export const EnhancedTrainerCard = memo(({
   showEngagementBadge = false,
   compactActions = false,
   hideViewControls = false,
+  hideViewProfileButton = false, // New prop
   engagementStage: propEngagementStage // Renamed to avoid confusion
 }: EnhancedTrainerCardProps) => {
   const navigate = useNavigate();
@@ -337,25 +338,28 @@ export const EnhancedTrainerCard = memo(({
     }
 
     // Full layout actions (existing logic)
-    buttons.push(
-      <Button
-        key="view-profile"
-        variant="outline"
-        size="sm"
-        onClick={(e) => {
-          e.stopPropagation();
-          if (onViewProfile) {
-            onViewProfile(trainer.id);
-          } else {
-            navigate(`/trainer/${trainer.id}`);
-          }
-        }}
-        className="flex-1"
-      >
-        <Eye className="w-4 h-4 mr-2" />
-        View Profile
-      </Button>
-    );
+    // Only add View Profile button if not explicitly hidden
+    if (!hideViewProfileButton) {
+      buttons.push(
+        <Button
+          key="view-profile"
+          variant="outline"
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onViewProfile) {
+              onViewProfile(trainer.id);
+            } else {
+              navigate(`/trainer/${trainer.id}`);
+            }
+          }}
+          className="flex-1"
+        >
+          <Eye className="w-4 h-4 mr-2" />
+          View Profile
+        </Button>
+      );
+    }
 
     // Show different buttons based on card state
     switch (cardState) {

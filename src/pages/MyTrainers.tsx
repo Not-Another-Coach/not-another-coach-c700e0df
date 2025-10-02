@@ -386,7 +386,17 @@ export default function MyTrainers() {
                       </Button>
                     </div>
                   ) : filteredTrainers.length > 0 ? (
-                     filteredTrainers.map((trainer) => (
+                     filteredTrainers.map((trainer) => {
+                        const effectiveStage = (trainer as any).engagement?.stage || 'browsing';
+                        
+                        // Debug logging for visibility
+                        console.log(`🔍 MyTrainers Card - ${trainer.name}:`, {
+                          status: trainer.status,
+                          engagementStage: effectiveStage,
+                          engagement: (trainer as any).engagement
+                        });
+                        
+                        return (
                         <div key={trainer.id} className="relative">
                            <EnhancedTrainerCard
                              trainer={trainer as any}
@@ -396,13 +406,14 @@ export default function MyTrainers() {
                              onRemove={trainer.shortlistedAt ? handleRemoveFromShortlist : undefined}
                              onStartConversation={handleStartConversation}
                              onBookDiscoveryCall={handleBookDiscoveryCall}
-                             onViewProfile={handleViewProfile}
+                             onViewProfile={undefined} // Remove View Profile from card - it's shown below
+                             hideViewProfileButton={true} // Hide View Profile button - shown below card
                              isShortlisted={!!trainer.shortlistedAt}
                              cardState={trainer.status === 'shortlisted' ? 'shortlisted' : trainer.status === 'saved' ? 'saved' : 'default'}
                              initialView={getSmartInitialView(trainer)}
                              onMoveToSaved={handleSaveTrainer}
                              onRemoveCompletely={handleRemoveFromShortlist}
-                             engagementStage={(trainer as any).engagement?.stage || 'browsing'}
+                             engagementStage={effectiveStage}
                            />
                           {!showComparison && (
                             <div className="absolute top-2 right-2 z-10">
@@ -414,9 +425,10 @@ export default function MyTrainers() {
                                 disabled={!selectedForComparison.includes(trainer.id) && selectedForComparison.length >= 4}
                               />
                             </div>
-                          )}
-                       </div>
-                     ))
+                           )}
+                        </div>
+                      );
+                      })
                   ) : (
                     <EnhancedEmptyState
                       filterType={activeFilter}

@@ -174,6 +174,7 @@ export interface UnifiedTrainerCardProps {
   showEngagementBadge?: boolean;
   compactActions?: boolean;
   hideViewControls?: boolean;
+  hideViewProfileButton?: boolean; // Option to hide View Profile button
   
   // Visibility control
   engagementStage?: string; // Optional engagement stage to bypass internal hook
