@@ -231,50 +231,11 @@ export const FeatureSummaryView = ({ trainer, children }: FeatureSummaryViewProp
           {/* Gradient overlay for text readability */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
           
-          {/* Trainer Info Overlay */}
-          <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-            <div className="flex items-end justify-between">
-              <div className="flex-1">
-                <VisibilityAwareBasicInfo
-                  name={trainer.name}
-                  location={trainer.location}
-                  visibilityState={getVisibility('basic_information')}
-                  variant="overlay"
-                  className="mb-2"
-                  trainer={{
-                    id: trainer.id,
-                    first_name: (trainer as any).firstName || (trainer as any).first_name,
-                    last_name: (trainer as any).lastName || (trainer as any).last_name,
-                    name: trainer.name
-                  }}
-                  engagementStage="browsing"
-                />
-                
-                {getVisibility('stats_ratings') !== 'hidden' && getVisibility('stats_ratings') !== 'blurred' && (
-                  <div className="flex items-center gap-3 text-white/90 text-sm mb-2">
-                    <VisibilityAwareRating
-                      rating={trainer.rating}
-                      reviewCount={trainer.reviews}
-                      visibilityState={getVisibility('stats_ratings')}
-                      size="sm"
-                      className="text-white/90"
-                    />
-                  </div>
-                )}
-                
-                <Badge variant="secondary" className="text-xs bg-white/20 text-white border-white/30 backdrop-blur-sm">
-                  {trainer.experience}
-                </Badge>
-              </div>
-              
-              {/* Price */}
-              <div className="text-right">
-                <div className="text-xl font-bold text-white drop-shadow-sm">
-                  {getTrainerDisplayPrice(trainer)}
-                </div>
-                <div className="text-xs text-white/80">package</div>
-              </div>
-            </div>
+          {/* Experience Badge Only */}
+          <div className="absolute bottom-0 left-0 right-0 p-4">
+            <Badge variant="secondary" className="text-xs bg-white/20 text-white border-white/30 backdrop-blur-sm">
+              {trainer.experience}
+            </Badge>
           </div>
         </div>
       </CardContent>
