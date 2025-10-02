@@ -50,14 +50,14 @@ export function ClientCustomHeader({
 
   return (
     <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border">
-      <div className="mx-auto px-6 lg:px-8 xl:px-12 py-3">
+      <div className="mx-auto px-3 sm:px-6 lg:px-8 xl:px-12 py-2 sm:py-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <AppLogo onClick={() => navigate('/client/dashboard')} />
-            <div className="text-muted-foreground">Your Journey</div>
-            {/* Your Journey Progress */}
+            <div className="hidden sm:block text-muted-foreground">Your Journey</div>
+            {/* Your Journey Progress - Hidden on mobile */}
             {showJourneyProgress && journeyProgress && (
-              <div className="flex items-center gap-2 ml-6 px-3 py-1 bg-primary/10 rounded-full">
+              <div className="hidden md:flex items-center gap-2 ml-6 px-3 py-1 bg-primary/10 rounded-full">
                 <div className="text-sm font-medium text-primary">
                   {formatJourneyStage(journeyProgress.stage)}
                 </div>
@@ -72,16 +72,16 @@ export function ClientCustomHeader({
               </div>
             )}
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3">
             {/* Notifications */}
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-9 w-9 p-0 relative">
+                <Button variant="ghost" size="sm" className="h-8 w-8 sm:h-9 sm:w-9 p-0 relative">
                   <Bell className="h-4 w-4" />
                   {(notifications.length > 0 || upcomingCalls.length > 0) && (
                     <Badge 
                       variant="destructive" 
-                      className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center"
+                      className="absolute -top-1 -right-1 h-4 w-4 sm:h-5 sm:w-5 rounded-full p-0 text-[10px] sm:text-xs flex items-center justify-center"
                     >
                       {notifications.length + upcomingCalls.length}
                     </Badge>
@@ -160,7 +160,7 @@ export function ClientCustomHeader({
             <Button 
               variant="ghost" 
               size="sm" 
-              className="h-9 w-9 p-0"
+              className="h-8 w-8 sm:h-9 sm:w-9 p-0"
               onClick={onMessagingOpen}
             >
               <MessageCircle className="h-4 w-4" />
@@ -171,10 +171,10 @@ export function ClientCustomHeader({
               variant="ghost" 
               size="sm"
               onClick={() => navigate('/client-survey')}
-              className="flex items-center gap-2 h-9 px-3"
+              className="flex items-center gap-2 h-8 sm:h-9 px-2 sm:px-3"
             >
               <Settings className="h-4 w-4" />
-              <span className="text-sm">Preferences</span>
+              <span className="hidden sm:inline text-sm">Preferences</span>
             </Button>
 
             {/* Profile Dropdown */}
