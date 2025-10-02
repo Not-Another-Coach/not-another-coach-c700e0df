@@ -151,8 +151,8 @@ My qualifications include NASM-CPT, Precision Nutrition Level 1, and certificati
       created_at: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
       showImages: true,
       consentGiven: true,
-      beforeImage: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600&h=800&fit=crop&crop=faces',
-      afterImage: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&h=800&fit=crop&crop=faces'
+      beforeImage: 'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=600&h=800&fit=crop&crop=entropy',
+      afterImage: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&h=800&fit=crop&crop=entropy'
     },
     {
       id: 'demo-test-2',
@@ -166,8 +166,8 @@ My qualifications include NASM-CPT, Precision Nutrition Level 1, and certificati
       created_at: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString(),
       showImages: true,
       consentGiven: true,
-      beforeImage: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&h=800&fit=crop&crop=faces',
-      afterImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=800&fit=crop&crop=faces'
+      beforeImage: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&h=800&fit=crop&crop=entropy',
+      afterImage: 'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=600&h=800&fit=crop&crop=entropy'
     },
     {
       id: 'demo-test-3',
