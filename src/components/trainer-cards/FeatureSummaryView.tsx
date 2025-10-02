@@ -9,6 +9,7 @@ import { useContentVisibility } from '@/hooks/useContentVisibility';
 import { VisibilityAwareRating } from "@/components/ui/VisibilityAwareRating";
 import { VisibilityAwareText } from "@/components/ui/VisibilityAwareText";
 import { VisibilityAwareBasicInfo } from "@/components/ui/VisibilityAwareBasicInfo";
+import { VisibilityAwareImage } from "@/components/ui/VisibilityAwareImage";
 
 interface FeatureSummaryViewProps {
   trainer: AnyTrainer;
@@ -51,10 +52,13 @@ export const FeatureSummaryView = ({ trainer, children }: FeatureSummaryViewProp
           {/* Background Image with Overlay */}
           {(trainer as any).profile_photo_url && (
             <div className="absolute inset-0">
-              <img 
-                src={(trainer as any).profile_photo_url} 
+              <VisibilityAwareImage
+                src={(trainer as any).profile_photo_url}
                 alt={trainer.name}
+                visibilityState={getVisibility('profile_image')}
                 className="w-full h-full object-cover opacity-20"
+                lockMessage="Profile image unlocks as you engage"
+                showLockIcon={false}
               />
               <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background/90" />
             </div>
