@@ -150,14 +150,6 @@ export default function Home() {
                 </Button>
               )}
               
-              {/* Reset Options Menu - always show if intent is set */}
-              {userIntent && (
-                <ResetOptionsButton 
-                  variant="ghost" 
-                  size="sm"
-                />
-              )}
-              
               <Button variant="ghost" onClick={() => navigate('/auth')}>
                 Sign In
               </Button>
