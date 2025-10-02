@@ -107,7 +107,7 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
           ...(uploadedImages || []).map(img => ({
             id: img.id,
             type: 'uploaded',
-            url: FileUploadService.getPublicUrl('trainer-images', img.file_path),
+            url: supabase.storage.from('trainer-images').getPublicUrl(img.file_path).data.publicUrl,
             displayOrder: img.display_order,
             mediaType: 'IMAGE'
           })),
