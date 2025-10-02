@@ -294,10 +294,17 @@ export const EnhancedTrainerCard = memo(({
   const renderActionButtons = () => {
     const buttons = [];
 
+    // Helper function to check if messaging is allowed based on engagement stage
+    const canShowMessage = () => {
+      const currentStage = stage || 'browsing';
+      // Only allow messaging for shortlisted and higher engagement stages
+      return ['shortlisted', 'getting_to_know_your_coach', 'discovery_in_progress', 'discovery_completed', 'agreed', 'payment_pending', 'active_client'].includes(currentStage);
+    };
+
     // For carousel layout, show compact actions or no actions at all
     if (finalLayout === 'carousel' && finalCompactActions) {
       // Only show actions if handlers are provided
-      if (onStartConversation) {
+      if (onStartConversation && canShowMessage()) {
         buttons.push(
           <Button
             key="message"
@@ -381,7 +388,7 @@ export const EnhancedTrainerCard = memo(({
             </Button>
           );
         }
-        if (onStartConversation) {
+        if (onStartConversation && canShowMessage()) {
           buttons.unshift(
             <Button
               key="message"
@@ -418,7 +425,7 @@ export const EnhancedTrainerCard = memo(({
             </Button>
           );
         }
-        if (onStartConversation) {
+        if (onStartConversation && canShowMessage()) {
           buttons.unshift(
             <Button
               key="message"
@@ -438,7 +445,7 @@ export const EnhancedTrainerCard = memo(({
         break;
 
       case 'matched':
-        if (onStartConversation) {
+        if (onStartConversation && canShowMessage()) {
           buttons.unshift(
             <Button
               key="message"
@@ -476,23 +483,7 @@ export const EnhancedTrainerCard = memo(({
             </Button>
           );
         }
-        if (onStartConversation) {
-          buttons.unshift(
-            <Button
-              key="message"
-              variant="secondary"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onStartConversation(trainer.id);
-              }}
-              className="flex-1"
-            >
-              <MessageCircle className="w-4 h-4 mr-2" />
-              Message
-            </Button>
-          );
-        }
+        // Remove message button from default state (saved/browsing) as it requires shortlisted or higher
         break;
     }
 
