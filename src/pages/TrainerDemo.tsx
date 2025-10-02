@@ -1,6 +1,4 @@
-import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAnonymousTrainerSession } from '@/hooks/useAnonymousTrainerSession';
 import { TrainerDemoCalendar } from '@/components/trainer-demo/TrainerDemoCalendar';
 import { GrowthTracker } from '@/components/trainer-demo/GrowthTracker';
 import { CoachJourneyInfographic } from '@/components/trainer-demo/CoachJourneyInfographic';
@@ -16,15 +14,9 @@ import heroImage from '@/assets/hero-coach-success.jpg';
 
 export default function TrainerDemo() {
   const navigate = useNavigate();
-  const { trackInteraction, updateTrainerProfile } = useAnonymousTrainerSession();
-
-  useEffect(() => {
-    trackInteraction('viewedDashboard');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const handleCreateProfile = () => {
-    navigate('/trainer/preview');
+    navigate('/auth?signup=trainer');
   };
 
 

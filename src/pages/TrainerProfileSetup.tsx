@@ -186,26 +186,6 @@ const TrainerProfileSetup = () => {
     if (profile && profile.id && !hasInitialized.current) {
       hasInitialized.current = true;
       
-      // Check for anonymous trainer profile draft
-      const draftData = localStorage.getItem('nac_trainer_profile_draft');
-      let anonymousData = null;
-      
-      if (draftData) {
-        try {
-          anonymousData = JSON.parse(draftData);
-          console.log('📋 Found anonymous trainer profile draft:', anonymousData);
-          
-          // Show success toast
-          toast({
-            title: "Welcome back!",
-            description: "We've restored your profile draft data.",
-            duration: 4000,
-          });
-        } catch (error) {
-          console.error('Error parsing anonymous trainer draft:', error);
-        }
-      }
-      
       console.log('Form data being initialized from profile:', {
         accuracy_confirmed: profile.accuracy_confirmed,
         terms_agreed: profile.terms_agreed,
@@ -215,32 +195,25 @@ const TrainerProfileSetup = () => {
       });
         
       const initialData = {
-        // Merge profile data with anonymous draft (draft takes precedence for empty profile fields)
-        first_name: profile.first_name || anonymousData?.firstName || "",
-        last_name: profile.last_name || anonymousData?.lastName || "",
-        tagline: profile.tagline || anonymousData?.tagline || "",
-        bio: profile.bio || anonymousData?.bio || "",
+        first_name: profile.first_name || "",
+        last_name: profile.last_name || "",
+        tagline: profile.tagline || "",
+        bio: profile.bio || "",
         how_started: profile.how_started || "",
         philosophy: profile.philosophy || "",
         professional_milestones: profile.professional_milestones || [],
         profile_photo_url: profile.profile_photo_url || "",
         profile_image_position: profile.profile_image_position || { x: 50, y: 50, scale: 1 },
-        qualifications: Array.isArray(profile.qualifications) && profile.qualifications.length > 0 
-          ? profile.qualifications 
-          : (anonymousData?.qualifications || []),
+        qualifications: Array.isArray(profile.qualifications) ? profile.qualifications : [],
         certificates: profile.uploaded_certificates || [],
-        specializations: Array.isArray(profile.specializations) && profile.specializations.length > 0
-          ? profile.specializations 
-          : (anonymousData?.specializations || []),
-        training_types: Array.isArray(profile.training_types) && profile.training_types.length > 0
-          ? profile.training_types 
-          : (anonymousData?.trainingTypes || []),
-        location: profile.location || anonymousData?.location || "",
+        specializations: Array.isArray(profile.specializations) ? profile.specializations : [],
+        training_types: Array.isArray(profile.training_types) ? profile.training_types : [],
+        location: profile.location || "",
         delivery_format: Array.isArray(profile.delivery_format) ? profile.delivery_format[0] || "hybrid" : profile.delivery_format || "hybrid",
         ideal_client_types: Array.isArray(profile.ideal_client_types) ? profile.ideal_client_types : [],
         coaching_style: Array.isArray(profile.coaching_style) ? profile.coaching_style : [],
         ideal_client_personality: profile.ideal_client_personality || "",
-        hourly_rate: profile.hourly_rate || anonymousData?.hourlyRate || null,
+        hourly_rate: profile.hourly_rate || null,
         package_options: profile.package_options || [],
         free_discovery_call: profile.free_discovery_call || false,
         calendar_link: profile.calendar_link || "",
@@ -278,12 +251,6 @@ const TrainerProfileSetup = () => {
       setFormData(prev => ({ ...prev, ...initialData }));
       initialFormData.current = { ...initialData };
       setHasUnsavedChanges(false);
-      
-      // Clear the draft after successful integration
-      if (anonymousData) {
-        localStorage.removeItem('nac_trainer_profile_draft');
-        console.log('✅ Anonymous trainer draft cleared after integration');
-      }
     }
   }, [profile]);
 
