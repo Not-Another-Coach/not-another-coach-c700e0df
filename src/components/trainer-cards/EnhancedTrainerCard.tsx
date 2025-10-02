@@ -301,6 +301,13 @@ export const EnhancedTrainerCard = memo(({
       return ['shortlisted', 'getting_to_know_your_coach', 'discovery_in_progress', 'discovery_completed', 'agreed', 'payment_pending', 'active_client'].includes(currentStage);
     };
 
+    // Helper function to check if profile viewing is allowed based on engagement stage
+    const canViewProfile = () => {
+      const currentStage = stage || 'browsing';
+      // Profile viewing requires at least liked/saved stage
+      return currentStage !== 'browsing';
+    };
+
     // For carousel layout, show compact actions or no actions at all
     if (finalLayout === 'carousel' && finalCompactActions) {
       // Only show actions if handlers are provided
@@ -345,8 +352,8 @@ export const EnhancedTrainerCard = memo(({
     }
 
     // Full layout actions (existing logic)
-    // Only add View Profile button if not explicitly hidden
-    if (!hideViewProfileButton) {
+    // Only add View Profile button if not explicitly hidden and engagement allows it
+    if (!hideViewProfileButton && canViewProfile()) {
       buttons.push(
         <Button
           key="view-profile"

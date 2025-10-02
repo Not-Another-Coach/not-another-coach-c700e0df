@@ -18,6 +18,8 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserTypeChecks } from '@/hooks/useUserType';
 import { AppLogo } from '@/components/ui/app-logo';
+import { useEngagementStage } from '@/hooks/useEngagementStage';
+import { toast } from '@/hooks/use-toast';
 
 export const TrainerProfile = () => {
   const { trainerId } = useParams<{ trainerId: string }>();
@@ -26,6 +28,9 @@ export const TrainerProfile = () => {
   const { user_type, isClient } = useUserTypeChecks();
   const [searchParams] = useSearchParams();
   const fromSource = searchParams.get('from');
+  
+  // Check engagement stage for access control
+  const { stage: engagementStage, loading: engagementLoading } = useEngagementStage(trainerId || '', !user);
   
   const includeOwnUnpublished = useMemo(() => 
     user?.id ? { userId: user.id } : undefined, 
@@ -74,7 +79,19 @@ export const TrainerProfile = () => {
   const trainer = trainers.find(t => t.id === trainerId);
   const isOwnProfile = user?.id === trainerId;
 
-  if (loading) {
+  // Restrict profile access for browsing stage (unless viewing own profile)
+  React.useEffect(() => {
+    if (!engagementLoading && !isOwnProfile && user && engagementStage === 'browsing') {
+      toast({
+        title: "Profile Access Restricted",
+        description: "Please save this trainer's profile to view their full details.",
+        variant: "destructive"
+      });
+      navigate('/client/explore');
+    }
+  }, [engagementStage, engagementLoading, isOwnProfile, user, navigate]);
+
+  if (loading || engagementLoading) {
     return (
       <div className="container mx-auto p-6">
         <div className="animate-pulse space-y-6">
