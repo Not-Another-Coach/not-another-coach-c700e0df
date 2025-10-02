@@ -49,20 +49,8 @@ export const FeatureSummaryView = ({ trainer, children }: FeatureSummaryViewProp
         
         {/* Feature Cards Grid - Full Height */}
         <div className="relative aspect-square">
-          {/* Background Image with Overlay */}
-          {(trainer as any).profile_photo_url && (
-            <div className="absolute inset-0">
-              <VisibilityAwareImage
-                src={(trainer as any).profile_photo_url}
-                alt={trainer.name}
-                visibilityState={getVisibility('profile_image')}
-                className="w-full h-full object-cover opacity-20"
-                lockMessage="Profile image unlocks as you engage"
-                showLockIcon={false}
-              />
-              <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background/90" />
-            </div>
-          )}
+          {/* Gradient overlay for card aesthetics */}
+          <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background/90" />
           
           <div className="h-full p-4 pb-20 relative z-10">
             <div className="grid grid-cols-2 gap-3 mb-4">

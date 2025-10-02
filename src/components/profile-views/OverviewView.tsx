@@ -7,6 +7,8 @@ import { AnyTrainer } from '@/types/trainer';
 import { getTrainerDisplayPrice } from '@/lib/priceUtils';
 import { useContentVisibility } from '@/hooks/useContentVisibility';
 import { VisibilityAwarePricing } from '@/components/ui/VisibilityAwarePricing';
+import { useEngagementStage } from '@/hooks/useEngagementStage';
+import { VisibilityAwareImage } from '@/components/ui/VisibilityAwareImage';
 
 interface OverviewViewProps {
   trainer: AnyTrainer;
@@ -15,8 +17,10 @@ interface OverviewViewProps {
 }
 
 export const OverviewView = ({ trainer, onMessage, onBookDiscovery }: OverviewViewProps) => {
+  const { stage: engagementStage, isGuest } = useEngagementStage(trainer.id);
   const { getVisibility } = useContentVisibility({
-    engagementStage: 'browsing' // Default stage for overview
+    engagementStage,
+    isGuest
   });
   // Generate initials from trainer name
   const getInitials = (name: string) => {
@@ -35,17 +39,32 @@ export const OverviewView = ({ trainer, onMessage, onBookDiscovery }: OverviewVi
         <CardContent className="p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
             <div className="relative mx-auto sm:mx-0">
-              <PositionedAvatar 
-                src={trainer.image || undefined}
-                alt={trainer.name}
-                fallback={trainer.name ? getInitials(trainer.name) : 'PT'}
-                position={trainer.profileImagePosition}
-                size="2xl"
-                className="border-4 border-secondary/20"
-              />
-              {trainer.certifications.length > 0 && (
-                <div className="absolute -bottom-1 -right-1 bg-success text-white rounded-full p-2">
-                  <Award className="h-4 w-4" />
+              {getVisibility('profile_image') === 'visible' ? (
+                <>
+                  <PositionedAvatar 
+                    src={trainer.image || undefined}
+                    alt={trainer.name}
+                    fallback={trainer.name ? getInitials(trainer.name) : 'PT'}
+                    position={trainer.profileImagePosition}
+                    size="2xl"
+                    className="border-4 border-secondary/20"
+                  />
+                  {trainer.certifications.length > 0 && (
+                    <div className="absolute -bottom-1 -right-1 bg-success text-white rounded-full p-2">
+                      <Award className="h-4 w-4" />
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="w-32 h-32 sm:w-40 sm:h-40">
+                  <VisibilityAwareImage
+                    src={trainer.image || ''}
+                    alt={trainer.name}
+                    visibilityState={getVisibility('profile_image')}
+                    className="rounded-full border-4 border-secondary/20"
+                    lockMessage="Profile image unlocks as you engage"
+                    showLockIcon={true}
+                  />
                 </div>
               )}
             </div>
