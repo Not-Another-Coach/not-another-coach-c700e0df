@@ -263,9 +263,9 @@ export function useUnifiedTrainerData(): UnifiedTrainerState & TrainerActions {
         });
       });
 
-      // Calculate counts
+      // Calculate counts - exclude browsing trainers from all count
       const counts = {
-        all: trainers.length,
+        all: trainers.filter(t => t.status !== 'browsing').length,
         saved: trainers.filter(t => t.status === 'saved').length,
         shortlisted: trainers.filter(t => t.status === 'shortlisted').length,
         discovery: trainers.filter(t => t.status === 'discovery').length,
@@ -460,7 +460,10 @@ export function useUnifiedTrainerData(): UnifiedTrainerState & TrainerActions {
   }, [user, fetchTrainerData]);
 
   const filterTrainers = useCallback((filter: string): UnifiedTrainer[] => {
-    if (filter === 'all') return state.trainers;
+    if (filter === 'all') {
+      // Exclude trainers with 'browsing' status from 'all' tab
+      return state.trainers.filter(t => t.status !== 'browsing');
+    }
     return state.trainers.filter(t => t.status === filter);
   }, [state.trainers]);
 
