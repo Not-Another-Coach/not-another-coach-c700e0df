@@ -409,6 +409,7 @@ export default function MyTrainers() {
                              onViewProfile={undefined} // Remove View Profile from card - it's shown below
                              hideViewProfileButton={true} // Hide View Profile button - shown below card
                              isShortlisted={!!trainer.shortlistedAt}
+                             trainerOffersDiscoveryCalls={trainer.offersDiscoveryCall || (trainer as any).offers_discovery_call || false}
                              cardState={trainer.status === 'shortlisted' ? 'shortlisted' : trainer.status === 'saved' ? 'saved' : 'default'}
                              initialView={getSmartInitialView(trainer)}
                              onMoveToSaved={handleSaveTrainer}
