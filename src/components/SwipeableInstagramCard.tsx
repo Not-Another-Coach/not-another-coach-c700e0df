@@ -132,9 +132,8 @@ export const SwipeableInstagramCard = ({
           }))
         ].sort((a, b) => a.displayOrder - b.displayOrder);
 
-        // Apply grid size slicing
-        const slicedImages = allImages.slice(0, autoGridSize);
-        setDisplayImages(slicedImages);
+        // Display all images - grid layout adapts to count
+        setDisplayImages(allImages);
       } catch (error) {
         console.error('Error fetching trainer images:', error);
         // Fallback to trainer profile image

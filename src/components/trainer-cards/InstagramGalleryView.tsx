@@ -119,21 +119,19 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
             mediaType: img.media_type
           }))
         ].sort((a, b) => a.displayOrder - b.displayOrder);
-
-        // Apply grid size slicing and log for debugging
-        const slicedImages = allImages.slice(0, autoGridSize);
+        
         console.log(`InstagramGalleryView Debug:`, {
           totalSelectedImages,
           autoGridSize,
           allImagesLength: allImages.length,
-          slicedImagesLength: slicedImages.length,
           allImages: allImages.map(img => ({
             id: img.id,
             type: img.type,
             url: typeof img.url === 'string' ? img.url.substring(0, 50) + '...' : '...'
           }))
         });
-        setDisplayImages(slicedImages);
+        
+        setDisplayImages(allImages);
       } catch (error) {
         console.error('Error fetching trainer images:', error);
         // Fallback to trainer profile image with hero layout
@@ -151,24 +149,6 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
 
     fetchTrainerImages();
     
-    // Set up real-time subscription for preference changes
-    const preferencesSubscription = supabase
-      .channel('trainer_image_preferences_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'trainer_image_preferences',
-          filter: `trainer_id=eq.${trainer.id}`
-        },
-        () => {
-          // Refetch when preferences change
-          fetchTrainerImages();
-        }
-      )
-      .subscribe();
-
     // Set up real-time subscription for image selection changes
     const imagesSubscription = supabase
       .channel('trainer_images_changes')
@@ -199,7 +179,6 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
       .subscribe();
 
     return () => {
-      preferencesSubscription.unsubscribe();
       imagesSubscription.unsubscribe();
     };
   }, [trainer.id, trainer.image]);
