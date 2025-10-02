@@ -109,45 +109,6 @@ export const ClientTransformationView = ({ trainer, children, testimonialIndex =
             
             {/* Gradient overlay for text readability */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-            
-            {/* Trainer Info Overlay */}
-            <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-              <div className="flex items-end justify-between">
-                <div className="flex-1">
-                  <VisibilityAwareName
-                    trainer={{
-                      id: trainer.id,
-                      first_name: (trainer as any).firstName || (trainer as any).first_name,
-                      last_name: (trainer as any).lastName || (trainer as any).last_name,
-                      name: trainer.name
-                    }}
-                    visibilityState={getVisibility('basic_information')}
-                    engagementStage={stage}
-                    variant="overlay"
-                    className="font-bold text-lg mb-1 text-white drop-shadow-sm"
-                  />
-                  
-                  <div className="flex items-center gap-3 text-white/90 text-sm mb-2">
-                    <div className="flex items-center gap-1">
-                      <Star className="h-3 w-3 fill-current" />
-                      <span className="font-medium">{trainer.rating}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <MapPin className="h-3 w-3" />
-                      <span>{trainer.location}</span>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Price */}
-                <div className="text-right">
-                  <div className="text-xl font-bold text-white drop-shadow-sm">
-                    {getTrainerDisplayPrice(trainer)}
-                  </div>
-                  <div className="text-xs text-white/80">packages</div>
-                </div>
-              </div>
-            </div>
           </div>
         </CardContent>
       </Card>
@@ -220,42 +181,6 @@ export const ClientTransformationView = ({ trainer, children, testimonialIndex =
 
         {/* Trainer Info & Current Testimonial Overlay */}
         <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-          <div className="flex items-start justify-between mb-3">
-            <div className="flex-1 min-w-0">
-              <VisibilityAwareName
-                trainer={{
-                  id: trainer.id,
-                  first_name: (trainer as any).firstName || (trainer as any).first_name,
-                  last_name: (trainer as any).lastName || (trainer as any).last_name,
-                  name: trainer.name
-                }}
-                visibilityState={getVisibility('basic_information')}
-                engagementStage={stage}
-                variant="overlay"
-                className="font-bold text-lg mb-1 text-white drop-shadow-sm"
-              />
-              
-              <div className="flex items-center gap-3 text-white/90 text-sm mb-2">
-                <div className="flex items-center gap-1">
-                  <Star className="h-3 w-3 fill-current" />
-                  <span className="font-medium">{trainer.rating}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <MapPin className="h-3 w-3" />
-                  <span>{trainer.location}</span>
-                </div>
-              </div>
-            </div>
-            
-            {/* Price */}
-            <div className="text-right">
-              <div className="text-xl font-bold text-white drop-shadow-sm">
-                {getTrainerDisplayPrice(trainer)}
-              </div>
-              <div className="text-xs text-white/80">packages</div>
-            </div>
-          </div>
-
           {/* Current Testimonial with Visibility */}
           {testimonialVisibility === 'visible' ? (
             <div className="bg-black/30 backdrop-blur-sm rounded-lg p-3 border border-white/20">
