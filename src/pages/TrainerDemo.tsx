@@ -3,7 +3,6 @@ import { TrainerDemoCalendar } from '@/components/trainer-demo/TrainerDemoCalend
 import { GrowthTracker } from '@/components/trainer-demo/GrowthTracker';
 import { CoachJourneyInfographic } from '@/components/trainer-demo/CoachJourneyInfographic';
 import { DemoProfilePreview } from '@/components/trainer-demo/DemoProfilePreview';
-import { DemoClientTransformations } from '@/components/trainer-demo/DemoClientTransformations';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -97,14 +96,11 @@ export default function TrainerDemo() {
 
       <div className="container mx-auto px-4 py-8">
         {/* Profile Preview Section */}
-        <div className="mb-12 max-w-md mx-auto">
+        <div className="mb-12">
           <DemoProfilePreview />
         </div>
 
         <div className="space-y-8">
-          {/* Client Transformations */}
-          <DemoClientTransformations />
-
           {/* Calendar and Growth Tracker Side by Side */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <TrainerDemoCalendar />

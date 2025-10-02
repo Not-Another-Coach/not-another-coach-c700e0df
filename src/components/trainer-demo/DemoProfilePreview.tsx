@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EnhancedTrainerCard } from '@/components/trainer-cards/EnhancedTrainerCard';
+import { DemoClientTransformations } from '@/components/trainer-demo/DemoClientTransformations';
 import { Loader2 } from 'lucide-react';
 import type { AnyTrainer } from '@/types/trainer';
 
@@ -206,29 +207,34 @@ export function DemoProfilePreview() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <span>Your Profile Preview</span>
-          <span className="text-sm font-normal text-muted-foreground">
-            How clients see you
-          </span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="max-w-md mx-auto">
-          <EnhancedTrainerCard
-            trainer={trainerData}
-            config="anonymous"
-            initialView="instagram"
-            showComparisonCheckbox={false}
-            allowViewSwitching={true}
-            onViewProfile={() => {}}
-            onMessage={() => {}}
-            onBookDiscoveryCall={() => {}}
-          />
-        </div>
-      </CardContent>
-    </Card>
+    <div className="space-y-8">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <span>Your Profile Preview</span>
+            <span className="text-sm font-normal text-muted-foreground">
+              How clients see you
+            </span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="max-w-md mx-auto">
+            <EnhancedTrainerCard
+              trainer={trainerData}
+              config="anonymous"
+              initialView="instagram"
+              showComparisonCheckbox={false}
+              allowViewSwitching={true}
+              onViewProfile={() => {}}
+              onMessage={() => {}}
+              onBookDiscoveryCall={() => {}}
+            />
+          </div>
+        </CardContent>
+      </Card>
+      
+      {/* Client Transformations Section */}
+      <DemoClientTransformations />
+    </div>
   );
 }
