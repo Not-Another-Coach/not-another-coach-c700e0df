@@ -2,6 +2,8 @@ import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSavedTrainers } from "@/hooks/useSavedTrainers";
 import { useShortlistedTrainers } from "@/hooks/useShortlistedTrainers";
+import { useEngagementStage } from "@/hooks/useEngagementStage";
+import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,6 +47,7 @@ interface ExploreAllTrainersProps {
 
 export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { saveTrainer, isTrainerSaved } = useSavedTrainers();
   const { shortlistTrainer, isShortlisted, shortlistCount, canShortlistMore } = useShortlistedTrainers();
   
@@ -170,11 +173,71 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
   };
 
   const handleMessage = (trainerId: string) => {
-    // Dispatch a custom event to open messaging popup with specific trainer
-    const event = new CustomEvent('openMessagePopup', {
-      detail: { trainerId }
-    });
-    window.dispatchEvent(event);
+    navigate(`/messaging?trainerId=${trainerId}`);
+  };
+
+  // Component to render CTAs with engagement stage checking
+  const TrainerCTAs = ({ trainer }: { trainer: any }) => {
+    const isSaved = isTrainerSaved(trainer.id);
+    const isShortlistedTrainer = isShortlisted(trainer.id);
+    const { stage: engagementStage } = useEngagementStage(trainer.id, !user);
+    
+    // Check if messaging is allowed based on engagement stage
+    const canShowMessage = () => {
+      const currentStage = engagementStage || 'browsing';
+      return ['shortlisted', 'getting_to_know_your_coach', 'discovery_in_progress', 'discovery_completed', 'agreed', 'payment_pending', 'active_client'].includes(currentStage);
+    };
+
+    return (
+      <div className="space-y-2 p-3 bg-background border rounded-lg">
+        <div className="grid grid-cols-2 gap-2">
+          {!isSaved && !isShortlistedTrainer && (
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => handleSaveTrainer(trainer.id)}
+            >
+              <Heart className="h-3 w-3 mr-1" />
+              Save
+            </Button>
+          )}
+          
+          {isSaved && !isShortlistedTrainer && (
+            <Button 
+              size="sm" 
+              variant="default"
+              onClick={() => handleShortlist(trainer.id)}
+              disabled={!canShortlistMore}
+            >
+              <Star className="h-3 w-3 mr-1" />
+              {canShortlistMore ? 'Shortlist' : 'Full'}
+            </Button>
+          )}
+          
+          {isShortlistedTrainer && (
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => navigate('/my-trainers')}
+            >
+              <Star className="h-3 w-3 mr-1 fill-current" />
+              Shortlisted
+            </Button>
+          )}
+          
+          {canShowMessage() && (
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => handleMessage(trainer.id)}
+            >
+              <MessageCircle className="h-3 w-3 mr-1" />
+              Message
+            </Button>
+          )}
+        </div>
+      </div>
+    );
   };
 
   const handleSaveTrainer = async (trainerId: string) => {
@@ -230,60 +293,6 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
 
   const getSelectedTrainersData = () => {
     return paginatedTrainers.filter(trainer => selectedForComparison.includes(trainer.id));
-  };
-
-  const renderCTAs = (trainer: any) => {
-    const isSaved = isTrainerSaved(trainer.id);
-    const isShortlistedTrainer = isShortlisted(trainer.id);
-
-    return (
-      <div className="space-y-2 p-3 bg-background border rounded-lg">
-        <div className="grid grid-cols-2 gap-2">
-          {!isSaved && !isShortlistedTrainer && (
-            <Button 
-              size="sm" 
-              variant="outline"
-              onClick={() => handleSaveTrainer(trainer.id)}
-            >
-              <Heart className="h-3 w-3 mr-1" />
-              Save
-            </Button>
-          )}
-          
-          {isSaved && !isShortlistedTrainer && (
-            <Button 
-              size="sm" 
-              variant="default"
-              onClick={() => handleShortlist(trainer.id)}
-              disabled={!canShortlistMore}
-            >
-              <Star className="h-3 w-3 mr-1" />
-              {canShortlistMore ? 'Shortlist' : 'Full'}
-            </Button>
-          )}
-          
-          {isShortlistedTrainer && (
-            <Button 
-              size="sm" 
-              variant="outline"
-              onClick={() => navigate('/my-trainers')}
-            >
-              <Star className="h-3 w-3 mr-1 fill-current" />
-              Shortlisted
-            </Button>
-          )}
-          
-          <Button 
-            size="sm" 
-            variant="outline"
-            onClick={() => handleMessage(trainer.id)}
-          >
-            <MessageCircle className="h-3 w-3 mr-1" />
-            Message
-          </Button>
-        </div>
-      </div>
-    );
   };
 
   const renderPagination = () => {
@@ -494,7 +503,7 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
                 />
                 
                 {/* CTAs */}
-                {renderCTAs(trainer)}
+                <TrainerCTAs trainer={trainer} />
               </div>
             ))}
           </div>
