@@ -3,6 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EnhancedTrainerCard } from '@/components/trainer-cards/EnhancedTrainerCard';
 import { Loader2 } from 'lucide-react';
 import type { AnyTrainer } from '@/types/trainer';
+import demoBeforeFemale from '@/assets/demo-before-female.png';
+import demoAfterFemale from '@/assets/demo-after-female.png';
+import demoBeforeMale from '@/assets/demo-before-male.png';
+import demoAfterMale from '@/assets/demo-after-male.png';
 
 // Hardcoded demo trainer profile for consistent demo experience
 const DEMO_TRAINER_DATA = {
@@ -151,8 +155,8 @@ My qualifications include NASM-CPT, Precision Nutrition Level 1, and certificati
       created_at: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
       showImages: true,
       consentGiven: true,
-      beforeImage: 'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=600&h=800&fit=crop&crop=entropy',
-      afterImage: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&h=800&fit=crop&crop=entropy'
+      beforeImage: demoBeforeFemale,
+      afterImage: demoAfterFemale
     },
     {
       id: 'demo-test-2',
@@ -166,8 +170,8 @@ My qualifications include NASM-CPT, Precision Nutrition Level 1, and certificati
       created_at: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString(),
       showImages: true,
       consentGiven: true,
-      beforeImage: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&h=800&fit=crop&crop=entropy',
-      afterImage: 'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=600&h=800&fit=crop&crop=entropy'
+      beforeImage: demoBeforeMale,
+      afterImage: demoAfterMale
     },
     {
       id: 'demo-test-3',
