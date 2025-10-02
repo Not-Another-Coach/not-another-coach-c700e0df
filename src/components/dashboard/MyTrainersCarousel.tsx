@@ -191,7 +191,7 @@ export function MyTrainersCarousel({ onTabChange }: MyTrainersCarouselProps) {
                 onViewProfile={handleViewProfile}
                 onStartConversation={handleMessage}
                 onBookDiscoveryCall={handleBookDiscoveryCall}
-                trainerOffersDiscoveryCalls={true}
+                trainerOffersDiscoveryCalls={trainer.offersDiscoveryCall || false}
                 initialView="instagram"
                 compactActions={false}
                 hideViewControls={true}
