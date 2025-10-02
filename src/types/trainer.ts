@@ -174,6 +174,9 @@ export interface UnifiedTrainerCardProps {
   showEngagementBadge?: boolean;
   compactActions?: boolean;
   hideViewControls?: boolean;
+  
+  // Visibility control
+  engagementStage?: string; // Optional engagement stage to bypass internal hook
 }
 
 // Trainer card configuration for different contexts

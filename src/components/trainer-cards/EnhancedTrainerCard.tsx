@@ -62,7 +62,8 @@ export const EnhancedTrainerCard = memo(({
   allowViewSwitching = true,
   showEngagementBadge = false,
   compactActions = false,
-  hideViewControls = false
+  hideViewControls = false,
+  engagementStage: propEngagementStage // Renamed to avoid confusion
 }: EnhancedTrainerCardProps) => {
   const navigate = useNavigate();
   const { isTrainerSaved, saveTrainer, unsaveTrainer } = useSavedTrainers();
@@ -93,7 +94,11 @@ export const EnhancedTrainerCard = memo(({
 
   // Add visibility context - this will be passed to sub-components through their own hooks
   const isAnonymousMode = config === 'anonymous';
-  const { stage, isGuest } = useEngagementStage(trainer.id, isAnonymousMode);
+  // Use prop engagement stage if provided, otherwise fetch it
+  const hookResult = useEngagementStage(trainer.id, isAnonymousMode);
+  const stage = propEngagementStage as any || hookResult.stage;
+  const isGuest = hookResult.isGuest;
+  
   const { canViewContent, loading: visibilityLoading } = useContentVisibility({
     engagementStage: stage || 'browsing',
     isGuest: isGuest || isAnonymousMode

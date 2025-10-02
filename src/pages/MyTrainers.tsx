@@ -402,6 +402,7 @@ export default function MyTrainers() {
                              initialView={getSmartInitialView(trainer)}
                              onMoveToSaved={handleSaveTrainer}
                              onRemoveCompletely={handleRemoveFromShortlist}
+                             engagementStage={(trainer as any).engagement?.stage || 'browsing'}
                            />
                           {!showComparison && (
                             <div className="absolute top-2 right-2 z-10">
