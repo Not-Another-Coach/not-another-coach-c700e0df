@@ -68,12 +68,14 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
   const [selectedForComparison, setSelectedForComparison] = useState<string[]>([]);
   const [showComparison, setShowComparison] = useState(false);
 
-  // Fetch all published trainers
+  // Fetch all published trainers excluding those with engagement
   useEffect(() => {
     const fetchAllTrainers = async () => {
       try {
         setLoading(true);
-        const { data, error } = await supabase
+        
+        // Get all published trainers
+        const { data: trainersData, error } = await supabase
           .from('v_trainers')
           .select(`
             id,
@@ -100,7 +102,26 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
           return;
         }
 
-        const trainers = data?.map((trainer, index) => {
+        // If user is authenticated, exclude trainers with existing engagement
+        let excludedTrainerIds: string[] = [];
+        if (user) {
+          const { data: engagements } = await supabase
+            .from('client_trainer_engagement')
+            .select('trainer_id, stage')
+            .eq('client_id', user.id);
+          
+          // Exclude trainers with any engagement stage (liked or higher)
+          excludedTrainerIds = (engagements || [])
+            .filter(e => e.stage !== 'browsing')
+            .map(e => e.trainer_id);
+        }
+
+        // Filter out trainers with engagement
+        const filteredTrainersData = (trainersData || []).filter(
+          trainer => !excludedTrainerIds.includes(trainer.id)
+        );
+
+        const trainers = filteredTrainersData.map((trainer, index) => {
           // Use profile photo if available, otherwise use fallback image
           const imageUrl = trainer.profile_photo_url || trainerImages[index % trainerImages.length];
           
@@ -127,7 +148,7 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
             offers_discovery_call: false,
             testimonials: (trainer.testimonials as any[]) || []
           };
-        }) || [];
+        });
 
         setAllTrainers(trainers);
       } catch (error) {
@@ -138,7 +159,7 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
     };
 
     fetchAllTrainers();
-  }, []);
+  }, [user]);
 
   // Filter trainers based on search and filters
   const filteredTrainers = useMemo(() => {
