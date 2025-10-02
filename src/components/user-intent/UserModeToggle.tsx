@@ -42,7 +42,7 @@ export function UserModeToggle() {
       <ToggleGroupItem 
         value="client" 
         aria-label="Find a Coach"
-        className="gap-2 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+        className="gap-2 bg-background data-[state=on]:bg-primary data-[state=on]:text-primary-foreground relative z-10"
       >
         <UserCircle className="h-4 w-4" />
         <span className="hidden sm:inline">Find a Coach</span>
@@ -51,7 +51,7 @@ export function UserModeToggle() {
       <ToggleGroupItem 
         value="trainer" 
         aria-label="I'm a Coach"
-        className="gap-2 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+        className="gap-2 bg-background data-[state=on]:bg-primary data-[state=on]:text-primary-foreground relative z-10"
       >
         <Dumbbell className="h-4 w-4" />
         <span className="hidden sm:inline">I'm a Coach</span>
