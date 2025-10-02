@@ -133,15 +133,18 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
         
         setDisplayImages(allImages);
       } catch (error) {
-        console.error('Error fetching trainer images:', error);
-        // Fallback to trainer profile image with hero layout
-        setGridSize(1);
-        setDisplayImages([{ 
-          id: 'fallback', 
-          type: 'profile', 
-          url: (trainer as any).profilePhotoUrl || trainer.image, 
-          mediaType: 'IMAGE' 
-        }]);
+        console.error('❌ CRITICAL ERROR fetching trainer images:', {
+          trainerId: trainer.id,
+          trainerName: trainer.name,
+          error: error,
+          errorMessage: error instanceof Error ? error.message : String(error),
+          errorStack: error instanceof Error ? error.stack : undefined
+        });
+        
+        // Don't fall back to profile picture - let the component show empty state
+        // This will help us identify the real issue
+        setDisplayImages([]);
+        setGridSize(0);
       } finally {
         setLoading(false);
       }
@@ -203,13 +206,13 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
               <ImageIcon className="h-8 w-8 text-muted-foreground animate-pulse" />
             </div>
           ) : (
-            // Single hero image fallback
-            <div className="aspect-square relative">
-              <img
-                src={(trainer as any).profilePhotoUrl || trainer.image}
-                 alt={trainer.name}
-                className="w-full h-full object-cover"
-              />
+            // Empty state - no gallery images available
+            <div className="aspect-square relative flex items-center justify-center bg-muted">
+              <div className="text-center p-6">
+                <ImageIcon className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                <p className="text-sm text-muted-foreground font-medium">No gallery images yet</p>
+                <p className="text-xs text-muted-foreground/70 mt-1">Trainer hasn't uploaded any images</p>
+              </div>
             </div>
           )}
           
