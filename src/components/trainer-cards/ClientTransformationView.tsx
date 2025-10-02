@@ -121,7 +121,8 @@ export const ClientTransformationView = ({ trainer, children, testimonialIndex =
                       last_name: (trainer as any).lastName || (trainer as any).last_name,
                       name: trainer.name
                     }}
-                    visibilityState="visible"  // Will be controlled by parent visibility logic
+                    visibilityState={getVisibility('basic_information')}
+                    engagementStage={stage}
                     variant="overlay"
                     className="font-bold text-lg mb-1 text-white drop-shadow-sm"
                   />
@@ -228,7 +229,8 @@ export const ClientTransformationView = ({ trainer, children, testimonialIndex =
                   last_name: (trainer as any).lastName || (trainer as any).last_name,
                   name: trainer.name
                 }}
-                visibilityState="visible"  // Will be controlled by parent visibility logic
+                visibilityState={getVisibility('basic_information')}
+                engagementStage={stage}
                 variant="overlay"
                 className="font-bold text-lg mb-1 text-white drop-shadow-sm"
               />
@@ -295,9 +297,9 @@ export const ClientTransformationView = ({ trainer, children, testimonialIndex =
             </div>
           ) : (
             <div className="bg-black/30 backdrop-blur-sm rounded-lg p-3 border border-white/20">
-              <div className="flex items-center justify-center">
-                <span className="text-xs text-white/70">
-                  Client testimonials unlock as you engage
+              <div className="w-full text-center py-1">
+                <span className="text-sm font-medium text-white/90 block">
+                  🔒 Trainer info unlocked with engagement
                 </span>
               </div>
             </div>
