@@ -1045,12 +1045,14 @@ export type Database = {
           correlation_id: string | null
           created_at: string
           id: string
+          package_currency: string | null
           package_duration: string | null
           package_id: string
           package_name: string
           package_price: number | null
           responded_at: string | null
           status: string
+          suggested_alternative_package_currency: string | null
           suggested_alternative_package_id: string | null
           suggested_alternative_package_name: string | null
           suggested_alternative_package_price: number | null
@@ -1064,12 +1066,14 @@ export type Database = {
           correlation_id?: string | null
           created_at?: string
           id?: string
+          package_currency?: string | null
           package_duration?: string | null
           package_id: string
           package_name: string
           package_price?: number | null
           responded_at?: string | null
           status?: string
+          suggested_alternative_package_currency?: string | null
           suggested_alternative_package_id?: string | null
           suggested_alternative_package_name?: string | null
           suggested_alternative_package_price?: number | null
@@ -1083,12 +1087,14 @@ export type Database = {
           correlation_id?: string | null
           created_at?: string
           id?: string
+          package_currency?: string | null
           package_duration?: string | null
           package_id?: string
           package_name?: string
           package_price?: number | null
           responded_at?: string | null
           status?: string
+          suggested_alternative_package_currency?: string | null
           suggested_alternative_package_id?: string | null
           suggested_alternative_package_name?: string | null
           suggested_alternative_package_price?: number | null
@@ -6699,14 +6705,24 @@ export type Database = {
         Returns: Database["public"]["Enums"]["verification_overall_status"]
       }
       create_coach_selection_request: {
-        Args: {
-          p_client_message?: string
-          p_package_duration: string
-          p_package_id: string
-          p_package_name: string
-          p_package_price: number
-          p_trainer_id: string
-        }
+        Args:
+          | {
+              p_client_message?: string
+              p_package_currency?: string
+              p_package_duration: string
+              p_package_id: string
+              p_package_name: string
+              p_package_price: number
+              p_trainer_id: string
+            }
+          | {
+              p_client_message?: string
+              p_package_duration: string
+              p_package_id: string
+              p_package_name: string
+              p_package_price: number
+              p_trainer_id: string
+            }
         Returns: string
       }
       create_consent_snapshot: {

@@ -11,6 +11,7 @@ import { useCoachSelection, CoachSelectionRequest } from '@/hooks/useCoachSelect
 import { useUserTypeChecks } from '@/hooks/useUserType';
 import { useTrainerProfile } from '@/hooks/useTrainerProfile';
 import { formatDistanceToNow } from 'date-fns';
+import { getCurrencySymbol } from '@/lib/packagePaymentUtils';
 
 export const CoachSelectionRequests = () => {
   const { isTrainer } = useUserTypeChecks();
@@ -143,9 +144,8 @@ export const CoachSelectionRequests = () => {
                         {request.status === 'alternative_suggested' ? 'Originally Requested:' : 'Package Requested:'}
                       </h4>
                       <div className="text-right">
-                        <div className="flex items-center gap-1 font-semibold">
-                          <DollarSign className="w-4 h-4" />
-                          {request.package_price}
+                        <div className="font-semibold">
+                          {getCurrencySymbol(request.package_currency || 'GBP')}{request.package_price}
                         </div>
                         <div className="flex items-center gap-1 text-sm text-muted-foreground">
                           <Clock className="w-3 h-3" />
@@ -162,9 +162,8 @@ export const CoachSelectionRequests = () => {
                       <div className="flex justify-between items-center">
                         <h4 className="font-medium text-blue-900">Your Suggested Package:</h4>
                         <div className="text-right">
-                          <div className="flex items-center gap-1 font-semibold text-blue-900">
-                            <DollarSign className="w-4 h-4" />
-                            {request.suggested_alternative_package_price}
+                          <div className="font-semibold text-blue-900">
+                            {getCurrencySymbol(request.suggested_alternative_package_currency || request.package_currency || 'GBP')}{request.suggested_alternative_package_price}
                           </div>
                         </div>
                       </div>
@@ -237,7 +236,7 @@ export const CoachSelectionRequests = () => {
                     {(selectedRequest as any).client?.first_name} {(selectedRequest as any).client?.last_name}
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    Requested {selectedRequest.package_name} - ${selectedRequest.package_price}
+                    Requested {selectedRequest.package_name} - {getCurrencySymbol(selectedRequest.package_currency || 'GBP')}{selectedRequest.package_price}
                   </p>
                 </div>
               </div>
@@ -288,9 +287,9 @@ export const CoachSelectionRequests = () => {
                       {profile?.package_options?.map((pkg: any) => (
                         <SelectItem 
                           key={pkg.id} 
-                          value={JSON.stringify({ id: pkg.id, name: pkg.name, price: pkg.price })}
+                          value={JSON.stringify({ id: pkg.id, name: pkg.name, price: pkg.price, currency: pkg.currency || 'GBP' })}
                         >
-                          {pkg.name} - ${pkg.price}
+                          {pkg.name} - {getCurrencySymbol(pkg.currency || 'GBP')}{pkg.price}
                         </SelectItem>
                       ))}
                     </SelectContent>

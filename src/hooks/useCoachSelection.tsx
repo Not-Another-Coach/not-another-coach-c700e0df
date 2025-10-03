@@ -11,6 +11,7 @@ export interface CoachSelectionRequest {
   package_id: string;
   package_name: string;
   package_price: number;
+  package_currency: string;
   package_duration: string;
   status: 'pending' | 'accepted' | 'declined' | 'alternative_suggested' | 'awaiting_payment';
   client_message?: string;
@@ -18,6 +19,7 @@ export interface CoachSelectionRequest {
   suggested_alternative_package_id?: string;
   suggested_alternative_package_name?: string;
   suggested_alternative_package_price?: number;
+  suggested_alternative_package_currency?: string;
   created_at: string;
   updated_at: string;
   responded_at?: string;
@@ -74,6 +76,7 @@ export function useCoachSelection() {
     packageName: string,
     packagePrice: number,
     packageDuration: string,
+    packageCurrency: string = 'GBP',
     clientMessage?: string
   ) => {
     if (!user) {
@@ -89,6 +92,7 @@ export function useCoachSelection() {
         p_package_name: packageName,
         p_package_price: Number(packagePrice),
         p_package_duration: packageDuration || '',
+        p_package_currency: packageCurrency || 'GBP',
         p_client_message: clientMessage || null
       });
 

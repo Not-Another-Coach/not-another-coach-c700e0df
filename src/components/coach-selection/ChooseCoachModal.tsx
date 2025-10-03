@@ -115,6 +115,7 @@ export const ChooseCoachModal = ({
       selectedPackage.name,
       selectedPackage.price,
       formatDuration(selectedPackage),
+      selectedPackage.currency || 'GBP',
       clientMessage.trim() || undefined
     );
     

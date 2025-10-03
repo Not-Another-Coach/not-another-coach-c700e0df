@@ -21,7 +21,7 @@ export function TrainerCustomHeader({
   onMessagingOpen
 }: TrainerCustomHeaderProps) {
   const navigate = useNavigate();
-  const { alerts } = useAlerts();
+  const { alerts, unviewedCount, markAsViewed } = useAlerts();
   const { unreadCount } = useUnreadMessages();
 
   const formatAvailabilityStatus = () => {
@@ -38,6 +38,13 @@ export function TrainerCustomHeader({
   };
 
   const statusInfo = formatAvailabilityStatus();
+
+  const handleNotificationOpen = (open: boolean) => {
+    if (open && alerts.length > 0) {
+      // Mark all alerts as viewed when opening the notification panel
+      markAsViewed(alerts.map(a => a.id));
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border">
@@ -58,16 +65,16 @@ export function TrainerCustomHeader({
           
           <div className="flex items-center gap-3">
             {/* Notifications */}
-            <Popover>
+            <Popover onOpenChange={handleNotificationOpen}>
               <PopoverTrigger asChild>
                 <Button variant="ghost" size="sm" className="h-9 w-9 p-0 relative">
                   <Bell className="h-4 w-4" />
-                  {alerts.length > 0 && (
+                  {unviewedCount > 0 && (
                     <Badge 
                       variant="destructive" 
                       className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center"
                     >
-                      {alerts.length}
+                      {unviewedCount}
                     </Badge>
                   )}
                 </Button>

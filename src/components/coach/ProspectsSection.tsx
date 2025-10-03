@@ -9,6 +9,7 @@ import { format } from 'date-fns';
 import { Users, MessageCircle, Calendar, Video, Phone, UserPlus, UserMinus, TrendingUp, Clock, Star, Target } from 'lucide-react';
 import { MessagingPopup } from '@/components/MessagingPopup';
 import { DiscoveryCallNotesTaker } from '@/components/DiscoveryCallNotesTaker';
+import { getCurrencySymbol } from '@/lib/packagePaymentUtils';
 
 interface Prospect {
   id: string;
@@ -33,6 +34,7 @@ interface Prospect {
     client_id: string;
     package_name: string;
     package_price: number;
+    package_currency: string;
     status: string;
     created_at: string;
   };
@@ -154,7 +156,7 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
           .in('status', ['scheduled', 'rescheduled']),
         supabase
           .from('coach_selection_requests')
-          .select('client_id, package_name, package_price, status, created_at')
+          .select('client_id, package_name, package_price, package_currency, status, created_at')
           .eq('trainer_id', profile.id)
           .in('client_id', clientIds)
       ]);
@@ -343,7 +345,7 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
                    {prospect.selection_request && (
                     <div className="mt-2 p-2 bg-green-50 rounded border border-green-200">
                       <p className="text-sm font-medium text-green-900">
-                        Package Selected: {prospect.selection_request.package_name} - ${prospect.selection_request.package_price}
+                        Package Selected: {prospect.selection_request.package_name} - {getCurrencySymbol(prospect.selection_request.package_currency || 'GBP')}{prospect.selection_request.package_price}
                       </p>
                       <p className="text-xs text-green-700">
                         Status: {prospect.selection_request.status} • {format(new Date(prospect.selection_request.created_at), 'MMM d, yyyy')}
