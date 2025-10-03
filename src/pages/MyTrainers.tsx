@@ -145,6 +145,11 @@ export default function MyTrainers() {
     navigate(`/trainer/${trainerId}`);
   };
 
+  const handleProceedWithCoach = (trainerId: string) => {
+    console.log('Proceeding with coach selection:', trainerId);
+    refreshData();
+  };
+
   const handleComparisonToggle = (trainerId: string) => {
     setSelectedForComparison(prev => 
       prev.includes(trainerId) 
@@ -414,6 +419,7 @@ export default function MyTrainers() {
                              onRemove={trainer.shortlistedAt ? handleRemoveFromShortlist : undefined}
                              onStartConversation={handleStartConversation}
                              onBookDiscoveryCall={handleBookDiscoveryCall}
+                             onProceedWithCoach={handleProceedWithCoach}
                              onViewProfile={handleViewProfile}
                              hideViewProfileButton={false}
                              isShortlisted={!!trainer.shortlistedAt}

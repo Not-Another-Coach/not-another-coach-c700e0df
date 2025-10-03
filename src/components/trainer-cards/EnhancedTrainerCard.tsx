@@ -449,6 +449,15 @@ export const EnhancedTrainerCard = memo(({
         }
         
         // Show Message button
+        console.log('🔍 Discovery Message Check:', {
+          trainerId: trainer.id,
+          trainerName: trainer.name,
+          stage: stage,
+          hasOnStartConversation: !!onStartConversation,
+          canShowMessageResult: canShowMessage(),
+          cardState: cardState
+        });
+        
         if (onStartConversation && canShowMessage()) {
           buttons.unshift(
             <Button
