@@ -459,6 +459,25 @@ export const EnhancedTrainerCard = memo(({
           );
         }
         
+        // If no discovery call booked yet, allow booking one directly in discovery state
+        if (!hasDiscoveryCall && trainerOffersDiscoveryCalls && onBookDiscoveryCall) {
+          discoveryButtons.push(
+            <Button
+              key="book-call"
+              variant="default"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onBookDiscoveryCall(trainer.id);
+              }}
+              className="flex-1"
+            >
+              <Calendar className="w-4 h-4 mr-2" />
+              Book Call
+            </Button>
+          );
+        }
+        
         // Choose Coach button third
         if (onProceedWithCoach) {
           discoveryButtons.push(
