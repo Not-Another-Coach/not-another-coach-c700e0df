@@ -424,13 +424,13 @@ export default function MyTrainers() {
                              hideViewProfileButton={false}
                              isShortlisted={!!trainer.shortlistedAt}
                              trainerOffersDiscoveryCalls={trainer.offersDiscoveryCall || (trainer as any).offers_discovery_call || false}
-                             cardState={
-                               effectiveStage === 'shortlisted' ? 'shortlisted' : 
-                               effectiveStage === 'liked' ? 'saved' : 
-                               ['getting_to_know_your_coach', 'discovery_call_booked', 'discovery_in_progress'].includes(effectiveStage || '') ? 'discovery' :
-                               effectiveStage === 'active_client' ? 'matched' : 
-                               'default'
-                             }
+                              cardState={
+                                effectiveStage === 'shortlisted' ? 'shortlisted' : 
+                                effectiveStage === 'liked' ? 'saved' : 
+                                ['getting_to_know_your_coach', 'discovery_call_booked', 'discovery_in_progress', 'discovery_completed'].includes(effectiveStage || '') ? 'discovery' :
+                                effectiveStage === 'active_client' ? 'matched' : 
+                                'default'
+                              }
                              initialView={getSmartInitialView(trainer)}
                              onMoveToSaved={handleSaveTrainer}
                              onRemoveCompletely={handleRemoveFromShortlist}
