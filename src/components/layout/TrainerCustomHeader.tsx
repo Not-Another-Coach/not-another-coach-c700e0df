@@ -48,22 +48,27 @@ export function TrainerCustomHeader({
 
   return (
     <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border">
-      <div className="mx-auto px-6 lg:px-8 xl:px-12 py-3">
+      <div className="mx-auto px-3 sm:px-6 lg:px-8 xl:px-12 py-2 sm:py-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <AppLogo onClick={() => navigate('/trainer/dashboard')} />
-            <div className="text-muted-foreground">Mission Control</div>
+            <div className="text-muted-foreground hidden sm:block">Mission Control</div>
             
             {/* Availability Status Badge */}
-            <div className="flex items-center gap-2 ml-6 px-3 py-1 bg-muted/50 rounded-full">
-              <div className={`w-2 h-2 rounded-full ${statusInfo.color} ${availabilityStatus === 'accepting' ? 'animate-pulse' : ''}`} />
-              <div className={`text-sm font-medium ${statusInfo.textColor}`}>
-                {statusInfo.text}
+            <div className="flex items-center ml-2 sm:ml-6">
+              {/* Compact dot on small screens */}
+              <div className={`sm:hidden w-2.5 h-2.5 rounded-full ${statusInfo.color} ${availabilityStatus === 'accepting' ? 'animate-pulse' : ''}`} />
+              {/* Full pill on sm+ */}
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-muted/50 rounded-full">
+                <div className={`w-2 h-2 rounded-full ${statusInfo.color} ${availabilityStatus === 'accepting' ? 'animate-pulse' : ''}`} />
+                <div className={`text-sm font-medium ${statusInfo.textColor}`}>
+                  {statusInfo.text}
+                </div>
               </div>
             </div>
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3">
             {/* Notifications */}
             <Popover onOpenChange={handleNotificationOpen}>
               <PopoverTrigger asChild>
@@ -79,7 +84,7 @@ export function TrainerCustomHeader({
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-96" align="end">
+              <PopoverContent className="w-80 sm:w-96" align="end">
                 <div className="space-y-4">
                   <h4 className="font-medium text-sm">Notifications</h4>
                   
@@ -163,10 +168,10 @@ export function TrainerCustomHeader({
               variant="ghost" 
               size="sm"
               onClick={() => navigate('/trainer/profile-setup')}
-              className="flex items-center gap-2 h-9 px-3"
+              className="flex items-center gap-2 h-9 px-2 sm:px-3"
             >
               <Settings className="h-4 w-4" />
-              <span className="text-sm">Profile Settings</span>
+              <span className="text-sm hidden md:inline">Profile Settings</span>
             </Button>
 
             {/* Profile Dropdown */}
