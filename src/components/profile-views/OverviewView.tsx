@@ -9,6 +9,9 @@ import { useContentVisibility } from '@/hooks/useContentVisibility';
 import { VisibilityAwarePricing } from '@/components/ui/VisibilityAwarePricing';
 import { useEngagementStage } from '@/hooks/useEngagementStage';
 import { VisibilityAwareImage } from '@/components/ui/VisibilityAwareImage';
+import { VisibilityAwareText } from '@/components/ui/VisibilityAwareText';
+import { VisibilityAwareSection } from '@/components/ui/VisibilityAwareSection';
+import { VisibilityAwareBasicInfo } from '@/components/ui/VisibilityAwareBasicInfo';
 
 interface OverviewViewProps {
   trainer: AnyTrainer;
@@ -70,7 +73,20 @@ export const OverviewView = ({ trainer, onMessage, onBookDiscovery }: OverviewVi
             </div>
             
             <div className="flex-1 text-center sm:text-left">
-              <h1 className="text-2xl sm:text-3xl font-bold mb-2">{trainer.name}</h1>
+              <VisibilityAwareBasicInfo
+                name={trainer.name}
+                location={trainer.location}
+                visibilityState={getVisibility('basic_information')}
+                variant="default"
+                className="mb-3"
+                trainer={{
+                  id: trainer.id,
+                  first_name: (trainer as any).firstName || (trainer as any).first_name,
+                  last_name: (trainer as any).lastName || (trainer as any).last_name,
+                  name: trainer.name
+                }}
+                engagementStage={engagementStage || 'browsing'}
+              />
               
               <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 mb-3">
                 <div className="flex items-center gap-1">
@@ -83,10 +99,6 @@ export const OverviewView = ({ trainer, onMessage, onBookDiscovery }: OverviewVi
               
               <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6 text-muted-foreground mb-4">
                 <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
-                  <span className="text-sm sm:text-base">{trainer.location}</span>
-                </div>
-                <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4" />
                   <span className="text-sm sm:text-base">{trainer.availability}</span>
                 </div>
@@ -96,9 +108,14 @@ export const OverviewView = ({ trainer, onMessage, onBookDiscovery }: OverviewVi
                 </div>
               </div>
               
-              <p className="text-muted-foreground leading-relaxed text-sm sm:text-base">
+              <VisibilityAwareText
+                visibilityState={getVisibility('description_bio')}
+                className="text-muted-foreground leading-relaxed text-sm sm:text-base"
+                placeholder="Description unlocks with engagement"
+                showLockIcon={false}
+              >
                 {trainer.description}
-              </p>
+              </VisibilityAwareText>
             </div>
             
             <div className="text-center sm:text-right min-w-0 w-full sm:w-auto">
@@ -124,13 +141,19 @@ export const OverviewView = ({ trainer, onMessage, onBookDiscovery }: OverviewVi
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap gap-2">
-            {trainer.specialties.map((specialty) => (
-              <Badge key={specialty} variant="outline" className="text-sm">
-                {specialty}
-              </Badge>
-            ))}
-          </div>
+          <VisibilityAwareSection
+            visibilityState={getVisibility('specializations')}
+            placeholder="Specializations unlock with engagement"
+            title="Specializations"
+          >
+            <div className="flex flex-wrap gap-2">
+              {trainer.specialties.map((specialty) => (
+                <Badge key={specialty} variant="outline" className="text-sm">
+                  {specialty}
+                </Badge>
+              ))}
+            </div>
+          </VisibilityAwareSection>
         </CardContent>
       </Card>
 
@@ -144,14 +167,20 @@ export const OverviewView = ({ trainer, onMessage, onBookDiscovery }: OverviewVi
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 gap-3">
-              {trainer.certifications.map((cert, index) => (
-                <div key={`cert-${index}`} className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg">
-                  <Award className="h-4 w-4 text-accent flex-shrink-0" />
-                  <span className="text-sm font-medium break-words">{cert}</span>
-                </div>
-              ))}
-            </div>
+            <VisibilityAwareSection
+              visibilityState={getVisibility('certifications_qualifications')}
+              placeholder="Qualifications unlock with engagement"
+              title="Qualifications & Certifications"
+            >
+              <div className="grid grid-cols-1 gap-3">
+                {trainer.certifications.map((cert, index) => (
+                  <div key={`cert-${index}`} className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg">
+                    <Award className="h-4 w-4 text-accent flex-shrink-0" />
+                    <span className="text-sm font-medium break-words">{cert}</span>
+                  </div>
+                ))}
+              </div>
+            </VisibilityAwareSection>
           </CardContent>
         </Card>
       )}
