@@ -308,10 +308,10 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
                         }
                       >
                         {prospect.selection_request.status === 'awaiting_payment' 
-                          ? `Awaiting Payment - ${prospect.selection_request.package_name}`
+                          ? 'Awaiting Payment'
                           : prospect.selection_request.status === 'accepted'
-                          ? `Coach Chosen - ${prospect.selection_request.package_name}`
-                          : `Package Requested - ${prospect.selection_request.package_name}`
+                          ? 'Coach Chosen'
+                          : 'Package Requested'
                         }
                       </Badge>
                     )}
@@ -345,7 +345,7 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
                    {prospect.selection_request && (
                     <div className="mt-2 p-2 bg-green-50 rounded border border-green-200">
                       <p className="text-sm font-medium text-green-900">
-                        Package Selected: {prospect.selection_request.package_name} - {getCurrencySymbol(prospect.selection_request.package_currency || 'GBP')}{prospect.selection_request.package_price}
+                        {prospect.selection_request.package_name} — {getCurrencySymbol(prospect.selection_request.package_currency || 'GBP')}{(prospect.selection_request.package_price / 100).toFixed(2)}
                       </p>
                       <p className="text-xs text-green-700">
                         Status: {prospect.selection_request.status} • {format(new Date(prospect.selection_request.created_at), 'MMM d, yyyy')}
