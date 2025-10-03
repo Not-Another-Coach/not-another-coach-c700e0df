@@ -378,7 +378,11 @@ export const EnhancedTrainerCard = memo(({
     // Show different buttons based on card state
     switch (cardState) {
       case 'shortlisted':
-        if (trainerOffersDiscoveryCalls && onBookDiscoveryCall && !hasDiscoveryCall) {
+        // Book Discovery Call button - also show for getting_to_know_your_coach stage
+        // when trainer offers discovery calls and no call is booked yet
+        const shouldShowBookCall = trainerOffersDiscoveryCalls && onBookDiscoveryCall && !hasDiscoveryCall;
+        
+        if (shouldShowBookCall) {
           buttons.unshift(
             <Button
               key="book-call"
@@ -395,6 +399,7 @@ export const EnhancedTrainerCard = memo(({
             </Button>
           );
         }
+        
         if (onStartConversation && canShowMessage()) {
           buttons.unshift(
             <Button
