@@ -183,14 +183,15 @@ export function useUnifiedTrainerData(): UnifiedTrainerState & TrainerActions {
       const activeCalls = discoveryCallsResponse.data || [];
 
       trainersResponse.data?.forEach(trainerData => {
-        const engagement = engagements.find(e => e.trainer_id === trainerData.id);
-        const isWaitlisted = waitlisted.some(w => w.coach_id === trainerData.id);
-        const hasConversation = conversations.some(c => 
-          c.trainer_id === trainerData.id || c.client_id === trainerData.id
-        );
-        const hasActiveCall = activeCalls.some(c => c.trainer_id === trainerData.id);
-        const discoverySettings = discoverySettingsResponse.data?.find(d => d.id === trainerData.id);
-        const availability = availabilityResponse.data?.find(a => a.coach_id === trainerData.id);
+        try {
+          const engagement = engagements.find(e => e.trainer_id === trainerData.id);
+          const isWaitlisted = waitlisted.some(w => w.coach_id === trainerData.id);
+          const hasConversation = conversations.some(c => 
+            c.trainer_id === trainerData.id || c.client_id === trainerData.id
+          );
+          const hasActiveCall = activeCalls.some(c => c.trainer_id === trainerData.id);
+          const discoverySettings = discoverySettingsResponse.data?.find(d => d.id === trainerData.id);
+          const availability = availabilityResponse.data?.find(a => a.coach_id === trainerData.id);
 
         // Determine status based on priority
         let status: UnifiedTrainer['status'] = 'browsing';
@@ -231,36 +232,42 @@ export function useUnifiedTrainerData(): UnifiedTrainerState & TrainerActions {
           statusColor = 'bg-orange-100 text-orange-800';
         }
 
-        trainers.push({
-          id: trainerData.id,
-          name: `${trainerData.first_name || ''} ${trainerData.last_name || ''}`.trim(),
-          firstName: trainerData.first_name || '',
-          lastName: trainerData.last_name || '',
-          location: trainerData.location || '',
-          specializations: trainerData.specializations || [],
-          profilePhotoUrl: trainerData.profile_photo_url,
-          hourlyRate: trainerData.hourly_rate || 0,
-          trainingTypes: Array.isArray(trainerData.training_types) ? trainerData.training_types : [],
-          packageOptions: Array.isArray(trainerData.package_options) ? trainerData.package_options : [],
-          testimonials: Array.isArray(trainerData.testimonials) ? trainerData.testimonials : [],
-          rating: trainerData.rating || 4.5,
-          reviewCount: trainerData.total_ratings || 0,
-          offersDiscoveryCall: discoverySettings?.offers_discovery_call || false,
+          const trainerName = `${trainerData.first_name || ''} ${trainerData.last_name || ''}`.trim();
           
-          status,
-          statusLabel,
-          statusColor,
-          engagementStage: engagement?.stage,
-          engagementId: engagement?.id,
-          likedAt: engagement?.liked_at,
-          shortlistedAt: engagement?.stage === 'shortlisted' ? engagement?.updated_at : undefined,
-          
-          hasActiveCall,
-          hasConversation,
-          hasExclusiveAccess: false, // Will be calculated separately if needed
-          availabilityStatus: (availability?.availability_status === 'accepting' ? 'available' : availability?.availability_status) || 'available',
-          allowDiscoveryOnWaitlist: availability?.allow_discovery_calls_on_waitlist || false
-        });
+          trainers.push({
+            id: trainerData.id,
+            name: trainerName || 'Unknown Trainer',
+            firstName: trainerData.first_name || '',
+            lastName: trainerData.last_name || '',
+            location: trainerData.location || '',
+            specializations: Array.isArray(trainerData.specializations) ? trainerData.specializations : [],
+            profilePhotoUrl: trainerData.profile_photo_url || null,
+            hourlyRate: typeof trainerData.hourly_rate === 'number' ? trainerData.hourly_rate : 0,
+            trainingTypes: Array.isArray(trainerData.training_types) ? trainerData.training_types : [],
+            packageOptions: Array.isArray(trainerData.package_options) ? trainerData.package_options : [],
+            testimonials: Array.isArray(trainerData.testimonials) ? trainerData.testimonials : [],
+            rating: typeof trainerData.rating === 'number' ? trainerData.rating : 4.5,
+            reviewCount: typeof trainerData.total_ratings === 'number' ? trainerData.total_ratings : 0,
+            offersDiscoveryCall: discoverySettings?.offers_discovery_call === true,
+            
+            status,
+            statusLabel,
+            statusColor,
+            engagementStage: engagement?.stage || undefined,
+            engagementId: engagement?.id || undefined,
+            likedAt: engagement?.liked_at || undefined,
+            shortlistedAt: engagement?.stage === 'shortlisted' ? (engagement?.updated_at || undefined) : undefined,
+            
+            hasActiveCall,
+            hasConversation,
+            hasExclusiveAccess: false,
+            availabilityStatus: (availability?.availability_status === 'accepting' ? 'available' : availability?.availability_status) as any || 'available',
+            allowDiscoveryOnWaitlist: availability?.allow_discovery_calls_on_waitlist === true
+          });
+        } catch (itemError) {
+          console.error('Error processing trainer:', trainerData.id, itemError);
+          // Continue processing other trainers
+        }
       });
 
       // Calculate counts - exclude browsing trainers from all count
@@ -276,6 +283,12 @@ export function useUnifiedTrainerData(): UnifiedTrainerState & TrainerActions {
       // Cache the results
       cache.current.set(cacheKey, trainers);
       lastFetchTime.current = now;
+
+      console.log('✅ Unified trainer data loaded:', {
+        totalTrainers: trainers.length,
+        counts,
+        trainerIds: trainers.map(t => ({ id: t.id, name: t.name, status: t.status }))
+      });
 
       setState({ trainers, loading: false, error: null, counts });
       markTrainersLoaded();
