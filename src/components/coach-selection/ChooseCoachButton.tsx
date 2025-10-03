@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Heart, Clock, CheckCircle } from 'lucide-react';
@@ -47,6 +47,8 @@ export const ChooseCoachButton = ({
     stage === 'discovery_in_progress'
   );
 
+  const lastTrainerIdRef = useRef<string | null>(null);
+
   useEffect(() => {
     const fetchSelectionRequest = async () => {
       if (!isClient() || !canChooseCoach) {
@@ -54,6 +56,12 @@ export const ChooseCoachButton = ({
         setLoading(false);
         return;
       }
+
+      // Prevent repeated fetches for the same trainer id
+      if (lastTrainerIdRef.current === trainer.id) {
+        return;
+      }
+      lastTrainerIdRef.current = trainer.id;
       
       console.log('🔍 ChooseCoachButton: Fetching selection request for trainer:', trainer.id);
       setLoading(true);
