@@ -315,10 +315,11 @@ export const TrainerProfile = () => {
         {renderCurrentView()}
 
         {/* Messaging Popup */}
-        <MessagingPopup 
-          isOpen={isMessagingOpen}
-          onClose={() => setIsMessagingOpen(false)}
-        />
+      <MessagingPopup 
+        isOpen={isMessagingOpen}
+        onClose={() => setIsMessagingOpen(false)}
+        preSelectedTrainerId={trainerId}
+      />
       </div>
     </div>
   );
