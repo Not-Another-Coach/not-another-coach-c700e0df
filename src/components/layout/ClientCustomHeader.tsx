@@ -84,17 +84,17 @@ export function ClientCustomHeader({
           <div className="flex items-center gap-2 sm:gap-3">
             <AppLogo onClick={() => navigate('/client/dashboard')} />
             <div className="hidden sm:block text-muted-foreground">Your Journey</div>
-            {/* Your Journey Progress - Hidden on mobile */}
+            {/* Your Journey Progress - Compact on mobile, full on desktop */}
             {showJourneyProgress && journeyProgress && (
-              <div className="hidden md:flex items-center gap-2 ml-6 px-3 py-1 bg-primary/10 rounded-full">
-                <div className="text-sm font-medium text-primary">
+              <div className="flex items-center gap-1 sm:gap-2 ml-2 sm:ml-6 px-2 sm:px-3 py-1 bg-primary/10 rounded-full">
+                <div className="text-xs sm:text-sm font-medium text-primary truncate max-w-[120px] sm:max-w-none">
                   {formatJourneyStage(journeyProgress.stage)}
                 </div>
                 <Button 
                   variant="ghost" 
                   size="sm"
                   onClick={() => navigate('/client/journey')}
-                  className="h-6 w-6 p-0 rounded-full hover:bg-primary/20"
+                  className="h-5 w-5 sm:h-6 sm:w-6 p-0 rounded-full hover:bg-primary/20 flex-shrink-0"
                 >
                   <Eye className="h-3 w-3" />
                 </Button>
