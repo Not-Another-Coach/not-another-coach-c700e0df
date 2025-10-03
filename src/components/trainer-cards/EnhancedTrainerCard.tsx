@@ -359,7 +359,7 @@ export const EnhancedTrainerCard = memo(({
         <Button
           key="view-profile"
           variant="outline"
-          size="sm"
+          size="icon"
           onClick={(e) => {
             e.stopPropagation();
             if (onViewProfile) {
@@ -368,10 +368,9 @@ export const EnhancedTrainerCard = memo(({
               navigate(`/trainer/${trainer.id}`);
             }
           }}
-          className="flex-1"
+          title="View Profile"
         >
-          <User className="w-4 h-4 mr-2" />
-          View Profile
+          <User className="w-4 h-4" />
         </Button>
       );
     }
@@ -401,15 +400,14 @@ export const EnhancedTrainerCard = memo(({
             <Button
               key="message"
               variant="secondary"
-              size="sm"
+              size="icon"
               onClick={(e) => {
                 e.stopPropagation();
                 onStartConversation(trainer.id);
               }}
-              className="flex-1"
+              title="Message"
             >
-              <MessageCircle className="w-4 h-4 mr-2" />
-              Message
+              <MessageCircle className="w-4 h-4" />
             </Button>
           );
         }
@@ -425,15 +423,14 @@ export const EnhancedTrainerCard = memo(({
             <Button
               key="message"
               variant="default"
-              size="sm"
+              size="icon"
               onClick={(e) => {
                 e.stopPropagation();
                 onStartConversation(trainer.id);
               }}
-              className="flex-1"
+              title="Message"
             >
-              <MessageCircle className="w-4 h-4 mr-2" />
-              Message
+              <MessageCircle className="w-4 h-4" />
             </Button>
           );
         }
@@ -480,15 +477,14 @@ export const EnhancedTrainerCard = memo(({
             <Button
               key="message"
               variant="default"
-              size="sm"
+              size="icon"
               onClick={(e) => {
                 e.stopPropagation();
                 onStartConversation(trainer.id);
               }}
-              className="flex-1"
+              title="Start Chat"
             >
-              <MessageCircle className="w-4 h-4 mr-2" />
-              Start Chat
+              <MessageCircle className="w-4 h-4" />
             </Button>
           );
         }
