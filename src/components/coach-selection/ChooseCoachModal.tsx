@@ -57,18 +57,21 @@ export const ChooseCoachModal = ({
 
   console.log('🔍 ChooseCoachModal: Packages available:', packages.length, packages);
 
-  // Determine package benefits based on package characteristics
+  // Determine package benefits based on package characteristics (null-safe)
   const getPackageBenefit = (pkg: Package, index: number) => {
-    const sortedByPrice = [...packages].sort((a, b) => (b.price / (b.sessions || 1)) - (a.price / (a.sessions || 1)));
+    const safeSessions = typeof pkg.sessions === 'number' && pkg.sessions > 0 ? pkg.sessions : 0;
+    const perSession = safeSessions > 0 && typeof pkg.price === 'number' ? pkg.price / safeSessions : Infinity;
+
     const sortedBySessions = [...packages].sort((a, b) => (b.sessions || 0) - (a.sessions || 0));
-    
-    if (sortedBySessions[0]?.id === pkg.id && (pkg.sessions || 0) > 1) {
+
+    if (sortedBySessions[0]?.id === pkg.id && safeSessions > 1) {
       return { label: 'Best Value', icon: TrendingUp, color: 'text-emerald-600 bg-emerald-50 border-emerald-200' };
     }
     if (packages.length >= 3 && index === Math.floor(packages.length / 2)) {
       return { label: 'Most Popular', icon: Star, color: 'text-amber-600 bg-amber-50 border-amber-200' };
     }
-    if (pkg.duration.toLowerCase().includes('week') || (pkg.sessions || 0) <= 4) {
+    const durationStr = `${pkg.duration ?? ''}`.toLowerCase();
+    if (durationStr.includes('week') || safeSessions <= 4) {
       return { label: 'Great for Consistency', icon: Zap, color: 'text-blue-600 bg-blue-50 border-blue-200' };
     }
     return null;
@@ -203,11 +206,11 @@ export const ChooseCoachModal = ({
                             <CardTitle className="text-lg pr-24">{pkg.name}</CardTitle>
                             <div className="text-right">
                               <div className="flex items-center gap-1 text-lg font-bold">
-                                <DollarSign className="w-4 h-4" />
-                                <VisibilityAwarePricing
-                                  pricing={pkg.price.toString()}
-                                  visibilityState={getVisibility('pricing_discovery_call')}
-                                />
+                              <DollarSign className="w-4 h-4" />
+                              <VisibilityAwarePricing
+                                pricing={(pkg.price ?? 0).toString()}
+                                visibilityState={getVisibility('pricing_discovery_call')}
+                              />
                               </div>
                               <div className="flex items-center gap-1 text-sm text-muted-foreground">
                                 <Clock className="w-3 h-3" />
@@ -277,7 +280,7 @@ export const ChooseCoachModal = ({
                 <CardContent className="relative">
                   <div className="flex justify-between items-center mb-3">
                     <VisibilityAwarePricing
-                      pricing={`$${selectedPackage.price}`}
+                      pricing={selectedPackage.price != null ? `$${selectedPackage.price}` : 'Contact'}
                       visibilityState={getVisibility('pricing_discovery_call')}
                       className="text-lg font-bold"
                     />
