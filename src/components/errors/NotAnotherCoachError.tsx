@@ -209,7 +209,7 @@ export function NotAnotherCoachError({
           </p>
 
           {/* Action buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button
               size="lg"
               onClick={handlePrimaryClick}
@@ -230,11 +230,11 @@ export function NotAnotherCoachError({
             ) : null}
           </div>
 
-          {/* Safety link - always show a way home */}
-          {variant.primaryAction !== 'home' && (
+          {/* Safety link - only show if no home button exists */}
+          {variant.primaryAction !== 'home' && variant.secondaryAction !== 'home' && (
             <a
               href={homeHref}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors underline"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors underline mt-6 block"
               onClick={(e) => {
                 e.preventDefault();
                 navigate(homeHref);
