@@ -1,10 +1,13 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { useClientJourneyProgress } from "@/hooks/useClientJourneyProgress";
 import { useUserRoles } from "@/hooks/useUserRoles";
-import { Shield, ChevronRight, Home, Settings, Users, UserSearch, CreditCard } from "lucide-react";
+import { useUnreadMessages } from "@/hooks/useUnreadMessages";
+import { MessagingPopup } from "@/components/MessagingPopup";
+import { Shield, ChevronRight, Home, Settings, Users, UserSearch, CreditCard, MessageCircle } from "lucide-react";
 
 interface ClientHeaderProps {
   profile: any;
@@ -24,6 +27,8 @@ export function ClientHeader({
   const navigate = useNavigate();
   const { isAdmin } = useUserRoles();
   const { progress: journeyProgress, loading: journeyLoading } = useClientJourneyProgress();
+  const { unreadCount } = useUnreadMessages();
+  const [isMessagingOpen, setIsMessagingOpen] = useState(false);
 
   const defaultNavigationItems = [
     { key: "summary", label: "Dashboard", icon: Home, route: "/client/dashboard" },
@@ -88,6 +93,24 @@ export function ClientHeader({
           )}
           
           <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => setIsMessagingOpen(true)}
+            className="relative"
+            title="Messages"
+          >
+            <MessageCircle className="w-5 h-5" />
+            {unreadCount > 0 && (
+              <Badge 
+                variant="destructive" 
+                className="absolute -top-1 -right-1 h-5 min-w-5 px-1 flex items-center justify-center text-xs"
+              >
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </Badge>
+            )}
+          </Button>
+          
+          <Button 
             variant="outline" 
             size="sm"
             onClick={() => navigate('/client-survey')}
@@ -125,6 +148,12 @@ export function ClientHeader({
           </nav>
         </div>
       )}
+
+      {/* Messaging Popup */}
+      <MessagingPopup 
+        isOpen={isMessagingOpen}
+        onClose={() => setIsMessagingOpen(false)}
+      />
     </div>
   );
 }

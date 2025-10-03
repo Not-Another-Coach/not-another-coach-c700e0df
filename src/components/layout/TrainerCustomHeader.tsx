@@ -6,7 +6,7 @@ import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { AppLogo } from "@/components/ui/app-logo";
 import { Bell, MessageCircle, Settings } from "lucide-react";
 import { useAlerts } from "@/hooks/useAlerts";
-import { useConversations } from "@/hooks/useConversations";
+import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { format } from "date-fns";
 
 interface TrainerCustomHeaderProps {
@@ -22,31 +22,7 @@ export function TrainerCustomHeader({
 }: TrainerCustomHeaderProps) {
   const navigate = useNavigate();
   const { alerts } = useAlerts();
-  const { conversations } = useConversations();
-
-  // Calculate unread messages count from conversations
-  const unreadMessagesCount = conversations.reduce((count, conv) => {
-    // For trainers, count messages sent after trainer_last_read_at
-    const lastReadAt = conv.trainer_last_read_at;
-    
-    if (!conv.messages || conv.messages.length === 0) return count;
-    
-    // If never read, count all messages from the other person (client)
-    if (!lastReadAt) {
-      const unreadInConv = conv.messages.filter(msg => 
-        msg.sender_id !== profile?.id
-      ).length;
-      return count + unreadInConv;
-    }
-    
-    // Count messages after last read time
-    const unreadInConv = conv.messages.filter(msg => 
-      new Date(msg.created_at) > new Date(lastReadAt) && 
-      msg.sender_id !== profile?.id
-    ).length;
-    
-    return count + unreadInConv;
-  }, 0);
+  const { unreadCount } = useUnreadMessages();
 
   const formatAvailabilityStatus = () => {
     switch (availabilityStatus) {
@@ -162,14 +138,15 @@ export function TrainerCustomHeader({
               size="sm" 
               className="h-9 w-9 p-0 relative"
               onClick={onMessagingOpen}
+              title="Messages"
             >
               <MessageCircle className="h-4 w-4" />
-              {unreadMessagesCount > 0 && (
+              {unreadCount > 0 && (
                 <Badge 
                   variant="destructive" 
                   className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center"
                 >
-                  {unreadMessagesCount}
+                  {unreadCount > 9 ? '9+' : unreadCount}
                 </Badge>
               )}
             </Button>
