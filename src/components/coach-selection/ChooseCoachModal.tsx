@@ -22,6 +22,8 @@ interface Package {
   sessions?: number;
   includes?: string[];
   inclusions?: string[];
+  isPromotion?: boolean;
+  promotionEndDate?: string;
 }
 
 interface ChooseCoachModalProps {
@@ -55,7 +57,13 @@ export const ChooseCoachModal = ({
   });
 
   const trainerName = trainer.name || `${trainer.firstName || ''} ${trainer.lastName || ''}`.trim();
-  const packages = trainer.packageOptions || [];
+  
+  // Sort packages: promotions first, then by price
+  const packages = (trainer.packageOptions || []).sort((a, b) => {
+    if (a.isPromotion && !b.isPromotion) return -1;
+    if (!a.isPromotion && b.isPromotion) return 1;
+    return (a.price || 0) - (b.price || 0);
+  });
 
   console.log('🔍 ChooseCoachModal: Packages available:', packages.length, packages);
 
@@ -116,12 +124,20 @@ export const ChooseCoachModal = ({
 
         {/* Progress Indicator */}
         <div className="flex items-center justify-between px-2 py-4 border-b">
-          <div className={cn("flex items-center gap-2 transition-all", step === 'select' ? 'text-primary' : 'text-muted-foreground')}>
+          <button
+            onClick={() => step === 'confirm' && setStep('select')}
+            className={cn(
+              "flex items-center gap-2 transition-all",
+              step === 'select' ? 'text-primary' : 'text-muted-foreground',
+              step === 'confirm' && 'cursor-pointer hover:text-primary'
+            )}
+            disabled={step === 'select'}
+          >
             <div className={cn("w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all", step === 'select' ? 'bg-primary text-primary-foreground border-primary' : 'bg-muted border-muted-foreground/20')}>
               <Heart className="w-4 h-4" />
             </div>
             <span className="text-sm font-medium hidden sm:inline">Select Package</span>
-          </div>
+          </button>
           <div className="h-px flex-1 mx-2 bg-border" />
           <div className={cn("flex items-center gap-2 transition-all", step === 'confirm' ? 'text-primary' : 'text-muted-foreground')}>
             <div className={cn("w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all", step === 'confirm' ? 'bg-primary text-primary-foreground border-primary' : 'bg-muted border-muted-foreground/20')}>
@@ -177,16 +193,33 @@ export const ChooseCoachModal = ({
                 <div className="grid gap-4">
                   {packages.map((pkg) => {
                     const includes = pkg.includes || pkg.inclusions || [];
+                    const isPromotion = pkg.isPromotion;
+                    const promotionEndDate = pkg.promotionEndDate ? new Date(pkg.promotionEndDate).toLocaleDateString() : null;
                     
                     return (
                       <Card 
                         key={pkg.id}
-                        className="cursor-pointer transition-all hover:shadow-lg hover-scale relative overflow-hidden group"
+                        className={cn(
+                          "cursor-pointer transition-all hover:shadow-lg hover-scale relative overflow-hidden group",
+                          isPromotion && "border-2 border-primary/50 bg-primary/5"
+                        )}
                         onClick={() => handlePackageSelect(pkg)}
                       >
+                        {isPromotion && (
+                          <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-3 py-1 text-xs font-semibold rounded-bl-lg">
+                            PROMOTION
+                          </div>
+                        )}
                         <CardHeader className="pb-3">
                           <div className="flex justify-between items-start">
-                            <CardTitle className="text-lg">{pkg.name}</CardTitle>
+                            <div className="flex-1 pr-4">
+                              <CardTitle className="text-lg">{pkg.name}</CardTitle>
+                              {isPromotion && promotionEndDate && (
+                                <p className="text-xs text-primary font-medium mt-1">
+                                  Ends {promotionEndDate}
+                                </p>
+                              )}
+                            </div>
                             <div className="text-right">
                               <div className="flex items-center gap-1 text-lg font-bold">
                                 <VisibilityAwarePricing
@@ -242,8 +275,16 @@ export const ChooseCoachModal = ({
                 <span className="font-medium">Package Selected</span>
               </div>
               
-              <Card className="border-emerald-200 bg-emerald-50/30 relative overflow-hidden">
+              <Card className={cn(
+                "border-emerald-200 bg-emerald-50/30 relative overflow-hidden",
+                selectedPackage.isPromotion && "border-primary/50"
+              )}>
                 <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-100 rounded-full -mr-16 -mt-16 opacity-50" />
+                {selectedPackage.isPromotion && (
+                  <div className="absolute top-3 right-3 bg-primary text-primary-foreground px-3 py-1 text-xs font-semibold rounded-full z-10">
+                    PROMOTION
+                  </div>
+                )}
                 <CardHeader className="pb-3 relative">
                   <div className="flex items-start gap-3">
                     {trainer.profilePhotoUrl && (
@@ -256,16 +297,22 @@ export const ChooseCoachModal = ({
                     <div className="flex-1">
                       <CardTitle className="text-lg">{selectedPackage.name}</CardTitle>
                       <p className="text-sm text-muted-foreground mt-1">with {trainerName}</p>
+                      {selectedPackage.isPromotion && selectedPackage.promotionEndDate && (
+                        <p className="text-xs text-primary font-medium mt-1">
+                          Promotion ends {new Date(selectedPackage.promotionEndDate).toLocaleDateString()}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent className="relative">
                   <div className="flex justify-between items-center mb-3">
-                    <VisibilityAwarePricing
-                      pricing={`${selectedPackage.currency} ${selectedPackage.price}`}
-                      visibilityState={getVisibility('pricing_discovery_call')}
-                      className="text-lg font-bold"
-                    />
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-lg font-bold">
+                        {selectedPackage.currency} {selectedPackage.price}
+                      </span>
+                    </div>
                     <span className="text-sm text-muted-foreground">{formatDuration(selectedPackage)}</span>
                   </div>
                   {selectedPackage.description && (
