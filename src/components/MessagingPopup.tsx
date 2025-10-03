@@ -634,7 +634,7 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
                              size="md"
                            />
                           <div className="flex-1 text-left">
-                            {contact.id && !selectedClient ? (
+                            {!isTrainer && contact.id && !selectedClient ? (
                               <TrainerContactName contact={contact} />
                             ) : (
                               <>
@@ -691,7 +691,7 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
                        size="sm"
                      />
                      <div>
-                       {selectedContact && (selectedContact as any).id && !selectedClient ? (
+                       {!isTrainer && selectedContact && (selectedContact as any).id && !selectedClient ? (
                          <TrainerContactName contact={selectedContact} />
                        ) : (
                          <>
