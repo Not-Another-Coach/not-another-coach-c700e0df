@@ -73,7 +73,7 @@ export const FloatingMessageButton = () => {
   React.useEffect(() => {
     const handleMessageEvent = (event: CustomEvent) => {
       console.log('🔥 FloatingMessageButton received openMessagePopup event:', event.detail);
-      setPreSelectedTrainerId(event.detail.trainerId);
+      setPreSelectedTrainerId(event.detail?.trainerId || null);
       setIsPopupOpen(true);
       console.log('🔥 FloatingMessageButton setting popup open to true');
     };

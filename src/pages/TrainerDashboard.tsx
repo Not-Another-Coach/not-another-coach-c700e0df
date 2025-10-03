@@ -294,7 +294,9 @@ const TrainerDashboard = () => {
         availabilityStatus={availabilityStatus}
         onMessagingOpen={() => {
           // Trigger messaging popup
-          const event = new CustomEvent('openMessagePopup');
+          const event = new CustomEvent('openMessagePopup', { 
+            detail: { trainerId: null } 
+          });
           window.dispatchEvent(event);
         }}
       />
