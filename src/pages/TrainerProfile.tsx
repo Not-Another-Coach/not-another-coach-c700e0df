@@ -276,7 +276,7 @@ export const TrainerProfile = () => {
                 hideViewControls={false}
                 cardState={engagementStage === 'shortlisted' ? 'shortlisted' : 
                           engagementStage === 'liked' ? 'saved' : 
-                          ['discovery_call_booked', 'discovery_in_progress'].includes(engagementStage || '') ? 'discovery' :
+                          ['getting_to_know_your_coach', 'discovery_call_booked', 'discovery_in_progress'].includes(engagementStage || '') ? 'discovery' :
                           engagementStage === 'active_client' ? 'matched' : 'default'}
                 isShortlisted={engagementStage === 'shortlisted'}
                 onViewProfile={() => {}} // Already on profile page

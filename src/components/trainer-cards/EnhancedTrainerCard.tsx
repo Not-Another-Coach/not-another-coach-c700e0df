@@ -21,6 +21,7 @@ import { AnyTrainer, TrainerCardLayout, UnifiedTrainerCardProps, TRAINER_CARD_CO
 import { cn } from '@/lib/utils';
 import { VisibilityAwareName } from '@/components/ui/VisibilityAwareName';
 import { useProgressiveNameVisibility } from '@/hooks/useProgressiveNameVisibility';
+import { ChooseCoachButton } from '@/components/coach-selection/ChooseCoachButton';
 
 // Extended interface that merges UnifiedTrainerCardProps with specific props
 interface EnhancedTrainerCardProps extends Omit<UnifiedTrainerCardProps, 'trainer'> {
@@ -415,6 +416,20 @@ export const EnhancedTrainerCard = memo(({
         break;
 
       case 'discovery':
+        // Add Choose Coach button if handler provided
+        if (onProceedWithCoach) {
+          buttons.unshift(
+            <ChooseCoachButton
+              key="choose-coach"
+              trainer={trainer}
+              stage={stage}
+              onSuccess={() => onProceedWithCoach?.(trainer.id)}
+              className="flex-1"
+            />
+          );
+        }
+        
+        // Show Edit Call button if discovery call exists
         if (hasDiscoveryCall && onEditDiscoveryCall) {
           buttons.unshift(
             <Button
@@ -432,6 +447,8 @@ export const EnhancedTrainerCard = memo(({
             </Button>
           );
         }
+        
+        // Show Message button
         if (onStartConversation && canShowMessage()) {
           buttons.unshift(
             <Button
