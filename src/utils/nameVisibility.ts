@@ -37,12 +37,18 @@ export function getDisplayNameByEngagement(
   const lastName = trainer.last_name || '';
   const fullName = trainer.name || `${firstName} ${lastName}`.trim();
 
-  // PRIORITY 1: Honor visibility state first
+  // PRIORITY 1: Honor visibility state first (only when explicitly visible)
   if (visibilityState === 'visible') {
     // Show full name when visibility is explicitly set to visible
     return fullName || `${firstName} ${lastName}`.trim() || generateAnonymousId(trainer.id);
   }
 
+  // PRIORITY 2: Shortlisted stage should always show anonymous unless explicitly visible
+  if (engagementStage === 'shortlisted') {
+    return generateAnonymousId(trainer.id);
+  }
+
+  // PRIORITY 3: Other visibility states
   if (visibilityState === 'blurred') {
     // Show first name + last initial when blurred
     if (firstName && lastName) {
@@ -60,15 +66,14 @@ export function getDisplayNameByEngagement(
     return generateAnonymousId(trainer.id);
   }
 
-  // PRIORITY 2: Progressive disclosure based on engagement stage (fallback)
+  // PRIORITY 4: Progressive disclosure based on engagement stage (fallback)
   switch (engagementStage) {
     case 'browsing':
       // Anonymous guests see anonymous ID
       return generateAnonymousId(trainer.id);
       
     case 'liked':
-    case 'shortlisted':
-      // Known users see first name only
+      // Liked trainers see first name only
       return firstName || fullName.split(' ')[0] || generateAnonymousId(trainer.id);
       
     case 'getting_to_know_your_coach':
