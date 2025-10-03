@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Heart, MessageCircle, DollarSign, Clock, CheckCircle, Send, Eye, CreditCard, Rocket, Zap, Star, TrendingUp } from 'lucide-react';
+import { Heart, MessageCircle, DollarSign, Clock, CheckCircle, Send, Eye, CreditCard, Rocket } from 'lucide-react';
 import { useCoachSelection } from '@/hooks/useCoachSelection';
 import { useUserTypeChecks } from '@/hooks/useUserType';
 import { useContentVisibility } from '@/hooks/useContentVisibility';
@@ -16,10 +16,12 @@ interface Package {
   id: string;
   name: string;
   price: number;
-  duration: string;
+  currency: string;
+  durationWeeks?: number;
   description?: string;
   sessions?: number;
   includes?: string[];
+  inclusions?: string[];
 }
 
 interface ChooseCoachModalProps {
@@ -57,24 +59,12 @@ export const ChooseCoachModal = ({
 
   console.log('🔍 ChooseCoachModal: Packages available:', packages.length, packages);
 
-  // Determine package benefits based on package characteristics (null-safe)
-  const getPackageBenefit = (pkg: Package, index: number) => {
-    const safeSessions = typeof pkg.sessions === 'number' && pkg.sessions > 0 ? pkg.sessions : 0;
-    const perSession = safeSessions > 0 && typeof pkg.price === 'number' ? pkg.price / safeSessions : Infinity;
-
-    const sortedBySessions = [...packages].sort((a, b) => (b.sessions || 0) - (a.sessions || 0));
-
-    if (sortedBySessions[0]?.id === pkg.id && safeSessions > 1) {
-      return { label: 'Best Value', icon: TrendingUp, color: 'text-emerald-600 bg-emerald-50 border-emerald-200' };
+  // Format duration display from durationWeeks
+  const formatDuration = (pkg: Package) => {
+    if (pkg.durationWeeks) {
+      return pkg.durationWeeks === 1 ? '1 week' : `${pkg.durationWeeks} weeks`;
     }
-    if (packages.length >= 3 && index === Math.floor(packages.length / 2)) {
-      return { label: 'Most Popular', icon: Star, color: 'text-amber-600 bg-amber-50 border-amber-200' };
-    }
-    const durationStr = `${pkg.duration ?? ''}`.toLowerCase();
-    if (durationStr.includes('week') || safeSessions <= 4) {
-      return { label: 'Great for Consistency', icon: Zap, color: 'text-blue-600 bg-blue-50 border-blue-200' };
-    }
-    return null;
+    return 'Contact for details';
   };
 
   useEffect(() => {
@@ -100,7 +90,7 @@ export const ChooseCoachModal = ({
       selectedPackage.id,
       selectedPackage.name,
       selectedPackage.price,
-      selectedPackage.duration,
+      formatDuration(selectedPackage),
       clientMessage.trim() || undefined
     );
     
@@ -185,9 +175,8 @@ export const ChooseCoachModal = ({
                 </Card>
               ) : (
                 <div className="grid gap-4">
-                  {packages.map((pkg, index) => {
-                    const benefit = getPackageBenefit(pkg, index);
-                    const BenefitIcon = benefit?.icon;
+                  {packages.map((pkg) => {
+                    const includes = pkg.includes || pkg.inclusions || [];
                     
                     return (
                       <Card 
@@ -195,26 +184,19 @@ export const ChooseCoachModal = ({
                         className="cursor-pointer transition-all hover:shadow-lg hover-scale relative overflow-hidden group"
                         onClick={() => handlePackageSelect(pkg)}
                       >
-                        {benefit && (
-                          <div className={cn("absolute top-3 right-3 px-2 py-1 rounded-full border text-xs font-medium flex items-center gap-1", benefit.color)}>
-                            {BenefitIcon && <BenefitIcon className="w-3 h-3" />}
-                            {benefit.label}
-                          </div>
-                        )}
                         <CardHeader className="pb-3">
                           <div className="flex justify-between items-start">
-                            <CardTitle className="text-lg pr-24">{pkg.name}</CardTitle>
+                            <CardTitle className="text-lg">{pkg.name}</CardTitle>
                             <div className="text-right">
                               <div className="flex items-center gap-1 text-lg font-bold">
-                              <DollarSign className="w-4 h-4" />
-                              <VisibilityAwarePricing
-                                pricing={(pkg.price ?? 0).toString()}
-                                visibilityState={getVisibility('pricing_discovery_call')}
-                              />
+                                <VisibilityAwarePricing
+                                  pricing={`${pkg.currency} ${pkg.price}`}
+                                  visibilityState={getVisibility('pricing_discovery_call')}
+                                />
                               </div>
                               <div className="flex items-center gap-1 text-sm text-muted-foreground">
                                 <Clock className="w-3 h-3" />
-                                {pkg.duration}
+                                {formatDuration(pkg)}
                               </div>
                             </div>
                           </div>
@@ -230,11 +212,11 @@ export const ChooseCoachModal = ({
                               {pkg.sessions} sessions
                             </Badge>
                           )}
-                          {pkg.includes && pkg.includes.length > 0 && (
+                          {includes.length > 0 && (
                             <div className="mt-3">
                               <p className="text-sm font-medium mb-2">Includes:</p>
                               <ul className="text-sm text-muted-foreground space-y-1">
-                                {pkg.includes.map((item, index) => (
+                                {includes.map((item: string, index: number) => (
                                   <li key={index} className="flex items-center gap-2">
                                     <CheckCircle className="w-3 h-3 text-emerald-500" />
                                     {item}
@@ -280,11 +262,11 @@ export const ChooseCoachModal = ({
                 <CardContent className="relative">
                   <div className="flex justify-between items-center mb-3">
                     <VisibilityAwarePricing
-                      pricing={selectedPackage.price != null ? `$${selectedPackage.price}` : 'Contact'}
+                      pricing={`${selectedPackage.currency} ${selectedPackage.price}`}
                       visibilityState={getVisibility('pricing_discovery_call')}
                       className="text-lg font-bold"
                     />
-                    <span className="text-sm text-muted-foreground">{selectedPackage.duration}</span>
+                    <span className="text-sm text-muted-foreground">{formatDuration(selectedPackage)}</span>
                   </div>
                   {selectedPackage.description && (
                     <p className="text-sm text-muted-foreground">
