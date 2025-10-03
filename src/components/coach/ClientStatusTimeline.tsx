@@ -68,29 +68,29 @@ export const ClientStatusTimeline = ({
   ];
 
   return (
-    <div className="flex items-center gap-1 my-2">
+    <div className="flex items-center gap-0.5 my-2 overflow-x-auto pb-1">
       {stages.map((stage, index) => (
-        <div key={stage.key} className="flex items-center">
+        <div key={stage.key} className="flex items-center min-w-fit">
           {/* Stage Circle */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5 sm:gap-1">
             {stage.complete ? (
               <CheckCircle2 
                 className={cn(
-                  "w-4 h-4",
+                  "w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0",
                   stage.active ? "text-primary" : "text-muted-foreground"
                 )} 
               />
             ) : (
               <Circle 
                 className={cn(
-                  "w-4 h-4",
+                  "w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0",
                   stage.active ? "text-primary fill-primary/20" : "text-muted-foreground/40"
                 )} 
               />
             )}
             <span 
               className={cn(
-                "text-xs whitespace-nowrap",
+                "text-[10px] sm:text-xs whitespace-nowrap",
                 stage.complete && stage.active && "font-medium text-primary",
                 stage.complete && !stage.active && "text-muted-foreground",
                 !stage.complete && stage.active && "font-medium text-primary",
@@ -105,7 +105,7 @@ export const ClientStatusTimeline = ({
           {index < stages.length - 1 && (
             <div 
               className={cn(
-                "h-px w-4 mx-1",
+                "h-px w-2 sm:w-4 mx-0.5 sm:mx-1 flex-shrink-0",
                 stage.complete ? "bg-muted-foreground/30" : "bg-muted-foreground/10"
               )}
             />

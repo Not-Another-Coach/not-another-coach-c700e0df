@@ -413,29 +413,7 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
                     </Button>
                   )}
                   
-                  {prospect.stage === 'discovery_completed' && (
-                    <Button
-                      size="sm"
-                      variant="default"
-                      onClick={() => {
-                        console.log('Convert to client:', prospect.client_id);
-                      }}
-                    >
-                      <UserPlus className="w-3 h-3 mr-1" />
-                      Convert to Client
-                    </Button>
-                  )}
-                  
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      console.log('View profile:', prospect.client_id);
-                    }}
-                  >
-                    <Users className="w-3 h-3 mr-1" />
-                    View Profile
-                  </Button>
+                  {/* Removed Convert to Client and View Profile buttons */}
                 </div>
               )}
               
