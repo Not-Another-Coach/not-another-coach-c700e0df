@@ -30,7 +30,7 @@ interface ChooseCoachModalProps {
     firstName?: string;
     lastName?: string;
     profilePhotoUrl?: string;
-    package_options?: Package[];
+    packageOptions?: Package[];
   };
   onSuccess?: () => void;
 }
@@ -52,7 +52,9 @@ export const ChooseCoachModal = ({
   });
 
   const trainerName = trainer.name || `${trainer.firstName || ''} ${trainer.lastName || ''}`.trim();
-  const packages = trainer.package_options || [];
+  const packages = trainer.packageOptions || [];
+
+  console.log('🔍 ChooseCoachModal: Packages available:', packages.length, packages);
 
   useEffect(() => {
     if (open) {

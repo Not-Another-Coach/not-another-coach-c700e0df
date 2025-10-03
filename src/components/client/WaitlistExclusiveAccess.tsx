@@ -149,7 +149,7 @@ export function WaitlistExclusiveAccess({ trainer, exclusiveUntil }: WaitlistExc
                 firstName: trainer.first_name,
                 lastName: trainer.last_name,
                 profilePhotoUrl: trainer.profile_photo_url,
-                package_options: trainer.package_options
+                packageOptions: trainer.package_options
               }}
               stage="browsing"
               className="flex-1"

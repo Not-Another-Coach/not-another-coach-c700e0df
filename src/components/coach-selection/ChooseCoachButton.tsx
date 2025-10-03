@@ -16,7 +16,7 @@ interface ChooseCoachButtonProps {
     firstName?: string;
     lastName?: string;
     profilePhotoUrl?: string;
-    package_options?: any[];
+    packageOptions?: any[];
   };
   stage: EngagementStage;
   onSuccess?: () => void;
@@ -50,13 +50,16 @@ export const ChooseCoachButton = ({
   useEffect(() => {
     const fetchSelectionRequest = async () => {
       if (!isClient() || !canChooseCoach) {
+        console.log('🔍 ChooseCoachButton: Not fetching - isClient:', isClient(), 'canChooseCoach:', canChooseCoach);
         setLoading(false);
         return;
       }
       
+      console.log('🔍 ChooseCoachButton: Fetching selection request for trainer:', trainer.id);
       setLoading(true);
       try {
         const result = await getSelectionRequest(trainer.id);
+        console.log('🔍 ChooseCoachButton: Selection request result:', result);
         if (result.data) {
           setSelectionRequest(result.data);
         }
@@ -64,6 +67,7 @@ export const ChooseCoachButton = ({
         console.error('Error fetching selection request:', error);
       } finally {
         setLoading(false);
+        console.log('🔍 ChooseCoachButton: Loading set to false');
       }
     };
 
@@ -102,7 +106,7 @@ export const ChooseCoachButton = ({
   // Show status if there's an existing request
   if (selectionRequest) {
     // Find the selected package from trainer's package options to get enhanced payment data
-    const selectedPackage = trainer.package_options?.find(pkg => 
+    const selectedPackage = trainer.packageOptions?.find(pkg => 
       pkg.name === selectionRequest?.package_name || 
       pkg.id === selectionRequest?.package_id
     );
@@ -241,10 +245,21 @@ export const ChooseCoachButton = ({
     );
   }
 
+  console.log('🔍 ChooseCoachButton render:', { 
+    trainerId: trainer.id, 
+    loading, 
+    canChooseCoach, 
+    hasRequest: !!selectionRequest,
+    packageCount: trainer.packageOptions?.length || 0
+  });
+
   return (
     <div className={className}>
       <Button
-        onClick={() => setShowModal(true)}
+        onClick={() => {
+          console.log('🔍 ChooseCoachButton: Opening modal with packages:', trainer.packageOptions);
+          setShowModal(true);
+        }}
         disabled={loading}
         className="w-full"
         size="lg"
