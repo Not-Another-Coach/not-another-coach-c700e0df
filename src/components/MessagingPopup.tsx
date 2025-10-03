@@ -48,19 +48,30 @@ const TrainerContactName = ({ contact }: { contact: any }) => {
     isGuest
   });
 
+  const basicInfoVisibility = getVisibility('basic_information');
+  const showLocation = basicInfoVisibility === 'visible';
+
   return (
-    <VisibilityAwareName
-      trainer={{
-        id: contact.id,
-        first_name: contact.firstName,
-        last_name: contact.lastName,
-        name: contact.name
-      }}
-      visibilityState={getVisibility('basic_information')}
-      engagementStage={stage || 'browsing'}
-      fallbackName={contact.name}
-      className="font-medium text-sm"
-    />
+    <>
+      <VisibilityAwareName
+        trainer={{
+          id: contact.id,
+          first_name: contact.firstName,
+          last_name: contact.lastName,
+          name: contact.name
+        }}
+        visibilityState={basicInfoVisibility}
+        engagementStage={stage || 'browsing'}
+        fallbackName={contact.name}
+        className="font-medium text-sm"
+      />
+      {showLocation && contact.location && (
+        <p className="text-xs text-muted-foreground">{contact.location}</p>
+      )}
+      {!showLocation && (
+        <p className="text-xs text-muted-foreground">Available for chat</p>
+      )}
+    </>
   );
 };
 
@@ -593,11 +604,13 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
                             {contact.id && !selectedClient ? (
                               <TrainerContactName contact={contact} />
                             ) : (
-                              <p className="font-medium text-sm">{contact.name}</p>
+                              <>
+                                <p className="font-medium text-sm">{contact.name}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {contact.location || 'Available for chat'}
+                                </p>
+                              </>
                             )}
-                            <p className="text-xs text-muted-foreground">
-                              {contact.location || 'Available for chat'}
-                            </p>
                           </div>
                            <div className="flex-shrink-0 flex items-center gap-2">
                              {unreadCounts[contact.id] > 0 && (
@@ -648,9 +661,11 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
                        {selectedContact && (selectedContact as any).id && !selectedClient ? (
                          <TrainerContactName contact={selectedContact} />
                        ) : (
-                         <p className="font-medium text-sm">{selectedContact.name}</p>
+                         <>
+                           <p className="font-medium text-sm">{selectedContact.name}</p>
+                           <p className="text-xs text-muted-foreground">{selectedContact.location}</p>
+                         </>
                        )}
-                       <p className="text-xs text-muted-foreground">{selectedContact.location}</p>
                      </div>
                     <Badge variant="secondary" className="ml-auto text-xs">
                       Online
