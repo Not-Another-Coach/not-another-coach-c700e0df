@@ -20,6 +20,8 @@ import { useUserTypeChecks } from '@/hooks/useUserType';
 import { AppLogo } from '@/components/ui/app-logo';
 import { useEngagementStage } from '@/hooks/useEngagementStage';
 import { toast } from '@/hooks/use-toast';
+import { useContentVisibility } from '@/hooks/useContentVisibility';
+import { VisibilityAwareName } from '@/components/ui/VisibilityAwareName';
 
 export const TrainerProfile = () => {
   const { trainerId } = useParams<{ trainerId: string }>();
@@ -30,7 +32,13 @@ export const TrainerProfile = () => {
   const fromSource = searchParams.get('from');
   
   // Check engagement stage for access control
-  const { stage: engagementStage, loading: engagementLoading } = useEngagementStage(trainerId || '', !user);
+  const { stage: engagementStage, loading: engagementLoading, isGuest } = useEngagementStage(trainerId || '', !user);
+  
+  // Get visibility settings
+  const { getVisibility } = useContentVisibility({
+    engagementStage: engagementStage || 'browsing',
+    isGuest
+  });
   
   const includeOwnUnpublished = useMemo(() => 
     user?.id ? { userId: user.id } : undefined, 
@@ -227,7 +235,19 @@ export const TrainerProfile = () => {
           </Button>
           
           <div className="flex-1">
-            <h1 className="text-2xl font-bold">{trainer.name}</h1>
+            <h1 className="text-2xl font-bold">
+              <VisibilityAwareName
+                trainer={{
+                  id: trainer.id,
+                  first_name: (trainer as any).firstName || (trainer as any).first_name,
+                  last_name: (trainer as any).lastName || (trainer as any).last_name,
+                  name: trainer.name
+                }}
+                visibilityState={getVisibility('basic_information')}
+                engagementStage={engagementStage || 'browsing'}
+                fallbackName={trainer.name}
+              />
+            </h1>
             <p className="text-muted-foreground">
               {isOwnProfile ? 'Your Profile Preview' : 'Personal Trainer Profile'}
             </p>
