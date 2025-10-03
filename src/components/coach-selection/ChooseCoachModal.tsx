@@ -62,6 +62,16 @@ export const ChooseCoachModal = ({
     return 'Pay in full';
   };
 
+  // Helper to get currency symbol
+  const getCurrencySymbol = (currency: string) => {
+    const symbols: Record<string, string> = {
+      'GBP': '£',
+      'USD': '$',
+      'EUR': '€',
+    };
+    return symbols[currency] || currency;
+  };
+
   const trainerName = trainer.name || `${trainer.firstName || ''} ${trainer.lastName || ''}`.trim();
   
   // Sort packages: promotions first, then by price
@@ -228,7 +238,7 @@ export const ChooseCoachModal = ({
                             </div>
                             <div className="text-right">
                               <div className="text-lg font-bold">
-                                {pkg.currency} {pkg.price}
+                                {getCurrencySymbol(pkg.currency)} {pkg.price}
                               </div>
                               <div className="flex items-center gap-1 text-sm text-muted-foreground">
                                 <Clock className="w-3 h-3" />
@@ -250,7 +260,6 @@ export const ChooseCoachModal = ({
                               </Badge>
                             )}
                             <Badge variant="outline" className="border-primary/30 text-primary">
-                              <DollarSign className="w-3 h-3 mr-1" />
                               {getPaymentTermsLabel(pkg)}
                             </Badge>
                           </div>
@@ -316,12 +325,9 @@ export const ChooseCoachModal = ({
                 </CardHeader>
                 <CardContent className="relative">
                   <div className="flex justify-between items-center mb-3">
-                    <div className="flex items-center gap-2">
-                      <DollarSign className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-lg font-bold">
-                        {selectedPackage.currency} {selectedPackage.price}
-                      </span>
-                    </div>
+                    <span className="text-lg font-bold">
+                      {getCurrencySymbol(selectedPackage.currency)} {selectedPackage.price}
+                    </span>
                     <span className="text-sm text-muted-foreground">{formatDuration(selectedPackage)}</span>
                   </div>
                   {selectedPackage.description && (
