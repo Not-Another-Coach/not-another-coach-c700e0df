@@ -5,6 +5,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { AppLogo } from "@/components/ui/app-logo";
 import { Bell, MessageCircle, Settings, Eye } from "lucide-react";
+import { useConversations } from "@/hooks/useConversations";
+import { useMemo } from "react";
 
 interface ClientCustomHeaderProps {
   currentPage: 'dashboard' | 'journey' | 'trainers' | 'explore';
@@ -26,6 +28,33 @@ export function ClientCustomHeader({
   showJourneyProgress = true
 }: ClientCustomHeaderProps) {
   const navigate = useNavigate();
+  const { conversations } = useConversations();
+
+  // Calculate unread messages count from conversations
+  const unreadMessagesCount = useMemo(() => {
+    return conversations.reduce((count, conv) => {
+      // For clients, count messages sent after client_last_read_at
+      const lastReadAt = conv.client_last_read_at;
+      
+      if (!conv.messages || conv.messages.length === 0) return count;
+      
+      // If never read, count all messages from the other person (trainer)
+      if (!lastReadAt) {
+        const unreadInConv = conv.messages.filter(msg => 
+          msg.sender_id !== profile?.id
+        ).length;
+        return count + unreadInConv;
+      }
+      
+      // Count messages after last read time
+      const unreadInConv = conv.messages.filter(msg => 
+        new Date(msg.created_at) > new Date(lastReadAt) && 
+        msg.sender_id !== profile?.id
+      ).length;
+      
+      return count + unreadInConv;
+    }, 0);
+  }, [conversations, profile?.id]);
 
   const formatJourneyStage = (stage: string) => {
     return stage
@@ -160,10 +189,18 @@ export function ClientCustomHeader({
             <Button 
               variant="ghost" 
               size="sm" 
-              className="h-8 w-8 sm:h-9 sm:w-9 p-0"
+              className="h-8 w-8 sm:h-9 sm:w-9 p-0 relative"
               onClick={onMessagingOpen}
             >
               <MessageCircle className="h-4 w-4" />
+              {unreadMessagesCount > 0 && (
+                <Badge 
+                  variant="destructive" 
+                  className="absolute -top-1 -right-1 h-4 w-4 sm:h-5 sm:w-5 rounded-full p-0 text-[10px] sm:text-xs flex items-center justify-center"
+                >
+                  {unreadMessagesCount}
+                </Badge>
+              )}
             </Button>
 
             {/* Preferences */}
