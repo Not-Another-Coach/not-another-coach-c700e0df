@@ -414,8 +414,8 @@ export default function MyTrainers() {
                              onRemove={trainer.shortlistedAt ? handleRemoveFromShortlist : undefined}
                              onStartConversation={handleStartConversation}
                              onBookDiscoveryCall={handleBookDiscoveryCall}
-                             onViewProfile={undefined} // Remove View Profile from card - it's shown below
-                             hideViewProfileButton={true} // Hide View Profile button - shown below card
+                             onViewProfile={handleViewProfile}
+                             hideViewProfileButton={false}
                              isShortlisted={!!trainer.shortlistedAt}
                              trainerOffersDiscoveryCalls={trainer.offersDiscoveryCall || (trainer as any).offers_discovery_call || false}
                              cardState={trainer.status === 'shortlisted' ? 'shortlisted' : trainer.status === 'saved' ? 'saved' : 'default'}
