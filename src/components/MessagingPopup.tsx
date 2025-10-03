@@ -190,11 +190,21 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
         // Combine conversation data with profile data
         const contacts = conversations.map(conv => {
           const clientProfile = clientProfiles?.find(profile => profile.id === conv.client_id);
+          
+          // Better fallback name handling
+          const clientName = (() => {
+            if (clientProfile?.first_name && clientProfile?.last_name) {
+              return `${clientProfile.first_name} ${clientProfile.last_name}`;
+            }
+            if (clientProfile?.first_name) {
+              return clientProfile.first_name;
+            }
+            return 'Client (Name Not Set)';
+          })();
+          
           return {
             id: conv.client_id,
-            name: clientProfile?.first_name && clientProfile?.last_name
-              ? `${clientProfile.first_name} ${clientProfile.last_name}`
-              : `Client ${conv.client_id.slice(0, 8)}`,
+            name: clientName,
             firstName: clientProfile?.first_name,
             lastName: clientProfile?.last_name,
             location: clientProfile?.training_location_preference || 'Location not specified',
@@ -217,17 +227,28 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
         // For clients, show conversations + pre-selected trainer if not in conversations
         const conversationContacts = conversations
           .filter(conv => conv.client_id === profile?.id)
-          .map(conv => ({
-            id: conv.trainer_id,
-            name: conv.otherUser?.first_name && conv.otherUser?.last_name 
-              ? `${conv.otherUser.first_name} ${conv.otherUser.last_name}`
-              : `Trainer ${conv.trainer_id.slice(0, 8)}`,
-            firstName: conv.otherUser?.first_name,
-            lastName: conv.otherUser?.last_name,
-            location: 'Available for chat',
-            profilePhotoUrl: conv.otherUser?.profile_photo_url,
-            lastMessageAt: conv.last_message_at
-          }));
+          .map(conv => {
+            // Better fallback name handling for trainers
+            const trainerName = (() => {
+              if (conv.otherUser?.first_name && conv.otherUser?.last_name) {
+                return `${conv.otherUser.first_name} ${conv.otherUser.last_name}`;
+              }
+              if (conv.otherUser?.first_name) {
+                return conv.otherUser.first_name;
+              }
+              return 'Trainer (Name Not Set)';
+            })();
+            
+            return {
+              id: conv.trainer_id,
+              name: trainerName,
+              firstName: conv.otherUser?.first_name,
+              lastName: conv.otherUser?.last_name,
+              location: 'Available for chat',
+              profilePhotoUrl: conv.otherUser?.profile_photo_url,
+              lastMessageAt: conv.last_message_at
+            };
+          });
 
         // If there's a pre-selected trainer not in conversations, add them
         if (preSelectedTrainerId && !conversationContacts.find(c => c.id === preSelectedTrainerId)) {
@@ -344,15 +365,27 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
 
   // Handle the selected contact - either from trainer list or selectedClient
   const selectedContact = selectedClient 
-    ? {
-        id: selectedClient.user_id,
-        name: selectedClient.client_profile?.first_name && selectedClient.client_profile?.last_name 
-          ? `${selectedClient.client_profile.first_name} ${selectedClient.client_profile.last_name}`
-          : `Client ${selectedClient.user_id.slice(0, 8)}`,
-        firstName: selectedClient.client_profile?.first_name,
-        lastName: selectedClient.client_profile?.last_name,
-        location: selectedClient.client_profile?.training_location_preference || 'Location not specified'
-      }
+    ? (() => {
+        // Better fallback name for selected client
+        const clientName = (() => {
+          const profile = selectedClient.client_profile;
+          if (profile?.first_name && profile?.last_name) {
+            return `${profile.first_name} ${profile.last_name}`;
+          }
+          if (profile?.first_name) {
+            return profile.first_name;
+          }
+          return 'Client (Name Not Set)';
+        })();
+        
+        return {
+          id: selectedClient.user_id,
+          name: clientName,
+          firstName: selectedClient.client_profile?.first_name,
+          lastName: selectedClient.client_profile?.last_name,
+          location: selectedClient.client_profile?.training_location_preference || 'Location not specified'
+        };
+      })()
     : selectedTrainerId 
       ? (isTrainer 
           ? trainerContacts.find(c => c.id === selectedTrainerId)
