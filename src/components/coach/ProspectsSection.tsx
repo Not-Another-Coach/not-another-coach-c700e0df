@@ -354,11 +354,11 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
                     </p>
                   )}
                    {prospect.selection_request && (
-                    <div className="mt-2 p-2 bg-green-50 rounded border border-green-200">
-                      <p className="text-sm font-medium text-green-900">
+                    <div className="mt-2 p-2 bg-green-50 rounded border border-green-200 overflow-hidden">
+                      <p className="text-sm font-medium text-green-900 break-words">
                         {prospect.selection_request.package_name} — {getCurrencySymbol(prospect.selection_request.package_currency || 'GBP')}{(prospect.selection_request.package_price / 100).toFixed(2)}
                       </p>
-                      <p className="text-xs text-green-700">
+                      <p className="text-xs text-green-700 break-words">
                         Status: {prospect.selection_request.status} • {format(new Date(prospect.selection_request.created_at), 'MMM d, yyyy')}
                       </p>
                     </div>

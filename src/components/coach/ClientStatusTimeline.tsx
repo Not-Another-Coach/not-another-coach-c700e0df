@@ -43,54 +43,54 @@ export const ClientStatusTimeline = ({
   const stages = [
     { 
       key: 'discovery', 
-      label: 'Discovery Call', 
+      label: 'Discovery', 
       complete: discoveryComplete,
       active: currentActiveStage === 'discovery'
     },
     { 
       key: 'package', 
-      label: 'Package Requested', 
+      label: 'Package', 
       complete: packageRequested,
       active: currentActiveStage === 'package'
     },
     { 
       key: 'payment', 
-      label: 'Awaiting Payment', 
+      label: 'Payment', 
       complete: paymentComplete,
       active: currentActiveStage === 'payment'
     },
     { 
       key: 'active', 
-      label: 'Active Client', 
+      label: 'Active', 
       complete: activeClient,
       active: currentActiveStage === 'active'
     },
   ];
 
   return (
-    <div className="flex items-center gap-0.5 my-2 overflow-x-auto pb-1">
+    <div className="flex items-center gap-0.5 my-2 flex-wrap">
       {stages.map((stage, index) => (
-        <div key={stage.key} className="flex items-center min-w-fit">
+        <div key={stage.key} className="flex items-center shrink-0">
           {/* Stage Circle */}
-          <div className="flex items-center gap-0.5 sm:gap-1">
+          <div className="flex items-center gap-0.5">
             {stage.complete ? (
               <CheckCircle2 
                 className={cn(
-                  "w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0",
+                  "w-3 h-3 shrink-0",
                   stage.active ? "text-primary" : "text-muted-foreground"
                 )} 
               />
             ) : (
               <Circle 
                 className={cn(
-                  "w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0",
+                  "w-3 h-3 shrink-0",
                   stage.active ? "text-primary fill-primary/20" : "text-muted-foreground/40"
                 )} 
               />
             )}
             <span 
               className={cn(
-                "text-[10px] sm:text-xs whitespace-nowrap",
+                "text-[10px] whitespace-nowrap",
                 stage.complete && stage.active && "font-medium text-primary",
                 stage.complete && !stage.active && "text-muted-foreground",
                 !stage.complete && stage.active && "font-medium text-primary",
@@ -105,7 +105,7 @@ export const ClientStatusTimeline = ({
           {index < stages.length - 1 && (
             <div 
               className={cn(
-                "h-px w-2 sm:w-4 mx-0.5 sm:mx-1 flex-shrink-0",
+                "h-px w-1.5 mx-0.5 shrink-0",
                 stage.complete ? "bg-muted-foreground/30" : "bg-muted-foreground/10"
               )}
             />
