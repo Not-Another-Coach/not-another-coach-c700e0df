@@ -192,7 +192,9 @@ export function ClientProspectSummary({ onActiveClientsCountChange, onProspectsC
           client_id: engagement.client_id,
           name: profile?.first_name && profile?.last_name 
             ? `${profile.first_name} ${profile.last_name}`
-            : `Client ${engagement.client_id.slice(0, 8)}`,
+            : profile?.first_name
+            ? profile.first_name
+            : 'Client (Name Not Set)',
           status,
           stage: engagement.stage,
           primary_goals: profile?.primary_goals || [],

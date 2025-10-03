@@ -282,7 +282,9 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
                     <h4 className="font-medium">
                       {prospect.client_profile?.first_name && prospect.client_profile?.last_name
                         ? `${prospect.client_profile.first_name} ${prospect.client_profile.last_name}`
-                        : `Client ${prospect.client_id.slice(0, 8)}`}
+                        : prospect.client_profile?.first_name
+                        ? prospect.client_profile.first_name
+                        : 'Client (Name Not Set)'}
                     </h4>
                     <Badge variant={stageInfo.variant} className={stageInfo.color}>
                       {stageInfo.label}
