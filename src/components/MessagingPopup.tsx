@@ -551,7 +551,7 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
   if (!isOpen) return null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed bottom-6 right-6 z-[100]">
       <Card className="w-80 h-96 shadow-2xl border-2 border-primary/20 bg-background">
         <CardHeader className="pb-3 bg-primary text-primary-foreground">
           <div className="flex items-center justify-between">
