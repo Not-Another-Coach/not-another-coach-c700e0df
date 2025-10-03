@@ -10,6 +10,7 @@ import { Users, MessageCircle, Calendar, Video, Phone, UserPlus, UserMinus, Tren
 import { MessagingPopup } from '@/components/MessagingPopup';
 import { DiscoveryCallNotesTaker } from '@/components/DiscoveryCallNotesTaker';
 import { getCurrencySymbol } from '@/lib/packagePaymentUtils';
+import { ClientStatusTimeline } from './ClientStatusTimeline';
 
 interface Prospect {
   id: string;
@@ -159,6 +160,7 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
           .select('client_id, package_name, package_price, package_currency, status, created_at')
           .eq('trainer_id', profile.id)
           .in('client_id', clientIds)
+          .neq('status', 'pending')
       ]);
 
       const { data: profilesData, error: profilesError } = profilesResult;
@@ -280,14 +282,23 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
             <div key={prospect.id} className="border rounded-lg p-4 space-y-3">
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <h4 className="font-medium">
-                      {prospect.client_profile?.first_name && prospect.client_profile?.last_name
-                        ? `${prospect.client_profile.first_name} ${prospect.client_profile.last_name}`
-                        : prospect.client_profile?.first_name
-                        ? prospect.client_profile.first_name
-                        : 'Client (Name Not Set)'}
-                    </h4>
+                  <h4 className="font-medium">
+                    {prospect.client_profile?.first_name && prospect.client_profile?.last_name
+                      ? `${prospect.client_profile.first_name} ${prospect.client_profile.last_name}`
+                      : prospect.client_profile?.first_name
+                      ? prospect.client_profile.first_name
+                      : 'Client (Name Not Set)'}
+                  </h4>
+                  
+                  <ClientStatusTimeline 
+                    currentStage={prospect.stage}
+                    hasDiscoveryCall={!!prospect.discovery_call}
+                    hasPackageRequest={!!prospect.selection_request}
+                    paymentStatus={prospect.selection_request?.status}
+                    isActive={prospect.stage === 'active_client'}
+                  />
+
+                  <div className="flex items-center gap-2 flex-wrap">
                     <Badge variant={stageInfo.variant} className={stageInfo.color}>
                       {stageInfo.label}
                     </Badge>

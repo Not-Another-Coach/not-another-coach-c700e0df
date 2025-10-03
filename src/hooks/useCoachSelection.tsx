@@ -229,12 +229,12 @@ export function useCoachSelection() {
     if (!user) return { error: 'Not authenticated' };
 
     try {
-      // First get the selection requests - include both pending and awaiting_payment
+      // Only get pending requests - once trainer responds, they move to Prospects section
       const { data: requestsData, error: requestsError } = await supabase
         .from('coach_selection_requests')
         .select('*')
         .eq('trainer_id', user.id)
-        .in('status', ['pending', 'awaiting_payment', 'alternative_suggested'])
+        .eq('status', 'pending')
         .order('created_at', { ascending: false });
 
       if (requestsError) {
