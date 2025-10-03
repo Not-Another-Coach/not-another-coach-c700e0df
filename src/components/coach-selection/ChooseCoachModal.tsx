@@ -7,8 +7,6 @@ import { Badge } from '@/components/ui/badge';
 import { Heart, MessageCircle, DollarSign, Clock, CheckCircle, Send, Eye, CreditCard, Rocket } from 'lucide-react';
 import { useCoachSelection } from '@/hooks/useCoachSelection';
 import { useUserTypeChecks } from '@/hooks/useUserType';
-import { useContentVisibility } from '@/hooks/useContentVisibility';
-import { VisibilityAwarePricing } from '@/components/ui/VisibilityAwarePricing';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -24,6 +22,7 @@ interface Package {
   inclusions?: string[];
   isPromotion?: boolean;
   promotionEndDate?: string;
+  customerPaymentModes?: string[];
 }
 
 interface ChooseCoachModalProps {
@@ -52,9 +51,16 @@ export const ChooseCoachModal = ({
   const [clientMessage, setClientMessage] = useState('');
   const [step, setStep] = useState<'select' | 'confirm'>('select');
   
-  const { getVisibility } = useContentVisibility({
-    engagementStage: 'browsing'
-  });
+  // Helper to get payment terms label
+  const getPaymentTermsLabel = (pkg: Package) => {
+    const modes = pkg.customerPaymentModes || [];
+    if (modes.includes('installments') && modes.includes('upfront')) {
+      return 'Installments option';
+    } else if (modes.includes('installments')) {
+      return 'Installments';
+    }
+    return 'Pay in full';
+  };
 
   const trainerName = trainer.name || `${trainer.firstName || ''} ${trainer.lastName || ''}`.trim();
   
@@ -221,11 +227,8 @@ export const ChooseCoachModal = ({
                               )}
                             </div>
                             <div className="text-right">
-                              <div className="flex items-center gap-1 text-lg font-bold">
-                                <VisibilityAwarePricing
-                                  pricing={`${pkg.currency} ${pkg.price}`}
-                                  visibilityState={getVisibility('pricing_discovery_call')}
-                                />
+                              <div className="text-lg font-bold">
+                                {pkg.currency} {pkg.price}
                               </div>
                               <div className="flex items-center gap-1 text-sm text-muted-foreground">
                                 <Clock className="w-3 h-3" />
@@ -240,11 +243,17 @@ export const ChooseCoachModal = ({
                               {pkg.description}
                             </p>
                           )}
-                          {pkg.sessions && (
-                            <Badge variant="secondary" className="mr-2">
-                              {pkg.sessions} sessions
+                          <div className="flex flex-wrap gap-2">
+                            {pkg.sessions && (
+                              <Badge variant="secondary">
+                                {pkg.sessions} sessions
+                              </Badge>
+                            )}
+                            <Badge variant="outline" className="border-primary/30 text-primary">
+                              <DollarSign className="w-3 h-3 mr-1" />
+                              {getPaymentTermsLabel(pkg)}
                             </Badge>
-                          )}
+                          </div>
                           {includes.length > 0 && (
                             <div className="mt-3">
                               <p className="text-sm font-medium mb-2">Includes:</p>
