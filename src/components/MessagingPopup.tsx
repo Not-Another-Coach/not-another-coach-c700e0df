@@ -582,11 +582,11 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
           </div>
         </CardHeader>
 
-        <CardContent className="p-0 h-[320px] flex flex-col">
+        <CardContent className="p-0 h-[320px] md:h-[400px] flex flex-col">
           {view === 'list' ? (
             // Trainer List View
-            <div className="flex-1">
-              <div className="p-4 border-b bg-muted/30 space-y-3">
+            <div className="flex-1 flex flex-col min-h-0">
+              <div className="p-4 border-b bg-muted/30 space-y-3 flex-shrink-0">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   {isTrainer ? (
                     <>
@@ -616,7 +616,7 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
                 </div>
               </div>
 
-              <ScrollArea className="flex-1">
+              <ScrollArea className="flex-1 min-h-0">
                 {filteredContacts.length > 0 ? (
                   <div className="p-2">
                     {filteredContacts.map((contact) => (
@@ -660,29 +660,36 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
                     ))}
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center h-full p-4 text-center">
-                    <Users className="w-12 h-12 text-muted-foreground/50 mb-2" />
-                    <p className="text-sm font-medium text-muted-foreground">
-                      {searchFilter ? 'No contacts found' : (isTrainer ? 'No client conversations' : 'No conversations started')}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {searchFilter 
-                        ? 'Try adjusting your search terms'
-                        : (isTrainer 
-                            ? 'When clients message you, they\'ll appear here'
-                            : 'Start a conversation with a shortlisted trainer from the Chat button'
-                          )
-                      }
-                    </p>
+                  <div className="flex items-center justify-center h-full p-8">
+                    <div className="text-center text-muted-foreground">
+                      {searchFilter ? (
+                        <>
+                          <Search className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                          <p className="text-sm">No contacts found matching "{searchFilter}"</p>
+                        </>
+                      ) : (
+                        <>
+                          <Users className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                          <p className="text-sm">
+                            {isTrainer ? 'No clients or prospects yet' : 'No conversations yet'}
+                          </p>
+                          <p className="text-xs mt-1">
+                            {isTrainer
+                              ? 'Start receiving client inquiries to begin conversations'
+                              : 'Save trainers and start messaging them'}
+                          </p>
+                        </>
+                      )}
+                    </div>
                   </div>
                 )}
               </ScrollArea>
             </div>
           ) : (
-            // Chat View
-            <div className="flex-1 flex flex-col">
+            // Chat View - Mobile optimized
+            <div className="flex-1 flex flex-col min-h-0">
               {selectedContact && (
-                 <div className="p-3 border-b bg-muted/30">
+                 <div className="p-3 border-b bg-muted/30 flex-shrink-0">
                    <div className="flex items-center gap-2">
                      <ProfileAvatar
                        profilePhotoUrl={selectedContact.profilePhotoUrl}
@@ -707,7 +714,7 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
                 </div>
               )}
 
-              <ScrollArea className="flex-1 p-3 max-h-[200px] overflow-y-auto">
+              <ScrollArea className="flex-1 p-3 min-h-0">
                 {!canMessage && isTrainer ? (
                   <div className="text-center text-muted-foreground py-8">
                     <Lock className="w-8 h-8 mx-auto mb-2 opacity-50" />
@@ -749,19 +756,27 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
               </ScrollArea>
 
               {canMessage && (
-                <div className="p-3 border-t">
-                  <div className="flex gap-2">
+                <div className="p-3 border-t bg-background flex-shrink-0">
+                  <div className="flex gap-2 items-end">
                     <Input
                       placeholder="Type your message..."
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
-                      className="flex-1 text-sm"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          handleSendMessage();
+                        }
+                      }}
+                      className="flex-1 text-sm min-h-[40px]"
+                      autoComplete="off"
                     />
                     <Button 
                       size="sm" 
                       onClick={handleSendMessage}
                       disabled={!message.trim() || sending}
+                      className="h-[40px] px-3 flex-shrink-0"
+                      type="button"
                     >
                       <Send className="w-4 h-4" />
                     </Button>
