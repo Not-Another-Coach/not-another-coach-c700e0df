@@ -28,8 +28,18 @@ export function TrainerCustomHeader({
   const unreadMessagesCount = conversations.reduce((count, conv) => {
     // For trainers, count messages sent after trainer_last_read_at
     const lastReadAt = conv.trainer_last_read_at;
-    if (!lastReadAt || !conv.messages) return count;
     
+    if (!conv.messages || conv.messages.length === 0) return count;
+    
+    // If never read, count all messages from the other person (client)
+    if (!lastReadAt) {
+      const unreadInConv = conv.messages.filter(msg => 
+        msg.sender_id !== profile?.id
+      ).length;
+      return count + unreadInConv;
+    }
+    
+    // Count messages after last read time
     const unreadInConv = conv.messages.filter(msg => 
       new Date(msg.created_at) > new Date(lastReadAt) && 
       msg.sender_id !== profile?.id

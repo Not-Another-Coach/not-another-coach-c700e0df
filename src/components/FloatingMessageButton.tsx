@@ -1,21 +1,73 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MessagingPopup } from '@/components/MessagingPopup';
 import { useSavedTrainers } from '@/hooks/useSavedTrainers';
 import { useProfileByType } from '@/hooks/useProfileByType';
+import { useConversations } from '@/hooks/useConversations';
 
 export const FloatingMessageButton = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [preSelectedTrainerId, setPreSelectedTrainerId] = useState<string | null>(null);
   const { savedTrainers } = useSavedTrainers();
   const { profile } = useProfileByType();
+  const { conversations } = useConversations();
   
   const isTrainer = profile?.user_type === 'trainer';
   
-  // For trainers, show different badge logic (would be based on unread messages in real app)
-  const badgeCount = isTrainer ? 0 : savedTrainers.length;
+  // Calculate unread messages count
+  const unreadCount = useMemo(() => {
+    if (isTrainer) {
+      // For trainers, count messages sent after trainer_last_read_at
+      return conversations.reduce((count, conv) => {
+        const lastReadAt = conv.trainer_last_read_at;
+        
+        if (!conv.messages || conv.messages.length === 0) return count;
+        
+        // If never read, count all messages from the other person (client)
+        if (!lastReadAt) {
+          const unreadInConv = conv.messages.filter(msg => 
+            msg.sender_id !== profile?.id
+          ).length;
+          return count + unreadInConv;
+        }
+        
+        // Count messages after last read time
+        const unreadInConv = conv.messages.filter(msg => 
+          new Date(msg.created_at) > new Date(lastReadAt) && 
+          msg.sender_id !== profile?.id
+        ).length;
+        
+        return count + unreadInConv;
+      }, 0);
+    } else {
+      // For clients, count messages sent after client_last_read_at
+      return conversations.reduce((count, conv) => {
+        const lastReadAt = conv.client_last_read_at;
+        
+        if (!conv.messages || conv.messages.length === 0) return count;
+        
+        // If never read, count all messages from the other person (trainer)
+        if (!lastReadAt) {
+          const unreadInConv = conv.messages.filter(msg => 
+            msg.sender_id !== profile?.id
+          ).length;
+          return count + unreadInConv;
+        }
+        
+        // Count messages after last read time
+        const unreadInConv = conv.messages.filter(msg => 
+          new Date(msg.created_at) > new Date(lastReadAt) && 
+          msg.sender_id !== profile?.id
+        ).length;
+        
+        return count + unreadInConv;
+      }, 0);
+    }
+  }, [conversations, isTrainer, profile?.id]);
+  
+  const badgeCount = unreadCount;
 
   // Listen for global message events to open popup with specific trainer
   React.useEffect(() => {
