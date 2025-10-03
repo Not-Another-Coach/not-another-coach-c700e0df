@@ -179,10 +179,9 @@ export const ClientTransformationView = ({ trainer, children, testimonialIndex =
           </div>
         )}
 
-        {/* Trainer Info & Current Testimonial Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-          {/* Current Testimonial with Visibility */}
-          {testimonialVisibility === 'visible' ? (
+        {/* Trainer Info & Current Testimonial Overlay - only show when visible */}
+        {testimonialVisibility === 'visible' && (
+          <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
             <div className="bg-black/30 backdrop-blur-sm rounded-lg p-3 border border-white/20">
               <div className="flex items-start gap-2">
                 <Quote className="h-3 w-3 text-white/70 flex-shrink-0 mt-0.5" />
@@ -201,7 +200,10 @@ export const ClientTransformationView = ({ trainer, children, testimonialIndex =
                 </div>
               </div>
             </div>
-          ) : testimonialVisibility === 'blurred' ? (
+          </div>
+        )}
+        {testimonialVisibility === 'blurred' && (
+          <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
             <div className="bg-black/30 backdrop-blur-sm rounded-lg p-3 border border-white/20">
               <div className="flex items-start gap-2">
                 <Quote className="h-3 w-3 text-white/70 flex-shrink-0 mt-0.5" />
@@ -220,16 +222,8 @@ export const ClientTransformationView = ({ trainer, children, testimonialIndex =
                 </div>
               </div>
             </div>
-          ) : (
-            <div className="bg-black/30 backdrop-blur-sm rounded-lg p-3 border border-white/20">
-              <div className="w-full text-center py-1">
-                <span className="text-sm font-medium text-white/90 block">
-                  🔒 Trainer info unlocked with engagement
-                </span>
-              </div>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

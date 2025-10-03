@@ -230,69 +230,71 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
           )}
         </div>
 
-        {/* Trainer Info Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-          <div className="flex items-end justify-between">
-            <div className="flex-1">
-              <VisibilityAwareBasicInfo
-                name={trainer.name}
-                location={trainer.location}
-                visibilityState={getVisibility('basic_information')}
-                variant="overlay"
-                className="mb-2"
-                trainer={{
-                  id: trainer.id,
-                  first_name: (trainer as any).firstName || (trainer as any).first_name,
-                  last_name: (trainer as any).lastName || (trainer as any).last_name,
-                  name: trainer.name
-                }}
-                engagementStage={stage || 'browsing'}
-              />
-              
-              
-              {getVisibility('stats_ratings') !== 'hidden' && getVisibility('stats_ratings') !== 'blurred' && (
-                <div className="flex items-center gap-3 text-white/90 text-sm mb-2">
-                  <VisibilityAwareRating
-                    rating={trainer.rating}
-                    reviewCount={trainer.reviews}
-                    visibilityState={getVisibility('stats_ratings')}
-                    size="sm"
-                    className="text-white/90"
-                  />
-                </div>
-              )}
-              
-              {/* Top specialties */}
-              <div className="flex gap-1 flex-wrap">
-                {((trainer as any).specializations || (trainer as any).specialties || []).slice(0, 2).map((specialty: string) => (
-                  <Badge 
-                    key={specialty} 
-                    variant="secondary" 
-                    className="text-xs bg-white/20 text-white border-white/30 backdrop-blur-sm"
-                  >
-                    {specialty}
-                  </Badge>
-                ))}
-                {((trainer as any).specializations || (trainer as any).specialties || []).length > 2 && (
-                  <Badge 
-                    variant="secondary" 
-                    className="text-xs bg-white/20 text-white border-white/30 backdrop-blur-sm"
-                  >
-                    +{((trainer as any).specializations || (trainer as any).specialties || []).length - 2}
-                  </Badge>
+        {/* Trainer Info Overlay - only show when basic_information is visible */}
+        {getVisibility('basic_information') === 'visible' && (
+          <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+            <div className="flex items-end justify-between">
+              <div className="flex-1">
+                <VisibilityAwareBasicInfo
+                  name={trainer.name}
+                  location={trainer.location}
+                  visibilityState={getVisibility('basic_information')}
+                  variant="overlay"
+                  className="mb-2"
+                  trainer={{
+                    id: trainer.id,
+                    first_name: (trainer as any).firstName || (trainer as any).first_name,
+                    last_name: (trainer as any).lastName || (trainer as any).last_name,
+                    name: trainer.name
+                  }}
+                  engagementStage={stage || 'browsing'}
+                />
+                
+                
+                {getVisibility('stats_ratings') !== 'hidden' && getVisibility('stats_ratings') !== 'blurred' && (
+                  <div className="flex items-center gap-3 text-white/90 text-sm mb-2">
+                    <VisibilityAwareRating
+                      rating={trainer.rating}
+                      reviewCount={trainer.reviews}
+                      visibilityState={getVisibility('stats_ratings')}
+                      size="sm"
+                      className="text-white/90"
+                    />
+                  </div>
                 )}
+                
+                {/* Top specialties */}
+                <div className="flex gap-1 flex-wrap">
+                  {((trainer as any).specializations || (trainer as any).specialties || []).slice(0, 2).map((specialty: string) => (
+                    <Badge 
+                      key={specialty} 
+                      variant="secondary" 
+                      className="text-xs bg-white/20 text-white border-white/30 backdrop-blur-sm"
+                    >
+                      {specialty}
+                    </Badge>
+                  ))}
+                  {((trainer as any).specializations || (trainer as any).specialties || []).length > 2 && (
+                    <Badge 
+                      variant="secondary" 
+                      className="text-xs bg-white/20 text-white border-white/30 backdrop-blur-sm"
+                    >
+                      +{((trainer as any).specializations || (trainer as any).specialties || []).length - 2}
+                    </Badge>
+                  )}
+                </div>
               </div>
-            </div>
-            
-            {/* Price */}
-            <div className="text-right">
-              <div className="text-xl font-bold text-white drop-shadow-sm">
-                {getTrainerDisplayPrice(trainer)}
+              
+              {/* Price */}
+              <div className="text-right">
+                <div className="text-xl font-bold text-white drop-shadow-sm">
+                  {getTrainerDisplayPrice(trainer)}
+                </div>
+                <div className="text-xs text-white/80">package</div>
               </div>
-              <div className="text-xs text-white/80">package</div>
             </div>
           </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );
