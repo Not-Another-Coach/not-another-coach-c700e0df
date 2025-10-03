@@ -12,6 +12,9 @@ import { useProfileByType } from '@/hooks/useProfileByType';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { ProfileAvatar } from '@/components/ui/profile-avatar';
+import { useEngagementStage } from '@/hooks/useEngagementStage';
+import { useContentVisibility } from '@/hooks/useContentVisibility';
+import { VisibilityAwareName } from '@/components/ui/VisibilityAwareName';
 
 interface Message {
   id: string;
@@ -36,6 +39,30 @@ interface MessagingPopupProps {
     };
   } | null;
 }
+
+// Helper component to display trainer name with progressive visibility
+const TrainerContactName = ({ contact }: { contact: any }) => {
+  const { stage, isGuest } = useEngagementStage(contact.id);
+  const { getVisibility } = useContentVisibility({
+    engagementStage: stage || 'browsing',
+    isGuest
+  });
+
+  return (
+    <VisibilityAwareName
+      trainer={{
+        id: contact.id,
+        first_name: contact.firstName,
+        last_name: contact.lastName,
+        name: contact.name
+      }}
+      visibilityState={getVisibility('basic_information')}
+      engagementStage={stage || 'browsing'}
+      fallbackName={contact.name}
+      className="font-medium text-sm"
+    />
+  );
+};
 
 export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selectedClient }: MessagingPopupProps) => {
   const [selectedTrainerId, setSelectedTrainerId] = useState<string | null>(null);
@@ -563,7 +590,11 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
                              size="md"
                            />
                           <div className="flex-1 text-left">
-                            <p className="font-medium text-sm">{contact.name}</p>
+                            {contact.id && !selectedClient ? (
+                              <TrainerContactName contact={contact} />
+                            ) : (
+                              <p className="font-medium text-sm">{contact.name}</p>
+                            )}
                             <p className="text-xs text-muted-foreground">
                               {contact.location || 'Available for chat'}
                             </p>
@@ -613,10 +644,14 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
                        lastName={selectedContact.lastName}
                        size="sm"
                      />
-                    <div>
-                      <p className="font-medium text-sm">{selectedContact.name}</p>
-                      <p className="text-xs text-muted-foreground">{selectedContact.location}</p>
-                    </div>
+                     <div>
+                       {selectedContact && (selectedContact as any).id && !selectedClient ? (
+                         <TrainerContactName contact={selectedContact} />
+                       ) : (
+                         <p className="font-medium text-sm">{selectedContact.name}</p>
+                       )}
+                       <p className="text-xs text-muted-foreground">{selectedContact.location}</p>
+                     </div>
                     <Badge variant="secondary" className="ml-auto text-xs">
                       Online
                     </Badge>

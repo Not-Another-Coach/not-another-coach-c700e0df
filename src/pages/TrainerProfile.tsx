@@ -274,12 +274,18 @@ export const TrainerProfile = () => {
                 showEngagementBadge={false}
                 compactActions={false}
                 hideViewControls={false}
+                cardState={engagementStage === 'shortlisted' ? 'shortlisted' : 
+                          engagementStage === 'liked' ? 'saved' : 
+                          ['discovery_call_booked', 'discovery_in_progress'].includes(engagementStage || '') ? 'discovery' :
+                          engagementStage === 'active_client' ? 'matched' : 'default'}
+                isShortlisted={engagementStage === 'shortlisted'}
                 onViewProfile={() => {}} // Already on profile page
                 onMessage={handleMessage}
                 onAddToShortlist={() => console.log('Add to shortlist')}
                 onStartConversation={handleMessage}
                 onBookDiscoveryCall={handleBookDiscovery}
                 trainerOffersDiscoveryCalls={trainer.offers_discovery_call || false}
+                engagementStage={engagementStage as any}
               />
             )}
           </div>
