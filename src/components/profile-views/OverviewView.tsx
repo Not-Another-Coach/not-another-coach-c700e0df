@@ -184,22 +184,6 @@ export const OverviewView = ({ trainer, onMessage, onBookDiscovery }: OverviewVi
           </CardContent>
         </Card>
       )}
-
-      {/* Action Buttons */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
-        {onMessage && (
-          <Button onClick={onMessage} className="w-full sm:flex-1">
-            <MessageCircle className="w-4 h-4 mr-2" />
-            Send Message
-          </Button>
-        )}
-        {onBookDiscovery && trainer.offers_discovery_call && (
-          <Button onClick={onBookDiscovery} variant="outline" className="w-full sm:flex-1">
-            <Calendar className="w-4 h-4 mr-2" />
-            Book Discovery Call
-          </Button>
-        )}
-      </div>
     </div>
   );
 };
