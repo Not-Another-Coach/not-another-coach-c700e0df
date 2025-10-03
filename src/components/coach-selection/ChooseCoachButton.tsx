@@ -51,14 +51,22 @@ export const ChooseCoachButton = ({
 
   useEffect(() => {
     const fetchSelectionRequest = async () => {
-      if (!isClient() || !canChooseCoach) return;
+      if (!isClient() || !canChooseCoach) {
+        setLoading(false);
+        return;
+      }
       
       setLoading(true);
-      const result = await getSelectionRequest(trainer.id);
-      if (result.data) {
-        setSelectionRequest(result.data);
+      try {
+        const result = await getSelectionRequest(trainer.id);
+        if (result.data) {
+          setSelectionRequest(result.data);
+        }
+      } catch (error) {
+        console.error('Error fetching selection request:', error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchSelectionRequest();

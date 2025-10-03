@@ -416,22 +416,31 @@ export const EnhancedTrainerCard = memo(({
         break;
 
       case 'discovery':
-        // Add Choose Coach button if handler provided
-        if (onProceedWithCoach) {
-          buttons.unshift(
-            <ChooseCoachButton
-              key="choose-coach"
-              trainer={trainer}
-              stage={stage}
-              onSuccess={() => onProceedWithCoach?.(trainer.id)}
+        // Build buttons in correct order (left to right)
+        const discoveryButtons = [];
+        
+        // Message button first
+        if (onStartConversation && canShowMessage()) {
+          discoveryButtons.push(
+            <Button
+              key="message"
+              variant="default"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onStartConversation(trainer.id);
+              }}
               className="flex-1"
-            />
+            >
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Message
+            </Button>
           );
         }
         
-        // Show Edit Call button if discovery call exists
+        // Edit Call button second
         if (hasDiscoveryCall && onEditDiscoveryCall) {
-          buttons.unshift(
+          discoveryButtons.push(
             <Button
               key="edit-call"
               variant="secondary"
@@ -448,33 +457,21 @@ export const EnhancedTrainerCard = memo(({
           );
         }
         
-        // Show Message button
-        console.log('🔍 Discovery Message Check:', {
-          trainerId: trainer.id,
-          trainerName: trainer.name,
-          stage: stage,
-          hasOnStartConversation: !!onStartConversation,
-          canShowMessageResult: canShowMessage(),
-          cardState: cardState
-        });
-        
-        if (onStartConversation && canShowMessage()) {
-          buttons.unshift(
-            <Button
-              key="message"
-              variant="default"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onStartConversation(trainer.id);
-              }}
+        // Choose Coach button third
+        if (onProceedWithCoach) {
+          discoveryButtons.push(
+            <ChooseCoachButton
+              key="choose-coach"
+              trainer={trainer}
+              stage={stage}
+              onSuccess={() => onProceedWithCoach?.(trainer.id)}
               className="flex-1"
-            >
-              <MessageCircle className="w-4 h-4 mr-2" />
-              Message
-            </Button>
+            />
           );
         }
+        
+        // Add all discovery buttons to the front
+        buttons.unshift(...discoveryButtons);
         break;
 
       case 'matched':
