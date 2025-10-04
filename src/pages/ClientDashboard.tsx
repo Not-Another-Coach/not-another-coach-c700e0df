@@ -257,9 +257,12 @@ export default function ClientDashboard() {
             />
 
             {/* Today's Highlights */}
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-foreground">Today's Highlights</h2>
-              <HighlightsCarousel />
+            <div className="relative overflow-hidden rounded-xl bg-gradient-hero p-6">
+              <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent" />
+              <div className="relative z-10 space-y-4">
+                <h2 className="text-xl font-semibold text-white">Today's Highlights</h2>
+                <HighlightsCarousel />
+              </div>
             </div>
 
             {/* Focus Tasks & Setup Progress - Side by Side */}
@@ -368,10 +371,19 @@ export default function ClientDashboard() {
             )}
 
             {/* Section 1: Today's Highlights */}
-            <HighlightsCarousel />
+            <div className="relative overflow-hidden rounded-xl bg-gradient-hero p-6">
+              <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent" />
+              <div className="relative z-10">
+                <HighlightsCarousel />
+              </div>
+            </div>
 
             {/* Section 2: My Snapshot (Metrics) - for exploration phase */}
-            <MetricsSnapshot onTabChange={handleTabChange} />
+            <Card className="bg-card border-border">
+              <CardContent className="p-6">
+                <MetricsSnapshot onTabChange={handleTabChange} />
+              </CardContent>
+            </Card>
 
             {/* Section 3: My Trainers Carousel */}
             <MyTrainersCarousel onTabChange={handleTabChange} />

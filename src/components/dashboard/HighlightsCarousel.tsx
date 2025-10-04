@@ -175,10 +175,10 @@ export function HighlightsCarousel() {
   if (loading) {
     return (
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold text-foreground">Today's Highlights</h2>
+        <h2 className="text-xl font-semibold text-white">Today's Highlights</h2>
         <div className="flex gap-4 overflow-hidden">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="w-80 h-64 bg-muted rounded-xl animate-pulse flex-shrink-0" />
+            <div key={i} className="w-80 h-64 bg-white/10 rounded-xl animate-pulse flex-shrink-0" />
           ))}
         </div>
       </div>
@@ -188,13 +188,13 @@ export function HighlightsCarousel() {
   if (highlights.length === 0) {
     return (
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold text-foreground">Today's Highlights</h2>
-        <Card className="w-full h-64 bg-gradient-to-br from-secondary-50 to-accent-50">
+        <h2 className="text-xl font-semibold text-white">Today's Highlights</h2>
+        <Card className="w-full h-64 bg-white/10 border-white/20">
           <CardContent className="flex items-center justify-center h-full">
             <div className="text-center">
-              <Star className="h-12 w-12 text-secondary mx-auto mb-3" />
-              <p className="text-muted-foreground">No highlights available today</p>
-              <p className="text-sm text-muted-foreground mt-1">Check back tomorrow for fresh content!</p>
+              <Star className="h-12 w-12 text-white mx-auto mb-3" />
+              <p className="text-white/80">No highlights available today</p>
+              <p className="text-sm text-white/60 mt-1">Check back tomorrow for fresh content!</p>
             </div>
           </CardContent>
         </Card>
@@ -205,9 +205,9 @@ export function HighlightsCarousel() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-foreground">Today's Highlights</h2>
+        <h2 className="text-xl font-semibold text-white">Today's Highlights</h2>
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">
+          <span className="text-sm text-white/80">
             {currentIndex + 1} of {highlights.length}
           </span>
           <div className="flex gap-1">
@@ -216,7 +216,7 @@ export function HighlightsCarousel() {
               size="sm"
               onClick={() => setIsPlaying(!isPlaying)}
               disabled={highlights.length <= 1}
-              className="h-8 w-8 p-0"
+              className="h-8 w-8 p-0 bg-white/10 border-white/30 text-white hover:bg-white/20"
               title={isPlaying ? "Pause auto-scroll" : "Resume auto-scroll"}
             >
               {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
@@ -226,7 +226,7 @@ export function HighlightsCarousel() {
               size="sm"
               onClick={prevSlide}
               disabled={highlights.length <= 1}
-              className="h-8 w-8 p-0"
+              className="h-8 w-8 p-0 bg-white/10 border-white/30 text-white hover:bg-white/20"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -235,7 +235,7 @@ export function HighlightsCarousel() {
               size="sm"
               onClick={nextSlide}
               disabled={highlights.length <= 1}
-              className="h-8 w-8 p-0"
+              className="h-8 w-8 p-0 bg-white/10 border-white/30 text-white hover:bg-white/20"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
