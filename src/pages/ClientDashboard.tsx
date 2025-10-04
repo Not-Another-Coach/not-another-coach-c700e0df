@@ -47,6 +47,15 @@ export default function ClientDashboard() {
     loading: onboardingLoading
   } = useClientOnboarding();
   
+  // Check if client has advanced engagements (beyond survey stage)
+  const hasAdvancedEngagement = engagements.some(
+    e => e.stage === 'discovery_completed' || 
+         e.stage === 'matched' || 
+         e.stage === 'active_client' ||
+         e.discoveryCompletedAt !== null ||
+         e.becameClientAt !== null
+  );
+  
   // Helper functions to adapt data structures for components
   const adaptStepsForTodaysNextSteps = (steps: import("@/hooks/useClientOnboarding").OnboardingStep[]) => {
     return steps.map(step => ({
@@ -114,8 +123,8 @@ export default function ClientDashboard() {
     }
   }, [user, loading, navigate]);
 
-  // Check if survey is incomplete to show CTA (no redirect)
-  const surveyIncomplete = profile && (!profile.quiz_completed || !profile.client_survey_completed);
+  // Check if survey is incomplete to show CTA (only if they haven't progressed beyond survey stage)
+  const surveyIncomplete = profile && (!profile.quiz_completed || !profile.client_survey_completed) && !hasAdvancedEngagement;
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);

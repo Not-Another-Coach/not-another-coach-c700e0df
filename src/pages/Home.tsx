@@ -8,6 +8,7 @@ import { AnonymousBrowse } from "@/components/anonymous/AnonymousBrowse";
 import { MatchQuizModal } from "@/components/anonymous/MatchQuizModal";
 import { Button } from "@/components/ui/button";
 import { useAnonymousSession } from "@/hooks/useAnonymousSession";
+import { supabase } from "@/integrations/supabase/client";
 import { AppLogo } from "@/components/ui/app-logo";
 import { EnhancedHeroSection } from "@/components/homepage/EnhancedHeroSection";
 import { InteractiveValueCards } from "@/components/homepage/InteractiveValueCards";
@@ -98,17 +99,36 @@ export default function Home() {
         navigate('/trainer/profile-setup', { replace: true });
       }
     } else if (currentUserType === 'client') {
-      // Check if client has completed both quiz and survey
-      if (profile && 'quiz_completed' in profile && 'client_survey_completed' in profile) {
-        const surveyCompleted = profile.quiz_completed && profile.client_survey_completed;
-        
-        if (surveyCompleted) {
-          console.log('✅ Home - Client survey complete, redirecting to dashboard');
-          navigate('/client/dashboard', { replace: true });
-        } else {
-          console.log('📝 Home - Client survey incomplete, redirecting to survey');
-          navigate('/client-survey', { replace: true });
-        }
+      // Check if client has completed survey OR has progressed beyond survey stage
+      if (profile && 'quiz_completed' in profile) {
+        // Check engagement data to see if client has progressed beyond survey
+        const checkEngagementAndRedirect = async () => {
+          const { data: engagements } = await supabase
+            .from('client_trainer_engagement')
+            .select('stage, discovery_completed_at, became_client_at')
+            .eq('client_id', user.id);
+
+          // If client has advanced engagements, they've implicitly completed survey
+          const hasAdvancedEngagement = engagements?.some(
+            e => e.stage === 'discovery_completed' || 
+                 e.stage === 'matched' || 
+                 e.stage === 'active_client' ||
+                 e.discovery_completed_at !== null ||
+                 e.became_client_at !== null
+          );
+
+          const surveyCompleted = (profile.quiz_completed && profile.client_survey_completed) || hasAdvancedEngagement;
+          
+          if (surveyCompleted) {
+            console.log('✅ Home - Client survey complete or has advanced engagement, redirecting to dashboard');
+            navigate('/client/dashboard', { replace: true });
+          } else {
+            console.log('📝 Home - Client survey incomplete, redirecting to survey');
+            navigate('/client-survey', { replace: true });
+          }
+        };
+
+        checkEngagementAndRedirect();
       } else {
         console.log('📝 Home - No client profile data, redirecting to survey');
         navigate('/client-survey', { replace: true });
