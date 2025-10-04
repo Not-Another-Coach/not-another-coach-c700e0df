@@ -552,7 +552,7 @@ const ClientSurvey = () => {
       {/* Survey Progress & Content */}
       <div className="pb-16 sm:pb-0">
         {/* Progress indicator - only show after header */}
-        <div className="bg-card border-b px-4 py-3">
+        <div className="bg-card/95 backdrop-blur-sm border-b px-4 py-3">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
             <div className="flex-1 min-w-0">
               <h2 className="text-lg sm:text-xl font-bold truncate">
@@ -585,7 +585,7 @@ const ClientSurvey = () => {
 
       {/* Progress Bar - only show if not fully complete */}
       {!isFullyComplete() && (
-        <div className="bg-card border-b p-3 sm:p-4">
+        <div className="bg-card/95 backdrop-blur-sm border-b p-3 sm:p-4">
           <div className="max-w-4xl mx-auto">
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-3">
               <span className="text-sm font-medium whitespace-nowrap">
@@ -681,7 +681,7 @@ const ClientSurvey = () => {
 
       {/* Step indicators for completed surveys */}
       {isFullyComplete() && (
-        <div className="bg-card border-b p-3 sm:p-4">
+        <div className="bg-card/95 backdrop-blur-sm border-b p-3 sm:p-4">
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center justify-center gap-2 mb-4">
               <span className="text-sm font-medium text-green-600">✓ Survey Complete</span>
@@ -755,7 +755,7 @@ const ClientSurvey = () => {
         </Card>
 
         {/* Navigation - Fixed bottom on mobile, normal on desktop */}
-        <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-3 sm:relative sm:bg-transparent sm:border-t-0 sm:p-0 sm:mt-6">
+        <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t p-3 sm:relative sm:bg-transparent sm:border-t-0 sm:p-0 sm:mt-6">
           <div className="flex justify-between max-w-4xl mx-auto">
             <Button
               variant="outline"
