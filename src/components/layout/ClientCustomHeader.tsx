@@ -66,6 +66,17 @@ export function ClientCustomHeader({
       .join(' ');
   };
 
+  const formatJourneyStageShort = (stage: string) => {
+    // Shortened versions for mobile display
+    const shortMap: Record<string, string> = {
+      'preferences_identified': 'Preferences Set',
+      'exploring_coaches': 'Exploring',
+      'discovery_process': 'Discovery',
+      'active_client': 'Active'
+    };
+    return shortMap[stage] || formatJourneyStage(stage);
+  };
+
   const handleLiveTrackerClick = () => {
     if (currentPage === 'dashboard') {
       const liveActivityElement = document.getElementById('live-activity-tracker');
@@ -96,8 +107,9 @@ export function ClientCustomHeader({
             {/* Your Journey Progress - Compact on mobile, full on desktop */}
             {showJourneyProgress && journeyProgress && (
               <div className="flex items-center gap-1 sm:gap-2 ml-2 sm:ml-6 px-2 sm:px-3 py-1 bg-primary/10 rounded-full">
-                <div className="text-xs sm:text-sm font-medium text-primary truncate max-w-[120px] sm:max-w-none">
-                  {formatJourneyStage(journeyProgress.stage)}
+                <div className="text-xs sm:text-sm font-medium text-primary whitespace-nowrap">
+                  <span className="sm:hidden">{formatJourneyStageShort(journeyProgress.stage)}</span>
+                  <span className="hidden sm:inline">{formatJourneyStage(journeyProgress.stage)}</span>
                 </div>
                 <Button 
                   variant="ghost" 
