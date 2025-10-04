@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -571,7 +571,20 @@ const ClientSurvey = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={currentStep === 1 ? () => navigate('/client/dashboard') : handlePrevious}
+                onClick={() => {
+                  if (currentStep === 1) {
+                    // Confirm before leaving if survey not complete
+                    if (!isFullyComplete() && (formData.primary_goals?.length > 0 || formData.training_location_preference)) {
+                      if (window.confirm('You have unsaved changes. Are you sure you want to leave?')) {
+                        navigate('/client/dashboard');
+                      }
+                    } else {
+                      navigate('/client/dashboard');
+                    }
+                  } else {
+                    handlePrevious();
+                  }
+                }}
                 className="sm:hidden"
               >
                 <ArrowLeft className="h-4 w-4" />
@@ -746,7 +759,10 @@ const ClientSurvey = () => {
       )}
       <div className="max-w-4xl mx-auto p-3 sm:p-6 pb-20 sm:pb-6">
         <Card className="shadow-sm">
-          <CardHeader className="pb-4 sm:pb-6">
+          <CardHeader className="pb-4 sm:pb-6 text-center">
+            <div className="flex justify-center mb-2">
+              {React.createElement(stepIcons[currentStep - 1], { className: "h-8 w-8 text-primary" })}
+            </div>
             <CardTitle className="text-xl sm:text-2xl leading-tight">
               {stepTitles[currentStep - 1]}
             </CardTitle>

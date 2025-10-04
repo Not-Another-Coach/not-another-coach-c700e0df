@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useClientProfile } from "@/hooks/useClientProfile";
@@ -114,16 +114,18 @@ export default function ClientDashboard() {
   }, [user, loading, navigate]);
 
   // Redirect clients to client survey if not completed
-  // Only redirect on initial mount, not on every render
+  // Only redirect on initial mount, not when user explicitly navigates away
+  const hasCheckedSurvey = useRef(false);
+  
   useEffect(() => {
-    if (!loading && !profileLoading && user && profile && profile.user_type === 'client') {
+    if (!loading && !profileLoading && user && profile && profile.user_type === 'client' && !hasCheckedSurvey.current) {
       const surveyCompleted = profile.quiz_completed && profile.client_survey_completed;
       if (!surveyCompleted) {
-        // Only redirect to survey on initial load, don't interfere with navigation
-        const timer = setTimeout(() => {
-          navigate('/client-survey', { replace: true });
-        }, 100);
-        return () => clearTimeout(timer);
+        // Mark as checked so we don't redirect again
+        hasCheckedSurvey.current = true;
+        // Only redirect to survey on initial load
+        navigate('/client-survey', { replace: true });
+        return;
       }
       
       // If survey is complete but they're still on profile_setup stage, trigger journey update
@@ -131,6 +133,8 @@ export default function ClientDashboard() {
         // Don't redirect, just refetch journey to update the stage
         refetchJourney();
       }
+      
+      hasCheckedSurvey.current = true;
     }
   }, [user?.id, profile?.id, loading, profileLoading]); // Only depend on IDs, not full objects
 
