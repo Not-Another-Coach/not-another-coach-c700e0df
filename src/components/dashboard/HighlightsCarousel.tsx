@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { ContentService } from '@/services/content';
+import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from '@/components/ui/carousel';
 
 interface Highlight {
   id: string;
@@ -26,21 +27,31 @@ export function HighlightsCarousel() {
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
+  const [api, setApi] = useState<CarouselApi>();
 
   useEffect(() => {
     loadTodaysHighlights();
   }, [user]);
 
-  // Auto-cycle through highlights
+  // Track current slide when carousel changes
   useEffect(() => {
-    if (!isPlaying || highlights.length <= 1) return;
+    if (!api) return;
+
+    api.on("select", () => {
+      setCurrentIndex(api.selectedScrollSnap());
+    });
+  }, [api]);
+
+  // Auto-cycle through highlights using Embla API
+  useEffect(() => {
+    if (!api || !isPlaying || highlights.length <= 1) return;
 
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % highlights.length);
+      api.scrollNext();
     }, 4000); // Change every 4 seconds
 
     return () => clearInterval(interval);
-  }, [isPlaying, highlights.length]);
+  }, [api, isPlaying, highlights.length]);
 
   const loadTodaysHighlights = async () => {
     if (!user) return;
@@ -135,11 +146,11 @@ export function HighlightsCarousel() {
   };
 
   const nextSlide = () => {
-    setCurrentIndex((prev) => (prev + 1) % highlights.length);
+    api?.scrollNext();
   };
 
   const prevSlide = () => {
-    setCurrentIndex((prev) => (prev - 1 + highlights.length) % highlights.length);
+    api?.scrollPrev();
   };
 
   const getContentTypeIcon = (type: string) => {
@@ -243,88 +254,93 @@ export function HighlightsCarousel() {
         </div>
       </div>
 
-      <div className="relative overflow-hidden">
-        <div 
-          className="flex transition-transform duration-300 ease-in-out gap-4"
-          style={{ transform: `translateX(-${currentIndex * 320}px)` }}
-        >
+      <Carousel 
+        setApi={setApi}
+        opts={{
+          loop: true,
+          align: "start",
+        }}
+        className="w-full"
+      >
+        <CarouselContent className="-ml-4">
           {highlights.map((highlight) => (
-            <Card 
-              key={highlight.id}
-              className="w-80 flex-shrink-0 group cursor-pointer hover:shadow-lg transition-all duration-200 bg-gradient-to-br from-card to-secondary-50/30"
-              onClick={() => handleViewTrainer(highlight)}
-            >
-              <CardContent className="p-0 relative h-64">
-                {/* Background Image */}
-                <div className="absolute inset-0 rounded-lg overflow-hidden">
-                  {highlight.media_urls[0] ? (
-                    <img 
-                      src={highlight.media_urls[0]} 
-                      alt={highlight.title}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-primary-100 to-secondary-100" />
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900/70 via-gray-900/20 to-transparent" />
-                </div>
+            <CarouselItem key={highlight.id} className="pl-4 basis-80">
+              <Card 
+                className="group cursor-pointer hover:shadow-lg transition-all duration-200 bg-gradient-to-br from-card to-secondary-50/30"
+                onClick={() => handleViewTrainer(highlight)}
+              >
+                <CardContent className="p-0 relative h-64">
+                  {/* Background Image */}
+                  <div className="absolute inset-0 rounded-lg overflow-hidden">
+                    {highlight.media_urls[0] ? (
+                      <img 
+                        src={highlight.media_urls[0]} 
+                        alt={highlight.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-primary-100 to-secondary-100" />
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900/70 via-gray-900/20 to-transparent" />
+                  </div>
 
-                {/* Content Type Badge */}
-                <div className="absolute top-3 left-3">
-                  <Badge variant="secondary" className="bg-white/90 text-gray-800">
-                    <span className="mr-1">{getContentTypeIcon(highlight.content_type)}</span>
-                    {getContentTypeLabel(highlight.content_type)}
-                  </Badge>
-                </div>
+                  {/* Content Type Badge */}
+                  <div className="absolute top-3 left-3">
+                    <Badge variant="secondary" className="bg-white/90 text-gray-800">
+                      <span className="mr-1">{getContentTypeIcon(highlight.content_type)}</span>
+                      {getContentTypeLabel(highlight.content_type)}
+                    </Badge>
+                  </div>
 
-                {/* Media Play Button for videos */}
-                {highlight.media_urls[0]?.includes('video') && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="bg-white/20 backdrop-blur-sm rounded-full p-4 group-hover:bg-white/30 transition-colors">
-                      <Play className="h-8 w-8 text-white" />
+                  {/* Media Play Button for videos */}
+                  {highlight.media_urls[0]?.includes('video') && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="bg-white/20 backdrop-blur-sm rounded-full p-4 group-hover:bg-white/30 transition-colors">
+                        <Play className="h-8 w-8 text-white" />
+                      </div>
                     </div>
-                  </div>
-                )}
-
-                {/* Content */}
-                <div className="absolute bottom-0 left-0 right-0 p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <img 
-                      src={highlight.trainer_image} 
-                      alt={highlight.trainer_name}
-                      className="w-6 h-6 rounded-full object-cover"
-                    />
-                    <span className="text-white text-sm font-medium">
-                      {highlight.trainer_name}
-                    </span>
-                  </div>
-                  
-                  <h3 className="text-white font-semibold text-lg mb-1 line-clamp-2">
-                    {highlight.title}
-                  </h3>
-                  
-                  {highlight.description && (
-                    <p className="text-white/90 text-sm line-clamp-2">
-                      {highlight.description}
-                    </p>
                   )}
 
-                  <Button 
-                    size="sm" 
-                    className="mt-3 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border-white/20"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleViewTrainer(highlight);
-                    }}
-                  >
-                    View Trainer
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                  {/* Content */}
+                  <div className="absolute bottom-0 left-0 right-0 p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <img 
+                        src={highlight.trainer_image} 
+                        alt={highlight.trainer_name}
+                        className="w-6 h-6 rounded-full object-cover"
+                      />
+                      <span className="text-white text-sm font-medium">
+                        {highlight.trainer_name}
+                      </span>
+                    </div>
+                    
+                    <h3 className="text-white font-semibold text-lg mb-1 line-clamp-2">
+                      {highlight.title}
+                    </h3>
+                    
+                    {highlight.description && (
+                      <p className="text-white/90 text-sm line-clamp-2">
+                        {highlight.description}
+                      </p>
+                    )}
+
+                    <Button 
+                      size="sm" 
+                      className="mt-3 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border-white/20"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleViewTrainer(highlight);
+                      }}
+                    >
+                      View Trainer
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </CarouselItem>
           ))}
-        </div>
-      </div>
+        </CarouselContent>
+      </Carousel>
 
       {/* Dots indicator */}
       {highlights.length > 1 && (
@@ -332,7 +348,7 @@ export function HighlightsCarousel() {
           {highlights.map((_, index) => (
             <button
               key={index}
-              onClick={() => setCurrentIndex(index)}
+              onClick={() => api?.scrollTo(index)}
               className={`w-2 h-2 rounded-full transition-colors ${
                 index === currentIndex ? 'bg-primary' : 'bg-muted'
               }`}
