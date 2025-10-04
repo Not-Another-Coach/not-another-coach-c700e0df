@@ -9,12 +9,12 @@ import { useConversations } from "@/hooks/useConversations";
 import { useMemo } from "react";
 
 interface ClientCustomHeaderProps {
-  currentPage: 'dashboard' | 'journey' | 'trainers' | 'explore';
-  profile: any;
+  currentPage?: 'dashboard' | 'journey' | 'trainers' | 'explore';
+  profile?: any;
   journeyProgress?: any;
   notifications?: any[];
   upcomingCalls?: any[];
-  onMessagingOpen: () => void;
+  onMessagingOpen?: () => void;
   showJourneyProgress?: boolean;
   // Optional navigation state to pass when clicking the logo
   logoNavigateState?: any;

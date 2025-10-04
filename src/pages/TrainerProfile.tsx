@@ -22,6 +22,7 @@ import { useEngagementStage } from '@/hooks/useEngagementStage';
 import { toast } from '@/hooks/use-toast';
 import { useContentVisibility } from '@/hooks/useContentVisibility';
 import { VisibilityAwareName } from '@/components/ui/VisibilityAwareName';
+import { ClientCustomHeader } from '@/components/layout/ClientCustomHeader';
 
 export const TrainerProfile = () => {
   const { trainerId } = useParams<{ trainerId: string }>();
@@ -201,8 +202,12 @@ export const TrainerProfile = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header for anonymous users */}
-      {!user && (
+      {/* Header */}
+      {user ? (
+        <ClientCustomHeader
+          onMessagingOpen={() => setIsMessagingOpen(true)}
+        />
+      ) : (
         <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
