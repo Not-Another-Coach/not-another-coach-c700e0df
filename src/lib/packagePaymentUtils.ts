@@ -150,3 +150,30 @@ export function formatPaymentOptionsForCustomer(calculation: PackagePaymentCalcu
     return `Choose: ${descriptions.join(' OR ')}`;
   }
 }
+
+/**
+ * Format package duration for display
+ * @param pkg - Package with duration information
+ * @returns Human-readable duration string
+ */
+export function formatPackageDuration(pkg: { 
+  duration_weeks?: number; 
+  duration_months?: number; 
+  sessions?: number;
+  durationWeeks?: number;
+  durationMonths?: number;
+}): string {
+  const weeks = pkg.duration_weeks || pkg.durationWeeks;
+  const months = pkg.duration_months || pkg.durationMonths;
+  
+  if (months) {
+    return months === 1 ? '1 month' : `${months} months`;
+  }
+  if (weeks) {
+    return weeks === 1 ? '1 week' : `${weeks} weeks`;
+  }
+  if (pkg.sessions) {
+    return `${pkg.sessions} sessions`;
+  }
+  return 'Per session';
+}

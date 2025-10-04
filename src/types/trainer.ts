@@ -122,6 +122,31 @@ export type TrainerCardLayout = 'full' | 'carousel' | 'grid';
 // View modes for trainer card content - updated to support dynamic transformations
 export type TrainerCardViewMode = 'instagram' | 'features' | 'transformations' | (string & {});
 
+// Package-related types for comparison display
+export interface PackageInclusion {
+  text: string;
+  icon?: string;
+}
+
+export interface TrainerPackageExtended {
+  id: string;
+  name: string;
+  price: number;
+  currency: string;
+  duration_weeks?: number;
+  duration_months?: number;
+  sessions?: number;
+  description?: string;
+  extraInclusions?: string[];
+  durationWeeks?: number;
+  durationMonths?: number;
+}
+
+export interface TrainerPackageData {
+  baseInclusions?: string[];
+  package_options: TrainerPackageExtended[];
+}
+
 // Unified trainer type that works with all interfaces
 export type AnyTrainer = Trainer | ConsolidatedTrainer | UnifiedTrainer;
 

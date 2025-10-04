@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { PositionedAvatar } from '@/components/ui/positioned-avatar';
 import { Star, MapPin, Clock, Award, Users, MessageCircle, Calendar, User } from 'lucide-react';
-import { AnyTrainer } from '@/types/trainer';
+import { AnyTrainer, TrainerPackageExtended } from '@/types/trainer';
 import { getTrainerDisplayPrice } from '@/lib/priceUtils';
 import { useContentVisibility } from '@/hooks/useContentVisibility';
 import { VisibilityAwarePricing } from '@/components/ui/VisibilityAwarePricing';
@@ -12,6 +12,7 @@ import { VisibilityAwareImage } from '@/components/ui/VisibilityAwareImage';
 import { VisibilityAwareText } from '@/components/ui/VisibilityAwareText';
 import { VisibilityAwareSection } from '@/components/ui/VisibilityAwareSection';
 import { VisibilityAwareBasicInfo } from '@/components/ui/VisibilityAwareBasicInfo';
+import { PackageComparisonSection } from './PackageComparisonSection';
 
 interface OverviewViewProps {
   trainer: AnyTrainer;
@@ -131,6 +132,14 @@ export const OverviewView = ({ trainer, onMessage, onBookDiscovery }: OverviewVi
           </div>
         </CardContent>
       </Card>
+
+      {/* Package Comparison Section - Only shown when shortlisted or higher */}
+      {engagementStage && ['shortlisted', 'matched', 'discovery_completed', 'active_client'].includes(engagementStage) && (
+        <PackageComparisonSection
+          baseInclusions={(trainer as any).baseInclusions}
+          packages={((trainer as any).package_options || []) as TrainerPackageExtended[]}
+        />
+      )}
 
       {/* Specialties */}
       <Card>
