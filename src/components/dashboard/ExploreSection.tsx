@@ -215,11 +215,6 @@ export function ExploreSection({ isActiveClient, journeyProgress }: ExploreSecti
     navigate(`/book-discovery-call/${trainerId}`);
   };
 
-  // Don't show if user is an active client
-  if (isActiveClient) {
-    return null;
-  }
-
   // Show "Ready to Explore" state for users in exploring_coaches stage
   if (journeyProgress?.stage === 'exploring_coaches') {
     return (
