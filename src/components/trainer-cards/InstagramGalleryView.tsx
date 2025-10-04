@@ -79,6 +79,11 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
       try {
         setLoading(true);
         
+        console.log('[IMAGE FETCH] Starting fetch for trainer:', {
+          trainerId: trainer.id,
+          trainerName: trainer.name
+        });
+        
         // Fetch uploaded images
         const { data: uploadedImages, error: uploadedError } = await supabase
           .from('trainer_uploaded_images')
@@ -89,6 +94,12 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
 
         if (uploadedError) throw uploadedError;
 
+        console.log('[IMAGE FETCH] Uploaded images:', {
+          trainerId: trainer.id,
+          count: uploadedImages?.length || 0,
+          images: uploadedImages
+        });
+
         // Fetch Instagram selections
         const { data: instagramImages, error: instagramError } = await supabase
           .from('trainer_instagram_selections')
@@ -98,6 +109,12 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
           .order('display_order', { ascending: true });
 
         if (instagramError) throw instagramError;
+
+        console.log('[IMAGE FETCH] Instagram images:', {
+          trainerId: trainer.id,
+          count: instagramImages?.length || 0,
+          images: instagramImages
+        });
 
         // Count selected images and auto-calculate grid size
         const totalSelectedImages = (uploadedImages?.length || 0) + (instagramImages?.length || 0);
@@ -122,29 +139,23 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
           }))
         ].sort((a, b) => a.displayOrder - b.displayOrder);
         
-        console.log(`InstagramGalleryView Debug:`, {
+        console.log('[IMAGE FETCH] Final combined images:', {
+          trainerId: trainer.id,
           totalSelectedImages,
           autoGridSize,
           allImagesLength: allImages.length,
-          allImages: allImages.map(img => ({
-            id: img.id,
-            type: img.type,
-            url: typeof img.url === 'string' ? img.url.substring(0, 50) + '...' : '...'
-          }))
+          firstImageUrl: allImages[0]?.url?.substring(0, 100)
         });
         
         setDisplayImages(allImages);
       } catch (error) {
-        console.error('❌ CRITICAL ERROR fetching trainer images:', {
+        console.error('[IMAGE FETCH] ❌ ERROR fetching trainer images:', {
           trainerId: trainer.id,
           trainerName: trainer.name,
           error: error,
-          errorMessage: error instanceof Error ? error.message : String(error),
-          errorStack: error instanceof Error ? error.stack : undefined
+          errorMessage: error instanceof Error ? error.message : String(error)
         });
         
-        // Don't fall back to profile picture - let the component show empty state
-        // This will help us identify the real issue
         setDisplayImages([]);
         setGridSize(0);
       } finally {
