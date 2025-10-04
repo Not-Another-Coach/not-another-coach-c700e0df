@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star, MapPin, Instagram, Play, Image as ImageIcon } from "lucide-react";
 import { AnyTrainer } from "@/types/trainer";
-import { getTrainerDisplayPrice } from "@/lib/priceUtils";
+import { getTrainerDisplayPrice, getVisibilityAwarePrice } from "@/lib/priceUtils";
 import { supabase } from "@/integrations/supabase/client";
 import { FileUploadService } from "@/services";
 import { useEffect, useState } from "react";
@@ -288,7 +288,7 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
               {/* Price */}
               <div className="text-right">
                 <div className="text-xl font-bold text-white drop-shadow-sm">
-                  {getTrainerDisplayPrice(trainer)}
+                  {getVisibilityAwarePrice(trainer, getVisibility('pricing_discovery_call'))}
                 </div>
                 <div className="text-xs text-white/80">package</div>
               </div>
