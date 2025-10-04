@@ -37,6 +37,7 @@ const ClientSurvey = () => {
   
   // Check if this is edit mode (navigating from dashboard)
   const isEditMode = location.state?.editMode === true;
+  const cachedProfile = location.state?.cachedProfile;
 
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -131,7 +132,8 @@ const ClientSurvey = () => {
     });
 
     // Wait for all loading to complete before making navigation decisions
-    if (loading || profileLoading) {
+    // Skip loading wait if we have cached profile from navigation
+    if ((loading || profileLoading) && !cachedProfile) {
       console.log('⏳ ClientSurvey - Still loading, waiting...');
       return;
     }
@@ -181,36 +183,38 @@ const ClientSurvey = () => {
     });
 
     // Fast-path for edit mode: authenticated users with existing profiles
-    if (isEditMode && profile && profile.id && !isMigrating && !hasInitialized.current) {
+    // Use cachedProfile if available, otherwise wait for profile
+    const profileData = cachedProfile || profile;
+    if (isEditMode && profileData && profileData.id && !isMigrating && !hasInitialized.current) {
       hasInitialized.current = true;
-      console.log('⚡ Fast-path initialization (edit mode)');
+      console.log('⚡ Fast-path initialization (edit mode)', cachedProfile ? 'with cached profile' : 'with loaded profile');
       
       const initialData = {
-        primary_goals: profile.primary_goals || [],
-        secondary_goals: profile.secondary_goals || [],
-        training_location_preference: profile.training_location_preference || null,
-        open_to_virtual_coaching: profile.open_to_virtual_coaching ?? false,
-        preferred_training_frequency: profile.preferred_training_frequency ? parseInt(profile.preferred_training_frequency) : null,
-        preferred_time_slots: profile.preferred_time_slots || [],
-        start_timeline: profile.start_timeline || null,
-        preferred_coaching_style: profile.preferred_coaching_style || [],
-        motivation_factors: profile.motivation_factors || [],
-        client_personality_type: profile.client_personality_type || [],
-        experience_level: profile.experience_level || "beginner",
-        location: (profile as any).location || null,
-        fitness_equipment_access: (profile as any).fitness_equipment_access || [],
-        lifestyle_description: (profile as any).lifestyle_description || [],
-        lifestyle_other: (profile as any).lifestyle_other || null,
-        health_conditions: (profile as any).health_conditions || null,
-        has_specific_event: (profile as any).has_specific_event || null,
-        specific_event_details: (profile as any).specific_event_details || null,
-        specific_event_date: (profile as any).specific_event_date ? new Date((profile as any).specific_event_date) : null,
-        preferred_package_type: profile.preferred_package_type || null,
-        budget_range_min: profile.budget_range_min || null,
-        budget_range_max: profile.budget_range_max || null,
-        budget_flexibility: profile.budget_flexibility || "flexible",
-        waitlist_preference: profile.waitlist_preference ?? null,
-        flexible_scheduling: profile.flexible_scheduling ?? false,
+        primary_goals: profileData.primary_goals || [],
+        secondary_goals: profileData.secondary_goals || [],
+        training_location_preference: profileData.training_location_preference || null,
+        open_to_virtual_coaching: profileData.open_to_virtual_coaching ?? false,
+        preferred_training_frequency: profileData.preferred_training_frequency ? parseInt(profileData.preferred_training_frequency) : null,
+        preferred_time_slots: profileData.preferred_time_slots || [],
+        start_timeline: profileData.start_timeline || null,
+        preferred_coaching_style: profileData.preferred_coaching_style || [],
+        motivation_factors: profileData.motivation_factors || [],
+        client_personality_type: profileData.client_personality_type || [],
+        experience_level: profileData.experience_level || "beginner",
+        location: (profileData as any).location || null,
+        fitness_equipment_access: (profileData as any).fitness_equipment_access || [],
+        lifestyle_description: (profileData as any).lifestyle_description || [],
+        lifestyle_other: (profileData as any).lifestyle_other || null,
+        health_conditions: (profileData as any).health_conditions || null,
+        has_specific_event: (profileData as any).has_specific_event || null,
+        specific_event_details: (profileData as any).specific_event_details || null,
+        specific_event_date: (profileData as any).specific_event_date ? new Date((profileData as any).specific_event_date) : null,
+        preferred_package_type: profileData.preferred_package_type || null,
+        budget_range_min: profileData.budget_range_min || null,
+        budget_range_max: profileData.budget_range_max || null,
+        budget_flexibility: profileData.budget_flexibility || "flexible",
+        waitlist_preference: profileData.waitlist_preference ?? null,
+        flexible_scheduling: profileData.flexible_scheduling ?? false,
         client_survey_completed: false,
       };
       

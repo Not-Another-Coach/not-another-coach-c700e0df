@@ -137,7 +137,7 @@ export default function ClientDashboard() {
         navigate('/client/explore');
         break;
       case 'preferences':
-        navigate('/client-survey', { state: { editMode: true } });
+        navigate('/client-survey', { state: { editMode: true, cachedProfile: profile } });
         break;
       case 'payments':
         navigate('/payments');
