@@ -60,18 +60,21 @@ class VisibilityConfigServiceClass {
     const cachedValue = cache.get(key);
     
     // DEBUG: Log cache lookups for troubleshooting
-    console.log(`VisibilityConfigService Debug: ${contentType} for ${stageGroup}`, {
+    console.log(`[VISIBILITY DEBUG] VisibilityConfigService - Lookup: ${contentType} for ${stageGroup}`, {
       key,
       cachedValue,
       cacheSize: cache.size,
-      allCacheKeys: Array.from(cache.keys())
+      allCacheKeys: Array.from(cache.keys()).slice(0, 5) // Show first 5 keys
     });
     
-    if (cachedValue) return cachedValue;
+    if (cachedValue) {
+      console.log(`[VISIBILITY DEBUG] VisibilityConfigService - FOUND in cache:`, { contentType, stageGroup, value: cachedValue });
+      return cachedValue;
+    }
     
     // For gallery_images, default to visible for browsing scenarios (but hidden for guests)
     if (contentType === 'gallery_images' && ['browsing', 'liked', 'shortlisted'].includes(stageGroup)) {
-      console.log('VisibilityConfigService: Using visible default for gallery_images', { contentType, stageGroup });
+      console.log('[VISIBILITY DEBUG] VisibilityConfigService - Using FALLBACK visible for gallery_images', { contentType, stageGroup });
       return 'visible';
     }
     

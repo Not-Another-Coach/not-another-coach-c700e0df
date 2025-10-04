@@ -52,21 +52,24 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
   const [loading, setLoading] = useState(true);
   const [gridSize, setGridSize] = useState<number>(6);
 
-  // Add visibility logic
+  // Add engagement stage and visibility logic
   const { stage, isGuest } = useEngagementStage(trainer.id);
-  const { getVisibility, loading: visibilityLoading } = useContentVisibility({
+  const { visibilityMap, getVisibility, loading: visibilityLoading } = useContentVisibility({
     engagementStage: stage || 'browsing',
     isGuest
   });
 
   const galleryVisibility = getVisibility('gallery_images');
 
-  // Debug visibility system
-  console.log('InstagramGalleryView Debug - Visibility:', {
+  // Enhanced debug visibility system
+  console.log('[VISIBILITY DEBUG] InstagramGalleryView:', {
     trainerId: trainer.id,
+    trainerName: trainer.name,
     engagementStage: stage || 'browsing',
+    isGuest,
     galleryVisibility,
-    visibilityLoading
+    visibilityLoading,
+    allVisibilityMap: visibilityMap
   });
 
   useEffect(() => {

@@ -71,16 +71,24 @@ export function useContentVisibility({ engagementStage, isGuest = false }: UseCo
       try {
         const stageGroup = getStageGroup(engagementStage, isGuest);
         
+        console.log('[VISIBILITY DEBUG] useContentVisibility - Fetching:', {
+          engagementStage,
+          isGuest,
+          stageGroup,
+          contentTypes
+        });
+        
         const visibilityPromises = contentTypes.map(async (contentType) => {
           // Use system-wide visibility configuration
           const visibility = await getContentVisibilityByGroup(contentType, stageGroup);
           
           // Debug visibility fetching
           if (contentType === 'gallery_images') {
-            console.log('useContentVisibility Debug - Gallery Images:', {
+            console.log('[VISIBILITY DEBUG] useContentVisibility - Gallery Images Result:', {
               contentType,
               stageGroup,
               engagementStage,
+              isGuest,
               visibility
             });
           }
@@ -107,6 +115,13 @@ export function useContentVisibility({ engagementStage, isGuest = false }: UseCo
           professional_journey: 'visible',
           professional_milestones: 'visible'
         } as ContentVisibilityMap);
+
+        console.log('[VISIBILITY DEBUG] useContentVisibility - Final Map:', {
+          engagementStage,
+          isGuest,
+          stageGroup,
+          visibilityMap: newVisibilityMap
+        });
 
         setVisibilityMap(newVisibilityMap);
       } catch (error) {
