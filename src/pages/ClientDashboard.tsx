@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useClientProfile } from "@/hooks/useClientProfile";
 import { useUserRoles } from "@/hooks/useUserRoles";
@@ -38,6 +38,7 @@ export default function ClientDashboard() {
   const { engagements } = useTrainerEngagement();
   const { notifications, upcomingCalls } = useDiscoveryCallNotifications();
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState("summary"); // Keep for compatibility with MetricsSnapshot
   const [isMessagingOpen, setIsMessagingOpen] = useState(false);
   const { 
@@ -118,25 +119,28 @@ export default function ClientDashboard() {
   const hasCheckedSurvey = useRef(false);
   
   useEffect(() => {
+    // If coming explicitly from survey, skip redirect once
+    // Note: location.state persists in history; this simply prevents unintended redirect loops
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const fromSurvey = (location.state as any)?.fromSurvey;
+    if (fromSurvey) {
+      hasCheckedSurvey.current = true;
+      return;
+    }
+
     if (!loading && !profileLoading && user && profile && profile.user_type === 'client' && !hasCheckedSurvey.current) {
       const surveyCompleted = profile.quiz_completed && profile.client_survey_completed;
       if (!surveyCompleted) {
-        // Mark as checked so we don't redirect again
         hasCheckedSurvey.current = true;
-        // Only redirect to survey on initial load
         navigate('/client-survey', { replace: true });
         return;
       }
-      
-      // If survey is complete but they're still on profile_setup stage, trigger journey update
       if (surveyCompleted && journeyProgress?.stage === 'preferences_identified') {
-        // Don't redirect, just refetch journey to update the stage
         refetchJourney();
       }
-      
       hasCheckedSurvey.current = true;
     }
-  }, [user?.id, profile?.id, loading, profileLoading]); // Only depend on IDs, not full objects
+  }, [user?.id, profile?.id, loading, profileLoading, location.state]);
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);

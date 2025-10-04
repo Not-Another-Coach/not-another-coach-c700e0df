@@ -441,7 +441,7 @@ const ClientSurvey = () => {
           title: "Survey completed!",
           description: "You can now discover and match with trainers.",
         });
-        navigate('/client/dashboard');
+        navigate('/client/dashboard', { state: { fromSurvey: true } });
       }
     } catch (error) {
       console.error('Error in handleNext:', error);
@@ -576,10 +576,10 @@ const ClientSurvey = () => {
                     // Confirm before leaving if survey not complete
                     if (!isFullyComplete() && (formData.primary_goals?.length > 0 || formData.training_location_preference)) {
                       if (window.confirm('You have unsaved changes. Are you sure you want to leave?')) {
-                        navigate('/client/dashboard');
+                        navigate('/client/dashboard', { state: { fromSurvey: true } });
                       }
                     } else {
-                      navigate('/client/dashboard');
+                      navigate('/client/dashboard', { state: { fromSurvey: true } });
                     }
                   } else {
                     handlePrevious();
