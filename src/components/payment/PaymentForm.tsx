@@ -101,6 +101,7 @@ export const PaymentForm = ({
         <PackagePaymentSelector
           package={packageData}
           onPaymentSelection={handlePaymentComplete}
+          packageDuration={packageDuration}
         />
       </DialogContent>
     </Dialog>

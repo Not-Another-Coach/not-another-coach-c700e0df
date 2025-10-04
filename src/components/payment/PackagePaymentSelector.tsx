@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { CreditCard, Calendar, Check } from "lucide-react";
+import { CreditCard, Calendar, Check, Lock, Shield } from "lucide-react";
 import { 
   calculatePackagePaymentOptions, 
   calculateInitialPayment, 
@@ -25,12 +25,14 @@ interface PackagePaymentSelectorProps {
   };
   onPaymentSelection: (paymentRecord: PaymentRecord) => void;
   loading?: boolean;
+  packageDuration?: string;
 }
 
 export function PackagePaymentSelector({ 
   package: pkg, 
   onPaymentSelection, 
-  loading = false 
+  loading = false,
+  packageDuration
 }: PackagePaymentSelectorProps) {
   const calculation = calculatePackagePaymentOptions(pkg);
   const { processPayment, processing } = useManualPayment();
@@ -59,21 +61,37 @@ export function PackagePaymentSelector({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="p-4 border rounded-lg bg-muted/50">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">{option.description}</p>
-                {option.mode === 'installments' && option.installmentCount && (
-                  <p className="text-sm text-muted-foreground mt-1">
-                    First payment: {getCurrencySymbol(pkg.currency)}{option.installmentAmount?.toFixed(2)}
-                  </p>
-                )}
+          {/* Package Details Breakdown */}
+          <div className="p-4 border rounded-lg bg-muted/50 space-y-2">
+            <h4 className="font-medium text-sm">Package Details</h4>
+            <div className="space-y-1 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Package:</span>
+                <span className="font-medium">{pkg.name}</span>
               </div>
-              <Badge variant="default">
-                {option.mode === 'upfront' ? 'Full Payment' : 'Installments'}
-              </Badge>
+              {packageDuration && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Duration:</span>
+                  <span className="font-medium">{packageDuration}</span>
+                </div>
+              )}
+              <div className="flex justify-between pt-1 border-t">
+                <span className="text-muted-foreground">Total:</span>
+                <span className="font-semibold">{getCurrencySymbol(pkg.currency)}{pkg.price.toFixed(2)}</span>
+              </div>
             </div>
           </div>
+
+          {option.mode === 'installments' && option.installmentCount && (
+            <div className="p-3 border rounded-lg bg-accent/50">
+              <p className="text-sm text-muted-foreground">
+                First payment: {getCurrencySymbol(pkg.currency)}{option.installmentAmount?.toFixed(2)}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Remaining payments will be processed automatically
+              </p>
+            </div>
+          )}
           
           <Button 
             onClick={handlePayment} 
@@ -81,8 +99,25 @@ export function PackagePaymentSelector({
             className="w-full"
             size="lg"
           >
-            {processing ? 'Processing Payment...' : `Pay ${getCurrencySymbol(pkg.currency)}${calculateInitialPayment(calculation, option.mode).toFixed(2)}`}
+            {processing ? 'Processing Payment...' : `Secure My Spot – ${getCurrencySymbol(pkg.currency)}${calculateInitialPayment(calculation, option.mode).toFixed(2)}`}
           </Button>
+
+          {/* Trust Signals */}
+          <div className="flex items-center justify-center gap-4 pt-3 border-t">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Lock className="h-3 w-3" />
+              <span>Secure checkout</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Shield className="h-3 w-3" />
+              <span>Payment protected</span>
+            </div>
+          </div>
+
+          {/* Cancellation Policy */}
+          <p className="text-xs text-center text-muted-foreground">
+            Cancel anytime before your first session for a full refund
+          </p>
         </CardContent>
       </Card>
     );
@@ -101,6 +136,27 @@ export function PackagePaymentSelector({
         </p>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Package Details Breakdown */}
+        <div className="p-4 border rounded-lg bg-muted/50 space-y-2">
+          <h4 className="font-medium text-sm">Package Details</h4>
+          <div className="space-y-1 text-sm">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Package:</span>
+              <span className="font-medium">{pkg.name}</span>
+            </div>
+            {packageDuration && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Duration:</span>
+                <span className="font-medium">{packageDuration}</span>
+              </div>
+            )}
+            <div className="flex justify-between pt-1 border-t">
+              <span className="text-muted-foreground">Total:</span>
+              <span className="font-semibold">{getCurrencySymbol(pkg.currency)}{pkg.price.toFixed(2)}</span>
+            </div>
+          </div>
+        </div>
+
         <RadioGroup value={selectedMode} onValueChange={(value) => setSelectedMode(value as 'upfront' | 'installments')}>
           {calculation.availableOptions.map((option) => (
             <div key={option.mode} className="space-y-2">
@@ -158,8 +214,8 @@ export function PackagePaymentSelector({
           ))}
         </RadioGroup>
 
-        <div className="border-t pt-4">
-          <div className="flex items-center justify-between mb-4">
+        <div className="border-t pt-4 space-y-4">
+          <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">
               {selectedMode === 'upfront' ? 'Total Amount:' : 'First Payment:'}
             </span>
@@ -174,8 +230,25 @@ export function PackagePaymentSelector({
             className="w-full"
             size="lg"
           >
-            {processing ? 'Processing Payment...' : `Process Payment`}
+            {processing ? 'Processing Payment...' : `Pay Securely – ${getCurrencySymbol(pkg.currency)}${calculateInitialPayment(calculation, selectedMode).toFixed(2)}`}
           </Button>
+
+          {/* Trust Signals */}
+          <div className="flex items-center justify-center gap-4 pt-3 border-t">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Lock className="h-3 w-3" />
+              <span>Secure checkout</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Shield className="h-3 w-3" />
+              <span>Payment protected</span>
+            </div>
+          </div>
+
+          {/* Cancellation Policy */}
+          <p className="text-xs text-center text-muted-foreground">
+            Cancel anytime before your first session for a full refund
+          </p>
         </div>
       </CardContent>
     </Card>
