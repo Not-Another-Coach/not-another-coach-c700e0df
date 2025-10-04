@@ -116,32 +116,7 @@ export const useClientJourneyProgress = () => {
         currentStage = stageMap[journeyStage] || 'preferences_identified';
       }
 
-      // Check if survey is not completed - should show journey but not redirect
-      if (currentStage === 'preferences_identified' && journeyStage === 'profile_setup') {
-        // Still show progress but don't cause flashing
-        const totalStages = Object.keys(CLIENT_JOURNEY_STAGES).length;
-        const steps: ClientJourneyStep[] = [{
-          id: 'preferences_identified',
-          title: CLIENT_JOURNEY_STAGES.preferences_identified.title,
-          description: CLIENT_JOURNEY_STAGES.preferences_identified.description,
-          tooltip: CLIENT_JOURNEY_STAGES.preferences_identified.tooltip,
-          completed: false,
-          current: true,
-          hasData: false,
-          icon: '🟠'
-        }];
-        
-        setProgress({
-          stage: 'preferences_identified',
-          currentStageIndex: 0,
-          totalStages,
-          steps,
-          percentage: 10,
-          nextAction: 'Complete your fitness preferences survey to get started'
-        });
-        setLoading(false);
-        return;
-      }
+      // Removed early return - all clients see full journey regardless of stage
 
       // Get engagement data for more detailed progress
       const { data: engagements } = await supabase
