@@ -268,8 +268,8 @@ export default function ClientDashboard() {
             <OnboardingHeroCard
               clientName={profile?.first_name || "there"}
               trainerName={onboardingData.trainerName}
-              trainerPhoto={null} // Would need to fetch from trainer profile
-              trainerTagline="Your Personal Trainer" // Could be dynamic
+              trainerPhoto={onboardingData.trainerPhoto}
+              trainerTagline="Your Personal Trainer"
               currentStep={onboardingData.completedCount + 1}
               totalSteps={onboardingData.totalCount}
               completionPercentage={onboardingData.percentageComplete}
@@ -285,8 +285,7 @@ export default function ClientDashboard() {
             {/* Today's Highlights */}
             <div className="relative overflow-hidden rounded-xl bg-gradient-hero p-6">
               <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent" />
-              <div className="relative z-10 space-y-4">
-                <h2 className="text-xl font-semibold text-white">Today's Highlights</h2>
+              <div className="relative z-10">
                 <HighlightsCarousel />
               </div>
             </div>

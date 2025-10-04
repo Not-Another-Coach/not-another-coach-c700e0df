@@ -94,9 +94,9 @@ export const PaymentForm = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg bg-gradient-to-br from-blue-50 via-white to-blue-50 border-blue-200">
         <DialogHeader>
-          <DialogTitle>Complete Your Booking - {trainerName}</DialogTitle>
+          <DialogTitle className="text-blue-900">Complete Your Booking - {trainerName}</DialogTitle>
         </DialogHeader>
         <PackagePaymentSelector
           package={packageData}

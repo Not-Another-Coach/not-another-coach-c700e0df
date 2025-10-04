@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Calendar, CreditCard, Package } from "lucide-react";
 import { getCurrencySymbol } from "@/lib/packagePaymentUtils";
+import { useNavigate } from "react-router-dom";
 import type { PaymentRecord } from "@/hooks/useManualPayment";
 
 interface PaymentConfirmationProps {
@@ -11,6 +12,13 @@ interface PaymentConfirmationProps {
 }
 
 export function PaymentConfirmation({ paymentRecord, onClose }: PaymentConfirmationProps) {
+  const navigate = useNavigate();
+
+  const handleContinue = () => {
+    onClose();
+    navigate('/client/dashboard');
+  };
+
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader className="text-center">
@@ -95,8 +103,8 @@ export function PaymentConfirmation({ paymentRecord, onClose }: PaymentConfirmat
         </div>
         
         <div className="pt-4 border-t">
-          <Button onClick={onClose} className="w-full">
-            Continue
+          <Button onClick={handleContinue} className="w-full">
+            Go to Dashboard
           </Button>
         </div>
       </CardContent>

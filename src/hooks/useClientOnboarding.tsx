@@ -26,6 +26,7 @@ export interface OnboardingStep {
 export interface OnboardingProgress {
   trainerId: string;
   trainerName: string;
+  trainerPhoto?: string | null;
   templateName?: string;
   steps: OnboardingStep[];
   completedCount: number;
@@ -72,10 +73,10 @@ export function useClientOnboarding() {
         return;
       }
 
-      // Get trainer name
+      // Get trainer name and photo
       const { data: trainerProfile, error: trainerError } = await supabase
         .from('profiles')
-        .select('first_name, last_name')
+        .select('first_name, last_name, profile_photo_url')
         .eq('id', engagement.trainer_id)
         .single();
 
@@ -133,6 +134,7 @@ export function useClientOnboarding() {
       setOnboardingData({
         trainerId: engagement.trainer_id,
         trainerName: `${trainerProfile.first_name} ${trainerProfile.last_name}`,
+        trainerPhoto: trainerProfile.profile_photo_url || null,
         templateName,
         steps: (steps || []).map(step => ({
           ...step,
