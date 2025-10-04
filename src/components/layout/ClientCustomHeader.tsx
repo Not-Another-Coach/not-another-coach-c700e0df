@@ -16,6 +16,8 @@ interface ClientCustomHeaderProps {
   upcomingCalls?: any[];
   onMessagingOpen: () => void;
   showJourneyProgress?: boolean;
+  // Optional navigation state to pass when clicking the logo
+  logoNavigateState?: any;
 }
 
 export function ClientCustomHeader({
@@ -25,7 +27,8 @@ export function ClientCustomHeader({
   notifications = [],
   upcomingCalls = [],
   onMessagingOpen,
-  showJourneyProgress = true
+  showJourneyProgress = true,
+  logoNavigateState
 }: ClientCustomHeaderProps) {
   const navigate = useNavigate();
   const { conversations } = useConversations();
@@ -82,7 +85,13 @@ export function ClientCustomHeader({
       <div className="mx-auto px-3 sm:px-6 lg:px-8 xl:px-12 py-2 sm:py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-3">
-            <AppLogo onClick={() => navigate('/client/dashboard')} />
+            <AppLogo onClick={() => {
+                if (logoNavigateState) {
+                  navigate('/client/dashboard', { state: logoNavigateState });
+                } else {
+                  navigate('/client/dashboard');
+                }
+              }} />
             <div className="hidden sm:block text-muted-foreground">Your Journey</div>
             {/* Your Journey Progress - Compact on mobile, full on desktop */}
             {showJourneyProgress && journeyProgress && (

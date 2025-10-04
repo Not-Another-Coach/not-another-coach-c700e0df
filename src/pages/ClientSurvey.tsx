@@ -547,6 +547,7 @@ const ClientSurvey = () => {
             profile={profile}
             onMessagingOpen={() => {}}
             showJourneyProgress={false}
+            logoNavigateState={{ fromSurvey: true }}
           />
         </div>
       )}
