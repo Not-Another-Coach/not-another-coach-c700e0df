@@ -117,28 +117,42 @@ const ClientSurvey = () => {
 
   // Redirect if not client or if survey is already completed
   useEffect(() => {
+    console.log('🔍 ClientSurvey - Auth Check:', {
+      loading,
+      profileLoading,
+      hasUser: !!user,
+      hasProfile: !!profile,
+      isClientCheck: isClient(),
+      pathname: '/client-survey'
+    });
+
     // Wait for all loading to complete before making navigation decisions
     if (loading || profileLoading) {
+      console.log('⏳ ClientSurvey - Still loading, waiting...');
       return;
     }
 
     // If not logged in, redirect to auth
     if (!user) {
+      console.log('❌ ClientSurvey - No user, redirecting to auth');
       navigate('/auth');
       return;
     }
 
     // If we have user but no profile yet, wait for profile to load
     if (!profile) {
+      console.log('⏳ ClientSurvey - No profile yet, waiting...');
       return;
     }
 
     // Check if user is a client
     if (!isClient()) {
+      console.log('❌ ClientSurvey - Not a client, redirecting to home');
       navigate('/');
       return;
     }
     
+    console.log('✅ ClientSurvey - All checks passed, user can access survey');
     // Allow users to access this page even after completion to edit their preferences
     // Only redirect to dashboard if they explicitly complete the survey flow
   }, [user, profile, loading, profileLoading, navigate, isClient]);

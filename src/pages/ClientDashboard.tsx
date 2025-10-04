@@ -119,28 +119,71 @@ export default function ClientDashboard() {
   const hasCheckedSurvey = useRef(false);
   
   useEffect(() => {
+    console.log('🔍 ClientDashboard - Survey Check:', {
+      loading,
+      profileLoading,
+      hasUser: !!user,
+      hasProfile: !!profile,
+      userType: profile?.user_type,
+      quizCompleted: profile?.quiz_completed,
+      surveyCompleted: profile?.client_survey_completed,
+      hasCheckedSurvey: hasCheckedSurvey.current,
+      fromSurvey: (location.state as any)?.fromSurvey,
+      pathname: location.pathname
+    });
+
     // If coming explicitly from survey, skip redirect once
     // Note: location.state persists in history; this simply prevents unintended redirect loops
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const fromSurvey = (location.state as any)?.fromSurvey;
     if (fromSurvey) {
+      console.log('✅ ClientDashboard - Coming from survey, skipping redirect check');
       hasCheckedSurvey.current = true;
       return;
     }
 
-    if (!loading && !profileLoading && user && profile && profile.user_type === 'client' && !hasCheckedSurvey.current) {
-      const surveyCompleted = profile.quiz_completed && profile.client_survey_completed;
-      if (!surveyCompleted) {
-        hasCheckedSurvey.current = true;
-        navigate('/client-survey', { replace: true });
-        return;
-      }
-      if (surveyCompleted && journeyProgress?.stage === 'preferences_identified') {
-        refetchJourney();
-      }
-      hasCheckedSurvey.current = true;
+    // Only check once per mount
+    if (hasCheckedSurvey.current) {
+      console.log('⏭️ ClientDashboard - Already checked survey, skipping');
+      return;
     }
-  }, [user?.id, profile?.id, loading, profileLoading, location.state]);
+
+    // Wait for loading to complete
+    if (loading || profileLoading) {
+      console.log('⏳ ClientDashboard - Still loading, waiting...');
+      return;
+    }
+
+    // Ensure we have user and profile
+    if (!user || !profile) {
+      console.log('❌ ClientDashboard - No user or profile');
+      return;
+    }
+
+    // Only check for clients
+    if (profile.user_type !== 'client') {
+      console.log('⏭️ ClientDashboard - Not a client, skipping survey check');
+      hasCheckedSurvey.current = true;
+      return;
+    }
+
+    // Mark as checked to prevent re-runs
+    hasCheckedSurvey.current = true;
+
+    const surveyCompleted = profile.quiz_completed && profile.client_survey_completed;
+    console.log('📋 ClientDashboard - Survey status check:', { surveyCompleted });
+    
+    if (!surveyCompleted) {
+      console.log('🔄 ClientDashboard - Redirecting to survey');
+      navigate('/client-survey', { replace: true });
+      return;
+    }
+    
+    console.log('✅ ClientDashboard - Survey completed, staying on dashboard');
+    if (surveyCompleted && journeyProgress?.stage === 'preferences_identified') {
+      refetchJourney();
+    }
+  }, [user, profile, loading, profileLoading, location.state, location.pathname, navigate, journeyProgress, refetchJourney]);
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);

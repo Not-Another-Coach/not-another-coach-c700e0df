@@ -46,21 +46,36 @@ export default function Home() {
 
   // Redirect authenticated users based on their role and profile completion
   useEffect(() => {
+    console.log('🔍 Home - Redirect Check:', {
+      loading,
+      profileLoading,
+      userTypeLoading,
+      isLoggingOut,
+      isMigrating,
+      hasUser: !!user,
+      userType: userType || user_type,
+      pathname: '/'
+    });
+
     if (loading || profileLoading || userTypeLoading || isLoggingOut || isMigrating) {
+      console.log('⏳ Home - Still loading, waiting...');
       return;
     }
 
     // Only redirect if user is authenticated
     if (!user) {
+      console.log('✅ Home - No user, staying on home page');
       return;
     }
 
     // Wait for migration to complete if in progress
     if (isMigrating) {
+      console.log('⏳ Home - Migration in progress, waiting...');
       return;
     }
 
     const currentUserType = userType || user_type;
+    console.log('🔄 Home - Redirecting based on user type:', currentUserType);
 
     // Redirect based on user type
     if (currentUserType === 'trainer') {
@@ -72,16 +87,21 @@ export default function Home() {
                                  trainerProfile.specializations.length > 0;
         
         if (isProfileComplete) {
+          console.log('✅ Home - Trainer profile complete, redirecting to dashboard');
           navigate('/trainer/dashboard', { replace: true });
         } else {
+          console.log('📝 Home - Trainer profile incomplete, redirecting to setup');
           navigate('/trainer/profile-setup', { replace: true });
         }
       } else {
+        console.log('📝 Home - No trainer profile, redirecting to setup');
         navigate('/trainer/profile-setup', { replace: true });
       }
     } else if (currentUserType === 'client') {
+      console.log('🔄 Home - Client user, redirecting to dashboard');
       navigate('/client/dashboard', { replace: true });
     } else if (currentUserType === 'admin') {
+      console.log('🔄 Home - Admin user, redirecting to admin');
       navigate('/admin', { replace: true });
     }
   }, [user, loading, profileLoading, userTypeLoading, isLoggingOut, isMigrating, userType, user_type, profile, navigate]);
