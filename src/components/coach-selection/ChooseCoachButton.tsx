@@ -171,33 +171,31 @@ export const ChooseCoachButton = ({
 
     return (
       <div className={className}>
-        <div className="space-y-3">
-          <Badge variant="secondary" className={`${config.color} text-white`}>
-            <Icon className="w-3 h-3 mr-1" />
-            {config.label}
-          </Badge>
-          <p className="text-sm text-muted-foreground">{config.description}</p>
-          
-          {(selectionRequest.status === 'accepted' || selectionRequest.status === 'awaiting_payment') && (
-            <Button 
-              className="w-full"
-              onClick={() => setShowPaymentForm(true)}
-            >
-              Proceed to Payment
-            </Button>
-          )}
-          
-          {(selectionRequest.status === 'declined') && (
-            <Button 
-              variant="outline" 
-              onClick={() => setShowModal(true)}
-              className="w-full"
-            >
-              Send New Request
-            </Button>
-          )}
-          
-          {selectionRequest.status === 'alternative_suggested' && selectionRequest.suggested_alternative_package_name && (
+        {(selectionRequest.status === 'accepted' || selectionRequest.status === 'awaiting_payment') && (
+          <Button 
+            className="w-full"
+            onClick={() => setShowPaymentForm(true)}
+          >
+            Proceed to Payment
+          </Button>
+        )}
+        
+        {(selectionRequest.status === 'declined') && (
+          <Button 
+            variant="outline" 
+            onClick={() => setShowModal(true)}
+            className="w-full"
+          >
+            Send New Request
+          </Button>
+        )}
+        
+        {selectionRequest.status === 'alternative_suggested' && selectionRequest.suggested_alternative_package_name && (
+          <div className="space-y-3">
+            <Badge variant="secondary" className={`${config.color} text-white`}>
+              <Icon className="w-3 h-3 mr-1" />
+              {config.label}
+            </Badge>
             <div className="p-3 bg-blue-50 rounded-lg space-y-3">
               <div>
                 <p className="text-sm font-medium text-blue-900">Suggested Package:</p>
@@ -228,8 +226,18 @@ export const ChooseCoachButton = ({
                 </Button>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
+        
+        {(selectionRequest.status === 'pending' || selectionRequest.status === 'completed') && (
+          <div className="space-y-3">
+            <Badge variant="secondary" className={`${config.color} text-white`}>
+              <Icon className="w-3 h-3 mr-1" />
+              {config.label}
+            </Badge>
+            <p className="text-sm text-muted-foreground">{config.description}</p>
+          </div>
+        )}
 
         <ChooseCoachModal
           open={showModal}
