@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Heart, ChevronRight, Eye } from 'lucide-react';
@@ -8,6 +8,8 @@ import { useShortlistedTrainers } from '@/hooks/useShortlistedTrainers';
 import { useUnifiedTrainerData } from '@/hooks/useUnifiedTrainerData';
 import { EnhancedTrainerCard } from '@/components/trainer-cards/EnhancedTrainerCard';
 import { AnyTrainer } from '@/types/trainer';
+import { supabase } from '@/integrations/supabase/client';
+import type { EngagementStage } from '@/hooks/useEngagementStage';
 
 interface MyTrainersCarouselProps {
   onTabChange: (tab: string) => void;
@@ -18,12 +20,35 @@ export function MyTrainersCarousel({ onTabChange }: MyTrainersCarouselProps) {
   const { savedTrainers } = useSavedTrainers();
   const { shortlistedTrainers } = useShortlistedTrainers();
   const { trainers, loading } = useUnifiedTrainerData();
+  const [engagementStages, setEngagementStages] = useState<Record<string, EngagementStage>>({});
 
   // Get trainers that are saved or shortlisted
   const myTrainers = trainers.filter(trainer => 
     savedTrainers.some(saved => saved.trainer_id === trainer.id) ||
     shortlistedTrainers.some(shortlisted => shortlisted.trainer_id === trainer.id)
   ).slice(0, 6); // Limit to 6 for carousel
+
+  // Fetch engagement stages for all displayed trainers
+  useEffect(() => {
+    const fetchEngagementStages = async () => {
+      if (myTrainers.length === 0) return;
+
+      const { data, error } = await supabase
+        .from('client_trainer_engagement')
+        .select('trainer_id, stage')
+        .in('trainer_id', myTrainers.map(t => t.id));
+
+      if (!error && data) {
+        const stagesMap = data.reduce((acc, item) => {
+          acc[item.trainer_id] = item.stage as EngagementStage;
+          return acc;
+        }, {} as Record<string, EngagementStage>);
+        setEngagementStages(stagesMap);
+      }
+    };
+
+    fetchEngagementStages();
+  }, [myTrainers.length]);
 
   // Removed carousel scrolling logic - now using grid layout
 
@@ -195,6 +220,7 @@ export function MyTrainersCarousel({ onTabChange }: MyTrainersCarouselProps) {
                 initialView="instagram"
                 compactActions={false}
                 hideViewControls={true}
+                engagementStage={engagementStages[trainer.id]}
               />
             ))}
           </div>
