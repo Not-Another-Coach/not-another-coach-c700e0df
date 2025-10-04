@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useClientProfile } from "@/hooks/useClientProfile";
 import { useUserTypeChecks } from "@/hooks/useUserType";
@@ -32,7 +32,11 @@ const ClientSurvey = () => {
   const { session: anonymousSession } = useAnonymousSession();
   const { isMigrating, migrationCompleted, migrationState, migrationProgress, migrationMessage } = useDataMigration();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+  
+  // Check if this is edit mode (navigating from dashboard)
+  const isEditMode = location.state?.editMode === true;
 
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -176,11 +180,51 @@ const ClientSurvey = () => {
       profileGoalsLength: profile?.primary_goals?.length || 0
     });
 
+    // Fast-path for edit mode: authenticated users with existing profiles
+    if (isEditMode && profile && profile.id && !isMigrating && !hasInitialized.current) {
+      hasInitialized.current = true;
+      console.log('⚡ Fast-path initialization (edit mode)');
+      
+      const initialData = {
+        primary_goals: profile.primary_goals || [],
+        secondary_goals: profile.secondary_goals || [],
+        training_location_preference: profile.training_location_preference || null,
+        open_to_virtual_coaching: profile.open_to_virtual_coaching ?? false,
+        preferred_training_frequency: profile.preferred_training_frequency ? parseInt(profile.preferred_training_frequency) : null,
+        preferred_time_slots: profile.preferred_time_slots || [],
+        start_timeline: profile.start_timeline || null,
+        preferred_coaching_style: profile.preferred_coaching_style || [],
+        motivation_factors: profile.motivation_factors || [],
+        client_personality_type: profile.client_personality_type || [],
+        experience_level: profile.experience_level || "beginner",
+        location: (profile as any).location || null,
+        fitness_equipment_access: (profile as any).fitness_equipment_access || [],
+        lifestyle_description: (profile as any).lifestyle_description || [],
+        lifestyle_other: (profile as any).lifestyle_other || null,
+        health_conditions: (profile as any).health_conditions || null,
+        has_specific_event: (profile as any).has_specific_event || null,
+        specific_event_details: (profile as any).specific_event_details || null,
+        specific_event_date: (profile as any).specific_event_date ? new Date((profile as any).specific_event_date) : null,
+        preferred_package_type: profile.preferred_package_type || null,
+        budget_range_min: profile.budget_range_min || null,
+        budget_range_max: profile.budget_range_max || null,
+        budget_flexibility: profile.budget_flexibility || "flexible",
+        waitlist_preference: profile.waitlist_preference ?? null,
+        flexible_scheduling: profile.flexible_scheduling ?? false,
+        client_survey_completed: false,
+      };
+      
+      setFormData(initialData);
+      setCurrentStep(1);
+      return;
+    }
+    
     // Initialize when we have a profile and either migration is done OR we're not migrating
-    // Add small delay after migration completion to ensure smooth transition
+    // Only apply delay for actual migration scenarios, not for existing users
     if (profile && profile.id && (migrationCompleted || migrationState === 'completed' || !isMigrating) && !hasInitialized.current) {
-      // Add slight delay after migration to ensure smooth UI transition
-      const initDelay = migrationCompleted && migrationState === 'completed' ? 500 : 0;
+      // Only delay if this was a genuine new user migration, not an existing user editing preferences
+      const isNewUserMigration = migrationCompleted && migrationState === 'completed' && !isEditMode;
+      const initDelay = isNewUserMigration ? 500 : 0;
       
       setTimeout(() => {
         hasInitialized.current = true;

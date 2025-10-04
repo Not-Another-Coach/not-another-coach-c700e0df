@@ -137,7 +137,7 @@ export default function ClientDashboard() {
         navigate('/client/explore');
         break;
       case 'preferences':
-        navigate('/client-survey');
+        navigate('/client-survey', { state: { editMode: true } });
         break;
       case 'payments':
         navigate('/payments');
