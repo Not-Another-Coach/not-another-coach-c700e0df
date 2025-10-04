@@ -158,8 +158,8 @@ export const useClientJourneyProgress = () => {
             currentStage = 'onboarding_in_progress';
           }
         } else {
-          // No onboarding tasks - they're on their journey
-          currentStage = 'on_your_journey';
+          // No onboarding tasks assigned yet - still in onboarding phase waiting for template
+          currentStage = 'onboarding_in_progress';
         }
       }
 
@@ -178,9 +178,13 @@ export const useClientJourneyProgress = () => {
         const hasDiscoveryCall = engagements?.some(e => e.matched_at) || discoveryCalls?.some(dc => dc.status === 'scheduled');
         const hasChosenCoach = engagements?.some(e => e.discovery_completed_at);
         // Check onboarding/active client status based on actual progress, not just engagement
-        const isOnboarding = totalOnboardingSteps > 0 && onboardingCompletionPercentage < 100;
-        const isActiveClient = (engagements?.some(e => e.became_client_at) && totalOnboardingSteps === 0) || 
-                              (engagements?.some(e => e.became_client_at) && onboardingCompletionPercentage === 100);
+        // Client is in onboarding if they're an active_client AND (no template OR incomplete template)
+        const isOnboarding = engagements?.some(e => e.became_client_at) && 
+                           (totalOnboardingSteps === 0 || onboardingCompletionPercentage < 100);
+        // Client is truly on their journey only if they have completed onboarding
+        const isActiveClient = engagements?.some(e => e.became_client_at) && 
+                              totalOnboardingSteps > 0 && 
+                              onboardingCompletionPercentage === 100;
 
         if (stageKey === 'preferences_identified') {
           hasData = true; // Always has data if we're showing the progress
