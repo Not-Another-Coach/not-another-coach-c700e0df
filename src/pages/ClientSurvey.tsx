@@ -538,7 +538,7 @@ const ClientSurvey = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-hero">
       {/* Header with Navigation */}
       {profile && (
         <ClientCustomHeader
