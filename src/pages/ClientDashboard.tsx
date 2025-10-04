@@ -114,12 +114,16 @@ export default function ClientDashboard() {
   }, [user, loading, navigate]);
 
   // Redirect clients to client survey if not completed
+  // Only redirect on initial mount, not on every render
   useEffect(() => {
     if (!loading && !profileLoading && user && profile && profile.user_type === 'client') {
       const surveyCompleted = profile.quiz_completed && profile.client_survey_completed;
       if (!surveyCompleted) {
-        navigate('/client-survey');
-        return;
+        // Only redirect to survey on initial load, don't interfere with navigation
+        const timer = setTimeout(() => {
+          navigate('/client-survey', { replace: true });
+        }, 100);
+        return () => clearTimeout(timer);
       }
       
       // If survey is complete but they're still on profile_setup stage, trigger journey update
@@ -128,7 +132,7 @@ export default function ClientDashboard() {
         refetchJourney();
       }
     }
-  }, [user, profile, loading, profileLoading, navigate, journeyProgress]);
+  }, [user?.id, profile?.id, loading, profileLoading]); // Only depend on IDs, not full objects
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
