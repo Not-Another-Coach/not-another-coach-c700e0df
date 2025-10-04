@@ -114,76 +114,8 @@ export default function ClientDashboard() {
     }
   }, [user, loading, navigate]);
 
-  // Redirect clients to client survey if not completed
-  // Only redirect on initial mount, not when user explicitly navigates away
-  const hasCheckedSurvey = useRef(false);
-  
-  useEffect(() => {
-    console.log('🔍 ClientDashboard - Survey Check:', {
-      loading,
-      profileLoading,
-      hasUser: !!user,
-      hasProfile: !!profile,
-      userType: profile?.user_type,
-      quizCompleted: profile?.quiz_completed,
-      surveyCompleted: profile?.client_survey_completed,
-      hasCheckedSurvey: hasCheckedSurvey.current,
-      fromSurvey: (location.state as any)?.fromSurvey,
-      pathname: location.pathname
-    });
-
-    // If coming explicitly from survey, skip redirect once
-    // Note: location.state persists in history; this simply prevents unintended redirect loops
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const fromSurvey = (location.state as any)?.fromSurvey;
-    if (fromSurvey) {
-      console.log('✅ ClientDashboard - Coming from survey, skipping redirect check');
-      hasCheckedSurvey.current = true;
-      return;
-    }
-
-    // Only check once per mount
-    if (hasCheckedSurvey.current) {
-      console.log('⏭️ ClientDashboard - Already checked survey, skipping');
-      return;
-    }
-
-    // Wait for loading to complete
-    if (loading || profileLoading) {
-      console.log('⏳ ClientDashboard - Still loading, waiting...');
-      return;
-    }
-
-    // Ensure we have user and profile
-    if (!user || !profile) {
-      console.log('❌ ClientDashboard - No user or profile');
-      return;
-    }
-
-    // Only check for clients
-    if (profile.user_type !== 'client') {
-      console.log('⏭️ ClientDashboard - Not a client, skipping survey check');
-      hasCheckedSurvey.current = true;
-      return;
-    }
-
-    // Mark as checked to prevent re-runs
-    hasCheckedSurvey.current = true;
-
-    const surveyCompleted = profile.quiz_completed && profile.client_survey_completed;
-    console.log('📋 ClientDashboard - Survey status check:', { surveyCompleted });
-    
-    if (!surveyCompleted) {
-      console.log('🔄 ClientDashboard - Redirecting to survey');
-      navigate('/client-survey', { replace: true });
-      return;
-    }
-    
-    console.log('✅ ClientDashboard - Survey completed, staying on dashboard');
-    if (surveyCompleted && journeyProgress?.stage === 'preferences_identified') {
-      refetchJourney();
-    }
-  }, [user, profile, loading, profileLoading, location.state, location.pathname, navigate, journeyProgress, refetchJourney]);
+  // Check if survey is incomplete to show CTA (no redirect)
+  const surveyIncomplete = profile && (!profile.quiz_completed || !profile.client_survey_completed);
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
@@ -270,8 +202,8 @@ export default function ClientDashboard() {
     );
   }
 
-  // Only render dashboard for clients with completed quiz
-  if (!profile || !user || profile.user_type !== 'client' || !profile.quiz_completed) {
+  // Only render dashboard for clients
+  if (!profile || !user || profile.user_type !== 'client') {
     return null;
   }
 
@@ -289,6 +221,36 @@ export default function ClientDashboard() {
 
       {/* Main Content - Conditional Layout */}
       <main className="mx-auto px-6 lg:px-8 xl:px-12 py-6 space-y-8">
+        
+        {/* Survey Incomplete CTA */}
+        {surveyIncomplete && (
+          <Card className="border-primary bg-gradient-to-br from-primary/5 to-primary/10">
+            <CardContent className="p-8 text-center">
+              <div className="space-y-4">
+                <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+                  <Settings className="h-8 w-8 text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-semibold text-foreground mb-2">
+                    Complete Your Preferences
+                  </h3>
+                  <p className="text-muted-foreground mb-4 max-w-md mx-auto">
+                    To unlock your personalized dashboard and start matching with trainers, 
+                    please complete your fitness preferences survey.
+                  </p>
+                </div>
+                <Button 
+                  size="lg"
+                  onClick={() => navigate('/client-survey')}
+                  className="mt-4"
+                >
+                  <Settings className="h-5 w-5 mr-2" />
+                  Complete Preferences
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
         
         {/* Onboarding-Focused Dashboard for Active Clients */}
         {isActiveClient && onboardingData ? (

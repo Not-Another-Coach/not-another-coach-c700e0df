@@ -98,8 +98,21 @@ export default function Home() {
         navigate('/trainer/profile-setup', { replace: true });
       }
     } else if (currentUserType === 'client') {
-      console.log('🔄 Home - Client user, redirecting to dashboard');
-      navigate('/client/dashboard', { replace: true });
+      // Check if client has completed both quiz and survey
+      if (profile && 'quiz_completed' in profile && 'client_survey_completed' in profile) {
+        const surveyCompleted = profile.quiz_completed && profile.client_survey_completed;
+        
+        if (surveyCompleted) {
+          console.log('✅ Home - Client survey complete, redirecting to dashboard');
+          navigate('/client/dashboard', { replace: true });
+        } else {
+          console.log('📝 Home - Client survey incomplete, redirecting to survey');
+          navigate('/client-survey', { replace: true });
+        }
+      } else {
+        console.log('📝 Home - No client profile data, redirecting to survey');
+        navigate('/client-survey', { replace: true });
+      }
     } else if (currentUserType === 'admin') {
       console.log('🔄 Home - Admin user, redirecting to admin');
       navigate('/admin', { replace: true });
