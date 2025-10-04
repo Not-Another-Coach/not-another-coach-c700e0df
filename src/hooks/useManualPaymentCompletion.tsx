@@ -18,11 +18,12 @@ export const useManualPaymentCompletion = () => {
         throw new Error('No client ID found');
       }
 
-      // Use the new atomic payment completion function
+      // Use the new atomic payment completion function with explicit null for stripe_payment_intent_id
       const { data, error } = await supabase.rpc('complete_coach_selection_payment', {
         p_client_id: currentClientId,
         p_trainer_id: trainerId,
-        p_payment_method: 'manual'
+        p_payment_method: 'manual',
+        p_stripe_payment_intent_id: null
       });
 
       if (error) {
