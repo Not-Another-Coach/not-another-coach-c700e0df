@@ -288,7 +288,21 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
               {/* Price */}
               <div className="text-right">
                 <div className="text-xl font-bold text-white drop-shadow-sm">
-                  {getVisibilityAwarePrice(trainer, getVisibility('pricing_discovery_call'))}
+                  {(() => {
+                    const pricingVisibility = getVisibility('pricing_discovery_call');
+                    console.log('🔍 InstagramGalleryView - Pricing Debug:', {
+                      trainerId: trainer.id,
+                      trainerName: trainer.name,
+                      package_options: trainer.package_options,
+                      package_options_type: typeof trainer.package_options,
+                      package_options_length: Array.isArray(trainer.package_options) ? trainer.package_options.length : 'not an array',
+                      pricingVisibility,
+                      fullTrainerObject: trainer
+                    });
+                    const price = getVisibilityAwarePrice(trainer, pricingVisibility);
+                    console.log('💰 InstagramGalleryView - Price Result:', price);
+                    return price;
+                  })()}
                 </div>
                 <div className="text-xs text-white/80">package</div>
               </div>

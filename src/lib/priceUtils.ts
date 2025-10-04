@@ -24,7 +24,15 @@ export function calculatePriceRange(packages: PackageOption[] | null | undefined
   max: number;
   currency: string;
 } | null {
+  console.log('📊 calculatePriceRange - Input:', {
+    packages,
+    packagesType: typeof packages,
+    isArray: Array.isArray(packages),
+    length: packages?.length
+  });
+
   if (!packages || packages.length === 0) {
+    console.log('⚠️ calculatePriceRange - No packages found, returning null');
     return null;
   }
 
@@ -35,11 +43,14 @@ export function calculatePriceRange(packages: PackageOption[] | null | undefined
   // Use the currency from the first package (assuming all packages use same currency)
   const currency = packages[0].currency || 'GBP';
 
-  return {
+  const result = {
     min: minPrice,
     max: maxPrice,
     currency
   };
+
+  console.log('✅ calculatePriceRange - Result:', result);
+  return result;
 }
 
 /**
@@ -48,18 +59,25 @@ export function calculatePriceRange(packages: PackageOption[] | null | undefined
  * @returns Formatted price string
  */
 export function formatPriceRange(priceRange: { min: number; max: number; currency: string } | null): string {
+  console.log('💵 formatPriceRange - Input:', priceRange);
+
   if (!priceRange) {
+    console.log('⚠️ formatPriceRange - No price range, returning "Contact for pricing"');
     return 'Contact for pricing';
   }
 
   const { min, max, currency } = priceRange;
   const currencySymbol = currency === 'GBP' ? '£' : currency === 'USD' ? '$' : '€';
 
+  let formatted: string;
   if (min === max) {
-    return `${currencySymbol}${min}`;
+    formatted = `${currencySymbol}${min}`;
+  } else {
+    formatted = `${currencySymbol}${min} - ${currencySymbol}${max}`;
   }
 
-  return `${currencySymbol}${min} - ${currencySymbol}${max}`;
+  console.log('✅ formatPriceRange - Result:', formatted);
+  return formatted;
 }
 
 /**
@@ -79,12 +97,23 @@ export function getTrainerDisplayPrice(trainer: any): string {
  * @returns Formatted price string or "TBC" for restricted access
  */
 export function getVisibilityAwarePrice(trainer: any, visibilityState: 'visible' | 'blurred' | 'hidden'): string {
+  console.log('🎯 getVisibilityAwarePrice - Called with:', {
+    trainerId: trainer?.id,
+    trainerName: trainer?.name,
+    package_options: trainer?.package_options,
+    package_options_type: typeof trainer?.package_options,
+    visibilityState
+  });
+
   if (visibilityState === 'blurred' || visibilityState === 'hidden') {
+    console.log('🔒 getVisibilityAwarePrice - Visibility restricted, returning TBC');
     return 'TBC';
   }
   
   const priceRange = calculatePriceRange(trainer.package_options);
-  return formatPriceRange(priceRange);
+  const result = formatPriceRange(priceRange);
+  console.log('✅ getVisibilityAwarePrice - Final result:', result);
+  return result;
 }
 
 /**
