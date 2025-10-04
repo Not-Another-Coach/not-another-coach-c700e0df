@@ -101,7 +101,7 @@ export const OnboardingHeroCard = ({
     <Card className="bg-gradient-to-br from-primary-50 via-secondary-50 to-accent-50 border-primary-200 overflow-hidden">
       <CardContent className="p-0">
         {/* Hero Header */}
-        <div className="relative bg-gradient-to-r from-primary-500 to-secondary-500 p-6 text-white">
+        <div className="relative bg-gradient-hero p-6 text-white">
           <div className="absolute inset-0 bg-black/10"></div>
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-4">

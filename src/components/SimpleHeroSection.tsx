@@ -2,7 +2,7 @@ import { Target, Dumbbell, Users } from "lucide-react";
 
 export const SimpleHeroSection = () => {
   return (
-    <div className="relative min-h-[40vh] flex items-center justify-center bg-gradient-to-br from-primary via-secondary to-success overflow-hidden">
+    <div className="relative min-h-[40vh] flex items-center justify-center bg-gradient-hero overflow-hidden">
       {/* Background decorative elements */}
       <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-transparent" />
       <div className="absolute top-10 right-10 w-32 h-32 rounded-full bg-white/10 blur-xl" />

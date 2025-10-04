@@ -9,14 +9,14 @@ interface EnhancedHeroSectionProps {
 export const EnhancedHeroSection = ({ onFindMatch }: EnhancedHeroSectionProps) => {
   return (
     <div className="relative min-h-[60vh] flex items-center justify-center overflow-hidden">
-      {/* Background Image with Overlay */}
+      {/* Background with Gradient Hero */}
       <div className="absolute inset-0">
         <img 
           src={heroImage}
           alt="Personal trainer working with client"
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover opacity-30"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/70 to-primary/50" />
+        <div className="absolute inset-0 bg-gradient-hero" />
       </div>
       
       {/* Floating decorative elements */}
