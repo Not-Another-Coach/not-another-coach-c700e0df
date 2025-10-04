@@ -124,7 +124,9 @@ export default function ClientDashboard() {
   }, [user, loading, navigate]);
 
   // Check if survey is incomplete to show CTA (only if they haven't progressed beyond survey stage)
-  const surveyIncomplete = profile && (!profile.quiz_completed || !profile.client_survey_completed) && !hasAdvancedEngagement;
+  // Hide preferences CTA once they're in onboarding or beyond
+  const isInOnboardingOrBeyond = journeyProgress?.stage === 'onboarding_in_progress' || journeyProgress?.stage === 'on_your_journey';
+  const surveyIncomplete = profile && (!profile.quiz_completed || !profile.client_survey_completed) && !hasAdvancedEngagement && !isInOnboardingOrBeyond;
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
