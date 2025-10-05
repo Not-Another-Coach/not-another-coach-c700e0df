@@ -187,17 +187,36 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
   };
 
   const handleMessage = (trainerId: string) => {
-    navigate(`/messaging?trainerId=${trainerId}`);
+    const event = new CustomEvent('openMessagePopup', {
+      detail: { trainerId }
+    });
+    window.dispatchEvent(event);
   };
 
   const handleSaveTrainer = async (trainerId: string) => {
     console.log('🔥 Save trainer clicked:', trainerId);
+    
+    // Optimistic UI update - remove trainer from list immediately
+    setAllTrainers(prev => prev.filter(t => t.id !== trainerId));
+    
     try {
       const result = await saveTrainer(trainerId);
       if (result) {
         toast.success('Trainer saved!');
       } else {
         toast.error('Failed to save trainer');
+        // Rollback on error - refetch to restore state
+        const { data: trainersData } = await supabase
+          .from('v_trainers')
+          .select('*')
+          .eq('profile_published', true);
+        if (trainersData) {
+          setAllTrainers(trainersData.map((trainer, index) => ({
+            id: trainer.id,
+            name: `${trainer.first_name || ''} ${trainer.last_name || ''}`.trim() || 'Professional Trainer',
+            // ... rest of mapping
+          })));
+        }
       }
     } catch (error) {
       console.error('Error saving trainer:', error);
@@ -388,6 +407,7 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
                   trainer={trainer}
                   layout="grid"
                   onViewProfile={handleViewProfile}
+                  onStartConversation={handleMessage}
                   cardState={
                     isShortlisted(trainer.id) ? "shortlisted" : 
                     isTrainerSaved(trainer.id) ? "saved" : 
