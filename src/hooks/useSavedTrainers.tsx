@@ -100,6 +100,9 @@ export const useSavedTrainers = () => {
       // Move back to browsing stage when unsaving
       await updateEngagementStage(trainerId, 'browsing');
       
+      // Notify other hooks/components for instant UI updates
+      window.dispatchEvent(new CustomEvent('engagementStageUpdated', { detail: { trainerId, stage: 'browsing' } }));
+      
       // Also remove from waitlist if they're on one (per spec requirement)
       await removeFromWaitlist(trainerId);
       

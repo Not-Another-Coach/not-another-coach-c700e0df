@@ -653,8 +653,48 @@ export function useUnifiedTrainerData(): UnifiedTrainerState & TrainerActions {
       )
       .subscribe();
 
+    // Also listen to local optimistic updates from other hooks/components
+    const handleLocalUpdate = (e: Event) => {
+      const event = e as CustomEvent<{ trainerId: string; stage: string }>;
+      const { trainerId, stage } = event.detail || {} as any;
+      if (!trainerId || !stage) return;
+
+      // Apply local optimistic update to unified state
+      setState(prev => {
+        const updatedTrainers = prev.trainers.map(trainer => {
+          if (trainer.id === trainerId) {
+            const updated = { ...trainer } as any;
+            if (stage === 'browsing') {
+              updated.status = 'browsing';
+              updated.statusLabel = 'Browsing';
+              updated.statusColor = 'bg-gray-100 text-gray-800';
+              updated.engagementStage = 'browsing';
+              updated.likedAt = undefined;
+              updated.shortlistedAt = undefined;
+            }
+            return updated as any;
+          }
+          return trainer;
+        });
+
+        const newCounts = {
+          all: updatedTrainers.filter(t => t.status !== 'browsing').length,
+          saved: updatedTrainers.filter(t => t.status === 'saved').length,
+          shortlisted: updatedTrainers.filter(t => t.status === 'shortlisted').length,
+          discovery: updatedTrainers.filter(t => t.status === 'discovery').length,
+          declined: updatedTrainers.filter(t => t.status === 'declined').length,
+          waitlist: updatedTrainers.filter(t => t.status === 'waitlist').length
+        } as any;
+
+        return { ...prev, trainers: updatedTrainers, counts: newCounts };
+      });
+    };
+
+    window.addEventListener('engagementStageUpdated', handleLocalUpdate as EventListener);
+
     return () => {
       supabase.removeChannel(channel);
+      window.removeEventListener('engagementStageUpdated', handleLocalUpdate as EventListener);
     };
   }, [user]);
 

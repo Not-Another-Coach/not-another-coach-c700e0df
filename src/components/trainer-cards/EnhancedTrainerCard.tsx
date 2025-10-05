@@ -565,7 +565,7 @@ export const EnhancedTrainerCard = memo(({
               className="bg-white/80 backdrop-blur hover:bg-white/90 transition-all"
               onClick={handleToggleSave}
             >
-              {isSaved || cardState === 'saved' || cardState === 'shortlisted' ? (
+              {isSaved || cardState === 'shortlisted' ? (
                 <Heart className="h-4 w-4 text-destructive fill-current" />
               ) : (
                 <Heart className="h-4 w-4 text-muted-foreground hover:text-destructive transition-colors" />
@@ -813,7 +813,7 @@ export const EnhancedTrainerCard = memo(({
               className="bg-white/80 backdrop-blur hover:bg-white/90 transition-all"
               onClick={handleToggleSave}
             >
-              {isSaved || cardState === 'saved' || cardState === 'shortlisted' ? (
+              {isSaved || cardState === 'shortlisted' ? (
                 <Heart className="h-4 w-4 text-destructive fill-current" />
               ) : (
                 <Heart className="h-4 w-4 text-muted-foreground hover:text-destructive transition-colors" />
