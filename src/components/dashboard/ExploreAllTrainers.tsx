@@ -10,7 +10,6 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { EnhancedTrainerCard } from "@/components/trainer-cards/EnhancedTrainerCard";
-import { ComparisonView } from "@/components/ComparisonView";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { 
@@ -27,8 +26,6 @@ import {
   Phone,
   MessageCircle,
   Calendar,
-  X,
-  BarChart3,
   ChevronLeft,
   ChevronRight
 } from "lucide-react";
@@ -63,10 +60,6 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
   const [selectedLocation, setSelectedLocation] = useState("all");
   const [selectedAvailability, setSelectedAvailability] = useState("all");
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  
-  // Comparison functionality
-  const [selectedForComparison, setSelectedForComparison] = useState<string[]>([]);
-  const [showComparison, setShowComparison] = useState(false);
 
   // Fetch all published trainers excluding those with engagement
   useEffect(() => {
@@ -197,70 +190,6 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
     navigate(`/messaging?trainerId=${trainerId}`);
   };
 
-  // Component to render CTAs with engagement stage checking
-  const TrainerCTAs = ({ trainer }: { trainer: any }) => {
-    const isSaved = isTrainerSaved(trainer.id);
-    const isShortlistedTrainer = isShortlisted(trainer.id);
-    const { stage: engagementStage } = useEngagementStage(trainer.id, !user);
-    
-    // Check if messaging is allowed based on engagement stage
-    const canShowMessage = () => {
-      const currentStage = engagementStage || 'browsing';
-      return ['shortlisted', 'getting_to_know_your_coach', 'discovery_in_progress', 'discovery_completed', 'agreed', 'payment_pending', 'active_client'].includes(currentStage);
-    };
-
-    return (
-      <div className="space-y-2 p-3 bg-background border rounded-lg">
-        <div className="grid grid-cols-2 gap-2">
-          {!isSaved && !isShortlistedTrainer && (
-            <Button 
-              size="sm" 
-              variant="outline"
-              onClick={() => handleSaveTrainer(trainer.id)}
-            >
-              <Heart className="h-3 w-3 mr-1" />
-              Save
-            </Button>
-          )}
-          
-          {isSaved && !isShortlistedTrainer && (
-            <Button 
-              size="sm" 
-              variant="default"
-              onClick={() => handleShortlist(trainer.id)}
-              disabled={!canShortlistMore}
-            >
-              <Star className="h-3 w-3 mr-1" />
-              {canShortlistMore ? 'Shortlist' : 'Full'}
-            </Button>
-          )}
-          
-          {isShortlistedTrainer && (
-            <Button 
-              size="sm" 
-              variant="outline"
-              onClick={() => navigate('/my-trainers')}
-            >
-              <Star className="h-3 w-3 mr-1 fill-current" />
-              Shortlisted
-            </Button>
-          )}
-          
-          {canShowMessage() && (
-            <Button 
-              size="sm" 
-              variant="outline"
-              onClick={() => handleMessage(trainer.id)}
-            >
-              <MessageCircle className="h-3 w-3 mr-1" />
-              Message
-            </Button>
-          )}
-        </div>
-      </div>
-    );
-  };
-
   const handleSaveTrainer = async (trainerId: string) => {
     console.log('🔥 Save trainer clicked:', trainerId);
     try {
@@ -294,26 +223,6 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
       console.error('Error shortlisting trainer:', error);
       toast.error('Failed to shortlist trainer');
     }
-  };
-
-  const handleComparisonToggle = (trainerId: string) => {
-    setSelectedForComparison(prev => 
-      prev.includes(trainerId) 
-        ? prev.filter(id => id !== trainerId)
-        : prev.length < 4 
-          ? [...prev, trainerId] 
-          : prev
-    );
-  };
-
-  const handleStartComparison = () => {
-    if (selectedForComparison.length >= 2) {
-      setShowComparison(true);
-    }
-  };
-
-  const getSelectedTrainersData = () => {
-    return paginatedTrainers.filter(trainer => selectedForComparison.includes(trainer.id));
   };
 
   const renderPagination = () => {
@@ -358,28 +267,6 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
     );
   };
 
-  if (showComparison) {
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            onClick={() => setShowComparison(false)}
-            className="flex items-center gap-2"
-          >
-            <X className="h-4 w-4" />
-            Back to Explore
-          </Button>
-          <h2 className="text-xl font-semibold">Compare Trainers</h2>
-        </div>
-        <ComparisonView
-          trainers={getSelectedTrainersData()}
-          onClose={() => setShowComparison(false)}
-        />
-      </div>
-    );
-  }
-
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -408,17 +295,6 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
               <Badge variant="secondary">
                 Page {currentPage} of {totalPages}
               </Badge>
-              {selectedForComparison.length >= 2 && (
-                <Button 
-                  variant="default" 
-                  size="sm"
-                  onClick={handleStartComparison}
-                  className="flex items-center gap-2"
-                >
-                  <BarChart3 className="h-4 w-4" />
-                  Compare ({selectedForComparison.length})
-                </Button>
-              )}
             </div>
           </div>
         </CardHeader>
@@ -517,14 +393,8 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
                     isTrainerSaved(trainer.id) ? "saved" : 
                     "default"
                   }
-                  showComparisonCheckbox={true}
-                  comparisonChecked={selectedForComparison.includes(trainer.id)}
-                  onComparisonToggle={handleComparisonToggle}
-                  comparisonDisabled={!selectedForComparison.includes(trainer.id) && selectedForComparison.length >= 4}
+                  showComparisonCheckbox={false}
                 />
-                
-                {/* CTAs */}
-                <TrainerCTAs trainer={trainer} />
               </div>
             ))}
           </div>
