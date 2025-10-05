@@ -365,6 +365,42 @@ export function useUnifiedTrainerData(): UnifiedTrainerState & TrainerActions {
       return { success: false, error: 'Shortlist limit reached' };
     }
 
+    // Store previous state for rollback
+    const previousTrainers = [...state.trainers];
+    const previousCounts = { ...state.counts };
+
+    // Optimistic update - update local state immediately
+    setState(prev => {
+      const updatedTrainers = prev.trainers.map(trainer => {
+        if (trainer.id === trainerId) {
+          return {
+            ...trainer,
+            status: 'shortlisted' as const,
+            statusLabel: 'Shortlisted',
+            statusColor: 'bg-yellow-100 text-yellow-800',
+            engagementStage: 'shortlisted',
+            shortlistedAt: new Date().toISOString()
+          };
+        }
+        return trainer;
+      });
+
+      const newCounts = {
+        all: updatedTrainers.filter(t => t.status !== 'browsing').length,
+        saved: updatedTrainers.filter(t => t.status === 'saved').length,
+        shortlisted: updatedTrainers.filter(t => t.status === 'shortlisted').length,
+        discovery: updatedTrainers.filter(t => t.status === 'discovery').length,
+        declined: updatedTrainers.filter(t => t.status === 'declined').length,
+        waitlist: updatedTrainers.filter(t => t.status === 'waitlist').length
+      };
+
+      return {
+        ...prev,
+        trainers: updatedTrainers,
+        counts: newCounts
+      };
+    });
+
     try {
       const { error } = await supabase.rpc('update_engagement_stage', {
         client_uuid: user.id,
@@ -375,17 +411,63 @@ export function useUnifiedTrainerData(): UnifiedTrainerState & TrainerActions {
       if (error) throw error;
       
       toast.success('Trainer shortlisted!');
-      fetchTrainerData();
+      
+      // Confirm with database fetch
+      await fetchTrainerData();
       return { success: true };
     } catch (error: any) {
       console.error('Error shortlisting trainer:', error);
+      
+      // Rollback optimistic update on error
+      setState(prev => ({
+        ...prev,
+        trainers: previousTrainers,
+        counts: previousCounts
+      }));
+      
       toast.error('Failed to shortlist trainer');
       return { success: false, error: error.message };
     }
-  }, [user, state.trainers, fetchTrainerData]);
+  }, [user, state.trainers, state.counts, fetchTrainerData]);
 
   const removeFromShortlist = useCallback(async (trainerId: string) => {
     if (!user) return { success: false, error: 'No user logged in' };
+
+    // Store previous state for rollback
+    const previousTrainers = [...state.trainers];
+    const previousCounts = { ...state.counts };
+
+    // Optimistic update - update local state immediately
+    setState(prev => {
+      const updatedTrainers = prev.trainers.map(trainer => {
+        if (trainer.id === trainerId) {
+          return {
+            ...trainer,
+            status: 'saved' as const,
+            statusLabel: 'Saved',
+            statusColor: 'bg-blue-100 text-blue-800',
+            engagementStage: 'liked',
+            shortlistedAt: undefined
+          };
+        }
+        return trainer;
+      });
+
+      const newCounts = {
+        all: updatedTrainers.filter(t => t.status !== 'browsing').length,
+        saved: updatedTrainers.filter(t => t.status === 'saved').length,
+        shortlisted: updatedTrainers.filter(t => t.status === 'shortlisted').length,
+        discovery: updatedTrainers.filter(t => t.status === 'discovery').length,
+        declined: updatedTrainers.filter(t => t.status === 'declined').length,
+        waitlist: updatedTrainers.filter(t => t.status === 'waitlist').length
+      };
+
+      return {
+        ...prev,
+        trainers: updatedTrainers,
+        counts: newCounts
+      };
+    });
 
     try {
       const { error } = await supabase.rpc('update_engagement_stage', {
@@ -397,14 +479,24 @@ export function useUnifiedTrainerData(): UnifiedTrainerState & TrainerActions {
       if (error) throw error;
       
       toast.success('Trainer removed from shortlist');
-      fetchTrainerData();
+      
+      // Confirm with database fetch
+      await fetchTrainerData();
       return { success: true };
     } catch (error: any) {
       console.error('Error removing from shortlist:', error);
+      
+      // Rollback optimistic update on error
+      setState(prev => ({
+        ...prev,
+        trainers: previousTrainers,
+        counts: previousCounts
+      }));
+      
       toast.error('Failed to remove from shortlist');
       return { success: false, error: error.message };
     }
-  }, [user, fetchTrainerData]);
+  }, [user, state.trainers, state.counts, fetchTrainerData]);
 
   const updateEngagementStage = useCallback(async (trainerId: string, stage: string): Promise<boolean> => {
     if (!user) return false;
