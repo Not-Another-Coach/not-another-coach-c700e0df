@@ -412,7 +412,9 @@ export function useUnifiedTrainerData(): UnifiedTrainerState & TrainerActions {
       
       toast.success('Trainer shortlisted!');
       
-      // Confirm with database fetch
+      // Invalidate cache and confirm with fresh database fetch
+      cache.current.clear();
+      lastFetchTime.current = 0;
       await fetchTrainerData();
       return { success: true };
     } catch (error: any) {
@@ -480,7 +482,9 @@ export function useUnifiedTrainerData(): UnifiedTrainerState & TrainerActions {
       
       toast.success('Trainer removed from shortlist');
       
-      // Confirm with database fetch
+      // Invalidate cache and confirm with fresh database fetch
+      cache.current.clear();
+      lastFetchTime.current = 0;
       await fetchTrainerData();
       return { success: true };
     } catch (error: any) {
