@@ -102,20 +102,21 @@ const MessagePromptName = ({ contact }: { contact: any }) => {
 };
 
 export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selectedClient }: MessagingPopupProps) => {
+  const { profile } = useProfileByType();
+  const isTrainer = profile?.user_type === 'trainer';
+  
   const [selectedTrainerId, setSelectedTrainerId] = useState<string | null>(null);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
-  const [canMessage, setCanMessage] = useState(true);
+  // Clients can always message trainers, trainers need to wait for client first message
+  const [canMessage, setCanMessage] = useState(!isTrainer);
   const [sending, setSending] = useState(false);
   const [searchFilter, setSearchFilter] = useState('');
   const [unreadCounts, setUnreadCounts] = useState<{ [key: string]: number }>({});
   
-  const { profile } = useProfileByType();
   const { savedTrainers, savedTrainerIds } = useSavedTrainers();
   const { trainers } = useRealTrainers();
   const { conversations } = useConversations();
-
-  const isTrainer = profile?.user_type === 'trainer';
   
   // If trainer provided a selectedClient, start directly in chat mode
   const initialView = selectedClient ? 'chat' : 'list';
@@ -727,7 +728,7 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
             // Chat View - Mobile optimized
             <div className="flex-1 flex flex-col min-h-0">
               {selectedContact && (
-                 <div className="p-3 border-b bg-muted/30 flex-shrink-0">
+                  <div className="p-3 border-b bg-muted/30 flex-shrink-0">
                    <div className="flex items-center gap-2">
                      <ProfileAvatar
                        profilePhotoUrl={selectedContact.profilePhotoUrl}
@@ -735,7 +736,7 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
                        lastName={selectedContact.lastName}
                        size="sm"
                      />
-                     <div>
+                     <div className="flex-1">
                        {!isTrainer && selectedContact && (selectedContact as any).id && !selectedClient ? (
                          <TrainerContactName contact={selectedContact} />
                        ) : (
@@ -745,9 +746,6 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
                          </>
                        )}
                      </div>
-                    <Badge variant="secondary" className="ml-auto text-xs">
-                      Online
-                    </Badge>
                   </div>
                 </div>
               )}
