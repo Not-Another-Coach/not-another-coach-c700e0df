@@ -243,12 +243,6 @@ export default function MyTrainers() {
           </main>
 
           <FloatingMessageButton />
-
-          {/* Messaging Popup */}
-          <MessagingPopup 
-            isOpen={isMessagingOpen}
-            onClose={() => setIsMessagingOpen(false)}
-          />
         </div>
       </ErrorBoundary>
     );
@@ -477,12 +471,6 @@ export default function MyTrainers() {
             setSelectedTrainerForCall(null);
             refreshData();
           }}
-        />
-
-        {/* Messaging Popup */}
-        <MessagingPopup 
-          isOpen={isMessagingOpen}
-          onClose={() => setIsMessagingOpen(false)}
         />
 
         {/* Discovery Call Booking Modal */}
