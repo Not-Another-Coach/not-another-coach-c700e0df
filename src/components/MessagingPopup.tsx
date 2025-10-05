@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MessageCircle, X, Send, Users, Heart, Lock, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -113,7 +113,6 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
   const [sending, setSending] = useState(false);
   const [searchFilter, setSearchFilter] = useState('');
   const [unreadCounts, setUnreadCounts] = useState<{ [key: string]: number }>({});
-  const inputRef = useRef<HTMLInputElement>(null);
   
   const { savedTrainers, savedTrainerIds } = useSavedTrainers();
   const { trainers } = useRealTrainers();
@@ -599,16 +598,6 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
     profileUserType: profile?.user_type
   });
 
-  // Auto-focus input when popup opens or switches to chat view for clients
-  useEffect(() => {
-    if (isOpen && view === 'chat' && selectedTrainerId && !isTrainer && inputRef.current) {
-      // Small delay to ensure DOM is ready
-      const timer = setTimeout(() => {
-        inputRef.current?.focus();
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen, view, selectedTrainerId, isTrainer]);
 
   return (
     <div className="fixed bottom-6 right-6 z-[9999]">
@@ -823,7 +812,6 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
                 <div className="p-3 border-t bg-background flex-shrink-0">
                   <div className="flex gap-2 items-end">
                     <Input
-                      ref={inputRef}
                       placeholder="Type your message..."
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
@@ -835,7 +823,6 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
                       }}
                       className="flex-1 text-sm min-h-[40px]"
                       autoComplete="off"
-                      autoFocus={!isTrainer}
                     />
                     <Button 
                       size="sm" 
@@ -847,11 +834,6 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
                       <Send className="w-4 h-4" />
                     </Button>
                   </div>
-                  {process.env.NODE_ENV === 'development' && (
-                    <div className="text-[10px] text-muted-foreground mt-1 opacity-60">
-                      Debug: isTrainer={String(isTrainer)} | view={view} | trainerId={selectedTrainerId || 'none'} | canMsg={String(canMessage)}
-                    </div>
-                  )}
                 </div>
               )}
             </div>
