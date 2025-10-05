@@ -68,22 +68,54 @@ export function useTrainerEngagement(refreshTrigger?: number) {
   const updateEngagementStage = async (trainerId: string, newStage: EngagementStage) => {
     if (!user) return;
 
+    // Store previous state for rollback
+    const previousEngagements = [...engagements];
+
+    // Optimistic update - update local state immediately
+    setEngagements(prevEngagements => {
+      const existingIndex = prevEngagements.findIndex(e => e.trainerId === trainerId);
+      const now = new Date().toISOString();
+      
+      if (existingIndex >= 0) {
+        // Update existing engagement
+        const updated = [...prevEngagements];
+        updated[existingIndex] = { 
+          ...updated[existingIndex], 
+          stage: newStage, 
+          updatedAt: now 
+        };
+        return updated;
+      } else {
+        // Create new engagement
+        return [...prevEngagements, {
+          trainerId,
+          stage: newStage,
+          createdAt: now,
+          updatedAt: now
+        }];
+      }
+    });
+
     try {
       const { error } = await supabase.rpc('update_engagement_stage', {
         client_uuid: user.id,
         trainer_uuid: trainerId,
-        new_stage: newStage as any // Type cast needed until Supabase regenerates types
+        new_stage: newStage as any
       });
 
       if (error) {
         console.error('Error updating engagement stage:', error);
+        // Rollback optimistic update
+        setEngagements(previousEngagements);
         return;
       }
 
-      // Refresh engagements only if needed to avoid unnecessary delays
-      setTimeout(() => fetchEngagements(), 100);
+      // Confirm with database fetch
+      await fetchEngagements();
     } catch (error) {
       console.error('Error updating engagement stage:', error);
+      // Rollback optimistic update
+      setEngagements(previousEngagements);
     }
   };
 
