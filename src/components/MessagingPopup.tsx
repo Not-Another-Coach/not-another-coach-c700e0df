@@ -588,9 +588,15 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
   };
 
   if (!isOpen) return null;
-  if (!profile) return null;
 
-  console.log('[MessagingPopup] Render state:', { isTrainer, canMessage, view, selectedTrainerId });
+  console.log('[MessagingPopup] Render state:', { 
+    isTrainer, 
+    canMessage, 
+    view, 
+    selectedTrainerId,
+    hasProfile: !!profile,
+    profileUserType: profile?.user_type
+  });
 
   return (
     <div className="fixed bottom-6 right-6 z-[100]">
