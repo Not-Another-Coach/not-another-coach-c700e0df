@@ -122,6 +122,14 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
   const initialView = selectedClient ? 'chat' : 'list';
   const [view, setView] = useState<'list' | 'chat'>(initialView);
   
+  // Sync canMessage with user type changes - ALWAYS show input for clients
+  useEffect(() => {
+    if (!isTrainer) {
+      setCanMessage(true); // Clients can always message
+    }
+    console.log('[MessagingPopup] State:', { isTrainer, canMessage, view, selectedTrainerId });
+  }, [isTrainer, canMessage, view, selectedTrainerId]);
+  
   // Set the selected trainer/client based on provided data
   useEffect(() => {
     if (selectedClient) {
@@ -797,7 +805,7 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
                 )}
               </ScrollArea>
 
-              {canMessage && (
+              {(!isTrainer || canMessage) && (
                 <div className="p-3 border-t bg-background flex-shrink-0">
                   <div className="flex gap-2 items-end">
                     <Input
