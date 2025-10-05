@@ -154,6 +154,24 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
     fetchAllTrainers();
   }, [user]);
 
+  // Listen for engagement updates to remove saved/engaged trainers instantly
+  useEffect(() => {
+    const handleEngagementUpdate = (e: Event) => {
+      const event = e as CustomEvent<{ trainerId: string; stage: string }>;
+      const { trainerId, stage } = event.detail || {} as any;
+      
+      // Remove trainer from list if they're no longer browsing
+      if (trainerId && stage && stage !== 'browsing') {
+        setAllTrainers(prev => prev.filter(t => t.id !== trainerId));
+      }
+    };
+
+    window.addEventListener('engagementStageUpdated', handleEngagementUpdate as EventListener);
+    return () => {
+      window.removeEventListener('engagementStageUpdated', handleEngagementUpdate as EventListener);
+    };
+  }, []);
+
   // Filter trainers based on search and filters
   const filteredTrainers = useMemo(() => {
     return allTrainers.filter(trainer => {

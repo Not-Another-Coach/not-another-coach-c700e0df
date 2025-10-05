@@ -154,6 +154,32 @@ export function ExploreSection({ isActiveClient, journeyProgress }: ExploreSecti
     fetchExplorableTrainers();
   }, []);
 
+  // Listen for engagement updates to remove saved/engaged trainers instantly
+  useEffect(() => {
+    const handleEngagementUpdate = (e: Event) => {
+      const event = e as CustomEvent<{ trainerId: string; stage: string }>;
+      const { trainerId, stage } = event.detail || {} as any;
+      
+      // Remove trainer from list if they're no longer browsing
+      if (trainerId && stage && stage !== 'browsing') {
+        setTrainers(prev => prev.filter(t => t.id !== trainerId));
+        // Adjust current index if needed
+        setCurrentIndex(prev => {
+          const newLength = trainers.length - 1;
+          if (prev >= newLength && newLength > 0) {
+            return newLength - 1;
+          }
+          return prev;
+        });
+      }
+    };
+
+    window.addEventListener('engagementStageUpdated', handleEngagementUpdate as EventListener);
+    return () => {
+      window.removeEventListener('engagementStageUpdated', handleEngagementUpdate as EventListener);
+    };
+  }, [trainers.length]);
+
   // Auto-carousel functionality
   const goToNext = useCallback(() => {
     setCurrentIndex((prev) => (prev < trainers.length - 1 ? prev + 1 : 0));
