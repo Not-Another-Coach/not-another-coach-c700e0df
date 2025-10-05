@@ -6670,7 +6670,9 @@ export type Database = {
         Returns: number
       }
       client_can_view_trainer_images: {
-        Args: { p_trainer_id: string }
+        Args:
+          | { p_client_id: string; p_trainer_id: string }
+          | { p_trainer_id: string }
         Returns: boolean
       }
       client_has_sent_first_message: {
