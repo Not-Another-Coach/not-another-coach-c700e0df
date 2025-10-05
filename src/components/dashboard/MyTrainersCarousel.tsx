@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Heart, ChevronRight, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -15,13 +16,16 @@ interface MyTrainersCarouselProps {
 
 export function MyTrainersCarousel({ onTabChange }: MyTrainersCarouselProps) {
   const navigate = useNavigate();
-  const { trainers, loading } = useUnifiedTrainerData();
+  const { trainers, loading, counts } = useUnifiedTrainerData();
   const [engagementStages, setEngagementStages] = useState<Record<string, EngagementStage>>({});
 
   // Get trainers that are saved or shortlisted using the unified data
   const myTrainers = trainers.filter(trainer => 
     trainer.status === 'saved' || trainer.status === 'shortlisted'
   ).slice(0, 6); // Limit to 6 for carousel
+
+  // Total count matches 'All' in My Trainers view
+  const totalCount = counts.all;
 
   // Fetch engagement stages for all displayed trainers
   useEffect(() => {
@@ -73,7 +77,10 @@ export function MyTrainersCarousel({ onTabChange }: MyTrainersCarouselProps) {
   if (loading) {
     return (
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold text-foreground">My Trainers</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-xl font-semibold text-foreground">My Trainers</h2>
+          <Badge variant="secondary" className="h-5 px-2 text-xs">0</Badge>
+        </div>
         <div className="flex gap-4 overflow-x-auto">
           {[1, 2, 3].map((i) => (
             <div key={i} className="min-w-[260px] h-80 bg-muted rounded-lg animate-pulse" />
@@ -94,6 +101,9 @@ export function MyTrainersCarousel({ onTabChange }: MyTrainersCarouselProps) {
             >
               My Trainers
             </button>
+            <Badge variant="secondary" className="h-5 px-2 text-xs">
+              {totalCount}
+            </Badge>
             <Button
               variant="ghost"
               size="sm"
@@ -174,6 +184,9 @@ export function MyTrainersCarousel({ onTabChange }: MyTrainersCarouselProps) {
           >
             My Trainers
           </button>
+          <Badge variant="secondary" className="h-5 px-2 text-xs">
+            {totalCount}
+          </Badge>
           <Button
             variant="ghost"
             size="sm"
