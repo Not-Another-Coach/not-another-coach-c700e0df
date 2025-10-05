@@ -75,6 +75,32 @@ const TrainerContactName = ({ contact }: { contact: any }) => {
   );
 };
 
+// Helper component for message prompt with visibility-aware name
+const MessagePromptName = ({ contact }: { contact: any }) => {
+  const { stage, isGuest } = useEngagementStage(contact.id);
+  const { getVisibility } = useContentVisibility({
+    engagementStage: stage || 'browsing',
+    isGuest
+  });
+
+  const basicInfoVisibility = getVisibility('basic_information');
+
+  return (
+    <VisibilityAwareName
+      trainer={{
+        id: contact.id,
+        first_name: contact.firstName,
+        last_name: contact.lastName,
+        name: contact.name
+      }}
+      visibilityState={basicInfoVisibility}
+      engagementStage={stage || 'browsing'}
+      fallbackName={contact.name}
+      className="inline"
+    />
+  );
+};
+
 export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selectedClient }: MessagingPopupProps) => {
   const [selectedTrainerId, setSelectedTrainerId] = useState<string | null>(null);
   const [message, setMessage] = useState('');
@@ -105,12 +131,14 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
         checkIfClientMessagedFirst(selectedClient.user_id);
         loadMessages(selectedClient.user_id);
       } else {
+        setCanMessage(true);
         loadMessages(selectedClient.user_id);
       }
     } else if (preSelectedTrainerId && !isTrainer) {
       // For clients with a pre-selected trainer, go directly to chat
       setSelectedTrainerId(preSelectedTrainerId);
       setView('chat');
+      setCanMessage(true); // Clients can always message trainers
       loadMessages(preSelectedTrainerId);
     }
   }, [selectedClient, preSelectedTrainerId, isTrainer]);
@@ -737,7 +765,13 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
                   <div className="text-center text-muted-foreground py-8">
                     <MessageCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
                     <p className="text-sm">Start the conversation!</p>
-                    <p className="text-xs mt-1">Send a message to {selectedContact?.name}</p>
+                    {!isTrainer && selectedContact && (selectedContact as any).id ? (
+                      <div className="text-xs mt-1">
+                        Send a message to <MessagePromptName contact={selectedContact} />
+                      </div>
+                    ) : (
+                      <p className="text-xs mt-1">Send a message to {selectedContact?.name}</p>
+                    )}
                   </div>
                 ) : (
                   <div className="space-y-3">
