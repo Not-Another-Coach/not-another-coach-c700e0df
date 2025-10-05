@@ -433,7 +433,7 @@ export default function MyTrainers() {
                                 'default'
                               }
                              initialView={getSmartInitialView(trainer)}
-                             onMoveToSaved={handleSaveTrainer}
+                             onMoveToSaved={handleRemoveFromShortlist}
                              onRemoveCompletely={handleRemoveFromShortlist}
                              engagementStage={effectiveStage}
                            />
