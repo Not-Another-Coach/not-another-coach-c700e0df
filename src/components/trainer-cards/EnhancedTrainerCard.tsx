@@ -29,6 +29,7 @@ interface EnhancedTrainerCardProps extends Omit<UnifiedTrainerCardProps, 'traine
   
   // Additional layout configuration
   config?: string; // Key from TRAINER_CARD_CONFIGS
+  hideShortlistButton?: boolean; // Hide the "Add to Shortlist" button
 }
 
 export const EnhancedTrainerCard = memo(({ 
@@ -64,7 +65,8 @@ export const EnhancedTrainerCard = memo(({
   showEngagementBadge = false,
   compactActions = false,
   hideViewControls = false,
-  hideViewProfileButton = false, // New prop
+  hideViewProfileButton = false,
+  hideShortlistButton = false, // New prop
   engagementStage: propEngagementStage // Renamed to avoid confusion
 }: EnhancedTrainerCardProps) => {
   const navigate = useNavigate();
@@ -515,8 +517,8 @@ export const EnhancedTrainerCard = memo(({
         break;
 
       default:
-        // For saved or default state, show shortlist button if available
-        if (onAddToShortlist && !isShortlisted) {
+        // For saved or default state, show shortlist button if available and not hidden
+        if (onAddToShortlist && !isShortlisted && !hideShortlistButton) {
           buttons.unshift(
             <Button
               key="shortlist"
