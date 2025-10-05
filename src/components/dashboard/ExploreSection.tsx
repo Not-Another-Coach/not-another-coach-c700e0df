@@ -221,6 +221,8 @@ export function ExploreSection({ isActiveClient, journeyProgress }: ExploreSecti
   };
 
   const handleAddToShortlist = async (trainerId: string) => {
+    // Optimistic removal for instant UX in explore carousel
+    setTrainers(prev => prev.filter(t => t.id !== trainerId));
     try {
       await shortlistTrainer(trainerId);
       toast.success("Trainer added to your shortlist!");

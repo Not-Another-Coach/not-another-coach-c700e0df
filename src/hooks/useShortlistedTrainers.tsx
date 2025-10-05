@@ -131,6 +131,8 @@ export function useShortlistedTrainers(refreshTrigger?: number) {
     try {
       // Update engagement stage first
       await engagementShortlistTrainer(trainerId);
+      // Notify other components for instant removal from explore views
+      window.dispatchEvent(new CustomEvent('engagementStageUpdated', { detail: { trainerId, stage: 'shortlisted' } }));
       
       // Update client journey in parallel to avoid blocking
       updateClientJourney().catch(error => 

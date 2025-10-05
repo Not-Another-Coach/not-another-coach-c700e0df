@@ -54,6 +54,8 @@ export const useSavedTrainers = () => {
     if (!user) {
       // Anonymous user - use anonymous session
       anonymousSession.saveTrainer(trainerId);
+      // Notify other components for instant removal from explore views
+      window.dispatchEvent(new CustomEvent('engagementStageUpdated', { detail: { trainerId, stage: 'liked' } }));
       if (!silent) {
         toast.success("Trainer saved! Create an account to keep them forever");
       }
@@ -63,6 +65,8 @@ export const useSavedTrainers = () => {
     try {
       console.log('Saving trainer:', trainerId);
       await engagementLikeTrainer(trainerId);
+      // Notify other components for instant removal from explore views
+      window.dispatchEvent(new CustomEvent('engagementStageUpdated', { detail: { trainerId, stage: 'liked' } }));
       
       // Track progress - first save advances to shortlisting stage
       if (savedTrainers.length === 0 && !silent) {
