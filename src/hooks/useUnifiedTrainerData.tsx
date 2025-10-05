@@ -380,10 +380,9 @@ export function useUnifiedTrainerData(): UnifiedTrainerState & TrainerActions {
       
       toast.success("Trainer removed from saved list");
       
-      // Invalidate cache and confirm with fresh database fetch
+      // Clear cache but DON'T refetch - optimistic update is already correct
       cache.current.clear();
       lastFetchTime.current = 0;
-      await fetchTrainerData();
       return true;
     } catch (error: any) {
       console.error('Error unsaving trainer:', error);
@@ -398,7 +397,7 @@ export function useUnifiedTrainerData(): UnifiedTrainerState & TrainerActions {
       toast.error("Failed to remove trainer");
       return false;
     }
-  }, [user, state.trainers, state.counts, fetchTrainerData]);
+  }, [user, state.trainers, state.counts]);
 
   const shortlistTrainer = useCallback(async (trainerId: string) => {
     if (!user) {
@@ -460,10 +459,9 @@ export function useUnifiedTrainerData(): UnifiedTrainerState & TrainerActions {
       
       toast.success('Trainer shortlisted!');
       
-      // Invalidate cache and confirm with fresh database fetch
+      // Clear cache but DON'T refetch - optimistic update is already correct
       cache.current.clear();
       lastFetchTime.current = 0;
-      await fetchTrainerData();
       return { success: true };
     } catch (error: any) {
       console.error('Error shortlisting trainer:', error);
@@ -478,7 +476,7 @@ export function useUnifiedTrainerData(): UnifiedTrainerState & TrainerActions {
       toast.error('Failed to shortlist trainer');
       return { success: false, error: error.message };
     }
-  }, [user, state.trainers, state.counts, fetchTrainerData]);
+  }, [user, state.trainers, state.counts]);
 
   const removeFromShortlist = useCallback(async (trainerId: string) => {
     if (!user) return { success: false, error: 'No user logged in' };
@@ -528,12 +526,11 @@ export function useUnifiedTrainerData(): UnifiedTrainerState & TrainerActions {
 
       if (error) throw error;
       
-      toast.success('Trainer removed from shortlist');
+      toast.success('Trainer moved to saved');
       
-      // Invalidate cache and confirm with fresh database fetch
+      // Clear cache but DON'T refetch - optimistic update is already correct
       cache.current.clear();
       lastFetchTime.current = 0;
-      await fetchTrainerData();
       return { success: true };
     } catch (error: any) {
       console.error('Error removing from shortlist:', error);
@@ -545,10 +542,10 @@ export function useUnifiedTrainerData(): UnifiedTrainerState & TrainerActions {
         counts: previousCounts
       }));
       
-      toast.error('Failed to remove from shortlist');
+      toast.error('Failed to move to saved');
       return { success: false, error: error.message };
     }
-  }, [user, state.trainers, state.counts, fetchTrainerData]);
+  }, [user, state.trainers, state.counts]);
 
   const updateEngagementStage = useCallback(async (trainerId: string, stage: string): Promise<boolean> => {
     if (!user) return false;
