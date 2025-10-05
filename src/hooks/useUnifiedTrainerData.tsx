@@ -333,6 +333,42 @@ export function useUnifiedTrainerData(): UnifiedTrainerState & TrainerActions {
   const unsaveTrainer = useCallback(async (trainerId: string): Promise<boolean> => {
     if (!user) return false;
 
+    // Store previous state for rollback
+    const previousTrainers = [...state.trainers];
+    const previousCounts = { ...state.counts };
+
+    // Optimistic update - immediately change to browsing
+    setState(prev => {
+      const updatedTrainers = prev.trainers.map(trainer => {
+        if (trainer.id === trainerId) {
+          return {
+            ...trainer,
+            status: 'browsing' as const,
+            statusLabel: 'Browsing',
+            statusColor: 'bg-gray-100 text-gray-800',
+            engagementStage: 'browsing',
+            likedAt: undefined
+          };
+        }
+        return trainer;
+      });
+
+      const newCounts = {
+        all: updatedTrainers.filter(t => t.status !== 'browsing').length,
+        saved: updatedTrainers.filter(t => t.status === 'saved').length,
+        shortlisted: updatedTrainers.filter(t => t.status === 'shortlisted').length,
+        discovery: updatedTrainers.filter(t => t.status === 'discovery').length,
+        declined: updatedTrainers.filter(t => t.status === 'declined').length,
+        waitlist: updatedTrainers.filter(t => t.status === 'waitlist').length
+      };
+
+      return {
+        ...prev,
+        trainers: updatedTrainers,
+        counts: newCounts
+      };
+    });
+
     try {
       const { error } = await supabase.rpc('update_engagement_stage', {
         client_uuid: user.id,
@@ -343,14 +379,26 @@ export function useUnifiedTrainerData(): UnifiedTrainerState & TrainerActions {
       if (error) throw error;
       
       toast.success("Trainer removed from saved list");
-      fetchTrainerData();
+      
+      // Invalidate cache and confirm with fresh database fetch
+      cache.current.clear();
+      lastFetchTime.current = 0;
+      await fetchTrainerData();
       return true;
     } catch (error: any) {
       console.error('Error unsaving trainer:', error);
+      
+      // Rollback optimistic update on error
+      setState(prev => ({
+        ...prev,
+        trainers: previousTrainers,
+        counts: previousCounts
+      }));
+      
       toast.error("Failed to remove trainer");
       return false;
     }
-  }, [user, fetchTrainerData]);
+  }, [user, state.trainers, state.counts, fetchTrainerData]);
 
   const shortlistTrainer = useCallback(async (trainerId: string) => {
     if (!user) {
