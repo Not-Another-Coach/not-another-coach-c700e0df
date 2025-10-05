@@ -76,18 +76,8 @@ export function useUnifiedTrainerData(): UnifiedTrainerState & TrainerActions {
 
   const cache = useRef<Map<string, any>>(new Map());
   const lastFetchTime = useRef<number>(0);
-  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-
-  // Debounced state updates to prevent excessive re-renders
-  const updateStateDebounced = useMemo(() => {
-    let timeoutId: NodeJS.Timeout;
-    return (updates: Partial<UnifiedTrainerState>) => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        setState(prev => ({ ...prev, ...updates }));
-      }, 100);
-    };
-  }, []);
+  const fetchInProgress = useRef<boolean>(false);
+  const CACHE_DURATION = 2 * 60 * 1000; // 2 minutes (reduced for better UX)
 
   const fetchTrainerData = useCallback(async () => {
     if (!user) {
@@ -95,17 +85,26 @@ export function useUnifiedTrainerData(): UnifiedTrainerState & TrainerActions {
       return;
     }
 
+    // Prevent concurrent fetches
+    if (fetchInProgress.current) {
+      console.log('⏸️ Fetch already in progress, skipping...');
+      return;
+    }
+
     const now = Date.now();
     const cacheKey = `trainer-data-${user.id}`;
     
-    // Check cache first
+    // Check cache first (only skip if cache is fresh)
     if (cache.current.has(cacheKey) && now - lastFetchTime.current < CACHE_DURATION) {
       const cachedData = cache.current.get(cacheKey);
+      console.log('✅ Using cached trainer data');
       setState(prev => ({ ...prev, trainers: cachedData, loading: false }));
+      markTrainersLoaded();
       return;
     }
 
     try {
+      fetchInProgress.current = true;
       setState(prev => ({ ...prev, loading: true, error: null }));
 
       // Fetch data in parallel for better performance
@@ -295,12 +294,14 @@ export function useUnifiedTrainerData(): UnifiedTrainerState & TrainerActions {
       markEngagementLoaded();
 
     } catch (error: any) {
-      console.error('Error fetching trainer data:', error);
+      console.error('❌ Error fetching trainer data:', error);
       setState(prev => ({ 
         ...prev, 
         loading: false, 
         error: error.message || 'Failed to load trainer data' 
       }));
+    } finally {
+      fetchInProgress.current = false;
     }
   }, [user, refreshTrigger, markTrainersLoaded, markEngagementLoaded]);
 

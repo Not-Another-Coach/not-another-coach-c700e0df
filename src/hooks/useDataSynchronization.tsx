@@ -62,15 +62,15 @@ export function useDataSynchronization() {
     }, 1000);
   }, []);
 
-  // Set up real-time subscriptions for engagement changes
+  // Set up real-time subscriptions for engagement changes (OPTIMIZED)
   useEffect(() => {
     if (!user?.id) return;
 
     console.log('🔄 Setting up real-time subscriptions for user:', user.id);
 
-    // Subscribe to engagement changes
-    const engagementChannel = supabase
-      .channel(`engagement-changes-${user.id}`)
+    // Combined channel for better performance
+    const dataChangesChannel = supabase
+      .channel(`data-changes-${user.id}`)
       .on(
         'postgres_changes',
         {
@@ -81,53 +81,27 @@ export function useDataSynchronization() {
         },
         (payload) => {
           console.log('🔄 Real-time engagement update:', payload);
-          // Debounced refresh to prevent excessive updates
+          // Longer debounce to batch updates
           clearTimeout(refreshTimeout.current);
           refreshTimeout.current = setTimeout(() => {
             setRefreshTrigger(prev => prev + 1);
-          }, 1000);
+          }, 2000);
         }
       )
-      .subscribe();
-
-    // Subscribe to discovery call changes
-    const discoveryCallChannel = supabase
-      .channel(`discovery-call-changes-${user.id}`)
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: 'INSERT',  // Only listen to new calls, not all changes
           schema: 'public',
           table: 'discovery_calls',
           filter: `client_id=eq.${user.id}`
         },
         (payload) => {
-          console.log('🔄 Real-time discovery call update:', payload);
+          console.log('🔄 Real-time discovery call created:', payload);
           clearTimeout(refreshTimeout.current);
           refreshTimeout.current = setTimeout(() => {
             setRefreshTrigger(prev => prev + 1);
-          }, 1000);
-        }
-      )
-      .subscribe();
-
-    // Subscribe to conversation changes
-    const conversationChannel = supabase
-      .channel(`conversation-changes-${user.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'conversations',
-          filter: `client_id=eq.${user.id}`
-        },
-        (payload) => {
-          console.log('🔄 Real-time conversation update:', payload);
-          clearTimeout(refreshTimeout.current);
-          refreshTimeout.current = setTimeout(() => {
-            setRefreshTrigger(prev => prev + 1);
-          }, 1000);
+          }, 2000);
         }
       )
       .subscribe();
@@ -135,9 +109,7 @@ export function useDataSynchronization() {
     return () => {
       console.log('🔄 Cleaning up real-time subscriptions');
       clearTimeout(refreshTimeout.current);
-      supabase.removeChannel(engagementChannel);
-      supabase.removeChannel(discoveryCallChannel);
-      supabase.removeChannel(conversationChannel);
+      supabase.removeChannel(dataChangesChannel);
     };
   }, [user?.id]);
 
