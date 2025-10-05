@@ -808,34 +808,35 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
               </ScrollArea>
 
               {/* Message Input - Clients can always message, trainers need client first message */}
-              {(!isTrainer || canMessage) && (
-                <div className="p-3 border-t bg-background flex-shrink-0">
-                  <div className="flex gap-2 items-end">
-                    <Input
-                      placeholder="Type your message..."
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          handleSendMessage();
-                        }
-                      }}
-                      className="flex-1 text-sm min-h-[40px]"
-                      autoComplete="off"
-                    />
-                    <Button 
-                      size="sm" 
-                      onClick={handleSendMessage}
-                      disabled={!message.trim() || sending}
-                      className="h-[40px] px-3 flex-shrink-0"
-                      type="button"
-                    >
-                      <Send className="w-4 h-4" />
-                    </Button>
-                  </div>
+              <div className="p-3 border-t bg-background flex-shrink-0">
+                <div className="flex gap-2 items-end">
+                  <Input
+                    placeholder={isTrainer && !canMessage ? "Waiting for client to send the first message..." : "Type your message..."}
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSendMessage();
+                      }
+                    }}
+                    className="flex-1 text-sm min-h-[40px]"
+                    autoComplete="off"
+                    disabled={isTrainer && !canMessage}
+                  />
+                  <Button 
+                    size="sm" 
+                    onClick={handleSendMessage}
+                    disabled={(isTrainer && !canMessage) || !message.trim() || sending}
+                    className="h-[40px] px-3 flex-shrink-0"
+                    type="button"
+                    aria-disabled={isTrainer && !canMessage}
+                    title={isTrainer && !canMessage ? 'Client must send the first message' : 'Send'}
+                  >
+                    <Send className="w-4 h-4" />
+                  </Button>
                 </div>
-              )}
+              </div>
             </div>
           )}
         </CardContent>
