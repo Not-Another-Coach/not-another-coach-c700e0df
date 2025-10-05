@@ -56,7 +56,7 @@ export class EngagementService extends BaseService {
         .select('*')
         .eq('client_id', effectiveClientId)
         .eq('trainer_id', trainerId)
-        .single();
+        .maybeSingle();
     });
   }
 
