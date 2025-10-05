@@ -307,8 +307,6 @@ export function ExploreSection({ isActiveClient, journeyProgress }: ExploreSecti
                           hideShortlistButton={true}
                           trainerOffersDiscoveryCalls={trainer.offers_discovery_call}
                           initialView="instagram"
-                          matchScore={Math.floor(75 + Math.random() * 20)} // Generate match scores between 75-95%
-                          matchReasons={["Great specialty match", "Excellent ratings", "Available times"]}
                         />
                       </div>
                     ))}

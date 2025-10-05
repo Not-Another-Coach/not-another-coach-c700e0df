@@ -3,8 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Heart, ChevronRight, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useSavedTrainers } from '@/hooks/useSavedTrainers';
-import { useShortlistedTrainers } from '@/hooks/useShortlistedTrainers';
 import { useUnifiedTrainerData } from '@/hooks/useUnifiedTrainerData';
 import { EnhancedTrainerCard } from '@/components/trainer-cards/EnhancedTrainerCard';
 import { AnyTrainer } from '@/types/trainer';
@@ -17,15 +15,12 @@ interface MyTrainersCarouselProps {
 
 export function MyTrainersCarousel({ onTabChange }: MyTrainersCarouselProps) {
   const navigate = useNavigate();
-  const { savedTrainers } = useSavedTrainers();
-  const { shortlistedTrainers } = useShortlistedTrainers();
   const { trainers, loading } = useUnifiedTrainerData();
   const [engagementStages, setEngagementStages] = useState<Record<string, EngagementStage>>({});
 
-  // Get trainers that are saved or shortlisted
+  // Get trainers that are saved or shortlisted using the unified data
   const myTrainers = trainers.filter(trainer => 
-    savedTrainers.some(saved => saved.trainer_id === trainer.id) ||
-    shortlistedTrainers.some(shortlisted => shortlisted.trainer_id === trainer.id)
+    trainer.status === 'saved' || trainer.status === 'shortlisted'
   ).slice(0, 6); // Limit to 6 for carousel
 
   // Fetch engagement stages for all displayed trainers
@@ -64,17 +59,10 @@ export function MyTrainersCarousel({ onTabChange }: MyTrainersCarouselProps) {
   };
 
   const getCardState = (trainerId: string): 'saved' | 'shortlisted' | 'default' => {
-    const isSaved = savedTrainers.some(saved => saved.trainer_id === trainerId);
-    const isShortlisted = shortlistedTrainers.some(shortlisted => shortlisted.trainer_id === trainerId);
-    
-    if (isSaved && isShortlisted) {
-      return 'shortlisted'; // Prioritize shortlisted if both
-    } else if (isShortlisted) {
-      return 'shortlisted';
-    } else if (isSaved) {
-      return 'saved';
-    }
-    return 'default';
+    const trainer = trainers.find(t => t.id === trainerId);
+    return trainer?.status === 'shortlisted' ? 'shortlisted' : 
+           trainer?.status === 'saved' ? 'saved' : 
+           'default';
   };
 
   const handleBookDiscoveryCall = (trainerId: string) => {
