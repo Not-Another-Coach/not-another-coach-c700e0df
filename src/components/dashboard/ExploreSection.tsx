@@ -86,15 +86,18 @@ export function ExploreSection({ isActiveClient, journeyProgress }: ExploreSecti
           `)
           .eq('profile_published', true);
 
-        // If user is authenticated, exclude trainers they're already engaged with
+        // If user is authenticated, exclude trainers with engagement beyond browsing
         if (currentUserId) {
           // Get trainers the user is already engaged with
           const { data: engagedTrainers } = await supabase
             .from('client_trainer_engagement')
-            .select('trainer_id')
+            .select('trainer_id, stage')
             .eq('client_id', currentUserId);
           
-          const engagedTrainerIds = engagedTrainers?.map(e => e.trainer_id) || [];
+          // Only exclude trainers with engagement beyond browsing
+          const engagedTrainerIds = (engagedTrainers || [])
+            .filter(e => e.stage !== 'browsing')
+            .map(e => e.trainer_id);
           
           if (engagedTrainerIds.length > 0) {
             query = query.not('id', 'in', `(${engagedTrainerIds.join(',')})`);
