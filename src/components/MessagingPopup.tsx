@@ -396,6 +396,12 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
   const handleSelectTrainer = (trainerId: string) => {
     setSelectedTrainerId(trainerId);
     setView('chat');
+    // Clients can always message, trainers need to check if client messaged first
+    if (!isTrainer) {
+      setCanMessage(true);
+    } else {
+      checkIfClientMessagedFirst(trainerId);
+    }
     loadMessages(trainerId);
   };
 
@@ -546,6 +552,10 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
   const handleBackToList = () => {
     setView('list');
     setSelectedTrainerId(null);
+    // Reset canMessage for next selection
+    if (!isTrainer) {
+      setCanMessage(true);
+    }
   };
 
   if (!isOpen) return null;
