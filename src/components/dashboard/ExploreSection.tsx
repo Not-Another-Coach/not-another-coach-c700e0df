@@ -215,8 +215,11 @@ export function ExploreSection({ isActiveClient, journeyProgress }: ExploreSecti
     navigate(`/book-discovery-call/${trainerId}`);
   };
 
-  // Show "Ready to Explore" state for users in exploring_coaches stage
-  if (journeyProgress?.stage === 'exploring_coaches') {
+  // Show "Ready to Explore" state for users not yet in onboarding stages
+  const showPotentialMatches = !isActiveClient && 
+    !['onboarding_in_progress', 'on_your_journey'].includes(journeyProgress?.stage || '');
+  
+  if (showPotentialMatches) {
     return (
       <Card 
         className="border-secondary-200 bg-gradient-to-br from-secondary-50 to-accent-50 cursor-pointer hover:shadow-lg transition-all duration-300"
@@ -298,6 +301,7 @@ export function ExploreSection({ isActiveClient, journeyProgress }: ExploreSecti
                           onStartConversation={handleStartConversation}
                           onBookDiscoveryCall={handleBookDiscoveryCall}
                           isShortlisted={isShortlisted(trainer.id)}
+                          hideShortlistButton={true}
                           trainerOffersDiscoveryCalls={trainer.offers_discovery_call}
                           initialView="instagram"
                           matchScore={Math.floor(75 + Math.random() * 20)} // Generate match scores between 75-95%
