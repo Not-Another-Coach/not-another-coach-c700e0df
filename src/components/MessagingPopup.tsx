@@ -597,31 +597,40 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
       <Card className="w-[450px] h-[600px] shadow-2xl border-2 border-primary/20 bg-white">
         <CardHeader className="pb-3 bg-primary text-primary-foreground">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-lg flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
               {view === 'chat' && (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleBackToList}
-                  className="text-primary-foreground hover:bg-primary-foreground/20 p-1 mr-2"
+                  className="text-primary-foreground hover:bg-primary-foreground/20 p-1 flex-shrink-0"
                 >
                   ←
                 </Button>
               )}
               {view === 'chat' && selectedContact ? (
-                <span>{selectedContact.name}</span>
-              ) : (
                 <>
+                  <ProfileAvatar
+                    profilePhotoUrl={selectedContact.profilePhotoUrl}
+                    firstName={selectedContact.firstName}
+                    lastName={selectedContact.lastName}
+                    size="sm"
+                    className="flex-shrink-0"
+                  />
+                  <CardTitle className="text-lg truncate">{selectedContact.name}</CardTitle>
+                </>
+              ) : (
+                <CardTitle className="text-lg flex items-center gap-2">
                   <MessageCircle className="w-5 h-5" />
                   Messages
-                </>
+                </CardTitle>
               )}
-            </CardTitle>
+            </div>
             <Button
               variant="ghost"
               size="sm"
               onClick={onClose}
-              className="text-primary-foreground hover:bg-primary-foreground/20 p-1"
+              className="text-primary-foreground hover:bg-primary-foreground/20 p-1 flex-shrink-0"
             >
               <X className="w-4 h-4" />
             </Button>
