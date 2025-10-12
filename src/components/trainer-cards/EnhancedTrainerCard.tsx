@@ -535,7 +535,24 @@ export const EnhancedTrainerCard = memo(({
             </Button>
           );
         }
-        // Remove message button from default state (saved/browsing) as it requires shortlisted or higher
+        
+        // Show message button if engagement stage allows, regardless of card state
+        if (onStartConversation && canShowMessage()) {
+          buttons.unshift(
+            <Button
+              key="message"
+              variant="secondary"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                onStartConversation(trainer.id);
+              }}
+              title="Message"
+            >
+              <MessageCircle className="w-4 h-4" />
+            </Button>
+          );
+        }
         break;
     }
 
