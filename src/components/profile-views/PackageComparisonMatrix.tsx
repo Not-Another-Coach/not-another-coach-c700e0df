@@ -170,7 +170,7 @@ export function PackageComparisonMatrix({
             {/* Package Headers */}
             <thead>
               <tr className="border-b-2 border-primary-200">
-                <th className="text-left p-4 font-semibold min-w-[200px] text-primary">Feature</th>
+                <th className="sticky left-0 z-10 bg-background text-left p-4 font-semibold min-w-[200px] text-primary shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)]">Feature</th>
                 {packages.map(pkg => (
                   <th 
                     key={pkg.id} 
@@ -208,7 +208,7 @@ export function PackageComparisonMatrix({
                 <>
                   {/* Category Header */}
                   <tr key={`${category.id}-header`} className="bg-gray-50">
-                    <td colSpan={packages.length + 1} className="p-3 font-semibold text-sm text-primary">
+                    <td colSpan={packages.length + 1} className="sticky left-0 z-10 bg-gray-50 p-3 font-semibold text-sm text-primary shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)]">
                       {category.label}
                     </td>
                   </tr>
@@ -219,7 +219,7 @@ export function PackageComparisonMatrix({
                       key={feature.id} 
                       className="border-b border-border hover:bg-secondary-50/30 transition-colors"
                     >
-                      <td className="p-3">
+                      <td className="sticky left-0 z-10 bg-background p-3 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)]">
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
