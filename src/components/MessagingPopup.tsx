@@ -21,7 +21,7 @@
  * @see MessagingService for backend API
  */
 import React, { useState, useEffect } from 'react';
-import { MessageCircle, X, Send, Users, Heart, Lock } from 'lucide-react';
+import { MessageCircle, X, Send, Users, Heart, Lock, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -37,6 +37,8 @@ import { ProfileAvatar } from '@/components/ui/profile-avatar';
 import { useEngagementStage } from '@/hooks/useEngagementStage';
 import { useContentVisibility } from '@/hooks/useContentVisibility';
 import { VisibilityAwareName } from '@/components/ui/VisibilityAwareName';
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
+import { MessageReadReceipt } from '@/components/messaging/MessageReadReceipt';
 
 interface Message {
   id: string;
@@ -126,6 +128,7 @@ const MessagePromptName = ({ contact }: { contact: any }) => {
 export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selectedClient }: MessagingPopupProps) => {
   const { profile } = useProfileByType();
   const isTrainer = profile?.user_type === 'trainer';
+  const { isUserOnline } = useOnlineStatus();
   
   const [selectedTrainerId, setSelectedTrainerId] = useState<string | null>(null);
   const [message, setMessage] = useState('');
@@ -632,14 +635,26 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
               )}
               {view === 'chat' && selectedContact ? (
                 <>
-                  <ProfileAvatar
-                    profilePhotoUrl={selectedContact.profilePhotoUrl}
-                    firstName={selectedContact.firstName}
-                    lastName={selectedContact.lastName}
-                    size="sm"
-                    className="flex-shrink-0"
-                  />
-                  <CardTitle className="text-lg truncate">{selectedContact.name}</CardTitle>
+                  <div className="relative">
+                    <ProfileAvatar
+                      profilePhotoUrl={selectedContact.profilePhotoUrl}
+                      firstName={selectedContact.firstName}
+                      lastName={selectedContact.lastName}
+                      size="sm"
+                      className="flex-shrink-0"
+                    />
+                    {isUserOnline(selectedContact.id) && (
+                      <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
+                    )}
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <CardTitle className="text-lg truncate">{selectedContact.name}</CardTitle>
+                    {isUserOnline(selectedContact.id) ? (
+                      <p className="text-xs text-green-200">Online</p>
+                    ) : (
+                      <p className="text-xs text-primary-foreground/70">{selectedContact.location}</p>
+                    )}
+                  </div>
                 </>
               ) : (
                 <CardTitle className="text-lg flex items-center gap-2">
@@ -684,12 +699,17 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
                             onClick={() => handleSelectTrainer(contact.id)}
                           >
                             <div className="flex items-start gap-3">
-                              <ProfileAvatar
-                                profilePhotoUrl={contact.profilePhotoUrl}
-                                firstName={contact.firstName}
-                                lastName={contact.lastName}
-                                size="md"
-                              />
+                              <div className="relative">
+                                <ProfileAvatar
+                                  profilePhotoUrl={contact.profilePhotoUrl}
+                                  firstName={contact.firstName}
+                                  lastName={contact.lastName}
+                                  size="md"
+                                />
+                                {isUserOnline(contact.id) && (
+                                  <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
+                                )}
+                              </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between mb-1">
                                   <p className="font-medium text-sm text-foreground truncate">
@@ -762,26 +782,47 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {messages.map((msg) => (
-                      <div
-                        key={msg.id}
-                        className={cn(
-                          "flex",
-                          msg.sender === 'user' ? 'justify-end' : 'justify-start'
-                        )}
-                      >
+                    {messages.map((msg) => {
+                      // Find the actual message data from conversations for read receipts
+                      const conversation = conversations.find(c => 
+                        (isTrainer ? c.client_id === selectedTrainerId : c.trainer_id === selectedTrainerId)
+                      );
+                      const actualMessage = conversation?.messages.find(m => m.id === msg.id);
+                      const otherUserLastReadAt = isTrainer 
+                        ? conversation?.client_last_read_at 
+                        : conversation?.trainer_last_read_at;
+
+                      return (
                         <div
+                          key={msg.id}
                           className={cn(
-                            "max-w-[80%] rounded-lg p-2 text-sm",
-                            msg.sender === 'user'
-                              ? 'bg-primary text-primary-foreground'
-                              : 'bg-muted'
+                            "flex",
+                            msg.sender === 'user' ? 'justify-end' : 'justify-start'
                           )}
                         >
-                          {msg.content}
+                          <div
+                            className={cn(
+                              "max-w-[80%] rounded-lg p-2 text-sm flex items-end gap-1",
+                              msg.sender === 'user'
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-muted'
+                            )}
+                          >
+                            <span className="flex-1">{msg.content}</span>
+                            {msg.sender === 'user' && actualMessage && (
+                              <MessageReadReceipt
+                                message={{
+                                  id: actualMessage.id,
+                                  created_at: actualMessage.created_at,
+                                  read_at: actualMessage.read_at
+                                }}
+                                conversationReadAt={otherUserLastReadAt || null}
+                              />
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </ScrollArea>

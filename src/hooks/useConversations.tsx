@@ -234,15 +234,34 @@ export function useConversations() {
         ? 'client_last_read_at' 
         : 'trainer_last_read_at';
 
+      const now = new Date().toISOString();
+
+      // Update individual message read_at timestamps for unread messages
+      await supabase
+        .from('messages')
+        .update({ read_at: now })
+        .eq('conversation_id', conversationId)
+        .neq('sender_id', user.id)
+        .is('read_at', null);
+
+      // Update conversation-level read timestamp
       await supabase
         .from('conversations')
-        .update({ [readField]: new Date().toISOString() })
+        .update({ [readField]: now })
         .eq('id', conversationId);
 
       // Update local state
       setConversations(prev => prev.map(conv => 
         conv.id === conversationId 
-          ? { ...conv, [readField]: new Date().toISOString() }
+          ? { 
+              ...conv, 
+              [readField]: now,
+              messages: conv.messages.map(msg => 
+                msg.sender_id !== user.id && !msg.read_at
+                  ? { ...msg, read_at: now }
+                  : msg
+              )
+            }
           : conv
       ));
     } catch (error) {
@@ -270,12 +289,12 @@ export function useConversations() {
     fetchConversations();
   }, [fetchConversations]);
 
-  // Set up real-time subscription for new messages
+  // Set up real-time subscriptions for messages and conversation updates
   useEffect(() => {
     if (!user) return;
 
     const channel = supabase
-      .channel('messages-changes')
+      .channel('messages-and-conversations')
       .on(
         'postgres_changes',
         {
@@ -288,6 +307,47 @@ export function useConversations() {
           setConversations(prev => prev.map(conv => 
             conv.id === newMessage.conversation_id
               ? { ...conv, messages: [...conv.messages, newMessage] }
+              : conv
+          ));
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'conversations'
+        },
+        (payload) => {
+          const updatedConv = payload.new as any;
+          setConversations(prev => prev.map(conv => 
+            conv.id === updatedConv.id
+              ? { 
+                  ...conv, 
+                  client_last_read_at: updatedConv.client_last_read_at,
+                  trainer_last_read_at: updatedConv.trainer_last_read_at
+                }
+              : conv
+          ));
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'messages'
+        },
+        (payload) => {
+          const updatedMessage = payload.new as Message;
+          setConversations(prev => prev.map(conv => 
+            conv.id === updatedMessage.conversation_id
+              ? {
+                  ...conv,
+                  messages: conv.messages.map(msg =>
+                    msg.id === updatedMessage.id ? updatedMessage : msg
+                  )
+                }
               : conv
           ));
         }
