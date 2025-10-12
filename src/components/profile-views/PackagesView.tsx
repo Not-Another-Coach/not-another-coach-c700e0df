@@ -34,12 +34,27 @@ export const PackagesView = ({ trainer }: PackagesViewProps) => {
         
         if (error) throw error;
         
-        // Filter by package IDs that exist in trainer's packages
+        // Align workflows to trainer's packages by id or by name (fallback)
         const trainerPackages = (trainer as any).package_options || (trainer as any).packages || [];
-        const trainerPackageIds = trainerPackages.map((p: any) => p.id) || [];
-        const filtered = (data || []).filter(w => 
-          trainerPackageIds.includes(w.package_id)
+        const trainerPackageIds: string[] = trainerPackages.map((p: any) => String(p.id));
+        const nameToId = new Map<string, string>(
+          trainerPackages.map((p: any) => [String(p.name).trim().toLowerCase(), String(p.id)])
         );
+
+        const normalized = (str?: string | null) => String(str ?? '').trim().toLowerCase();
+
+        const adjusted = (data || []).map((w: any) => {
+          const wId = String(w.package_id);
+          if (!trainerPackageIds.includes(wId)) {
+            const mappedId = nameToId.get(normalized(w.package_name));
+            if (mappedId) {
+              return { ...w, package_id: mappedId };
+            }
+          }
+          return w;
+        });
+
+        const filtered = adjusted.filter((w: any) => trainerPackageIds.includes(String(w.package_id)));
         
         setPackageWorkflows(filtered as any);
       } catch (error) {
