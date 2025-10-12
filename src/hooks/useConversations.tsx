@@ -272,16 +272,9 @@ export function useConversations() {
   const getUnreadCount = useCallback((conversation: Conversation) => {
     if (!user) return 0;
 
-    const isClient = conversation.client_id === user.id;
-    const lastReadAt = isClient ? conversation.client_last_read_at : conversation.trainer_last_read_at;
-    
-    if (!lastReadAt) {
-      return conversation.messages.filter(msg => msg.sender_id !== user.id).length;
-    }
-
+    // Count messages that are unread - check individual message read_at field
     return conversation.messages.filter(msg => 
-      msg.sender_id !== user.id && 
-      new Date(msg.created_at) > new Date(lastReadAt)
+      msg.sender_id !== user.id && !msg.read_at
     ).length;
   }, [user]);
 
