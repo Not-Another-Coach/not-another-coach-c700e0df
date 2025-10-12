@@ -16,56 +16,19 @@ export const FloatingMessageButton = () => {
   
   const isTrainer = profile?.user_type === 'trainer';
   
-  // Calculate unread messages count
+  // Calculate unread messages count - check individual message read_at fields
   const unreadCount = useMemo(() => {
-    if (isTrainer) {
-      // For trainers, count messages sent after trainer_last_read_at
-      return conversations.reduce((count, conv) => {
-        const lastReadAt = conv.trainer_last_read_at;
-        
-        if (!conv.messages || conv.messages.length === 0) return count;
-        
-        // If never read, count all messages from the other person (client)
-        if (!lastReadAt) {
-          const unreadInConv = conv.messages.filter(msg => 
-            msg.sender_id !== profile?.id
-          ).length;
-          return count + unreadInConv;
-        }
-        
-        // Count messages after last read time
-        const unreadInConv = conv.messages.filter(msg => 
-          new Date(msg.created_at) > new Date(lastReadAt) && 
-          msg.sender_id !== profile?.id
-        ).length;
-        
-        return count + unreadInConv;
-      }, 0);
-    } else {
-      // For clients, count messages sent after client_last_read_at
-      return conversations.reduce((count, conv) => {
-        const lastReadAt = conv.client_last_read_at;
-        
-        if (!conv.messages || conv.messages.length === 0) return count;
-        
-        // If never read, count all messages from the other person (trainer)
-        if (!lastReadAt) {
-          const unreadInConv = conv.messages.filter(msg => 
-            msg.sender_id !== profile?.id
-          ).length;
-          return count + unreadInConv;
-        }
-        
-        // Count messages after last read time
-        const unreadInConv = conv.messages.filter(msg => 
-          new Date(msg.created_at) > new Date(lastReadAt) && 
-          msg.sender_id !== profile?.id
-        ).length;
-        
-        return count + unreadInConv;
-      }, 0);
-    }
-  }, [conversations, isTrainer, profile?.id]);
+    return conversations.reduce((count, conv) => {
+      if (!conv.messages || conv.messages.length === 0) return count;
+      
+      // Count messages that are unread (no read_at) and not sent by current user
+      const unreadInConv = conv.messages.filter(msg => 
+        msg.sender_id !== profile?.id && !msg.read_at
+      ).length;
+      
+      return count + unreadInConv;
+    }, 0);
+  }, [conversations, profile?.id]);
   
   const badgeCount = unreadCount;
 
