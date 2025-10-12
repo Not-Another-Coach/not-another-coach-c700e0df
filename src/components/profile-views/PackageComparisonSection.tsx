@@ -37,14 +37,14 @@ export function PackageComparisonSection({
   return (
     <div className="space-y-6">
       {/* What's Always Included Section */}
-      <Card>
+      <Card className="bg-primary-50/30 border-primary-200 shadow-sm">
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Check className="h-5 w-5 text-primary" />
+          <CardTitle className="text-lg flex items-center gap-2 text-primary">
+            <Check className="h-5 w-5" />
             What's Always Included
           </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            These are included in all packages
+          <p className="text-sm text-secondary-700">
+            You're supported from day one
           </p>
         </CardHeader>
         <CardContent>

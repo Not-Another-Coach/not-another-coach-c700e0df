@@ -19,6 +19,7 @@ import { KBCategoryManager } from './KBCategoryManager';
 import { AddCoachDeclineArticle } from './AddCoachDeclineArticle';
 import { AddBreadcrumbProgressArticle } from './AddBreadcrumbProgressArticle';
 import { AddVerificationSystemArticle } from './AddVerificationSystemArticle';
+import { AddPackagesUIArticle } from './AddPackagesUIArticle';
 import { ArticleStagingManager } from './ArticleStagingManager';
 import { format } from 'date-fns';
 
@@ -184,6 +185,7 @@ export const KnowledgeBaseAdmin: React.FC = () => {
             <AddCoachDeclineArticle />
             <AddBreadcrumbProgressArticle />
             <AddVerificationSystemArticle />
+            <AddPackagesUIArticle />
           </div>
 
           {/* Articles List */}

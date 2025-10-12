@@ -32,14 +32,16 @@ export function PackageComparisonTable({ packages, highlightedPackageId }: Packa
             {packages.map((pkg) => (
               <TableRow 
                 key={pkg.id}
-                className={highlightedPackageId === pkg.id ? "bg-muted/50" : ""}
+                className={highlightedPackageId === pkg.id ? "bg-energy-50/30" : ""}
               >
                 <TableCell className="font-medium">
                   <div className="flex items-center gap-2">
-                    {pkg.name}
+                    <span className={highlightedPackageId === pkg.id ? "text-primary font-semibold" : ""}>
+                      {pkg.name}
+                    </span>
                     {highlightedPackageId === pkg.id && (
-                      <Badge variant="secondary" className="text-xs">
-                        Popular
+                      <Badge className="text-xs bg-energy text-energy-foreground">
+                        Popular Choice
                       </Badge>
                     )}
                   </div>
@@ -50,12 +52,17 @@ export function PackageComparisonTable({ packages, highlightedPackageId }: Packa
                 <TableCell>
                   {pkg.extraInclusions && pkg.extraInclusions.length > 0 ? (
                     <ul className="space-y-1">
-                      {pkg.extraInclusions.map((inclusion, idx) => (
+                      {pkg.extraInclusions.slice(0, 4).map((inclusion, idx) => (
                         <li key={idx} className="flex items-start gap-2 text-sm">
-                          <Check className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                          <Check className="h-4 w-4 text-secondary mt-0.5 flex-shrink-0" />
                           <span>{inclusion}</span>
                         </li>
                       ))}
+                      {pkg.extraInclusions.length > 4 && (
+                        <li className="text-xs text-muted-foreground italic pl-6">
+                          ...and {pkg.extraInclusions.length - 4} more
+                        </li>
+                      )}
                     </ul>
                   ) : (
                     <span className="text-muted-foreground text-sm">Standard package</span>
@@ -78,7 +85,7 @@ export function PackageComparisonTable({ packages, highlightedPackageId }: Packa
         {packages.map((pkg) => (
           <Card 
             key={pkg.id}
-            className={highlightedPackageId === pkg.id ? "border-primary" : ""}
+            className={highlightedPackageId === pkg.id ? "border-2 border-energy ring-2 ring-energy/20" : "border-secondary-200"}
           >
             <CardContent className="p-4 space-y-3">
               <div className="flex items-start justify-between">
@@ -99,21 +106,28 @@ export function PackageComparisonTable({ packages, highlightedPackageId }: Packa
               </div>
               
               {highlightedPackageId === pkg.id && (
-                <Badge variant="secondary" className="text-xs">
+                <Badge className="text-xs bg-energy text-energy-foreground">
                   Popular Choice
                 </Badge>
               )}
 
               {pkg.extraInclusions && pkg.extraInclusions.length > 0 && (
-                <div>
-                  <p className="text-sm font-medium mb-2">Extra Inclusions:</p>
+                <div className="bg-secondary-50/50 p-3 rounded-lg">
+                  <p className="text-xs font-medium text-secondary-600 uppercase tracking-wide mb-2">
+                    Extended Features
+                  </p>
                   <ul className="space-y-1.5">
-                    {pkg.extraInclusions.map((inclusion, idx) => (
+                    {pkg.extraInclusions.slice(0, 4).map((inclusion, idx) => (
                       <li key={idx} className="flex items-start gap-2 text-sm">
-                        <Check className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <Check className="h-4 w-4 text-secondary mt-0.5 flex-shrink-0" />
                         <span>{inclusion}</span>
                       </li>
                     ))}
+                    {pkg.extraInclusions.length > 4 && (
+                      <li className="text-xs text-muted-foreground italic pl-6">
+                        +{pkg.extraInclusions.length - 4} more features
+                      </li>
+                    )}
                   </ul>
                 </div>
               )}

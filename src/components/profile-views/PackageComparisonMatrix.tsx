@@ -1,11 +1,11 @@
 import { TrainerPackageExtended } from "@/types/trainer";
 import { PackageWaysOfWorking } from "@/hooks/usePackageWaysOfWorking";
-import { Check, Minus } from "lucide-react";
+import { Check, Minus, ChevronDown } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { getCurrencySymbol, formatPackageDuration } from "@/lib/packagePaymentUtils";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 
 interface PackageComparisonMatrixProps {
@@ -30,11 +30,12 @@ interface FeatureCategory {
 
 export function PackageComparisonMatrix({ 
   packages, 
-  packageWorkflows, 
+  packageWorkflows,
   baseInclusions = [],
   highlightedPackageId 
 }: PackageComparisonMatrixProps) {
   const [openPackages, setOpenPackages] = useState<Set<string>>(new Set());
+  const [isComparisonOpen, setIsComparisonOpen] = useState(false);
 
   if (!packages || packages.length === 0) {
     return null;
@@ -150,91 +151,109 @@ export function PackageComparisonMatrix({
 
   // Desktop table view
   const DesktopView = () => (
-    <div className="hidden md:block overflow-x-auto">
-      <table className="w-full border-collapse">
-        {/* Package Headers */}
-        <thead>
-          <tr className="border-b border-border">
-            <th className="text-left p-4 font-semibold min-w-[200px]">Feature</th>
-            {packages.map(pkg => (
-              <th 
-                key={pkg.id} 
-                className={`p-4 text-center min-w-[150px] ${
-                  highlightedPackageId === pkg.id ? 'bg-primary/5' : ''
-                }`}
-              >
-                <div className="space-y-2">
-                  <div className="font-semibold text-base">{pkg.name}</div>
-                  {highlightedPackageId === pkg.id && (
-                    <Badge variant="secondary" className="text-xs">Popular</Badge>
-                  )}
-                  <div className="text-2xl font-bold">
-                    {getCurrencySymbol(pkg.currency)}{pkg.price.toFixed(0)}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {formatPackageDuration(pkg)}
-                  </div>
-                  {pkg.description && (
-                    <div className="text-xs text-muted-foreground mt-2 line-clamp-2">
-                      {pkg.description}
-                    </div>
-                  )}
-                </div>
-              </th>
-            ))}
-          </tr>
-        </thead>
-
-        {/* Feature Rows */}
-        <tbody>
-          {featureCategories.map(category => (
-            <>
-              {/* Category Header */}
-              <tr key={`${category.id}-header`} className="bg-muted/30">
-                <td colSpan={packages.length + 1} className="p-3 font-semibold text-sm">
-                  {category.label}
-                </td>
-              </tr>
-              
-              {/* Category Features */}
-              {category.features.map(feature => (
-                <tr 
-                  key={feature.id} 
-                  className="border-b border-border hover:bg-muted/10 transition-colors"
-                >
-                  <td className="p-3">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="text-sm cursor-help">{feature.name}</span>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="text-xs max-w-xs">{feature.tooltip}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </td>
-                  {packages.map(pkg => (
-                    <td 
-                      key={pkg.id} 
-                      className={`p-3 text-center ${
-                        highlightedPackageId === pkg.id ? 'bg-primary/5' : ''
-                      }`}
-                    >
-                      {feature.presentInPackages.has(pkg.id) ? (
-                        <Check className="h-5 w-5 text-emerald-600 dark:text-emerald-400 mx-auto" />
-                      ) : (
-                        <Minus className="h-5 w-5 text-muted-foreground/30 mx-auto" />
+    <Collapsible open={isComparisonOpen} onOpenChange={setIsComparisonOpen}>
+      <div className="mb-4">
+        <CollapsibleTrigger asChild>
+          <Button 
+            variant="outline" 
+            className="w-full bg-primary hover:bg-primary-600 text-primary-foreground border-primary-200"
+          >
+            <span className="font-medium">Compare All Packages</span>
+            <ChevronDown className={`ml-2 h-4 w-4 transition-transform duration-200 ${isComparisonOpen ? 'rotate-180' : ''}`} />
+          </Button>
+        </CollapsibleTrigger>
+      </div>
+      
+      <CollapsibleContent className="hidden md:block">
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            {/* Package Headers */}
+            <thead>
+              <tr className="border-b-2 border-primary-200">
+                <th className="text-left p-4 font-semibold min-w-[200px] text-primary">Feature</th>
+                {packages.map(pkg => (
+                  <th 
+                    key={pkg.id} 
+                    className={`p-4 text-center min-w-[150px] ${
+                      highlightedPackageId === pkg.id ? 'bg-energy-50/30' : ''
+                    }`}
+                  >
+                    <div className="space-y-2">
+                      <div className={`font-semibold text-base ${highlightedPackageId === pkg.id ? 'text-primary' : ''}`}>
+                        {pkg.name}
+                      </div>
+                      {highlightedPackageId === pkg.id && (
+                        <Badge className="text-xs bg-energy text-energy-foreground">Popular Choice</Badge>
                       )}
+                      <div className="text-2xl font-bold text-primary">
+                        {getCurrencySymbol(pkg.currency)}{pkg.price.toFixed(0)}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {formatPackageDuration(pkg)}
+                      </div>
+                      {pkg.description && (
+                        <div className="text-xs text-muted-foreground mt-2 line-clamp-2">
+                          {pkg.description}
+                        </div>
+                      )}
+                    </div>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+
+            {/* Feature Rows */}
+            <tbody>
+              {featureCategories.map(category => (
+                <>
+                  {/* Category Header */}
+                  <tr key={`${category.id}-header`} className="bg-gray-50">
+                    <td colSpan={packages.length + 1} className="p-3 font-semibold text-sm text-primary">
+                      {category.label}
                     </td>
+                  </tr>
+                  
+                  {/* Category Features */}
+                  {category.features.map(feature => (
+                    <tr 
+                      key={feature.id} 
+                      className="border-b border-border hover:bg-secondary-50/30 transition-colors"
+                    >
+                      <td className="p-3">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="text-sm cursor-help">{feature.name}</span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="text-xs max-w-xs">{feature.tooltip}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </td>
+                      {packages.map(pkg => (
+                        <td 
+                          key={pkg.id} 
+                          className={`p-3 text-center ${
+                            highlightedPackageId === pkg.id ? 'bg-energy-50/30' : ''
+                          }`}
+                        >
+                          {feature.presentInPackages.has(pkg.id) ? (
+                            <Check className="h-5 w-5 text-secondary mx-auto" />
+                          ) : (
+                            <Minus className="h-5 w-5 text-muted-foreground/40 mx-auto" />
+                          )}
+                        </td>
+                      ))}
+                    </tr>
                   ))}
-                </tr>
+                </>
               ))}
-            </>
-          ))}
-        </tbody>
-      </table>
-    </div>
+            </tbody>
+          </table>
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 
   // Mobile accordion view
@@ -248,20 +267,22 @@ export function PackageComparisonMatrix({
             open={isOpen}
             onOpenChange={() => togglePackage(pkg.id)}
             className={`border rounded-lg ${
-              highlightedPackageId === pkg.id ? 'border-primary' : 'border-border'
+              highlightedPackageId === pkg.id ? 'border-2 border-energy ring-2 ring-energy/20' : 'border-secondary-200'
             }`}
           >
             <CollapsibleTrigger className="w-full p-4 text-left">
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <h4 className="font-semibold">{pkg.name}</h4>
+                    <h4 className={`font-semibold ${highlightedPackageId === pkg.id ? 'text-primary' : ''}`}>
+                      {pkg.name}
+                    </h4>
                     {highlightedPackageId === pkg.id && (
-                      <Badge variant="secondary" className="text-xs">Popular</Badge>
+                      <Badge className="text-xs bg-energy text-energy-foreground">Popular</Badge>
                     )}
                   </div>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-xl font-bold">
+                    <span className="text-xl font-bold text-primary">
                       {getCurrencySymbol(pkg.currency)}{pkg.price.toFixed(0)}
                     </span>
                     <span className="text-sm text-muted-foreground">
@@ -293,13 +314,13 @@ export function PackageComparisonMatrix({
 
                   return (
                     <div key={category.id}>
-                      <h5 className="text-sm font-semibold mb-2 text-muted-foreground">
+                      <h5 className="text-sm font-semibold mb-2 text-secondary-700">
                         {category.label}
                       </h5>
                       <ul className="space-y-1.5">
                         {categoryFeatures.map(feature => (
                           <li key={feature.id} className="flex items-start gap-2 text-sm">
-                            <Check className="h-4 w-4 text-emerald-600 dark:text-emerald-400 mt-0.5 flex-shrink-0" />
+                            <Check className="h-4 w-4 text-secondary mt-0.5 flex-shrink-0" />
                             <span>{feature.name}</span>
                           </li>
                         ))}
