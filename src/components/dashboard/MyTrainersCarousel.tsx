@@ -19,9 +19,9 @@ export function MyTrainersCarousel({ onTabChange }: MyTrainersCarouselProps) {
   const { trainers, loading, counts } = useUnifiedTrainerData();
   const [engagementStages, setEngagementStages] = useState<Record<string, EngagementStage>>({});
 
-  // Get trainers that are saved or shortlisted using the unified data
+  // Get trainers that are saved, shortlisted, or in discovery using the unified data
   const myTrainers = trainers.filter(trainer => 
-    trainer.status === 'saved' || trainer.status === 'shortlisted'
+    trainer.status === 'saved' || trainer.status === 'shortlisted' || trainer.status === 'discovery'
   ).slice(0, 6); // Limit to 6 for carousel
 
   // Total count matches 'All' in My Trainers view
