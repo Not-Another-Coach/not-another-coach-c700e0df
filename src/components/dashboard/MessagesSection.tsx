@@ -47,12 +47,6 @@ export function MessagesSection({ profile }: MessagesSectionProps) {
   
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
-
-  const filteredConversations = conversations.filter(conv =>
-    conv.otherUser?.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    conv.otherUser?.last_name?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   const selectedConv = conversations.find(conv => conv.id === selectedConversation);
 
@@ -105,27 +99,17 @@ export function MessagesSection({ profile }: MessagesSectionProps) {
                   Messages
                 </CardTitle>
                 <Badge variant="outline">
-                  {filteredConversations.length} chats
+                  {conversations.length} chats
                 </Badge>
               </div>
-              {/* Search */}
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input
-                  placeholder="Search conversations..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
             </CardHeader>
-            <CardContent className="p-0 space-y-0">
-              {filteredConversations.length > 0 ? (
-                filteredConversations.map((conversation, index) => (
+            <CardContent className="p-0 space-y-0 bg-white">
+              {conversations.length > 0 ? (
+                conversations.map((conversation, index) => (
                   <div key={conversation.id}>
-                    <div
-                      className={`p-4 cursor-pointer hover:bg-muted/50 transition-colors ${
-                        selectedConversation === conversation.id ? 'bg-muted' : ''
+                    <button
+                      className={`w-full text-left py-3 px-4 hover:bg-gray-50 transition-colors border-b border-gray-200 ${
+                        selectedConversation === conversation.id ? 'bg-gray-100' : ''
                       }`}
                       onClick={() => handleSelectConversation(conversation.id)}
                     >
@@ -143,38 +127,35 @@ export function MessagesSection({ profile }: MessagesSectionProps) {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between mb-1">
-                            <h3 className="font-medium truncate">
+                            <h3 className="font-medium text-sm text-foreground truncate">
                               {conversation.otherUser ? 
                                 `${conversation.otherUser.first_name || ''} ${conversation.otherUser.last_name || ''}`.trim() : 
                                 'Unknown User'
                               }
                             </h3>
-                            <div className="flex items-center gap-1">
-                              {getUnreadCount(conversation) > 0 && (
-                                <Badge className="bg-primary text-primary-foreground text-xs">
-                                  {getUnreadCount(conversation)}
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-                          <p className="text-sm text-muted-foreground truncate">
-                            {conversation.messages.length > 0 
-                              ? conversation.messages[conversation.messages.length - 1].content
-                              : 'No messages yet'
-                            }
-                          </p>
-                          <div className="flex items-center justify-between mt-2">
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-xs text-gray-400 ml-2 flex-shrink-0">
                               {conversation.last_message_at ? 
-                                format(new Date(conversation.last_message_at), 'MMM d, h:mm a') : 
-                                format(new Date(conversation.created_at), 'MMM d, h:mm a')
+                                format(new Date(conversation.last_message_at), 'h:mm a') : 
+                                format(new Date(conversation.created_at), 'h:mm a')
                               }
                             </span>
                           </div>
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm text-gray-500 line-clamp-2 flex-1">
+                              {conversation.messages.length > 0 
+                                ? conversation.messages[conversation.messages.length - 1].content
+                                : 'No messages yet'
+                              }
+                            </p>
+                            {getUnreadCount(conversation) > 0 && (
+                              <Badge className="bg-primary text-primary-foreground text-xs min-w-[20px] h-5 flex items-center justify-center rounded-full flex-shrink-0">
+                                {getUnreadCount(conversation)}
+                              </Badge>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    {index < filteredConversations.length - 1 && <Separator />}
+                    </button>
                   </div>
                 ))
               ) : (

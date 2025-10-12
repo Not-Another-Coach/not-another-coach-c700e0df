@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MessageCircle, X, Send, Users, Heart, Lock, Search } from 'lucide-react';
+import { MessageCircle, X, Send, Users, Heart, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -111,7 +111,6 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
   // Clients can always message trainers, trainers need to wait for client first message
   const [canMessage, setCanMessage] = useState(!isTrainer);
   const [sending, setSending] = useState(false);
-  const [searchFilter, setSearchFilter] = useState('');
   const [unreadCounts, setUnreadCounts] = useState<{ [key: string]: number }>({});
   
   const { savedTrainers, savedTrainerIds } = useSavedTrainers();
@@ -297,12 +296,6 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
 
         return conversationContacts;
       })();
-
-  // Filter contacts based on search
-  const filteredContacts = contacts.filter(contact => 
-    contact.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
-    (contact.location && contact.location.toLowerCase().includes(searchFilter.toLowerCase()))
-  );
 
   // Load unread counts for all contacts
   const loadUnreadCounts = async () => {
@@ -601,164 +594,119 @@ export const MessagingPopup = ({ isOpen, onClose, preSelectedTrainerId, selected
 
   return (
     <div className="fixed bottom-6 right-6 z-[9999]">
-      <Card className="w-80 h-96 shadow-2xl border-2 border-primary/20 bg-background">
+      <Card className="w-[450px] h-[600px] shadow-2xl border-2 border-primary/20 bg-white">
         <CardHeader className="pb-3 bg-primary text-primary-foreground">
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg flex items-center gap-2">
-              <MessageCircle className="w-5 h-5" />
-              Messages
-            </CardTitle>
-            <div className="flex items-center gap-2">
               {view === 'chat' && (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleBackToList}
-                  className="text-primary-foreground hover:bg-primary-foreground/20 p-1"
+                  className="text-primary-foreground hover:bg-primary-foreground/20 p-1 mr-2"
                 >
                   ←
                 </Button>
               )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onClose}
-                className="text-primary-foreground hover:bg-primary-foreground/20 p-1"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
+              {view === 'chat' && selectedContact ? (
+                <span>{selectedContact.name}</span>
+              ) : (
+                <>
+                  <MessageCircle className="w-5 h-5" />
+                  Messages
+                </>
+              )}
+            </CardTitle>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              className="text-primary-foreground hover:bg-primary-foreground/20 p-1"
+            >
+              <X className="w-4 h-4" />
+            </Button>
           </div>
         </CardHeader>
 
-        <CardContent className="p-0 h-[320px] md:h-[400px] flex flex-col">
+        <CardContent className="p-0 h-[520px] flex flex-col">
           {view === 'list' ? (
-            // Trainer List View
+            // Contact List View
             <div className="flex-1 flex flex-col min-h-0">
-              <div className="p-4 border-b bg-muted/30 space-y-3 flex-shrink-0">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  {isTrainer ? (
-                    <>
-                      <Users className="w-4 h-4" />
-                      <span>Your Clients & Prospects</span>
-                    </>
-                  ) : (
-                    <>
-                      <Heart className="w-4 h-4" />
-                      <span>Active Conversations</span>
-                    </>
-                  )}
-                  <Badge variant="secondary" className="ml-auto">
-                    {contacts.length}
-                  </Badge>
-                </div>
-                
-                {/* Search Filter */}
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search contacts..."
-                    value={searchFilter}
-                    onChange={(e) => setSearchFilter(e.target.value)}
-                    className="pl-9 h-8 text-sm"
-                  />
-                </div>
-              </div>
-
               <ScrollArea className="flex-1 min-h-0">
-                {filteredContacts.length > 0 ? (
-                  <div className="p-2">
-                    {filteredContacts.map((contact) => (
-                      <Button
-                        key={contact.id}
-                        variant="ghost"
-                        className="w-full justify-start h-auto p-3 mb-2 hover:bg-muted/50"
-                        onClick={() => handleSelectTrainer(contact.id)}
-                      >
-                         <div className="flex items-center gap-3 w-full">
-                           <ProfileAvatar
-                             profilePhotoUrl={contact.profilePhotoUrl}
-                             firstName={contact.firstName}
-                             lastName={contact.lastName}
-                             size="md"
-                           />
-                          <div className="flex-1 text-left">
-                            {!isTrainer && contact.id && !selectedClient ? (
-                              <TrainerContactName contact={contact} />
-                            ) : (
-                              <>
-                                <p className="font-medium text-sm">{contact.name}</p>
-                                <p className="text-xs text-muted-foreground">
-                                  {contact.location || 'Available for chat'}
-                                </p>
-                              </>
-                            )}
-                          </div>
-                           <div className="flex-shrink-0 flex items-center gap-2">
-                             {unreadCounts[contact.id] > 0 && (
-                               <Badge variant="destructive" className="text-xs min-w-[20px] h-5 flex items-center justify-center rounded-full">
-                                 {unreadCounts[contact.id]}
-                               </Badge>
-                             )}
-                             <Badge variant="outline" className="text-xs">
-                               Message
-                             </Badge>
-                           </div>
+                {contacts.length > 0 ? (
+                  <div className="bg-white">
+                    {contacts.map((contact, index) => {
+                      // Get last message for preview
+                      const conversation = conversations.find(c => 
+                        (isTrainer ? c.client_id === contact.id : c.trainer_id === contact.id)
+                      );
+                      const lastMessage = conversation?.messages?.[conversation.messages.length - 1];
+                      const lastMessageText = lastMessage?.content || 'No messages yet';
+                      const lastMessageTime = contact.lastMessageAt 
+                        ? new Date(contact.lastMessageAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+                        : '';
+                      
+                      return (
+                        <div key={contact.id}>
+                          <button
+                            className="w-full text-left py-3 px-4 hover:bg-gray-50 transition-colors border-b border-gray-200"
+                            onClick={() => handleSelectTrainer(contact.id)}
+                          >
+                            <div className="flex items-start gap-3">
+                              <ProfileAvatar
+                                profilePhotoUrl={contact.profilePhotoUrl}
+                                firstName={contact.firstName}
+                                lastName={contact.lastName}
+                                size="md"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center justify-between mb-1">
+                                  <p className="font-medium text-sm text-foreground truncate">
+                                    {contact.name}
+                                  </p>
+                                  {lastMessageTime && (
+                                    <span className="text-xs text-gray-400 ml-2 flex-shrink-0">
+                                      {lastMessageTime}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <p className="text-sm text-gray-500 line-clamp-2 flex-1">
+                                    {lastMessageText}
+                                  </p>
+                                  {unreadCounts[contact.id] > 0 && (
+                                    <Badge variant="default" className="bg-primary text-primary-foreground text-xs min-w-[20px] h-5 flex items-center justify-center rounded-full flex-shrink-0">
+                                      {unreadCounts[contact.id]}
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </button>
                         </div>
-                      </Button>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="flex items-center justify-center h-full p-8">
                     <div className="text-center text-muted-foreground">
-                      {searchFilter ? (
-                        <>
-                          <Search className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                          <p className="text-sm">No contacts found matching "{searchFilter}"</p>
-                        </>
-                      ) : (
-                        <>
-                          <Users className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                          <p className="text-sm">
-                            {isTrainer ? 'No clients or prospects yet' : 'No conversations yet'}
-                          </p>
-                          <p className="text-xs mt-1">
-                            {isTrainer
-                              ? 'Start receiving client inquiries to begin conversations'
-                              : 'Save trainers and start messaging them'}
-                          </p>
-                        </>
-                      )}
+                      <Users className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                      <p className="text-sm">
+                        {isTrainer ? 'No clients or prospects yet' : 'No conversations yet'}
+                      </p>
+                      <p className="text-xs mt-1">
+                        {isTrainer
+                          ? 'Start receiving client inquiries to begin conversations'
+                          : 'Save trainers and start messaging them'}
+                      </p>
                     </div>
                   </div>
                 )}
               </ScrollArea>
             </div>
           ) : (
-            // Chat View - Mobile optimized
-            <div className="flex-1 flex flex-col min-h-0">
-              {selectedContact && (
-                  <div className="p-3 border-b bg-muted/30 flex-shrink-0">
-                   <div className="flex items-center gap-2">
-                     <ProfileAvatar
-                       profilePhotoUrl={selectedContact.profilePhotoUrl}
-                       firstName={selectedContact.firstName}
-                       lastName={selectedContact.lastName}
-                       size="sm"
-                     />
-                     <div className="flex-1">
-                       {!isTrainer && selectedContact && (selectedContact as any).id && !selectedClient ? (
-                         <TrainerContactName contact={selectedContact} />
-                       ) : (
-                         <>
-                           <p className="font-medium text-sm">{selectedContact.name}</p>
-                           <p className="text-xs text-muted-foreground">{selectedContact.location}</p>
-                         </>
-                       )}
-                     </div>
-                  </div>
-                </div>
-              )}
+            // Chat View
+            <div className="flex-1 flex flex-col min-h-0 bg-white">
 
               <ScrollArea className="flex-1 p-3 min-h-0">
                 {!canMessage && isTrainer ? (

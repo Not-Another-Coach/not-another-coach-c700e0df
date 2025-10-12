@@ -89,13 +89,8 @@ export const Messaging = () => {
           </div>
           <div>
             <h1 className="text-xl font-bold">{trainer.name}</h1>
-            <p className="text-sm text-muted-foreground">Personal Trainer</p>
           </div>
         </div>
-
-        <Badge variant="secondary" className="bg-green-100 text-green-800">
-          Online
-        </Badge>
       </div>
 
       {/* Messages Container */}
