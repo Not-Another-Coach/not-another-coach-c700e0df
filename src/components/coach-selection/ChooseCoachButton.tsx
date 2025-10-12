@@ -43,6 +43,7 @@ export const ChooseCoachButton = ({
   // - OR shortlisted with message exchange (meaningful interaction has occurred)
   const canChooseCoach = isClient() && (
     stage === 'agreed' || 
+    stage === 'getting_to_know_your_coach' ||
     stage === 'discovery_completed' || 
     stage === 'discovery_in_progress'
   );
