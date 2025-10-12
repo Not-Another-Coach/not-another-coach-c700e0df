@@ -7139,6 +7139,7 @@ export type Database = {
         | "certifications_qualifications"
         | "professional_journey"
         | "professional_milestones"
+        | "package_ways_of_working"
       ct_status: "to_do" | "doing" | "done" | "skipped" | "deferred"
       ct_type:
         | "outreach"
@@ -7400,6 +7401,7 @@ export const Constants = {
         "certifications_qualifications",
         "professional_journey",
         "professional_milestones",
+        "package_ways_of_working",
       ],
       ct_status: ["to_do", "doing", "done", "skipped", "deferred"],
       ct_type: [
