@@ -35,7 +35,7 @@ export const PackagesView = ({ trainer }: PackagesViewProps) => {
         if (error) throw error;
         
         // Filter by package IDs that exist in trainer's packages
-        const trainerPackages = (trainer as any).packages || [];
+        const trainerPackages = (trainer as any).package_options || (trainer as any).packages || [];
         const trainerPackageIds = trainerPackages.map((p: any) => p.id) || [];
         const filtered = (data || []).filter(w => 
           trainerPackageIds.includes(w.package_id)
@@ -75,7 +75,7 @@ export const PackagesView = ({ trainer }: PackagesViewProps) => {
       </div>
       
       <PackageComparisonSection
-        packages={(trainer as any).packages || []}
+        packages={(trainer as any).package_options || (trainer as any).packages || []}
         packageWorkflows={packageWaysOfWorkingVisible ? packageWorkflows : undefined}
       />
     </div>
