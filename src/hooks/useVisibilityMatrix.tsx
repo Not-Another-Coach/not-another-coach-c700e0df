@@ -14,7 +14,8 @@ export type ContentType =
   | 'description_bio'
   | 'certifications_qualifications'
   | 'professional_journey'
-  | 'professional_milestones';
+  | 'professional_milestones'
+  | 'package_ways_of_working';
 
 export type VisibilityState = 'hidden' | 'blurred' | 'visible';
 

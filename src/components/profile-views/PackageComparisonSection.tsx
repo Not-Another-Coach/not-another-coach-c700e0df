@@ -1,17 +1,21 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check } from "lucide-react";
 import { PackageComparisonTable } from "./PackageComparisonTable";
+import { PackageComparisonMatrix } from "./PackageComparisonMatrix";
 import { TrainerPackageExtended } from "@/types/trainer";
+import { PackageWaysOfWorking } from "@/hooks/usePackageWaysOfWorking";
 
 interface PackageComparisonSectionProps {
   baseInclusions?: string[];
   packages: TrainerPackageExtended[];
+  packageWorkflows?: PackageWaysOfWorking[];
   highlightedPackageId?: string;
 }
 
 export function PackageComparisonSection({ 
   baseInclusions = [], 
   packages,
+  packageWorkflows = [],
   highlightedPackageId 
 }: PackageComparisonSectionProps) {
   if (!packages || packages.length === 0) {
@@ -26,6 +30,9 @@ export function PackageComparisonSection({
   ];
 
   const displayBaseInclusions = baseInclusions.length > 0 ? baseInclusions : defaultBaseInclusions;
+
+  // Show detailed matrix if workflows are available, otherwise show basic table
+  const showDetailedMatrix = packageWorkflows.length > 0;
 
   return (
     <div className="space-y-6">
@@ -57,14 +64,26 @@ export function PackageComparisonSection({
         <CardHeader>
           <CardTitle className="text-lg">Training Packages</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Choose the package that best fits your goals
+            {showDetailedMatrix 
+              ? 'Compare packages and see what\'s included in each'
+              : 'Choose the package that best fits your goals'
+            }
           </p>
         </CardHeader>
         <CardContent>
-          <PackageComparisonTable 
-            packages={packages} 
-            highlightedPackageId={highlightedPackageId}
-          />
+          {showDetailedMatrix ? (
+            <PackageComparisonMatrix
+              packages={packages}
+              packageWorkflows={packageWorkflows}
+              baseInclusions={displayBaseInclusions}
+              highlightedPackageId={highlightedPackageId}
+            />
+          ) : (
+            <PackageComparisonTable 
+              packages={packages} 
+              highlightedPackageId={highlightedPackageId}
+            />
+          )}
         </CardContent>
       </Card>
     </div>

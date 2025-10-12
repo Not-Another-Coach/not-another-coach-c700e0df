@@ -18,6 +18,7 @@ interface ContentVisibilityMap {
   certifications_qualifications: VisibilityState;
   professional_journey: VisibilityState;
   professional_milestones: VisibilityState;
+  package_ways_of_working: VisibilityState;
 }
 
 export function useContentVisibility({ engagementStage, isGuest = false }: UseContentVisibilityProps) {
@@ -33,7 +34,8 @@ export function useContentVisibility({ engagementStage, isGuest = false }: UseCo
     description_bio: 'visible', // Default visible types
     certifications_qualifications: 'visible', // Default visible types
     professional_journey: 'visible', // Default visible types
-    professional_milestones: 'visible' // Default visible types
+    professional_milestones: 'visible', // Default visible types
+    package_ways_of_working: 'hidden' // Admin controllable
   });
   const [loading, setLoading] = useState(true);
 
@@ -60,7 +62,8 @@ export function useContentVisibility({ engagementStage, isGuest = false }: UseCo
   const contentTypes: ContentType[] = [
     'profile_image', 'basic_information', 'testimonial_images', 'gallery_images',
     'specializations', 'pricing_discovery_call', 'stats_ratings', 'description_bio',
-    'certifications_qualifications', 'professional_journey', 'professional_milestones'
+    'certifications_qualifications', 'professional_journey', 'professional_milestones',
+    'package_ways_of_working'
   ];
 
   useEffect(() => {
@@ -113,7 +116,8 @@ export function useContentVisibility({ engagementStage, isGuest = false }: UseCo
           description_bio: 'visible',
           certifications_qualifications: 'visible',
           professional_journey: 'visible',
-          professional_milestones: 'visible'
+          professional_milestones: 'visible',
+          package_ways_of_working: 'hidden'
         } as ContentVisibilityMap);
 
         console.log('[VISIBILITY DEBUG] useContentVisibility - Final Map:', {

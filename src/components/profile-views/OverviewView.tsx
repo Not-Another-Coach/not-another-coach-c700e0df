@@ -13,6 +13,9 @@ import { VisibilityAwareText } from '@/components/ui/VisibilityAwareText';
 import { VisibilityAwareSection } from '@/components/ui/VisibilityAwareSection';
 import { VisibilityAwareBasicInfo } from '@/components/ui/VisibilityAwareBasicInfo';
 import { PackageComparisonSection } from './PackageComparisonSection';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { PackageWaysOfWorking } from '@/hooks/usePackageWaysOfWorking';
 
 interface OverviewViewProps {
   trainer: AnyTrainer;
@@ -26,6 +29,52 @@ export const OverviewView = ({ trainer, onMessage, onBookDiscovery }: OverviewVi
     engagementStage,
     isGuest
   });
+  
+  const [packageWorkflows, setPackageWorkflows] = useState<PackageWaysOfWorking[]>([]);
+  const [loadingWorkflows, setLoadingWorkflows] = useState(false);
+
+  // Fetch package ways of working for this trainer
+  useEffect(() => {
+    const fetchWorkflows = async () => {
+      if (!trainer.id) return;
+      
+      // Only fetch if visibility allows it
+      const visibility = getVisibility('package_ways_of_working');
+      if (visibility === 'hidden') {
+        setPackageWorkflows([]);
+        return;
+      }
+
+      setLoadingWorkflows(true);
+      try {
+        const { data, error } = await supabase
+          .from('package_ways_of_working')
+          .select('*')
+          .eq('trainer_id', trainer.id);
+
+        if (error) throw error;
+        
+        setPackageWorkflows((data || []).map(item => ({
+          ...item,
+          onboarding_items: (item.onboarding_items as any) || [],
+          first_week_items: (item.first_week_items as any) || [],
+          ongoing_structure_items: (item.ongoing_structure_items as any) || [],
+          tracking_tools_items: (item.tracking_tools_items as any) || [],
+          client_expectations_items: (item.client_expectations_items as any) || [],
+          what_i_bring_items: (item.what_i_bring_items as any) || [],
+          visibility: (item.visibility as 'public' | 'post_match') || 'public'
+        })));
+      } catch (error) {
+        console.error('Error fetching package workflows:', error);
+        setPackageWorkflows([]);
+      } finally {
+        setLoadingWorkflows(false);
+      }
+    };
+
+    fetchWorkflows();
+  }, [trainer.id, getVisibility]);
+  
   // Generate initials from trainer name
   const getInitials = (name: string) => {
     return name
@@ -138,6 +187,7 @@ export const OverviewView = ({ trainer, onMessage, onBookDiscovery }: OverviewVi
         <PackageComparisonSection
           baseInclusions={(trainer as any).baseInclusions}
           packages={((trainer as any).package_options || []) as TrainerPackageExtended[]}
+          packageWorkflows={packageWorkflows}
         />
       )}
 

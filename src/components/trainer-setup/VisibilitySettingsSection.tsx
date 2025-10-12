@@ -22,7 +22,8 @@ const contentTypeLabels: Record<ContentType, string> = {
   description_bio: 'Description & Bio',
   certifications_qualifications: 'Certifications & Qualifications',
   professional_journey: 'Professional Journey',
-  professional_milestones: 'Professional Milestones'
+  professional_milestones: 'Professional Milestones',
+  package_ways_of_working: 'Package & Ways of Working Details'
 };
 
 const stageGroupLabels: Record<EngagementStageGroup, { label: string; tooltip: string }> = {

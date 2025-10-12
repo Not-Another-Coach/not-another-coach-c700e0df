@@ -21,7 +21,8 @@ const contentTypeLabels: Record<ContentType, string> = {
   description_bio: 'Description & Bio',
   certifications_qualifications: 'Certifications & Qualifications',
   professional_journey: 'Professional Journey',
-  professional_milestones: 'Professional Milestones'
+  professional_milestones: 'Professional Milestones',
+  package_ways_of_working: 'Package & Ways of Working Details'
 };
 
 const stageGroupLabels: Record<EngagementStageGroup, { label: string; tooltip: string }> = {
@@ -72,7 +73,8 @@ export function SystemVisibilityDefaults() {
     'basic_information',
     'testimonial_images',
     'gallery_images',
-    'pricing_discovery_call'
+    'pricing_discovery_call',
+    'package_ways_of_working'
   ];
 
   // Default visible (not editable by admin)
@@ -176,7 +178,7 @@ export function SystemVisibilityDefaults() {
           if (visibilityState) {
             savePromises.push(
               supabase.rpc('save_system_default_visibility', {
-                p_content_type: contentType,
+                p_content_type: contentType as any,
                 p_stage_group: stageGroup as any,
                 p_visibility_state: visibilityState
               })
