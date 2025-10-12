@@ -12,10 +12,6 @@ import { VisibilityAwareImage } from '@/components/ui/VisibilityAwareImage';
 import { VisibilityAwareText } from '@/components/ui/VisibilityAwareText';
 import { VisibilityAwareSection } from '@/components/ui/VisibilityAwareSection';
 import { VisibilityAwareBasicInfo } from '@/components/ui/VisibilityAwareBasicInfo';
-import { PackageComparisonSection } from './PackageComparisonSection';
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { PackageWaysOfWorking } from '@/hooks/usePackageWaysOfWorking';
 
 interface OverviewViewProps {
   trainer: AnyTrainer;
@@ -29,51 +25,6 @@ export const OverviewView = ({ trainer, onMessage, onBookDiscovery }: OverviewVi
     engagementStage,
     isGuest
   });
-  
-  const [packageWorkflows, setPackageWorkflows] = useState<PackageWaysOfWorking[]>([]);
-  const [loadingWorkflows, setLoadingWorkflows] = useState(false);
-
-  // Fetch package ways of working for this trainer
-  useEffect(() => {
-    const fetchWorkflows = async () => {
-      if (!trainer.id) return;
-      
-      // Only fetch if visibility allows it
-      const visibility = getVisibility('package_ways_of_working');
-      if (visibility === 'hidden') {
-        setPackageWorkflows([]);
-        return;
-      }
-
-      setLoadingWorkflows(true);
-      try {
-        const { data, error } = await supabase
-          .from('package_ways_of_working')
-          .select('*')
-          .eq('trainer_id', trainer.id);
-
-        if (error) throw error;
-        
-        setPackageWorkflows((data || []).map(item => ({
-          ...item,
-          onboarding_items: (item.onboarding_items as any) || [],
-          first_week_items: (item.first_week_items as any) || [],
-          ongoing_structure_items: (item.ongoing_structure_items as any) || [],
-          tracking_tools_items: (item.tracking_tools_items as any) || [],
-          client_expectations_items: (item.client_expectations_items as any) || [],
-          what_i_bring_items: (item.what_i_bring_items as any) || [],
-          visibility: (item.visibility as 'public' | 'post_match') || 'public'
-        })));
-      } catch (error) {
-        console.error('Error fetching package workflows:', error);
-        setPackageWorkflows([]);
-      } finally {
-        setLoadingWorkflows(false);
-      }
-    };
-
-    fetchWorkflows();
-  }, [trainer.id, getVisibility]);
   
   // Generate initials from trainer name
   const getInitials = (name: string) => {
@@ -182,13 +133,43 @@ export const OverviewView = ({ trainer, onMessage, onBookDiscovery }: OverviewVi
         </CardContent>
       </Card>
 
-      {/* Package Comparison Section - Only shown when shortlisted or higher */}
-      {engagementStage && ['shortlisted', 'matched', 'discovery_completed', 'active_client'].includes(engagementStage) && (
-        <PackageComparisonSection
-          baseInclusions={(trainer as any).baseInclusions}
-          packages={((trainer as any).package_options || []) as TrainerPackageExtended[]}
-          packageWorkflows={packageWorkflows}
-        />
+      {/* Packages Teaser */}
+      {(trainer as any).packages && (trainer as any).packages.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              Training Packages
+              <Badge variant="secondary">{(trainer as any).packages.length} packages</Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-4">
+              {(trainer as any).packages.map((pkg: any) => (
+                <Card key={pkg.id} className="border-2">
+                  <CardContent className="pt-6">
+                    <h4 className="font-semibold text-lg mb-2">{pkg.name}</h4>
+                    <div className="text-2xl font-bold text-primary mb-2">
+                      £{pkg.price_gbp}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {pkg.duration_weeks} weeks • {pkg.sessions_per_week}x/week
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={() => {
+                const packagesTab = document.querySelector('[value="packages"]') as HTMLElement;
+                if (packagesTab) packagesTab.click();
+              }}
+            >
+              View Full Package Comparison →
+            </Button>
+          </CardContent>
+        </Card>
       )}
 
       {/* Specialties */}

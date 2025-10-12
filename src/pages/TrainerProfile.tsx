@@ -8,6 +8,7 @@ import { MessagingPopup } from '@/components/MessagingPopup';
 import { useRealTrainers } from '@/hooks/useRealTrainers';
 import { ProfileViewSelector, ProfileViewMode } from '@/components/profile-views/ProfileViewSelector';
 import { OverviewView } from '@/components/profile-views/OverviewView';
+import { PackagesView } from '@/components/profile-views/PackagesView';
 import { ResultsView } from '@/components/profile-views/ResultsView';
 import { StoryView } from '@/components/profile-views/StoryView';
 import { ContentView } from '@/components/profile-views/ContentView';
@@ -163,6 +164,8 @@ export const TrainerProfile = () => {
             onBookDiscovery={!isOwnProfile && trainer.offers_discovery_call ? handleBookDiscovery : undefined}
           />
         );
+      case 'packages':
+        return <PackagesView trainer={trainer} />;
       case 'results':
         return <ResultsView trainer={trainer} />;
       case 'story':

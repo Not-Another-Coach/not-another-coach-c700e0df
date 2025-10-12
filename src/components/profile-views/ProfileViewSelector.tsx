@@ -3,9 +3,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Eye, Trophy, BookOpen, Play, GitCompare, ChevronDown, Grid3X3 } from 'lucide-react';
+import { Eye, Trophy, BookOpen, Play, GitCompare, ChevronDown, Grid3X3, Package } from 'lucide-react';
 
-export type ProfileViewMode = 'overview' | 'results' | 'story' | 'content' | 'cards' | 'compare';
+export type ProfileViewMode = 'overview' | 'packages' | 'results' | 'story' | 'content' | 'cards' | 'compare';
 
 interface ProfileViewSelectorProps {
   currentView: ProfileViewMode;
@@ -24,6 +24,12 @@ const viewOptions = [
     label: 'Overview',
     icon: Eye,
     description: 'Brief summary of coach'
+  },
+  {
+    value: 'packages' as ProfileViewMode,
+    label: 'Packages',
+    icon: Package,
+    description: 'Training packages and ways of working'
   },
   {
     value: 'results' as ProfileViewMode,
