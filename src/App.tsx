@@ -25,7 +25,6 @@ import TrainerSettings from "./pages/TrainerSettings";
 import { AdminDashboard } from "./pages/AdminDashboard";
 import { AdminHighlights } from "./pages/AdminHighlights";
 import { TrainerProfile } from "./pages/TrainerProfile";
-import { Messaging } from "./pages/Messaging";
 import Documentation from "./pages/Documentation";
 import NotFound from "./pages/NotFound";
 import { DiagnosticsProvider } from "@/diagnostics/DiagnosticsContext";
@@ -100,7 +99,6 @@ const App = () => (
                 <Route path="/admin/templates" element={<TemplateManagement />} />
                 <Route path="/admin/system-settings" element={<AdminSystemSettings />} />
                 <Route path="/trainer/:trainerId" element={<TrainerProfile />} />
-                <Route path="/messages/:trainerId?" element={<Messaging />} />
                 <Route path="/documentation" element={<Documentation />} />
                 <Route path="/reset-demo" element={<ResetDemo />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

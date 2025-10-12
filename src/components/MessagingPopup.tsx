@@ -1,3 +1,25 @@
+/**
+ * MessagingPopup - Official Messaging Component
+ * 
+ * This is the ONLY messaging component in the application.
+ * It provides a WhatsApp-style messaging interface with:
+ * - Real-time message updates via Supabase subscriptions
+ * - Contact list with message previews
+ * - Read/unread status tracking
+ * - Profile photos and avatars
+ * - Mobile-friendly responsive design
+ * 
+ * Usage:
+ * <MessagingPopup 
+ *   isOpen={isOpen}
+ *   onClose={() => setIsOpen(false)}
+ *   preSelectedTrainerId={trainerId} // Optional
+ *   selectedClient={client}          // Optional
+ * />
+ * 
+ * @see useConversations hook for data management
+ * @see MessagingService for backend API
+ */
 import React, { useState, useEffect } from 'react';
 import { MessageCircle, X, Send, Users, Heart, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
