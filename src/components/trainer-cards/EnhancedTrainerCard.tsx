@@ -22,6 +22,7 @@ import { cn } from '@/lib/utils';
 import { VisibilityAwareName } from '@/components/ui/VisibilityAwareName';
 import { useProgressiveNameVisibility } from '@/hooks/useProgressiveNameVisibility';
 import { ChooseCoachButton } from '@/components/coach-selection/ChooseCoachButton';
+import { BookDiscoveryCallButton } from '@/components/discovery-call/BookDiscoveryCallButton';
 
 // Extended interface that merges UnifiedTrainerCardProps with specific props
 interface EnhancedTrainerCardProps extends Omit<UnifiedTrainerCardProps, 'trainer'> {

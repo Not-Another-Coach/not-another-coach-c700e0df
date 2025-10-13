@@ -148,6 +148,12 @@ export const useClientJourneyProgress = () => {
       const completedOnboardingSteps = onboardingProgress?.filter(step => step.status === 'completed').length || 0;
       const onboardingCompletionPercentage = totalOnboardingSteps > 0 ? (completedOnboardingSteps / totalOnboardingSteps) * 100 : 0;
 
+      // If a discovery call is booked, ensure we surface the correct stage even if RPC lags
+      const hasScheduledCall = discoveryCalls?.some(dc => dc.status === 'scheduled' || dc.status === 'rescheduled');
+      if (hasScheduledCall && (currentStage === 'preferences_identified' || currentStage === 'exploring_coaches')) {
+        currentStage = 'getting_to_know_your_coach';
+      }
+
       // For active clients, determine stage based on onboarding completion
       if (journeyStage === 'active_client') {
         if (totalOnboardingSteps > 0) {
