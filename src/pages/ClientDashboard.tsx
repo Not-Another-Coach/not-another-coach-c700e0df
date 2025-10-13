@@ -264,55 +264,6 @@ export default function ClientDashboard() {
           </Card>
         )}
         
-        {/* Upcoming Appointments */}
-        {upcomingCalls && upcomingCalls.length > 0 && (
-          <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-primary" />
-                Upcoming Appointments
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {upcomingCalls.map((call: any) => (
-                <div 
-                  key={call.id}
-                  className="flex items-center justify-between p-4 bg-background border rounded-lg hover:bg-accent/50 transition-colors"
-                >
-                  <div className="flex items-center gap-4">
-                    {call.trainer?.profile_photo_url ? (
-                      <img 
-                        src={call.trainer.profile_photo_url}
-                        alt={call.trainer.name}
-                        className="w-12 h-12 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                        <User className="w-6 h-6 text-primary" />
-                      </div>
-                    )}
-                    <div>
-                      <p className="font-semibold">{call.trainer?.name || 'Trainer'}</p>
-                      <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          {format(new Date(call.scheduled_for), 'MMM do, yyyy')}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {format(new Date(call.scheduled_for), 'HH:mm')}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <Badge variant={call.status === 'scheduled' ? 'default' : 'secondary'}>
-                    {call.status}
-                  </Badge>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        )}
         
         {/* Onboarding-Focused Dashboard for Active Clients */}
         {isActiveClient && onboardingData ? (
@@ -465,6 +416,56 @@ export default function ClientDashboard() {
 
             {/* Section 3: My Trainers Carousel */}
             <MyTrainersCarousel onTabChange={handleTabChange} />
+
+            {/* Upcoming Appointments - Below My Trainers */}
+            {upcomingCalls && upcomingCalls.length > 0 && (
+              <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Calendar className="w-5 h-5 text-primary" />
+                    Upcoming Appointments
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {upcomingCalls.map((call: any) => (
+                    <div 
+                      key={call.id}
+                      className="flex items-center justify-between p-4 bg-background border rounded-lg hover:bg-accent/50 transition-colors"
+                    >
+                      <div className="flex items-center gap-4">
+                        {call.trainer?.profile_photo_url ? (
+                          <img 
+                            src={call.trainer.profile_photo_url}
+                            alt={call.trainer.name}
+                            className="w-12 h-12 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                            <User className="w-6 h-6 text-primary" />
+                          </div>
+                        )}
+                        <div>
+                          <p className="font-semibold">{call.trainer?.name || 'Trainer'}</p>
+                          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <Calendar className="w-3 h-3" />
+                              {format(new Date(call.scheduled_for), 'MMM do, yyyy')}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              {format(new Date(call.scheduled_for), 'HH:mm')}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <Badge variant={call.status === 'scheduled' ? 'default' : 'secondary'}>
+                        {call.status}
+                      </Badge>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Section 4: Enhanced Explore Section with Swipeable Trainers */}
             <ExploreSection 

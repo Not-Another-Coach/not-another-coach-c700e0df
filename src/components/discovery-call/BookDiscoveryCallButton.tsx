@@ -42,11 +42,23 @@ export const BookDiscoveryCallButton = ({
     return null;
   }
 
+  // Wait for loading to complete before checking for active calls
+  if (callsLoading) {
+    return (
+      <Button
+        variant={variant}
+        disabled
+        className={`flex items-center gap-2 ${sizeClasses[size]} ${className}`}
+      >
+        <Calendar className="w-4 h-4" />
+        Loading...
+      </Button>
+    );
+  }
+
   // Check if there's an active discovery call with this trainer
   const activeCall = getDiscoveryCallForTrainer(trainer.id);
   const hasActiveCall = !!activeCall;
-
-  console.log('BookDiscoveryCallButton - Trainer:', trainer.id, 'Active Call:', activeCall, 'Has Active:', hasActiveCall);
 
   const handleCallUpdated = () => {
     refresh();

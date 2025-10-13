@@ -22,11 +22,8 @@ export function useDiscoveryCallData() {
 
   const fetchDiscoveryCalls = async () => {
     if (!user) {
-      console.log('useDiscoveryCallData: No user, skipping fetch');
       return;
     }
-
-    console.log('useDiscoveryCallData: Fetching discovery calls for user:', user.id);
 
     try {
       const { data, error } = await supabase
@@ -35,14 +32,13 @@ export function useDiscoveryCallData() {
         .eq('client_id', user.id);
 
       if (error) {
-        console.error('useDiscoveryCallData: Error fetching discovery calls:', error);
+        console.error('Error fetching discovery calls:', error);
         return;
       }
 
-      console.log('useDiscoveryCallData: Fetched calls:', data);
       setDiscoveryCalls(data || []);
     } catch (error) {
-      console.error('useDiscoveryCallData: Error fetching discovery calls:', error);
+      console.error('Error fetching discovery calls:', error);
     } finally {
       setLoading(false);
     }
@@ -69,12 +65,10 @@ export function useDiscoveryCallData() {
 
   // Get discovery call for a specific trainer
   const getDiscoveryCallForTrainer = (trainerId: string) => {
-    const call = discoveryCalls.find(call => 
+    return discoveryCalls.find(call => 
       call.trainer_id === trainerId && 
       (call.status === 'scheduled' || call.status === 'rescheduled')
     );
-    console.log('useDiscoveryCallData: getDiscoveryCallForTrainer', trainerId, 'found:', call);
-    return call;
   };
 
   return {
