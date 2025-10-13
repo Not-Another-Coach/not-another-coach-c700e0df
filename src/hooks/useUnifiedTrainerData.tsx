@@ -165,8 +165,8 @@ export function useUnifiedTrainerData(): UnifiedTrainerState & TrainerActions {
         
         supabase
           .from('discovery_call_settings')
-          .select('id, offers_discovery_call')
-          .in('id', Array.from(trainerIds)),
+          .select('trainer_id, offers_discovery_call')
+          .in('trainer_id', Array.from(trainerIds)),
         
         supabase
           .from('coach_availability_settings')
@@ -189,7 +189,7 @@ export function useUnifiedTrainerData(): UnifiedTrainerState & TrainerActions {
             c.trainer_id === trainerData.id || c.client_id === trainerData.id
           );
           const hasActiveCall = activeCalls.some(c => c.trainer_id === trainerData.id);
-          const discoverySettings = discoverySettingsResponse.data?.find(d => d.id === trainerData.id);
+          const discoverySettings = discoverySettingsResponse.data?.find(d => d.trainer_id === trainerData.id);
           const availability = availabilityResponse.data?.find(a => a.coach_id === trainerData.id);
 
         // Determine status based on priority
