@@ -53,7 +53,8 @@ export const DiscoveryCallBookingModal = ({
     booking, 
     getTrainerSettings, 
     getAvailableSlots, 
-    bookDiscoveryCall 
+    bookDiscoveryCall,
+    isDateAvailable
   } = useDiscoveryCallBooking();
 
   // Reset state when modal opens/closes
@@ -151,10 +152,25 @@ export const DiscoveryCallBookingModal = ({
                 mode="single"
                 selected={selectedDate}
                 onSelect={handleDateSelect}
-                disabled={(date) => date < new Date() || date < new Date(Date.now() - 86400000)}
+                disabled={(date) => {
+                  // Disable past dates
+                  if (date < new Date(Date.now() - 86400000)) {
+                    return true;
+                  }
+                  // Disable dates without trainer availability
+                  if (trainerSettings && !isDateAvailable(date, trainerSettings)) {
+                    return true;
+                  }
+                  return false;
+                }}
                 className={cn("rounded-md border pointer-events-auto")}
               />
             </div>
+            {trainerSettings && (
+              <p className="text-xs text-center text-muted-foreground mt-2">
+                Dates in gray are not available. Please select a highlighted date.
+              </p>
+            )}
           </div>
         );
 
@@ -314,7 +330,7 @@ export const DiscoveryCallBookingModal = ({
 
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <p className="text-sm text-blue-800">
-                📧 You'll receive email confirmations and reminders (coming in Phase 4)
+                📧 You'll receive email confirmations and reminders 24 hours and 1 hour before your call
               </p>
             </div>
 

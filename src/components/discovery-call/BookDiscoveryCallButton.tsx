@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Calendar, Clock } from 'lucide-react';
+import { Calendar, Clock, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DiscoveryCallBookingModal } from './DiscoveryCallBookingModal';
+import { ManageDiscoveryCallModal } from './ManageDiscoveryCallModal';
+import { useDiscoveryCallData } from '@/hooks/useDiscoveryCallData';
 
 interface BookDiscoveryCallButtonProps {
   trainer: {
@@ -25,7 +27,9 @@ export const BookDiscoveryCallButton = ({
   className = '',
   onCallBooked
 }: BookDiscoveryCallButtonProps) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [isManageModalOpen, setIsManageModalOpen] = useState(false);
+  const { getDiscoveryCallForTrainer, refresh } = useDiscoveryCallData();
 
   const sizeClasses = {
     sm: 'text-sm px-3 py-2',
@@ -38,26 +42,59 @@ export const BookDiscoveryCallButton = ({
     return null;
   }
 
+  // Check if there's an active discovery call with this trainer
+  const activeCall = getDiscoveryCallForTrainer(trainer.id);
+  const hasActiveCall = !!activeCall;
+
+  const handleCallUpdated = () => {
+    refresh();
+    onCallBooked?.();
+  };
+
   return (
     <>
-      <Button
-        variant={variant}
-        onClick={() => setIsModalOpen(true)}
-        className={`flex items-center gap-2 ${sizeClasses[size]} ${className}`}
-      >
-        <Calendar className="w-4 h-4" />
-        Book Discovery Call
-      </Button>
+      {hasActiveCall ? (
+        <Button
+          variant={variant}
+          onClick={() => setIsManageModalOpen(true)}
+          className={`flex items-center gap-2 ${sizeClasses[size]} ${className}`}
+        >
+          <Settings className="w-4 h-4" />
+          Manage Call
+        </Button>
+      ) : (
+        <Button
+          variant={variant}
+          onClick={() => setIsBookingModalOpen(true)}
+          className={`flex items-center gap-2 ${sizeClasses[size]} ${className}`}
+        >
+          <Calendar className="w-4 h-4" />
+          Book Discovery Call
+        </Button>
+      )}
 
       <DiscoveryCallBookingModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={isBookingModalOpen}
+        onClose={() => setIsBookingModalOpen(false)}
         trainer={trainer}
         onCallBooked={() => {
-          setIsModalOpen(false);
-          onCallBooked?.();
+          setIsBookingModalOpen(false);
+          handleCallUpdated();
         }}
       />
+
+      {hasActiveCall && (
+        <ManageDiscoveryCallModal
+          isOpen={isManageModalOpen}
+          onClose={() => setIsManageModalOpen(false)}
+          discoveryCall={activeCall}
+          trainer={trainer}
+          onCallUpdated={() => {
+            setIsManageModalOpen(false);
+            handleCallUpdated();
+          }}
+        />
+      )}
     </>
   );
 };

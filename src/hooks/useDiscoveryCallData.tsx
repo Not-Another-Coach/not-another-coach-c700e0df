@@ -7,8 +7,12 @@ interface DiscoveryCall {
   trainer_id: string;
   client_id: string;
   scheduled_for: string;
+  duration_minutes: number;
   status: 'scheduled' | 'completed' | 'cancelled' | 'rescheduled';
-  booking_notes?: string;
+  booking_notes?: string | null;
+  reminder_24h_sent?: string | null;
+  reminder_1h_sent?: string | null;
+  [key: string]: any; // Allow other database fields
 }
 
 export function useDiscoveryCallData() {

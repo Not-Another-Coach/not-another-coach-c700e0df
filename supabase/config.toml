@@ -50,6 +50,9 @@ verify_jwt = true
 [functions.send-discovery-call-email]
 verify_jwt = false
 
+[functions.send-scheduled-reminders]
+verify_jwt = false
+
 [functions.process-discovery-call-reminders]
 verify_jwt = false
 

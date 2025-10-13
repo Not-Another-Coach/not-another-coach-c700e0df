@@ -263,11 +263,23 @@ export function useDiscoveryCallBooking() {
     }
   };
 
+  const isDateAvailable = (date: Date, trainerSettings: any): boolean => {
+    if (!trainerSettings?.discovery_call_availability_schedule) {
+      return false;
+    }
+
+    const dayName = date.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+    const schedule = trainerSettings.discovery_call_availability_schedule[dayName];
+    
+    return schedule?.enabled && schedule?.slots?.length > 0;
+  };
+
   return {
     loading,
     booking,
     getTrainerSettings,
     getAvailableSlots,
-    bookDiscoveryCall
+    bookDiscoveryCall,
+    isDateAvailable
   };
 }
