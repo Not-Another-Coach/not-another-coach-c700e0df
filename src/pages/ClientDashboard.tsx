@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CheckSquare, Bell, MessageCircle, Settings, Eye } from "lucide-react";
+import { CheckSquare, Bell, MessageCircle, Settings, Eye, Calendar, Clock, User } from "lucide-react";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { FloatingMessageButton } from "@/components/FloatingMessageButton";
 import { MessagingPopup } from "@/components/MessagingPopup";
@@ -30,6 +30,7 @@ import { QuickActionsBar } from "@/components/onboarding/QuickActionsBar";
 import { SetupChecklist } from "@/components/onboarding/SetupChecklist";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { format } from 'date-fns';
 
 export default function ClientDashboard() {
   const { user, loading } = useAuth();
@@ -259,6 +260,56 @@ export default function ClientDashboard() {
                   Complete Preferences
                 </Button>
               </div>
+            </CardContent>
+          </Card>
+        )}
+        
+        {/* Upcoming Appointments */}
+        {upcomingCalls && upcomingCalls.length > 0 && (
+          <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-primary" />
+                Upcoming Appointments
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {upcomingCalls.map((call: any) => (
+                <div 
+                  key={call.id}
+                  className="flex items-center justify-between p-4 bg-background border rounded-lg hover:bg-accent/50 transition-colors"
+                >
+                  <div className="flex items-center gap-4">
+                    {call.trainer?.profile_photo_url ? (
+                      <img 
+                        src={call.trainer.profile_photo_url}
+                        alt={call.trainer.name}
+                        className="w-12 h-12 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                        <User className="w-6 h-6 text-primary" />
+                      </div>
+                    )}
+                    <div>
+                      <p className="font-semibold">{call.trainer?.name || 'Trainer'}</p>
+                      <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          {format(new Date(call.scheduled_for), 'MMM do, yyyy')}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {format(new Date(call.scheduled_for), 'HH:mm')}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <Badge variant={call.status === 'scheduled' ? 'default' : 'secondary'}>
+                    {call.status}
+                  </Badge>
+                </div>
+              ))}
             </CardContent>
           </Card>
         )}

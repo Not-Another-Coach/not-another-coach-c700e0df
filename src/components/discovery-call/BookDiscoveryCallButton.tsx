@@ -29,7 +29,7 @@ export const BookDiscoveryCallButton = ({
 }: BookDiscoveryCallButtonProps) => {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
-  const { getDiscoveryCallForTrainer, refresh } = useDiscoveryCallData();
+  const { getDiscoveryCallForTrainer, refresh, loading: callsLoading } = useDiscoveryCallData();
 
   const sizeClasses = {
     sm: 'text-sm px-3 py-2',
@@ -45,6 +45,8 @@ export const BookDiscoveryCallButton = ({
   // Check if there's an active discovery call with this trainer
   const activeCall = getDiscoveryCallForTrainer(trainer.id);
   const hasActiveCall = !!activeCall;
+
+  console.log('BookDiscoveryCallButton - Trainer:', trainer.id, 'Active Call:', activeCall, 'Has Active:', hasActiveCall);
 
   const handleCallUpdated = () => {
     refresh();
