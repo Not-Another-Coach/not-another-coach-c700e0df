@@ -24,6 +24,7 @@ export const TrainerCalendar = () => {
   const { upcomingCalls, loading } = useDiscoveryCallNotifications();
   const [sessions, setSessions] = useState<CalendarSession[]>([]);
   const [weekStart, setWeekStart] = useState(startOfWeek(new Date()));
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [stats, setStats] = useState({
     activeClients: 0,
     sessionsThisWeek: 0,
@@ -48,7 +49,7 @@ export const TrainerCalendar = () => {
     const weekEnd = addDays(weekStart, 7);
     const allSessions: CalendarSession[] = [];
 
-    // Fetch discovery calls
+    // Fetch discovery calls (exclude cancelled)
     const { data: discoveryCalls } = await supabase
       .from('discovery_calls')
       .select(`
@@ -60,6 +61,7 @@ export const TrainerCalendar = () => {
       .eq('trainer_id', user.id)
       .gte('scheduled_for', weekStart.toISOString())
       .lte('scheduled_for', weekEnd.toISOString())
+      .neq('status', 'cancelled')
       .order('scheduled_for', { ascending: true });
 
     if (discoveryCalls) {
@@ -148,6 +150,13 @@ export const TrainerCalendar = () => {
 
   const getTodaySessions = () => {
     return sessions.filter(session => isToday(session.scheduledFor));
+  };
+
+  const getSessionsForDate = (date: Date) => {
+    const dateStr = format(date, 'yyyy-MM-dd');
+    return sessions.filter(session => 
+      format(session.scheduledFor, 'yyyy-MM-dd') === dateStr
+    );
   };
 
   const handlePreviousWeek = () => {
@@ -243,6 +252,7 @@ export const TrainerCalendar = () => {
               const dayDate = format(day, 'd');
               const dayName = format(day, 'EEE');
               const isCurrentDay = isToday(day);
+              const isSelectedDay = format(day, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd');
               const daySessions = sessions.filter(s => 
                 format(s.scheduledFor, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
               );
@@ -250,20 +260,23 @@ export const TrainerCalendar = () => {
               return (
                 <div
                   key={index}
+                  onClick={() => setSelectedDate(day)}
                   className={cn(
-                    "p-2 rounded-lg border",
-                    isCurrentDay ? "bg-primary/10 border-primary" : "bg-muted/30"
+                    "p-2 rounded-lg border cursor-pointer transition-colors hover:bg-accent/50",
+                    isCurrentDay && "border-primary",
+                    isSelectedDay && "bg-primary/10 border-primary ring-2 ring-primary/20",
+                    !isCurrentDay && !isSelectedDay && "bg-muted/30"
                   )}
                 >
                   <div className={cn(
                     "text-xs font-medium",
-                    isCurrentDay ? "text-primary" : "text-muted-foreground"
+                    (isCurrentDay || isSelectedDay) ? "text-primary" : "text-muted-foreground"
                   )}>
                     {dayName}
                   </div>
                   <div className={cn(
                     "text-lg font-bold mt-1",
-                    isCurrentDay ? "text-primary" : ""
+                    (isCurrentDay || isSelectedDay) ? "text-primary" : ""
                   )}>
                     {dayDate}
                   </div>
@@ -279,16 +292,23 @@ export const TrainerCalendar = () => {
             })}
           </div>
 
-          {/* Today's Schedule */}
+          {/* Selected Date's Schedule */}
           <div>
-            <h3 className="text-sm font-semibold mb-3">Today's Schedule</h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold">
+                {isToday(selectedDate) ? "Today's Schedule" : "Schedule"}
+              </h3>
+              <span className="text-xs text-muted-foreground">
+                {format(selectedDate, 'EEEE, MMMM d, yyyy')}
+              </span>
+            </div>
             <div className="space-y-2">
-              {getTodaySessions().length === 0 ? (
+              {getSessionsForDate(selectedDate).length === 0 ? (
                 <div className="text-sm text-muted-foreground text-center py-4">
-                  No sessions scheduled for today
+                  No sessions scheduled for this date
                 </div>
               ) : (
-                getTodaySessions().map((session) => (
+                getSessionsForDate(selectedDate).map((session) => (
                   <div
                     key={session.id}
                     className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors cursor-pointer"

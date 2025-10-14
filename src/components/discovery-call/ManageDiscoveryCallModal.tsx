@@ -60,14 +60,74 @@ export const ManageDiscoveryCallModal = ({
     try {
       const { error } = await supabase
         .from('discovery_calls')
-        .update({ status: 'cancelled' })
+        .update({ 
+          status: 'cancelled',
+          updated_at: new Date().toISOString()
+        })
         .eq('id', discoveryCall.id);
 
       if (error) throw error;
 
+      // Create cancellation notifications for both trainer and client
+      const formattedDate = format(scheduledDate, 'MMMM d, yyyy \'at\' h:mm a');
+      
+      // Get trainer and client names
+      const { data: trainerProfile } = await supabase
+        .from('profiles')
+        .select('first_name, last_name')
+        .eq('id', trainer.id)
+        .maybeSingle();
+      
+      const { data: callData } = await supabase
+        .from('discovery_calls')
+        .select('client_id')
+        .eq('id', discoveryCall.id)
+        .single();
+      
+      const { data: clientProfile } = await supabase
+        .from('profiles')
+        .select('first_name, last_name')
+        .eq('id', callData?.client_id)
+        .maybeSingle();
+      
+      const trainerName = `${trainerProfile?.first_name || ''} ${trainerProfile?.last_name || ''}`.trim() || 'the trainer';
+      const clientName = `${clientProfile?.first_name || ''} ${clientProfile?.last_name || ''}`.trim() || 'the client';
+      
+      // Alert for trainer
+      await supabase.from('alerts').insert({
+        alert_type: 'discovery_call_cancelled',
+        title: 'Discovery Call Cancelled',
+        content: `${viewMode === 'trainer' ? clientName : 'You'} ${viewMode === 'trainer' ? 'has' : 'have'} cancelled the discovery call scheduled for ${formattedDate}`,
+        target_audience: { trainers: [trainer.id] },
+        metadata: { 
+          discovery_call_id: discoveryCall.id, 
+          client_id: callData?.client_id, 
+          trainer_id: trainer.id, 
+          scheduled_for: discoveryCall.scheduled_for 
+        },
+        is_active: true
+      });
+      
+      // Alert for client
+      if (callData?.client_id) {
+        await supabase.from('alerts').insert({
+          alert_type: 'discovery_call_cancelled',
+          title: 'Discovery Call Cancelled',
+          content: `${viewMode === 'client' ? 'You have' : `${trainerName} has`} cancelled the discovery call scheduled for ${formattedDate}`,
+          target_audience: { clients: [callData.client_id] },
+          metadata: { 
+            discovery_call_id: discoveryCall.id, 
+            client_id: callData.client_id, 
+            trainer_id: trainer.id, 
+            scheduled_for: discoveryCall.scheduled_for 
+          },
+          is_active: true
+        });
+      }
+
       toast({
         title: "Call cancelled",
-        description: "Your discovery call has been cancelled successfully.",
+        description: "The discovery call has been cancelled successfully.",
       });
 
       onCallUpdated?.();
@@ -76,7 +136,7 @@ export const ManageDiscoveryCallModal = ({
       console.error('Error cancelling call:', error);
       toast({
         title: "Cancellation failed",
-        description: "Failed to cancel your discovery call. Please try again.",
+        description: "Failed to cancel the discovery call. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -162,7 +222,9 @@ export const ManageDiscoveryCallModal = ({
             {discoveryCall.booking_notes && (
               <Card>
                 <CardContent className="p-4">
-                  <h4 className="font-medium mb-2 text-sm">Your Notes</h4>
+                  <h4 className="font-medium mb-2 text-sm">
+                    {viewMode === 'trainer' ? "Client's Notes" : 'Your Notes'}
+                  </h4>
                   <p className="text-sm text-muted-foreground">{discoveryCall.booking_notes}</p>
                 </CardContent>
               </Card>
@@ -181,7 +243,7 @@ export const ManageDiscoveryCallModal = ({
             )}
 
             {/* Action Buttons */}
-            {isUpcoming && (
+            {isUpcoming && discoveryCall.status !== 'cancelled' && (
               <div className="flex gap-2">
                 {viewMode === 'client' && (
                   <Button
@@ -201,6 +263,15 @@ export const ManageDiscoveryCallModal = ({
                   <X className="w-4 h-4 mr-2" />
                   Cancel Call
                 </Button>
+              </div>
+            )}
+
+            {/* Cancelled Call Message */}
+            {discoveryCall.status === 'cancelled' && (
+              <div className="flex items-center justify-center gap-2 p-3 bg-muted rounded-lg">
+                <p className="text-sm text-muted-foreground">
+                  This call has been cancelled
+                </p>
               </div>
             )}
 

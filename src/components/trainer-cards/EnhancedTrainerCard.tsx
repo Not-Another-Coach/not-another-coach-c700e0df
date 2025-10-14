@@ -431,14 +431,15 @@ export const EnhancedTrainerCard = memo(({
             <Button
               key="message"
               variant="default"
-              size="icon"
+              size="sm"
               onClick={(e) => {
                 e.stopPropagation();
                 onStartConversation(trainer.id);
               }}
-              title="Message"
+              className="h-10"
             >
-              <MessageCircle className="w-4 h-4" />
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Message
             </Button>
           );
         }
@@ -454,7 +455,7 @@ export const EnhancedTrainerCard = memo(({
                 e.stopPropagation();
                 onEditDiscoveryCall(trainer.id);
               }}
-              className="flex-1"
+              className="flex-1 h-10"
             >
               <Calendar className="w-4 h-4 mr-2" />
               Manage Call
@@ -473,7 +474,7 @@ export const EnhancedTrainerCard = memo(({
                 e.stopPropagation();
                 onBookDiscoveryCall(trainer.id);
               }}
-              className="flex-1"
+              className="flex-1 h-10"
             >
               <Calendar className="w-4 h-4 mr-2" />
               Book Call
@@ -489,7 +490,7 @@ export const EnhancedTrainerCard = memo(({
               trainer={trainer}
               stage={stage}
               onSuccess={() => onProceedWithCoach?.(trainer.id)}
-              className="flex-1"
+              className="flex-1 h-10"
             />
           );
         }
