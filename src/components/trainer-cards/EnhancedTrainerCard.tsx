@@ -443,11 +443,11 @@ export const EnhancedTrainerCard = memo(({
           );
         }
         
-        // Edit Call button second
+        // Manage Call button second
         if (hasDiscoveryCall && onEditDiscoveryCall) {
           discoveryButtons.push(
             <Button
-              key="edit-call"
+              key="manage-call"
               variant="secondary"
               size="sm"
               onClick={(e) => {
@@ -457,7 +457,7 @@ export const EnhancedTrainerCard = memo(({
               className="flex-1"
             >
               <Calendar className="w-4 h-4 mr-2" />
-              Edit Call
+              Manage Call
             </Button>
           );
         }

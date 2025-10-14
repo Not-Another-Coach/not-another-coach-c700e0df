@@ -28,6 +28,7 @@ import { OnboardingProgressTracker } from "@/components/onboarding/OnboardingPro
 import { TodaysNextSteps } from "@/components/onboarding/TodaysNextSteps";
 import { QuickActionsBar } from "@/components/onboarding/QuickActionsBar";
 import { SetupChecklist } from "@/components/onboarding/SetupChecklist";
+import { ManageDiscoveryCallModal } from "@/components/discovery-call/ManageDiscoveryCallModal";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { format } from 'date-fns';
@@ -116,6 +117,11 @@ export default function ClientDashboard() {
 
   // Additional state for onboarding interactions
   const [selectedStep, setSelectedStep] = useState<any>(null);
+  
+  // Manage Discovery Call modal state
+  const [selectedManageCall, setSelectedManageCall] = useState<any>(null);
+  const [selectedManageTrainer, setSelectedManageTrainer] = useState<{ id: string; name: string; profilePhotoUrl?: string } | null>(null);
+  const [showManageModal, setShowManageModal] = useState(false);
 
   // Redirect if not logged in
   useEffect(() => {
@@ -125,9 +131,17 @@ export default function ClientDashboard() {
   }, [user, loading, navigate]);
 
   // Check if survey is incomplete to show CTA (only if they haven't progressed beyond survey stage)
-  // Hide preferences CTA once they're in onboarding or beyond
+  // Hide preferences CTA once they're in onboarding or beyond, or if there's a scheduled call
   const isInOnboardingOrBeyond = journeyProgress?.stage === 'onboarding_in_progress' || journeyProgress?.stage === 'on_your_journey';
-  const surveyIncomplete = profile && (!profile.quiz_completed || !profile.client_survey_completed) && !hasAdvancedEngagement && !isInOnboardingOrBeyond;
+  const hasScheduledCall = (upcomingCalls?.length ?? 0) > 0;
+  const surveyIncomplete = profile && (!profile.quiz_completed || !profile.client_survey_completed) && !hasAdvancedEngagement && !isInOnboardingOrBeyond && !hasScheduledCall;
+  
+  // Refetch journey when upcoming calls change
+  useEffect(() => {
+    if (upcomingCalls) {
+      refetchJourney();
+    }
+  }, [upcomingCalls?.length, refetchJourney]);
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
@@ -430,13 +444,22 @@ export default function ClientDashboard() {
                   {upcomingCalls.map((call: any) => (
                     <div 
                       key={call.id}
-                      className="flex items-center justify-between p-4 bg-background border rounded-lg hover:bg-accent/50 transition-colors"
+                      className="flex items-center justify-between p-4 bg-background border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
+                      onClick={() => {
+                        setSelectedManageCall(call);
+                        setSelectedManageTrainer({ 
+                          id: call.trainer_id, 
+                          name: `${call.trainer?.first_name ?? ''} ${call.trainer?.last_name ?? ''}`.trim() || 'Trainer',
+                          profilePhotoUrl: call.trainer?.profile_photo_url
+                        });
+                        setShowManageModal(true);
+                      }}
                     >
                       <div className="flex items-center gap-4">
                         {call.trainer?.profile_photo_url ? (
                           <img 
                             src={call.trainer.profile_photo_url}
-                            alt={call.trainer.name}
+                            alt={`${call.trainer?.first_name ?? ''} ${call.trainer?.last_name ?? ''}`}
                             className="w-12 h-12 rounded-full object-cover"
                           />
                         ) : (
@@ -445,7 +468,9 @@ export default function ClientDashboard() {
                           </div>
                         )}
                         <div>
-                          <p className="font-semibold">{call.trainer?.name || 'Trainer'}</p>
+                          <p className="font-semibold">
+                            {`${call.trainer?.first_name ?? ''} ${call.trainer?.last_name ?? ''}`.trim() || 'Trainer'}
+                          </p>
                           <div className="flex items-center gap-3 text-sm text-muted-foreground">
                             <span className="flex items-center gap-1">
                               <Calendar className="w-3 h-3" />
@@ -492,6 +517,20 @@ export default function ClientDashboard() {
         isOpen={isMessagingOpen}
         onClose={() => setIsMessagingOpen(false)}
       />
+
+      {/* Manage Discovery Call Modal */}
+      {showManageModal && selectedManageCall && selectedManageTrainer && (
+        <ManageDiscoveryCallModal
+          isOpen={showManageModal}
+          discoveryCall={selectedManageCall}
+          trainer={selectedManageTrainer}
+          onClose={() => setShowManageModal(false)}
+          onCallUpdated={() => {
+            setShowManageModal(false);
+            refetchJourney();
+          }}
+        />
+      )}
     </div>
   );
 }

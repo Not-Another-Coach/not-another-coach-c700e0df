@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useClientProfile } from "@/hooks/useClientProfile";
 import { useClientJourneyProgress } from "@/hooks/useClientJourneyProgress";
 import { useDiscoveryCallNotifications } from "@/hooks/useDiscoveryCallNotifications";
+import { useDiscoveryCallData } from "@/hooks/useDiscoveryCallData";
 import { ErrorBoundary, TrainerDataErrorBoundary } from "@/components/ErrorBoundary";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +31,7 @@ import {
 } from "lucide-react";
 import { ClientCustomHeader } from "@/components/layout/ClientCustomHeader";
 import { DiscoveryCallBookingModal } from "@/components/discovery-call/DiscoveryCallBookingModal";
+import { ManageDiscoveryCallModal } from "@/components/discovery-call/ManageDiscoveryCallModal";
 import { EnhancedEmptyState } from "@/components/ui/EnhancedEmptyState";
 
 export default function MyTrainers() {
@@ -38,6 +40,7 @@ export default function MyTrainers() {
   const { profile } = useClientProfile();
   const { progress: journeyProgress } = useClientJourneyProgress();
   const { notifications, upcomingCalls } = useDiscoveryCallNotifications();
+  const { hasActiveDiscoveryCall, getDiscoveryCallForTrainer, loading: callsLoading, refresh: refreshCalls } = useDiscoveryCallData();
   
   // Unified trainer data hook
   const {
@@ -59,6 +62,11 @@ export default function MyTrainers() {
   const [selectedForComparison, setSelectedForComparison] = useState<string[]>([]);
   const [showComparison, setShowComparison] = useState(false);
   const [isMessagingOpen, setIsMessagingOpen] = useState(false);
+  
+  // Manage Discovery Call modal state
+  const [manageModalOpen, setManageModalOpen] = useState(false);
+  const [manageModalCall, setManageModalCall] = useState<any>(null);
+  const [manageModalTrainer, setManageModalTrainer] = useState<{ id: string; name: string; profilePhotoUrl?: string } | null>(null);
 
   // Listen for filter events from dashboard
   useEffect(() => {
@@ -172,6 +180,26 @@ export default function MyTrainers() {
 
   const handleJoinWaitlist = async (trainerId: string) => {
     await joinWaitlist(trainerId);
+  };
+
+  const handleEditDiscoveryCall = (trainerId: string) => {
+    const call = getDiscoveryCallForTrainer(trainerId);
+    const trainer = trainers.find(t => t.id === trainerId);
+    if (call && trainer) {
+      setManageModalCall(call);
+      setManageModalTrainer({ 
+        id: trainer.id, 
+        name: `${trainer.firstName ?? ''} ${trainer.lastName ?? ''}`.trim() || trainer.name, 
+        profilePhotoUrl: trainer.profilePhotoUrl 
+      });
+      setManageModalOpen(true);
+    }
+  };
+
+  const handleCallUpdated = () => {
+    refreshCalls();
+    refreshData();
+    setManageModalOpen(false);
   };
 
   // Smart initial view selection based on trainer content and engagement stage
@@ -403,7 +431,9 @@ export default function MyTrainers() {
                           trainerEngagementStage: trainer.engagementStage
                         });
                         
-                        return (
+                         const hasCall = !callsLoading && hasActiveDiscoveryCall(trainer.id);
+                         
+                         return (
                         <div key={trainer.id} className="relative">
                            <EnhancedTrainerCard
                              trainer={trainer as any}
@@ -413,10 +443,12 @@ export default function MyTrainers() {
                              onRemove={trainer.shortlistedAt ? handleRemoveFromShortlist : undefined}
                              onStartConversation={handleStartConversation}
                              onBookDiscoveryCall={handleBookDiscoveryCall}
+                             onEditDiscoveryCall={handleEditDiscoveryCall}
                              onProceedWithCoach={handleProceedWithCoach}
                              onViewProfile={handleViewProfile}
                              hideViewProfileButton={false}
                              isShortlisted={!!trainer.shortlistedAt}
+                             hasDiscoveryCall={hasCall}
                              trainerOffersDiscoveryCalls={trainer.offersDiscoveryCall || (trainer as any).offers_discovery_call || false}
                              cardState={
                                 effectiveStage === 'shortlisted' ? 'shortlisted' :
@@ -477,7 +509,22 @@ export default function MyTrainers() {
           <DiscoveryCallBookingModal
             trainer={trainers.find(t => t.id === selectedTrainerForCall) as any}
             isOpen={!!selectedTrainerForCall}
-            onClose={() => setSelectedTrainerForCall(null)}
+            onClose={() => {
+              setSelectedTrainerForCall(null);
+              refreshCalls();
+              refreshData();
+            }}
+          />
+        )}
+
+        {/* Manage Discovery Call Modal */}
+        {manageModalOpen && manageModalCall && manageModalTrainer && (
+          <ManageDiscoveryCallModal
+            isOpen={manageModalOpen}
+            discoveryCall={manageModalCall}
+            trainer={manageModalTrainer}
+            onClose={() => setManageModalOpen(false)}
+            onCallUpdated={handleCallUpdated}
           />
         )}
       </div>
