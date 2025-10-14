@@ -154,6 +154,12 @@ export const useClientJourneyProgress = () => {
         currentStage = 'getting_to_know_your_coach';
       }
 
+      // If discovery calls were cancelled but client has engagement history, keep them at exploring_coaches
+      const hasEngagementHistory = engagements && engagements.length > 0;
+      if (!hasScheduledCall && hasEngagementHistory && currentStage === 'preferences_identified') {
+        currentStage = 'exploring_coaches';
+      }
+
       // For active clients, determine stage based on onboarding completion
       if (journeyStage === 'active_client') {
         if (totalOnboardingSteps > 0) {

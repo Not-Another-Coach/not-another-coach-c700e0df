@@ -431,15 +431,15 @@ export const EnhancedTrainerCard = memo(({
             <Button
               key="message"
               variant="default"
-              size="sm"
+              size="icon"
               onClick={(e) => {
                 e.stopPropagation();
                 onStartConversation(trainer.id);
               }}
-              className="h-10"
+              className="h-10 w-10"
+              title="Message"
             >
-              <MessageCircle className="w-4 h-4 mr-2" />
-              Message
+              <MessageCircle className="w-4 h-4" />
             </Button>
           );
         }

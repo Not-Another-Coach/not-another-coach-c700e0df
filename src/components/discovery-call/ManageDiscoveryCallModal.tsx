@@ -58,6 +58,8 @@ export const ManageDiscoveryCallModal = ({
   const handleCancelCall = async () => {
     setCancelling(true);
     try {
+      const clientId = (discoveryCall as any).client_id;
+      
       const { error } = await supabase
         .from('discovery_calls')
         .update({ 
@@ -78,16 +80,10 @@ export const ManageDiscoveryCallModal = ({
         .eq('id', trainer.id)
         .maybeSingle();
       
-      const { data: callData } = await supabase
-        .from('discovery_calls')
-        .select('client_id')
-        .eq('id', discoveryCall.id)
-        .single();
-      
       const { data: clientProfile } = await supabase
         .from('profiles')
         .select('first_name, last_name')
-        .eq('id', callData?.client_id)
+        .eq('id', clientId)
         .maybeSingle();
       
       const trainerName = `${trainerProfile?.first_name || ''} ${trainerProfile?.last_name || ''}`.trim() || 'the trainer';
@@ -101,7 +97,7 @@ export const ManageDiscoveryCallModal = ({
         target_audience: { trainers: [trainer.id] },
         metadata: { 
           discovery_call_id: discoveryCall.id, 
-          client_id: callData?.client_id, 
+          client_id: clientId, 
           trainer_id: trainer.id, 
           scheduled_for: discoveryCall.scheduled_for 
         },
@@ -109,15 +105,15 @@ export const ManageDiscoveryCallModal = ({
       });
       
       // Alert for client
-      if (callData?.client_id) {
+      if (clientId) {
         await supabase.from('alerts').insert({
           alert_type: 'discovery_call_cancelled',
           title: 'Discovery Call Cancelled',
           content: `${viewMode === 'client' ? 'You have' : `${trainerName} has`} cancelled the discovery call scheduled for ${formattedDate}`,
-          target_audience: { clients: [callData.client_id] },
+          target_audience: { clients: [clientId] },
           metadata: { 
             discovery_call_id: discoveryCall.id, 
-            client_id: callData.client_id, 
+            client_id: clientId, 
             trainer_id: trainer.id, 
             scheduled_for: discoveryCall.scheduled_for 
           },
