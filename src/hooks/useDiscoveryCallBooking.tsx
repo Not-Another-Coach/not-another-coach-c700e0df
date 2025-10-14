@@ -192,14 +192,14 @@ export function useDiscoveryCallBooking() {
       if (!isReschedule) {
         console.log('Creating activity alert for trainer:', trainerId);
         try {
-          const alertResult = await supabase
+        const alertResult = await supabase
             .from('alerts')
             .insert({
               alert_type: 'discovery_call_booked',
               title: 'New Discovery Call Booked!',
               content: `A client has booked a discovery call for ${selectedDateTime.toLocaleDateString()} at ${selectedDateTime.toLocaleTimeString()}`,
               created_by: trainerId,
-              target_audience: ["trainers"],
+              target_audience: { trainers: [trainerId] },
               metadata: {
                 client_id: user.id,
                 discovery_call_id: data.id,
@@ -207,7 +207,7 @@ export function useDiscoveryCallBooking() {
                 trainer_id: trainerId
               },
               is_active: true,
-              priority: 1
+              priority: 2
             });
           
           console.log('Alert creation result:', alertResult);
