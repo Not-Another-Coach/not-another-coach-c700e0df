@@ -182,6 +182,42 @@ serve(async (req) => {
 
     console.log(`Email sent successfully: ${emailResult?.id}`)
 
+    // Create in-app alert for trainer notifications
+    if (type === 'trainer_notification' && notificationType === 'new_booking') {
+      try {
+        const alertTitle = notificationType === 'new_booking' 
+          ? 'New Discovery Call Booked!'
+          : 'Discovery Call Update'
+        
+        const alertContent = notificationType === 'new_booking'
+          ? `${clientName} has booked a discovery call with you for ${scheduledDate} at ${scheduledTime}.`
+          : `${clientName} has updated their discovery call.`
+
+        await supabase
+          .from('alerts')
+          .insert({
+            alert_type: 'discovery_call_booked',
+            title: alertTitle,
+            content: alertContent,
+            target_audience: { trainers: [discoveryCall.trainer_id] },
+            metadata: {
+              discovery_call_id: discoveryCallId,
+              client_id: discoveryCall.client_id,
+              trainer_id: discoveryCall.trainer_id,
+              scheduled_for: discoveryCall.scheduled_for,
+              client_name: clientName
+            },
+            is_active: true,
+            priority: 2
+          })
+
+        console.log('Alert created for trainer:', discoveryCall.trainer_id)
+      } catch (alertError) {
+        console.error('Error creating alert:', alertError)
+        // Don't fail the whole request if alert creation fails
+      }
+    }
+
     return new Response(
       JSON.stringify({ 
         success: true, 

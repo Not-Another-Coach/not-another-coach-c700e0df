@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { CalendarIcon, Clock, User, Star, Plus, ExternalLink } from 'lucide-react';
+import { CalendarIcon, Clock, User, Star, Plus, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useDiscoveryCallNotifications } from '@/hooks/useDiscoveryCallNotifications';
 import { format, addDays, startOfWeek, isToday } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
+import { ManageDiscoveryCallModal } from '@/components/discovery-call/ManageDiscoveryCallModal';
 
 interface CalendarSession {
   id: string;
@@ -28,6 +29,11 @@ export const TrainerCalendar = () => {
     sessionsThisWeek: 0,
     averageRating: 0
   });
+  
+  // State for managing discovery call modal
+  const [selectedCall, setSelectedCall] = useState<any>(null);
+  const [selectedClient, setSelectedClient] = useState<{ id: string; name: string; profilePhotoUrl?: string } | null>(null);
+  const [showManageModal, setShowManageModal] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -144,6 +150,45 @@ export const TrainerCalendar = () => {
     return sessions.filter(session => isToday(session.scheduledFor));
   };
 
+  const handlePreviousWeek = () => {
+    setWeekStart(addDays(weekStart, -7));
+  };
+
+  const handleNextWeek = () => {
+    setWeekStart(addDays(weekStart, 7));
+  };
+
+  const handleSessionClick = async (session: CalendarSession) => {
+    if (session.type === 'discovery') {
+      // Fetch full discovery call details
+      const { data: callData, error } = await supabase
+        .from('discovery_calls')
+        .select(`
+          *,
+          client:profiles!discovery_calls_client_id_fkey(id, first_name, last_name, profile_photo_url)
+        `)
+        .eq('id', session.id)
+        .single();
+
+      if (!error && callData) {
+        const client = callData.client as any;
+        setSelectedCall(callData);
+        setSelectedClient({
+          id: callData.client_id,
+          name: `${client.first_name || ''} ${client.last_name || ''}`.trim() || 'Client',
+          profilePhotoUrl: client.profile_photo_url
+        });
+        setShowManageModal(true);
+      }
+    }
+  };
+
+  const handleCallUpdated = () => {
+    fetchSessions();
+    fetchStats();
+    setShowManageModal(false);
+  };
+
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 
   if (loading) {
@@ -163,141 +208,174 @@ export const TrainerCalendar = () => {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <CalendarIcon className="h-5 w-5" />
-            Your Coaching Calendar
-          </CardTitle>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Week View */}
-        <div className="grid grid-cols-7 gap-2 text-center">
-          {weekDays.map((day, index) => {
-            const dayDate = format(day, 'd');
-            const dayName = format(day, 'EEE');
-            const isCurrentDay = isToday(day);
-            const daySessions = sessions.filter(s => 
-              format(s.scheduledFor, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
-            );
-            
-            return (
-              <div
-                key={index}
-                className={cn(
-                  "p-2 rounded-lg border",
-                  isCurrentDay ? "bg-primary/10 border-primary" : "bg-muted/30"
-                )}
+    <>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <CalendarIcon className="h-5 w-5" />
+              Your Coaching Calendar
+            </CardTitle>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePreviousWeek}
               >
-                <div className={cn(
-                  "text-xs font-medium",
-                  isCurrentDay ? "text-primary" : "text-muted-foreground"
-                )}>
-                  {dayName}
-                </div>
-                <div className={cn(
-                  "text-lg font-bold mt-1",
-                  isCurrentDay ? "text-primary" : ""
-                )}>
-                  {dayDate}
-                </div>
-                {daySessions.length > 0 && (
-                  <div className="mt-1">
-                    <Badge variant="secondary" className="text-xs px-1 py-0">
-                      {daySessions.length}
-                    </Badge>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Today's Schedule */}
-        <div>
-          <h3 className="text-sm font-semibold mb-3">Today's Schedule</h3>
-          <div className="space-y-2">
-            {getTodaySessions().length === 0 ? (
-              <div className="text-sm text-muted-foreground text-center py-4">
-                No sessions scheduled for today
-              </div>
-            ) : (
-              getTodaySessions().map((session) => (
+                <ChevronLeft className="w-4 h-4 mr-1" />
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleNextWeek}
+              >
+                Next
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Week View */}
+          <div className="grid grid-cols-7 gap-2 text-center">
+            {weekDays.map((day, index) => {
+              const dayDate = format(day, 'd');
+              const dayName = format(day, 'EEE');
+              const isCurrentDay = isToday(day);
+              const daySessions = sessions.filter(s => 
+                format(s.scheduledFor, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
+              );
+              
+              return (
                 <div
-                  key={session.id}
-                  className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                  key={index}
+                  className={cn(
+                    "p-2 rounded-lg border",
+                    isCurrentDay ? "bg-primary/10 border-primary" : "bg-muted/30"
+                  )}
                 >
-                  <div className="flex items-center gap-3">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <div className="font-medium text-sm">{session.time}</div>
-                      <div className="text-xs text-muted-foreground flex items-center gap-1">
-                        <User className="h-3 w-3" />
-                        {session.client}
+                  <div className={cn(
+                    "text-xs font-medium",
+                    isCurrentDay ? "text-primary" : "text-muted-foreground"
+                  )}>
+                    {dayName}
+                  </div>
+                  <div className={cn(
+                    "text-lg font-bold mt-1",
+                    isCurrentDay ? "text-primary" : ""
+                  )}>
+                    {dayDate}
+                  </div>
+                  {daySessions.length > 0 && (
+                    <div className="mt-1">
+                      <Badge variant="secondary" className="text-xs px-1 py-0">
+                        {daySessions.length}
+                      </Badge>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Today's Schedule */}
+          <div>
+            <h3 className="text-sm font-semibold mb-3">Today's Schedule</h3>
+            <div className="space-y-2">
+              {getTodaySessions().length === 0 ? (
+                <div className="text-sm text-muted-foreground text-center py-4">
+                  No sessions scheduled for today
+                </div>
+              ) : (
+                getTodaySessions().map((session) => (
+                  <div
+                    key={session.id}
+                    className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors cursor-pointer"
+                    onClick={() => handleSessionClick(session)}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Clock className="h-4 w-4 text-muted-foreground" />
+                      <div>
+                        <div className="font-medium text-sm">{session.time}</div>
+                        <div className="text-xs text-muted-foreground flex items-center gap-1">
+                          <User className="h-3 w-3" />
+                          {session.client}
+                        </div>
                       </div>
                     </div>
+                    <Badge
+                      variant={
+                        session.status === 'confirmed' ? 'default' :
+                        session.status === 'pending' ? 'secondary' : 'outline'
+                      }
+                    >
+                      {session.type === 'discovery' ? 'Discovery' : 'Training'}
+                    </Badge>
                   </div>
-                  <Badge
-                    variant={
-                      session.status === 'confirmed' ? 'default' :
-                      session.status === 'pending' ? 'secondary' : 'outline'
-                    }
-                  >
-                    {session.type === 'discovery' ? 'Discovery' : 'Training'}
-                  </Badge>
-                </div>
-              ))
-            )}
+                ))
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-3 gap-4">
-          <Card>
-            <CardContent className="pt-4 text-center">
-              <div className="text-2xl font-bold">{stats.activeClients}</div>
-              <div className="text-xs text-muted-foreground">Active Clients</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4 text-center">
-              <div className="text-2xl font-bold">{stats.sessionsThisWeek}</div>
-              <div className="text-xs text-muted-foreground">Sessions This Week</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4 text-center">
-              <div className="text-2xl font-bold flex items-center justify-center gap-1">
-                {stats.averageRating || '-'}
-                {stats.averageRating > 0 && <Star className="h-4 w-4 fill-current text-yellow-500" />}
-              </div>
-              <div className="text-xs text-muted-foreground">Average Rating</div>
-            </CardContent>
-          </Card>
-        </div>
+          {/* Quick Stats */}
+          <div className="grid grid-cols-3 gap-4">
+            <Card>
+              <CardContent className="pt-4 text-center">
+                <div className="text-2xl font-bold">{stats.activeClients}</div>
+                <div className="text-xs text-muted-foreground">Active Clients</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-4 text-center">
+                <div className="text-2xl font-bold">{stats.sessionsThisWeek}</div>
+                <div className="text-xs text-muted-foreground">Sessions This Week</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-4 text-center">
+                <div className="text-2xl font-bold flex items-center justify-center gap-1">
+                  {stats.averageRating || '-'}
+                  {stats.averageRating > 0 && <Star className="h-4 w-4 fill-current text-yellow-500" />}
+                </div>
+                <div className="text-xs text-muted-foreground">Average Rating</div>
+              </CardContent>
+            </Card>
+          </div>
 
-        {/* Action Buttons */}
-        <div className="space-y-2">
-          <Button variant="outline" size="sm" className="w-full" disabled>
-            <Plus className="h-4 w-4 mr-2" />
-            Add New Availability
-          </Button>
-          <Button variant="outline" size="sm" className="w-full" disabled>
-            <ExternalLink className="h-4 w-4 mr-2" />
-            Sync with Google Calendar
-          </Button>
-          <Button variant="outline" size="sm" className="w-full" disabled>
-            <CalendarIcon className="h-4 w-4 mr-2" />
-            View Monthly Report
-          </Button>
-        </div>
+          {/* Action Buttons */}
+          <div className="space-y-2">
+            <Button variant="outline" size="sm" className="w-full" disabled>
+              <Plus className="h-4 w-4 mr-2" />
+              Add New Availability
+            </Button>
+            <Button variant="outline" size="sm" className="w-full" disabled>
+              <ExternalLink className="h-4 w-4 mr-2" />
+              Sync with Google Calendar
+            </Button>
+            <Button variant="outline" size="sm" className="w-full" disabled>
+              <CalendarIcon className="h-4 w-4 mr-2" />
+              View Monthly Report
+            </Button>
+          </div>
 
-        <div className="text-xs text-muted-foreground text-center pt-2 border-t">
-          Full calendar management features coming soon
-        </div>
-      </CardContent>
-    </Card>
+          <div className="text-xs text-muted-foreground text-center pt-2 border-t">
+            Full calendar management features coming soon
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Manage Discovery Call Modal */}
+      {selectedCall && selectedClient && (
+        <ManageDiscoveryCallModal
+          isOpen={showManageModal}
+          onClose={() => setShowManageModal(false)}
+          discoveryCall={selectedCall}
+          trainer={selectedClient}
+          onCallUpdated={handleCallUpdated}
+          viewMode="trainer"
+        />
+      )}
+    </>
   );
 };

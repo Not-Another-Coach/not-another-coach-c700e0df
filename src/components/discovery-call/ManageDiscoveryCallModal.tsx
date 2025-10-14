@@ -39,6 +39,7 @@ interface ManageDiscoveryCallModalProps {
     profilePhotoUrl?: string;
   };
   onCallUpdated?: () => void;
+  viewMode?: 'client' | 'trainer';
 }
 
 export const ManageDiscoveryCallModal = ({
@@ -46,7 +47,8 @@ export const ManageDiscoveryCallModal = ({
   onClose,
   discoveryCall,
   trainer,
-  onCallUpdated
+  onCallUpdated,
+  viewMode = 'client'
 }: ManageDiscoveryCallModalProps) => {
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showRescheduleModal, setShowRescheduleModal] = useState(false);
@@ -108,8 +110,12 @@ export const ManageDiscoveryCallModal = ({
                 )}
               </div>
               <div>
-                <p className="font-semibold">Discovery Call Details</p>
-                <p className="text-sm text-muted-foreground">with {trainer.name}</p>
+                <p className="font-semibold">
+                  {viewMode === 'trainer' ? 'Discovery Call Details' : 'Manage Discovery Call'}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {viewMode === 'trainer' ? `with ${trainer.name}` : `with ${trainer.name}`}
+                </p>
               </div>
             </DialogTitle>
           </DialogHeader>
@@ -177,18 +183,20 @@ export const ManageDiscoveryCallModal = ({
             {/* Action Buttons */}
             {isUpcoming && (
               <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowRescheduleModal(true)}
-                  className="flex-1"
-                >
-                  <Edit className="w-4 h-4 mr-2" />
-                  Reschedule
-                </Button>
+                {viewMode === 'client' && (
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowRescheduleModal(true)}
+                    className="flex-1"
+                  >
+                    <Edit className="w-4 h-4 mr-2" />
+                    Reschedule
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   onClick={() => setShowCancelDialog(true)}
-                  className="flex-1 text-destructive hover:text-destructive"
+                  className={viewMode === 'client' ? "flex-1 text-destructive hover:text-destructive" : "w-full text-destructive hover:text-destructive"}
                 >
                   <X className="w-4 h-4 mr-2" />
                   Cancel Call

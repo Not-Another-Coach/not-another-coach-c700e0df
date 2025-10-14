@@ -11,6 +11,7 @@ import { MessagingPopup } from '@/components/MessagingPopup';
 import { DiscoveryCallNotesTaker } from '@/components/DiscoveryCallNotesTaker';
 import { getCurrencySymbol } from '@/lib/packagePaymentUtils';
 import { ClientStatusTimeline } from './ClientStatusTimeline';
+import { ManageDiscoveryCallModal } from '@/components/discovery-call/ManageDiscoveryCallModal';
 
 interface Prospect {
   id: string;
@@ -53,6 +54,11 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
   const [isMessagingOpen, setIsMessagingOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Prospect | null>(null);
   const [trainerOffersDiscoveryCall, setTrainerOffersDiscoveryCall] = useState(false);
+  
+  // State for managing discovery call modal
+  const [selectedCall, setSelectedCall] = useState<any>(null);
+  const [selectedCallClient, setSelectedCallClient] = useState<{ id: string; name: string; profilePhotoUrl?: string } | null>(null);
+  const [showManageModal, setShowManageModal] = useState(false);
   
   // Statistics state
   const [stats, setStats] = useState({
@@ -404,12 +410,30 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => {
-                        console.log('Join call:', prospect.client_id);
+                      onClick={async () => {
+                        // Fetch full discovery call details
+                        const { data: callData, error } = await supabase
+                          .from('discovery_calls')
+                          .select('*')
+                          .eq('client_id', prospect.client_id)
+                          .eq('trainer_id', profile?.id)
+                          .in('status', ['scheduled', 'rescheduled'])
+                          .single();
+
+                        if (!error && callData) {
+                          setSelectedCall(callData);
+                          setSelectedCallClient({
+                            id: prospect.client_id,
+                            name: prospect.client_profile?.first_name && prospect.client_profile?.last_name
+                              ? `${prospect.client_profile.first_name} ${prospect.client_profile.last_name}`
+                              : 'Client'
+                          });
+                          setShowManageModal(true);
+                        }
                       }}
                     >
                       <Video className="w-3 h-3 mr-1" />
-                      Join Call
+                      Manage Call
                     </Button>
                   )}
                   
@@ -534,6 +558,21 @@ export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
             setSelectedClient(null);
           }}
           selectedClient={selectedClient}
+        />
+      )}
+
+      {/* Manage Discovery Call Modal */}
+      {selectedCall && selectedCallClient && (
+        <ManageDiscoveryCallModal
+          isOpen={showManageModal}
+          onClose={() => setShowManageModal(false)}
+          discoveryCall={selectedCall}
+          trainer={selectedCallClient}
+          onCallUpdated={() => {
+            fetchProspects();
+            setShowManageModal(false);
+          }}
+          viewMode="trainer"
         />
       )}
     </div>
