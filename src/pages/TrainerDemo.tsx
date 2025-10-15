@@ -98,18 +98,6 @@ export default function TrainerDemo() {
         </div>
       </div>
 
-      {/* Pricing Plans */}
-      <PricingPlans />
-
-      {/* Growth Philosophy */}
-      <GrowthPhilosophy />
-
-      {/* Earnings Calculator */}
-      <MonthlyEarningsCalculator />
-
-      {/* Plan Comparison */}
-      <PlanComparison />
-
       {/* Features Overview */}
       <div className="container mx-auto px-4 py-16">
         {/* Profile Preview Section */}
@@ -127,8 +115,22 @@ export default function TrainerDemo() {
           {/* Coach Journey Infographic */}
           <CoachJourneyInfographic />
         </div>
+      </div>
 
-        {/* Coach Recruitment Section */}
+      {/* Pricing Plans */}
+      <PricingPlans />
+
+      {/* Growth Philosophy */}
+      <GrowthPhilosophy />
+
+      {/* Earnings Calculator */}
+      <MonthlyEarningsCalculator />
+
+      {/* Plan Comparison */}
+      <PlanComparison />
+
+      {/* Coach Recruitment Section */}
+      <div className="container mx-auto px-4">
         <CoachRecruitmentSection 
           onBecomeCoach={handleCreateProfile}
         />
