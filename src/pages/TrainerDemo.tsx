@@ -3,6 +3,10 @@ import { TrainerDemoCalendar } from '@/components/trainer-demo/TrainerDemoCalend
 import { GrowthTracker } from '@/components/trainer-demo/GrowthTracker';
 import { CoachJourneyInfographic } from '@/components/trainer-demo/CoachJourneyInfographic';
 import { DemoProfilePreview } from '@/components/trainer-demo/DemoProfilePreview';
+import { PricingPlans } from '@/components/trainer-demo/PricingPlans';
+import { MonthlyEarningsCalculator } from '@/components/trainer-demo/MonthlyEarningsCalculator';
+import { PlanComparison } from '@/components/trainer-demo/PlanComparison';
+import { GrowthPhilosophy } from '@/components/trainer-demo/GrowthPhilosophy';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -71,13 +75,13 @@ export default function TrainerDemo() {
         
         <div className="relative z-10 max-w-6xl mx-auto px-6 text-center">
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight animate-fade-in">
-            Your Coaching Business,
+            Build your business.
             <span className="block bg-gradient-to-r from-accent to-energy bg-clip-text text-transparent">
-              Supercharged
+              Keep more as you grow.
             </span>
           </h1>
           <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto mb-8 font-medium animate-fade-in [animation-delay:0.2s]">
-            Attract clients, manage your schedule, and grow your income — all in one place.
+            Start on £9.99 + 10% commission. Upgrade to keep 100%.
           </p>
           
           {/* CTA Button */}
@@ -94,7 +98,20 @@ export default function TrainerDemo() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
+      {/* Pricing Plans */}
+      <PricingPlans />
+
+      {/* Growth Philosophy */}
+      <GrowthPhilosophy />
+
+      {/* Earnings Calculator */}
+      <MonthlyEarningsCalculator />
+
+      {/* Plan Comparison */}
+      <PlanComparison />
+
+      {/* Features Overview */}
+      <div className="container mx-auto px-4 py-16">
         {/* Profile Preview Section */}
         <div className="mb-12 max-w-md mx-auto">
           <DemoProfilePreview />
@@ -109,69 +126,12 @@ export default function TrainerDemo() {
 
           {/* Coach Journey Infographic */}
           <CoachJourneyInfographic />
-
-          {/* Why Coaches Choose NAC - Updated 4-icon layout */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-center text-2xl">Why Coaches Choose NAC</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="flex items-start gap-4 p-4 rounded-lg bg-primary/5 border border-primary/10">
-                  <div className="p-3 rounded-lg bg-primary/10">
-                    <Target className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <div className="font-semibold text-lg mb-1">🎯 Smart Matching</div>
-                    <div className="text-sm text-muted-foreground">
-                      Find clients who truly fit your style
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4 p-4 rounded-lg bg-success/5 border border-success/10">
-                  <div className="p-3 rounded-lg bg-success/10">
-                    <CreditCard className="h-6 w-6 text-success" />
-                  </div>
-                  <div>
-                    <div className="font-semibold text-lg mb-1">💳 Instant Payments</div>
-                    <div className="text-sm text-muted-foreground">
-                      Get paid fast, with no stress
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4 p-4 rounded-lg bg-secondary/5 border border-secondary/10">
-                  <div className="p-3 rounded-lg bg-secondary/10">
-                    <TrendingUp className="h-6 w-6 text-secondary" />
-                  </div>
-                  <div>
-                    <div className="font-semibold text-lg mb-1">📈 Growth Tools</div>
-                    <div className="text-sm text-muted-foreground">
-                      Automate scheduling & track progress
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4 p-4 rounded-lg bg-warning/5 border border-warning/10">
-                  <div className="p-3 rounded-lg bg-warning/10">
-                    <Star className="h-6 w-6 text-warning" />
-                  </div>
-                  <div>
-                    <div className="font-semibold text-lg mb-1">⭐ Build Credibility</div>
-                    <div className="text-sm text-muted-foreground">
-                      Reviews & recognition
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
         </div>
 
         {/* Coach Recruitment Section */}
         <CoachRecruitmentSection 
           onBecomeCoach={handleCreateProfile}
         />
-
       </div>
     </div>
   );
