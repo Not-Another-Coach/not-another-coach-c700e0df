@@ -28,7 +28,7 @@ export const MembershipSettings: React.FC = () => {
     setLoading(true);
     const result = await fetchMembershipSettings();
     if (result) {
-      setSettings(result);
+      setSettings(result as Partial<MembershipSettingsType>);
     }
     setLoading(false);
   };

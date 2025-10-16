@@ -163,7 +163,7 @@ class AdminServiceClass extends BaseService {
   async getMembershipPlans(): Promise<ServiceResponse<any[]>> {
     return BaseService.executeListQuery(async () => {
       return await supabase
-        .from('membership_plan_definitions')
+        .from('membership_plan_definitions' as any)
         .select('*')
         .order('monthly_price_cents', { ascending: false });
     });
@@ -174,7 +174,7 @@ class AdminServiceClass extends BaseService {
    */
   async createMembershipPlan(request: any): Promise<ServiceResponse<string>> {
     try {
-      const { data, error } = await supabase.rpc('admin_create_membership_plan', {
+      const { data, error } = await supabase.rpc('admin_create_membership_plan' as any, {
         p_plan_name: request.plan_name,
         p_plan_type: request.plan_type,
         p_display_name: request.display_name,
@@ -201,7 +201,7 @@ class AdminServiceClass extends BaseService {
    */
   async updateMembershipPlan(request: any): Promise<ServiceResponse<void>> {
     try {
-      const { error } = await supabase.rpc('admin_update_membership_plan', {
+      const { error } = await supabase.rpc('admin_update_membership_plan' as any, {
         p_plan_id: request.plan_id,
         p_display_name: request.display_name || null,
         p_description: request.description || null,
@@ -227,7 +227,7 @@ class AdminServiceClass extends BaseService {
    */
   async archiveMembershipPlan(planId: string): Promise<ServiceResponse<void>> {
     try {
-      const { error } = await supabase.rpc('admin_archive_membership_plan', {
+      const { error } = await supabase.rpc('admin_archive_membership_plan' as any, {
         p_plan_id: planId
       });
       
@@ -244,7 +244,7 @@ class AdminServiceClass extends BaseService {
   async getMembershipPlanStats(): Promise<ServiceResponse<Record<string, number>>> {
     try {
       const { data, error } = await supabase
-        .from('trainer_membership')
+        .from('trainer_membership' as any)
         .select('plan_definition_id')
         .eq('is_active', true);
       
@@ -252,7 +252,7 @@ class AdminServiceClass extends BaseService {
       
       // Count trainers per plan
       const stats: Record<string, number> = {};
-      data?.forEach(membership => {
+      (data as any)?.forEach((membership: any) => {
         const planId = membership.plan_definition_id;
         if (planId) {
           stats[planId] = (stats[planId] || 0) + 1;

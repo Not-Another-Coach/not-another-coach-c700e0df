@@ -18,7 +18,7 @@ export const useTrainerMembershipPlans = (trainerId?: string) => {
 
   const fetchAvailablePlans = async () => {
     const { data, error } = await supabase
-      .from('membership_plan_definitions')
+      .from('membership_plan_definitions' as any)
       .select('*')
       .or('is_available_to_new_trainers.eq.true')
       .order('monthly_price_cents', { ascending: false });
@@ -29,13 +29,13 @@ export const useTrainerMembershipPlans = (trainerId?: string) => {
       return;
     }
     
-    setAvailablePlans((data || []) as MembershipPlanDefinition[]);
+    setAvailablePlans((data || []) as unknown as MembershipPlanDefinition[]);
   };
 
   const fetchCurrentPlan = async (userId: string) => {
     // Get trainer's current membership with plan details
     const { data: membershipData, error: membershipError } = await supabase
-      .from('trainer_membership')
+      .from('trainer_membership' as any)
       .select(`
         id,
         plan_definition_id,
@@ -54,15 +54,15 @@ export const useTrainerMembershipPlans = (trainerId?: string) => {
       return;
     }
     
-    if (membershipData && membershipData.membership_plan_definitions) {
-      const planDef = membershipData.membership_plan_definitions as any;
+    if (membershipData && (membershipData as any).membership_plan_definitions) {
+      const planDef = (membershipData as any).membership_plan_definitions;
       setCurrentPlan({
         ...planDef,
-        membership_id: membershipData.id,
-        is_active: membershipData.is_active,
-        renewal_date: membershipData.renewal_date,
-        stripe_subscription_id: membershipData.stripe_subscription_id,
-        stripe_customer_id: membershipData.stripe_customer_id
+        membership_id: (membershipData as any).id,
+        is_active: (membershipData as any).is_active,
+        renewal_date: (membershipData as any).renewal_date,
+        stripe_subscription_id: (membershipData as any).stripe_subscription_id,
+        stripe_customer_id: (membershipData as any).stripe_customer_id
       });
     }
   };
@@ -76,8 +76,8 @@ export const useTrainerMembershipPlans = (trainerId?: string) => {
     try {
       // Update the trainer_membership table with the new plan_definition_id
       const { error } = await supabase
-        .from('trainer_membership')
-        .update({ 
+        .from('trainer_membership' as any)
+        .update({
           plan_definition_id: planDefinitionId,
           updated_at: new Date().toISOString()
         })
