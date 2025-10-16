@@ -254,14 +254,33 @@ export function usePaymentStatements() {
     if (!targetId) return null;
 
     try {
-      const { data, error } = await supabase
-        .from('trainer_membership_settings')
-        .select('*')
+      // Fetch trainer's current membership with plan details
+      const { data: membershipData, error: membershipError } = await supabase
+        .from('trainer_membership')
+        .select(`
+          *,
+          membership_plan_definitions (*)
+        `)
         .eq('trainer_id', targetId)
+        .eq('is_active', true)
         .single();
 
-      if (error && error.code !== 'PGRST116') throw error;
-      return data as MembershipSettings | null;
+      if (membershipError && membershipError.code !== 'PGRST116') throw membershipError;
+      if (!membershipData || !membershipData.membership_plan_definitions) return null;
+
+      const planDef = membershipData.membership_plan_definitions as any;
+
+      return {
+        planType: planDef.plan_type as MembershipPlanType,
+        monthlyPriceCents: planDef.monthly_price_cents || 0,
+        onboardingFeeType: planDef.has_package_commission 
+          ? planDef.commission_fee_type as 'percentage' | 'fixed'
+          : undefined,
+        onboardingFeePercent: planDef.commission_fee_value_percent || undefined,
+        onboardingFeeFixed: planDef.commission_fee_value_flat_cents
+          ? { currency: 'GBP', amount: planDef.commission_fee_value_flat_cents }
+          : undefined
+      };
     } catch (error) {
       console.error('Error fetching membership settings:', error);
       return null;

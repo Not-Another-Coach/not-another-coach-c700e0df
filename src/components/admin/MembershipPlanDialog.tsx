@@ -1,0 +1,288 @@
+import { useState, useEffect } from 'react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { MembershipPlanDefinition, CreateMembershipPlanRequest, UpdateMembershipPlanRequest } from '@/services/admin/types';
+
+interface MembershipPlanDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  plan?: MembershipPlanDefinition;
+  onSave: (request: CreateMembershipPlanRequest | UpdateMembershipPlanRequest) => Promise<boolean>;
+}
+
+export const MembershipPlanDialog = ({ open, onOpenChange, plan, onSave }: MembershipPlanDialogProps) => {
+  const isEdit = !!plan;
+  const [loading, setLoading] = useState(false);
+  
+  const [formData, setFormData] = useState({
+    plan_name: '',
+    plan_type: 'high' as 'high' | 'low',
+    display_name: '',
+    description: '',
+    monthly_price_cents: 0,
+    has_package_commission: false,
+    commission_fee_type: 'percentage' as 'percentage' | 'flat',
+    commission_fee_value_percent: 0,
+    commission_fee_value_flat_cents: 0,
+    is_available_to_new_trainers: true,
+    stripe_product_id: '',
+    stripe_price_id: ''
+  });
+
+  useEffect(() => {
+    if (plan) {
+      setFormData({
+        plan_name: plan.plan_name,
+        plan_type: plan.plan_type,
+        display_name: plan.display_name,
+        description: plan.description || '',
+        monthly_price_cents: plan.monthly_price_cents,
+        has_package_commission: plan.has_package_commission,
+        commission_fee_type: plan.commission_fee_type || 'percentage',
+        commission_fee_value_percent: plan.commission_fee_value_percent || 0,
+        commission_fee_value_flat_cents: plan.commission_fee_value_flat_cents || 0,
+        is_available_to_new_trainers: plan.is_available_to_new_trainers,
+        stripe_product_id: plan.stripe_product_id || '',
+        stripe_price_id: plan.stripe_price_id || ''
+      });
+    } else {
+      setFormData({
+        plan_name: '',
+        plan_type: 'high',
+        display_name: '',
+        description: '',
+        monthly_price_cents: 0,
+        has_package_commission: false,
+        commission_fee_type: 'percentage',
+        commission_fee_value_percent: 0,
+        commission_fee_value_flat_cents: 0,
+        is_available_to_new_trainers: true,
+        stripe_product_id: '',
+        stripe_price_id: ''
+      });
+    }
+  }, [plan]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const request = isEdit
+      ? {
+          plan_id: plan!.id,
+          display_name: formData.display_name,
+          description: formData.description,
+          monthly_price_cents: formData.monthly_price_cents,
+          has_package_commission: formData.has_package_commission,
+          commission_fee_type: formData.has_package_commission ? formData.commission_fee_type : undefined,
+          commission_fee_value_percent: formData.has_package_commission && formData.commission_fee_type === 'percentage' 
+            ? formData.commission_fee_value_percent 
+            : undefined,
+          commission_fee_value_flat_cents: formData.has_package_commission && formData.commission_fee_type === 'flat' 
+            ? formData.commission_fee_value_flat_cents 
+            : undefined,
+          is_available_to_new_trainers: formData.is_available_to_new_trainers,
+          stripe_product_id: formData.stripe_product_id,
+          stripe_price_id: formData.stripe_price_id
+        } as UpdateMembershipPlanRequest
+      : {
+          ...formData,
+          commission_fee_type: formData.has_package_commission ? formData.commission_fee_type : undefined,
+          commission_fee_value_percent: formData.has_package_commission && formData.commission_fee_type === 'percentage' 
+            ? formData.commission_fee_value_percent 
+            : undefined,
+          commission_fee_value_flat_cents: formData.has_package_commission && formData.commission_fee_type === 'flat' 
+            ? formData.commission_fee_value_flat_cents 
+            : undefined
+        } as CreateMembershipPlanRequest;
+
+    const success = await onSave(request);
+    setLoading(false);
+    
+    if (success) {
+      onOpenChange(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{isEdit ? 'Edit Membership Plan' : 'Create Membership Plan'}</DialogTitle>
+          <DialogDescription>
+            {isEdit ? 'Update the membership plan details' : 'Create a new membership plan for trainers'}
+          </DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {!isEdit && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="plan_name">Plan Name (Internal)</Label>
+                <Input
+                  id="plan_name"
+                  value={formData.plan_name}
+                  onChange={(e) => setFormData({ ...formData, plan_name: e.target.value })}
+                  placeholder="e.g., high_subscription_v2"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="plan_type">Plan Type</Label>
+                <Select
+                  value={formData.plan_type}
+                  onValueChange={(value: 'high' | 'low') => setFormData({ ...formData, plan_type: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="high">High (No Commission)</SelectItem>
+                    <SelectItem value="low">Low (With Commission)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="display_name">Display Name</Label>
+            <Input
+              id="display_name"
+              value={formData.display_name}
+              onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
+              placeholder="e.g., High Subscription"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder="Explain what this plan offers to trainers..."
+              rows={3}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="monthly_price">Monthly Price (£)</Label>
+            <Input
+              id="monthly_price"
+              type="number"
+              step="0.01"
+              value={(formData.monthly_price_cents / 100).toFixed(2)}
+              onChange={(e) => setFormData({ ...formData, monthly_price_cents: Math.round(parseFloat(e.target.value) * 100) })}
+              required
+            />
+          </div>
+
+          <div className="flex items-center justify-between space-x-2">
+            <Label htmlFor="has_commission">Has Package Commission</Label>
+            <Switch
+              id="has_commission"
+              checked={formData.has_package_commission}
+              onCheckedChange={(checked) => setFormData({ ...formData, has_package_commission: checked })}
+            />
+          </div>
+
+          {formData.has_package_commission && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="commission_type">Commission Type</Label>
+                <Select
+                  value={formData.commission_fee_type}
+                  onValueChange={(value: 'percentage' | 'flat') => setFormData({ ...formData, commission_fee_type: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="percentage">Percentage</SelectItem>
+                    <SelectItem value="flat">Flat Amount</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {formData.commission_fee_type === 'percentage' ? (
+                <div className="space-y-2">
+                  <Label htmlFor="commission_percent">Commission Percentage (%)</Label>
+                  <Input
+                    id="commission_percent"
+                    type="number"
+                    step="0.01"
+                    value={formData.commission_fee_value_percent}
+                    onChange={(e) => setFormData({ ...formData, commission_fee_value_percent: parseFloat(e.target.value) })}
+                    required={formData.has_package_commission}
+                  />
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Label htmlFor="commission_flat">Commission Flat Amount (£)</Label>
+                  <Input
+                    id="commission_flat"
+                    type="number"
+                    step="0.01"
+                    value={(formData.commission_fee_value_flat_cents / 100).toFixed(2)}
+                    onChange={(e) => setFormData({ ...formData, commission_fee_value_flat_cents: Math.round(parseFloat(e.target.value) * 100) })}
+                    required={formData.has_package_commission}
+                  />
+                </div>
+              )}
+            </>
+          )}
+
+          <div className="flex items-center justify-between space-x-2">
+            <Label htmlFor="available">Available to New Trainers</Label>
+            <Switch
+              id="available"
+              checked={formData.is_available_to_new_trainers}
+              onCheckedChange={(checked) => setFormData({ ...formData, is_available_to_new_trainers: checked })}
+            />
+          </div>
+
+          <div className="border-t pt-4 space-y-4">
+            <h3 className="text-sm font-semibold">Stripe Integration</h3>
+            
+            <div className="space-y-2">
+              <Label htmlFor="stripe_product_id">Stripe Product ID</Label>
+              <Input
+                id="stripe_product_id"
+                value={formData.stripe_product_id}
+                onChange={(e) => setFormData({ ...formData, stripe_product_id: e.target.value })}
+                placeholder="prod_..."
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="stripe_price_id">Stripe Price ID</Label>
+              <Input
+                id="stripe_price_id"
+                value={formData.stripe_price_id}
+                onChange={(e) => setFormData({ ...formData, stripe_price_id: e.target.value })}
+                placeholder="price_..."
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-4">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? 'Saving...' : isEdit ? 'Update Plan' : 'Create Plan'}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};

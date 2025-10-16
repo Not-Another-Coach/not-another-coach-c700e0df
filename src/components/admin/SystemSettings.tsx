@@ -5,7 +5,8 @@ import { LogoManagement } from './LogoManagement';
 import { SystemVisibilityDefaults } from './visibility/SystemVisibilityDefaults';
 import { TrainerVisibilityManagement } from './visibility/TrainerVisibilityManagement';
 import { VisibilityAnalytics } from './visibility/VisibilityAnalytics';
-import { Settings, Image, Database, Users } from 'lucide-react';
+import { MembershipPlanManager } from './MembershipPlanManager';
+import { Settings, Image, Database, Users, CreditCard } from 'lucide-react';
 
 export function SystemSettings() {
   return (
@@ -16,10 +17,14 @@ export function SystemSettings() {
       </div>
 
       <Tabs defaultValue="branding" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="branding" className="flex items-center gap-2">
             <Image className="h-4 w-4" />
             Branding
+          </TabsTrigger>
+          <TabsTrigger value="membership" className="flex items-center gap-2">
+            <CreditCard className="h-4 w-4" />
+            Membership
           </TabsTrigger>
           <TabsTrigger value="general" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
@@ -35,9 +40,13 @@ export function SystemSettings() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="branding" className="space-y-6">
-          <LogoManagement />
-        </TabsContent>
+      <TabsContent value="branding" className="space-y-6">
+        <LogoManagement />
+      </TabsContent>
+
+      <TabsContent value="membership" className="space-y-6">
+        <MembershipPlanManager />
+      </TabsContent>
 
         <TabsContent value="general" className="space-y-6">
           <SystemVisibilityDefaults />

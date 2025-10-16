@@ -52,3 +52,51 @@ export interface UpdateVerificationRequest {
   adminNotes?: string;
   rejectionReason?: string;
 }
+
+export interface MembershipPlanDefinition {
+  id: string;
+  plan_name: string;
+  plan_type: 'high' | 'low';
+  display_name: string;
+  description?: string;
+  monthly_price_cents: number;
+  has_package_commission: boolean;
+  commission_fee_type?: 'percentage' | 'flat';
+  commission_fee_value_percent?: number;
+  commission_fee_value_flat_cents?: number;
+  is_available_to_new_trainers: boolean;
+  stripe_product_id?: string;
+  stripe_price_id?: string;
+  created_at: string;
+  updated_at: string;
+  created_by?: string;
+}
+
+export interface CreateMembershipPlanRequest {
+  plan_name: string;
+  plan_type: 'high' | 'low';
+  display_name: string;
+  description?: string;
+  monthly_price_cents: number;
+  has_package_commission: boolean;
+  commission_fee_type?: 'percentage' | 'flat';
+  commission_fee_value_percent?: number;
+  commission_fee_value_flat_cents?: number;
+  is_available_to_new_trainers?: boolean;
+  stripe_product_id?: string;
+  stripe_price_id?: string;
+}
+
+export interface UpdateMembershipPlanRequest {
+  plan_id: string;
+  display_name?: string;
+  description?: string;
+  monthly_price_cents?: number;
+  has_package_commission?: boolean;
+  commission_fee_type?: 'percentage' | 'flat';
+  commission_fee_value_percent?: number;
+  commission_fee_value_flat_cents?: number;
+  is_available_to_new_trainers?: boolean;
+  stripe_product_id?: string;
+  stripe_price_id?: string;
+}

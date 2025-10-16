@@ -156,6 +156,114 @@ class AdminServiceClass extends BaseService {
       return { success: false, error: { code: 'ERROR', message: String(error) } };
     }
   }
+
+  /**
+   * Get all membership plan definitions
+   */
+  async getMembershipPlans(): Promise<ServiceResponse<any[]>> {
+    return BaseService.executeListQuery(async () => {
+      return await supabase
+        .from('membership_plan_definitions')
+        .select('*')
+        .order('monthly_price_cents', { ascending: false });
+    });
+  }
+
+  /**
+   * Create a new membership plan
+   */
+  async createMembershipPlan(request: any): Promise<ServiceResponse<string>> {
+    try {
+      const { data, error } = await supabase.rpc('admin_create_membership_plan', {
+        p_plan_name: request.plan_name,
+        p_plan_type: request.plan_type,
+        p_display_name: request.display_name,
+        p_description: request.description || null,
+        p_monthly_price_cents: request.monthly_price_cents,
+        p_has_package_commission: request.has_package_commission,
+        p_commission_fee_type: request.commission_fee_type || null,
+        p_commission_fee_value_percent: request.commission_fee_value_percent || null,
+        p_commission_fee_value_flat_cents: request.commission_fee_value_flat_cents || null,
+        p_is_available_to_new_trainers: request.is_available_to_new_trainers ?? true,
+        p_stripe_product_id: request.stripe_product_id || null,
+        p_stripe_price_id: request.stripe_price_id || null
+      });
+      
+      if (error) throw error;
+      return { success: true, data: data as string };
+    } catch (error) {
+      return { success: false, error: { code: 'ERROR', message: String(error) } };
+    }
+  }
+
+  /**
+   * Update an existing membership plan
+   */
+  async updateMembershipPlan(request: any): Promise<ServiceResponse<void>> {
+    try {
+      const { error } = await supabase.rpc('admin_update_membership_plan', {
+        p_plan_id: request.plan_id,
+        p_display_name: request.display_name || null,
+        p_description: request.description || null,
+        p_monthly_price_cents: request.monthly_price_cents || null,
+        p_has_package_commission: request.has_package_commission ?? null,
+        p_commission_fee_type: request.commission_fee_type || null,
+        p_commission_fee_value_percent: request.commission_fee_value_percent || null,
+        p_commission_fee_value_flat_cents: request.commission_fee_value_flat_cents || null,
+        p_is_available_to_new_trainers: request.is_available_to_new_trainers ?? null,
+        p_stripe_product_id: request.stripe_product_id || null,
+        p_stripe_price_id: request.stripe_price_id || null
+      });
+      
+      if (error) throw error;
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: { code: 'ERROR', message: String(error) } };
+    }
+  }
+
+  /**
+   * Archive a membership plan
+   */
+  async archiveMembershipPlan(planId: string): Promise<ServiceResponse<void>> {
+    try {
+      const { error } = await supabase.rpc('admin_archive_membership_plan', {
+        p_plan_id: planId
+      });
+      
+      if (error) throw error;
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: { code: 'ERROR', message: String(error) } };
+    }
+  }
+
+  /**
+   * Get membership plan statistics
+   */
+  async getMembershipPlanStats(): Promise<ServiceResponse<Record<string, number>>> {
+    try {
+      const { data, error } = await supabase
+        .from('trainer_membership')
+        .select('plan_definition_id')
+        .eq('is_active', true);
+      
+      if (error) throw error;
+      
+      // Count trainers per plan
+      const stats: Record<string, number> = {};
+      data?.forEach(membership => {
+        const planId = membership.plan_definition_id;
+        if (planId) {
+          stats[planId] = (stats[planId] || 0) + 1;
+        }
+      });
+      
+      return { success: true, data: stats };
+    } catch (error) {
+      return { success: false, error: { code: 'ERROR', message: String(error) } };
+    }
+  }
 }
 
 export const AdminService = new AdminServiceClass();
