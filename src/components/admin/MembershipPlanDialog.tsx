@@ -76,29 +76,32 @@ export const MembershipPlanDialog = ({ open, onOpenChange, plan, onSave }: Membe
       ? {
           plan_id: plan!.id,
           display_name: formData.display_name,
-          description: formData.description,
+          description: formData.description || null,
           monthly_price_cents: formData.monthly_price_cents,
           has_package_commission: formData.has_package_commission,
-          commission_fee_type: formData.has_package_commission ? formData.commission_fee_type : undefined,
+          commission_fee_type: formData.has_package_commission ? formData.commission_fee_type : null,
           commission_fee_value_percent: formData.has_package_commission && formData.commission_fee_type === 'percentage' 
             ? formData.commission_fee_value_percent 
-            : undefined,
+            : null,
           commission_fee_value_flat_cents: formData.has_package_commission && formData.commission_fee_type === 'flat' 
             ? formData.commission_fee_value_flat_cents 
-            : undefined,
+            : null,
           is_available_to_new_trainers: formData.is_available_to_new_trainers,
-          stripe_product_id: formData.stripe_product_id,
-          stripe_price_id: formData.stripe_price_id
+          stripe_product_id: formData.stripe_product_id || null,
+          stripe_price_id: formData.stripe_price_id || null
         } as UpdateMembershipPlanRequest
       : {
           ...formData,
-          commission_fee_type: formData.has_package_commission ? formData.commission_fee_type : undefined,
+          description: formData.description || null,
+          commission_fee_type: formData.has_package_commission ? formData.commission_fee_type : null,
           commission_fee_value_percent: formData.has_package_commission && formData.commission_fee_type === 'percentage' 
             ? formData.commission_fee_value_percent 
-            : undefined,
+            : null,
           commission_fee_value_flat_cents: formData.has_package_commission && formData.commission_fee_type === 'flat' 
             ? formData.commission_fee_value_flat_cents 
-            : undefined
+            : null,
+          stripe_product_id: formData.stripe_product_id || null,
+          stripe_price_id: formData.stripe_price_id || null
         } as CreateMembershipPlanRequest;
 
     const success = await onSave(request);
@@ -137,7 +140,13 @@ export const MembershipPlanDialog = ({ open, onOpenChange, plan, onSave }: Membe
                 <Label htmlFor="plan_type">Plan Type</Label>
                 <Select
                   value={formData.plan_type}
-                  onValueChange={(value: 'high' | 'low') => setFormData({ ...formData, plan_type: value })}
+                  onValueChange={(value: 'high' | 'low') => {
+                    setFormData({ 
+                      ...formData, 
+                      plan_type: value,
+                      has_package_commission: value === 'low'
+                    });
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -177,10 +186,18 @@ export const MembershipPlanDialog = ({ open, onOpenChange, plan, onSave }: Membe
             <Label htmlFor="monthly_price">Monthly Price (£)</Label>
             <Input
               id="monthly_price"
-              type="number"
-              step="0.01"
+              type="text"
+              inputMode="decimal"
+              pattern="[0-9]*\.?[0-9]*"
               value={(formData.monthly_price_cents / 100).toFixed(2)}
-              onChange={(e) => setFormData({ ...formData, monthly_price_cents: Math.round(parseFloat(e.target.value) * 100) })}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
+                  const cents = value === '' ? 0 : Math.round(parseFloat(value || '0') * 100);
+                  setFormData({ ...formData, monthly_price_cents: cents });
+                }
+              }}
+              placeholder="0.00"
               required
             />
           </div>
@@ -191,6 +208,7 @@ export const MembershipPlanDialog = ({ open, onOpenChange, plan, onSave }: Membe
               id="has_commission"
               checked={formData.has_package_commission}
               onCheckedChange={(checked) => setFormData({ ...formData, has_package_commission: checked })}
+              disabled={!isEdit && formData.plan_type === 'low'}
             />
           </div>
 
@@ -217,10 +235,16 @@ export const MembershipPlanDialog = ({ open, onOpenChange, plan, onSave }: Membe
                   <Label htmlFor="commission_percent">Commission Percentage (%)</Label>
                   <Input
                     id="commission_percent"
-                    type="number"
-                    step="0.01"
+                    type="text"
+                    inputMode="decimal"
                     value={formData.commission_fee_value_percent}
-                    onChange={(e) => setFormData({ ...formData, commission_fee_value_percent: parseFloat(e.target.value) })}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
+                        setFormData({ ...formData, commission_fee_value_percent: parseFloat(value || '0') });
+                      }
+                    }}
+                    placeholder="0.00"
                     required={formData.has_package_commission}
                   />
                 </div>
@@ -229,10 +253,17 @@ export const MembershipPlanDialog = ({ open, onOpenChange, plan, onSave }: Membe
                   <Label htmlFor="commission_flat">Commission Flat Amount (£)</Label>
                   <Input
                     id="commission_flat"
-                    type="number"
-                    step="0.01"
+                    type="text"
+                    inputMode="decimal"
                     value={(formData.commission_fee_value_flat_cents / 100).toFixed(2)}
-                    onChange={(e) => setFormData({ ...formData, commission_fee_value_flat_cents: Math.round(parseFloat(e.target.value) * 100) })}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
+                        const cents = value === '' ? 0 : Math.round(parseFloat(value || '0') * 100);
+                        setFormData({ ...formData, commission_fee_value_flat_cents: cents });
+                      }
+                    }}
+                    placeholder="0.00"
                     required={formData.has_package_commission}
                   />
                 </div>
