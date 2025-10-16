@@ -2777,6 +2777,63 @@ export type Database = {
           },
         ]
       }
+      membership_plan_definitions: {
+        Row: {
+          commission_fee_type: string | null
+          commission_fee_value_flat_cents: number | null
+          commission_fee_value_percent: number | null
+          created_at: string
+          description: string | null
+          display_name: string
+          has_package_commission: boolean
+          id: string
+          is_active: boolean
+          is_available_to_new_trainers: boolean
+          monthly_price_cents: number
+          plan_name: string
+          plan_type: string
+          stripe_price_id: string | null
+          stripe_product_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          commission_fee_type?: string | null
+          commission_fee_value_flat_cents?: number | null
+          commission_fee_value_percent?: number | null
+          created_at?: string
+          description?: string | null
+          display_name: string
+          has_package_commission?: boolean
+          id?: string
+          is_active?: boolean
+          is_available_to_new_trainers?: boolean
+          monthly_price_cents: number
+          plan_name: string
+          plan_type: string
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          commission_fee_type?: string | null
+          commission_fee_value_flat_cents?: number | null
+          commission_fee_value_percent?: number | null
+          created_at?: string
+          description?: string | null
+          display_name?: string
+          has_package_commission?: boolean
+          id?: string
+          is_active?: boolean
+          is_available_to_new_trainers?: boolean
+          monthly_price_cents?: number
+          plan_name?: string
+          plan_type?: string
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       message_publish_ledger: {
         Row: {
           consent_snapshot: Json
