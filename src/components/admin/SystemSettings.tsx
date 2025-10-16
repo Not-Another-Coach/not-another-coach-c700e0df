@@ -6,6 +6,7 @@ import { SystemVisibilityDefaults } from './visibility/SystemVisibilityDefaults'
 import { TrainerVisibilityManagement } from './visibility/TrainerVisibilityManagement';
 import { VisibilityAnalytics } from './visibility/VisibilityAnalytics';
 import { MembershipPlanManager } from './MembershipPlanManager';
+import { TrainerMembershipAssignment } from './TrainerMembershipAssignment';
 import { Settings, Image, Database, Users, CreditCard } from 'lucide-react';
 
 export function SystemSettings() {
@@ -17,14 +18,18 @@ export function SystemSettings() {
       </div>
 
       <Tabs defaultValue="branding" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="branding" className="flex items-center gap-2">
             <Image className="h-4 w-4" />
             Branding
           </TabsTrigger>
           <TabsTrigger value="membership" className="flex items-center gap-2">
             <CreditCard className="h-4 w-4" />
-            Membership
+            Plan Definitions
+          </TabsTrigger>
+          <TabsTrigger value="assignments" className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            Trainer Plans
           </TabsTrigger>
           <TabsTrigger value="general" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
@@ -36,7 +41,7 @@ export function SystemSettings() {
           </TabsTrigger>
           <TabsTrigger value="users" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
-            Users
+            User Management
           </TabsTrigger>
         </TabsList>
 
@@ -46,6 +51,10 @@ export function SystemSettings() {
 
       <TabsContent value="membership" className="space-y-6">
         <MembershipPlanManager />
+      </TabsContent>
+
+      <TabsContent value="assignments" className="space-y-6">
+        <TrainerMembershipAssignment />
       </TabsContent>
 
         <TabsContent value="general" className="space-y-6">
