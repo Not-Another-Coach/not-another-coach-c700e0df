@@ -411,12 +411,197 @@ const handler = async (req: Request): Promise<Response> => {
       async (eventPayload: any, eventId: string) => {
         console.log(`Processing event ${eventId}:`, eventPayload);
         
-        // Add your event-specific processing logic here
-        // This is where you would handle different event types
-        // For example:
-        // - Payment events: Update order status, send confirmation emails
-        // - Email events: Update delivery status, handle bounces
-        // - SMS events: Update message status, handle failures
+        const supabase = createClient(supabaseUrl, supabaseServiceKey);
+        
+        // Stripe-specific event processing
+        if (providerName.toLowerCase() === 'stripe') {
+          switch (eventType) {
+            case 'checkout.session.completed': {
+              const session = eventPayload.data.object;
+              const metadata = session.metadata;
+              
+              if (metadata.payment_type === 'coach_selection') {
+                // Create customer payment record
+                const { error: paymentError } = await supabase
+                  .from('customer_payments')
+                  .insert({
+                    package_id: metadata.package_id,
+                    amount_value: session.amount_total / 100,
+                    amount_currency: session.currency.toUpperCase(),
+                    payment_method: 'card',
+                    status: 'succeeded',
+                    paid_at: new Date().toISOString(),
+                    stripe_payment_intent_id: session.payment_intent,
+                    metadata: {
+                      stripe_session_id: session.id,
+                      payment_mode: metadata.payment_mode,
+                      stripe_subscription_id: session.subscription,
+                    }
+                  });
+
+                if (paymentError) console.error('Payment insert error:', paymentError);
+
+                // Update coach selection request status
+                const { error: requestError } = await supabase
+                  .from('coach_selection_requests')
+                  .update({ 
+                    status: 'payment_completed',
+                    responded_at: new Date().toISOString() 
+                  })
+                  .eq('package_id', metadata.package_id)
+                  .eq('client_id', metadata.user_id);
+
+                if (requestError) console.error('Request update error:', requestError);
+
+                // Update engagement stage to active_client
+                const { error: engagementError } = await supabase
+                  .from('client_trainer_engagement')
+                  .update({ 
+                    stage: 'active_client',
+                    became_client_at: new Date().toISOString()
+                  })
+                  .eq('client_id', metadata.user_id)
+                  .eq('trainer_id', metadata.trainer_id);
+
+                if (engagementError) console.error('Engagement update error:', engagementError);
+
+                console.log('Coach selection payment processed:', metadata.package_id);
+              } else if (metadata.payment_type === 'trainer_membership') {
+                // Will be handled by subscription.created event
+                console.log('Membership checkout completed, awaiting subscription creation');
+              }
+              break;
+            }
+
+            case 'customer.subscription.created': {
+              const subscription = eventPayload.data.object;
+              const metadata = subscription.metadata;
+
+              if (metadata.plan_type) {
+                // Create trainer membership record
+                const { error: membershipError } = await supabase
+                  .from('trainer_membership')
+                  .upsert({
+                    trainer_id: metadata.user_id,
+                    plan_type: metadata.plan_type,
+                    status: 'active',
+                    stripe_subscription_id: subscription.id,
+                    stripe_customer_id: subscription.customer,
+                    current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
+                    current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+                    is_active: true,
+                  }, {
+                    onConflict: 'trainer_id'
+                  });
+
+                if (membershipError) console.error('Membership insert error:', membershipError);
+                console.log('Trainer membership created:', metadata.user_id);
+              }
+              break;
+            }
+
+            case 'customer.subscription.updated': {
+              const subscription = eventPayload.data.object;
+
+              // Update membership status
+              const { error: updateError } = await supabase
+                .from('trainer_membership')
+                .update({
+                  status: subscription.status,
+                  current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
+                  current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+                  is_active: subscription.status === 'active',
+                })
+                .eq('stripe_subscription_id', subscription.id);
+
+              if (updateError) console.error('Membership update error:', updateError);
+              console.log('Trainer membership updated:', subscription.id);
+              break;
+            }
+
+            case 'customer.subscription.deleted': {
+              const subscription = eventPayload.data.object;
+
+              // Mark membership as cancelled
+              const { error: deleteError } = await supabase
+                .from('trainer_membership')
+                .update({
+                  status: 'cancelled',
+                  is_active: false,
+                  cancelled_at: new Date().toISOString(),
+                })
+                .eq('stripe_subscription_id', subscription.id);
+
+              if (deleteError) console.error('Membership cancellation error:', deleteError);
+              console.log('Trainer membership cancelled:', subscription.id);
+              break;
+            }
+
+            case 'invoice.payment_succeeded': {
+              const invoice = eventPayload.data.object;
+
+              // Create/update billing invoice
+              const { error: invoiceError } = await supabase
+                .from('billing_invoice')
+                .upsert({
+                  stripe_invoice_id: invoice.id,
+                  trainer_id: invoice.metadata?.trainer_id,
+                  amount_cents: invoice.amount_paid,
+                  currency: invoice.currency.toUpperCase(),
+                  status: 'paid',
+                  invoice_type: invoice.subscription ? 'subscription' : 'one_off',
+                  period_start: invoice.period_start ? new Date(invoice.period_start * 1000).toISOString().split('T')[0] : null,
+                  period_end: invoice.period_end ? new Date(invoice.period_end * 1000).toISOString().split('T')[0] : null,
+                  download_url: invoice.invoice_pdf,
+                  paid_at: new Date(invoice.status_transitions.paid_at * 1000).toISOString(),
+                }, {
+                  onConflict: 'stripe_invoice_id'
+                });
+
+              if (invoiceError) console.error('Invoice insert error:', invoiceError);
+              console.log('Invoice payment succeeded:', invoice.id);
+              break;
+            }
+
+            case 'invoice.payment_failed': {
+              const invoice = eventPayload.data.object;
+
+              // Update invoice status
+              const { error: invoiceError } = await supabase
+                .from('billing_invoice')
+                .update({
+                  status: 'failed',
+                })
+                .eq('stripe_invoice_id', invoice.id);
+
+              if (invoiceError) console.error('Invoice update error:', invoiceError);
+
+              // Create alert for trainer
+              const { error: alertError } = await supabase
+                .from('alerts')
+                .insert({
+                  alert_type: 'payment_failed',
+                  title: 'Payment Failed',
+                  content: `Your payment of ${invoice.currency.toUpperCase()} ${(invoice.amount_due / 100).toFixed(2)} failed. Please update your payment method.`,
+                  target_audience: { trainers: [invoice.metadata?.trainer_id] },
+                  metadata: {
+                    invoice_id: invoice.id,
+                    amount: invoice.amount_due,
+                    currency: invoice.currency,
+                  },
+                  is_active: true,
+                  priority: 3,
+                });
+
+              if (alertError) console.error('Alert creation error:', alertError);
+              console.log('Invoice payment failed, alert created:', invoice.id);
+              break;
+            }
+
+            default:
+              console.log('Unhandled Stripe event type:', eventType);
+          }
+        }
         
         return {
           processed_at: new Date().toISOString(),

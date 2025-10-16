@@ -13,6 +13,7 @@ import {
   type PackagePaymentCalculation 
 } from "@/lib/packagePaymentUtils";
 import { useManualPayment, type PaymentRecord } from "@/hooks/useManualPayment";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PackagePaymentSelectorProps {
   package: {
@@ -42,8 +43,28 @@ export function PackagePaymentSelector({
 
   const handlePayment = async () => {
     try {
-      const paymentRecord = await processPayment(pkg, selectedMode);
-      onPaymentSelection(paymentRecord);
+      // Create Stripe checkout session
+      const currentUrl = window.location.origin;
+      const successUrl = `${currentUrl}/payment-success?package_id=${pkg.id}`;
+      const cancelUrl = `${currentUrl}/payment-cancelled`;
+
+      const { data, error } = await supabase.functions.invoke('create-checkout-session', {
+        body: {
+          payment_type: 'coach_selection',
+          package_id: pkg.id,
+          success_url: successUrl,
+          cancel_url: cancelUrl,
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.url) {
+        // Redirect to Stripe Checkout
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL received');
+      }
     } catch (error) {
       console.error('Payment failed:', error);
     }

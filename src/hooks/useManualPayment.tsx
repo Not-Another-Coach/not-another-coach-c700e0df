@@ -33,7 +33,9 @@ export function useManualPayment() {
       customerPaymentModes?: ('upfront' | 'installments')[];
       installmentCount?: number;
     },
-    selectedMode: 'upfront' | 'installments'
+    selectedMode: 'upfront' | 'installments',
+    successUrl?: string,
+    cancelUrl?: string
   ): Promise<PaymentRecord> => {
     setProcessing(true);
     
@@ -41,40 +43,34 @@ export function useManualPayment() {
       const calculation = calculatePackagePaymentOptions(pkg);
       const initialAmount = calculateInitialPayment(calculation, selectedMode);
       
-      // Simulate payment processing delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      // Redirect to Stripe Checkout - return a placeholder record
+      // The actual payment will be processed via webhook
       const paymentRecord: PaymentRecord = {
-        id: `payment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: `pending_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         packageId: pkg.id,
         packageName: pkg.name,
         paymentType: selectedMode === 'upfront' ? 'one-off' : 'subscription',
         paymentMode: selectedMode,
         totalAmount: pkg.price,
-        paidAmount: initialAmount,
-        remainingAmount: selectedMode === 'upfront' ? 0 : pkg.price - initialAmount,
+        paidAmount: 0, // Will be updated after webhook
+        remainingAmount: pkg.price,
         currency: pkg.currency,
         installmentCount: selectedMode === 'installments' ? pkg.installmentCount : undefined,
         installmentAmount: selectedMode === 'installments' ? initialAmount : undefined,
-        paidInstallments: selectedMode === 'installments' ? 1 : 0,
-        status: selectedMode === 'upfront' ? 'completed' : 'active',
+        paidInstallments: 0,
+        status: 'pending',
         createdAt: new Date(),
         nextPaymentDate: selectedMode === 'installments' && pkg.installmentCount && pkg.installmentCount > 1 
-          ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
+          ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
           : undefined,
       };
       
       setPaymentHistory(prev => [...prev, paymentRecord]);
       
-      toast.success(
-        selectedMode === 'upfront' 
-          ? "Payment completed successfully!" 
-          : `First installment processed! Next payment due: ${paymentRecord.nextPaymentDate?.toLocaleDateString()}`
-      );
-      
+      // This will be handled by the calling component to redirect to Stripe
       return paymentRecord;
     } catch (error) {
-      toast.error("Payment processing failed. Please try again.");
+      toast.error("Payment setup failed. Please try again.");
       throw error;
     } finally {
       setProcessing(false);
