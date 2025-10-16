@@ -184,22 +184,26 @@ export const MembershipPlanDialog = ({ open, onOpenChange, plan, onSave }: Membe
 
           <div className="space-y-2">
             <Label htmlFor="monthly_price">Monthly Price (£)</Label>
-            <Input
-              id="monthly_price"
-              type="text"
-              inputMode="decimal"
-              pattern="[0-9]*\.?[0-9]*"
-              value={(formData.monthly_price_cents / 100).toFixed(2)}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
-                  const cents = value === '' ? 0 : Math.round(parseFloat(value || '0') * 100);
-                  setFormData({ ...formData, monthly_price_cents: cents });
-                }
-              }}
-              placeholder="0.00"
-              required
-            />
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">£</span>
+              <Input
+                id="monthly_price"
+                type="text"
+                inputMode="decimal"
+                className="pl-7"
+                value={(formData.monthly_price_cents / 100).toFixed(2)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
+                    const cents = value === '' ? 0 : Math.round(parseFloat(value || '0') * 100);
+                    setFormData({ ...formData, monthly_price_cents: cents });
+                  }
+                }}
+                placeholder="0.00"
+                required
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">Enter amount in pounds (e.g., 49.99)</p>
           </div>
 
           <div className="flex items-center justify-between space-x-2">
@@ -233,39 +237,49 @@ export const MembershipPlanDialog = ({ open, onOpenChange, plan, onSave }: Membe
               {formData.commission_fee_type === 'percentage' ? (
                 <div className="space-y-2">
                   <Label htmlFor="commission_percent">Commission Percentage (%)</Label>
-                  <Input
-                    id="commission_percent"
-                    type="text"
-                    inputMode="decimal"
-                    value={formData.commission_fee_value_percent}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
-                        setFormData({ ...formData, commission_fee_value_percent: parseFloat(value || '0') });
-                      }
-                    }}
-                    placeholder="0.00"
-                    required={formData.has_package_commission}
-                  />
+                  <div className="relative">
+                    <Input
+                      id="commission_percent"
+                      type="text"
+                      inputMode="decimal"
+                      className="pr-7"
+                      value={formData.commission_fee_value_percent}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
+                          setFormData({ ...formData, commission_fee_value_percent: parseFloat(value || '0') });
+                        }
+                      }}
+                      placeholder="0.00"
+                      required={formData.has_package_commission}
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">%</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Enter percentage (e.g., 10 for 10%)</p>
                 </div>
               ) : (
                 <div className="space-y-2">
                   <Label htmlFor="commission_flat">Commission Flat Amount (£)</Label>
-                  <Input
-                    id="commission_flat"
-                    type="text"
-                    inputMode="decimal"
-                    value={(formData.commission_fee_value_flat_cents / 100).toFixed(2)}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
-                        const cents = value === '' ? 0 : Math.round(parseFloat(value || '0') * 100);
-                        setFormData({ ...formData, commission_fee_value_flat_cents: cents });
-                      }
-                    }}
-                    placeholder="0.00"
-                    required={formData.has_package_commission}
-                  />
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">£</span>
+                    <Input
+                      id="commission_flat"
+                      type="text"
+                      inputMode="decimal"
+                      className="pl-7"
+                      value={(formData.commission_fee_value_flat_cents / 100).toFixed(2)}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
+                          const cents = value === '' ? 0 : Math.round(parseFloat(value || '0') * 100);
+                          setFormData({ ...formData, commission_fee_value_flat_cents: cents });
+                        }
+                      }}
+                      placeholder="0.00"
+                      required={formData.has_package_commission}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">Enter amount in pounds (e.g., 5.00)</p>
                 </div>
               )}
             </>

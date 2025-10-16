@@ -191,8 +191,10 @@ class AdminServiceClass extends BaseService {
       
       if (error) throw error;
       return { success: true, data: data as string };
-    } catch (error) {
-      return { success: false, error: { code: 'ERROR', message: String(error) } };
+    } catch (error: any) {
+      const errorMessage = error?.message || error?.hint || JSON.stringify(error);
+      console.error('Error creating membership plan:', error);
+      return { success: false, error: { code: 'ERROR', message: errorMessage } };
     }
   }
 
@@ -217,8 +219,10 @@ class AdminServiceClass extends BaseService {
       
       if (error) throw error;
       return { success: true };
-    } catch (error) {
-      return { success: false, error: { code: 'ERROR', message: String(error) } };
+    } catch (error: any) {
+      const errorMessage = error?.message || error?.hint || JSON.stringify(error);
+      console.error('Error updating membership plan:', error);
+      return { success: false, error: { code: 'ERROR', message: errorMessage } };
     }
   }
 
@@ -233,8 +237,10 @@ class AdminServiceClass extends BaseService {
       
       if (error) throw error;
       return { success: true };
-    } catch (error) {
-      return { success: false, error: { code: 'ERROR', message: String(error) } };
+    } catch (error: any) {
+      const errorMessage = error?.message || error?.hint || JSON.stringify(error);
+      console.error('Error archiving membership plan:', error);
+      return { success: false, error: { code: 'ERROR', message: errorMessage } };
     }
   }
 
