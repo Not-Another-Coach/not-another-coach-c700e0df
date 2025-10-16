@@ -32,9 +32,9 @@ const TrainerSettings = () => {
       <div className="p-6 max-w-4xl mx-auto space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Membership Settings</CardTitle>
+            <CardTitle>Membership Plan</CardTitle>
             <CardDescription>
-              Configure your membership plan and commission structure.
+              View your current membership plan and commission structure.
             </CardDescription>
           </CardHeader>
           <CardContent>
