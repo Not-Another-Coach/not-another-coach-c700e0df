@@ -141,7 +141,7 @@ export type Database = {
           created_at: string
           id: string
           reason: string | null
-          target_user_id: string
+          target_user_id: string | null
         }
         Insert: {
           action_details?: Json | null
@@ -150,7 +150,7 @@ export type Database = {
           created_at?: string
           id?: string
           reason?: string | null
-          target_user_id: string
+          target_user_id?: string | null
         }
         Update: {
           action_details?: Json | null
@@ -159,7 +159,7 @@ export type Database = {
           created_at?: string
           id?: string
           reason?: string | null
-          target_user_id?: string
+          target_user_id?: string | null
         }
         Relationships: [
           {
