@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import { InstagramIntegration } from "@/components/instagram/InstagramIntegration";
+import { MembershipSettings } from "@/components/payment-statements/MembershipSettings";
 
 const TrainerSettings = () => {
   const { user } = useAuth();
@@ -29,6 +30,18 @@ const TrainerSettings = () => {
 
       {/* Content */}
       <div className="p-6 max-w-4xl mx-auto space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Membership Settings</CardTitle>
+            <CardDescription>
+              Configure your membership plan and commission structure.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <MembershipSettings />
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Instagram Integration</CardTitle>
