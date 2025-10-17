@@ -45,22 +45,33 @@ export class MembershipAssignmentService {
         .eq('user_type', 'trainer')
         .order('first_name');
 
-      if (profilesError) throw profilesError;
+      if (profilesError) {
+        console.error('Profile fetch error:', profilesError);
+        throw profilesError;
+      }
 
       // Fetch active plan definitions to map plan_type -> human plan_name
       const { data: planDefs, error: defsError } = await supabase
         .from('membership_plan_definitions')
         .select('plan_type, plan_name, is_active');
-      if (defsError) throw defsError;
+      
+      if (defsError) {
+        console.error('Plan definitions fetch error:', defsError);
+        throw defsError;
+      }
       const planNameByType = new Map<string, string>(
         (planDefs || [])
           .filter((p: any) => p.is_active !== false)
           .map((p: any) => [p.plan_type, p.plan_name])
       );
 
-      // Get emails from edge function
+      // Get emails from edge function (continue even if it fails)
       const { data: emailsData, error: emailsError } = await supabase.functions.invoke('get-user-emails');
-      if (emailsError) throw emailsError;
+      
+      if (emailsError) {
+        console.error('Email fetch error (non-critical):', emailsError);
+        // Don't throw - continue with "No email" for all trainers
+      }
 
       const emailMap = new Map<string, string>();
       const usersArray = Array.isArray(emailsData?.users) ? emailsData.users : Array.isArray(emailsData) ? emailsData : [];

@@ -50,11 +50,14 @@ export function TrainerMembershipAssignment() {
 
   const loadTrainers = async () => {
     setLoading(true);
+    console.log('Loading trainers...');
     const response = await MembershipAssignmentService.getTrainersWithMemberships();
     
     if (response.success && response.data) {
+      console.log('Trainers loaded successfully:', response.data.length);
       setTrainers(response.data);
     } else {
+      console.error('Failed to load trainers:', response.error);
       toast({
         title: 'Error',
         description: typeof response.error === 'string' ? response.error : 'Failed to load trainers',
@@ -96,6 +99,8 @@ export function TrainerMembershipAssignment() {
   const handleAssignPlan = async () => {
     if (!selectedTrainer || !selectedPlanId) return;
 
+    console.log('Assigning plan:', { trainerId: selectedTrainer.trainer_id, planId: selectedPlanId });
+
     const response = await MembershipAssignmentService.assignPlan(
       selectedTrainer.trainer_id,
       selectedPlanId,
@@ -108,8 +113,10 @@ export function TrainerMembershipAssignment() {
         description: 'Membership plan assigned successfully',
       });
       setAssignDialogOpen(false);
-      loadTrainers();
+      console.log('Plan assigned, reloading trainers...');
+      await loadTrainers();
     } else {
+      console.error('Assignment failed:', response.error);
       toast({
         title: 'Error',
         description: typeof response.error === 'string' ? response.error : 'Failed to assign plan',
