@@ -27,21 +27,10 @@ export class MembershipAssignmentService {
    */
   static async getTrainersWithMemberships(): Promise<ServiceResponse<TrainerMembershipInfo[]>> {
     try {
-      // Fetch trainer profiles with their membership records (no FK to plan defs)
+      // 1) Get trainer profiles (no joins)
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
-        .select(`
-          id,
-          first_name,
-          last_name,
-          trainer_membership!left (
-            id,
-            plan_type,
-            monthly_price_cents,
-            is_active,
-            renewal_date
-          )
-        `)
+        .select('id, first_name, last_name')
         .eq('user_type', 'trainer')
         .order('first_name');
 
@@ -50,37 +39,64 @@ export class MembershipAssignmentService {
         throw profilesError;
       }
 
-      // Fetch active plan definitions to map plan_type -> human plan_name
+      const trainerIds = (profilesData || []).map((p: any) => p.id);
+
+      // 2) Get memberships for these trainers separately
+      const membershipsByTrainer = new Map<string, any>();
+      if (trainerIds.length > 0) {
+        const { data: memberships, error: membershipError } = await supabase
+          .from('trainer_membership')
+          .select('trainer_id, plan_type, monthly_price_cents, is_active, renewal_date')
+          .in('trainer_id', trainerIds);
+
+        if (membershipError) {
+          console.error('Membership fetch error (non-fatal):', membershipError);
+        } else {
+          (memberships || []).forEach((m: any) => {
+            // prefer active membership
+            const existing = membershipsByTrainer.get(m.trainer_id);
+            if (!existing || (m.is_active && !existing.is_active)) {
+              membershipsByTrainer.set(m.trainer_id, m);
+            }
+          });
+        }
+      }
+
+      // 3) Fetch active plan definitions to map plan_type -> human plan_name
       const { data: planDefs, error: defsError } = await supabase
         .from('membership_plan_definitions')
         .select('plan_type, plan_name, is_active');
-      
+
       if (defsError) {
         console.error('Plan definitions fetch error:', defsError);
         throw defsError;
       }
+
       const planNameByType = new Map<string, string>(
         (planDefs || [])
           .filter((p: any) => p.is_active !== false)
           .map((p: any) => [p.plan_type, p.plan_name])
       );
 
-      // Get emails from edge function (continue even if it fails)
+      // 4) Get emails from edge function (continue even if it fails or different shape)
       const { data: emailsData, error: emailsError } = await supabase.functions.invoke('get-user-emails');
-      
       if (emailsError) {
         console.error('Email fetch error (non-critical):', emailsError);
-        // Don't throw - continue with "No email" for all trainers
       }
 
       const emailMap = new Map<string, string>();
-      const usersArray = Array.isArray(emailsData?.users) ? emailsData.users : Array.isArray(emailsData) ? emailsData : [];
+      const usersArray = Array.isArray((emailsData as any)?.users)
+        ? (emailsData as any).users
+        : Array.isArray(emailsData)
+        ? (emailsData as any)
+        : [];
       usersArray.forEach((user: any) => {
         if (user?.id && user?.email) emailMap.set(user.id, user.email);
       });
 
+      // 5) Compose final trainers list
       const trainers: TrainerMembershipInfo[] = (profilesData || []).map((trainer: any) => {
-        const activeMembership = trainer.trainer_membership?.find((m: any) => m.is_active);
+        const activeMembership = membershipsByTrainer.get(trainer.id);
         const planType = activeMembership?.plan_type as string | undefined;
 
         return {
