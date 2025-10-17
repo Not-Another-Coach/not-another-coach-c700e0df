@@ -7118,7 +7118,7 @@ export type Database = {
         Returns: Database["public"]["Enums"]["visibility_state"]
       }
       get_trainer_available_plans: {
-        Args: { p_trainer_id?: string }
+        Args: { p_trainer_id: string }
         Returns: {
           blocked_reason: string
           can_switch_to: boolean
