@@ -55,7 +55,26 @@ export function useRealTrainers(refreshTrigger?: number, includeOwnUnpublished?:
           return;
         }
 
-        const realTrainers: Trainer[] = data?.map((trainer, index) => {
+        // Filter out trainers in limited mode
+        let filteredData = data || [];
+        if (data && data.length > 0) {
+          const trainerIds = data.map(t => t.id);
+          const { data: memberships } = await supabase
+            .from('trainer_membership')
+            .select('trainer_id, payment_status')
+            .in('trainer_id', trainerIds)
+            .eq('is_active', true);
+
+          const limitedModeIds = new Set(
+            (memberships || [])
+              .filter(m => m.payment_status === 'limited_mode')
+              .map(m => m.trainer_id)
+          );
+
+          filteredData = data.filter(t => !limitedModeIds.has(t.id));
+        }
+
+        const realTrainers: Trainer[] = filteredData?.map((trainer, index) => {
           // Debug logging for Lou specifically
           if (trainer.bio?.includes('Lou') || trainer.id === 'f5562940-ccc4-40c2-b8dd-8f8c22311003') {
             console.log(`🐛 DEBUG Raw trainer data for Lou:`, {

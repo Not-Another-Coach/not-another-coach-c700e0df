@@ -95,6 +95,25 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
           return;
         }
 
+        // Filter out trainers in limited mode
+        let filteredTrainersData = trainersData || [];
+        if (trainersData && trainersData.length > 0) {
+          const trainerIds = trainersData.map(t => t.id);
+          const { data: memberships } = await supabase
+            .from('trainer_membership')
+            .select('trainer_id, payment_status')
+            .in('trainer_id', trainerIds)
+            .eq('is_active', true);
+
+          const limitedModeIds = new Set(
+            (memberships || [])
+              .filter(m => m.payment_status === 'limited_mode')
+              .map(m => m.trainer_id)
+          );
+
+          filteredTrainersData = trainersData.filter(t => !limitedModeIds.has(t.id));
+        }
+
         // If user is authenticated, exclude trainers with existing engagement
         let excludedTrainerIds: string[] = [];
         if (user) {
@@ -110,7 +129,7 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
         }
 
         // Filter out trainers with engagement
-        const filteredTrainersData = (trainersData || []).filter(
+        filteredTrainersData = filteredTrainersData.filter(
           trainer => !excludedTrainerIds.includes(trainer.id)
         );
 

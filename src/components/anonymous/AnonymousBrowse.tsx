@@ -66,9 +66,28 @@ export const AnonymousBrowse = () => {
         .limit(12);
 
       if (error) throw error;
-      console.log('🔍 AnonymousBrowse: Fetched trainers:', data?.length || 0);
-      
-      setTrainers((data || []) as Trainer[]);
+
+      // Filter out trainers in limited mode
+      let filteredData = data || [];
+      if (data && data.length > 0) {
+        const trainerIds = data.map(t => t.id);
+        const { data: memberships } = await supabase
+          .from('trainer_membership')
+          .select('trainer_id, payment_status')
+          .in('trainer_id', trainerIds)
+          .eq('is_active', true);
+
+        const limitedModeIds = new Set(
+          (memberships || [])
+            .filter(m => m.payment_status === 'limited_mode')
+            .map(m => m.trainer_id)
+        );
+
+        filteredData = data.filter(t => !limitedModeIds.has(t.id));
+      }
+
+      console.log('🔍 AnonymousBrowse: Fetched trainers:', filteredData.length);
+      setTrainers(filteredData as Trainer[]);
     } catch (error) {
       console.error('Error fetching trainers:', error);
     } finally {

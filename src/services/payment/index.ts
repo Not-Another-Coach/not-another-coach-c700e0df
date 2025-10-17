@@ -66,7 +66,7 @@ class PaymentServiceClass extends BaseService {
   }
 
   /**
-   * Create payment package
+   * Create payment package with commission snapshot
    */
   static async createPackage(
     packageData: Record<string, any>
@@ -76,19 +76,78 @@ class PaymentServiceClass extends BaseService {
       return ServiceResponseHelper.error(userIdResponse.error!);
     }
 
+    const trainerId = packageData.trainer_id || userIdResponse.data;
+
     try {
+      // 1. Fetch current membership commission details
+      const { data: membership, error: membershipError } = await this.db
+        .from('trainer_membership')
+        .select(`
+          id,
+          plan_type,
+          membership_plan_definitions!inner(
+            id,
+            has_package_commission,
+            commission_fee_type,
+            commission_fee_value_percent,
+            commission_fee_value_flat_cents
+          )
+        `)
+        .eq('trainer_id', trainerId)
+        .eq('is_active', true)
+        .single();
+
+      if (membershipError) throw new Error('Failed to fetch membership details');
+
+      const planDef = (membership as any).membership_plan_definitions;
+
+      // 2. Check engagement stage to determine commission lock timing
+      const clientId = packageData.customer_id || packageData.client_id;
+      let engagementStage = 'getting_to_know_your_coach'; // Default
+
+      if (clientId) {
+        const { data: engagement } = await this.db
+          .from('client_trainer_engagement')
+          .select('stage')
+          .eq('trainer_id', trainerId)
+          .eq('client_id', clientId)
+          .single();
+
+        if (engagement) {
+          engagementStage = engagement.stage;
+        }
+      }
+
+      // 3. Create package with commission snapshot
+      const packageWithCommission = {
+        ...packageData,
+        applied_commission_plan_id: planDef.id,
+        applied_commission_snapshot: {
+          has_commission: planDef.has_package_commission,
+          fee_type: planDef.commission_fee_type,
+          fee_value_percent: planDef.commission_fee_value_percent,
+          fee_value_flat_cents: planDef.commission_fee_value_flat_cents
+        },
+        engagement_stage_at_lock: engagementStage,
+        commission_locked_at: new Date().toISOString()
+      };
+
       const { data, error } = await this.db
         .from('payment_packages')
         .insert([{
-          ...packageData,
+          ...packageWithCommission,
           customer_id: userIdResponse.data
         }] as any)
         .select()
         .single();
       
       if (error) throw error;
+
+      console.log('✅ Package created with commission snapshot:', data.id);
+      
       return ServiceResponseHelper.success(data);
     } catch (error) {
+      console.error('❌ Package creation failed:', error);
       return ServiceResponseHelper.error(ServiceError.fromError(error));
     }
   }
