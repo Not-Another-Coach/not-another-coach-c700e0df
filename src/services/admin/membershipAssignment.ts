@@ -27,11 +27,11 @@ export class MembershipAssignmentService {
    */
   static async getTrainersWithMemberships(): Promise<ServiceResponse<TrainerMembershipInfo[]>> {
     try {
-      const { data, error } = await supabase
+      // First, get trainer profiles with membership data
+      const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select(`
           id,
-          email,
           first_name,
           last_name,
           trainer_membership!left (
@@ -48,17 +48,30 @@ export class MembershipAssignmentService {
           )
         `)
         .eq('user_type', 'trainer')
-        .order('email');
+        .order('first_name');
 
-      if (error) throw error;
+      if (profilesError) throw profilesError;
 
-      const trainers: TrainerMembershipInfo[] = data.map((trainer: any) => {
+      // Get emails from edge function
+      const { data: emailsData, error: emailsError } = await supabase.functions.invoke('get-user-emails');
+      
+      if (emailsError) throw emailsError;
+
+      // Create email lookup map
+      const emailMap = new Map<string, string>();
+      if (emailsData?.users) {
+        emailsData.users.forEach((user: any) => {
+          emailMap.set(user.id, user.email);
+        });
+      }
+
+      const trainers: TrainerMembershipInfo[] = profilesData.map((trainer: any) => {
         const activeMembership = trainer.trainer_membership?.find((m: any) => m.is_active);
         const plan = activeMembership?.membership_plan_definitions;
 
         return {
           trainer_id: trainer.id,
-          trainer_email: trainer.email,
+          trainer_email: emailMap.get(trainer.id) || 'No email',
           trainer_name: `${trainer.first_name || ''} ${trainer.last_name || ''}`.trim() || 'Unnamed',
           current_plan_id: plan?.id,
           current_plan_name: plan?.plan_name,
