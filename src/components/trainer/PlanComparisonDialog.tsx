@@ -27,14 +27,20 @@ interface PlanComparisonDialogProps {
   onOpenChange: (open: boolean) => void;
   trainerId: string;
   onSuccess: () => void;
+  currentPlanType?: string;
+  renewalDate?: string;
+  isCancelled?: boolean;
 }
 
-export const PlanComparisonDialog = ({ open, onOpenChange, trainerId, onSuccess }: PlanComparisonDialogProps) => {
+export const PlanComparisonDialog = ({ open, onOpenChange, trainerId, onSuccess, currentPlanType, renewalDate, isCancelled }: PlanComparisonDialogProps) => {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [reason, setReason] = useState('');
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [showCancelSection, setShowCancelSection] = useState(false);
+  const [cancellationReason, setCancellationReason] = useState('');
+  const [customCancellationReason, setCustomCancellationReason] = useState('');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -46,7 +52,7 @@ export const PlanComparisonDialog = ({ open, onOpenChange, trainerId, onSuccess 
   const loadPlans = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.rpc('get_trainer_available_plans', {
+      const { data, error } = await supabase.rpc('get_trainer_available_plans' as any, {
         p_trainer_id: trainerId
       });
 
@@ -68,7 +74,7 @@ export const PlanComparisonDialog = ({ open, onOpenChange, trainerId, onSuccess 
 
     setSubmitting(true);
     try {
-      const { data, error } = await supabase.rpc('change_trainer_plan', {
+      const { data, error } = await supabase.rpc('change_trainer_plan' as any, {
         p_requested_plan_id: selectedPlan.plan_id,
         p_reason: reason || null
       });
@@ -86,6 +92,36 @@ export const PlanComparisonDialog = ({ open, onOpenChange, trainerId, onSuccess 
 
       onSuccess();
       onOpenChange(false);
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive'
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleCancellation = async () => {
+    setSubmitting(true);
+    try {
+      const finalReason = cancellationReason === 'other' ? customCancellationReason : cancellationReason;
+      
+      const { data, error } = await supabase.rpc('cancel_trainer_plan' as any, {
+        p_reason: finalReason
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Plan Cancellation Scheduled',
+        description: `Your plan will remain active until ${renewalDate}. You can reactivate anytime before then.`
+      });
+
+      onSuccess();
+      onOpenChange(false);
+      setShowCancelSection(false);
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -120,14 +156,67 @@ export const PlanComparisonDialog = ({ open, onOpenChange, trainerId, onSuccess 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Compare & Change Plans</DialogTitle>
+          <DialogTitle>Manage Your Plan</DialogTitle>
           <DialogDescription>
-            Choose a new plan. Existing client engagements will keep their current commission structure.
+            Change to a different plan or cancel your current membership.
           </DialogDescription>
         </DialogHeader>
 
         {loading ? (
           <div className="py-8 text-center text-muted-foreground">Loading plans...</div>
+        ) : showCancelSection ? (
+          <div className="space-y-6 p-4">
+            <div className="space-y-4">
+              <h3 className="font-semibold">Cancel Your Plan</h3>
+              <p className="text-sm text-muted-foreground">
+                Your plan will remain active until {renewalDate}. You can reactivate anytime before then.
+              </p>
+
+              <div className="space-y-3">
+                <Label className="text-base">Why are you cancelling?</Label>
+                {['Too expensive', 'Not enough clients', 'Features not meeting needs', 'Switching platforms', 'Taking a break', 'other'].map(option => (
+                  <label key={option} className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="cancellation_reason"
+                      value={option}
+                      checked={cancellationReason === option}
+                      onChange={(e) => setCancellationReason(e.target.value)}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm">{option === 'other' ? 'Other' : option}</span>
+                  </label>
+                ))}
+              </div>
+
+              {cancellationReason === 'other' && (
+                <Textarea
+                  value={customCancellationReason}
+                  onChange={(e) => setCustomCancellationReason(e.target.value)}
+                  placeholder="Please tell us more..."
+                  rows={3}
+                />
+              )}
+
+              <div className="flex flex-col sm:flex-row gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowCancelSection(false)}
+                  className="w-full sm:w-auto"
+                >
+                  Back to Plans
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={handleCancellation}
+                  disabled={!cancellationReason || (cancellationReason === 'other' && !customCancellationReason) || submitting}
+                  className="w-full sm:w-auto"
+                >
+                  {submitting ? 'Processing...' : 'Confirm Cancellation'}
+                </Button>
+              </div>
+            </div>
+          </div>
         ) : (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -182,6 +271,18 @@ export const PlanComparisonDialog = ({ open, onOpenChange, trainerId, onSuccess 
               ))}
             </div>
 
+            {!isCancelled && (
+              <div className="border-t pt-4">
+                <Button
+                  variant="ghost"
+                  className="w-full text-destructive hover:text-destructive hover:bg-destructive/10"
+                  onClick={() => setShowCancelSection(true)}
+                >
+                  Cancel Current Plan
+                </Button>
+              </div>
+            )}
+
             {selectedPlan && !selectedPlan.is_current_plan && (
               <div className="border-t pt-6 space-y-4">
                 <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
@@ -234,13 +335,18 @@ export const PlanComparisonDialog = ({ open, onOpenChange, trainerId, onSuccess 
                   />
                 </div>
 
-                <div className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={() => onOpenChange(false)}>
-                    Cancel
+                <div className="flex flex-col sm:flex-row justify-end gap-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => onOpenChange(false)}
+                    className="w-full sm:w-auto"
+                  >
+                    Close
                   </Button>
                   <Button
                     onClick={handlePlanChange}
                     disabled={submitting || (selectedPlan.switch_type === 'downgrade' && !reason)}
+                    className="w-full sm:w-auto"
                   >
                     {submitting ? 'Processing...' : selectedPlan.switch_type === 'upgrade' ? 'Upgrade Now' : 'Schedule Downgrade'}
                   </Button>

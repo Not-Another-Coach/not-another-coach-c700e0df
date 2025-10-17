@@ -8,7 +8,6 @@ import { useTrainerMembershipPlans } from '@/hooks/useTrainerMembershipPlans';
 import { PaymentStatusBanner } from '@/components/trainer/PaymentStatusBanner';
 import { PlanComparisonDialog } from '@/components/trainer/PlanComparisonDialog';
 import { CancellationBanner } from '@/components/trainer/CancellationBanner';
-import { CancelPlanDialog } from '@/components/trainer/CancelPlanDialog';
 import { PlanChangeHistory } from '@/components/trainer/PlanChangeHistory';
 import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -17,7 +16,6 @@ export const MembershipSettings: React.FC = () => {
   const { user } = useAuth();
   const { currentPlan, loading, refreshPlans } = useTrainerMembershipPlans(user?.id);
   const [showPlanDialog, setShowPlanDialog] = useState(false);
-  const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<any>(null);
   const [membership, setMembership] = useState<any>(null);
 
@@ -113,27 +111,15 @@ export const MembershipSettings: React.FC = () => {
               <Settings className="h-5 w-5" />
               Your Membership Plan
             </CardTitle>
-            <div className="flex gap-2">
-              <Button 
-                onClick={() => setShowPlanDialog(true)}
-                size="sm"
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                <Repeat className="h-4 w-4" />
-                Change Plan
-              </Button>
-              {!membership?.cancel_at_period_end && (
-                <Button 
-                  onClick={() => setShowCancelDialog(true)}
-                  size="sm"
-                  variant="ghost"
-                  className="text-destructive hover:text-destructive"
-                >
-                  Cancel Plan
-                </Button>
-              )}
-            </div>
+            <Button 
+              onClick={() => setShowPlanDialog(true)}
+              size="sm"
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Repeat className="h-4 w-4" />
+              Manage Plan
+            </Button>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -217,17 +203,9 @@ export const MembershipSettings: React.FC = () => {
       open={showPlanDialog}
       onOpenChange={setShowPlanDialog}
       trainerId={user?.id || ''}
-      onSuccess={() => {
-        refreshPlans();
-        loadPaymentStatus();
-      }}
-    />
-
-    <CancelPlanDialog 
-      open={showCancelDialog}
-      onOpenChange={setShowCancelDialog}
-      currentPlan={membership?.plan_type || ''}
-      renewalDate={membership?.renewal_date || ''}
+      currentPlanType={membership?.plan_type}
+      renewalDate={membership?.renewal_date}
+      isCancelled={membership?.cancel_at_period_end}
       onSuccess={() => {
         refreshPlans();
         loadPaymentStatus();
