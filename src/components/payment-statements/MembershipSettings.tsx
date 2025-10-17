@@ -7,13 +7,19 @@ import { useAuth } from '@/hooks/useAuth';
 import { useTrainerMembershipPlans } from '@/hooks/useTrainerMembershipPlans';
 import { PaymentStatusBanner } from '@/components/trainer/PaymentStatusBanner';
 import { PlanComparisonDialog } from '@/components/trainer/PlanComparisonDialog';
+import { CancellationBanner } from '@/components/trainer/CancellationBanner';
+import { CancelPlanDialog } from '@/components/trainer/CancelPlanDialog';
+import { PlanChangeHistory } from '@/components/trainer/PlanChangeHistory';
 import { supabase } from '@/integrations/supabase/client';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export const MembershipSettings: React.FC = () => {
   const { user } = useAuth();
   const { currentPlan, loading, refreshPlans } = useTrainerMembershipPlans(user?.id);
   const [showPlanDialog, setShowPlanDialog] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<any>(null);
+  const [membership, setMembership] = useState<any>(null);
 
   useEffect(() => {
     console.log('Current membership plan:', currentPlan);
@@ -27,13 +33,14 @@ export const MembershipSettings: React.FC = () => {
     
     const { data } = await supabase
       .from('trainer_membership')
-      .select('payment_status, grace_end_date, payment_blocked_reason')
+      .select('payment_status, grace_end_date, payment_blocked_reason, cancel_at_period_end, cancellation_grace_end, renewal_date, plan_type')
       .eq('trainer_id', user.id)
       .eq('is_active', true)
       .maybeSingle();
 
     if (data) {
       setPaymentStatus(data);
+      setMembership(data);
     }
   };
 
@@ -72,7 +79,7 @@ export const MembershipSettings: React.FC = () => {
   const monthlyPrice = (currentPlan.monthly_price_cents / 100).toFixed(2);
 
   return (
-    <>
+    <div className="space-y-6">
       {paymentStatus && (
         <PaymentStatusBanner 
           paymentStatus={paymentStatus.payment_status}
@@ -81,6 +88,24 @@ export const MembershipSettings: React.FC = () => {
         />
       )}
       
+      {membership?.cancel_at_period_end && (
+        <CancellationBanner 
+          renewalDate={membership.renewal_date}
+          graceEndDate={membership.cancellation_grace_end}
+          onReactivate={() => {
+            refreshPlans();
+            loadPaymentStatus();
+          }}
+        />
+      )}
+
+      <Tabs defaultValue="current" className="w-full">
+        <TabsList>
+          <TabsTrigger value="current">Current Plan</TabsTrigger>
+          <TabsTrigger value="history">Plan History</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="current" className="space-y-6">
       <Card className="w-full max-w-2xl">
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -88,15 +113,27 @@ export const MembershipSettings: React.FC = () => {
               <Settings className="h-5 w-5" />
               Your Membership Plan
             </CardTitle>
-            <Button 
-              onClick={() => setShowPlanDialog(true)}
-              size="sm"
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <Repeat className="h-4 w-4" />
-              Change Plan
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                onClick={() => setShowPlanDialog(true)}
+                size="sm"
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <Repeat className="h-4 w-4" />
+                Change Plan
+              </Button>
+              {!membership?.cancel_at_period_end && (
+                <Button 
+                  onClick={() => setShowCancelDialog(true)}
+                  size="sm"
+                  variant="ghost"
+                  className="text-destructive hover:text-destructive"
+                >
+                  Cancel Plan
+                </Button>
+              )}
+            </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -169,6 +206,12 @@ export const MembershipSettings: React.FC = () => {
         </div>
       </CardContent>
     </Card>
+        </TabsContent>
+
+        <TabsContent value="history">
+          <PlanChangeHistory trainerId={user?.id || ''} />
+        </TabsContent>
+      </Tabs>
 
     <PlanComparisonDialog 
       open={showPlanDialog}
@@ -179,6 +222,17 @@ export const MembershipSettings: React.FC = () => {
         loadPaymentStatus();
       }}
     />
-  </>
+
+    <CancelPlanDialog 
+      open={showCancelDialog}
+      onOpenChange={setShowCancelDialog}
+      currentPlan={membership?.plan_type || ''}
+      renewalDate={membership?.renewal_date || ''}
+      onSuccess={() => {
+        refreshPlans();
+        loadPaymentStatus();
+      }}
+    />
+    </div>
   );
 };

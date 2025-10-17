@@ -6,7 +6,9 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { MembershipAssignmentService, TrainerMembershipInfo } from '@/services/admin/membershipAssignment';
 import { useMembershipPlans } from '@/hooks/useMembershipPlans';
-import { Users, Search, Zap, UserPlus } from 'lucide-react';
+import { ExtendGracePeriodDialog } from './ExtendGracePeriodDialog';
+import { supabase } from '@/integrations/supabase/client';
+import { Users, Search, Zap, UserPlus, Clock, RefreshCw } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -36,6 +38,8 @@ export function TrainerMembershipAssignment() {
   const [selectedPlanId, setSelectedPlanId] = useState<string>('');
   const [assignmentNotes, setAssignmentNotes] = useState('');
   const [bulkAssigning, setBulkAssigning] = useState(false);
+  const [extendGraceDialog, setExtendGraceDialog] = useState<{ open: boolean; trainer: TrainerMembershipInfo | null }>({ open: false, trainer: null });
+  const [retryingPayment, setRetryingPayment] = useState<string | null>(null);
 
   const { toast } = useToast();
   const { plans } = useMembershipPlans();
@@ -146,6 +150,32 @@ export function TrainerMembershipAssignment() {
     setBulkAssigning(false);
   };
 
+  const handleRetryPayment = async (trainerId: string) => {
+    setRetryingPayment(trainerId);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-retry-payment', {
+        body: { trainer_id: trainerId }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Payment Retry Initiated',
+        description: 'Payment retry has been processed.',
+      });
+      
+      await loadTrainers();
+    } catch (error: any) {
+      toast({
+        title: 'Retry Failed',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setRetryingPayment(null);
+    }
+  };
+
   const formatPrice = (cents?: number) => {
     if (!cents) return 'N/A';
     return `£${(cents / 100).toFixed(2)}`;
@@ -224,6 +254,7 @@ export function TrainerMembershipAssignment() {
                     <th className="text-left p-3 font-medium">Current Plan</th>
                     <th className="text-left p-3 font-medium">Monthly Price</th>
                     <th className="text-left p-3 font-medium">Status</th>
+                    <th className="text-left p-3 font-medium">Payment</th>
                     <th className="text-left p-3 font-medium">Renewal Date</th>
                     <th className="text-right p-3 font-medium">Actions</th>
                   </tr>
@@ -258,19 +289,53 @@ export function TrainerMembershipAssignment() {
                         )}
                       </td>
                       <td className="p-3">
+                        {trainer.payment_status === 'past_due' && (
+                          <Badge variant="destructive">Past Due</Badge>
+                        )}
+                        {trainer.payment_status === 'limited_mode' && (
+                          <Badge variant="outline" className="border-orange-500 text-orange-600">Limited</Badge>
+                        )}
+                        {trainer.payment_status === 'current' && (
+                          <Badge variant="outline" className="border-green-500 text-green-600">Current</Badge>
+                        )}
+                      </td>
+                      <td className="p-3">
                         {trainer.renewal_date
                           ? new Date(trainer.renewal_date).toLocaleDateString()
                           : 'N/A'}
                       </td>
                       <td className="p-3 text-right">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleAssignClick(trainer)}
-                        >
-                          <UserPlus className="h-4 w-4 mr-2" />
-                          {trainer.is_active ? 'Change' : 'Assign'}
-                        </Button>
+                        <div className="flex gap-2 justify-end">
+                          {trainer.payment_status === 'past_due' && (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleRetryPayment(trainer.trainer_id)}
+                                disabled={retryingPayment === trainer.trainer_id}
+                              >
+                                <RefreshCw className="h-4 w-4 mr-2" />
+                                {retryingPayment === trainer.trainer_id ? 'Retrying...' : 'Retry Payment'}
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setExtendGraceDialog({ open: true, trainer })}
+                              >
+                                <Clock className="h-4 w-4 mr-2" />
+                                Extend Grace
+                              </Button>
+                            </>
+                          )}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleAssignClick(trainer)}
+                          >
+                            <UserPlus className="h-4 w-4 mr-2" />
+                            {trainer.is_active ? 'Change' : 'Assign'}
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -334,6 +399,17 @@ export function TrainerMembershipAssignment() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Grace Period Extension Dialog */}
+      {extendGraceDialog.trainer && (
+        <ExtendGracePeriodDialog 
+          open={extendGraceDialog.open}
+          onOpenChange={(open) => setExtendGraceDialog({ open, trainer: null })}
+          trainerId={extendGraceDialog.trainer.trainer_id}
+          currentGraceEnd={extendGraceDialog.trainer.grace_end_date || ''}
+          onSuccess={loadTrainers}
+        />
+      )}
     </>
   );
 }

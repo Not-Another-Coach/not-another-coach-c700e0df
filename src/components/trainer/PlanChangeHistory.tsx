@@ -19,19 +19,29 @@ interface PlanChange {
   metadata?: any;
 }
 
-export const PlanChangeHistory = () => {
+interface PlanChangeHistoryProps {
+  trainerId?: string;
+}
+
+export const PlanChangeHistory = ({ trainerId }: PlanChangeHistoryProps) => {
   const [changes, setChanges] = useState<PlanChange[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadHistory();
-  }, []);
+    if (trainerId) {
+      loadHistory();
+    }
+  }, [trainerId]);
 
   const loadHistory = async () => {
+    if (!trainerId) return;
+    
+    setLoading(true);
     try {
       const { data, error } = await supabase
         .from('trainer_membership_history')
         .select('*')
+        .eq('trainer_id', trainerId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;

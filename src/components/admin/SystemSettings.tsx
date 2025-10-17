@@ -7,7 +7,9 @@ import { TrainerVisibilityManagement } from './visibility/TrainerVisibilityManag
 import { VisibilityAnalytics } from './visibility/VisibilityAnalytics';
 import { MembershipPlanManager } from './MembershipPlanManager';
 import { TrainerMembershipAssignment } from './TrainerMembershipAssignment';
-import { Settings, Image, Database, Users, CreditCard } from 'lucide-react';
+import { FailedPaymentConfigPanel } from './FailedPaymentConfigPanel';
+import { PlanAnalytics } from './PlanAnalytics';
+import { Settings, Image, Database, Users, CreditCard, DollarSign, BarChart3 } from 'lucide-react';
 
 export function SystemSettings() {
   return (
@@ -18,22 +20,30 @@ export function SystemSettings() {
       </div>
 
       <Tabs defaultValue="branding" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
           <TabsTrigger value="branding" className="flex items-center gap-2">
             <Image className="h-4 w-4" />
             Branding
           </TabsTrigger>
           <TabsTrigger value="membership" className="flex items-center gap-2">
             <CreditCard className="h-4 w-4" />
-            Plan Definitions
+            Plans
           </TabsTrigger>
           <TabsTrigger value="assignments" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
-            Trainer Plans
+            Assignments
+          </TabsTrigger>
+          <TabsTrigger value="payment-rules" className="flex items-center gap-2">
+            <DollarSign className="h-4 w-4" />
+            Payment Rules
+          </TabsTrigger>
+          <TabsTrigger value="analytics" className="flex items-center gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Analytics
           </TabsTrigger>
           <TabsTrigger value="general" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
-            System Visibility
+            Visibility
           </TabsTrigger>
           <TabsTrigger value="database" className="flex items-center gap-2">
             <Database className="h-4 w-4" />
@@ -41,7 +51,7 @@ export function SystemSettings() {
           </TabsTrigger>
           <TabsTrigger value="users" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
-            User Management
+            Users
           </TabsTrigger>
         </TabsList>
 
@@ -55,6 +65,14 @@ export function SystemSettings() {
 
       <TabsContent value="assignments" className="space-y-6">
         <TrainerMembershipAssignment />
+      </TabsContent>
+
+      <TabsContent value="payment-rules" className="space-y-6">
+        <FailedPaymentConfigPanel />
+      </TabsContent>
+
+      <TabsContent value="analytics" className="space-y-6">
+        <PlanAnalytics />
       </TabsContent>
 
         <TabsContent value="general" className="space-y-6">

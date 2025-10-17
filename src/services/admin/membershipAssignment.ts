@@ -13,6 +13,8 @@ export interface TrainerMembershipInfo {
   monthly_price_cents?: number;
   is_active?: boolean;
   renewal_date?: string;
+  payment_status?: string;
+  grace_end_date?: string;
 }
 
 export interface BulkAssignmentResult {
@@ -46,7 +48,7 @@ export class MembershipAssignmentService {
       if (trainerIds.length > 0) {
         const { data: memberships, error: membershipError } = await supabase
           .from('trainer_membership')
-          .select('trainer_id, plan_type, monthly_price_cents, is_active, renewal_date')
+          .select('trainer_id, plan_type, monthly_price_cents, is_active, renewal_date, payment_status, grace_end_date')
           .in('trainer_id', trainerIds);
 
         if (membershipError) {
@@ -109,6 +111,8 @@ export class MembershipAssignmentService {
           monthly_price_cents: activeMembership?.monthly_price_cents,
           is_active: activeMembership?.is_active,
           renewal_date: activeMembership?.renewal_date,
+          payment_status: activeMembership?.payment_status,
+          grace_end_date: activeMembership?.grace_end_date,
         };
       });
 
