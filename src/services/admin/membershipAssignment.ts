@@ -27,7 +27,7 @@ export class MembershipAssignmentService {
    */
   static async getTrainersWithMemberships(): Promise<ServiceResponse<TrainerMembershipInfo[]>> {
     try {
-      // First, get trainer profiles with membership data
+      // Fetch trainer profiles with their membership records (no FK to plan defs)
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select(`
@@ -36,15 +36,10 @@ export class MembershipAssignmentService {
           last_name,
           trainer_membership!left (
             id,
-            plan_definition_id,
+            plan_type,
+            monthly_price_cents,
             is_active,
-            renewal_date,
-            membership_plan_definitions (
-              id,
-              plan_name,
-              plan_type,
-              monthly_price_cents
-            )
+            renewal_date
           )
         `)
         .eq('user_type', 'trainer')
@@ -52,31 +47,39 @@ export class MembershipAssignmentService {
 
       if (profilesError) throw profilesError;
 
+      // Fetch active plan definitions to map plan_type -> human plan_name
+      const { data: planDefs, error: defsError } = await supabase
+        .from('membership_plan_definitions')
+        .select('plan_type, plan_name, is_active');
+      if (defsError) throw defsError;
+      const planNameByType = new Map<string, string>(
+        (planDefs || [])
+          .filter((p: any) => p.is_active !== false)
+          .map((p: any) => [p.plan_type, p.plan_name])
+      );
+
       // Get emails from edge function
       const { data: emailsData, error: emailsError } = await supabase.functions.invoke('get-user-emails');
-      
       if (emailsError) throw emailsError;
 
-      // Create email lookup map
       const emailMap = new Map<string, string>();
-      if (emailsData?.users) {
-        emailsData.users.forEach((user: any) => {
-          emailMap.set(user.id, user.email);
-        });
-      }
+      const usersArray = Array.isArray(emailsData?.users) ? emailsData.users : Array.isArray(emailsData) ? emailsData : [];
+      usersArray.forEach((user: any) => {
+        if (user?.id && user?.email) emailMap.set(user.id, user.email);
+      });
 
-      const trainers: TrainerMembershipInfo[] = profilesData.map((trainer: any) => {
+      const trainers: TrainerMembershipInfo[] = (profilesData || []).map((trainer: any) => {
         const activeMembership = trainer.trainer_membership?.find((m: any) => m.is_active);
-        const plan = activeMembership?.membership_plan_definitions;
+        const planType = activeMembership?.plan_type as string | undefined;
 
         return {
           trainer_id: trainer.id,
           trainer_email: emailMap.get(trainer.id) || 'No email',
           trainer_name: `${trainer.first_name || ''} ${trainer.last_name || ''}`.trim() || 'Unnamed',
-          current_plan_id: plan?.id,
-          current_plan_name: plan?.plan_name,
-          current_plan_type: plan?.plan_type,
-          monthly_price_cents: plan?.monthly_price_cents,
+          current_plan_id: undefined,
+          current_plan_name: planType ? planNameByType.get(planType) || planType : undefined,
+          current_plan_type: planType,
+          monthly_price_cents: activeMembership?.monthly_price_cents,
           is_active: activeMembership?.is_active,
           renewal_date: activeMembership?.renewal_date,
         };
