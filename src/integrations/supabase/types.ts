@@ -6669,6 +6669,14 @@ export type Database = {
         Args: { p_plan_id: string }
         Returns: undefined
       }
+      admin_assign_trainer_membership_plan: {
+        Args: {
+          p_notes?: string
+          p_plan_definition_id: string
+          p_trainer_id: string
+        }
+        Returns: string
+      }
       admin_cleanup_client_trainer_interactions: {
         Args: { p_client_id: string; p_trainer_id: string }
         Returns: Json
