@@ -36,7 +36,7 @@ export const useTrainerMembershipPlans = (trainerId?: string) => {
     // Get trainer's active membership (schema stores plan_type, not plan_definition_id)
     const { data: membership, error: membershipError } = await supabase
       .from('trainer_membership' as any)
-      .select('id, trainer_id, plan_type, monthly_price_cents, is_active, renewal_date, stripe_subscription_id, stripe_customer_id')
+      .select('id, trainer_id, plan_type, monthly_price_cents, is_active, renewal_date')
       .eq('trainer_id', userId)
       .eq('is_active', true)
       .maybeSingle();
@@ -71,8 +71,8 @@ export const useTrainerMembershipPlans = (trainerId?: string) => {
         membership_id: (membership as any).id,
         is_active: (membership as any).is_active,
         renewal_date: (membership as any).renewal_date,
-        stripe_subscription_id: (membership as any).stripe_subscription_id,
-        stripe_customer_id: (membership as any).stripe_customer_id
+        stripe_subscription_id: null,
+        stripe_customer_id: null
       } as TrainerCurrentPlan);
     } else {
       // Fallback minimal plan using membership info
@@ -90,8 +90,8 @@ export const useTrainerMembershipPlans = (trainerId?: string) => {
         membership_id: (membership as any).id,
         is_active: (membership as any).is_active,
         renewal_date: (membership as any).renewal_date,
-        stripe_subscription_id: (membership as any).stripe_subscription_id,
-        stripe_customer_id: (membership as any).stripe_customer_id
+        stripe_subscription_id: null,
+        stripe_customer_id: null
       } as TrainerCurrentPlan);
     }
   };
