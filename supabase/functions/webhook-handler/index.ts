@@ -559,12 +559,47 @@ const handler = async (req: Request): Promise<Response> => {
                 });
 
               if (invoiceError) console.error('Invoice insert error:', invoiceError);
+
+              // Restore account status if previously had payment issues
+              if (invoice.metadata?.trainer_id) {
+                const { error: restoreError } = await supabase
+                  .from('trainer_membership')
+                  .update({
+                    payment_status: 'current',
+                    grace_end_date: null,
+                    limited_mode_activated_at: null,
+                    payment_blocked_reason: null,
+                    retry_count: 0
+                  })
+                  .eq('trainer_id', invoice.metadata.trainer_id)
+                  .eq('is_active', true);
+
+                if (restoreError) console.error('Restore error:', restoreError);
+
+                // Create success alert
+                await supabase.from('alerts').insert({
+                  alert_type: 'payment_restored',
+                  title: 'Payment Successful - Access Restored',
+                  content: 'Your payment was successful. Full access has been restored.',
+                  target_audience: { trainers: [invoice.metadata.trainer_id] },
+                  metadata: {
+                    invoice_id: invoice.id,
+                    amount_cents: invoice.amount_paid
+                  },
+                  is_active: true,
+                  priority: 1
+                });
+
+                console.log('Payment restored for trainer:', invoice.metadata.trainer_id);
+              }
+
               console.log('Invoice payment succeeded:', invoice.id);
               break;
             }
 
             case 'invoice.payment_failed': {
               const invoice = eventPayload.data.object;
+              const trainerId = invoice.metadata?.trainer_id;
 
               // Update invoice status
               const { error: invoiceError } = await supabase
@@ -576,25 +611,69 @@ const handler = async (req: Request): Promise<Response> => {
 
               if (invoiceError) console.error('Invoice update error:', invoiceError);
 
-              // Create alert for trainer
-              const { error: alertError } = await supabase
-                .from('alerts')
-                .insert({
-                  alert_type: 'payment_failed',
-                  title: 'Payment Failed',
-                  content: `Your payment of ${invoice.currency.toUpperCase()} ${(invoice.amount_due / 100).toFixed(2)} failed. Please update your payment method.`,
-                  target_audience: { trainers: [invoice.metadata?.trainer_id] },
-                  metadata: {
-                    invoice_id: invoice.id,
-                    amount: invoice.amount_due,
-                    currency: invoice.currency,
-                  },
-                  is_active: true,
-                  priority: 3,
-                });
+              if (!trainerId) {
+                console.error('No trainer_id in invoice metadata');
+                break;
+              }
 
-              if (alertError) console.error('Alert creation error:', alertError);
-              console.log('Invoice payment failed, alert created:', invoice.id);
+              // Get failed payment config
+              const { data: config } = await supabase
+                .from('app_settings')
+                .select('setting_value')
+                .eq('setting_key', 'failed_payment_config')
+                .single();
+
+              const graceDays = config?.setting_value?.grace_days || 7;
+              const graceEndDate = new Date();
+              graceEndDate.setDate(graceEndDate.getDate() + graceDays);
+
+              // Update trainer_membership to past_due
+              const { error: membershipError } = await supabase
+                .from('trainer_membership')
+                .update({
+                  payment_status: 'past_due',
+                  grace_end_date: graceEndDate.toISOString().split('T')[0],
+                  last_payment_attempt_at: new Date().toISOString(),
+                  retry_count: invoice.attempt_count || 1,
+                  payment_blocked_reason: `Payment failed on ${new Date().toISOString().split('T')[0]}`
+                })
+                .eq('trainer_id', trainerId)
+                .eq('is_active', true);
+
+              if (membershipError) console.error('Membership update error:', membershipError);
+
+              // Create high-priority alert for trainer
+              await supabase.from('alerts').insert({
+                alert_type: 'payment_failed',
+                title: 'Payment Failed - Action Required',
+                content: `Your payment of £${(invoice.amount_due / 100).toFixed(2)} failed. You have ${graceDays} days to update your payment method before your account enters Limited mode.`,
+                target_audience: { trainers: [trainerId] },
+                metadata: {
+                  invoice_id: invoice.id,
+                  amount_cents: invoice.amount_due,
+                  grace_end_date: graceEndDate.toISOString().split('T')[0],
+                  retry_count: invoice.attempt_count
+                },
+                is_active: true,
+                priority: 3
+              });
+
+              // Alert admin
+              await supabase.from('alerts').insert({
+                alert_type: 'trainer_payment_failed',
+                title: 'Trainer Payment Failed',
+                content: `Trainer ${trainerId} payment failed. Amount: £${(invoice.amount_due / 100).toFixed(2)}`,
+                target_audience: { admins: ['all'] },
+                metadata: {
+                  trainer_id: trainerId,
+                  invoice_id: invoice.id,
+                  amount_cents: invoice.amount_due
+                },
+                is_active: true,
+                priority: 2
+              });
+
+              console.log('Payment failure processed for trainer:', trainerId);
               break;
             }
 

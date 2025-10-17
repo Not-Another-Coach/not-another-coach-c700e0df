@@ -3789,14 +3789,18 @@ export type Database = {
       }
       payment_packages: {
         Row: {
+          applied_commission_plan_id: string | null
+          applied_commission_snapshot: Json | null
           applied_onboarding_fee_kind: string | null
           applied_onboarding_fee_value: number | null
           coach_selection_request_id: string | null
+          commission_locked_at: string | null
           created_at: string
           customer_id: string
           customer_payment_mode: Database["public"]["Enums"]["customer_payment_mode_enum"]
           duration_months: number | null
           duration_weeks: number | null
+          engagement_stage_at_lock: string | null
           final_price_amount: number
           final_price_currency: string
           id: string
@@ -3811,14 +3815,18 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          applied_commission_plan_id?: string | null
+          applied_commission_snapshot?: Json | null
           applied_onboarding_fee_kind?: string | null
           applied_onboarding_fee_value?: number | null
           coach_selection_request_id?: string | null
+          commission_locked_at?: string | null
           created_at?: string
           customer_id: string
           customer_payment_mode?: Database["public"]["Enums"]["customer_payment_mode_enum"]
           duration_months?: number | null
           duration_weeks?: number | null
+          engagement_stage_at_lock?: string | null
           final_price_amount: number
           final_price_currency?: string
           id?: string
@@ -3833,14 +3841,18 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          applied_commission_plan_id?: string | null
+          applied_commission_snapshot?: Json | null
           applied_onboarding_fee_kind?: string | null
           applied_onboarding_fee_value?: number | null
           coach_selection_request_id?: string | null
+          commission_locked_at?: string | null
           created_at?: string
           customer_id?: string
           customer_payment_mode?: Database["public"]["Enums"]["customer_payment_mode_enum"]
           duration_months?: number | null
           duration_weeks?: number | null
+          engagement_stage_at_lock?: string | null
           final_price_amount?: number
           final_price_currency?: string
           id?: string
@@ -3855,6 +3867,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "payment_packages_applied_commission_plan_id_fkey"
+            columns: ["applied_commission_plan_id"]
+            isOneToOne: false
+            referencedRelation: "membership_plan_definitions"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "payment_packages_coach_selection_request_id_fkey"
             columns: ["coach_selection_request_id"]
@@ -5075,34 +5094,52 @@ export type Database = {
       trainer_membership: {
         Row: {
           created_at: string
+          grace_end_date: string | null
           id: string
           is_active: boolean
+          last_payment_attempt_at: string | null
+          limited_mode_activated_at: string | null
           monthly_price_cents: number
+          payment_blocked_reason: string | null
+          payment_status: string | null
           plan_type: string
           proration_mode: string
           renewal_date: string
+          retry_count: number | null
           trainer_id: string
           updated_at: string
         }
         Insert: {
           created_at?: string
+          grace_end_date?: string | null
           id?: string
           is_active?: boolean
+          last_payment_attempt_at?: string | null
+          limited_mode_activated_at?: string | null
           monthly_price_cents?: number
+          payment_blocked_reason?: string | null
+          payment_status?: string | null
           plan_type?: string
           proration_mode?: string
           renewal_date?: string
+          retry_count?: number | null
           trainer_id: string
           updated_at?: string
         }
         Update: {
           created_at?: string
+          grace_end_date?: string | null
           id?: string
           is_active?: boolean
+          last_payment_attempt_at?: string | null
+          limited_mode_activated_at?: string | null
           monthly_price_cents?: number
+          payment_blocked_reason?: string | null
+          payment_status?: string | null
           plan_type?: string
           proration_mode?: string
           renewal_date?: string
+          retry_count?: number | null
           trainer_id?: string
           updated_at?: string
         }
@@ -5125,6 +5162,120 @@ export type Database = {
             foreignKeyName: "trainer_membership_trainer_id_fkey"
             columns: ["trainer_id"]
             isOneToOne: true
+            referencedRelation: "v_trainers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trainer_membership_history: {
+        Row: {
+          applied_at: string | null
+          change_type: string | null
+          commission_changes: Json | null
+          created_at: string | null
+          effective_date: string
+          from_plan_id: string | null
+          id: string
+          initiated_by: string | null
+          initiated_by_user_id: string | null
+          new_renewal_date: string | null
+          previous_renewal_date: string | null
+          prorated_amount_cents: number | null
+          reason: string | null
+          stripe_subscription_id: string | null
+          to_plan_id: string | null
+          trainer_id: string
+        }
+        Insert: {
+          applied_at?: string | null
+          change_type?: string | null
+          commission_changes?: Json | null
+          created_at?: string | null
+          effective_date: string
+          from_plan_id?: string | null
+          id?: string
+          initiated_by?: string | null
+          initiated_by_user_id?: string | null
+          new_renewal_date?: string | null
+          previous_renewal_date?: string | null
+          prorated_amount_cents?: number | null
+          reason?: string | null
+          stripe_subscription_id?: string | null
+          to_plan_id?: string | null
+          trainer_id: string
+        }
+        Update: {
+          applied_at?: string | null
+          change_type?: string | null
+          commission_changes?: Json | null
+          created_at?: string | null
+          effective_date?: string
+          from_plan_id?: string | null
+          id?: string
+          initiated_by?: string | null
+          initiated_by_user_id?: string | null
+          new_renewal_date?: string | null
+          previous_renewal_date?: string | null
+          prorated_amount_cents?: number | null
+          reason?: string | null
+          stripe_subscription_id?: string | null
+          to_plan_id?: string | null
+          trainer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainer_membership_history_from_plan_id_fkey"
+            columns: ["from_plan_id"]
+            isOneToOne: false
+            referencedRelation: "membership_plan_definitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_membership_history_initiated_by_user_id_fkey"
+            columns: ["initiated_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_membership_history_initiated_by_user_id_fkey"
+            columns: ["initiated_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "v_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_membership_history_initiated_by_user_id_fkey"
+            columns: ["initiated_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "v_trainers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_membership_history_to_plan_id_fkey"
+            columns: ["to_plan_id"]
+            isOneToOne: false
+            referencedRelation: "membership_plan_definitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_membership_history_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_membership_history_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "v_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_membership_history_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
             referencedRelation: "v_trainers"
             referencedColumns: ["id"]
           },
@@ -6748,7 +6899,13 @@ export type Database = {
         Returns: number
       }
       calculate_package_commission: {
-        Args: { p_package_price_cents: number; p_trainer_id: string }
+        Args:
+          | {
+              p_package_id?: string
+              p_package_price_cents: number
+              p_trainer_id: string
+            }
+          | { p_package_price_cents: number; p_trainer_id: string }
         Returns: number
       }
       can_send_marketing_message: {
@@ -6762,6 +6919,10 @@ export type Database = {
           p_trainer_id: string
         }
         Returns: number
+      }
+      change_trainer_plan: {
+        Args: { p_reason?: string; p_requested_plan_id: string }
+        Returns: Json
       }
       check_verification_expiry: {
         Args: Record<PropertyKey, never>
@@ -6956,6 +7117,22 @@ export type Database = {
             }
         Returns: Database["public"]["Enums"]["visibility_state"]
       }
+      get_trainer_available_plans: {
+        Args: { p_trainer_id?: string }
+        Returns: {
+          blocked_reason: string
+          can_switch_to: boolean
+          commission_details: Json
+          display_name: string
+          has_commission: boolean
+          is_current_plan: boolean
+          monthly_price_cents: number
+          plan_id: string
+          plan_name: string
+          proration_estimate_cents: number
+          switch_type: string
+        }[]
+      }
       get_trainer_membership_details: {
         Args: { p_trainer_id: string }
         Returns: {
@@ -7013,6 +7190,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      has_unpaid_invoices: {
+        Args: { p_trainer_id?: string }
+        Returns: Json
       }
       import_activities_from_ways_of_working: {
         Args: { p_trainer_id?: string }

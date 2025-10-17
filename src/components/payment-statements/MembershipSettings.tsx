@@ -1,17 +1,41 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Settings, Info, CheckCircle2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Settings, Info, CheckCircle2, Repeat } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTrainerMembershipPlans } from '@/hooks/useTrainerMembershipPlans';
+import { PaymentStatusBanner } from '@/components/trainer/PaymentStatusBanner';
+import { PlanComparisonDialog } from '@/components/trainer/PlanComparisonDialog';
+import { supabase } from '@/integrations/supabase/client';
 
 export const MembershipSettings: React.FC = () => {
   const { user } = useAuth();
-  const { currentPlan, loading } = useTrainerMembershipPlans(user?.id);
+  const { currentPlan, loading, refreshPlans } = useTrainerMembershipPlans(user?.id);
+  const [showPlanDialog, setShowPlanDialog] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState<any>(null);
 
   useEffect(() => {
     console.log('Current membership plan:', currentPlan);
-  }, [currentPlan]);
+    if (user?.id) {
+      loadPaymentStatus();
+    }
+  }, [currentPlan, user?.id]);
+
+  const loadPaymentStatus = async () => {
+    if (!user?.id) return;
+    
+    const { data } = await supabase
+      .from('trainer_membership')
+      .select('payment_status, grace_end_date, payment_blocked_reason')
+      .eq('trainer_id', user.id)
+      .eq('is_active', true)
+      .maybeSingle();
+
+    if (data) {
+      setPaymentStatus(data);
+    }
+  };
 
   if (loading) {
     return (
@@ -48,14 +72,34 @@ export const MembershipSettings: React.FC = () => {
   const monthlyPrice = (currentPlan.monthly_price_cents / 100).toFixed(2);
 
   return (
-    <Card className="w-full max-w-2xl">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Settings className="h-5 w-5" />
-          Your Membership Plan
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
+    <>
+      {paymentStatus && (
+        <PaymentStatusBanner 
+          paymentStatus={paymentStatus.payment_status}
+          graceEndDate={paymentStatus.grace_end_date}
+          paymentBlockedReason={paymentStatus.payment_blocked_reason}
+        />
+      )}
+      
+      <Card className="w-full max-w-2xl">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              Your Membership Plan
+            </CardTitle>
+            <Button 
+              onClick={() => setShowPlanDialog(true)}
+              size="sm"
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Repeat className="h-4 w-4" />
+              Change Plan
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
         {/* Current Plan Display */}
         <div className="space-y-4">
           <div className="flex items-start gap-3 p-4 border-2 border-primary bg-primary/5 rounded-lg">
@@ -125,5 +169,16 @@ export const MembershipSettings: React.FC = () => {
         </div>
       </CardContent>
     </Card>
+
+    <PlanComparisonDialog 
+      open={showPlanDialog}
+      onOpenChange={setShowPlanDialog}
+      trainerId={user?.id || ''}
+      onSuccess={() => {
+        refreshPlans();
+        loadPaymentStatus();
+      }}
+    />
+  </>
   );
 };
