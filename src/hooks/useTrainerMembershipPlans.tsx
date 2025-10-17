@@ -20,7 +20,7 @@ export const useTrainerMembershipPlans = (trainerId?: string) => {
     const { data, error } = await supabase
       .from('membership_plan_definitions' as any)
       .select('*')
-      .or('is_available_to_new_trainers.eq.true')
+      .eq('is_available_to_new_trainers', true)
       .order('monthly_price_cents', { ascending: false });
     
     if (error) {
@@ -33,37 +33,66 @@ export const useTrainerMembershipPlans = (trainerId?: string) => {
   };
 
   const fetchCurrentPlan = async (userId: string) => {
-    // Get trainer's current membership with plan details
-    const { data: membershipData, error: membershipError } = await supabase
+    // Get trainer's active membership (schema stores plan_type, not plan_definition_id)
+    const { data: membership, error: membershipError } = await supabase
       .from('trainer_membership' as any)
-      .select(`
-        id,
-        plan_definition_id,
-        is_active,
-        renewal_date,
-        stripe_subscription_id,
-        stripe_customer_id,
-        membership_plan_definitions (*)
-      `)
+      .select('id, trainer_id, plan_type, monthly_price_cents, is_active, renewal_date, stripe_subscription_id, stripe_customer_id')
       .eq('trainer_id', userId)
       .eq('is_active', true)
-      .single();
-    
+      .maybeSingle();
+
     if (membershipError) {
-      console.error('Error fetching current plan:', membershipError);
+      console.error('Error fetching trainer_membership:', membershipError);
+      setCurrentPlan(null);
       return;
     }
-    
-    if (membershipData && (membershipData as any).membership_plan_definitions) {
-      const planDef = (membershipData as any).membership_plan_definitions;
+
+    if (!membership) {
+      setCurrentPlan(null);
+      return;
+    }
+
+    // Fetch plan definition by plan_type and merge details
+    const { data: planDef, error: defError } = await supabase
+      .from('membership_plan_definitions' as any)
+      .select('*')
+      .eq('plan_type', (membership as any).plan_type)
+      .maybeSingle();
+
+    if (defError) {
+      console.error('Error fetching plan definition:', defError);
+    }
+
+    if (planDef) {
       setCurrentPlan({
-        ...planDef,
-        membership_id: (membershipData as any).id,
-        is_active: (membershipData as any).is_active,
-        renewal_date: (membershipData as any).renewal_date,
-        stripe_subscription_id: (membershipData as any).stripe_subscription_id,
-        stripe_customer_id: (membershipData as any).stripe_customer_id
-      });
+        ...(planDef as any),
+        // Ensure price present (prefer planDef, fallback to membership)
+        monthly_price_cents: (planDef as any).monthly_price_cents ?? (membership as any).monthly_price_cents ?? 0,
+        membership_id: (membership as any).id,
+        is_active: (membership as any).is_active,
+        renewal_date: (membership as any).renewal_date,
+        stripe_subscription_id: (membership as any).stripe_subscription_id,
+        stripe_customer_id: (membership as any).stripe_customer_id
+      } as TrainerCurrentPlan);
+    } else {
+      // Fallback minimal plan using membership info
+      const planType = (membership as any).plan_type as 'high' | 'low';
+      setCurrentPlan({
+        id: `synthetic-${planType}`,
+        plan_name: planType,
+        plan_type: planType,
+        display_name: planType === 'high' ? 'High Plan' : 'Low Plan',
+        monthly_price_cents: (membership as any).monthly_price_cents ?? 0,
+        has_package_commission: false,
+        is_available_to_new_trainers: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        membership_id: (membership as any).id,
+        is_active: (membership as any).is_active,
+        renewal_date: (membership as any).renewal_date,
+        stripe_subscription_id: (membership as any).stripe_subscription_id,
+        stripe_customer_id: (membership as any).stripe_customer_id
+      } as TrainerCurrentPlan);
     }
   };
 
