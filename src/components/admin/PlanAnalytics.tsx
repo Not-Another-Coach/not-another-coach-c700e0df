@@ -49,11 +49,12 @@ export const PlanAnalytics = () => {
       // Plan distribution
       const { data: planDist } = await supabase
         .from('trainer_membership')
-        .select('plan_type')
+        .select('plan_definition_id, membership_plan_definitions!inner(display_name)')
         .eq('is_active', true);
 
-      const distribution = (planDist || []).reduce((acc: Record<string, number>, curr) => {
-        acc[curr.plan_type] = (acc[curr.plan_type] || 0) + 1;
+      const distribution = (planDist || []).reduce((acc: Record<string, number>, curr: any) => {
+        const planName = curr.membership_plan_definitions?.display_name || 'Unknown';
+        acc[planName] = (acc[planName] || 0) + 1;
         return acc;
       }, {});
 

@@ -2791,7 +2791,6 @@ export type Database = {
           is_available_to_new_trainers: boolean
           monthly_price_cents: number
           plan_name: string
-          plan_type: string
           stripe_price_id: string | null
           stripe_product_id: string | null
           updated_at: string
@@ -2809,7 +2808,6 @@ export type Database = {
           is_available_to_new_trainers?: boolean
           monthly_price_cents: number
           plan_name: string
-          plan_type: string
           stripe_price_id?: string | null
           stripe_product_id?: string | null
           updated_at?: string
@@ -2827,7 +2825,6 @@ export type Database = {
           is_available_to_new_trainers?: boolean
           monthly_price_cents?: number
           plan_name?: string
-          plan_type?: string
           stripe_price_id?: string | null
           stripe_product_id?: string | null
           updated_at?: string
@@ -5102,7 +5099,7 @@ export type Database = {
           monthly_price_cents: number
           payment_blocked_reason: string | null
           payment_status: string | null
-          plan_type: string
+          plan_definition_id: string
           proration_mode: string
           renewal_date: string
           retry_count: number | null
@@ -5119,7 +5116,7 @@ export type Database = {
           monthly_price_cents?: number
           payment_blocked_reason?: string | null
           payment_status?: string | null
-          plan_type?: string
+          plan_definition_id: string
           proration_mode?: string
           renewal_date?: string
           retry_count?: number | null
@@ -5136,7 +5133,7 @@ export type Database = {
           monthly_price_cents?: number
           payment_blocked_reason?: string | null
           payment_status?: string | null
-          plan_type?: string
+          plan_definition_id?: string
           proration_mode?: string
           renewal_date?: string
           retry_count?: number | null
@@ -5144,6 +5141,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "trainer_membership_plan_definition_id_fkey"
+            columns: ["plan_definition_id"]
+            isOneToOne: false
+            referencedRelation: "membership_plan_definitions"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "trainer_membership_trainer_id_fkey"
             columns: ["trainer_id"]
