@@ -100,14 +100,25 @@ export const PlanComparisonDialog = ({ open, onOpenChange, trainerId, onSuccess,
           }
         );
 
-        if (sessionError) throw sessionError;
+        console.log('Checkout session response:', { sessionData, sessionError });
+
+        if (sessionError) {
+          console.error('Session creation error:', sessionError);
+          throw sessionError;
+        }
 
         // Redirect to Stripe Checkout
-        if (sessionData?.url) {
-          window.location.href = sessionData.url;
-        } else {
-          throw new Error('No checkout URL returned');
+        const checkoutUrl = sessionData?.url;
+        console.log('Checkout URL:', checkoutUrl);
+        console.log('Full session data:', sessionData);
+
+        if (!checkoutUrl) {
+          console.error('No checkout URL in response. Full response:', sessionData);
+          throw new Error(`No checkout URL returned. Response: ${JSON.stringify(sessionData)}`);
         }
+
+        console.log('Redirecting to Stripe:', checkoutUrl);
+        window.location.href = checkoutUrl;
       } else {
         // Downgrade or switch - no payment required
         const effectiveDate = result.effective_date ? new Date(result.effective_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
