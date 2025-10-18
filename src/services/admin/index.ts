@@ -176,7 +176,6 @@ class AdminServiceClass extends BaseService {
     try {
       const { data, error } = await supabase.rpc('admin_create_membership_plan' as any, {
         p_plan_name: request.plan_name,
-        p_plan_type: request.plan_type,
         p_display_name: request.display_name,
         p_description: request.description || null,
         p_monthly_price_cents: request.monthly_price_cents,
@@ -205,6 +204,7 @@ class AdminServiceClass extends BaseService {
     try {
       const { error } = await supabase.rpc('admin_update_membership_plan' as any, {
         p_plan_id: request.plan_id,
+        p_plan_name: request.plan_name || null,
         p_display_name: request.display_name || null,
         p_description: request.description || null,
         p_monthly_price_cents: request.monthly_price_cents || null,

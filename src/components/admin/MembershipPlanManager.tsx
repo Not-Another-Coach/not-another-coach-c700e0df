@@ -97,7 +97,6 @@ export const MembershipPlanManager = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Plan Name</TableHead>
-                <TableHead>Type</TableHead>
                 <TableHead>Monthly Price</TableHead>
                 <TableHead>Commission</TableHead>
                 <TableHead>Active Trainers</TableHead>
@@ -109,7 +108,7 @@ export const MembershipPlanManager = () => {
             <TableBody>
               {plans.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                     No membership plans found. Create one to get started.
                   </TableCell>
                 </TableRow>
@@ -120,15 +119,22 @@ export const MembershipPlanManager = () => {
                       <div>
                         <div className="font-medium">{plan.display_name}</div>
                         <div className="text-xs text-muted-foreground">{plan.plan_name}</div>
+                        {plan.description && (
+                          <div className="text-xs text-muted-foreground mt-1">{plan.description}</div>
+                        )}
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <Badge variant={plan.plan_type === 'high' ? 'default' : 'secondary'}>
-                        {plan.plan_type.toUpperCase()}
-                      </Badge>
-                    </TableCell>
                     <TableCell>{formatCurrency(plan.monthly_price_cents)}</TableCell>
-                    <TableCell>{formatCommission(plan)}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span>{formatCommission(plan)}</span>
+                        {plan.has_package_commission && (
+                          <span className="text-xs text-muted-foreground">
+                            {plan.commission_fee_type === 'percentage' ? 'per package' : 'flat fee'}
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
                         <Users className="h-4 w-4 text-muted-foreground" />

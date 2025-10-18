@@ -27,12 +27,11 @@ interface PlanComparisonDialogProps {
   onOpenChange: (open: boolean) => void;
   trainerId: string;
   onSuccess: () => void;
-  currentPlanType?: string;
   renewalDate?: string;
   isCancelled?: boolean;
 }
 
-export const PlanComparisonDialog = ({ open, onOpenChange, trainerId, onSuccess, currentPlanType, renewalDate, isCancelled }: PlanComparisonDialogProps) => {
+export const PlanComparisonDialog = ({ open, onOpenChange, trainerId, onSuccess, renewalDate, isCancelled }: PlanComparisonDialogProps) => {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [reason, setReason] = useState('');

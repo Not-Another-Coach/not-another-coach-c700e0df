@@ -31,7 +31,7 @@ export const MembershipSettings: React.FC = () => {
     
     const { data } = await supabase
       .from('trainer_membership')
-      .select('payment_status, grace_end_date, payment_blocked_reason, cancel_at_period_end, cancellation_grace_end, renewal_date, plan_type')
+      .select('payment_status, grace_end_date, payment_blocked_reason, cancel_at_period_end, cancellation_grace_end, renewal_date')
       .eq('trainer_id', user.id)
       .eq('is_active', true)
       .maybeSingle();
@@ -203,7 +203,6 @@ export const MembershipSettings: React.FC = () => {
       open={showPlanDialog}
       onOpenChange={setShowPlanDialog}
       trainerId={user?.id || ''}
-      currentPlanType={membership?.plan_type}
       renewalDate={membership?.renewal_date}
       isCancelled={membership?.cancel_at_period_end}
       onSuccess={() => {

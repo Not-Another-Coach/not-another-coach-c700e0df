@@ -33,66 +33,57 @@ export const useTrainerMembershipPlans = (trainerId?: string) => {
   };
 
   const fetchCurrentPlan = async (userId: string) => {
-    // Get trainer's active membership (schema stores plan_type, not plan_definition_id)
-    const { data: membership, error: membershipError } = await supabase
-      .from('trainer_membership' as any)
-      .select('id, trainer_id, plan_type, monthly_price_cents, is_active, renewal_date')
-      .eq('trainer_id', userId)
-      .eq('is_active', true)
-      .maybeSingle();
+    try {
+      // First get the trainer's membership
+      const { data: membership, error: membershipError } = await supabase
+        .from('trainer_membership' as any)
+        .select('*')
+        .eq('trainer_id', userId)
+        .eq('is_active', true)
+        .maybeSingle();
 
-    if (membershipError) {
-      console.error('Error fetching trainer_membership:', membershipError);
-      setCurrentPlan(null);
-      return;
-    }
+      if (membershipError) {
+        console.error('Error fetching membership:', membershipError);
+        toast.error('Failed to load membership');
+        return;
+      }
 
-    if (!membership) {
-      setCurrentPlan(null);
-      return;
-    }
+      if (!membership) {
+        setCurrentPlan(null);
+        return;
+      }
 
-    // Fetch plan definition by plan_type and merge details
-    const { data: planDef, error: defError } = await supabase
-      .from('membership_plan_definitions' as any)
-      .select('*')
-      .eq('plan_type', (membership as any).plan_type)
-      .maybeSingle();
+      // Then get the plan definition
+      const { data: planDefinition, error: planError } = await supabase
+        .from('membership_plan_definitions' as any)
+        .select('*')
+        .eq('id', (membership as any).plan_definition_id)
+        .maybeSingle();
 
-    if (defError) {
-      console.error('Error fetching plan definition:', defError);
-    }
+      if (planError) {
+        console.error('Error fetching plan definition:', planError);
+        toast.error('Failed to load plan definition');
+        return;
+      }
 
-    if (planDef) {
+      if (!planDefinition) {
+        console.warn(`No plan definition found for id: ${(membership as any).plan_definition_id}`);
+        setCurrentPlan(null);
+        return;
+      }
+
+      // Merge the data
       setCurrentPlan({
-        ...(planDef as any),
-        // Ensure price present (prefer planDef, fallback to membership)
-        monthly_price_cents: (planDef as any).monthly_price_cents ?? (membership as any).monthly_price_cents ?? 0,
         membership_id: (membership as any).id,
         is_active: (membership as any).is_active,
+        stripe_subscription_id: (membership as any).stripe_subscription_id,
+        stripe_customer_id: (membership as any).stripe_customer_id,
         renewal_date: (membership as any).renewal_date,
-        stripe_subscription_id: null,
-        stripe_customer_id: null
+        ...(planDefinition as any)
       } as TrainerCurrentPlan);
-    } else {
-      // Fallback minimal plan using membership info
-      const planType = (membership as any).plan_type as 'high' | 'low';
-      setCurrentPlan({
-        id: `synthetic-${planType}`,
-        plan_name: planType,
-        plan_type: planType,
-        display_name: planType === 'high' ? 'High Plan' : 'Low Plan',
-        monthly_price_cents: (membership as any).monthly_price_cents ?? 0,
-        has_package_commission: false,
-        is_available_to_new_trainers: false,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        membership_id: (membership as any).id,
-        is_active: (membership as any).is_active,
-        renewal_date: (membership as any).renewal_date,
-        stripe_subscription_id: null,
-        stripe_customer_id: null
-      } as TrainerCurrentPlan);
+    } catch (error) {
+      console.error('Error in fetchCurrentPlan:', error);
+      toast.error('Failed to load membership information');
     }
   };
 

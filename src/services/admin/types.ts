@@ -56,7 +56,6 @@ export interface UpdateVerificationRequest {
 export interface MembershipPlanDefinition {
   id: string;
   plan_name: string;
-  plan_type: 'high' | 'low';
   display_name: string;
   description?: string;
   monthly_price_cents: number;
@@ -74,7 +73,6 @@ export interface MembershipPlanDefinition {
 
 export interface CreateMembershipPlanRequest {
   plan_name: string;
-  plan_type: 'high' | 'low';
   display_name: string;
   description?: string;
   monthly_price_cents: number;
@@ -89,6 +87,7 @@ export interface CreateMembershipPlanRequest {
 
 export interface UpdateMembershipPlanRequest {
   plan_id: string;
+  plan_name?: string;
   display_name?: string;
   description?: string;
   monthly_price_cents?: number;

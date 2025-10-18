@@ -26,7 +26,7 @@ serve(async (req) => {
       try {
         const { data: newPlan } = await supabase
           .from('membership_plan_definitions')
-          .select('plan_type, monthly_price_cents')
+          .select('id, monthly_price_cents')
           .eq('id', change.to_plan_id)
           .single()
 
@@ -34,7 +34,7 @@ serve(async (req) => {
           await supabase
             .from('trainer_membership')
             .update({
-              plan_type: newPlan.plan_type,
+              plan_definition_id: newPlan.id,
               monthly_price_cents: newPlan.monthly_price_cents,
               updated_at: new Date().toISOString()
             })

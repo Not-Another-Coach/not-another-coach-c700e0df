@@ -21,7 +21,6 @@ export const MembershipPlanDialog = ({ open, onOpenChange, plan, onSave }: Membe
   
   const [formData, setFormData] = useState({
     plan_name: '',
-    plan_type: 'high' as 'high' | 'low',
     display_name: '',
     description: '',
     monthly_price_cents: 0,
@@ -38,7 +37,6 @@ export const MembershipPlanDialog = ({ open, onOpenChange, plan, onSave }: Membe
     if (plan) {
       setFormData({
         plan_name: plan.plan_name,
-        plan_type: plan.plan_type,
         display_name: plan.display_name,
         description: plan.description || '',
         monthly_price_cents: plan.monthly_price_cents,
@@ -53,7 +51,6 @@ export const MembershipPlanDialog = ({ open, onOpenChange, plan, onSave }: Membe
     } else {
       setFormData({
         plan_name: '',
-        plan_type: 'high',
         display_name: '',
         description: '',
         monthly_price_cents: 0,
@@ -75,6 +72,7 @@ export const MembershipPlanDialog = ({ open, onOpenChange, plan, onSave }: Membe
     const request = isEdit
       ? {
           plan_id: plan!.id,
+          plan_name: formData.plan_name,
           display_name: formData.display_name,
           description: formData.description || null,
           monthly_price_cents: formData.monthly_price_cents,
@@ -123,42 +121,20 @@ export const MembershipPlanDialog = ({ open, onOpenChange, plan, onSave }: Membe
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {!isEdit && (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="plan_name">Plan Name (Internal)</Label>
-                <Input
-                  id="plan_name"
-                  value={formData.plan_name}
-                  onChange={(e) => setFormData({ ...formData, plan_name: e.target.value })}
-                  placeholder="e.g., high_subscription_v2"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="plan_type">Plan Type</Label>
-                <Select
-                  value={formData.plan_type}
-                  onValueChange={(value: 'high' | 'low') => {
-                    setFormData({ 
-                      ...formData, 
-                      plan_type: value,
-                      has_package_commission: value === 'low'
-                    });
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="high">High (No Commission)</SelectItem>
-                    <SelectItem value="low">Low (With Commission)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </>
-          )}
+          <div className="space-y-2">
+            <Label htmlFor="plan_name">Plan Name (Internal Identifier)</Label>
+            <Input
+              id="plan_name"
+              value={formData.plan_name}
+              onChange={(e) => setFormData({ ...formData, plan_name: e.target.value })}
+              placeholder="e.g., professional_plan"
+              required
+              disabled={isEdit}
+            />
+            <p className="text-xs text-muted-foreground">
+              {isEdit ? 'Plan name cannot be changed after creation' : 'Use a unique identifier (lowercase, underscores)'}
+            </p>
+          </div>
 
           <div className="space-y-2">
             <Label htmlFor="display_name">Display Name</Label>
@@ -207,12 +183,16 @@ export const MembershipPlanDialog = ({ open, onOpenChange, plan, onSave }: Membe
           </div>
 
           <div className="flex items-center justify-between space-x-2">
-            <Label htmlFor="has_commission">Has Package Commission</Label>
+            <div className="space-y-1">
+              <Label htmlFor="has_commission">Package Commission</Label>
+              <p className="text-xs text-muted-foreground">
+                Charge a commission on client package payments
+              </p>
+            </div>
             <Switch
               id="has_commission"
               checked={formData.has_package_commission}
               onCheckedChange={(checked) => setFormData({ ...formData, has_package_commission: checked })}
-              disabled={!isEdit && formData.plan_type === 'low'}
             />
           </div>
 
