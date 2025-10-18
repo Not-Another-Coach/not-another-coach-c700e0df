@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Settings, Info, CheckCircle2, Repeat, AlertCircle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Settings, Info, CheckCircle2, Repeat, AlertCircle, Calendar } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTrainerMembershipPlans } from '@/hooks/useTrainerMembershipPlans';
 import { PaymentStatusBanner } from '@/components/trainer/PaymentStatusBanner';
@@ -98,6 +99,16 @@ export const MembershipSettings: React.FC = () => {
 
   const hasCommission = currentPlan.has_package_commission;
   const monthlyPrice = (currentPlan.monthly_price_cents / 100).toFixed(2);
+  
+  const getStatusBadge = () => {
+    if (membership?.cancel_at_period_end) {
+      return <Badge variant="destructive">Cancelled - ends {format(new Date(membership.renewal_date), 'MMM d')}</Badge>;
+    }
+    if (pendingDowngrade) {
+      return <Badge className="bg-orange-100 text-orange-800 border-orange-200">Scheduled change</Badge>;
+    }
+    return <Badge className="bg-green-100 text-green-800 border-green-200">Active</Badge>;
+  };
 
   return (
     <div className="space-y-6">
@@ -145,10 +156,13 @@ export const MembershipSettings: React.FC = () => {
       <Card className="w-full max-w-2xl">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Settings className="h-5 w-5" />
-              Your Membership Plan
-            </CardTitle>
+            <div>
+              <CardTitle className="flex items-center gap-2 mb-2">
+                <Settings className="h-5 w-5" />
+                Your Membership Plan
+              </CardTitle>
+              {getStatusBadge()}
+            </div>
             <Button 
               onClick={() => setShowPlanDialog(true)}
               size="sm"
@@ -173,6 +187,13 @@ export const MembershipSettings: React.FC = () => {
                 <p className="text-sm text-muted-foreground mb-3">{currentPlan.description}</p>
               )}
               <div className="space-y-2">
+                {membership?.renewal_date && !membership?.cancel_at_period_end && (
+                  <div className="flex items-center gap-2 text-sm mb-2 pb-2 border-b">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">Next renewal:</span>
+                    <span className="font-medium">{format(new Date(membership.renewal_date), 'MMMM d, yyyy')}</span>
+                  </div>
+                )}
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Monthly Subscription:</span>
                   <span className="font-medium">£{monthlyPrice}</span>
@@ -214,17 +235,12 @@ export const MembershipSettings: React.FC = () => {
         )}
 
         {/* Info Section */}
-        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <div className="p-4 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg">
           <div className="flex items-start gap-2">
-            <Info className="h-5 w-5 text-blue-600 mt-0.5" />
-            <div className="text-sm text-blue-800">
-              <p className="font-medium mb-2">Important Information:</p>
-              <ul className="space-y-1 list-disc list-inside">
-                <li>Your membership plan is managed by administrators</li>
-                <li>Commission structure applies to all new package payments</li>
-                <li>Monthly subscription fees are billed separately</li>
-                <li>Contact support if you have questions about your plan</li>
-              </ul>
+            <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+            <div className="text-sm text-blue-800 dark:text-blue-200">
+              <p className="font-medium mb-2">Plan & Billing Notes</p>
+              <p>Your plan details are managed automatically. Commission rates apply only to new client packages. Monthly billing is handled securely through our payment provider.</p>
             </div>
           </div>
         </div>

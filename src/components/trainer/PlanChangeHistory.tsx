@@ -40,7 +40,11 @@ export const PlanChangeHistory = ({ trainerId }: PlanChangeHistoryProps) => {
     try {
       const { data, error } = await supabase
         .from('trainer_membership_history')
-        .select('*')
+        .select(`
+          *,
+          from_plan:from_plan_id(display_name),
+          to_plan:to_plan_id(display_name)
+        `)
         .eq('trainer_id', trainerId)
         .order('created_at', { ascending: false });
 
@@ -135,8 +139,16 @@ export const PlanChangeHistory = ({ trainerId }: PlanChangeHistoryProps) => {
                   </div>
 
                   <div className="space-y-1">
-                    <p className="text-sm font-medium">
-                      Effective Date: {format(new Date(change.effective_date), 'MMM d, yyyy')}
+                    {(change as any).from_plan && (change as any).to_plan && (
+                      <p className="text-sm font-medium mb-2">
+                        {change.change_type === 'upgrade' && '⬆️ '}
+                        {change.change_type === 'downgrade' && '⬇️ '}
+                        {(change as any).from_plan?.display_name} → {(change as any).to_plan?.display_name}
+                      </p>
+                    )}
+                    <p className="text-sm">
+                      <span className="text-muted-foreground">Effective Date:</span>{' '}
+                      <span className="font-medium">{format(new Date(change.effective_date), 'MMM d, yyyy')}</span>
                     </p>
                     {change.change_reason && (
                       <p className="text-sm text-muted-foreground">
@@ -144,7 +156,7 @@ export const PlanChangeHistory = ({ trainerId }: PlanChangeHistoryProps) => {
                       </p>
                     )}
                     <p className="text-xs text-muted-foreground">
-                      Initiated by: {change.initiated_by}
+                      Initiated by: {change.initiated_by === 'system' ? 'System' : 'Trainer'} | Status: {change.applied_at ? 'Applied' : 'Pending'}
                     </p>
                   </div>
 

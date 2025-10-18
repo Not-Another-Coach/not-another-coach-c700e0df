@@ -47,8 +47,8 @@ export function CancelPlanDialog({
 
       if (error) throw error;
 
-      toast.success('Plan Cancellation Scheduled', {
-        description: `Your plan will cancel on ${renewalDate}. You can reactivate anytime before then.`
+      toast.success('Cancellation Confirmed', {
+        description: `Your cancellation has been confirmed. You'll retain access until ${renewalDate}.`
       });
 
       onSuccess();
@@ -71,13 +71,13 @@ export function CancelPlanDialog({
             Cancel {currentPlan} Plan
           </DialogTitle>
           <DialogDescription>
-            Your plan will remain active until {renewalDate}. You can reactivate anytime before then.
+            We're sorry to see you go. Your plan will remain active until {renewalDate}. You can reactivate anytime before then.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <div>
-            <Label>Why are you cancelling?</Label>
+            <Label>What's the main reason for leaving?</Label>
             <RadioGroup value={reason} onValueChange={setReason} className="mt-2 space-y-2">
               {reasons.map(r => (
                 <div key={r} className="flex items-center space-x-2">
@@ -107,9 +107,9 @@ export function CancelPlanDialog({
               <p className="font-medium text-blue-900 dark:text-blue-100">Cancellation Details</p>
               <ul className="mt-2 space-y-1 text-blue-800 dark:text-blue-200">
                 <li>• Full access until {renewalDate}</li>
+                <li>• You won't be charged again after this date</li>
                 <li>• 3-day grace period to reactivate</li>
                 <li>• Existing clients unaffected</li>
-                <li>• No refunds for current period</li>
               </ul>
             </div>
           </div>
@@ -124,9 +124,12 @@ export function CancelPlanDialog({
               disabled={!reason || loading}
               className="flex-1"
             >
-              {loading ? 'Processing...' : 'Confirm Cancellation'}
+              {loading ? 'Processing...' : 'Confirm & Cancel Plan'}
             </Button>
           </div>
+          <p className="text-xs text-muted-foreground text-center">
+            Need help? <a href="mailto:support@example.com" className="underline">Contact support before cancelling</a>
+          </p>
         </div>
       </DialogContent>
     </Dialog>

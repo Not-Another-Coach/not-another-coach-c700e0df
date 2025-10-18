@@ -1,6 +1,6 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, RotateCcw } from 'lucide-react';
+import { Clock, RotateCcw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useState } from 'react';
@@ -24,8 +24,8 @@ export function CancellationBanner({
       const { error } = await supabase.rpc('reactivate_trainer_plan' as any);
       if (error) throw error;
 
-      toast.success('Plan Reactivated', {
-        description: 'Your plan will continue as normal on your next renewal.'
+      toast.success('✅ Plan Reactivated', {
+        description: 'Your membership continues without interruption.'
       });
 
       onReactivate();
@@ -43,24 +43,28 @@ export function CancellationBanner({
   );
 
   return (
-    <Alert variant="destructive" className="mb-4">
-      <AlertTriangle className="h-4 w-4" />
-      <AlertTitle>Plan Cancellation Scheduled</AlertTitle>
+    <Alert className="mb-4 border-amber-200 bg-amber-50 dark:bg-amber-950/20">
+      <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+      <AlertTitle className="text-amber-900 dark:text-amber-100">Plan Cancellation Scheduled</AlertTitle>
       <AlertDescription>
-        <p className="mb-3">
-          Your plan will cancel on <strong>{renewalDate}</strong> ({daysUntilCancellation} days).
-          You have until <strong>{graceEndDate}</strong> to reactivate without losing access.
+        <p className="mb-3 text-amber-800 dark:text-amber-200">
+          Your plan is set to end on <strong>{renewalDate}</strong> ({daysUntilCancellation} days).
+          You'll continue to have full access until then. To keep your membership active, reactivate anytime before <strong>{graceEndDate}</strong>.
         </p>
-        <Button 
-          onClick={handleReactivate} 
-          disabled={loading}
-          variant="outline"
-          size="sm"
-          className="gap-2"
-        >
-          <RotateCcw className="h-4 w-4" />
-          {loading ? 'Reactivating...' : 'Reactivate Plan'}
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Button 
+            onClick={handleReactivate} 
+            disabled={loading}
+            size="sm"
+            className="gap-2"
+          >
+            <RotateCcw className="h-4 w-4" />
+            {loading ? 'Reactivating...' : 'Reactivate Plan'}
+          </Button>
+        </div>
+        <p className="text-xs text-amber-700 dark:text-amber-300 mt-3">
+          Changed your mind? Contact support to explore other plan options.
+        </p>
       </AlertDescription>
     </Alert>
   );
