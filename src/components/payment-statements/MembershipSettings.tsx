@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Settings, Info, CheckCircle2, Repeat } from 'lucide-react';
+import { Settings, Info, CheckCircle2, Repeat, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTrainerMembershipPlans } from '@/hooks/useTrainerMembershipPlans';
 import { PaymentStatusBanner } from '@/components/trainer/PaymentStatusBanner';
@@ -11,6 +11,8 @@ import { CancellationBanner } from '@/components/trainer/CancellationBanner';
 import { PlanChangeHistory } from '@/components/trainer/PlanChangeHistory';
 import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { format } from 'date-fns';
 
 export const MembershipSettings: React.FC = () => {
   const { user } = useAuth();
@@ -18,11 +20,13 @@ export const MembershipSettings: React.FC = () => {
   const [showPlanDialog, setShowPlanDialog] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<any>(null);
   const [membership, setMembership] = useState<any>(null);
+  const [pendingDowngrade, setPendingDowngrade] = useState<any>(null);
 
   useEffect(() => {
     console.log('Current membership plan:', currentPlan);
     if (user?.id) {
       loadPaymentStatus();
+      loadPendingDowngrade();
     }
   }, [currentPlan, user?.id]);
 
@@ -40,6 +44,25 @@ export const MembershipSettings: React.FC = () => {
       setPaymentStatus(data);
       setMembership(data);
     }
+  };
+
+  const loadPendingDowngrade = async () => {
+    if (!user?.id) return;
+    
+    const { data } = await supabase
+      .from('trainer_membership_history')
+      .select(`
+        *,
+        new_plan:to_plan_id(display_name, monthly_price_cents)
+      `)
+      .eq('trainer_id', user.id)
+      .eq('change_type', 'downgrade')
+      .is('applied_at', null)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    setPendingDowngrade(data);
   };
 
   if (loading) {
@@ -104,6 +127,21 @@ export const MembershipSettings: React.FC = () => {
         </TabsList>
 
         <TabsContent value="current" className="space-y-6">
+          {pendingDowngrade && (
+            <Alert className="border-orange-200 bg-orange-50">
+              <AlertCircle className="h-4 w-4 text-orange-600" />
+              <AlertDescription className="text-orange-800">
+                <span className="font-medium">Plan change scheduled:</span> Your plan will change to{' '}
+                <span className="font-semibold">{pendingDowngrade.new_plan?.display_name}</span>{' '}
+                on{' '}
+                <span className="font-semibold">
+                  {format(new Date(pendingDowngrade.effective_date), 'MMMM d, yyyy')}
+                </span>
+                . You'll keep your current features until then.
+              </AlertDescription>
+            </Alert>
+          )}
+
       <Card className="w-full max-w-2xl">
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -208,6 +246,7 @@ export const MembershipSettings: React.FC = () => {
       onSuccess={() => {
         refreshPlans();
         loadPaymentStatus();
+        loadPendingDowngrade();
       }}
     />
     </div>
