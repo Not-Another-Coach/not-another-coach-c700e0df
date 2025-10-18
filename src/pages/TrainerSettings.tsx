@@ -1,14 +1,31 @@
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import { InstagramIntegration } from "@/components/instagram/InstagramIntegration";
 import { MembershipSettings } from "@/components/payment-statements/MembershipSettings";
+import { useToast } from "@/hooks/use-toast";
+import { useEffect } from "react";
 
 const TrainerSettings = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (searchParams.get('upgrade_cancelled') === 'true') {
+      toast({
+        title: "Upgrade Cancelled",
+        description: "Your plan upgrade was cancelled. No charges were made.",
+        variant: "default",
+      });
+      // Remove the parameter from the URL
+      searchParams.delete('upgrade_cancelled');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams, toast]);
 
   return (
     <div className="min-h-screen bg-background">

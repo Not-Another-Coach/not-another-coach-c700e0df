@@ -31,6 +31,7 @@ import { DiagnosticsProvider } from "@/diagnostics/DiagnosticsContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import AdminDiagnostics from "@/pages/AdminDiagnostics";
 import { PaymentManagement } from "./pages/PaymentManagement";
+import PlanUpgradeSuccess from "./pages/PlanUpgradeSuccess";
 import ClientPayments from "./pages/ClientPayments";
 
 // Admin pages
@@ -79,6 +80,7 @@ const App = () => (
                 <Route path="/trainer/demo" element={<TrainerDemo />} />
                 <Route path="/trainer/profile-setup" element={<TrainerProfileSetup />} />
                 <Route path="/trainer/settings" element={<TrainerSettings />} />
+                <Route path="/trainer/plan-upgrade-success" element={<PlanUpgradeSuccess />} />
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
                 <Route path="/admin/highlights" element={<AdminHighlights />} />

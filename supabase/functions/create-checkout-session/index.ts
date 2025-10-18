@@ -8,10 +8,13 @@ const corsHeaders = {
 };
 
 interface CheckoutSessionRequest {
-  payment_type: 'trainer_membership' | 'coach_selection';
+  payment_type: 'trainer_membership' | 'coach_selection' | 'plan_upgrade';
   package_id?: string;
   trainer_id?: string;
   plan_type?: string;
+  history_id?: string;
+  proration_amount_cents?: number;
+  new_plan_name?: string;
   success_url: string;
   cancel_url: string;
 }
@@ -45,7 +48,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const requestData: CheckoutSessionRequest = await req.json();
-    const { payment_type, package_id, trainer_id, plan_type, success_url, cancel_url } = requestData;
+    const { payment_type, package_id, trainer_id, plan_type, history_id, proration_amount_cents, new_plan_name, success_url, cancel_url } = requestData;
 
     let sessionParams: Stripe.Checkout.SessionCreateParams;
 
@@ -176,6 +179,35 @@ const handler = async (req: Request): Promise<Response> => {
           },
         };
       }
+    } else if (payment_type === 'plan_upgrade') {
+      // Plan upgrade - one-time prorated payment
+      if (!history_id || !proration_amount_cents || !new_plan_name) {
+        throw new Error('history_id, proration_amount_cents, and new_plan_name are required for plan upgrade');
+      }
+
+      sessionParams = {
+        mode: 'payment',
+        payment_method_types: ['card'],
+        line_items: [{
+          price_data: {
+            currency: 'gbp',
+            product_data: {
+              name: `Upgrade to ${new_plan_name}`,
+              description: `Prorated upgrade charge`,
+            },
+            unit_amount: proration_amount_cents,
+          },
+          quantity: 1,
+        }],
+        success_url,
+        cancel_url,
+        customer_email: user.email,
+        metadata: {
+          user_id: user.id,
+          payment_type: 'plan_upgrade',
+          history_id,
+        },
+      };
     } else {
       throw new Error('Invalid payment type');
     }

@@ -82,22 +82,49 @@ export const PlanComparisonDialog = ({ open, onOpenChange, trainerId, onSuccess,
 
       const result = data as any;
       
-      toast({
-        title: result.change_type === 'upgrade' ? 'Plan Upgraded!' : 'Plan Change Scheduled',
-        description: result.change_type === 'upgrade'
-          ? `You've been upgraded to ${selectedPlan.display_name}. Prorated charge: £${(result.proration_cents / 100).toFixed(2)}`
-          : `Your plan will change to ${selectedPlan.display_name} on ${result.effective_date}`
-      });
+      // Check if payment is required (upgrade)
+      if (result?.requires_payment) {
+        // Create Stripe checkout session for plan upgrade
+        const { data: sessionData, error: sessionError } = await supabase.functions.invoke(
+          'create-checkout-session',
+          {
+            body: {
+              payment_type: 'plan_upgrade',
+              history_id: result.history_id,
+              proration_amount_cents: result.proration_cents,
+              new_plan_name: result.new_plan_name,
+              success_url: `${window.location.origin}/trainer/plan-upgrade-success?session_id={CHECKOUT_SESSION_ID}`,
+              cancel_url: `${window.location.origin}/trainer/settings?upgrade_cancelled=true`,
+            },
+          }
+        );
 
-      onSuccess();
-      onOpenChange(false);
+        if (sessionError) throw sessionError;
+
+        // Redirect to Stripe Checkout
+        if (sessionData?.url) {
+          window.location.href = sessionData.url;
+        } else {
+          throw new Error('No checkout URL returned');
+        }
+      } else {
+        // Downgrade or switch - no payment required
+        toast({
+          title: result.change_type === 'upgrade' ? 'Plan Upgraded!' : 'Plan Change Scheduled',
+          description: result.change_type === 'upgrade'
+            ? `You've been upgraded to ${selectedPlan.display_name}. Prorated charge: £${(result.proration_cents / 100).toFixed(2)}`
+            : `Your plan will change to ${selectedPlan.display_name} on ${result.effective_date}`
+        });
+
+        onSuccess();
+        onOpenChange(false);
+      }
     } catch (error: any) {
       toast({
         title: 'Error',
         description: error.message,
         variant: 'destructive'
       });
-    } finally {
       setSubmitting(false);
     }
   };
@@ -362,7 +389,7 @@ export const PlanComparisonDialog = ({ open, onOpenChange, trainerId, onSuccess,
                     disabled={submitting || (selectedPlan.switch_type === 'downgrade' && !reason)}
                     className="w-full sm:w-auto"
                   >
-                    {submitting ? 'Processing...' : selectedPlan.switch_type === 'upgrade' ? 'Upgrade Now' : 'Schedule Downgrade'}
+                    {submitting ? 'Processing...' : selectedPlan.switch_type === 'upgrade' ? 'Proceed to Payment' : 'Schedule Downgrade'}
                   </Button>
                 </div>
               </div>

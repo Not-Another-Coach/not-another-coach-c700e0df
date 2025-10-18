@@ -5183,9 +5183,12 @@ export type Database = {
           initiated_by: string | null
           initiated_by_user_id: string | null
           new_renewal_date: string | null
+          payment_status: string | null
           previous_renewal_date: string | null
           prorated_amount_cents: number | null
           reason: string | null
+          stripe_checkout_session_id: string | null
+          stripe_payment_intent_id: string | null
           stripe_subscription_id: string | null
           to_plan_id: string | null
           trainer_id: string
@@ -5201,9 +5204,12 @@ export type Database = {
           initiated_by?: string | null
           initiated_by_user_id?: string | null
           new_renewal_date?: string | null
+          payment_status?: string | null
           previous_renewal_date?: string | null
           prorated_amount_cents?: number | null
           reason?: string | null
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
           stripe_subscription_id?: string | null
           to_plan_id?: string | null
           trainer_id: string
@@ -5219,9 +5225,12 @@ export type Database = {
           initiated_by?: string | null
           initiated_by_user_id?: string | null
           new_renewal_date?: string | null
+          payment_status?: string | null
           previous_renewal_date?: string | null
           prorated_amount_cents?: number | null
           reason?: string | null
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
           stripe_subscription_id?: string | null
           to_plan_id?: string | null
           trainer_id?: string
