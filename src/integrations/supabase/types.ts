@@ -6852,20 +6852,34 @@ export type Database = {
         Returns: Json
       }
       admin_create_membership_plan: {
-        Args: {
-          p_commission_fee_type: string
-          p_commission_fee_value_flat_cents: number
-          p_commission_fee_value_percent: number
-          p_description: string
-          p_display_name: string
-          p_has_package_commission: boolean
-          p_is_available_to_new_trainers: boolean
-          p_monthly_price_cents: number
-          p_plan_name: string
-          p_plan_type: string
-          p_stripe_price_id: string
-          p_stripe_product_id: string
-        }
+        Args:
+          | {
+              p_commission_fee_type: string
+              p_commission_fee_value_flat_cents: number
+              p_commission_fee_value_percent: number
+              p_description: string
+              p_display_name: string
+              p_has_package_commission: boolean
+              p_is_available_to_new_trainers: boolean
+              p_monthly_price_cents: number
+              p_plan_name: string
+              p_plan_type: string
+              p_stripe_price_id: string
+              p_stripe_product_id: string
+            }
+          | {
+              p_commission_fee_type: string
+              p_commission_fee_value_flat_cents: number
+              p_commission_fee_value_percent: number
+              p_description: string
+              p_display_name: string
+              p_has_package_commission: boolean
+              p_is_available_to_new_trainers: boolean
+              p_monthly_price_cents: number
+              p_plan_name: string
+              p_stripe_price_id: string
+              p_stripe_product_id: string
+            }
         Returns: string
       }
       admin_delete_user_completely: {
@@ -6883,6 +6897,7 @@ export type Database = {
           p_is_available_to_new_trainers: boolean
           p_monthly_price_cents: number
           p_plan_id: string
+          p_plan_name: string
           p_stripe_price_id: string
           p_stripe_product_id: string
         }
