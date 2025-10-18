@@ -8,7 +8,7 @@ import { MembershipAssignmentService, TrainerMembershipInfo } from '@/services/a
 import { useMembershipPlans } from '@/hooks/useMembershipPlans';
 import { ExtendGracePeriodDialog } from './ExtendGracePeriodDialog';
 import { supabase } from '@/integrations/supabase/client';
-import { Users, Search, Zap, UserPlus, Clock, RefreshCw } from 'lucide-react';
+import { Users, Search, Zap, UserPlus, Clock, RefreshCw, TrendingDown } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -270,7 +270,15 @@ export function TrainerMembershipAssignment() {
                       </td>
                       <td className="p-3">
                         {trainer.current_plan_name ? (
-                          <div className="font-medium">{trainer.current_plan_name}</div>
+                          <div>
+                            <div className="font-medium">{trainer.current_plan_name}</div>
+                            {trainer.pending_downgrade && (
+                              <div className="flex items-center gap-1 text-xs text-orange-600 mt-1">
+                                <TrendingDown className="h-3 w-3" />
+                                <span>Downgrade to {trainer.pending_downgrade.new_plan_name} on {new Date(trainer.pending_downgrade.effective_date).toLocaleDateString()}</span>
+                              </div>
+                            )}
+                          </div>
                         ) : (
                           <span className="text-muted-foreground">Not Assigned</span>
                         )}

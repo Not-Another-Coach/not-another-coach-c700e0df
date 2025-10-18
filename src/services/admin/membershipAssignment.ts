@@ -15,6 +15,10 @@ export interface TrainerMembershipInfo {
   renewal_date?: string;
   payment_status?: string;
   grace_end_date?: string;
+  pending_downgrade?: {
+    new_plan_name: string;
+    effective_date: string;
+  };
 }
 
 export interface BulkAssignmentResult {
@@ -96,11 +100,36 @@ export class MembershipAssignmentService {
         if (user?.id && user?.email) emailMap.set(user.id, user.email);
       });
 
-      // 5) Compose final trainers list
+      // 5) Fetch pending downgrades
+      const pendingDowngradesMap = new Map<string, { new_plan_name: string; effective_date: string }>();
+      if (trainerIds.length > 0) {
+        const { data: downgrades } = await supabase
+          .from('trainer_membership_history')
+          .select(`
+            trainer_id,
+            effective_date,
+            to_plan:to_plan_id(display_name)
+          `)
+          .in('trainer_id', trainerIds)
+          .eq('change_type', 'downgrade')
+          .is('applied_at', null);
+
+        (downgrades || []).forEach((d: any) => {
+          if (d.to_plan?.display_name) {
+            pendingDowngradesMap.set(d.trainer_id, {
+              new_plan_name: d.to_plan.display_name,
+              effective_date: d.effective_date,
+            });
+          }
+        });
+      }
+
+      // 6) Compose final trainers list
       const trainers: TrainerMembershipInfo[] = (profilesData || []).map((trainer: any) => {
         const activeMembership = membershipsByTrainer.get(trainer.id);
         const planDefId = activeMembership?.plan_definition_id as string | undefined;
         const planInfo = planDefId ? planInfoById.get(planDefId) : undefined;
+        const pendingDowngrade = pendingDowngradesMap.get(trainer.id);
 
         return {
           trainer_id: trainer.id,
@@ -114,6 +143,7 @@ export class MembershipAssignmentService {
           renewal_date: activeMembership?.renewal_date,
           payment_status: activeMembership?.payment_status,
           grace_end_date: activeMembership?.grace_end_date,
+          pending_downgrade: pendingDowngrade,
         };
       });
 
