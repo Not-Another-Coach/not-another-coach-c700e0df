@@ -115,7 +115,7 @@ export const PlanComparisonDialog = ({ open, onOpenChange, trainerId, onSuccess,
 
       toast({
         title: 'Plan Cancellation Scheduled',
-        description: `Your plan will remain active until ${renewalDate}. You can reactivate anytime before then.`
+        description: `Your plan will remain active until ${formatDate(renewalDate)}. You can reactivate anytime before then.`
       });
 
       onSuccess();
@@ -149,16 +149,31 @@ export const PlanComparisonDialog = ({ open, onOpenChange, trainerId, onSuccess,
     }
   };
 
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'your renewal date';
+    try {
+      return new Date(dateString).toLocaleDateString('en-GB', { 
+        day: 'numeric', 
+        month: 'long', 
+        year: 'numeric' 
+      });
+    } catch {
+      return dateString;
+    }
+  };
+
   const currentPlan = plans.find(p => p.is_current_plan);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Manage Your Plan</DialogTitle>
-          <DialogDescription>
-            Change to a different plan or cancel your current membership.
-          </DialogDescription>
+          <DialogTitle>{showCancelSection ? 'Cancel Your Plan' : 'Manage Your Plan'}</DialogTitle>
+          {!showCancelSection && (
+            <DialogDescription>
+              Change to a different plan or cancel your current membership.
+            </DialogDescription>
+          )}
         </DialogHeader>
 
         {loading ? (
@@ -168,7 +183,7 @@ export const PlanComparisonDialog = ({ open, onOpenChange, trainerId, onSuccess,
             <div className="space-y-4">
               <h3 className="font-semibold">Cancel Your Plan</h3>
               <p className="text-sm text-muted-foreground">
-                Your plan will remain active until {renewalDate}. You can reactivate anytime before then.
+                Your plan will remain active until {formatDate(renewalDate)}. You can reactivate anytime before then.
               </p>
 
               <div className="space-y-3">

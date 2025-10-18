@@ -48,7 +48,7 @@ export class MembershipAssignmentService {
       if (trainerIds.length > 0) {
         const { data: memberships, error: membershipError } = await supabase
           .from('trainer_membership')
-          .select('trainer_id, plan_type, monthly_price_cents, is_active, renewal_date, payment_status, grace_end_date')
+          .select('trainer_id, plan_definition_id, monthly_price_cents, is_active, renewal_date, payment_status, grace_end_date')
           .in('trainer_id', trainerIds);
 
         if (membershipError) {
@@ -64,20 +64,20 @@ export class MembershipAssignmentService {
         }
       }
 
-      // 3) Fetch active plan definitions to map plan_type -> human plan_name
+      // 3) Fetch active plan definitions to map plan_definition_id -> human plan_name
       const { data: planDefs, error: defsError } = await supabase
         .from('membership_plan_definitions')
-        .select('plan_type, plan_name, is_active');
+        .select('id, plan_name, display_name, is_active');
 
       if (defsError) {
         console.error('Plan definitions fetch error:', defsError);
         throw defsError;
       }
 
-      const planNameByType = new Map<string, string>(
+      const planInfoById = new Map<string, { name: string; displayName: string }>(
         (planDefs || [])
           .filter((p: any) => p.is_active !== false)
-          .map((p: any) => [p.plan_type, p.plan_name])
+          .map((p: any) => [p.id, { name: p.plan_name, displayName: p.display_name }])
       );
 
       // 4) Get emails from edge function (continue even if it fails or different shape)
@@ -99,15 +99,16 @@ export class MembershipAssignmentService {
       // 5) Compose final trainers list
       const trainers: TrainerMembershipInfo[] = (profilesData || []).map((trainer: any) => {
         const activeMembership = membershipsByTrainer.get(trainer.id);
-        const planType = activeMembership?.plan_type as string | undefined;
+        const planDefId = activeMembership?.plan_definition_id as string | undefined;
+        const planInfo = planDefId ? planInfoById.get(planDefId) : undefined;
 
         return {
           trainer_id: trainer.id,
           trainer_email: emailMap.get(trainer.id) || 'No email',
           trainer_name: `${trainer.first_name || ''} ${trainer.last_name || ''}`.trim() || 'Unnamed',
-          current_plan_id: undefined,
-          current_plan_name: planType ? planNameByType.get(planType) || planType : undefined,
-          current_plan_type: planType,
+          current_plan_id: planDefId,
+          current_plan_name: planInfo?.displayName || planInfo?.name,
+          current_plan_type: undefined, // deprecated field
           monthly_price_cents: activeMembership?.monthly_price_cents,
           is_active: activeMembership?.is_active,
           renewal_date: activeMembership?.renewal_date,

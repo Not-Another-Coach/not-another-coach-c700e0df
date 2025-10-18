@@ -270,12 +270,7 @@ export function TrainerMembershipAssignment() {
                       </td>
                       <td className="p-3">
                         {trainer.current_plan_name ? (
-                          <div>
-                            <div className="font-medium">{trainer.current_plan_name}</div>
-                            <Badge variant="outline" className="text-xs mt-1">
-                              {trainer.current_plan_type}
-                            </Badge>
-                          </div>
+                          <div className="font-medium">{trainer.current_plan_name}</div>
                         ) : (
                           <span className="text-muted-foreground">Not Assigned</span>
                         )}

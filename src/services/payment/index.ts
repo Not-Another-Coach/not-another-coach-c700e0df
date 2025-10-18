@@ -84,7 +84,7 @@ class PaymentServiceClass extends BaseService {
         .from('trainer_membership')
         .select(`
           id,
-          plan_type,
+          plan_definition_id,
           membership_plan_definitions!inner(
             id,
             has_package_commission,
