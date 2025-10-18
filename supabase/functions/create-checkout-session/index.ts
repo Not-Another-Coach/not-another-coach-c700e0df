@@ -181,7 +181,7 @@ const handler = async (req: Request): Promise<Response> => {
       }
     } else if (payment_type === 'plan_upgrade') {
       // Plan upgrade - one-time prorated payment
-      if (!history_id || !proration_amount_cents || !new_plan_name) {
+      if (!history_id || proration_amount_cents === null || proration_amount_cents === undefined || !new_plan_name) {
         throw new Error('history_id, proration_amount_cents, and new_plan_name are required for plan upgrade');
       }
 

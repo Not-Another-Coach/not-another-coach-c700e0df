@@ -116,7 +116,8 @@ export const PlanComparisonDialog = ({ open, onOpenChange, trainerId, onSuccess,
           title: result.change_type === 'upgrade' ? 'Plan Upgraded!' : 'Downgrade Scheduled',
           description: result.change_type === 'upgrade'
             ? `You've been upgraded to ${selectedPlan.display_name}. Prorated charge: £${(result.proration_cents / 100).toFixed(2)}`
-            : `Your downgrade has been scheduled for ${effectiveDate}`
+            : `Your downgrade has been scheduled for ${effectiveDate}`,
+          duration: 6000,
         });
 
         onSuccess();
@@ -273,11 +274,11 @@ export const PlanComparisonDialog = ({ open, onOpenChange, trainerId, onSuccess,
               {plans.map(plan => (
                 <div
                   key={plan.plan_id}
-                  className={`relative border rounded-lg p-4 cursor-pointer transition-all ${
+                  className={`relative border rounded-lg p-4 cursor-pointer transition-all duration-200 ${
                     selectedPlan?.plan_id === plan.plan_id
-                      ? 'border-primary ring-2 ring-primary'
+                      ? 'border-primary ring-2 ring-primary shadow-lg'
                       : plan.can_switch_to
-                      ? 'hover:border-primary/50'
+                      ? 'hover:border-primary/50 hover:shadow-md'
                       : 'opacity-50 cursor-not-allowed'
                   }`}
                   onClick={() => plan.can_switch_to && setSelectedPlan(plan)}
@@ -331,6 +332,17 @@ export const PlanComparisonDialog = ({ open, onOpenChange, trainerId, onSuccess,
                   </div>
                 </div>
               ))}
+            </div>
+
+            <div className="text-center text-sm text-muted-foreground">
+              <a 
+                href="https://docs.example.com/plans" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="underline hover:text-primary transition-colors"
+              >
+                Compare all plan features
+              </a>
             </div>
 
             {!isCancelled && (
