@@ -7285,6 +7285,10 @@ export type Database = {
         }
         Returns: Json
       }
+      reactivate_trainer_plan: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       reactivate_user: {
         Args: { p_reason?: string; p_user_id: string }
         Returns: undefined
