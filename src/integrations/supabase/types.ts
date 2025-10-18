@@ -6929,7 +6929,13 @@ export type Database = {
         Returns: number
       }
       change_trainer_plan: {
-        Args: { p_reason?: string; p_requested_plan_id: string }
+        Args:
+          | {
+              p_changed_by?: string
+              p_new_plan_definition_id: string
+              p_trainer_id: string
+            }
+          | { p_reason?: string; p_requested_plan_id: string }
         Returns: Json
       }
       check_verification_expiry: {
@@ -7144,16 +7150,19 @@ export type Database = {
       get_trainer_membership_details: {
         Args: { p_trainer_id: string }
         Returns: {
-          fee_preview_text: string
-          fee_type: string
-          fee_value_flat_cents: number
-          fee_value_percent: number
+          commission_fee_type: string
+          commission_fee_value_flat_cents: number
+          commission_fee_value_percent: number
+          display_name: string
+          has_package_commission: boolean
           is_active: boolean
           membership_id: string
-          monthly_price_cents: number
-          plan_type: string
-          proration_mode: string
+          payment_status: string
+          plan_definition_id: string
+          plan_name: string
           renewal_date: string
+          stripe_customer_id: string
+          stripe_subscription_id: string
         }[]
       }
       get_trainer_streak_count: {
