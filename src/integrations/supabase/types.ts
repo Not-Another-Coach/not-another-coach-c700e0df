@@ -5090,6 +5090,8 @@ export type Database = {
       }
       trainer_membership: {
         Row: {
+          cancel_at_period_end: boolean | null
+          cancellation_grace_end: string | null
           created_at: string
           grace_end_date: string | null
           id: string
@@ -5107,6 +5109,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          cancel_at_period_end?: boolean | null
+          cancellation_grace_end?: string | null
           created_at?: string
           grace_end_date?: string | null
           id?: string
@@ -5124,6 +5128,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          cancel_at_period_end?: boolean | null
+          cancellation_grace_end?: string | null
           created_at?: string
           grace_end_date?: string | null
           id?: string
