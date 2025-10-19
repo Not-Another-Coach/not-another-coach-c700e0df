@@ -107,10 +107,10 @@ export const PlanComparisonDialog = ({ open, onOpenChange, trainerId, onSuccess,
           throw sessionError;
         }
 
-        // Redirect to Stripe Checkout
-        const checkoutUrl = sessionData?.url;
+        // Redirect to Stripe Checkout - note: data is nested in .data property
+        const checkoutUrl = sessionData?.data?.url;
         console.log('Checkout URL:', checkoutUrl);
-        console.log('Full session data:', sessionData);
+        console.log('Full session data:', sessionData?.data);
 
         if (!checkoutUrl) {
           console.error('No checkout URL in response. Full response:', sessionData);
