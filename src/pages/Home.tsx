@@ -265,7 +265,7 @@ export default function Home() {
             onClick={() => navigate('/trainer/demo')}
             className="bg-gradient-primary hover:opacity-90 text-white font-semibold px-8 py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
           >
-            Become a Coach Today
+            Become Not Another Coach Today
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
         </div>
