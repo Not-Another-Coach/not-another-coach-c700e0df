@@ -417,7 +417,7 @@ const TrainerProfileSetup = () => {
         console.log('🔍 Discovery Call Debug - Settings:', discoverySettings);
         const offersDiscoverySetting = discoverySettings?.offers_discovery_call;
         const offersDiscoveryForm = typeof formData.free_discovery_call === 'boolean' ? formData.free_discovery_call : undefined;
-        const offersDiscovery = (offersDiscoverySetting ?? offersDiscoveryForm) ?? false;
+        const offersDiscovery = (offersDiscoverySetting ?? offersDiscoveryForm);
         const hasCalendarLink = !!formData.calendar_link?.trim();
         const hasDcSlots = !!discoverySettings?.availability_schedule && 
           Object.values(discoverySettings.availability_schedule).some((d: any) => 
@@ -426,12 +426,18 @@ const TrainerProfileSetup = () => {
         
         console.log('🔍 Discovery Call Debug - Values:', { offersDiscovery, hasCalendarLink, hasDcSlots });
         
-        // If discovery calls are switched off anywhere, mark as completed
-        if (!offersDiscovery) return 'completed';
+        // Only mark as completed if trainer has explicitly made a choice
+        // If they haven't set anything, it's not started
+        if (offersDiscovery === undefined || offersDiscovery === null) return 'not_started';
+        
+        // If discovery calls are explicitly switched off, mark as completed
+        if (offersDiscovery === false) return 'completed';
+        
         // If discovery calls are on and either a calendar link or in-app slots are configured, completed
         if (hasCalendarLink || hasDcSlots) return 'completed';
-        // Otherwise partial if anything is set, else not started
-        return (offersDiscovery || hasCalendarLink || hasDcSlots) ? 'partial' : 'not_started';
+        
+        // Discovery calls are on but not configured yet
+        return 'partial';
         
       case 7: // Testimonials & Case Studies
         const hasTestimonials = formData.testimonials?.length > 0;
@@ -465,17 +471,21 @@ const TrainerProfileSetup = () => {
         
         // Consider local pending selection as well to avoid stale state
         const effectiveStatus = pendingAvailabilityChanges?.status || availabilitySettings?.availability_status;
-        const hasAvailabilityStatus = !!effectiveStatus && ['accepting', 'waitlist', 'unavailable'].includes(effectiveStatus as string);
+        
+        // Only mark completed if trainer has explicitly chosen a status AND it's a valid status
+        // New trainers with no settings should show as not_started
+        const hasExplicitStatus = effectiveStatus && 
+          ['accepting', 'waitlist', 'unavailable'].includes(effectiveStatus as string);
         
         const hasWorkingHours = !!availabilitySettings?.availability_schedule && 
           Object.values(availabilitySettings.availability_schedule).some((day: any) => 
             day?.enabled && Array.isArray(day?.slots) && day.slots.length > 0
           );
         
-        console.log('🔍 Availability Debug - Values:', { hasAvailabilityStatus, hasWorkingHours, effectiveStatus });
+        console.log('🔍 Availability Debug - Values:', { hasExplicitStatus, hasWorkingHours, effectiveStatus });
         
-        // Mark completed if a status is selected; working hours are optional for completion
-        if (hasAvailabilityStatus) return 'completed';
+        // Only mark completed if they've explicitly set a status
+        if (hasExplicitStatus) return 'completed';
         if (hasWorkingHours) return 'partial';
         return 'not_started';
         
@@ -483,8 +493,9 @@ const TrainerProfileSetup = () => {
         return (formData.terms_agreed && formData.accuracy_confirmed) ? 'completed' : 'not_started';
         
       case 12: // Verification Preference
-        // Always mark as completed since it's just a preference setting
-        return 'completed';
+        // Only mark as completed if trainer has made a choice (default is undefined/null)
+        // This is an optional setting, so 'not_started' doesn't block profile completion
+        return 'not_started';
         
       case 13: // Professional Documents
         console.log('🔍 Prof Documents Debug - Status:', getProfDocumentsStatus());
