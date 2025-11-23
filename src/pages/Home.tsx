@@ -14,6 +14,7 @@ import { EnhancedHeroSection } from "@/components/homepage/EnhancedHeroSection";
 import { InteractiveValueCards } from "@/components/homepage/InteractiveValueCards";
 import { QuickResetMenu } from "@/components/ui/QuickResetMenu";
 import { ResetOptionsButton } from "@/components/ui/ResetOptionsButton";
+import { ClientJourneyInfographic } from "@/components/homepage/ClientJourneyInfographic";
 
 import { UserModeToggle } from "@/components/user-intent/UserModeToggle";
 import { useUserIntent } from "@/hooks/useUserIntent";
@@ -245,6 +246,13 @@ export default function Home() {
           </div>
           
           <AnonymousBrowse />
+        </div>
+      </section>
+
+      {/* Client Journey Section */}
+      <section className="py-16 bg-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ClientJourneyInfographic />
         </div>
       </section>
 
