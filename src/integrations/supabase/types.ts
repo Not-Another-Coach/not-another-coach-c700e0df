@@ -428,7 +428,7 @@ export type Database = {
           commitment_id: string
           created_at: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           notes: string | null
           signature_data: string | null
           trainer_id: string
@@ -440,7 +440,7 @@ export type Database = {
           commitment_id: string
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           notes?: string | null
           signature_data?: string | null
           trainer_id: string
@@ -452,7 +452,7 @@ export type Database = {
           commitment_id?: string
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           notes?: string | null
           signature_data?: string | null
           trainer_id?: string
@@ -1159,7 +1159,7 @@ export type Database = {
           consent_version: string
           created_at: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           legal_basis: string
           metadata: Json | null
           new_value: boolean
@@ -1174,7 +1174,7 @@ export type Database = {
           consent_version?: string
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           legal_basis?: string
           metadata?: Json | null
           new_value: boolean
@@ -1189,7 +1189,7 @@ export type Database = {
           consent_version?: string
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           legal_basis?: string
           metadata?: Json | null
           new_value?: boolean
@@ -2531,7 +2531,7 @@ export type Database = {
           id: string
           metadata: Json | null
           published_at: string | null
-          search_vector: unknown | null
+          search_vector: unknown
           slug: string
           status: Database["public"]["Enums"]["kb_article_status"]
           title: string
@@ -2550,7 +2550,7 @@ export type Database = {
           id?: string
           metadata?: Json | null
           published_at?: string | null
-          search_vector?: unknown | null
+          search_vector?: unknown
           slug: string
           status?: Database["public"]["Enums"]["kb_article_status"]
           title: string
@@ -2569,7 +2569,7 @@ export type Database = {
           id?: string
           metadata?: Json | null
           published_at?: string | null
-          search_vector?: unknown | null
+          search_vector?: unknown
           slug?: string
           status?: Database["public"]["Enums"]["kb_article_status"]
           title?: string
@@ -2674,7 +2674,7 @@ export type Database = {
         Row: {
           failure_reason: string | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           login_at: string
           success: boolean
           user_agent: string | null
@@ -2683,7 +2683,7 @@ export type Database = {
         Insert: {
           failure_reason?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           login_at?: string
           success?: boolean
           user_agent?: string | null
@@ -2692,7 +2692,7 @@ export type Database = {
         Update: {
           failure_reason?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           login_at?: string
           success?: boolean
           user_agent?: string | null
@@ -3754,7 +3754,7 @@ export type Database = {
           action: string
           created_at: string | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           payment_id: string | null
           user_id: string | null
         }
@@ -3762,7 +3762,7 @@ export type Database = {
           action: string
           created_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           payment_id?: string | null
           user_id?: string | null
         }
@@ -3770,7 +3770,7 @@ export type Database = {
           action?: string
           created_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           payment_id?: string | null
           user_id?: string | null
         }
@@ -6851,9 +6851,9 @@ export type Database = {
         Args: { p_client_id: string; p_trainer_id: string }
         Returns: Json
       }
-      admin_create_membership_plan: {
-        Args:
-          | {
+      admin_create_membership_plan:
+        | {
+            Args: {
               p_commission_fee_type: string
               p_commission_fee_value_flat_cents: number
               p_commission_fee_value_percent: number
@@ -6867,7 +6867,10 @@ export type Database = {
               p_stripe_price_id: string
               p_stripe_product_id: string
             }
-          | {
+            Returns: string
+          }
+        | {
+            Args: {
               p_commission_fee_type: string
               p_commission_fee_value_flat_cents: number
               p_commission_fee_value_percent: number
@@ -6880,8 +6883,8 @@ export type Database = {
               p_stripe_price_id: string
               p_stripe_product_id: string
             }
-        Returns: string
-      }
+            Returns: string
+          }
       admin_delete_user_completely: {
         Args: { p_user_id: string }
         Returns: Json
@@ -6903,27 +6906,27 @@ export type Database = {
         }
         Returns: undefined
       }
-      admin_update_verification_check: {
-        Args:
-          | {
-              p_admin_notes?: string
-              p_check_id: string
-              p_rejection_reason?: string
-              p_status: Database["public"]["Enums"]["verification_check_status"]
-            }
-          | {
+      admin_update_verification_check:
+        | {
+            Args: {
               p_admin_notes?: string
               p_check_type: Database["public"]["Enums"]["verification_check_type"]
               p_rejection_reason?: string
               p_status: Database["public"]["Enums"]["verification_check_status"]
               p_trainer_id: string
             }
-        Returns: undefined
-      }
-      auto_end_expired_exclusive_periods: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              p_admin_notes?: string
+              p_check_id: string
+              p_rejection_reason?: string
+              p_status: Database["public"]["Enums"]["verification_check_status"]
+            }
+            Returns: undefined
+          }
+      auto_end_expired_exclusive_periods: { Args: never; Returns: undefined }
       calculate_business_due_date: {
         Args: { business_days: number; start_date: string }
         Returns: string
@@ -6932,24 +6935,24 @@ export type Database = {
         Args: { p_trainer_id: string; p_week_start: string }
         Returns: number
       }
-      calculate_package_commission: {
-        Args:
-          | {
+      calculate_package_commission:
+        | {
+            Args: {
               p_package_id?: string
               p_package_price_cents: number
               p_trainer_id: string
             }
-          | { p_package_price_cents: number; p_trainer_id: string }
-        Returns: number
-      }
+            Returns: number
+          }
+        | {
+            Args: { p_package_price_cents: number; p_trainer_id: string }
+            Returns: number
+          }
       can_send_marketing_message: {
         Args: { p_user_id: string }
         Returns: boolean
       }
-      cancel_trainer_plan: {
-        Args: { p_reason?: string }
-        Returns: Json
-      }
+      cancel_trainer_plan: { Args: { p_reason?: string }; Returns: Json }
       carry_forward_incomplete_cts: {
         Args: {
           p_from_week_start: string
@@ -6958,30 +6961,27 @@ export type Database = {
         }
         Returns: number
       }
-      change_trainer_plan: {
-        Args:
-          | {
+      change_trainer_plan:
+        | {
+            Args: { p_reason?: string; p_requested_plan_id: string }
+            Returns: Json
+          }
+        | {
+            Args: {
               p_changed_by?: string
               p_new_plan_definition_id: string
               p_trainer_id: string
             }
-          | { p_reason?: string; p_requested_plan_id: string }
-        Returns: Json
-      }
-      check_verification_expiry: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      cleanup_expired_anonymous_sessions: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
-      client_can_view_trainer_images: {
-        Args:
-          | { p_client_id: string; p_trainer_id: string }
-          | { p_trainer_id: string }
-        Returns: boolean
-      }
+            Returns: undefined
+          }
+      check_verification_expiry: { Args: never; Returns: undefined }
+      cleanup_expired_anonymous_sessions: { Args: never; Returns: number }
+      client_can_view_trainer_images:
+        | {
+            Args: { p_client_id: string; p_trainer_id: string }
+            Returns: boolean
+          }
+        | { Args: { p_trainer_id: string }; Returns: boolean }
       client_has_sent_first_message: {
         Args: { client_uuid: string; conversation_uuid: string }
         Returns: boolean
@@ -6990,21 +6990,24 @@ export type Database = {
         Args: { p_client_id: string; p_coach_id: string }
         Returns: boolean
       }
-      complete_coach_selection_payment: {
-        Args:
-          | {
+      complete_coach_selection_payment:
+        | {
+            Args: {
               p_client_id: string
               p_payment_method?: string
               p_stripe_payment_intent_id?: string
               p_trainer_id: string
             }
-          | {
+            Returns: Json
+          }
+        | {
+            Args: {
               p_client_id: string
               p_payment_method?: string
               p_trainer_id: string
             }
-        Returns: Json
-      }
+            Returns: Json
+          }
       complete_webhook_event: {
         Args: { p_event_id: string; p_result?: Json }
         Returns: undefined
@@ -7013,9 +7016,9 @@ export type Database = {
         Args: { p_trainer_id: string }
         Returns: Database["public"]["Enums"]["verification_overall_status"]
       }
-      create_coach_selection_request: {
-        Args:
-          | {
+      create_coach_selection_request:
+        | {
+            Args: {
               p_client_message?: string
               p_package_currency?: string
               p_package_duration: string
@@ -7024,7 +7027,10 @@ export type Database = {
               p_package_price: number
               p_trainer_id: string
             }
-          | {
+            Returns: string
+          }
+        | {
+            Args: {
               p_client_message?: string
               p_package_duration: string
               p_package_id: string
@@ -7032,12 +7038,9 @@ export type Database = {
               p_package_price: number
               p_trainer_id: string
             }
-        Returns: string
-      }
-      create_consent_snapshot: {
-        Args: { p_user_id: string }
-        Returns: Json
-      }
+            Returns: string
+          }
+      create_consent_snapshot: { Args: { p_user_id: string }; Returns: Json }
       create_template_version: {
         Args: { p_changelog?: string; p_template_id: string }
         Returns: string
@@ -7063,10 +7066,7 @@ export type Database = {
         Args: { p_error_message: string; p_event_id: string }
         Returns: undefined
       }
-      fix_client_lou_status: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      fix_client_lou_status: { Args: never; Returns: undefined }
       get_activity_recommendations_for_template: {
         Args: { p_package_ids?: string[]; p_trainer_id: string }
         Returns: {
@@ -7093,7 +7093,7 @@ export type Database = {
         }[]
       }
       get_all_system_visibility_defaults: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           content_type: Database["public"]["Enums"]["content_type"]
           stage_group: Database["public"]["Enums"]["engagement_stage_group"]
@@ -7104,10 +7104,7 @@ export type Database = {
         Args: { p_client_id: string }
         Returns: string
       }
-      get_client_status: {
-        Args: { p_client_id: string }
-        Returns: string
-      }
+      get_client_status: { Args: { p_client_id: string }; Returns: string }
       get_content_visibility: {
         Args: {
           p_content_type: string
@@ -7124,10 +7121,7 @@ export type Database = {
         }
         Returns: string
       }
-      get_current_user_type: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      get_current_user_type: { Args: never; Returns: string }
       get_engagement_stage: {
         Args: { client_uuid: string; trainer_uuid: string }
         Returns: Database["public"]["Enums"]["engagement_stage"]
@@ -7152,15 +7146,22 @@ export type Database = {
         Args: { stage: Database["public"]["Enums"]["engagement_stage"] }
         Returns: Database["public"]["Enums"]["engagement_stage_group"]
       }
-      get_system_default_visibility: {
-        Args:
-          | Record<PropertyKey, never>
-          | {
+      get_system_default_visibility:
+        | {
+            Args: {
               p_content_type: Database["public"]["Enums"]["content_type"]
               p_stage_group: Database["public"]["Enums"]["engagement_stage_group"]
             }
-        Returns: Database["public"]["Enums"]["visibility_state"]
-      }
+            Returns: Database["public"]["Enums"]["visibility_state"]
+          }
+        | {
+            Args: never
+            Returns: {
+              content_type: string
+              stage_group: string
+              visibility_state: string
+            }[]
+          }
       get_trainer_available_plans: {
         Args: { p_trainer_id: string }
         Returns: {
@@ -7200,14 +7201,14 @@ export type Database = {
         Returns: number
       }
       get_user_emails_for_admin: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           email: string
           user_id: string
         }[]
       }
       get_user_emails_for_development: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           email: string
           user_id: string
@@ -7219,18 +7220,9 @@ export type Database = {
           role: Database["public"]["Enums"]["app_role"]
         }[]
       }
-      get_week_end: {
-        Args: { input_date: string }
-        Returns: string
-      }
-      get_week_start: {
-        Args: { input_date: string }
-        Returns: string
-      }
-      grant_admin_role: {
-        Args: { _user_id: string }
-        Returns: undefined
-      }
+      get_week_end: { Args: { input_date: string }; Returns: string }
+      get_week_start: { Args: { input_date: string }; Returns: string }
+      grant_admin_role: { Args: { _user_id: string }; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -7238,10 +7230,7 @@ export type Database = {
         }
         Returns: boolean
       }
-      has_unpaid_invoices: {
-        Args: { p_trainer_id?: string }
-        Returns: Json
-      }
+      has_unpaid_invoices: { Args: { p_trainer_id?: string }; Returns: Json }
       import_activities_from_ways_of_working: {
         Args: { p_trainer_id?: string }
         Returns: number
@@ -7266,12 +7255,9 @@ export type Database = {
         Args: { p_client_id: string; p_trainer_id: string }
         Returns: boolean
       }
-      is_current_user_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      is_current_user_admin: { Args: never; Returns: boolean }
       list_users_minimal_admin: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           email: string
           first_name: string
@@ -7300,10 +7286,7 @@ export type Database = {
         }
         Returns: Json
       }
-      reactivate_trainer_plan: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
+      reactivate_trainer_plan: { Args: never; Returns: Json }
       reactivate_user: {
         Args: { p_reason?: string; p_user_id: string }
         Returns: undefined
@@ -7312,10 +7295,7 @@ export type Database = {
         Args: { question_ids: string[] }
         Returns: undefined
       }
-      request_profile_publication: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      request_profile_publication: { Args: never; Returns: string }
       request_profile_verification: {
         Args: { trainer_id: string }
         Returns: boolean
@@ -7366,10 +7346,7 @@ export type Database = {
         Args: { p_duration_days?: number; p_reason: string; p_user_id: string }
         Returns: undefined
       }
-      sync_verification_fields: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      sync_verification_fields: { Args: never; Returns: undefined }
       sync_ways_of_working_to_activities: {
         Args: {
           p_items: Json
@@ -7383,14 +7360,8 @@ export type Database = {
         Args: { p_notes: string; p_user_id: string }
         Returns: undefined
       }
-      update_all_user_passwords_dev: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      update_all_user_passwords_dev_simple: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      update_all_user_passwords_dev: { Args: never; Returns: undefined }
+      update_all_user_passwords_dev_simple: { Args: never; Returns: undefined }
       update_engagement_stage: {
         Args: {
           client_uuid: string
@@ -7408,17 +7379,17 @@ export type Database = {
         }
         Returns: undefined
       }
-      update_trainer_verification_status: {
-        Args:
-          | {
+      update_trainer_verification_status:
+        | { Args: { p_trainer_id: string }; Returns: undefined }
+        | {
+            Args: {
               p_admin_notes?: string
               p_rejection_reason?: string
               p_status: Database["public"]["Enums"]["verification_status_enum"]
               p_trainer_id: string
             }
-          | { p_trainer_id: string }
-        Returns: undefined
-      }
+            Returns: undefined
+          }
       update_user_email_for_admin: {
         Args: { new_email: string; target_user_id: string }
         Returns: boolean
@@ -7439,10 +7410,7 @@ export type Database = {
         Args: { audience_json: Json }
         Returns: boolean
       }
-      user_owns_template: {
-        Args: { template_id: string }
-        Returns: boolean
-      }
+      user_owns_template: { Args: { template_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "trainer" | "client"

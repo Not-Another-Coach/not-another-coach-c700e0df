@@ -75,14 +75,14 @@ export const useTestUsers = (shouldLoad: boolean = true) => {
       try {
         // First try the new admin-only RPC that combines profiles + emails
         console.log('TestUsers: Trying admin list function...');
-        const adminPromise = supabase.rpc('list_users_minimal_admin', {});
+        const adminPromise = supabase.rpc('list_users_minimal_admin');
         const { data: adminUserList, error: adminListError } = await Promise.race([adminPromise, timeoutPromise]) as any;
           
         if (adminListError) {
           console.log('Admin list function failed (not admin or error):', adminListError);
           // Fallback to development function for email only
           console.log('TestUsers: Trying development email function...');
-          const devPromise = supabase.rpc('get_user_emails_for_development', {});
+          const devPromise = supabase.rpc('get_user_emails_for_development');
           const { data: devEmails, error: devEmailError } = await Promise.race([devPromise, timeoutPromise]) as any;
             
           if (devEmailError) {
