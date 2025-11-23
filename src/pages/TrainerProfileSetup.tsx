@@ -32,6 +32,7 @@ import {
 import { ProfilePreviewModal } from "@/components/trainer-setup/ProfilePreviewModal";
 import { ResponsiveBreadcrumb, BreadcrumbItem } from "@/components/ui/responsive-breadcrumb";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
+import { ProfileLoadingState } from "@/components/ui/profile-loading-state";
 
 // Import form sections
 import { BasicInfoSection } from "@/components/trainer-setup/BasicInfoSection";
@@ -69,6 +70,8 @@ const TrainerProfileSetup = () => {
 
   // Combine critical loading states to show skeleton
   const isCriticalDataLoading = loading || profileLoading || verificationLoading;
+  const [minLoadTimeElapsed, setMinLoadTimeElapsed] = useState(false);
+  const [showContent, setShowContent] = useState(false);
 
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -184,6 +187,22 @@ const TrainerProfileSetup = () => {
       navigate('/auth');
     }
   }, [user, loading, navigate]);
+
+  // Minimum load time timer
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMinLoadTimeElapsed(true);
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Show content only when both conditions are met
+  useEffect(() => {
+    if (!isCriticalDataLoading && minLoadTimeElapsed) {
+      setTimeout(() => setShowContent(true), 50);
+    }
+  }, [isCriticalDataLoading, minLoadTimeElapsed]);
 
   // Initialize form data from profile when available
   useEffect(() => {
@@ -845,39 +864,13 @@ const TrainerProfileSetup = () => {
     }
   };
 
-  // Show loading skeleton while critical data loads
-  if (isCriticalDataLoading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <div className="p-4 border-b bg-card">
-          <div className="flex items-center gap-4">
-            <Skeleton className="h-9 w-40" />
-            <Skeleton className="h-6 w-48" />
-          </div>
-        </div>
-        <div className="max-w-5xl mx-auto p-6 space-y-6">
-          <Skeleton className="h-2 w-full" />
-          <Card>
-            <CardHeader>
-              <Skeleton className="h-6 w-48" />
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-32 w-full" />
-            </CardContent>
-          </Card>
-          <div className="flex justify-between">
-            <Skeleton className="h-10 w-24" />
-            <Skeleton className="h-10 w-24" />
-          </div>
-        </div>
-      </div>
-    );
+  // Show full-page loading state while waiting
+  if (!showContent) {
+    return <ProfileLoadingState />;
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background opacity-0 animate-fadeIn">
       {/* Header */}
       <div className="p-4 border-b bg-card">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">

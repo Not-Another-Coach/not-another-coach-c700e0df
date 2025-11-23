@@ -15,6 +15,7 @@ import { InteractiveValueCards } from "@/components/homepage/InteractiveValueCar
 import { QuickResetMenu } from "@/components/ui/QuickResetMenu";
 import { ResetOptionsButton } from "@/components/ui/ResetOptionsButton";
 import { ClientJourneyInfographic } from "@/components/homepage/ClientJourneyInfographic";
+import { ProfileLoadingState } from "@/components/ui/profile-loading-state";
 
 import { UserModeToggle } from "@/components/user-intent/UserModeToggle";
 import { useUserIntent } from "@/hooks/useUserIntent";
@@ -31,6 +32,7 @@ export default function Home() {
   
   const [showQuizModal, setShowQuizModal] = useState(false);
   const [isCheckingRedirect, setIsCheckingRedirect] = useState(true);
+  const [minLoadTimeElapsed, setMinLoadTimeElapsed] = useState(false);
 
   // Initialize data migration hook
   useDataMigration();
@@ -46,6 +48,15 @@ export default function Home() {
       setUserIntent('client');
     }
   }, [userIntent, setUserIntent]);
+
+  // Minimum load time timer
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMinLoadTimeElapsed(true);
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   // Redirect authenticated users based on their role and profile completion
   useEffect(() => {
@@ -170,14 +181,15 @@ export default function Home() {
   };
 
   // Show loading while checking auth status or during migration
-  if (loading || (user && (profileLoading || userTypeLoading)) || isMigrating || isCheckingRedirect) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">
-          {isMigrating ? 'Setting up your profile...' : 'Loading...'}
-        </div>
-      </div>
-    );
+  const shouldShowLoading = 
+    loading || 
+    (user && (profileLoading || userTypeLoading)) || 
+    isMigrating || 
+    isCheckingRedirect ||
+    !minLoadTimeElapsed;
+
+  if (shouldShowLoading) {
+    return <ProfileLoadingState />;
   }
 
   // Render home page for everyone
