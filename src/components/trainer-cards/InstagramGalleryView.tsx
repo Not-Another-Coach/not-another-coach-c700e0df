@@ -83,6 +83,29 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
           trainerId: trainer.id,
           trainerName: trainer.name
         });
+
+        // Check if this is demo data with hardcoded instagram_posts
+        const demoInstagramPosts = (trainer as any).instagram_posts;
+        if (demoInstagramPosts && Array.isArray(demoInstagramPosts) && demoInstagramPosts.length > 0) {
+          console.log('[IMAGE FETCH] Using demo Instagram posts:', {
+            trainerId: trainer.id,
+            count: demoInstagramPosts.length
+          });
+
+          // Transform demo data to gallery format
+          const demoImages = demoInstagramPosts.map((post: any, index: number) => ({
+            id: post.id,
+            type: 'instagram',
+            url: post.media_url,
+            displayOrder: index,
+            mediaType: post.media_type || 'IMAGE'
+          }));
+
+          setDisplayImages(demoImages);
+          setGridSize(getRecommendedGridSizeForCount(demoImages.length));
+          setLoading(false);
+          return;
+        }
         
         // Fetch uploaded images
         const { data: uploadedImages, error: uploadedError } = await supabase
