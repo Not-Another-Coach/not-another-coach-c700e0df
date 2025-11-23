@@ -189,7 +189,7 @@ export default function Home() {
             </div>
           
             {/* Right side: Actions */}
-            <div className="flex items-center gap-3 flex-shrink-0">
+            <div className="flex items-center gap-4 flex-shrink-0">
               {savedTrainersCount > 0 && (
                 <Button
                   variant="ghost"
@@ -204,17 +204,12 @@ export default function Home() {
                 </Button>
               )}
               
-              {/* Desktop: Sign In + Prominent CTA */}
+              {/* Desktop: Separate buttons */}
               <Button variant="ghost" onClick={() => navigate('/auth')} className="hidden md:flex">
                 Sign In
               </Button>
-              <Button 
-                onClick={() => navigate('/auth?signup=client')} 
-                className="hidden md:flex bg-gradient-primary hover:opacity-90 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
-                size="lg"
-              >
-                Start Your Coaching Journey
-                <ArrowRight className="ml-2 h-5 w-5" />
+              <Button onClick={() => navigate('/auth?signup=client')} className="hidden md:flex">
+                Join
               </Button>
               
               {/* Mobile: Single pill button */}
