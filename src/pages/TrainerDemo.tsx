@@ -35,7 +35,7 @@ export default function TrainerDemo() {
           <div className="flex items-center justify-between gap-4 relative">
             <div className="flex items-center gap-3 flex-shrink-0">
               <AppLogo onClick={() => navigate('/')} />
-              <div className="text-muted-foreground hidden sm:block">Coach Demo</div>
+              <div className="text-muted-foreground hidden sm:block md:hidden">Coach Demo</div>
             </div>
             
             {/* User Mode Toggle - Center */}
