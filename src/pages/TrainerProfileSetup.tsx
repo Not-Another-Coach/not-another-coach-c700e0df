@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ProfilePreviewModal } from "@/components/trainer-setup/ProfilePreviewModal";
 import { ResponsiveBreadcrumb, BreadcrumbItem } from "@/components/ui/responsive-breadcrumb";
+import { ProfileDropdown } from "@/components/ProfileDropdown";
 
 // Import form sections
 import { BasicInfoSection } from "@/components/trainer-setup/BasicInfoSection";
@@ -968,6 +969,11 @@ const TrainerProfileSetup = () => {
                 <span className="xs:hidden">Live</span>
               </Button>
             )}
+            <ProfileDropdown profile={profile ? { 
+              ...profile, 
+              user_type: 'trainer',
+              email: user?.email 
+            } : null} />
           </div>
         </div>
       </div>
