@@ -70,7 +70,6 @@ const TrainerProfileSetup = () => {
 
   // Combine critical loading states to show skeleton
   const isCriticalDataLoading = loading || profileLoading || verificationLoading;
-  const [minLoadTimeElapsed, setMinLoadTimeElapsed] = useState(false);
   const [showContent, setShowContent] = useState(false);
 
   const [currentStep, setCurrentStep] = useState(1);
@@ -188,32 +187,16 @@ const TrainerProfileSetup = () => {
     }
   }, [user, loading, navigate]);
 
-  // Minimum load time timer
+  // Stable loading check - wait 300ms minimum, then show content when data ready
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setMinLoadTimeElapsed(true);
+    const minLoadTimer = setTimeout(() => {
+      if (!isCriticalDataLoading) {
+        setShowContent(true);
+      }
     }, 300);
-    
-    return () => clearTimeout(timer);
-  }, []);
 
-  // Show content only when both conditions are met
-  useEffect(() => {
-    console.log('🔍 Loading state check:', {
-      loading,
-      profileLoading,
-      verificationLoading,
-      hasProfile: !!profile,
-      isCriticalDataLoading,
-      minLoadTimeElapsed,
-      showContent
-    });
-    
-    if (!isCriticalDataLoading && minLoadTimeElapsed) {
-      console.log('✅ Conditions met, showing content');
-      setTimeout(() => setShowContent(true), 50);
-    }
-  }, [isCriticalDataLoading, minLoadTimeElapsed, loading, profileLoading, verificationLoading, profile, showContent]);
+    return () => clearTimeout(minLoadTimer);
+  }, [isCriticalDataLoading]);
 
   // Initialize form data from profile when available
   useEffect(() => {
