@@ -9,6 +9,7 @@ import { StoryView } from '@/components/profile-views/StoryView';
 import { ContentView } from '@/components/profile-views/ContentView';
 import { CompareView } from '@/components/profile-views/CompareView';
 import { CardsView } from '@/components/profile-views/CardsView';
+import { PackagesView } from '@/components/profile-views/PackagesView';
 import { EngagementStage } from '@/hooks/useEngagementStage';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Card, CardContent } from '@/components/ui/card';
@@ -121,6 +122,8 @@ export const ProfilePreviewModal = ({
         return <CardsView trainer={trainer} />;
       case 'content':
         return <ContentView trainer={trainer} />;
+      case 'packages':
+        return <PackagesView trainer={trainer} />;
       default:
         return (
           <OverviewView 
