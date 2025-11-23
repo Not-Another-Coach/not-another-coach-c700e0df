@@ -14,9 +14,9 @@ interface StoryViewProps {
 // Helper function to get journey content from trainer data
 const getJourneyContent = (trainer: any) => {
   return {
-    howStarted: trainer.how_started || "My fitness journey began with a passion for helping others discover their potential.",
-    philosophy: trainer.philosophy || "My coaching philosophy centers on sustainable, personalized approaches to fitness and wellness.",
-    specialization: trainer.specialization_description || "I specialize in helping clients achieve their unique goals through evidence-based training methods."
+    howStarted: trainer.how_started || null,
+    philosophy: trainer.philosophy || null,
+    specialization: trainer.specialization_description || null
   };
 };
 
@@ -45,26 +45,40 @@ export const StoryView = ({ trainer }: StoryViewProps) => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div>
-            <h4 className="font-semibold mb-2 text-primary">How It All Started</h4>
-            <p className="text-muted-foreground leading-relaxed">
-              {journeyContent.howStarted}
+          {!journeyContent.howStarted && !journeyContent.philosophy && !journeyContent.specialization ? (
+            <p className="text-sm text-muted-foreground text-center py-8">
+              No personal journey story added yet.
             </p>
-          </div>
-          
-          <div>
-            <h4 className="font-semibold mb-2 text-primary">My Philosophy</h4>
-            <p className="text-muted-foreground leading-relaxed">
-              {journeyContent.philosophy}
-            </p>
-          </div>
-          
-          <div>
-            <h4 className="font-semibold mb-2 text-primary">What I Specialize In</h4>
-            <p className="text-muted-foreground leading-relaxed">
-              {journeyContent.specialization}
-            </p>
-          </div>
+          ) : (
+            <>
+              {journeyContent.howStarted && (
+                <div>
+                  <h4 className="font-semibold mb-2 text-primary">How It All Started</h4>
+                  <p className="text-muted-foreground leading-relaxed">
+                    {journeyContent.howStarted}
+                  </p>
+                </div>
+              )}
+              
+              {journeyContent.philosophy && (
+                <div>
+                  <h4 className="font-semibold mb-2 text-primary">My Philosophy</h4>
+                  <p className="text-muted-foreground leading-relaxed">
+                    {journeyContent.philosophy}
+                  </p>
+                </div>
+              )}
+              
+              {journeyContent.specialization && (
+                <div>
+                  <h4 className="font-semibold mb-2 text-primary">What I Specialize In</h4>
+                  <p className="text-muted-foreground leading-relaxed">
+                    {journeyContent.specialization}
+                  </p>
+                </div>
+              )}
+            </>
+          )}
         </CardContent>
       </Card>
 
