@@ -17,11 +17,17 @@ interface FeatureSummaryViewProps {
 }
 
 export const FeatureSummaryView = ({ trainer, children }: FeatureSummaryViewProps) => {
+  // Detect if this is a demo trainer
+  const isDemoProfile = trainer.id.startsWith('demo-trainer-');
+  
   const { stage: engagementStage, isGuest } = useEngagementStage(trainer.id);
   const { canViewContent, getVisibility } = useContentVisibility({
     engagementStage,
     isGuest
   });
+  
+  // Override visibility for demo profiles
+  const effectiveDescriptionVisibility = isDemoProfile ? 'visible' : getVisibility('description_bio');
   
   // Get and standardize specialties for feature cards
   const allSpecialties = ((trainer as any).specializations || (trainer as any).specialties || []);
@@ -210,7 +216,7 @@ export const FeatureSummaryView = ({ trainer, children }: FeatureSummaryViewProp
 
             {/* Description */}
             <VisibilityAwareText
-              visibilityState={getVisibility('description_bio')}
+              visibilityState={effectiveDescriptionVisibility}
               className="bg-gradient-to-br from-muted/30 to-muted/50 rounded-xl p-4 border border-muted-foreground/10 backdrop-blur-sm mt-3"
               placeholder="Bio unlocks as you engage"
             >

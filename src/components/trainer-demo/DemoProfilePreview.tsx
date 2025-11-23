@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { EnhancedTrainerCard } from '@/components/trainer-cards/EnhancedTrainerCard';
 import { Loader2 } from 'lucide-react';
 import type { AnyTrainer } from '@/types/trainer';
@@ -7,6 +8,10 @@ import demoBeforeFemale from '@/assets/demo-before-female.png';
 import demoAfterFemale from '@/assets/demo-after-female.png';
 import demoBeforeMale from '@/assets/demo-before-male.png';
 import demoAfterMale from '@/assets/demo-after-male.png';
+import demoBeforeMaleSkinny from '@/assets/demo-before-male-skinny.jpg';
+import demoAfterMaleMuscular from '@/assets/demo-after-male-muscular.jpg';
+import demoBeforeMaleDad from '@/assets/demo-before-male-dad.jpg';
+import demoAfterMaleAthletic from '@/assets/demo-after-male-athletic.jpg';
 
 // Hardcoded demo trainer profile for consistent demo experience
 const DEMO_TRAINER_DATA = {
@@ -183,19 +188,197 @@ My qualifications include NASM-CPT, Precision Nutrition Level 1, and certificati
   ]
 };
 
+// Male-focused demo trainer profile for muscle building
+const DEMO_TRAINER_DATA_MALE = {
+  id: 'demo-trainer-marcus-steel',
+  name: 'Marcus Steel',
+  firstName: 'Marcus',
+  lastName: 'Steel',
+  profilePhotoUrl: 'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=400&h=400&fit=crop',
+  profileImagePosition: { x: 50, y: 50, scale: 1 },
+  tagline: 'Build Muscle, Build Confidence',
+  bio: `Specialized in helping skinny guys pack on serious muscle mass. With 10 years of competitive bodybuilding experience and professional coaching, I've transformed hundreds of hardgainers into confident, muscular athletes.
+
+I focus on progressive overload training, optimized nutrition for muscle growth, and sustainable lifestyle changes that stick. Whether you're a complete beginner or stuck at a plateau, I'll help you break through and achieve the physique you've always wanted.
+
+My approach combines science-based training protocols with practical nutrition strategies. Certified Personal Trainer (CPT), Sports Nutrition Specialist, and former natural bodybuilding competitor. I believe in building real, functional strength - not just for the mirror, but for life.`,
+  location: 'Manchester, UK',
+  experience: '10+ years',
+  hourlyRate: 70,
+  rating: 4.8,
+  totalRatings: 156,
+  isVerified: true,
+  status: 'accepting',
+  instagram_handle: '@marcussteel_coach',
+  instagram_connected: true,
+  instagram_posts: [
+    {
+      id: 'demo-ig-male-1',
+      media_url: 'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=600&h=600&fit=crop',
+      media_type: 'IMAGE',
+      caption: '💪 Transformation Tuesday! Tom went from 65kg to 80kg in 6 months. Progressive overload and consistent surplus = gains! 🔥\n\n#musclebuilding #bulking #transformation',
+      permalink: 'https://instagram.com/p/demo-male1',
+      timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'demo-ig-male-2',
+      media_url: 'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=600&h=600&fit=crop',
+      media_type: 'IMAGE',
+      caption: '🏋️ Progressive overload is the key! Here\'s how to add weight safely and effectively. Swipe for my weekly progression guide.\n\n#strengthtraining #progressive #gainz',
+      permalink: 'https://instagram.com/p/demo-male2',
+      timestamp: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'demo-ig-male-3',
+      media_url: 'https://images.unsplash.com/photo-1623874514711-0f321325f318?w=600&h=600&fit=crop',
+      media_type: 'IMAGE',
+      caption: '🥩 High protein meal prep for muscle growth. Aiming for 2g per kg bodyweight? Here\'s how I structure my meals.\n\n#mealprep #bulking #proteinmeals',
+      permalink: 'https://instagram.com/p/demo-male3',
+      timestamp: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'demo-ig-male-4',
+      media_url: 'https://images.unsplash.com/photo-1605296867304-46d5465a13f1?w=600&h=600&fit=crop',
+      media_type: 'IMAGE',
+      caption: '🔥 Compound movements = maximum gains. Squat, bench, deadlift, overhead press. Master these four.\n\n#compoundlifts #strengthtraining #bigthree',
+      permalink: 'https://instagram.com/p/demo-male4',
+      timestamp: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'demo-ig-male-5',
+      media_url: 'https://images.unsplash.com/photo-1526506118085-60ce8714f8c5?w=600&h=600&fit=crop',
+      media_type: 'IMAGE',
+      caption: '💯 Mindset Monday: Your body won\'t go where your mind doesn\'t push it. Stay consistent, stay hungry.\n\n#mindset #motivation #nevergiveup',
+      permalink: 'https://instagram.com/p/demo-male5',
+      timestamp: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'demo-ig-male-6',
+      media_url: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&h=600&fit=crop',
+      media_type: 'IMAGE',
+      caption: '🎯 Taking on new clients! Limited spots for online and in-person muscle building programs. DM for info!\n\n#personaltrainer #manchesterpt #musclebuilding',
+      permalink: 'https://instagram.com/p/demo-male6',
+      timestamp: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+    }
+  ],
+  specializations: [
+    'Muscle Building',
+    'Strength Training',
+    'Body Recomposition',
+    'Nutrition for Gains',
+    'Progressive Overload'
+  ],
+  trainingTypes: ['In-Person', 'Online', 'Hybrid'],
+  packageOptions: [
+    {
+      id: 'demo-pkg-male-1',
+      name: 'Muscle Kickstart',
+      description: '4 weeks of intensive muscle building training',
+      price: 449,
+      currency: 'GBP',
+      duration: '4 weeks',
+      sessions: 8,
+      features: [
+        '8 strength training sessions',
+        'Custom bulking nutrition plan',
+        'Weekly progress photos & measurements',
+        'Exercise library access'
+      ]
+    },
+    {
+      id: 'demo-pkg-male-2',
+      name: 'Mass Builder Program',
+      description: '12 weeks of comprehensive muscle building coaching',
+      price: 1099,
+      currency: 'GBP',
+      duration: '12 weeks',
+      sessions: 24,
+      features: [
+        '24 personal training sessions',
+        'Personalized meal plans for gains',
+        'Bi-weekly body composition analysis',
+        'Unlimited messaging support',
+        'Custom progressive overload programming'
+      ],
+      isPromotional: true,
+      promotionPrice: 999,
+      promotionStartDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+      promotionEndDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'demo-pkg-male-3',
+      name: 'Online Muscle Coaching',
+      description: 'Flexible online-only training for remote muscle building',
+      price: 299,
+      currency: 'GBP',
+      duration: '4 weeks',
+      sessions: 0,
+      features: [
+        'Custom muscle building program',
+        'Bulking nutrition guidance',
+        'Weekly video check-ins',
+        'Form review via video',
+        'WhatsApp support'
+      ]
+    }
+  ],
+  testimonials: [
+    {
+      id: 'demo-test-male-1',
+      client_name: 'Tom Richardson',
+      clientName: 'Tom R.',
+      rating: 5,
+      text: 'Marcus helped me go from skinny to strong. Gained 15kg of lean muscle in 6 months. His programming and nutrition advice are spot on!',
+      clientQuote: 'I was a hardgainer my whole life. Marcus showed me exactly how to eat and train to actually build muscle. Game changer.',
+      achievement: 'Gained 15kg lean muscle',
+      outcomeTag: '6 Month Bulk',
+      created_at: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
+      showImages: true,
+      consentGiven: true,
+      beforeImage: demoBeforeMaleSkinny,
+      afterImage: demoAfterMaleMuscular
+    },
+    {
+      id: 'demo-test-male-2',
+      client_name: 'David Khan',
+      clientName: 'David K.',
+      rating: 5,
+      text: 'At 45, I thought I was past my prime. Marcus proved me wrong. Lost the dad bod, gained muscle and confidence. Feel 10 years younger.',
+      clientQuote: 'The structured approach to recomposition was exactly what I needed. Lost fat while building muscle simultaneously.',
+      achievement: 'Lost 12kg fat, gained 8kg muscle',
+      outcomeTag: '12 Week Recomp',
+      created_at: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString(),
+      showImages: true,
+      consentGiven: true,
+      beforeImage: demoBeforeMaleDad,
+      afterImage: demoAfterMaleAthletic
+    },
+    {
+      id: 'demo-test-male-3',
+      client_name: 'James Morrison',
+      rating: 5,
+      text: 'Best investment in myself. Marcus\'s no-BS approach to muscle building got me results I\'d been chasing for years. Highly recommend!',
+      created_at: new Date(Date.now() - 120 * 24 * 60 * 60 * 1000).toISOString()
+    }
+  ]
+};
+
 export function DemoProfilePreview() {
+  const [selectedProfile, setSelectedProfile] = useState<'female' | 'male'>('female');
   const [trainerData, setTrainerData] = useState<AnyTrainer | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Simulate a brief loading state for better UX
+    setLoading(true);
     const timer = setTimeout(() => {
-      setTrainerData(DEMO_TRAINER_DATA as AnyTrainer);
+      const currentDemoData = selectedProfile === 'female' ? DEMO_TRAINER_DATA : DEMO_TRAINER_DATA_MALE;
+      setTrainerData(currentDemoData as AnyTrainer);
       setLoading(false);
     }, 300);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [selectedProfile]);
 
   if (loading) {
     return (
@@ -228,12 +411,28 @@ export function DemoProfilePreview() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <span>Your Profile Preview</span>
-          <span className="text-sm font-normal text-muted-foreground">
-            How clients see you
-          </span>
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>Your Profile Preview</CardTitle>
+          <div className="flex gap-2">
+            <Button 
+              variant={selectedProfile === 'female' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setSelectedProfile('female')}
+            >
+              Female Focus
+            </Button>
+            <Button 
+              variant={selectedProfile === 'male' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setSelectedProfile('male')}
+            >
+              Male Focus
+            </Button>
+          </div>
+        </div>
+        <p className="text-sm text-muted-foreground mt-2">
+          How clients see you
+        </p>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="max-w-md mx-auto">
