@@ -101,7 +101,7 @@ export default function Home() {
       }
     } else if (currentUserType === 'client') {
       // Check if client has completed survey OR has progressed beyond survey stage
-      if (profile && 'quiz_completed' in profile) {
+      if (profile && 'client_survey_completed' in profile) {
         // Check engagement data to see if client has progressed beyond survey
         const checkEngagementAndRedirect = async () => {
           const { data: engagements } = await supabase
@@ -118,7 +118,7 @@ export default function Home() {
                  e.became_client_at !== null
           );
 
-          const surveyCompleted = (profile.quiz_completed && profile.client_survey_completed) || hasAdvancedEngagement;
+          const surveyCompleted = profile.client_survey_completed || hasAdvancedEngagement;
           
           if (surveyCompleted) {
             console.log('✅ Home - Client survey complete or has advanced engagement, redirecting to dashboard');

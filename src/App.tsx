@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { UserIntentProvider } from "@/hooks/useUserIntent";
 import { VisibilityConfigProvider } from "@/contexts/VisibilityConfigContext";
+import { PlatformAccessGuard } from "@/components/auth/PlatformAccessGuard";
 import { SessionNotification } from "@/components/SessionNotification";
 import Home from "./pages/Home";
 import ResetDemo from "./pages/ResetDemo";
@@ -22,6 +23,8 @@ import TrainerDashboard from "./pages/TrainerDashboard";
 import TrainerDemo from "./pages/TrainerDemo";
 import TrainerProfileSetup from "./pages/TrainerProfileSetup";
 import TrainerSettings from "./pages/TrainerSettings";
+import { TrainerAccessPending } from "./pages/TrainerAccessPending";
+import { ClientAccessPending } from "./pages/ClientAccessPending";
 import { AdminDashboard } from "./pages/AdminDashboard";
 import { AdminHighlights } from "./pages/AdminHighlights";
 import { TrainerProfile } from "./pages/TrainerProfile";
@@ -63,13 +66,20 @@ const App = () => (
             <BrowserRouter>
               <DiagnosticsProvider>
                 <ErrorBoundary>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/auth/callback" element={<AuthCallback />} />
-                <Route path="/anonymous-saved" element={<AnonymousSaved />} />
-                <Route path="/anonymous-shortlist" element={<AnonymousSaved />} />
-                <Route path="/client/dashboard" element={<ClientDashboard />} />
+                  <PlatformAccessGuard>
+                    <Routes>
+                      <Route path="/" element={<Home />} />
+                      <Route path="/auth" element={<Auth />} />
+                      <Route path="/auth/callback" element={<AuthCallback />} />
+                      <Route path="/anonymous-saved" element={<AnonymousSaved />} />
+                      <Route path="/anonymous-shortlist" element={<AnonymousSaved />} />
+                      
+                      {/* Access pending routes */}
+                      <Route path="/trainer/access-pending" element={<TrainerAccessPending />} />
+                      <Route path="/client/access-pending" element={<ClientAccessPending />} />
+                      
+                      {/* Client routes */}
+                      <Route path="/client/dashboard" element={<ClientDashboard />} />
                 <Route path="/client/explore" element={<ClientExplore />} />
                 <Route path="/client/payments" element={<ClientPayments />} />
                 <Route path="/my-trainers" element={<MyTrainers />} />
@@ -106,7 +116,8 @@ const App = () => (
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="/payment-management" element={<PaymentManagement />} />
                   <Route path="*" element={<NotFound />} />
-              </Routes>
+                </Routes>
+                  </PlatformAccessGuard>
                 </ErrorBoundary>
               </DiagnosticsProvider>
             </BrowserRouter>

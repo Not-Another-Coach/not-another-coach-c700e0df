@@ -325,9 +325,7 @@ export function ClientSurveyWidget({ profile }: ClientSurveyWidgetProps) {
         // Complete the survey - update both completion flags
         await updateProfile({ 
           ...formData, 
-          client_survey_completed: true,
-          quiz_completed: true,
-          client_survey_step: totalSteps
+          client_survey_completed: true
         } as any);
         
         toast({
