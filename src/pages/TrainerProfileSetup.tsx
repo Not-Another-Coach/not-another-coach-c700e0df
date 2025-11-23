@@ -428,29 +428,31 @@ const TrainerProfileSetup = () => {
         return hasPackages ? 'completed' : 'not_started';
         
       case 6: // Discovery Calls
+        // First check if database record exists - if not, step hasn't been started
+        if (!discoverySettings?.id) {
+          return 'not_started';
+        }
+        
         console.log('🔍 Discovery Call Debug - Settings:', discoverySettings);
-        const offersDiscoverySetting = discoverySettings?.offers_discovery_call;
-        const offersDiscoveryForm = typeof formData.free_discovery_call === 'boolean' ? formData.free_discovery_call : undefined;
-        const offersDiscovery = (offersDiscoverySetting ?? offersDiscoveryForm);
+        const offersDiscovery = discoverySettings.offers_discovery_call;
         const hasCalendarLink = !!formData.calendar_link?.trim();
-        const hasDcSlots = !!discoverySettings?.availability_schedule && 
+        const hasDcSlots = !!discoverySettings.availability_schedule && 
           Object.values(discoverySettings.availability_schedule).some((d: any) => 
             d?.enabled === true && Array.isArray(d?.slots) && d.slots.length > 0
           );
         
         console.log('🔍 Discovery Call Debug - Values:', { offersDiscovery, hasCalendarLink, hasDcSlots });
         
-        // Only mark as completed if trainer has explicitly made a choice
-        // If they haven't set anything, it's not started
-        if (offersDiscovery === undefined || offersDiscovery === null) return 'not_started';
+        // If null, trainer hasn't made a choice yet
+        if (offersDiscovery === null) return 'not_started';
         
-        // If discovery calls are explicitly switched off, mark as completed
+        // If explicitly false, trainer chose to disable - mark as completed
         if (offersDiscovery === false) return 'completed';
         
-        // If discovery calls are on and either a calendar link or in-app slots are configured, completed
+        // If true and configured (calendar link OR in-app slots), completed
         if (hasCalendarLink || hasDcSlots) return 'completed';
         
-        // Discovery calls are on but not configured yet
+        // Discovery calls enabled but not configured yet
         return 'partial';
         
       case 7: // Testimonials & Case Studies
