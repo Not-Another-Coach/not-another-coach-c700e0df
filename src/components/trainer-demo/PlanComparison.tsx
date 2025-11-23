@@ -126,12 +126,6 @@ export function PlanComparison() {
                 </tbody>
               </table>
             </div>
-
-            <div className="mt-8 p-4 bg-muted rounded-lg text-center">
-              <p className="text-sm text-muted-foreground">
-                💡 <span className="font-medium">Pro tip:</span> Most trainers upgrade to Builder by month 3 when their earnings make it worthwhile
-              </p>
-            </div>
           </CardContent>
         </Card>
       </div>

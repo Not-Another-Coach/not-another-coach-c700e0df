@@ -28,7 +28,7 @@ export const CoachRecruitmentSection = ({ onBecomeCoach }: CoachRecruitmentSecti
             className="bg-gradient-primary hover:opacity-90 text-white font-semibold px-8 py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
           >
             <Link to="/auth">
-              Become a Coach Today
+              Become Not Another Coach Today
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
           </Button>

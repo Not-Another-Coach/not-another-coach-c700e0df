@@ -5,7 +5,7 @@ import { CoachJourneyInfographic } from '@/components/trainer-demo/CoachJourneyI
 import { DemoProfilePreview } from '@/components/trainer-demo/DemoProfilePreview';
 import { PricingPlans } from '@/components/trainer-demo/PricingPlans';
 import { MonthlyEarningsCalculator } from '@/components/trainer-demo/MonthlyEarningsCalculator';
-import { PlanComparison } from '@/components/trainer-demo/PlanComparison';
+// import { PlanComparison } from '@/components/trainer-demo/PlanComparison';
 import { GrowthPhilosophy } from '@/components/trainer-demo/GrowthPhilosophy';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -127,7 +127,7 @@ export default function TrainerDemo() {
       <MonthlyEarningsCalculator />
 
       {/* Plan Comparison */}
-      <PlanComparison />
+      {/* <PlanComparison /> */}
 
       {/* Coach Recruitment Section */}
       <div className="container mx-auto px-4">
