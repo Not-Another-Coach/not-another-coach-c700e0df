@@ -55,13 +55,6 @@ export function DemoOnboardingSummary() {
               key={metric.label} 
               className={`p-6 ${metric.bgColor} ${metric.borderColor} border-2 hover:shadow-md transition-shadow duration-300`}
             >
-              <div className="flex items-center gap-3 mb-4">
-                <Icon className={`h-8 w-8 ${metric.iconColor}`} />
-                <div className="flex gap-1">
-                  <div className={`w-3 h-1 ${metric.iconColor} opacity-60`}></div>
-                  <div className={`w-3 h-1 ${metric.iconColor} opacity-60`}></div>
-                </div>
-              </div>
               <div className={`text-4xl font-bold ${metric.textColor} mb-2`}>{metric.value}</div>
               <div className={`text-base font-medium ${metric.textColor}`}>{metric.label}</div>
             </Card>

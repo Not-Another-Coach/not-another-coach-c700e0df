@@ -56,12 +56,6 @@ export function DemoDashboardMetrics() {
               key={metric.label} 
               className={`p-6 ${metric.bgColor} ${metric.borderColor} border-2 hover:shadow-md transition-shadow duration-300`}
             >
-              <div className="flex justify-center mb-4">
-                <div className="flex gap-1">
-                  <div className={`w-3 h-1 ${metric.dashColor}`}></div>
-                  <div className={`w-3 h-1 ${metric.dashColor}`}></div>
-                </div>
-              </div>
               <div className="text-center space-y-3">
                 <div className={`text-3xl font-bold ${metric.textColor}`}>{metric.value}</div>
                 <div className={`text-base font-medium ${metric.textColor}`}>{metric.label}</div>
