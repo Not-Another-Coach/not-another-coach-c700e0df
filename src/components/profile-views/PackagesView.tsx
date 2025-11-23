@@ -97,13 +97,40 @@ export const PackagesView = ({ trainer }: PackagesViewProps) => {
           packageWorkflows={packageWaysOfWorkingVisible ? packageWorkflows : undefined}
         />
       ) : (
-        <div className="text-center py-12 px-4">
-          <p className="text-muted-foreground mb-2">
-            No training packages have been set up yet.
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Check back later or contact the trainer for package details.
-          </p>
+        <div className="space-y-6">
+          <div className="bg-muted/30 border-2 border-dashed border-muted-foreground/30 rounded-lg p-8 text-center">
+            <p className="text-muted-foreground mb-4">
+              <strong>Preview:</strong> This is how your packages will appear to clients
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+              {/* Placeholder Package Cards */}
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-background border border-border rounded-lg p-6 text-left opacity-60">
+                  <div className="space-y-4">
+                    <div>
+                      <div className="h-6 bg-muted rounded w-2/3 mb-2"></div>
+                      <div className="h-8 bg-muted rounded w-1/2"></div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="h-4 bg-muted rounded w-full"></div>
+                      <div className="h-4 bg-muted rounded w-5/6"></div>
+                      <div className="h-4 bg-muted rounded w-4/6"></div>
+                    </div>
+                    
+                    <div className="pt-4 border-t border-border">
+                      <div className="h-10 bg-muted rounded"></div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <p className="text-sm text-muted-foreground mt-6">
+              Add your training packages in the <strong>Pricing & Packages</strong> section to populate this view
+            </p>
+          </div>
         </div>
       )}
     </div>
