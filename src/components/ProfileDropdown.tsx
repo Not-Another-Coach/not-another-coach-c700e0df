@@ -24,6 +24,7 @@ interface ProfileDropdownProps {
     profile_image_position?: any;
     quiz_completed?: boolean;
     email?: string;
+    verification_status?: string | null;
   } | null;
 }
 
@@ -165,13 +166,15 @@ export const ProfileDropdown = ({ profile }: ProfileDropdownProps) => {
               <span>Edit Profile</span>
             </DropdownMenuItem>
             
-            <DropdownMenuItem 
-              className="cursor-pointer"
-              onClick={() => navigate('/trainer/settings')}
-            >
-              <Settings className="mr-2 h-4 w-4" />
-              <span>Settings</span>
-            </DropdownMenuItem>
+            {profile.verification_status === 'verified' && (
+              <DropdownMenuItem 
+                className="cursor-pointer"
+                onClick={() => navigate('/trainer/settings')}
+              >
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Settings</span>
+              </DropdownMenuItem>
+            )}
           </>
         )}
         

@@ -30,6 +30,7 @@ export default function Home() {
   const navigate = useNavigate();
   
   const [showQuizModal, setShowQuizModal] = useState(false);
+  const [isCheckingRedirect, setIsCheckingRedirect] = useState(true);
 
   // Initialize data migration hook
   useDataMigration();
@@ -67,6 +68,7 @@ export default function Home() {
     // Only redirect if user is authenticated
     if (!user) {
       console.log('✅ Home - No user, staying on home page');
+      setIsCheckingRedirect(false);
       return;
     }
 
@@ -138,6 +140,11 @@ export default function Home() {
       console.log('🔄 Home - Admin user, redirecting to admin');
       navigate('/admin', { replace: true });
     }
+
+    // Set isCheckingRedirect to false after a small delay to ensure state settles
+    if (!loading && !profileLoading && !userTypeLoading && !isLoggingOut && !isMigrating) {
+      setTimeout(() => setIsCheckingRedirect(false), 100);
+    }
   }, [user, loading, profileLoading, userTypeLoading, isLoggingOut, isMigrating, userType, user_type, profile, navigate]);
 
   const handleQuizComplete = (results: any) => {
@@ -163,7 +170,7 @@ export default function Home() {
   };
 
   // Show loading while checking auth status or during migration
-  if (loading || (user && (profileLoading || userTypeLoading)) || isMigrating) {
+  if (loading || (user && (profileLoading || userTypeLoading)) || isMigrating || isCheckingRedirect) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-lg">
