@@ -48,7 +48,7 @@ export class UserServiceClass extends BaseService {
    */
   static async getUserEmailsForDevelopment(): Promise<ServiceResponse<UserEmail[]>> {
     try {
-      const { data, error } = await this.db.rpc('get_user_emails_for_development', {});
+      const { data, error } = await this.db.rpc('get_user_emails_for_development');
 
       if (error) throw error;
       return ServiceResponseHelper.success(data || []);
@@ -62,7 +62,7 @@ export class UserServiceClass extends BaseService {
    */
   static async listUsersMinimalAdmin(): Promise<ServiceResponse<any[]>> {
     try {
-      const { data, error } = await this.db.rpc('list_users_minimal_admin', {});
+      const { data, error } = await this.db.rpc('list_users_minimal_admin');
 
       if (error) throw error;
       return ServiceResponseHelper.success(data || []);
