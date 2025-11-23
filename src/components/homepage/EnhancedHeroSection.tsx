@@ -4,9 +4,10 @@ import heroImage from "@/assets/hero-fitness-lifestyle.jpg";
 
 interface EnhancedHeroSectionProps {
   onFindMatch: () => void;
+  showFindMatchButton?: boolean;
 }
 
-export const EnhancedHeroSection = ({ onFindMatch }: EnhancedHeroSectionProps) => {
+export const EnhancedHeroSection = ({ onFindMatch, showFindMatchButton = true }: EnhancedHeroSectionProps) => {
   return (
     <div className="relative min-h-[60vh] flex items-center justify-center overflow-hidden">
       {/* Background with Gradient Hero */}
@@ -37,17 +38,19 @@ export const EnhancedHeroSection = ({ onFindMatch }: EnhancedHeroSectionProps) =
           </p>
           
           {/* CTA Button */}
-          <div className="flex justify-center animate-fade-in [animation-delay:0.4s]">
-            <Button
-              onClick={onFindMatch}
-              variant="hero"
-              size="lg"
-              className="bg-accent hover:bg-accent/90 text-white font-semibold px-8 py-4 text-lg shadow-accent hover:shadow-xl transform hover:scale-105 transition-all duration-300"
-            >
-              Find My Match
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </div>
+          {showFindMatchButton && (
+            <div className="flex justify-center animate-fade-in [animation-delay:0.4s]">
+              <Button
+                onClick={onFindMatch}
+                variant="hero"
+                size="lg"
+                className="bg-accent hover:bg-accent/90 text-white font-semibold px-8 py-4 text-lg shadow-accent hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+              >
+                Find My Match
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </div>
