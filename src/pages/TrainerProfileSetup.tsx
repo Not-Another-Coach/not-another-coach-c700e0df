@@ -972,7 +972,8 @@ const TrainerProfileSetup = () => {
             <ProfileDropdown profile={profile ? { 
               ...profile, 
               user_type: 'trainer',
-              email: user?.email 
+              email: user?.email,
+              verification_status: profile.verification_status
             } : null} />
           </div>
         </div>
