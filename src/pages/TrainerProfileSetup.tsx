@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useProfileStepValidation } from "@/hooks/useProfileStepValidation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ArrowLeft, ArrowRight, Save, Eye, ExternalLink, CheckCircle, AlertCircle, Shield, Check, Info } from "lucide-react";
@@ -55,7 +56,7 @@ const TrainerProfileSetup = () => {
   const { isTrainer } = useUserTypeChecks();
   const { packageWorkflows, loading: waysOfWorkingLoading } = usePackageWaysOfWorking();
   const { verificationRequest } = useTrainerVerification();
-  const { getCheckByType } = useEnhancedTrainerVerification();
+  const { getCheckByType, loading: verificationLoading } = useEnhancedTrainerVerification();
   const { settings: discoverySettings } = useDiscoveryCallSettings();
   const { settings: availabilitySettings, refetch: refetchAvailability } = useCoachAvailability();
   const { getStepCompletion: getValidationStepCompletion } = useProfileStepValidation();
@@ -64,6 +65,9 @@ const TrainerProfileSetup = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
+
+  // Combine critical loading states to show skeleton
+  const isCriticalDataLoading = loading || profileLoading || verificationLoading;
 
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -827,10 +831,33 @@ const TrainerProfileSetup = () => {
     }
   };
 
-  if (loading || profileLoading || waysOfWorkingLoading) {
+  // Show loading skeleton while critical data loads
+  if (isCriticalDataLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
+      <div className="min-h-screen bg-background">
+        <div className="p-4 border-b bg-card">
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-9 w-40" />
+            <Skeleton className="h-6 w-48" />
+          </div>
+        </div>
+        <div className="max-w-5xl mx-auto p-6 space-y-6">
+          <Skeleton className="h-2 w-full" />
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-48" />
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-32 w-full" />
+            </CardContent>
+          </Card>
+          <div className="flex justify-between">
+            <Skeleton className="h-10 w-24" />
+            <Skeleton className="h-10 w-24" />
+          </div>
+        </div>
       </div>
     );
   }
