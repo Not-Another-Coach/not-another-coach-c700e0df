@@ -5,9 +5,10 @@ import heroImage from "@/assets/hero-fitness-lifestyle.jpg";
 interface EnhancedHeroSectionProps {
   onFindMatch: () => void;
   showFindMatchButton?: boolean;
+  buttonText?: string;
 }
 
-export const EnhancedHeroSection = ({ onFindMatch, showFindMatchButton = true }: EnhancedHeroSectionProps) => {
+export const EnhancedHeroSection = ({ onFindMatch, showFindMatchButton = true, buttonText = "Find My Match" }: EnhancedHeroSectionProps) => {
   return (
     <div className="relative min-h-[60vh] flex items-center justify-center overflow-hidden">
       {/* Background with Gradient Hero */}
@@ -46,7 +47,7 @@ export const EnhancedHeroSection = ({ onFindMatch, showFindMatchButton = true }:
                 size="lg"
                 className="bg-accent hover:bg-accent/90 text-white font-semibold px-8 py-4 text-lg shadow-accent hover:shadow-xl transform hover:scale-105 transition-all duration-300"
               >
-                Find My Match
+                {buttonText}
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </div>
