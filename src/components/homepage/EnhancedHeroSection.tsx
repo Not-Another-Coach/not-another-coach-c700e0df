@@ -33,7 +33,7 @@ export const EnhancedHeroSection = ({ onFindMatch }: EnhancedHeroSectionProps) =
             </span>
           </h1>
           <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto mb-8 font-medium animate-fade-in [animation-delay:0.2s]">
-            Discover expert trainers, compare coaching styles, and book your perfect match — no signup needed.
+            Discover expert trainers, compare coaching styles, and book your perfect match — explore coaches with no commitment.
           </p>
           
           {/* CTA Button */}
