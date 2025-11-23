@@ -230,8 +230,9 @@ export default function Home() {
 
       {/* Enhanced Hero Section */}
       <EnhancedHeroSection 
-        onFindMatch={() => setShowQuizModal(true)}
-        showFindMatchButton={false}
+        onFindMatch={() => navigate('/auth?signup=client')}
+        showFindMatchButton={true}
+        buttonText="Start your coaching journey"
       />
 
       {/* Meet The Coaches Section */}
