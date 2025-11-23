@@ -199,10 +199,21 @@ const TrainerProfileSetup = () => {
 
   // Show content only when both conditions are met
   useEffect(() => {
+    console.log('🔍 Loading state check:', {
+      loading,
+      profileLoading,
+      verificationLoading,
+      hasProfile: !!profile,
+      isCriticalDataLoading,
+      minLoadTimeElapsed,
+      showContent
+    });
+    
     if (!isCriticalDataLoading && minLoadTimeElapsed) {
+      console.log('✅ Conditions met, showing content');
       setTimeout(() => setShowContent(true), 50);
     }
-  }, [isCriticalDataLoading, minLoadTimeElapsed]);
+  }, [isCriticalDataLoading, minLoadTimeElapsed, loading, profileLoading, verificationLoading, profile, showContent]);
 
   // Initialize form data from profile when available
   useEffect(() => {
