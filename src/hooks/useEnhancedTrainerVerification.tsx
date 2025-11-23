@@ -60,25 +60,7 @@ export const useEnhancedTrainerVerification = () => {
   const [auditLog, setAuditLog] = useState<VerificationAuditEntry[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // Check if user is admin
-  useEffect(() => {
-    const checkAdminRole = async () => {
-      if (!user) return;
-      
-      const { data } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-        .eq('role', 'admin')
-        .maybeSingle();
-      
-      setIsAdmin(!!data);
-    };
-
-    checkAdminRole();
-  }, [user]);
-
-  // Fetch trainer's verification data (optimized)
+  // Fetch trainer's verification data (optimized) - no admin state dependency to prevent double-fetch
   const fetchVerificationData = useCallback(async (trainerId?: string) => {
     if (!user) return;
     
@@ -86,6 +68,17 @@ export const useEnhancedTrainerVerification = () => {
     setLoading(true);
 
     try {
+      // Check admin role inline to avoid double-fetch from state changes
+      const { data: adminData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', 'admin')
+        .maybeSingle();
+      
+      const isAdminUser = !!adminData;
+      setIsAdmin(isAdminUser);
+
       // Batch all data fetching in parallel for better performance
       const [overviewResult, checksResult, auditResult] = await Promise.all([
         supabase
@@ -98,7 +91,7 @@ export const useEnhancedTrainerVerification = () => {
           .select('*')
           .eq('trainer_id', targetTrainerId)
           .order('check_type'),
-        (isAdmin || targetTrainerId === user.id) 
+        (isAdminUser || targetTrainerId === user.id) 
           ? supabase
               .from('trainer_verification_audit_log')
               .select('*')
@@ -127,7 +120,7 @@ export const useEnhancedTrainerVerification = () => {
     } finally {
       setLoading(false);
     }
-  }, [user, isAdmin]);
+  }, [user]);
 
   // Update verification preference toggle
   const updateDisplayPreference = useCallback(async (preference: 'verified_allowed' | 'hidden') => {
@@ -405,12 +398,13 @@ export const useEnhancedTrainerVerification = () => {
       : 'hidden';
   }, [overview]);
 
-  // Initialize data on mount
+  // Initialize data on mount - removed fetchVerificationData from deps to prevent re-fetch loop
   useEffect(() => {
     if (user) {
       fetchVerificationData();
     }
-  }, [user, fetchVerificationData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   // Check if certificate is expiring within 14 days
   const isExpiringWithin14Days = useCallback((expiryDate?: string) => {
