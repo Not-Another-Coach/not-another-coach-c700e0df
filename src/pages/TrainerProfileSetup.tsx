@@ -1161,20 +1161,22 @@ const TrainerProfileSetup = () => {
             firstName: formData.first_name,
             lastName: formData.last_name,
             specialties: formData.specializations || [],
-            rating: 4.8,
-            reviews: 127,
-            experience: "Verified Professional",
             location: formData.location || "Location TBD",
             hourlyRate: formData.hourly_rate || 75,
             image: formData.profile_photo_url || "/api/placeholder/150/150",
             profilePhotoUrl: formData.profile_photo_url,
-            qualifications: formData.qualifications || [], // Include qualifications for profile views
-            certifications: formData.qualifications || [], // For backward compatibility with some views
-            description: formData.bio || "Professional fitness trainer dedicated to helping you achieve your goals.",
+            qualifications: formData.qualifications || [],
+            certifications: formData.qualifications || [],
+            description: formData.bio || "",
             availability: "Available",
-            trainingType: formData.training_types || ["In-Person", "Online"],
+            trainingType: formData.training_types || [],
             offers_discovery_call: formData.free_discovery_call || false,
-            package_options: formData.package_options || []
+            package_options: formData.package_options || [],
+            verification_status: (profile as any)?.verification_status || 'pending',
+            how_started: formData.how_started || "",
+            philosophy: formData.philosophy || "",
+            professional_milestones: formData.professional_milestones || [],
+            testimonials: formData.testimonials || []
           }}
       />
     </div>

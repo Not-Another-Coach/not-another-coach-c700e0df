@@ -89,14 +89,15 @@ export const OverviewView = ({ trainer, onMessage, onBookDiscovery }: OverviewVi
                 engagementStage={engagementStage || 'browsing'}
               />
               
-              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 mb-3">
-                <div className="flex items-center gap-1">
-                  <Star className="h-5 w-5 fill-accent text-accent" />
-                  <span className="font-semibold text-lg">{trainer.rating}</span>
-                  <span className="text-muted-foreground">({trainer.reviews} reviews)</span>
+              {/* Only show verified badge if trainer is actually verified */}
+              {(trainer as any).verification_status === 'verified' && (
+                <div className="flex justify-center sm:justify-start mb-3">
+                  <Badge variant="secondary" className="gap-1">
+                    <Award className="h-3 w-3" />
+                    Verified Professional
+                  </Badge>
                 </div>
-                <Badge variant="secondary">{trainer.experience}</Badge>
-              </div>
+              )}
               
               <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6 text-muted-foreground mb-4">
                 <div className="flex items-center gap-2">

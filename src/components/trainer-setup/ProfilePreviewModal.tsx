@@ -121,18 +121,6 @@ export const ProfilePreviewModal = ({
         return <CardsView trainer={trainer} />;
       case 'content':
         return <ContentView trainer={trainer} />;
-      case 'compare':
-        return (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <Eye className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Comparison Mode</h3>
-              <p className="text-muted-foreground text-center max-w-md">
-                This view shows how your profile will appear when clients compare you with other trainers side-by-side.
-              </p>
-            </CardContent>
-          </Card>
-        );
       default:
         return (
           <OverviewView 
@@ -175,6 +163,8 @@ export const ProfilePreviewModal = ({
               currentView={currentView}
               onViewChange={setCurrentView}
               isMobile={isMobile}
+              hideCompareView={true}
+              hideViewingBadge={true}
             />
           </div>
           
