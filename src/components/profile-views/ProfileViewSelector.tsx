@@ -48,12 +48,6 @@ const viewOptions = [
     label: 'Card Views',
     icon: Grid3X3,
     description: 'How your profile appears as cards'
-  },
-  {
-    value: 'compare' as ProfileViewMode,
-    label: 'Compare',
-    icon: GitCompare,
-    description: 'Side-by-side comparison'
   }
 ];
 
