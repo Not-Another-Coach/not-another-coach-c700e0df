@@ -117,18 +117,6 @@ const TrainerDashboard = () => {
     }
   }, [user, loading, navigate]);
 
-  // Redirect incomplete profiles to profile setup
-  useEffect(() => {
-    if (!loading && !profileLoading && profile) {
-      const isProfileComplete = profile.profile_setup_completed === true;
-      
-      if (!isProfileComplete) {
-        console.log('🔒 Dashboard - Profile incomplete, redirecting to setup');
-        navigate('/trainer/profile-setup', { replace: true });
-      }
-    }
-  }, [profile, loading, profileLoading, navigate]);
-
   const calculateProfileCompletion = () => {
     if (!profile) return 0;
     

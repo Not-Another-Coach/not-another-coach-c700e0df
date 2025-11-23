@@ -472,21 +472,23 @@ const TrainerProfileSetup = () => {
         // Consider local pending selection as well to avoid stale state
         const effectiveStatus = pendingAvailabilityChanges?.status || availabilitySettings?.availability_status;
         
-        // Only mark completed if trainer has explicitly chosen a status AND it's a valid status
-        // New trainers with no settings should show as not_started
-        const hasExplicitStatus = effectiveStatus && 
-          ['accepting', 'waitlist', 'unavailable'].includes(effectiveStatus as string);
-        
         const hasWorkingHours = !!availabilitySettings?.availability_schedule && 
           Object.values(availabilitySettings.availability_schedule).some((day: any) => 
             day?.enabled && Array.isArray(day?.slots) && day.slots.length > 0
           );
         
-        console.log('🔍 Availability Debug - Values:', { hasExplicitStatus, hasWorkingHours, effectiveStatus });
+        const hasValidStatus = effectiveStatus && 
+          ['accepting', 'waitlist', 'unavailable'].includes(effectiveStatus as string);
         
-        // Only mark completed if they've explicitly set a status
-        if (hasExplicitStatus) return 'completed';
-        if (hasWorkingHours) return 'partial';
+        console.log('🔍 Availability Debug - Values:', { 
+          hasWorkingHours, 
+          hasValidStatus,
+          effectiveStatus 
+        });
+        
+        // Only mark completed if they've set working hours (explicit action)
+        // Status alone is not enough since it has a database default
+        if (hasWorkingHours) return 'completed';
         return 'not_started';
         
       case 11: // Terms & Notifications
@@ -879,15 +881,29 @@ const TrainerProfileSetup = () => {
       <div className="p-4 border-b bg-card">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div className="flex items-center gap-4 min-w-0">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleBackToDashboard}
-              className="flex-shrink-0"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleBackToDashboard}
+                      disabled={!profile?.profile_setup_completed}
+                      className="flex-shrink-0"
+                    >
+                      <ArrowLeft className="h-4 w-4 mr-2" />
+                      Back to Dashboard
+                    </Button>
+                  </div>
+                </TooltipTrigger>
+                {!profile?.profile_setup_completed && (
+                  <TooltipContent>
+                    <p>Complete your profile to access the dashboard</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
             <div className="flex items-center gap-2 min-w-0">
               <h1 className="text-lg sm:text-xl font-bold truncate">
                 {isFullyComplete() ? 'Profile Management' : 'Profile Setup'}
