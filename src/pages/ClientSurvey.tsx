@@ -495,8 +495,7 @@ const ClientSurvey = () => {
         await updateProfile({ 
           ...formData, 
           preferred_training_frequency: formData.preferred_training_frequency ? String(formData.preferred_training_frequency) : null,
-          client_survey_completed: true,
-          quiz_completed: true
+          client_survey_completed: true
         });
         
         toast({

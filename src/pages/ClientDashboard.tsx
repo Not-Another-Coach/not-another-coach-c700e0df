@@ -134,7 +134,7 @@ export default function ClientDashboard() {
   // Hide preferences CTA once they're in onboarding or beyond, or if there's a scheduled call
   const isInOnboardingOrBeyond = journeyProgress?.stage === 'onboarding_in_progress' || journeyProgress?.stage === 'on_your_journey';
   const hasScheduledCall = (upcomingCalls?.length ?? 0) > 0;
-  const surveyIncomplete = profile && (!profile.quiz_completed || !profile.client_survey_completed) && !hasAdvancedEngagement && !isInOnboardingOrBeyond && !hasScheduledCall;
+  const surveyIncomplete = profile && !profile.client_survey_completed && !hasAdvancedEngagement && !isInOnboardingOrBeyond && !hasScheduledCall;
   
   // Refetch journey when upcoming calls change
   useEffect(() => {

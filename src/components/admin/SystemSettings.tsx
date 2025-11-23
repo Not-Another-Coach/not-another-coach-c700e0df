@@ -9,7 +9,8 @@ import { MembershipPlanManager } from './MembershipPlanManager';
 import { TrainerMembershipAssignment } from './TrainerMembershipAssignment';
 import { FailedPaymentConfigPanel } from './FailedPaymentConfigPanel';
 import { PlanAnalytics } from './PlanAnalytics';
-import { Settings, Image, Database, Users, CreditCard, DollarSign, BarChart3 } from 'lucide-react';
+import { PlatformAccessControl } from './PlatformAccessControl';
+import { Settings, Image, Database, Users, CreditCard, DollarSign, BarChart3, Shield } from 'lucide-react';
 
 export function SystemSettings() {
   return (
@@ -20,7 +21,7 @@ export function SystemSettings() {
       </div>
 
       <Tabs defaultValue="branding" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
+        <TabsList className="grid w-full grid-cols-4 lg:grid-cols-9">
           <TabsTrigger value="branding" className="flex items-center gap-2">
             <Image className="h-4 w-4" />
             Branding
@@ -40,6 +41,10 @@ export function SystemSettings() {
           <TabsTrigger value="analytics" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
             Analytics
+          </TabsTrigger>
+          <TabsTrigger value="access" className="flex items-center gap-2">
+            <Shield className="h-4 w-4" />
+            Access
           </TabsTrigger>
           <TabsTrigger value="general" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
@@ -73,6 +78,10 @@ export function SystemSettings() {
 
       <TabsContent value="analytics" className="space-y-6">
         <PlanAnalytics />
+      </TabsContent>
+
+      <TabsContent value="access" className="space-y-6">
+        <PlatformAccessControl />
       </TabsContent>
 
         <TabsContent value="general" className="space-y-6">

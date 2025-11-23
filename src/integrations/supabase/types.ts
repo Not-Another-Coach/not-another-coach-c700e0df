@@ -4264,6 +4264,7 @@ export type Database = {
           consent_version: string | null
           created_at: string
           data_retention_until: string | null
+          date_profile_completed: string | null
           delivery_format: string | null
           discovery_call_price: number | null
           discovery_call_settings: Json | null
@@ -4396,6 +4397,7 @@ export type Database = {
           consent_version?: string | null
           created_at?: string
           data_retention_until?: string | null
+          date_profile_completed?: string | null
           delivery_format?: string | null
           discovery_call_price?: number | null
           discovery_call_settings?: Json | null
@@ -4528,6 +4530,7 @@ export type Database = {
           consent_version?: string | null
           created_at?: string
           data_retention_until?: string | null
+          date_profile_completed?: string | null
           delivery_format?: string | null
           discovery_call_price?: number | null
           discovery_call_settings?: Json | null
@@ -6952,6 +6955,7 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: boolean
       }
+      can_user_access_platform: { Args: { user_id: string }; Returns: boolean }
       cancel_trainer_plan: { Args: { p_reason?: string }; Returns: Json }
       carry_forward_incomplete_cts: {
         Args: {
@@ -7132,6 +7136,7 @@ export type Database = {
         }
         Returns: Database["public"]["Enums"]["engagement_stage"][]
       }
+      get_platform_access_settings: { Args: never; Returns: Json }
       get_secure_profile_data: {
         Args: { p_user_id?: string }
         Returns: {
@@ -7276,6 +7281,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      mark_profile_completed: { Args: { user_id: string }; Returns: undefined }
       process_webhook_event: {
         Args: {
           p_event_type: string
@@ -7368,6 +7374,10 @@ export type Database = {
           new_stage: Database["public"]["Enums"]["engagement_stage"]
           trainer_uuid: string
         }
+        Returns: undefined
+      }
+      update_platform_access_settings: {
+        Args: { client_enabled: boolean; trainer_enabled: boolean }
         Returns: undefined
       }
       update_template_analytics: {
