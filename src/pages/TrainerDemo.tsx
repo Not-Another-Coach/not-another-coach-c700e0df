@@ -40,11 +40,20 @@ export default function TrainerDemo() {
               <UserModeToggle />
             </div>
             
-            <Button onClick={handleCreateProfile} size="sm" className="sm:size-default flex-shrink-0">
-              <span className="hidden sm:inline">Create Your Profile</span>
-              <span className="sm:hidden">Create Profile</span>
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+            <div className="flex items-center gap-4 flex-shrink-0">
+              {/* Desktop: Separate buttons */}
+              <Button variant="ghost" onClick={() => navigate('/auth')} className="hidden md:flex">
+                Sign In
+              </Button>
+              <Button onClick={handleCreateProfile} className="hidden md:flex">
+                Join
+              </Button>
+              
+              {/* Mobile: Single pill button */}
+              <Button onClick={handleCreateProfile} className="md:hidden">
+                Join
+              </Button>
+            </div>
           </div>
         </div>
         
