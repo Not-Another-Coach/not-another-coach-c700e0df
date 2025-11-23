@@ -52,14 +52,16 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
   const [loading, setLoading] = useState(true);
   const [gridSize, setGridSize] = useState<number>(6);
 
-  // Add engagement stage and visibility logic
+  // Detect if this is a demo trainer
+  const isDemoProfile = trainer.id.startsWith('demo-trainer-');
+  
   const { stage, isGuest } = useEngagementStage(trainer.id);
   const { visibilityMap, getVisibility, loading: visibilityLoading } = useContentVisibility({
     engagementStage: stage || 'browsing',
     isGuest
   });
 
-  const galleryVisibility = getVisibility('gallery_images');
+  const galleryVisibility = isDemoProfile ? 'visible' : getVisibility('gallery_images');
 
   // Enhanced debug visibility system
   console.log('[VISIBILITY DEBUG] InstagramGalleryView:', {

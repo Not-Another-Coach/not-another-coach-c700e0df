@@ -62,6 +62,9 @@ const getTransformationData = (trainer: AnyTrainer) => {
 export const ClientTransformationView = ({ trainer, children, testimonialIndex = 0 }: ClientTransformationViewProps) => {
   const transformationData = getTransformationData(trainer);
   
+  // Detect if this is a demo trainer
+  const isDemoProfile = trainer.id.startsWith('demo-trainer-');
+  
   // Add visibility logic
   const { stage, isGuest } = useEngagementStage(trainer.id);
   const { getVisibility, loading: visibilityLoading } = useContentVisibility({
@@ -74,8 +77,17 @@ export const ClientTransformationView = ({ trainer, children, testimonialIndex =
   // Compute effective visibility for transformations
   const isFirstGuest = isGuest && testimonialIndex === 0;
   const isSecondaryGuest = isGuest && testimonialIndex > 0;
-  // Force first transformation visible for guests; blur subsequent ones
-  const effectiveVisibility = isFirstGuest ? 'visible' : (isSecondaryGuest ? 'blurred' : testimonialVisibility);
+  
+  let effectiveVisibility: 'visible' | 'blurred' | 'hidden';
+  
+  if (isDemoProfile) {
+    // Demo profiles: always visible
+    effectiveVisibility = 'visible';
+    console.log('🎯 Demo profile detected - forcing all images visible');
+  } else {
+    // Regular profiles: apply engagement rules
+    effectiveVisibility = isFirstGuest ? 'visible' : (isSecondaryGuest ? 'blurred' : testimonialVisibility);
+  }
   
   // DEBUG: Log visibility states for first transformation debugging
   console.log(`🔍 ClientTransformationView Debug - Trainer: ${trainer.name}`, {
@@ -87,7 +99,8 @@ export const ClientTransformationView = ({ trainer, children, testimonialIndex =
     effectiveVisibility,
     isFirstGuest,
     isSecondaryGuest,
-    visibilityLoading
+    visibilityLoading,
+    isDemoProfile
   });
 
   // If no transformations available, show placeholder
