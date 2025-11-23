@@ -37,11 +37,18 @@ export function useDiscoveryCallSettings() {
     if (!user) return;
     
     try {
-      const { data, error } = await supabase
+      // Add timeout to prevent hanging
+      const fetchPromise = supabase
         .from('discovery_call_settings')
         .select('*')
         .eq('trainer_id', user.id)
         .maybeSingle();
+      
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout')), 10000)
+      );
+      
+      const { data, error } = await Promise.race([fetchPromise, timeoutPromise]) as any;
 
       if (error) {
         // Handle permission errors gracefully
@@ -85,11 +92,14 @@ export function useDiscoveryCallSettings() {
         };
         setSettings(defaultSettings);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching discovery call settings:', error);
+      const isTimeout = error?.message === 'Request timeout';
       toast({
-        title: "Error",
-        description: "Failed to load discovery call settings",
+        title: isTimeout ? "Request Timeout" : "Error",
+        description: isTimeout 
+          ? "Discovery call settings are taking too long to load. Please try again."
+          : "Failed to load discovery call settings",
         variant: "destructive",
       });
     } finally {
