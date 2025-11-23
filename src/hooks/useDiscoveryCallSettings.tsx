@@ -6,7 +6,7 @@ import { useToast } from './use-toast';
 interface DiscoveryCallSettings {
   id?: string;
   trainer_id: string;
-  offers_discovery_call: boolean;
+  offers_discovery_call: boolean | null;
   discovery_call_duration: number;
   availability_schedule: {
     [key: string]: {
@@ -74,10 +74,10 @@ export function useDiscoveryCallSettings() {
           availability_schedule: data.discovery_call_availability_schedule as DiscoveryCallSettings['availability_schedule']
         });
       } else {
-        // Create default settings if none exist
+        // Create default settings if none exist - use null for "not configured"
         const defaultSettings: DiscoveryCallSettings = {
           trainer_id: user.id,
-          offers_discovery_call: false,
+          offers_discovery_call: null,
           discovery_call_duration: 15,
           availability_schedule: {
             monday: { enabled: false, slots: [] },

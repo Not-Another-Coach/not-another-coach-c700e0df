@@ -146,13 +146,13 @@ export const TrainerProfile = () => {
     // Prevent anonymous users from accessing content view
     if (!user && currentView === 'content') {
       setCurrentView('overview');
-      return (
-        <OverviewView 
-          trainer={trainer} 
-          onMessage={!isOwnProfile ? handleMessage : undefined}
-          onBookDiscovery={!isOwnProfile && trainer.offers_discovery_call ? handleBookDiscovery : undefined}
-        />
-      );
+        return (
+          <OverviewView 
+            trainer={trainer} 
+            onMessage={!isOwnProfile ? handleMessage : undefined}
+            onBookDiscovery={!isOwnProfile && trainer.offers_discovery_call === true ? handleBookDiscovery : undefined}
+          />
+        );
     }
 
     switch (currentView) {
@@ -161,7 +161,7 @@ export const TrainerProfile = () => {
           <OverviewView 
             trainer={trainer} 
             onMessage={!isOwnProfile ? handleMessage : undefined}
-            onBookDiscovery={!isOwnProfile && trainer.offers_discovery_call ? handleBookDiscovery : undefined}
+            onBookDiscovery={!isOwnProfile && trainer.offers_discovery_call === true ? handleBookDiscovery : undefined}
           />
         );
       case 'packages':
@@ -176,7 +176,7 @@ export const TrainerProfile = () => {
           <OverviewView 
             trainer={trainer} 
             onMessage={!isOwnProfile ? handleMessage : undefined}
-            onBookDiscovery={!isOwnProfile && trainer.offers_discovery_call ? handleBookDiscovery : undefined}
+            onBookDiscovery={!isOwnProfile && trainer.offers_discovery_call === true ? handleBookDiscovery : undefined}
           />
         );
       case 'compare':
@@ -199,7 +199,7 @@ export const TrainerProfile = () => {
           </Card>
         );
       default:
-        return <OverviewView trainer={trainer} onMessage={!isOwnProfile ? handleMessage : undefined} onBookDiscovery={!isOwnProfile ? handleBookDiscovery : undefined} />;
+        return <OverviewView trainer={trainer} onMessage={!isOwnProfile ? handleMessage : undefined} onBookDiscovery={!isOwnProfile && trainer.offers_discovery_call === true ? handleBookDiscovery : undefined} />;
     }
   };
 
@@ -292,7 +292,7 @@ export const TrainerProfile = () => {
                 onAddToShortlist={() => console.log('Add to shortlist')}
                 onStartConversation={handleMessage}
                 onBookDiscoveryCall={handleBookDiscovery}
-                trainerOffersDiscoveryCalls={trainer.offers_discovery_call || false}
+                trainerOffersDiscoveryCalls={trainer.offers_discovery_call === true}
                 engagementStage={engagementStage as any}
               />
             )}

@@ -24,7 +24,7 @@ export interface TrainerWithStatus {
   description: string;
   availability: string;
   trainingType: string[];
-  offers_discovery_call: boolean;
+  offers_discovery_call: boolean | null;
   package_options?: any[];
   testimonials?: any[];
   // Status fields
@@ -140,7 +140,7 @@ export function useMyTrainers(refreshTrigger?: number) {
         // Helper function to create optimized trainer object
         const createTrainerObject = (trainerProfile: any): Omit<TrainerWithStatus, 'status' | 'engagement' | 'statusLabel' | 'statusColor'> => {
           const discoverySettings = discoveryCallSettings?.find(d => d.id === trainerProfile.id);
-          const discoveryCallValue = discoverySettings?.offers_discovery_call || false;
+          const discoveryCallValue = discoverySettings?.offers_discovery_call ?? null;
           
           return {
             id: trainerProfile.id,

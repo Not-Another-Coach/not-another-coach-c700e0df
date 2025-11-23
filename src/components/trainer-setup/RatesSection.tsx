@@ -958,7 +958,7 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
                 </div>
                 <Switch
                   id="offers-discovery-call"
-                  checked={discoverySettings.offers_discovery_call}
+                  checked={discoverySettings.offers_discovery_call === true}
                   onCheckedChange={(checked) => 
                     updateSettings({ offers_discovery_call: checked })
                   }

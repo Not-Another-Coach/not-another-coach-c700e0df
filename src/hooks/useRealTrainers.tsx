@@ -79,7 +79,7 @@ export function useRealTrainers(refreshTrigger?: number, includeOwnUnpublished?:
           if (trainer.bio?.includes('Lou') || trainer.id === 'f5562940-ccc4-40c2-b8dd-8f8c22311003') {
             console.log(`🐛 DEBUG Raw trainer data for Lou:`, {
               trainerId: trainer.id,
-              offers_discovery_call: false // Default to false since discovery_call_settings not available
+              offers_discovery_call: null // Default to null since discovery_call_settings not available
             });
           }
           
@@ -108,7 +108,7 @@ export function useRealTrainers(refreshTrigger?: number, includeOwnUnpublished?:
             description: trainer.bio || "Professional fitness trainer dedicated to helping you achieve your goals.",
             availability: "Available",
             trainingType: trainer.training_types || ["In-Person", "Online"],
-            offers_discovery_call: false, // Default to false since discovery_call_settings not available
+            offers_discovery_call: null, // Default to null since discovery_call_settings not available
             package_options: (trainer.package_options as any[]) || [],
             testimonials: (trainer.testimonials as any[]) || [],
             professional_milestones: (trainer.professional_milestones as any[]) || []

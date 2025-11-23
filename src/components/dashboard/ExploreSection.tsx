@@ -37,7 +37,7 @@ interface ExploreTrainer {
   description: string;
   availability: string;
   trainingType: string[];
-  offers_discovery_call?: boolean;
+  offers_discovery_call?: boolean | null;
   testimonials?: any[];
 }
 

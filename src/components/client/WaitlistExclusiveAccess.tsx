@@ -22,7 +22,7 @@ interface WaitlistExclusiveAccessProps {
     rating?: number;
     package_options?: any;
     discovery_call_settings?: {
-      offers_discovery_call: boolean;
+      offers_discovery_call: boolean | null;
     };
   };
   exclusiveUntil: string;
@@ -68,7 +68,7 @@ export function WaitlistExclusiveAccess({ trainer, exclusiveUntil }: WaitlistExc
   }
 
   const trainerName = `${trainer.first_name} ${trainer.last_name}`;
-  const offersDiscoveryCall = trainer.discovery_call_settings?.offers_discovery_call ?? false;
+  const offersDiscoveryCall = trainer.discovery_call_settings?.offers_discovery_call === true;
 
   return (
     <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10">
