@@ -80,6 +80,8 @@ export const PackagesView = ({ trainer }: PackagesViewProps) => {
     );
   }
   
+  const trainerPackages = (trainer as any).package_options || (trainer as any).packages || [];
+  
   return (
     <div className="space-y-6">
       <div>
@@ -89,10 +91,21 @@ export const PackagesView = ({ trainer }: PackagesViewProps) => {
         </p>
       </div>
       
-      <PackageComparisonSection
-        packages={(trainer as any).package_options || (trainer as any).packages || []}
-        packageWorkflows={packageWaysOfWorkingVisible ? packageWorkflows : undefined}
-      />
+      {trainerPackages.length > 0 ? (
+        <PackageComparisonSection
+          packages={trainerPackages}
+          packageWorkflows={packageWaysOfWorkingVisible ? packageWorkflows : undefined}
+        />
+      ) : (
+        <div className="text-center py-12 px-4">
+          <p className="text-muted-foreground mb-2">
+            No training packages have been set up yet.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Check back later or contact the trainer for package details.
+          </p>
+        </div>
+      )}
     </div>
   );
 };
