@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -71,13 +71,13 @@ export function DiscoveryCallSection({ formData, updateFormData, errors }: Disco
   const { settings: discoverySettings, loading: discoveryLoading, updateSettings } = useDiscoveryCallSettings();
   const { toast } = useToast();
   const [prepNotesLocal, setPrepNotesLocal] = useState("");
+  
   // Sync local state when settings load/update
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  (function syncLocalFromSettings() {
-    if (discoverySettings && typeof discoverySettings.prep_notes === 'string' && prepNotesLocal === "") {
-      setPrepNotesLocal(discoverySettings.prep_notes || "");
+  useEffect(() => {
+    if (discoverySettings?.prep_notes && prepNotesLocal === "") {
+      setPrepNotesLocal(discoverySettings.prep_notes);
     }
-  })();
+  }, [discoverySettings?.prep_notes, prepNotesLocal]);
 
   const testBookingLink = () => {
     if (formData.calendar_link) {
