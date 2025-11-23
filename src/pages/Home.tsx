@@ -232,22 +232,14 @@ export default function Home() {
       <EnhancedHeroSection 
         onFindMatch={() => navigate('/auth?signup=client')}
         showFindMatchButton={true}
-        buttonText="Start your coaching journey"
+        buttonText="Start Your Coaching Journey"
       />
 
       {/* Meet The Coaches Section */}
       <section id="browse-trainers" className="py-16 bg-muted/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <div className="flex items-center justify-center gap-4 mb-4">
-              <h2 className="text-3xl font-bold">Meet The Coaches</h2>
-              {userIntent && (
-                <ResetOptionsButton 
-                  variant="outline" 
-                  size="sm"
-                />
-              )}
-            </div>
+            <h2 className="text-3xl font-bold mb-4">Meet The Coaches</h2>
             <p className="text-xl text-muted-foreground">
               Discover your perfect training match
             </p>
