@@ -7,6 +7,9 @@ import { PricingPlans } from '@/components/trainer-demo/PricingPlans';
 import { MonthlyEarningsCalculator } from '@/components/trainer-demo/MonthlyEarningsCalculator';
 // import { PlanComparison } from '@/components/trainer-demo/PlanComparison';
 import { GrowthPhilosophy } from '@/components/trainer-demo/GrowthPhilosophy';
+import { DemoDashboardMetrics } from '@/components/trainer-demo/DemoDashboardMetrics';
+import { DemoOnboardingSummary } from '@/components/trainer-demo/DemoOnboardingSummary';
+import { DemoExecutionCard } from '@/components/trainer-demo/DemoExecutionCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -112,6 +115,26 @@ export default function TrainerDemo() {
         {/* Profile Preview Section */}
         <div className="mb-12 max-w-md mx-auto">
           <DemoProfilePreview />
+        </div>
+
+        {/* Dashboard Preview Section */}
+        <div className="mb-16">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              Your Command Center
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Track every aspect of your coaching business with powerful analytics and insights
+            </p>
+          </div>
+          
+          <div className="space-y-6">
+            <DemoDashboardMetrics />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <DemoOnboardingSummary />
+              <DemoExecutionCard />
+            </div>
+          </div>
         </div>
 
         <div className="space-y-8">
