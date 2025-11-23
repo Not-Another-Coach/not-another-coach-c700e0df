@@ -204,11 +204,17 @@ export default function Home() {
                 </Button>
               )}
               
-              <Button variant="ghost" onClick={() => navigate('/auth')}>
+              {/* Desktop: Separate buttons */}
+              <Button variant="ghost" onClick={() => navigate('/auth')} className="hidden md:flex">
                 Sign In
               </Button>
-              <Button onClick={() => navigate('/auth?signup=client')}>
-                Create Account
+              <Button onClick={() => navigate('/auth?signup=client')} className="hidden md:flex">
+                Join
+              </Button>
+              
+              {/* Mobile: Single pill button */}
+              <Button onClick={() => navigate('/auth')} className="md:hidden">
+                Sign in / Join
               </Button>
             </div>
           </div>
