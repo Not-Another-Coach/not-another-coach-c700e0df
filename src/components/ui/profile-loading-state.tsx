@@ -10,8 +10,8 @@ export function ProfileLoadingState({
   subtitle = "Setting up your workspace and loading your information."
 }: ProfileLoadingStateProps) {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/30">
-      <div className="text-center space-y-6 px-4 max-w-md animate-fade-in">
+    <div className="min-h-screen flex items-center justify-center bg-muted/30 animate-fade-in">
+      <div className="text-center space-y-6 px-4 max-w-md">
         <div className="flex justify-center">
           <div className="relative">
             <User className="h-16 w-16 text-primary/60" strokeWidth={1.5} />
