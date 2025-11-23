@@ -1,4 +1,4 @@
-import { Target, CreditCard, TrendingUp, Shield } from "lucide-react";
+import { Target, CreditCard, TrendingUp, Shield, ShieldCheck } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 export const InteractiveValueCards = () => {
@@ -50,6 +50,18 @@ export const InteractiveValueCards = () => {
         badge: "bg-accent/10 text-accent"
       },
       stats: "Protected"
+    },
+    {
+      icon: ShieldCheck,
+      title: "Verified Coaches (NAC Vetting Levels)",
+      description: "See each coach's verification status — certificates, insurance, background checks & more",
+      colorClasses: {
+        bg: "bg-warning/10 group-hover:bg-warning/20",
+        text: "text-warning",
+        border: "border-l-warning",
+        badge: "bg-warning/10 text-warning"
+      },
+      stats: "Trust Built-In"
     }
   ];
 
