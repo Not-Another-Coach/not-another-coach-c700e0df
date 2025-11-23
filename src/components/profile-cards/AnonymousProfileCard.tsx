@@ -19,7 +19,7 @@ interface Trainer {
   years_experience?: number;
   rating?: number;
   client_count?: number;
-  offers_discovery_call?: boolean;
+  offers_discovery_call?: boolean | null;
   price_range?: string;
   transformation_specialties?: string[];
 }
@@ -233,7 +233,7 @@ export const AnonymousProfileCard: React.FC<AnonymousProfileCardProps> = ({
                 Send Message
               </Button>
               
-              {trainer.offers_discovery_call && (
+              {trainer.offers_discovery_call === true && (
                 <Button 
                   onClick={onBookDiscovery}
                   className="flex items-center gap-2"

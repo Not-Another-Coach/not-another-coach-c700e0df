@@ -1817,7 +1817,7 @@ export type Database = {
           discovery_call_availability_schedule: Json | null
           discovery_call_duration: number
           id: string
-          offers_discovery_call: boolean
+          offers_discovery_call: boolean | null
           prep_notes: string | null
           trainer_id: string
           updated_at: string
@@ -1827,7 +1827,7 @@ export type Database = {
           discovery_call_availability_schedule?: Json | null
           discovery_call_duration?: number
           id?: string
-          offers_discovery_call?: boolean
+          offers_discovery_call?: boolean | null
           prep_notes?: string | null
           trainer_id: string
           updated_at?: string
@@ -1837,7 +1837,7 @@ export type Database = {
           discovery_call_availability_schedule?: Json | null
           discovery_call_duration?: number
           id?: string
-          offers_discovery_call?: boolean
+          offers_discovery_call?: boolean | null
           prep_notes?: string | null
           trainer_id?: string
           updated_at?: string

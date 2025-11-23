@@ -133,7 +133,7 @@ export function DiscoveryCallSection({ formData, updateFormData, errors }: Disco
                   </p>
                 </div>
                 <Switch
-                  checked={discoverySettings.offers_discovery_call}
+                  checked={discoverySettings.offers_discovery_call === true}
                   onCheckedChange={(checked) => {
                     updateSettings({ offers_discovery_call: checked });
                     // Sync with profile form for step completion logic

@@ -12,7 +12,7 @@ interface BookDiscoveryCallButtonProps {
     firstName?: string;
     lastName?: string;
     profilePhotoUrl?: string;
-    offers_discovery_call?: boolean;
+    offers_discovery_call?: boolean | null;
   };
   variant?: 'default' | 'outline' | 'secondary';
   size?: 'sm' | 'md' | 'lg';
