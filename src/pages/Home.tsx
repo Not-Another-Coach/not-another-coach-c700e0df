@@ -213,7 +213,7 @@ export default function Home() {
               </Button>
               
               {/* Mobile: Single pill button */}
-              <Button onClick={() => navigate('/auth')} className="md:hidden">
+              <Button onClick={() => navigate('/auth?signup=client')} className="md:hidden">
                 Join
               </Button>
             </div>
