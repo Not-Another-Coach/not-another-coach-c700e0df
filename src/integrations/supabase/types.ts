@@ -5532,6 +5532,7 @@ export type Database = {
           created_at: string | null
           delivery_format: string[] | null
           discovery_call_price: number | null
+          document_not_applicable: Json | null
           free_discovery_call: boolean | null
           hourly_rate: number | null
           how_started: string | null
@@ -5552,6 +5553,7 @@ export type Database = {
           terms_agreed: boolean | null
           testimonials: Json | null
           total_ratings: number | null
+          training_type_delivery: Json | null
           training_types: string[] | null
           updated_at: string | null
           uploaded_certificates: Json | null
@@ -5581,6 +5583,7 @@ export type Database = {
           created_at?: string | null
           delivery_format?: string[] | null
           discovery_call_price?: number | null
+          document_not_applicable?: Json | null
           free_discovery_call?: boolean | null
           hourly_rate?: number | null
           how_started?: string | null
@@ -5601,6 +5604,7 @@ export type Database = {
           terms_agreed?: boolean | null
           testimonials?: Json | null
           total_ratings?: number | null
+          training_type_delivery?: Json | null
           training_types?: string[] | null
           updated_at?: string | null
           uploaded_certificates?: Json | null
@@ -5630,6 +5634,7 @@ export type Database = {
           created_at?: string | null
           delivery_format?: string[] | null
           discovery_call_price?: number | null
+          document_not_applicable?: Json | null
           free_discovery_call?: boolean | null
           hourly_rate?: number | null
           how_started?: string | null
@@ -5650,6 +5655,7 @@ export type Database = {
           terms_agreed?: boolean | null
           testimonials?: Json | null
           total_ratings?: number | null
+          training_type_delivery?: Json | null
           training_types?: string[] | null
           updated_at?: string | null
           uploaded_certificates?: Json | null

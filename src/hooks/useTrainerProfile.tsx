@@ -51,8 +51,10 @@ interface TrainerProfile {
   calendar_link: string | null;
   testimonials: any;
   training_types: string[] | null;
+  training_type_delivery: any | null;
   delivery_format: string[] | null;
   communication_style: string[] | null;
+  document_not_applicable: any | null;
   coaching_style: string[] | null;
   client_preferences: string[] | null;
   ideal_client_personality: string | null;
@@ -139,6 +141,8 @@ export function useTrainerProfile() {
           discovery_call_price: (data as any)?.discovery_call_price ?? null,
           certifying_body: (data as any)?.certifying_body ?? null,
           year_certified: (data as any)?.year_certified ?? null,
+          training_type_delivery: (data as any)?.training_type_delivery || {},
+          document_not_applicable: (data as any)?.document_not_applicable || {},
         } as TrainerProfile;
         setProfile(profileWithDefaults);
       }
@@ -182,12 +186,12 @@ export function useTrainerProfile() {
         'verification_requested_at', 'verification_documents', 'admin_verification_notes',
         'is_verified', 'rating', 'total_ratings', 'free_discovery_call', 
         'offers_discovery_call', 'discovery_call_price', 'calendar_link', 'testimonials', 'training_types',
-        'delivery_format', 'communication_style', 'coaching_style', 'client_preferences', 
+        'training_type_delivery', 'delivery_format', 'communication_style', 'coaching_style', 'client_preferences', 
         'ideal_client_personality', 'ideal_client_types', 'video_checkins', 'messaging_support', 
         'weekly_programming_only', 'ways_of_working_onboarding', 'ways_of_working_first_week',
         'ways_of_working_ongoing', 'ways_of_working_tracking', 'ways_of_working_expectations',
         'ways_of_working_what_i_bring', 'profile_setup_completed', 'how_started', 'philosophy', 
-        'professional_milestones'
+        'professional_milestones', 'document_not_applicable'
       ];
 
       Object.keys(updates).forEach(key => {

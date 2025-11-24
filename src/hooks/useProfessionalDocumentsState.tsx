@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useEnhancedTrainerVerification } from './useEnhancedTrainerVerification';
 import { useAuth } from './useAuth';
+import { useTrainerProfile } from './useTrainerProfile';
 
 interface DocumentFormData {
   provider?: string;
@@ -14,16 +15,24 @@ interface DocumentFormData {
   not_applicable?: boolean;
 }
 
-export const useProfessionalDocumentsState = () => {
+export const useProfessionalDocumentsState = (profileDocumentNotApplicable?: any) => {
   const { checks, submitVerificationCheck } = useEnhancedTrainerVerification();
   const { user } = useAuth();
+  const { updateProfile } = useTrainerProfile();
   const [formData, setFormData] = useState<Record<string, DocumentFormData>>({});
   const [notApplicable, setNotApplicable] = useState<Record<string, boolean>>({});
   const [savingStatus, setSavingStatus] = useState<Record<string, boolean>>({});
 
-  // Initialize not_applicable flags from checks and localStorage
+  // Initialize not_applicable flags from profile database, then checks, then localStorage
   useEffect(() => {
     const flags: Record<string, boolean> = {};
+    
+    // First, load from profile database
+    if (profileDocumentNotApplicable && typeof profileDocumentNotApplicable === 'object') {
+      Object.assign(flags, profileDocumentNotApplicable);
+    }
+    
+    // Then merge from checks
     if (checks) {
       checks.forEach((check: any) => {
         if (check?.status === 'not_applicable') {
@@ -32,7 +41,7 @@ export const useProfessionalDocumentsState = () => {
       });
     }
 
-    // Merge in any locally saved preferences
+    // Finally merge from localStorage (fallback)
     try {
       const key = user?.id ? `verification_not_applicable_${user.id}` : null;
       if (key) {
@@ -47,7 +56,7 @@ export const useProfessionalDocumentsState = () => {
     if (Object.keys(flags).length > 0) {
       setNotApplicable(prev => ({ ...prev, ...flags }));
     }
-  }, [checks, user?.id]);
+  }, [checks, user?.id, profileDocumentNotApplicable]);
 
 
   // Create form state that can be accessed by validation
@@ -72,20 +81,19 @@ export const useProfessionalDocumentsState = () => {
     }));
   };
 
-  const updateNotApplicable = (checkType: string, isNotApplicable: boolean) => {
-    setNotApplicable(prev => {
-      const updated = { ...prev, [checkType]: isNotApplicable };
-      // Persist locally per-user so it's remembered
-      try {
-        if (user?.id) {
-          localStorage.setItem(
-            `verification_not_applicable_${user.id}`,
-            JSON.stringify(updated)
-          );
-        }
-      } catch {}
-      return updated;
-    });
+  const updateNotApplicable = async (checkType: string, isNotApplicable: boolean) => {
+    const updated = { ...notApplicable, [checkType]: isNotApplicable };
+    setNotApplicable(updated);
+    
+    // Persist locally per-user so it's remembered
+    try {
+      if (user?.id) {
+        localStorage.setItem(
+          `verification_not_applicable_${user.id}`,
+          JSON.stringify(updated)
+        );
+      }
+    } catch {}
     
     // Reflect in local form data immediately
     setFormData(prev => ({
@@ -93,8 +101,14 @@ export const useProfessionalDocumentsState = () => {
       [checkType]: { ...(prev[checkType] || {}), not_applicable: isNotApplicable },
     }));
 
-    // Do NOT persist to DB as a status; the DB enum doesn't support 'not_applicable'
-    // This avoids submission errors and keeps the flag local for completion logic.
+    // Save to database
+    try {
+      if (updateProfile) {
+        await updateProfile({ document_not_applicable: updated });
+      }
+    } catch (error) {
+      console.error('Error saving document_not_applicable to database:', error);
+    }
   };
 
   const isAnyFieldFilled = (checkType: string): boolean => {

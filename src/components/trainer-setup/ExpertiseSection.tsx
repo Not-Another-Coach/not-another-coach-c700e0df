@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -41,6 +41,22 @@ export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionP
     description: '',
     justification: ''
   });
+
+  // Sync selectedTrainingTypeDelivery when formData.training_type_delivery changes
+  useEffect(() => {
+    if (formData.training_type_delivery) {
+      setSelectedTrainingTypeDelivery(formData.training_type_delivery);
+    } else if (formData.training_types?.length > 0 && Object.keys(formData.training_type_delivery || {}).length === 0) {
+      // Backward compatibility: if training_types exist but training_type_delivery is empty,
+      // derive default delivery formats (in-person for all)
+      const defaultDelivery: {[key: string]: string[]} = {};
+      formData.training_types.forEach((type: string) => {
+        defaultDelivery[type] = ['in-person'];
+      });
+      setSelectedTrainingTypeDelivery(defaultDelivery);
+      updateFormData({ training_type_delivery: defaultDelivery });
+    }
+  }, [formData.training_type_delivery, formData.training_types]);
 
   const handleTrainingTypeDeliveryToggle = async (trainingTypeName: string, deliveryFormat: string, trainingTypeId?: string) => {
     const currentDelivery = selectedTrainingTypeDelivery[trainingTypeName] || [];

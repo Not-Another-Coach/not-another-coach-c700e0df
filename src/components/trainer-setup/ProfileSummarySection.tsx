@@ -33,9 +33,9 @@ const StatusConfig = {
 };
 
 export const ProfileSummarySection = () => {
-  const { getCompletionStatus, notApplicable } = useProfessionalDocumentsState();
-  const { checks, getCheckByType } = useEnhancedTrainerVerification();
   const { profile } = useTrainerProfile();
+  const { getCompletionStatus, notApplicable } = useProfessionalDocumentsState(profile?.document_not_applicable);
+  const { checks, getCheckByType } = useEnhancedTrainerVerification();
   
   const completionStatus = getCompletionStatus();
 
