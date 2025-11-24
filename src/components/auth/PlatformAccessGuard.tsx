@@ -56,7 +56,8 @@ export function PlatformAccessGuard({ children }: PlatformAccessGuardProps) {
 
   // Allow access to holding pages
   const isHoldingPage = location.pathname === '/trainer/access-pending' || 
-                        location.pathname === '/client/access-pending';
+                        location.pathname === '/client/access-pending' ||
+                        location.pathname === '/trainer/holding';
 
   if (authLoading || userTypeLoading || canAccess === null) {
     return null; // Loading state
