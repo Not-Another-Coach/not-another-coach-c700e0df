@@ -117,17 +117,40 @@ const TrainerDashboard = () => {
     }
   }, [user, loading, navigate]);
 
-  // Redirect to profile setup if profile incomplete
+  // Check profile completion and access control
   useEffect(() => {
-    if (!loading && !profileLoading && profile) {
-      // Check if profile setup is completed
-      const isProfileComplete = profile.profile_setup_completed === true;
-      
-      if (!isProfileComplete) {
-        console.log('⚠️ Profile incomplete, redirecting to setup...');
-        navigate('/trainer/profile-setup');
+    const checkAccessAndRedirect = async () => {
+      if (!loading && !profileLoading && profile) {
+        // If profile is incomplete, redirect to setup
+        if (!profile.profile_setup_completed) {
+          console.log('⚠️ Profile incomplete, redirecting to setup...');
+          navigate('/trainer/profile-setup');
+          return;
+        }
+
+        // If profile is complete, check if trainer access is enabled
+        try {
+          const { data: accessSetting } = await (await import('@/integrations/supabase/client')).supabase
+            .from('app_settings')
+            .select('setting_value')
+            .eq('setting_key', 'trainer_access_enabled')
+            .single();
+
+          const settingValue = accessSetting?.setting_value as { enabled?: boolean } | null;
+          const trainerAccessEnabled = settingValue?.enabled ?? true;
+
+          // If access is disabled and profile is complete, redirect to holding page
+          if (!trainerAccessEnabled && profile.profile_setup_completed) {
+            console.log('⚠️ Trainer access disabled, redirecting to holding page...');
+            navigate('/trainer/holding');
+          }
+        } catch (error) {
+          console.error('Error checking trainer access:', error);
+        }
       }
-    }
+    };
+
+    checkAccessAndRedirect();
   }, [profile, loading, profileLoading, navigate]);
 
   const calculateProfileCompletion = () => {

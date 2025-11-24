@@ -25,6 +25,7 @@ import TrainerProfileSetup from "./pages/TrainerProfileSetup";
 import TrainerSettings from "./pages/TrainerSettings";
 import { TrainerAccessPending } from "./pages/TrainerAccessPending";
 import { ClientAccessPending } from "./pages/ClientAccessPending";
+import { TrainerHolding } from "./pages/TrainerHolding";
 import { AdminDashboard } from "./pages/AdminDashboard";
 import { AdminHighlights } from "./pages/AdminHighlights";
 import { TrainerProfile } from "./pages/TrainerProfile";
@@ -77,6 +78,7 @@ const App = () => (
                       {/* Access pending routes */}
                       <Route path="/trainer/access-pending" element={<TrainerAccessPending />} />
                       <Route path="/client/access-pending" element={<ClientAccessPending />} />
+                      <Route path="/trainer/holding" element={<TrainerHolding />} />
                       
                       {/* Client routes */}
                       <Route path="/client/dashboard" element={<ClientDashboard />} />
