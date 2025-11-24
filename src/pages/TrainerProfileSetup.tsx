@@ -405,9 +405,18 @@ const TrainerProfileSetup = () => {
           Object.values(formData).filter(v => v && v.toString().trim()).length >= 3;
         return hasAllBasicInfo ? 'completed' : (hasPartialBasicInfo ? 'partial' : 'not_started');
         
-      case 2: // Qualifications - require 2-3 for completion
+      case 2: // Qualifications - require 2+ qualifications, all without cert requirements OR all certs uploaded
         const qualCount = formData.qualifications?.length || 0;
-        if (qualCount >= 2) return 'completed';
+        const certCount = formData.certificates?.length || 0;
+        
+        // If we have 2+ qualifications
+        if (qualCount >= 2) {
+          // Check if any certs are needed by looking at certificates array
+          // If certificates array has items, assume some require verification
+          // For now, mark as completed if we have 2+ qualifications (simplified logic)
+          // TODO: Add requires_verification check when qualification metadata available
+          return 'completed';
+        }
         if (qualCount >= 1) return 'partial';
         return 'not_started';
         
@@ -471,13 +480,14 @@ const TrainerProfileSetup = () => {
         
       case 9: // Image Management
         const selectedCount = getSelectedImagesCount();
-        const gridSize = imagePreferences?.max_images_per_view;
         const validationStatus = getValidationStatus();
         
-        if (validationStatus.status === 'complete' && selectedCount > 0 && gridSize) {
+        // If images are selected and validation passes, mark as completed (gridSize not required)
+        if (validationStatus.status === 'complete' && selectedCount > 0) {
           return 'completed';
         }
-        if (selectedCount > 0 || gridSize) {
+        // If any images selected, at least partial
+        if (selectedCount > 0) {
           return 'partial';
         }
         return 'not_started';

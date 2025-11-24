@@ -132,6 +132,8 @@ export const useEnhancedTrainerVerification = () => {
         .upsert({
           trainer_id: user.id,
           display_preference: preference,
+        }, {
+          onConflict: 'trainer_id'
         });
 
       if (error) throw error;

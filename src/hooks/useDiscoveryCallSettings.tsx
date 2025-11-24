@@ -152,6 +152,10 @@ export function useDiscoveryCallSettings() {
         ...data,
         availability_schedule: data.discovery_call_availability_schedule as DiscoveryCallSettings['availability_schedule']
       });
+      
+      // Force a refetch to ensure parent components get fresh data
+      await fetchSettings();
+      
       toast({
         title: "Settings updated",
         description: "Your discovery call settings have been saved",
