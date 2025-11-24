@@ -87,7 +87,8 @@ function useAdminProfile() {
  * Use this for components that need basic profile info regardless of user type
  */
 export function useProfileByType() {
-  const { user_type } = useUserType();
+  const { user } = useAuth();
+  const { user_type, loading: userTypeLoading } = useUserType();
   const { profile: trainerProfile, loading: trainerLoading, updateProfile: updateTrainerProfile } = useTrainerProfile();
   const { profile: clientProfile, loading: clientLoading, updateProfile: updateClientProfile } = useClientProfile();
   const { profile: adminProfile, loading: adminLoading, updateProfile: updateAdminProfile } = useAdminProfile();
@@ -136,10 +137,20 @@ export function useProfileByType() {
     };
   }
 
-  // Default case (no user type determined yet)
+  // If we're still loading auth or user type (and have a user), keep loading
+  if (user && userTypeLoading) {
+    return {
+      profile: null,
+      loading: true,
+      updateProfile: async () => ({ error: 'Loading...' }),
+      userType: null
+    };
+  }
+
+  // Default case - no authenticated user or user type not determined
   return {
     profile: null,
-    loading: true,
+    loading: false, // ✅ No user means no need to keep loading
     updateProfile: async () => ({ error: 'No user type determined' }),
     userType: null
   };
