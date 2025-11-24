@@ -71,8 +71,15 @@ export default function Home() {
       pathname: '/'
     });
 
-    if (loading || profileLoading || userTypeLoading || isLoggingOut || isMigrating) {
-      console.log('⏳ Home - Still loading, waiting...');
+    // Wait for auth to complete
+    if (loading || isLoggingOut || isMigrating) {
+      console.log('⏳ Home - Auth still loading, waiting...');
+      return;
+    }
+
+    // Only wait for profile/userType loading if there IS a user
+    if (user && (profileLoading || userTypeLoading)) {
+      console.log('⏳ Home - User profile loading, waiting...');
       return;
     }
 
