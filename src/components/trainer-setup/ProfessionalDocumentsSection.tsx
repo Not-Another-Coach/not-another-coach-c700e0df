@@ -10,6 +10,7 @@ import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useProfessionalDocumentsState } from "@/hooks/useProfessionalDocumentsState";
 import { useEnhancedTrainerVerification } from "@/hooks/useEnhancedTrainerVerification";
+import { useTrainerProfile } from "@/hooks/useTrainerProfile";
 
 interface DocumentFormData {
   provider?: string;
@@ -55,6 +56,8 @@ const StatusConfig = {
 };
 
 export const ProfessionalDocumentsSection = () => {
+  const { profile } = useTrainerProfile();
+  
   const {
     formData,
     notApplicable,
@@ -64,7 +67,7 @@ export const ProfessionalDocumentsSection = () => {
     isAnyFieldFilled,
     saveDraft,
     submitForReview
-  } = useProfessionalDocumentsState();
+  } = useProfessionalDocumentsState(profile?.document_not_applicable);
 
   const { 
     checks, 

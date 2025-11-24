@@ -58,12 +58,12 @@ const TrainerProfileSetup = () => {
   const { isTrainer } = useUserTypeChecks();
   const { packageWorkflows, loading: waysOfWorkingLoading } = usePackageWaysOfWorking();
   const { verificationRequest } = useTrainerVerification();
-  const { getCheckByType, loading: verificationLoading } = useEnhancedTrainerVerification();
+  const { getCheckByType, loading: verificationLoading, overview } = useEnhancedTrainerVerification();
   const { settings: discoverySettings } = useDiscoveryCallSettings();
   const { settings: availabilitySettings, refetch: refetchAvailability } = useCoachAvailability();
   const { getStepCompletion: getValidationStepCompletion } = useProfileStepValidation();
   const { getSelectedImagesCount, imagePreferences, getValidationStatus } = useTrainerImages();
-  const { getCompletionStatus: getProfDocumentsStatus } = useProfessionalDocumentsState();
+  const { getCompletionStatus: getProfDocumentsStatus } = useProfessionalDocumentsState(profile?.document_not_applicable);
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
@@ -101,6 +101,7 @@ const TrainerProfileSetup = () => {
     // Expertise & Services - these exist in TrainerProfile
     specializations: [] as string[],
     training_types: [] as string[],
+    training_type_delivery: {},
     location: "",
     delivery_format: "hybrid" as string,
     
@@ -226,6 +227,7 @@ const TrainerProfileSetup = () => {
         certificates: profile.uploaded_certificates || [],
         specializations: Array.isArray(profile.specializations) ? profile.specializations : [],
         training_types: Array.isArray(profile.training_types) ? profile.training_types : [],
+        training_type_delivery: profile.training_type_delivery || {},
         location: profile.location || "",
         delivery_format: Array.isArray(profile.delivery_format) ? profile.delivery_format[0] || "hybrid" : profile.delivery_format || "hybrid",
         ideal_client_types: Array.isArray(profile.ideal_client_types) ? profile.ideal_client_types : [],
@@ -521,8 +523,10 @@ const TrainerProfileSetup = () => {
         return (formData.terms_agreed && formData.accuracy_confirmed) ? 'completed' : 'not_started';
         
       case 12: // Verification Preference
-        // Only mark as completed if trainer has made a choice (default is undefined/null)
-        // This is an optional setting, so 'not_started' doesn't block profile completion
+        // Check if trainer has set a display preference (exists in DB)
+        if (overview?.display_preference) {
+          return 'completed';
+        }
         return 'not_started';
         
       case 13: // Professional Documents
