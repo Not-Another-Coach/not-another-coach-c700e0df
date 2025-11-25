@@ -196,6 +196,11 @@ const TrainerProfileSetup = () => {
 
   // Redirect if not trainer or not logged in - only after all data is loaded
   useEffect(() => {
+    const cameFromHolding = location.state?.fromHolding === true;
+    
+    // If user came from holding page, they're already authenticated - skip all redirect checks
+    if (cameFromHolding) return;
+    
     // Wait for all loading to complete before checking redirects
     if (loading || profileLoading) return;
     
