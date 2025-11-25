@@ -8,12 +8,12 @@ export const TrainerHolding = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="max-w-2xl w-full">
+      <Card className="max-w-2xl w-full border-primary/20 shadow-lg shadow-primary/5">
         <CardHeader className="text-center space-y-4">
-          <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+          <div className="mx-auto w-16 h-16 rounded-full bg-primary/15 flex items-center justify-center ring-2 ring-primary/20">
             <CheckCircle className="w-8 h-8 text-primary" />
           </div>
-          <CardTitle className="text-3xl">Thank You for Completing Your Profile!</CardTitle>
+          <CardTitle className="text-3xl text-primary">Thank You for Completing Your Profile!</CardTitle>
           <CardDescription className="text-base">
             We appreciate you setting up your trainer profile
           </CardDescription>
