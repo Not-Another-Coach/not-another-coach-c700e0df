@@ -13,8 +13,15 @@ export const ResponsiveBreadcrumb: React.FC<ResponsiveBreadcrumbProps> = ({
   className,
 }) => {
   return (
-    <div className={cn("w-full", className)}>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:flex xl:flex-wrap gap-2 xl:gap-4 justify-center">
+    <div 
+      className={cn("w-full overflow-x-auto scrollbar-hide", className)}
+      style={{
+        scrollbarWidth: 'none',
+        msOverflowStyle: 'none',
+        WebkitOverflowScrolling: 'touch',
+      }}
+    >
+      <div className="flex gap-1 md:gap-2 lg:gap-3 min-w-max md:flex-wrap md:justify-center px-2 pb-2">
         {children}
       </div>
     </div>
@@ -62,9 +69,9 @@ export const BreadcrumbItem: React.FC<BreadcrumbItemProps> = ({
     <div
       data-step={stepNumber}
       onClick={onClick}
-      className="flex flex-col items-center gap-1 cursor-pointer hover:opacity-80 transition-opacity p-2 rounded-lg hover:bg-muted/50"
+      className="flex flex-col items-center gap-0.5 md:gap-1 cursor-pointer hover:opacity-80 transition-opacity p-1.5 md:p-2 rounded-lg hover:bg-muted/50 min-w-fit"
     >
-      <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-medium ${borderColor} ${bgColor} ${statusColor}`}>
+      <div className={`w-6 h-6 md:w-7 md:h-7 rounded-full border-2 flex items-center justify-center text-xs font-medium ${borderColor} ${bgColor} ${statusColor}`}>
         {showIcon ? (
           isPartial ? (
             <AlertCircle className="w-3 h-3 text-white" />
@@ -75,7 +82,7 @@ export const BreadcrumbItem: React.FC<BreadcrumbItemProps> = ({
           stepNumber
         )}
       </div>
-      <div className={`text-xs leading-tight text-center max-w-20 ${statusColor}`}>
+      <div className={`text-[10px] md:text-xs leading-tight text-center whitespace-nowrap ${statusColor}`}>
         {title}
       </div>
     </div>
