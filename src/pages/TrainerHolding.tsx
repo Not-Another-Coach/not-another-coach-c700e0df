@@ -54,7 +54,10 @@ export const TrainerHolding = () => {
 
           <div className="pt-4 flex justify-center">
             <Button
-              onClick={() => navigate("/trainer/profile-setup", { replace: true })}
+              onClick={() => navigate("/trainer/profile-setup", { 
+                replace: true,
+                state: { fromHolding: true }
+              })}
               className="bg-gradient-primary hover:shadow-primary text-white"
             >
               Edit Profile
