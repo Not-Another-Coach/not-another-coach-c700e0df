@@ -15,13 +15,22 @@ export function PlatformAccessGuard({ children }: PlatformAccessGuardProps) {
   const location = useLocation();
 
   useEffect(() => {
+    // Skip access check for exempt paths
+    const exemptPaths = ['/profile-setup', '/survey', '/settings', '/access-pending', '/holding'];
+    const isExempt = exemptPaths.some(p => location.pathname.includes(p));
+    
+    if (isExempt) {
+      setCanAccess(true); // Immediately allow
+      return;
+    }
+    
     if (!user || !user_type) {
       setCanAccess(true); // Allow unauthenticated access to public routes
       return;
     }
     
     checkAccess();
-  }, [user, user_type]);
+  }, [user, user_type, location.pathname]);
 
   const checkAccess = async () => {
     if (!user) return;
@@ -43,7 +52,7 @@ export function PlatformAccessGuard({ children }: PlatformAccessGuardProps) {
     }
   };
 
-  // Allow access to public routes and auth routes
+  // Check path exemptions FIRST (before any loading checks)
   const publicPaths = ['/', '/auth', '/about', '/how-it-works', '/pricing', '/privacy', '/terms'];
   const isPublicPath = publicPaths.some(path => 
     location.pathname === path || location.pathname.startsWith('/auth')
@@ -59,13 +68,14 @@ export function PlatformAccessGuard({ children }: PlatformAccessGuardProps) {
                         location.pathname === '/client/access-pending' ||
                         location.pathname === '/trainer/holding';
 
-  if (authLoading || userTypeLoading || canAccess === null) {
-    return null; // Loading state
-  }
-
-  // Allow access to public paths, profile setup, and holding pages
+  // Allow exempt paths immediately - no loading check needed
   if (isPublicPath || isProfileSetupPath || isHoldingPage) {
     return <>{children}</>;
+  }
+
+  // Only show loading for paths that actually need access control
+  if (authLoading || userTypeLoading || canAccess === null) {
+    return null; // Loading state
   }
 
   // If access is denied, redirect to appropriate holding page
