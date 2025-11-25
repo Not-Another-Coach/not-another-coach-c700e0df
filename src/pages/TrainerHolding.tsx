@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock } from "lucide-react";
+import { CheckCircle, Check } from "lucide-react";
 
 export const TrainerHolding = () => {
   const navigate = useNavigate();
@@ -11,12 +11,18 @@ export const TrainerHolding = () => {
       <Card className="max-w-2xl w-full">
         <CardHeader className="text-center space-y-4">
           <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-            <Clock className="w-8 h-8 text-primary" />
+            <CheckCircle className="w-8 h-8 text-primary" />
           </div>
           <CardTitle className="text-3xl">Thank You for Completing Your Profile!</CardTitle>
           <CardDescription className="text-base">
             We appreciate you setting up your trainer profile
           </CardDescription>
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800">
+            <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <span className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
+              Your profile has been fully saved
+            </span>
+          </div>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="bg-muted/50 rounded-lg p-6 space-y-3">
