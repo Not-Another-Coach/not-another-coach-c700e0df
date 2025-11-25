@@ -34,7 +34,12 @@ export function ProfileLoadingState({
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-hero animate-fade-in">
-      <div className="text-center space-y-6 px-4 max-w-md">
+      <div 
+        className="text-center space-y-6 px-4 max-w-md"
+        style={{
+          background: 'radial-gradient(circle, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 60%)'
+        }}
+      >
         <div className="flex justify-center">
           <div className="relative">
             {/* Outer pulsing ring */}
@@ -63,10 +68,22 @@ export function ProfileLoadingState({
         </div>
         
         <div className="space-y-2">
-          <h2 className="text-xl font-semibold text-foreground">
+          <h2 
+            className="text-xl font-semibold"
+            style={{ 
+              color: 'rgba(255, 255, 255, 0.95)',
+              textShadow: '0 1px 2px rgba(0,0,0,0.25)'
+            }}
+          >
             {title}
           </h2>
-          <p className="text-sm text-muted-foreground">
+          <p 
+            className="text-sm"
+            style={{ 
+              color: 'rgba(255, 255, 255, 0.85)',
+              textShadow: '0 1px 2px rgba(0,0,0,0.25)'
+            }}
+          >
             {subtitle}
           </p>
         </div>
@@ -84,9 +101,13 @@ export function ProfileLoadingState({
         {/* Rotating progress messages */}
         <div className="h-6 flex items-center justify-center">
           <p 
-            className={`text-xs text-muted-foreground transition-opacity duration-300 ${
+            className={`text-xs transition-opacity duration-300 ${
               fade ? 'opacity-100' : 'opacity-0'
             }`}
+            style={{ 
+              color: 'rgba(255, 255, 255, 0.75)',
+              textShadow: '0 1px 2px rgba(0,0,0,0.25)'
+            }}
           >
             {progressMessages[currentMessageIndex]}
           </p>
