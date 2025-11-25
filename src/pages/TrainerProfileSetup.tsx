@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useTrainerProfileContext } from "@/contexts/TrainerProfileContext";
 import { useUserTypeChecks } from "@/hooks/useUserType";
@@ -65,6 +65,7 @@ const TrainerProfileSetup = () => {
   const { getSelectedImagesCount, imagePreferences, getValidationStatus } = useTrainerImages();
   const { getCompletionStatus: getProfDocumentsStatus, notApplicable } = useProfessionalDocumentsState(profile?.document_not_applicable);
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
 
@@ -193,19 +194,20 @@ const TrainerProfileSetup = () => {
     "Profile Summary"
   ];
 
-  // Redirect if not trainer - using simple check
+  // Redirect if not trainer or not logged in - only after all data is loaded
   useEffect(() => {
-    if (!loading && !profileLoading && user && profile && !isTrainer()) {
+    // Wait for all loading to complete before checking redirects
+    if (loading || profileLoading) return;
+    
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+    
+    if (user && profile && !isTrainer()) {
       navigate('/');
     }
   }, [user, profile, loading, profileLoading, isTrainer, navigate]);
-
-  // Redirect to auth if not logged in
-  useEffect(() => {
-    if (!loading && !user) {
-      navigate('/auth');
-    }
-  }, [user, loading, navigate]);
 
   // Stable loading check - wait 300ms minimum, then show content when data ready
   useEffect(() => {
