@@ -102,8 +102,22 @@ export default function Home() {
                                  trainerProfile.specializations.length > 0;
         
         if (isProfileComplete) {
-          console.log('✅ Home - Trainer profile complete, redirecting to dashboard');
-          navigate('/trainer/dashboard', { replace: true });
+          // Check platform access before redirecting to dashboard
+          const checkAccessAndRedirect = async () => {
+            const { data: hasAccess } = await supabase.rpc('can_user_access_platform', {
+              user_id: user.id
+            });
+
+            if (hasAccess) {
+              console.log('✅ Home - Trainer has platform access, redirecting to dashboard');
+              navigate('/trainer/dashboard', { replace: true });
+            } else {
+              console.log('🚫 Home - Trainer access limited, redirecting to holding page');
+              navigate('/trainer/holding', { replace: true });
+            }
+          };
+
+          checkAccessAndRedirect();
         } else {
           console.log('📝 Home - Trainer profile incomplete, redirecting to setup');
           navigate('/trainer/profile-setup', { replace: true });
