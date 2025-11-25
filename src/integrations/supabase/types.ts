@@ -6782,6 +6782,7 @@ export type Database = {
           coaching_style: string[] | null
           communication_style: string[] | null
           delivery_format: string[] | null
+          document_not_applicable: Json | null
           first_name: string | null
           free_discovery_call: boolean | null
           hourly_rate: number | null
