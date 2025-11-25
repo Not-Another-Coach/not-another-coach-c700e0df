@@ -1,29 +1,136 @@
 import React from 'react';
-import { Check, AlertCircle } from 'lucide-react';
+import { Check, AlertCircle, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
+interface StepData {
+  stepNumber: number;
+  title: string;
+  completion: 'completed' | 'partial' | 'not_started';
+}
 
 interface ResponsiveBreadcrumbProps {
   children: React.ReactNode;
   className?: string;
+  currentStep?: number;
+  steps?: StepData[];
+  onStepChange?: (step: number) => void;
+  totalSteps?: number;
+  overallProgress?: number;
 }
 
 export const ResponsiveBreadcrumb: React.FC<ResponsiveBreadcrumbProps> = ({
   children,
   className,
+  currentStep,
+  steps,
+  onStepChange,
+  totalSteps,
+  overallProgress,
 }) => {
+  const getCurrentStepInfo = () => {
+    if (!currentStep || !steps) return null;
+    return steps.find(s => s.stepNumber === currentStep);
+  };
+
+  const currentStepInfo = getCurrentStepInfo();
+  const completedSteps = steps?.filter(s => s.completion === 'completed').length || 0;
+
   return (
-    <div 
-      className={cn("w-full overflow-x-auto scrollbar-hide", className)}
-      style={{
-        scrollbarWidth: 'none',
-        msOverflowStyle: 'none',
-        WebkitOverflowScrolling: 'touch',
-      }}
-    >
-      <div className="flex gap-1 md:gap-2 lg:gap-3 min-w-max md:flex-wrap md:justify-center px-2 pb-2">
-        {children}
+    <>
+      {/* Mobile Dropdown */}
+      {currentStep && steps && onStepChange && (
+        <div className="md:hidden w-full px-4 pb-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="w-full flex items-center justify-between gap-2 p-3 bg-card border border-border rounded-lg hover:bg-accent/50 transition-colors">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full border-2 border-primary bg-primary flex items-center justify-center text-xs font-medium text-primary-foreground">
+                    {currentStep}
+                  </div>
+                  <div className="flex flex-col items-start min-w-0 flex-1">
+                    <span className="text-sm font-medium text-foreground truncate w-full">
+                      {currentStepInfo?.title}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      Step {currentStep} of {totalSteps} • {overallProgress}% Complete
+                    </span>
+                  </div>
+                </div>
+                <ChevronDown className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent 
+              align="start" 
+              className="w-[calc(100vw-2rem)] max-h-[60vh] overflow-y-auto bg-popover border border-border z-50"
+            >
+              {steps.map((step) => {
+                const isCurrent = step.stepNumber === currentStep;
+                let statusIcon = null;
+                let statusColor = 'text-muted-foreground';
+                let bgColor = 'bg-background';
+                
+                if (step.completion === 'completed') {
+                  statusIcon = <Check className="w-3 h-3 text-white" />;
+                  statusColor = 'text-green-600';
+                  bgColor = 'bg-green-600';
+                } else if (step.completion === 'partial') {
+                  statusIcon = <AlertCircle className="w-3 h-3 text-white" />;
+                  statusColor = 'text-amber-600';
+                  bgColor = 'bg-amber-600';
+                }
+
+                return (
+                  <DropdownMenuItem
+                    key={step.stepNumber}
+                    onClick={() => onStepChange(step.stepNumber)}
+                    className={cn(
+                      "flex items-center gap-3 p-3 cursor-pointer",
+                      isCurrent && "bg-accent"
+                    )}
+                  >
+                    <div className={cn(
+                      "flex-shrink-0 w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-medium",
+                      step.completion === 'completed' ? 'border-green-600' : 
+                      step.completion === 'partial' ? 'border-amber-600' : 'border-muted-foreground/30',
+                      bgColor,
+                      statusColor
+                    )}>
+                      {statusIcon || step.stepNumber}
+                    </div>
+                    <span className={cn(
+                      "text-sm flex-1",
+                      isCurrent ? "font-medium text-foreground" : "text-muted-foreground"
+                    )}>
+                      {step.title}
+                    </span>
+                  </DropdownMenuItem>
+                );
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
+
+      {/* Desktop Horizontal Layout */}
+      <div 
+        className={cn("hidden md:block w-full overflow-x-auto scrollbar-hide", className)}
+        style={{
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+          WebkitOverflowScrolling: 'touch',
+        }}
+      >
+        <div className="flex gap-1 md:gap-2 lg:gap-3 min-w-max md:flex-wrap md:justify-center px-2 pb-2">
+          {children}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

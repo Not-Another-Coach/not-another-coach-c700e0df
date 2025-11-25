@@ -1044,7 +1044,18 @@ const TrainerProfileSetup = () => {
             </div>
             
             {/* Step indicators */}
-        <ResponsiveBreadcrumb className="px-4">
+        <ResponsiveBreadcrumb 
+              className="px-4"
+              currentStep={currentStep}
+              steps={stepTitles.map((title, index) => ({
+                stepNumber: index + 1,
+                title,
+                completion: getStepCompletion(index + 1),
+              }))}
+              onStepChange={setCurrentStep}
+              totalSteps={totalSteps}
+              overallProgress={calculateOverallCompletion()}
+            >
               {stepTitles.map((title, index) => {
                 const stepNumber = index + 1;
                 const completion = getStepCompletion(stepNumber);
