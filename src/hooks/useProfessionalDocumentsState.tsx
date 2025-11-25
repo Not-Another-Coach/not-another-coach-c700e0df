@@ -101,13 +101,23 @@ export const useProfessionalDocumentsState = (profileDocumentNotApplicable?: any
       [checkType]: { ...(prev[checkType] || {}), not_applicable: isNotApplicable },
     }));
 
-    // Save to database
+    // Save to database with proper error handling
     try {
       if (updateProfile) {
-        await updateProfile({ document_not_applicable: updated });
+        console.log('💾 Saving document_not_applicable to database:', updated);
+        const result = await updateProfile({ document_not_applicable: updated });
+        if (result?.error) {
+          console.error('Database update error:', result.error);
+          throw new Error('Failed to save preference to database');
+        }
+        console.log('✅ Successfully saved document_not_applicable to database');
+      } else {
+        console.warn('⚠️ updateProfile function not available');
       }
     } catch (error) {
-      console.error('Error saving document_not_applicable to database:', error);
+      console.error('❌ Error saving document_not_applicable to database:', error);
+      // Re-throw to let caller handle the error (e.g., show toast)
+      throw error;
     }
   };
 
