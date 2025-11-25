@@ -913,10 +913,115 @@ const TrainerProfileSetup = () => {
     return <ProfileLoadingState />;
   }
 
+  const renderVerificationBadge = () => {
+    const verificationStatus = (profile as any)?.verification_status || 'pending';
+    if (verificationStatus === 'verified') {
+      return (
+        <div className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium whitespace-nowrap">
+          <Shield className="h-3 w-3" />
+          <Check className="h-3 w-3" />
+          Verified
+        </div>
+      );
+    } else if (verificationStatus === 'under_review') {
+      return (
+        <div className="flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium whitespace-nowrap">
+          <Shield className="h-3 w-3" />
+          Under Review
+        </div>
+      );
+    } else if (verificationStatus === 'pending') {
+      return (
+        <div className="flex items-center gap-1 px-2 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-medium whitespace-nowrap">
+          <Shield className="h-3 w-3" />
+          Pending
+        </div>
+      );
+    } else if (verificationStatus === 'rejected') {
+      return (
+        <div className="flex items-center gap-1 px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium whitespace-nowrap">
+          <Shield className="h-3 w-3" />
+          Rejected
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="min-h-screen bg-background opacity-0 animate-fadeIn">
-      {/* Header */}
-      <div className="p-4 border-b bg-card">
+      {/* Mobile Header (Two Rows + Action Bar) */}
+      <div className="md:hidden border-b bg-card">
+        {/* Row 1: Navigation */}
+        <div className="flex justify-between items-center p-3 border-b border-border/50">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleBackToDashboard}
+                    disabled={!profile?.profile_setup_completed}
+                    className="flex-shrink-0"
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-1" />
+                    Back
+                  </Button>
+                </div>
+              </TooltipTrigger>
+              {!profile?.profile_setup_completed && (
+                <TooltipContent>
+                  <p>Complete your profile to access the dashboard</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
+          <ProfileDropdown profile={profile ? { 
+            ...profile, 
+            user_type: 'trainer',
+            email: user?.email,
+            verification_status: profile.verification_status
+          } : null} />
+        </div>
+
+        {/* Row 2: Title & Badge */}
+        <div className="flex justify-between items-center p-3 border-b border-border/50">
+          <h1 className="text-lg font-bold">
+            {isFullyComplete() ? 'Profile' : 'Profile Setup'}
+          </h1>
+          {renderVerificationBadge()}
+        </div>
+
+        {/* Action Bar */}
+        <div className="p-3 bg-muted/30 space-y-2">
+          <PublishButton profile={profile} />
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => handleSave()} className="flex-1">
+              <Save className="h-4 w-4 mr-2" />
+              Save
+            </Button>
+            <Button variant="outline" size="sm" onClick={handlePreview} className="flex-1">
+              <Eye className="h-4 w-4 mr-2" />
+              Preview
+            </Button>
+          </div>
+          {profile?.profile_published && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => navigate(`/trainer/${profile?.id}?from=profile-setup`)}
+              className="w-full"
+            >
+              <ExternalLink className="h-4 w-4 mr-2" />
+              View Live
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Desktop Header */}
+      <div className="hidden md:block p-4 border-b bg-card">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div className="flex items-center gap-4 min-w-0">
             <TooltipProvider>
@@ -944,43 +1049,9 @@ const TrainerProfileSetup = () => {
             </TooltipProvider>
             <div className="flex items-center gap-2 min-w-0">
               <h1 className="text-lg sm:text-xl font-bold truncate">
-                {isFullyComplete() ? 'Profile Management' : 'Profile Setup'}
+                {isFullyComplete() ? 'Profile' : 'Profile Setup'}
               </h1>
-              {/* Verification Badge */}
-              {(() => {
-                const verificationStatus = (profile as any)?.verification_status || 'pending';
-                if (verificationStatus === 'verified') {
-                  return (
-                    <div className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium whitespace-nowrap">
-                      <Shield className="h-3 w-3" />
-                      <Check className="h-3 w-3" />
-                      Verified
-                    </div>
-                  );
-                } else if (verificationStatus === 'under_review') {
-                  return (
-                    <div className="flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium whitespace-nowrap">
-                      <Shield className="h-3 w-3" />
-                      Under Review
-                    </div>
-                  );
-                } else if (verificationStatus === 'pending') {
-                  return (
-                    <div className="flex items-center gap-1 px-2 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-medium whitespace-nowrap">
-                      <Shield className="h-3 w-3" />
-                      Pending
-                    </div>
-                  );
-                } else if (verificationStatus === 'rejected') {
-                  return (
-                    <div className="flex items-center gap-1 px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium whitespace-nowrap">
-                      <Shield className="h-3 w-3" />
-                      Rejected
-                    </div>
-                  );
-                }
-                return null;
-              })()}
+              {renderVerificationBadge()}
             </div>
           </div>
           <div className="flex items-center gap-2 justify-end sm:justify-start">
