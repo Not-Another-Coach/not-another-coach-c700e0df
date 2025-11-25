@@ -48,7 +48,7 @@ export const TrainerHolding = () => {
 
           <div className="pt-4 flex justify-center">
             <Button
-              onClick={() => navigate("/trainer/profile-setup")}
+              onClick={() => navigate("/trainer/profile-setup", { replace: true })}
             >
               Edit Profile
             </Button>
