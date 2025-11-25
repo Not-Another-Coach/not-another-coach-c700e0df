@@ -33,7 +33,7 @@ export function ProfileLoadingState({
   }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-primary/5 via-background to-secondary/5 animate-fade-in">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/15 via-background to-energy/10 animate-fade-in">
       <div className="text-center space-y-6 px-4 max-w-md">
         <div className="flex justify-center">
           <div className="relative">
@@ -51,7 +51,7 @@ export function ProfileLoadingState({
             </div>
             
             {/* Icon container with glow */}
-            <div className="relative w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center shadow-lg shadow-primary/20">
+            <div className="relative w-20 h-20 rounded-full bg-gradient-primary/20 flex items-center justify-center shadow-lg shadow-primary/20">
               <Target 
                 className="h-10 w-10 text-primary" 
                 strokeWidth={1.5}

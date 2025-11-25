@@ -7,7 +7,7 @@ export const TrainerHolding = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-energy/10 flex items-center justify-center p-4">
       <Card className="max-w-2xl w-full border-primary/20 shadow-lg shadow-primary/5">
         <CardHeader className="text-center space-y-4">
           <div className="mx-auto w-16 h-16 rounded-full bg-primary/15 flex items-center justify-center ring-2 ring-primary/20">
@@ -55,6 +55,7 @@ export const TrainerHolding = () => {
           <div className="pt-4 flex justify-center">
             <Button
               onClick={() => navigate("/trainer/profile-setup", { replace: true })}
+              className="bg-gradient-primary hover:shadow-primary text-white"
             >
               Edit Profile
             </Button>
