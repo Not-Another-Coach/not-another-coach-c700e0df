@@ -37,17 +37,10 @@ export default function Home() {
   // Initialize data migration hook
   useDataMigration();
 
-  // Set page title and reset trainer intent on home page
+  // Set page title
   useEffect(() => {
     document.title = "Home - Find Your Perfect Coach";
-    
-    // If user navigates back to home with trainer intent, reset to client view
-    // This ensures the toggle matches the page content
-    if (userIntent === 'trainer') {
-      console.log('🔄 Resetting trainer intent to client on home page');
-      setUserIntent('client');
-    }
-  }, [userIntent, setUserIntent]);
+  }, []);
 
   // Minimum load time timer
   useEffect(() => {
