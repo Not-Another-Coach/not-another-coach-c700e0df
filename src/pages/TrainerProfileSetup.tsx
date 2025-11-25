@@ -72,6 +72,23 @@ const TrainerProfileSetup = () => {
   const isCriticalDataLoading = loading || profileLoading || verificationLoading;
   const [showContent, setShowContent] = useState(false);
 
+  // Fetch trainer access settings
+  useEffect(() => {
+    const fetchAccessSettings = async () => {
+      const { data } = await supabase
+        .from('app_settings')
+        .select('setting_value')
+        .eq('setting_key', 'platform_access_control')
+        .single();
+      
+      if (data?.setting_value) {
+        const accessControl = data.setting_value as any;
+        setTrainerAccessEnabled(accessControl?.trainer_access_enabled !== false);
+      }
+    };
+    fetchAccessSettings();
+  }, []);
+
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -79,6 +96,7 @@ const TrainerProfileSetup = () => {
   const [showExitDialog, setShowExitDialog] = useState(false);
   const [pendingAvailabilityChanges, setPendingAvailabilityChanges] = useState<any>(null);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [trainerAccessEnabled, setTrainerAccessEnabled] = useState<boolean>(true);
   const hasInitialized = useRef(false);
   const hasLoadedOnce = useRef(false);
   const initialFormData = useRef<typeof formData | null>(null);
@@ -801,6 +819,10 @@ const TrainerProfileSetup = () => {
     }
   };
 
+  const getExitDestination = () => {
+    return trainerAccessEnabled ? '/trainer/dashboard' : '/trainer/holding';
+  };
+
   const handleSaveAndExit = async () => {
     try {
       await handleSave(false);
@@ -814,14 +836,14 @@ const TrainerProfileSetup = () => {
         setPendingAvailabilityChanges(null);
       }
       
-      navigate('/trainer/dashboard');
+      navigate(getExitDestination());
     } catch (error) {
       // Error already handled in handleSave
     }
   };
 
   const handleDiscardAndExit = () => {
-    navigate('/trainer/dashboard');
+    navigate(getExitDestination());
   };
 
   const calculateProgress = () => {
@@ -916,29 +938,17 @@ const TrainerProfileSetup = () => {
       <div className="p-4 border-b bg-card">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div className="flex items-center gap-4 min-w-0">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleBackToDashboard}
-                      disabled={!profile?.profile_setup_completed}
-                      className="flex-shrink-0"
-                    >
-                      <ArrowLeft className="h-4 w-4 mr-2" />
-                      Back to Dashboard
-                    </Button>
-                  </div>
-                </TooltipTrigger>
-                {!profile?.profile_setup_completed && (
-                  <TooltipContent>
-                    <p>Complete your profile to access the dashboard</p>
-                  </TooltipContent>
-                )}
-              </Tooltip>
-            </TooltipProvider>
+            {trainerAccessEnabled && profile?.profile_setup_completed && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleBackToDashboard}
+                className="flex-shrink-0"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Dashboard
+              </Button>
+            )}
             <div className="flex items-center gap-2 min-w-0">
               <h1 className="text-lg sm:text-xl font-bold truncate">
                 {isFullyComplete() ? 'Profile Management' : 'Profile Setup'}
