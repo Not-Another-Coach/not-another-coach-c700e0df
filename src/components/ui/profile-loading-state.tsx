@@ -33,7 +33,7 @@ export function ProfileLoadingState({
   }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/15 via-background to-energy/10 animate-fade-in">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-hero animate-fade-in">
       <div className="text-center space-y-6 px-4 max-w-md">
         <div className="flex justify-center">
           <div className="relative">
