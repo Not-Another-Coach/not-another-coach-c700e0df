@@ -208,11 +208,21 @@ export const useProfileStepValidation = () => {
     }
     
     // Professional documents validation: 
+    // - If marked as "not applicable" → valid (section not required)
     // - If no fields filled and not marked as "not applicable" → valid (optional)
-    // - If marked as "not applicable" → valid
     // - If any field is filled → all required fields must be filled
     
     const checkTypes = ['cimspa_membership', 'insurance_proof', 'first_aid_certification'];
+    
+    // Check if all are marked as N/A - if so, section is complete and valid
+    const allNotApplicable = checkTypes.every(checkType => {
+      return formData.verification_not_applicable?.[checkType] === true;
+    });
+    
+    if (allNotApplicable) {
+      console.log('✅ Prof Documents Validation - All marked N/A, section valid');
+      return true;
+    }
     
     return checkTypes.every(checkType => {
       const data = formData.verification_data?.[checkType];
