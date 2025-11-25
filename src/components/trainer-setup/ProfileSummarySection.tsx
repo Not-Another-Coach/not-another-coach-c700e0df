@@ -51,14 +51,24 @@ export const ProfileSummarySection = () => {
   const getOverallStatus = () => {
     const allStatuses = Object.keys(CheckTypeConfig).map(checkType => getDocumentStatus(checkType));
     
-    if (allStatuses.every(status => status === 'verified')) {
+    const allComplete = allStatuses.every(status => status === 'verified' || status === 'not_applicable');
+    const allNotApplicable = allStatuses.every(status => status === 'not_applicable');
+    const hasRejected = allStatuses.some(status => status === 'rejected');
+    const hasPending = allStatuses.some(status => status === 'pending');
+    const hasNotStarted = allStatuses.some(status => status === 'not_started');
+    
+    if (allNotApplicable) {
+      return { status: 'not_applicable', message: 'All professional documents marked as not applicable' };
+    } else if (allComplete) {
       return { status: 'completed', message: 'All documents verified - your profile is ready!' };
-    } else if (allStatuses.some(status => status === 'rejected')) {
+    } else if (hasRejected) {
       return { status: 'attention', message: 'Some documents need attention - please review rejected items' };
-    } else if (allStatuses.some(status => status === 'pending')) {
+    } else if (hasPending) {
       return { status: 'pending', message: 'Documents are under review - we\'ll notify you once complete' };
-    } else {
+    } else if (hasNotStarted) {
       return { status: 'incomplete', message: 'Please complete your professional document verification' };
+    } else {
+      return { status: 'partial', message: 'Some documents are complete, continue with remaining items' };
     }
   };
 
@@ -78,6 +88,8 @@ export const ProfileSummarySection = () => {
           <div className={`p-4 rounded-lg border ${
             overallStatus.status === 'completed' 
               ? 'bg-green-50 border-green-200 text-green-800'
+              : overallStatus.status === 'not_applicable'
+              ? 'bg-slate-50 border-slate-200 text-slate-700'
               : overallStatus.status === 'attention'
               ? 'bg-red-50 border-red-200 text-red-800'
               : overallStatus.status === 'pending'
@@ -157,7 +169,19 @@ export const ProfileSummarySection = () => {
           <CardTitle>Next Steps</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          {overallStatus.status === 'completed' ? (
+          {overallStatus.status === 'not_applicable' ? (
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">
+                You've marked all professional documents as not applicable:
+              </p>
+              <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+                <li>• Your profile can still be published without verification</li>
+                <li>• You won't receive the "Verified Coach" badge</li>
+                <li>• You can update this anytime in the Professional Documents tab</li>
+                <li>• Consider adding verification later to build trust with clients</li>
+              </ul>
+            </div>
+          ) : overallStatus.status === 'completed' ? (
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">
                 🎉 <strong>Congratulations!</strong> Your profile verification is complete.
