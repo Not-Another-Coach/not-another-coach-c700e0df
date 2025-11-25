@@ -63,7 +63,7 @@ const TrainerProfileSetup = () => {
   const { settings: availabilitySettings, refetch: refetchAvailability } = useCoachAvailability();
   const { getStepCompletion: getValidationStepCompletion } = useProfileStepValidation();
   const { getSelectedImagesCount, imagePreferences, getValidationStatus } = useTrainerImages();
-  const { getCompletionStatus: getProfDocumentsStatus } = useProfessionalDocumentsState(profile?.document_not_applicable);
+  const { getCompletionStatus: getProfDocumentsStatus, notApplicable } = useProfessionalDocumentsState(profile?.document_not_applicable);
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
@@ -536,8 +536,16 @@ const TrainerProfileSetup = () => {
         return getProfDocumentsStatus();
         
       case 14: // Profile Summary (Verification)
-        // Check verification checks using enhanced verification system
+        // First check if all documents are marked as "not applicable"
         const checkTypes = ['cimspa_membership', 'insurance_proof', 'first_aid_certification'];
+        const allNotApplicable = checkTypes.every(type => notApplicable?.[type] === true);
+        
+        if (allNotApplicable) {
+          console.log('🔍 Verification Debug - All documents marked as not applicable');
+          return 'completed';
+        }
+        
+        // Check verification checks using enhanced verification system
         const verificationChecks = checkTypes.map(type => getCheckByType(type as any)).filter(Boolean);
         
         console.log('🔍 Verification Debug - Checks found:', verificationChecks.length);
