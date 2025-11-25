@@ -133,11 +133,11 @@ const TrainerDashboard = () => {
           const { data: accessSetting } = await (await import('@/integrations/supabase/client')).supabase
             .from('app_settings')
             .select('setting_value')
-            .eq('setting_key', 'trainer_access_enabled')
+            .eq('setting_key', 'platform_access_control')
             .single();
 
-          const settingValue = accessSetting?.setting_value as { enabled?: boolean } | null;
-          const trainerAccessEnabled = settingValue?.enabled ?? true;
+          const settingValue = accessSetting?.setting_value as { trainer_access_enabled?: boolean; client_access_enabled?: boolean } | null;
+          const trainerAccessEnabled = settingValue?.trainer_access_enabled ?? true;
 
           // If access is disabled and profile is complete, redirect to holding page
           if (!trainerAccessEnabled && profile.profile_setup_completed) {
