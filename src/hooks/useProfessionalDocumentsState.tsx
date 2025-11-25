@@ -219,8 +219,9 @@ export const useProfessionalDocumentsState = (profileDocumentNotApplicable?: any
       }
     });
 
+    // IMPORTANT: If all documents are marked as N/A, this section is complete
     const result = completedCount === checkTypes.length ? 'completed' : (partialCount > 0 || completedCount > 0) ? 'partial' : 'not_started';
-    console.log('🔍 Prof Documents - Final status:', result, { completedCount, partialCount });
+    console.log('🔍 Prof Documents - Final status:', result, { completedCount, partialCount, totalRequired: checkTypes.length });
     
     return result;
   };
