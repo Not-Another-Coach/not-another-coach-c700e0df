@@ -186,7 +186,7 @@ export default function Home() {
     (user && (profileLoading || userTypeLoading)) || 
     isMigrating || 
     isCheckingRedirect ||
-    !minLoadTimeElapsed;
+    (user && !minLoadTimeElapsed); // Only apply min load time for authenticated users
 
   if (shouldShowLoading) {
     return <ProfileLoadingState />;
