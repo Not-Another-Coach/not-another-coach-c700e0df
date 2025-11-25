@@ -80,6 +80,7 @@ const TrainerProfileSetup = () => {
   const [pendingAvailabilityChanges, setPendingAvailabilityChanges] = useState<any>(null);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const hasInitialized = useRef(false);
+  const hasLoadedOnce = useRef(false);
   const initialFormData = useRef<typeof formData | null>(null);
 
   const [formData, setFormData] = useState({
@@ -191,14 +192,34 @@ const TrainerProfileSetup = () => {
 
   // Stable loading check - wait 300ms minimum, then show content when data ready
   useEffect(() => {
+    // Once content has been shown, never go back to loading state
+    if (hasLoadedOnce.current) {
+      setShowContent(true);
+      return;
+    }
+    
     const minLoadTimer = setTimeout(() => {
       if (!isCriticalDataLoading) {
+        hasLoadedOnce.current = true;
         setShowContent(true);
       }
     }, 300);
 
     return () => clearTimeout(minLoadTimer);
   }, [isCriticalDataLoading]);
+
+  // Fallback: Show content after max 3s regardless of loading state
+  useEffect(() => {
+    const fallbackTimer = setTimeout(() => {
+      if (!hasLoadedOnce.current) {
+        console.warn('Profile loading fallback triggered - showing content despite loading state');
+        hasLoadedOnce.current = true;
+        setShowContent(true);
+      }
+    }, 3000);
+    
+    return () => clearTimeout(fallbackTimer);
+  }, []);
 
   // Initialize form data from profile when available
   useEffect(() => {
