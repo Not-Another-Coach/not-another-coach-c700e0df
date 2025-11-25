@@ -54,7 +54,7 @@ interface VerificationAuditEntry {
 
 export const useEnhancedTrainerVerification = () => {
   const { user } = useAuth();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Start true since we'll fetch on mount
   const [overview, setOverview] = useState<VerificationOverview | null>(null);
   const [checks, setChecks] = useState<VerificationCheck[]>([]);
   const [auditLog, setAuditLog] = useState<VerificationAuditEntry[]>([]);
@@ -404,6 +404,8 @@ export const useEnhancedTrainerVerification = () => {
   useEffect(() => {
     if (user) {
       fetchVerificationData();
+    } else {
+      setLoading(false); // No user means no data to load
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);

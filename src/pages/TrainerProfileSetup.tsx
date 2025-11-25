@@ -199,14 +199,15 @@ const TrainerProfileSetup = () => {
     }
     
     const minLoadTimer = setTimeout(() => {
-      if (!isCriticalDataLoading) {
+      // Only mark as loaded if we actually have profile data
+      if (!isCriticalDataLoading && profile) {
         hasLoadedOnce.current = true;
         setShowContent(true);
       }
     }, 300);
 
     return () => clearTimeout(minLoadTimer);
-  }, [isCriticalDataLoading]);
+  }, [isCriticalDataLoading, profile]);
 
   // Fallback: Show content after max 3s regardless of loading state
   useEffect(() => {
