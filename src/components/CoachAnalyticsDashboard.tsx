@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useCoachAnalytics } from '@/hooks/useCoachAnalytics';
-import { useTrainerProfile } from '@/hooks/useTrainerProfile';
+import { useTrainerProfileContext } from '@/contexts/TrainerProfileContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -26,7 +26,7 @@ interface CoachAnalyticsDashboardProps {
 }
 
 export const CoachAnalyticsDashboard = ({ trainerId }: CoachAnalyticsDashboardProps) => {
-  const { profile } = useTrainerProfile();
+  const { profile } = useTrainerProfileContext();
   const currentTrainerId = trainerId || profile?.id?.toString();
   const { analytics, shortlistedClients, shortlistedStats, loading } = useCoachAnalytics(currentTrainerId);
 

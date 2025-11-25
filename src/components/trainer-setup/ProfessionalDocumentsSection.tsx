@@ -10,7 +10,7 @@ import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useProfessionalDocumentsState } from "@/hooks/useProfessionalDocumentsState";
 import { useEnhancedTrainerVerification } from "@/hooks/useEnhancedTrainerVerification";
-import { useTrainerProfile } from "@/hooks/useTrainerProfile";
+import { useTrainerProfileContext } from "@/contexts/TrainerProfileContext";
 
 interface DocumentFormData {
   provider?: string;
@@ -56,7 +56,7 @@ const StatusConfig = {
 };
 
 export const ProfessionalDocumentsSection = () => {
-  const { profile } = useTrainerProfile();
+  const { profile } = useTrainerProfileContext();
   
   const {
     formData,

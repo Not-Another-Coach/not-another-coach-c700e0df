@@ -1,7 +1,7 @@
 import { useState, useEffect, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useTrainerProfile } from "@/hooks/useTrainerProfile";
+import { useTrainerProfileContext } from "@/contexts/TrainerProfileContext";
 import { useCoachAnalytics } from "@/hooks/useCoachAnalytics";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { useUserRoles } from "@/hooks/useUserRoles";
@@ -82,7 +82,7 @@ import { TrainerCustomHeader } from "@/components/layout/TrainerCustomHeader";
 
 const TrainerDashboard = () => {
   const { user, loading } = useAuth();
-  const { profile, loading: profileLoading, updateProfile } = useTrainerProfile();
+  const { profile, loading: profileLoading, updateProfile } = useTrainerProfileContext();
   const { analytics, shortlistedClients, shortlistedStats, loading: analyticsLoading } = useCoachAnalytics(profile?.id);
   const { isAdmin } = useUserRoles();
   const { waitlistEntries } = useWaitlist();

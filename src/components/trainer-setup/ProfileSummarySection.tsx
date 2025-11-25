@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, Clock, AlertCircle, FileText, Award, Shield, Upload, X } from 'lucide-react';
 import { useProfessionalDocumentsState } from '@/hooks/useProfessionalDocumentsState';
 import { useEnhancedTrainerVerification } from '@/hooks/useEnhancedTrainerVerification';
-import { useTrainerProfile } from '@/hooks/useTrainerProfile';
+import { useTrainerProfileContext } from '@/contexts/TrainerProfileContext';
 
 const CheckTypeConfig = {
   cimspa_membership: {
@@ -33,7 +33,7 @@ const StatusConfig = {
 };
 
 export const ProfileSummarySection = () => {
-  const { profile } = useTrainerProfile();
+  const { profile } = useTrainerProfileContext();
   const { getCompletionStatus, notApplicable } = useProfessionalDocumentsState(profile?.document_not_applicable);
   const { checks, getCheckByType } = useEnhancedTrainerVerification();
   

@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useUserTypeChecks } from '@/hooks/useUserType';
-import { useTrainerProfile } from '@/hooks/useTrainerProfile';
+import { useTrainerProfileContext } from '@/contexts/TrainerProfileContext';
 import { format } from 'date-fns';
 import { Users, MessageCircle, Calendar, UserCheck, Plus, Edit2 } from 'lucide-react';
 import { DiscoveryCallNotesTaker } from '@/components/DiscoveryCallNotesTaker';
@@ -58,7 +58,7 @@ interface ActiveClientsSectionProps {
 }
 
 export function ActiveClientsSection({ onCountChange }: ActiveClientsSectionProps) {
-  const { profile } = useTrainerProfile();
+  const { profile } = useTrainerProfileContext();
   const { isTrainer } = useUserTypeChecks();
   const { user } = useAuth();
   const { templates, loading: templatesLoading } = useTemplateBuilder();

@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
-import { useTrainerProfile } from '@/hooks/useTrainerProfile';
+import { useTrainerProfileContext } from '@/contexts/TrainerProfileContext';
 import { format } from 'date-fns';
 import { Users, MessageCircle, Calendar, Video, Phone, UserPlus, UserMinus, TrendingUp, Clock, Star, Target } from 'lucide-react';
 import { MessagingPopup } from '@/components/MessagingPopup';
@@ -47,7 +47,7 @@ interface ProspectsSectionProps {
 }
 
 export function ProspectsSection({ onCountChange }: ProspectsSectionProps) {
-  const { profile } = useTrainerProfile();
+  const { profile } = useTrainerProfileContext();
   const [activeProspects, setActiveProspects] = useState<Prospect[]>([]);
   const [lostProspects, setLostProspects] = useState<Prospect[]>([]);
   const [loading, setLoading] = useState(true);

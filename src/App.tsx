@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { UserIntentProvider } from "@/hooks/useUserIntent";
 import { VisibilityConfigProvider } from "@/contexts/VisibilityConfigContext";
+import { TrainerProfileProvider } from "@/contexts/TrainerProfileContext";
 import { PlatformAccessGuard } from "@/components/auth/PlatformAccessGuard";
 import { SessionNotification } from "@/components/SessionNotification";
 import Home from "./pages/Home";
@@ -58,16 +59,17 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <UserIntentProvider>
-        <VisibilityConfigProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <SessionNotification />
-            <BrowserRouter>
-              <DiagnosticsProvider>
-                <ErrorBoundary>
-                  <PlatformAccessGuard>
+      <TrainerProfileProvider>
+        <UserIntentProvider>
+          <VisibilityConfigProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <SessionNotification />
+              <BrowserRouter>
+                <DiagnosticsProvider>
+                  <ErrorBoundary>
+                    <PlatformAccessGuard>
                     <Routes>
                       <Route path="/" element={<Home />} />
                       <Route path="/auth" element={<Auth />} />
@@ -126,6 +128,7 @@ const App = () => (
           </TooltipProvider>
         </VisibilityConfigProvider>
       </UserIntentProvider>
+      </TrainerProfileProvider>
     </AuthProvider>
   </QueryClientProvider>
 );

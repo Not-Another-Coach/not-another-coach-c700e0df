@@ -1,4 +1,4 @@
-import { useTrainerProfile } from '@/hooks/useTrainerProfile';
+import { useTrainerProfileContext } from '@/contexts/TrainerProfileContext';
 import { useClientProfile } from '@/hooks/useClientProfile';
 import { useUserType } from '@/hooks/useUserType';
 import { useAuth } from '@/hooks/useAuth';
@@ -89,7 +89,7 @@ function useAdminProfile() {
 export function useProfileByType() {
   const { user } = useAuth();
   const { user_type, loading: userTypeLoading } = useUserType();
-  const { profile: trainerProfile, loading: trainerLoading, updateProfile: updateTrainerProfile } = useTrainerProfile();
+  const { profile: trainerProfile, loading: trainerLoading, updateProfile: updateTrainerProfile } = useTrainerProfileContext();
   const { profile: clientProfile, loading: clientLoading, updateProfile: updateClientProfile } = useClientProfile();
   const { profile: adminProfile, loading: adminLoading, updateProfile: updateAdminProfile } = useAdminProfile();
 

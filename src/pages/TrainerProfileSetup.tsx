@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useTrainerProfile } from "@/hooks/useTrainerProfile";
+import { useTrainerProfileContext } from "@/contexts/TrainerProfileContext";
 import { useUserTypeChecks } from "@/hooks/useUserType";
 import { usePackageWaysOfWorking } from "@/hooks/usePackageWaysOfWorking";
 import { useTrainerVerification } from "@/hooks/useTrainerVerification";
@@ -54,7 +54,7 @@ import { PublishButton } from "@/components/trainer-setup/PublishButton";
 
 const TrainerProfileSetup = () => {
   const { user, loading } = useAuth();
-  const { profile, loading: profileLoading, updateProfile } = useTrainerProfile();
+  const { profile, loading: profileLoading, updateProfile } = useTrainerProfileContext();
   const { isTrainer } = useUserTypeChecks();
   const { packageWorkflows, loading: waysOfWorkingLoading } = usePackageWaysOfWorking();
   const { verificationRequest } = useTrainerVerification();
@@ -103,7 +103,6 @@ const TrainerProfileSetup = () => {
     specializations: [] as string[],
     training_types: [] as string[],
     training_type_delivery: {},
-    document_not_applicable: {},
     location: "",
     delivery_format: "hybrid" as string,
     
@@ -251,7 +250,6 @@ const TrainerProfileSetup = () => {
         specializations: Array.isArray(profile.specializations) ? profile.specializations : [],
         training_types: Array.isArray(profile.training_types) ? profile.training_types : [],
         training_type_delivery: profile.training_type_delivery || {},
-        document_not_applicable: profile.document_not_applicable || {},
         location: profile.location || "",
         delivery_format: Array.isArray(profile.delivery_format) ? profile.delivery_format[0] || "hybrid" : profile.delivery_format || "hybrid",
         ideal_client_types: Array.isArray(profile.ideal_client_types) ? profile.ideal_client_types : [],
@@ -617,7 +615,6 @@ const TrainerProfileSetup = () => {
         training_type_delivery: formData.training_type_delivery || {},
         // Map certificates back to uploaded_certificates for database storage
         uploaded_certificates: formData.certificates || [],
-        document_not_applicable: formData.document_not_applicable || {},
         // Explicitly include Ways of Working fields to ensure persistence
         wow_how_i_work: formData.wow_how_i_work || "",
         wow_what_i_provide: formData.wow_what_i_provide || "",
