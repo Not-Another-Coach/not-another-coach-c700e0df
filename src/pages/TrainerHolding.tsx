@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock, Settings } from "lucide-react";
+import { Clock } from "lucide-react";
 
 export const TrainerHolding = () => {
   const navigate = useNavigate();
@@ -37,7 +37,7 @@ export const TrainerHolding = () => {
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-primary mt-0.5">•</span>
-                <span>You can update your profile settings anytime</span>
+                <span>You can edit your profile information anytime</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-primary mt-0.5">•</span>
@@ -46,17 +46,8 @@ export const TrainerHolding = () => {
             </ul>
           </div>
 
-          <div className="pt-4 flex gap-3">
+          <div className="pt-4 flex justify-center">
             <Button
-              variant="outline"
-              className="flex-1"
-              onClick={() => navigate("/trainer/settings")}
-            >
-              <Settings className="w-4 h-4 mr-2" />
-              View Settings
-            </Button>
-            <Button
-              className="flex-1"
               onClick={() => navigate("/trainer/profile-setup")}
             >
               Edit Profile
