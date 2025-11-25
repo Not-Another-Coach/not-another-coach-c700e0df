@@ -1030,7 +1030,14 @@ const TrainerProfileSetup = () => {
             </div>
             
             {/* Step indicators */}
-            <ResponsiveBreadcrumb className="px-4">
+            <ResponsiveBreadcrumb 
+              className="px-4"
+              currentStep={currentStep}
+              currentStepTitle={stepTitles[currentStep - 1]}
+              currentStepCompletion={getStepCompletion(currentStep)}
+              totalSteps={totalSteps}
+              completedSteps={stepTitles.filter((_, i) => getStepCompletion(i + 1) === 'completed').length}
+            >
               {stepTitles.map((title, index) => {
                 const stepNumber = index + 1;
                 const completion = getStepCompletion(stepNumber);
