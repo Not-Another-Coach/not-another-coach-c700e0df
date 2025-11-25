@@ -7,7 +7,7 @@ import { Eye, EyeOff, Lock, Settings, ExternalLink } from 'lucide-react';
 import { useVisibilityMatrix, ContentType, VisibilityState, EngagementStageGroup } from '@/hooks/useVisibilityMatrix';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { HelpCircle } from 'lucide-react';
-import { useTrainerProfile } from '@/hooks/useTrainerProfile';
+import { useTrainerProfileContext } from '@/contexts/TrainerProfileContext';
 import { ProfilePreviewModal } from './ProfilePreviewModal';
 import { toast } from 'sonner';
 
@@ -64,7 +64,7 @@ const visibilityStateLabels: Record<VisibilityState, { label: string; icon: any;
 };
 
 export const VisibilitySettingsSection = () => {
-  const { profile } = useTrainerProfile();
+  const { profile } = useTrainerProfileContext();
   const { loading } = useVisibilityMatrix();
   const [settings, setSettings] = useState<Record<string, VisibilityState>>({});
   const [previewStage, setPreviewStage] = useState<EngagementStageGroup | null>(null);

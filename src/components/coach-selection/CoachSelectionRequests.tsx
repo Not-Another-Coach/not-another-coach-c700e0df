@@ -9,13 +9,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { CheckCircle, X, MessageSquare, DollarSign, Clock } from 'lucide-react';
 import { useCoachSelection, CoachSelectionRequest } from '@/hooks/useCoachSelection';
 import { useUserTypeChecks } from '@/hooks/useUserType';
-import { useTrainerProfile } from '@/hooks/useTrainerProfile';
+import { useTrainerProfileContext } from '@/contexts/TrainerProfileContext';
 import { formatDistanceToNow } from 'date-fns';
 import { getCurrencySymbol } from '@/lib/packagePaymentUtils';
 
 export const CoachSelectionRequests = () => {
   const { isTrainer } = useUserTypeChecks();
-  const { profile } = useTrainerProfile();
+  const { profile } = useTrainerProfileContext();
   const { getPendingRequests, respondToRequest, loading } = useCoachSelection();
   const [requests, setRequests] = useState<any[]>([]);
   const [selectedRequest, setSelectedRequest] = useState<any>(null);

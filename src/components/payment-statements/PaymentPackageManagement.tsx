@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useProfileByType } from "@/hooks/useProfileByType";
+import { useTrainerProfileContext } from "@/contexts/TrainerProfileContext";
 import { usePaymentStatements } from "@/hooks/usePaymentStatements";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -46,7 +46,7 @@ interface PaymentPackage {
 
 export const PaymentPackageManagement = () => {
   const { user } = useAuth();
-  const { profile, updateProfile } = useProfileByType();
+  const { profile, updateProfile } = useTrainerProfileContext();
   const { packages, loading } = usePaymentStatements();
   const { toast } = useToast();
   const navigate = useNavigate();

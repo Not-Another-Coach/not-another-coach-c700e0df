@@ -31,7 +31,7 @@ import { TemplateAssignmentView } from '@/components/coach/TemplateAssignmentVie
 import CategoryMappingManagement from "@/components/admin/CategoryMappingManagement";
 import TemplateSectionsManagement from "@/components/admin/TemplateSectionsManagement";
 import { useUserRoles } from '@/hooks/useUserRoles';
-import { useTrainerProfile } from '@/hooks/useTrainerProfile';
+import { useTrainerProfileContext } from '@/contexts/TrainerProfileContext';
 
 export function TemplateManagementTabs() {
   const {
@@ -45,7 +45,7 @@ export function TemplateManagementTabs() {
   const { activities, loading: activitiesLoading, error: activitiesError, refresh: refreshActivities, createActivity, updateActivity, updateActivityDetails } = useTrainerActivities();
   const { user } = useAuth();
   const { isAdmin } = useUserRoles();
-  const { profile, loading: profileLoading } = useTrainerProfile();
+  const { profile, loading: profileLoading } = useTrainerProfileContext();
   
   const { 
     activities: enhancedActivities, 

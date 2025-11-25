@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useEnhancedTrainerVerification } from './useEnhancedTrainerVerification';
 import { useAuth } from './useAuth';
-import { useTrainerProfile } from './useTrainerProfile';
+import { useTrainerProfileContext } from '@/contexts/TrainerProfileContext';
 
 interface DocumentFormData {
   provider?: string;
@@ -18,7 +18,7 @@ interface DocumentFormData {
 export const useProfessionalDocumentsState = (profileDocumentNotApplicable?: any) => {
   const { checks, submitVerificationCheck } = useEnhancedTrainerVerification();
   const { user } = useAuth();
-  const { updateProfile } = useTrainerProfile();
+  const { updateProfile } = useTrainerProfileContext();
   const [formData, setFormData] = useState<Record<string, DocumentFormData>>({});
   const [notApplicable, setNotApplicable] = useState<Record<string, boolean>>({});
   const [savingStatus, setSavingStatus] = useState<Record<string, boolean>>({});

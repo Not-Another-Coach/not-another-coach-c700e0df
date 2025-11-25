@@ -41,6 +41,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { cn } from '@/lib/utils';
 import { MessagingPopup } from '@/components/MessagingPopup';
 import { TemplateAssignmentDialog } from '@/components/coach/TemplateAssignmentDialog';
+import { useTrainerProfileContext } from '@/contexts/TrainerProfileContext';
 
 type ClientStatus = 'active' | 'prospect' | 'inactive' | 'completed';
 type ViewMode = 'card' | 'table';
@@ -102,7 +103,7 @@ const GOAL_COLORS = {
 } as const;
 
 export function ClientProspectSummary({ onActiveClientsCountChange, onProspectsCountChange }: ClientProspectSummaryProps) {
-  const { profile } = useTrainerProfile();
+  const { profile } = useTrainerProfileContext();
   const [clients, setClients] = useState<ClientRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>('card');
