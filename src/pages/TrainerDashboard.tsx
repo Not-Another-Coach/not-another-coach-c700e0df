@@ -120,11 +120,17 @@ const TrainerDashboard = () => {
   // Check profile completion and access control
   useEffect(() => {
     const checkAccessAndRedirect = async () => {
+      // Skip redirect checks if we're not on the dashboard page
+      // This prevents infinite redirect loops when navigating between pages
+      if (window.location.pathname !== '/trainer/dashboard') {
+        return;
+      }
+
       if (!loading && !profileLoading && profile) {
         // If profile is incomplete, redirect to setup
         if (!profile.profile_setup_completed) {
           console.log('⚠️ Profile incomplete, redirecting to setup...');
-          navigate('/trainer/profile-setup');
+          navigate('/trainer/profile-setup', { replace: true });
           return;
         }
 
@@ -142,7 +148,7 @@ const TrainerDashboard = () => {
           // If access is disabled and profile is complete, redirect to holding page
           if (!trainerAccessEnabled && profile.profile_setup_completed) {
             console.log('⚠️ Trainer access disabled, redirecting to holding page...');
-            navigate('/trainer/holding');
+            navigate('/trainer/holding', { replace: true });
           }
         } catch (error) {
           console.error('Error checking trainer access:', error);

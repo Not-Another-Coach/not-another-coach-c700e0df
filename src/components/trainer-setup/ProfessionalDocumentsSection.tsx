@@ -87,8 +87,22 @@ export const ProfessionalDocumentsSection = () => {
     updateFormData(checkType, field, file);
   };
 
-  const handleNotApplicableChange = (checkType: string, isNotApplicable: boolean) => {
-    updateNotApplicable(checkType, isNotApplicable);
+  const handleNotApplicableChange = async (checkType: string, isNotApplicable: boolean) => {
+    try {
+      await updateNotApplicable(checkType, isNotApplicable);
+      toast({
+        title: "Preference saved",
+        description: isNotApplicable 
+          ? `${CheckTypeConfig[checkType as keyof typeof CheckTypeConfig]?.title} marked as not applicable`
+          : `${CheckTypeConfig[checkType as keyof typeof CheckTypeConfig]?.title} marked as applicable`,
+      });
+    } catch (error) {
+      toast({
+        title: "Failed to save preference",
+        description: "Please try again or contact support if the issue persists",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleSaveDraft = async (checkType: string) => {
@@ -245,7 +259,7 @@ export const ProfessionalDocumentsSection = () => {
                   <Switch
                     id={`not-applicable-${checkType}`}
                     checked={isNotApplicable}
-                    onCheckedChange={(checked) => updateNotApplicable(checkType, checked)}
+                    onCheckedChange={(checked) => handleNotApplicableChange(checkType, checked)}
                   />
                   <Label htmlFor={`not-applicable-${checkType}`} className="text-sm">
                     Not applicable to my training services
