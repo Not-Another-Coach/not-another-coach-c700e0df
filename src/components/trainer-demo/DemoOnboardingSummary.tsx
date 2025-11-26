@@ -42,21 +42,21 @@ export function DemoOnboardingSummary() {
   ];
 
   return (
-    <Card className="p-6">
-      <div className="flex items-center gap-2 mb-6">
-        <TrendingUp className="h-5 w-5 text-muted-foreground" />
-        <h3 className="text-xl font-semibold text-foreground">Client Onboarding Summary</h3>
+    <Card className="p-4">
+      <div className="flex items-center gap-2 mb-4">
+        <TrendingUp className="h-4 w-4 text-muted-foreground" />
+        <h3 className="text-lg font-semibold text-foreground">Client Onboarding Summary</h3>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3">
         {metrics.map((metric) => {
           const Icon = metric.icon;
           return (
             <Card 
               key={metric.label} 
-              className={`p-6 ${metric.bgColor} ${metric.borderColor} border-2 hover:shadow-md transition-shadow duration-300`}
+              className={`p-3 ${metric.bgColor} ${metric.borderColor} border-2 hover:shadow-md transition-shadow duration-300`}
             >
-              <div className={`text-4xl font-bold ${metric.textColor} mb-2`}>{metric.value}</div>
-              <div className={`text-base font-medium ${metric.textColor}`}>{metric.label}</div>
+              <div className={`text-2xl font-bold ${metric.textColor} mb-1`}>{metric.value}</div>
+              <div className={`text-xs font-medium ${metric.textColor}`}>{metric.label}</div>
             </Card>
           );
         })}
