@@ -286,7 +286,7 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
                 <Label htmlFor="outcome_tags">Outcome Tags</Label>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button type="button" variant="default" size="sm">
+                    <Button type="button" variant="secondary" size="sm">
                       <Plus className="h-4 w-4 mr-1" />
                       Add tags
                     </Button>
