@@ -22,6 +22,7 @@ import { VisibilityAwareName } from '@/components/ui/VisibilityAwareName';
 import { useProgressiveNameVisibility } from '@/hooks/useProgressiveNameVisibility';
 import { ChooseCoachButton } from '@/components/coach-selection/ChooseCoachButton';
 import { BookDiscoveryCallButton } from '@/components/discovery-call/BookDiscoveryCallButton';
+import { isDemoTrainerId } from '@/config/demoTrainers';
 
 // Extended interface that merges UnifiedTrainerCardProps with specific props
 interface EnhancedTrainerCardProps extends Omit<UnifiedTrainerCardProps, 'trainer'> {
@@ -93,7 +94,7 @@ export const EnhancedTrainerCard = memo(({
 
   // Add visibility context - this will be passed to sub-components through their own hooks
   const isAnonymousMode = config === 'anonymous';
-  const isDemoProfile = trainer.id.startsWith('demo-trainer-') || require('@/config/demoTrainers').isDemoTrainerId(trainer.id);
+  const isDemoProfile = trainer.id.startsWith('demo-trainer-') || isDemoTrainerId(trainer.id);
   
   // Use prop engagement stage if provided, otherwise fetch it
   // For demo profiles, force guest mode but with full visibility

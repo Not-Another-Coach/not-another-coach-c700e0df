@@ -11,6 +11,7 @@ import { VisibilityAwareGallery } from '@/components/ui/VisibilityAwareGallery';
 import { getRecommendedGridSizeForCount } from '@/hooks/useTrainerImages';
 import { VisibilityAwareBasicInfo } from "@/components/ui/VisibilityAwareBasicInfo";
 import { VisibilityAwareRating } from "@/components/ui/VisibilityAwareRating";
+import { isDemoTrainerId } from '@/config/demoTrainers';
 
 const getGridClasses = (actualImageCount: number): string => {
   // Use actual image count to determine the best grid layout
@@ -53,7 +54,7 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
   const [gridSize, setGridSize] = useState<number>(6);
 
   // Detect if this is a demo trainer
-  const isDemoProfile = trainer.id.startsWith('demo-trainer-') || require('@/config/demoTrainers').isDemoTrainerId(trainer.id);
+  const isDemoProfile = trainer.id.startsWith('demo-trainer-') || isDemoTrainerId(trainer.id);
   
   const { stage, isGuest } = useEngagementStage(trainer.id);
   const { visibilityMap, getVisibility, loading: visibilityLoading } = useContentVisibility({

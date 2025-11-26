@@ -7,6 +7,7 @@ import { useContentVisibility } from '@/hooks/useContentVisibility';
 import { useEngagementStage } from '@/hooks/useEngagementStage';
 import { VisibilityAwareImage } from '@/components/ui/VisibilityAwareImage';
 import { VisibilityAwareName } from '@/components/ui/VisibilityAwareName';
+import { isDemoTrainerId } from '@/config/demoTrainers';
 
 interface ClientTransformationViewProps {
   trainer: AnyTrainer;
@@ -63,7 +64,7 @@ export const ClientTransformationView = ({ trainer, children, testimonialIndex =
   const transformationData = getTransformationData(trainer);
   
   // Detect if this is a demo trainer
-  const isDemoProfile = trainer.id.startsWith('demo-trainer-') || require('@/config/demoTrainers').isDemoTrainerId(trainer.id);
+  const isDemoProfile = trainer.id.startsWith('demo-trainer-') || isDemoTrainerId(trainer.id);
   
   // Add visibility logic
   const { stage, isGuest } = useEngagementStage(trainer.id);
