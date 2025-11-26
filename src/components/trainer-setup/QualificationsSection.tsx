@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { X, Upload, FileText, Eye, Trash2, Plus, Send, Search, CheckCircle, Clock } from 'lucide-react';
+import { X, Upload, FileText, Eye, Trash2, Plus, Send, Search, CheckCircle, Clock, ShieldCheck } from 'lucide-react';
 import { SectionHeader } from './SectionHeader';
 import { FileUploadService } from '@/services';
 import { useAuth } from '@/hooks/useAuth';
@@ -234,7 +234,7 @@ export const QualificationsSection: React.FC<QualificationsSectionProps> = ({
       const filePath = `${user.id}/${fileName}`;
 
       const uploadResult = await FileUploadService.uploadFile(
-        'documents',
+        'qualification-proofs',
         filePath,
         file
       );
@@ -389,7 +389,13 @@ export const QualificationsSection: React.FC<QualificationsSectionProps> = ({
       {/* Search and Select Qualifications */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Popular Qualifications</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg">Popular Qualifications</CardTitle>
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <ShieldCheck className="w-3.5 h-3.5 text-amber-500" />
+              <span>= Certificate required</span>
+            </div>
+          </div>
           <div className="relative">
             <Search className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
             <Input
@@ -412,13 +418,11 @@ export const QualificationsSection: React.FC<QualificationsSectionProps> = ({
                   />
                   <label 
                     htmlFor={qualification.id}
-                    className="text-sm cursor-pointer flex-1 flex items-center justify-between"
+                    className="text-sm cursor-pointer flex-1 flex items-center"
                   >
                     <span>{qualification.name}</span>
                     {qualification.requires_verification && (
-                      <Badge variant="outline" className="text-xs ml-2">
-                        Cert Required
-                      </Badge>
+                      <ShieldCheck className="w-4 h-4 text-amber-500 ml-1.5" />
                     )}
                   </label>
                 </div>
