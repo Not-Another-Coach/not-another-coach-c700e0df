@@ -69,11 +69,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Clear any saved credentials
     localStorage.removeItem('savedCredentials');
     localStorage.removeItem('rememberMe');
+    localStorage.removeItem('savedEmail');
     
-    // Sign out from Supabase FIRST to ensure session is cleared
+    // Explicitly clear Supabase auth token from localStorage
+    // This ensures logout works even if server session is invalid
+    const projectRef = 'ogpiovfxjxcclptfybrk';
+    localStorage.removeItem(`sb-${projectRef}-auth-token`);
+    
+    // Sign out from Supabase (may fail if session already invalid)
     const response = await AuthService.signOut();
     
-    // Then redirect after sign out completes
+    // Clear local state immediately
+    setUser(null);
+    setSession(null);
+    
+    // Then redirect after everything is cleared
     window.location.href = '/auth';
     
     return { error: response.error || null };
