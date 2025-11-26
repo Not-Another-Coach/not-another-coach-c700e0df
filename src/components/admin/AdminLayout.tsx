@@ -1,4 +1,5 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,8 +12,16 @@ interface AdminLayoutProps {
 }
 
 export function AdminLayout({ children }: AdminLayoutProps) {
+  const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { isAdmin, adminCheckLoading } = useUserRoles();
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate('/auth', { replace: true });
+    }
+  }, [user, authLoading, navigate]);
 
   // Show loading while checking auth or admin status
   if (authLoading || adminCheckLoading) {
@@ -23,8 +32,13 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     );
   }
 
-  // Only show access denied after all checks are complete
-  if (!user || !isAdmin) {
+  // Redirect to login if not authenticated (during render)
+  if (!user) {
+    return null;
+  }
+
+  // Show access denied if authenticated but not admin
+  if (!isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Card className="p-6">
