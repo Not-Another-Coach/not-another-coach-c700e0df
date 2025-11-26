@@ -7,7 +7,8 @@ export type StorageBucket =
   | 'onboarding-public'
   | 'avatars'
   | 'documents'
-  | 'verification-documents';
+  | 'verification-documents'
+  | 'qualification-proofs';
 
 export interface FileUploadOptions {
   cacheControl?: string;
