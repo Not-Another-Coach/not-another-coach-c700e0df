@@ -22,17 +22,17 @@ export function DemoExecutionCard() {
 
   return (
     <Card className="hover:shadow-lg transition-shadow duration-300">
-      <CardHeader>
+      <CardHeader className="pb-3">
         <CardTitle className="text-lg">Today's Execution</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4">
         {/* Weekly Score Circle */}
         <div className="flex items-center justify-center">
           <div className="relative">
-            <div className={`text-4xl font-bold ${getScoreColor(weeklyScore)}`}>
+            <div className={`text-3xl font-bold ${getScoreColor(weeklyScore)}`}>
               {weeklyScore}%
             </div>
-            <div className="text-xs text-muted-foreground text-center mt-1">Weekly Score</div>
+            <div className="text-xs text-muted-foreground text-center mt-0.5">Weekly Score</div>
           </div>
         </div>
 

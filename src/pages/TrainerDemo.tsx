@@ -129,27 +129,25 @@ export default function TrainerDemo() {
           </div>
           
           <div className="space-y-6">
-            {/* Row 1: Performance Metrics + Client Onboarding Summary */}
+            {/* Row 1: Performance Metrics - Full Width */}
+            <DemoDashboardMetrics />
+            
+            {/* Row 2: Client Onboarding Summary + Today's Execution */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <DemoDashboardMetrics />
               <DemoOnboardingSummary />
+              <DemoExecutionCard />
             </div>
             
-            {/* Row 2: Today's Execution + Coaching Calendar */}
+            {/* Row 3: Coaching Calendar + Growth Tracker */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <DemoExecutionCard />
               <TrainerDemoCalendar />
+              <GrowthTracker />
             </div>
           </div>
         </div>
 
-        <div className="space-y-8">
-          {/* Growth Tracker */}
-          <GrowthTracker />
-
-          {/* Coach Journey Infographic */}
-          <CoachJourneyInfographic />
-        </div>
+        {/* Coach Journey Infographic */}
+        <CoachJourneyInfographic />
       </div>
 
       {/* Pricing Plans */}
