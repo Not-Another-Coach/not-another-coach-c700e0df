@@ -47,7 +47,7 @@ export const ClientAccessPending = () => {
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button
                 variant="outline"
-                onClick={() => navigate('/settings/profile')}
+                onClick={() => navigate('/client-survey', { state: { editMode: true } })}
               >
                 Edit Preferences
               </Button>
