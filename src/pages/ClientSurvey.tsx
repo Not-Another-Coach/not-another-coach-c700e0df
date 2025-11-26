@@ -4,7 +4,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useClientProfile } from "@/hooks/useClientProfile";
 import { useUserTypeChecks } from "@/hooks/useUserType";
-import { useAnonymousSession } from "@/hooks/useAnonymousSession";
 import { useDataMigration } from "@/hooks/useDataMigration";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,7 +30,6 @@ const ClientSurvey = () => {
   const { user, loading } = useAuth();
   const { profile, loading: profileLoading, updateProfile } = useClientProfile();
   const { isClient } = useUserTypeChecks();
-  const { session: anonymousSession } = useAnonymousSession();
   const { isMigrating, migrationCompleted, migrationState, migrationProgress, migrationMessage } = useDataMigration();
   const navigate = useNavigate();
   const location = useLocation();
@@ -271,49 +269,6 @@ const ClientSurvey = () => {
           client_survey_completed: false,
         };
         
-        // Fallback: If profile is empty but we have anonymous session data, use it
-        if (anonymousSession?.quizResults && !profile.primary_goals?.length) {
-          console.log('📋 Using anonymous session data as fallback');
-          const quizResults = anonymousSession.quizResults;
-          
-          // Map from quiz to form using only properties that exist
-          if (quizResults.primary_goals || quizResults.goals) {
-            initialData.primary_goals = quizResults.primary_goals || quizResults.goals || [];
-          }
-          if (quizResults.secondary_goals) {
-            initialData.secondary_goals = quizResults.secondary_goals || [];
-          }
-          if (quizResults.training_location_preference || quizResults.location) {
-            initialData.training_location_preference = quizResults.training_location_preference || quizResults.location || null;
-          }
-          if (quizResults.open_to_virtual_coaching !== undefined) {
-            initialData.open_to_virtual_coaching = quizResults.open_to_virtual_coaching || false;
-          }
-          if (quizResults.preferred_training_frequency || quizResults.availability) {
-            const frequencyValue = quizResults.preferred_training_frequency || quizResults.availability || null;
-            initialData.preferred_training_frequency = typeof frequencyValue === 'number' ? frequencyValue : 
-              (typeof frequencyValue === 'string' ? parseInt(frequencyValue) : null);
-          }
-          if (quizResults.preferred_time_slots) {
-            initialData.preferred_time_slots = quizResults.preferred_time_slots || [];
-          }
-          if (quizResults.start_timeline) {
-            initialData.start_timeline = quizResults.start_timeline || null;
-          }
-          if (quizResults.preferred_coaching_style || quizResults.coachingStyle) {
-            initialData.preferred_coaching_style = quizResults.preferred_coaching_style || quizResults.coachingStyle || [];
-          }
-          if (quizResults.budget_range_min) {
-            initialData.budget_range_min = quizResults.budget_range_min || null;
-          }
-          if (quizResults.budget_range_max) {
-            initialData.budget_range_max = quizResults.budget_range_max || null;
-          }
-          if (quizResults.budget_flexibility) {
-            initialData.budget_flexibility = quizResults.budget_flexibility || "flexible";
-          }
-        }
-        
         console.log('📝 Setting form data:', initialData);
         setFormData(initialData);
         
@@ -321,7 +276,7 @@ const ClientSurvey = () => {
         setCurrentStep(1);
       }, initDelay);
     }
-  }, [profile?.id, migrationCompleted, migrationState, isMigrating, anonymousSession]);
+  }, [profile?.id, migrationCompleted, migrationState, isMigrating]);
 
   // Stable update function
   const updateFormData = (updates: Partial<typeof formData>) => {

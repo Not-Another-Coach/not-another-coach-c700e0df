@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useAnonymousSession } from './useAnonymousSession';
 
 type UserIntent = 'client' | 'trainer' | null;
 
@@ -16,7 +15,6 @@ const INTENT_STORAGE_KEY = 'user-intent';
 
 export function UserIntentProvider({ children }: { children: ReactNode }) {
   const [userIntent, setUserIntentState] = useState<UserIntent>(null);
-  const { clearSession, createSession } = useAnonymousSession();
 
   useEffect(() => {
     // Load from localStorage on mount
@@ -57,10 +55,7 @@ export function UserIntentProvider({ children }: { children: ReactNode }) {
   };
 
   const resetIntentAndCreateNewSession = () => {
-    console.log('🔄 INTENT: Resetting intent and creating new anonymous session');
-    
-    // Clear the current anonymous session (saved trainers, quiz results, etc.)
-    clearSession();
+    console.log('🔄 INTENT: Resetting intent (anonymous sessions no longer available)');
     
     // Clear user intent
     setUserIntentState(null);
@@ -71,10 +66,7 @@ export function UserIntentProvider({ children }: { children: ReactNode }) {
       console.error('Error clearing user intent from localStorage:', error);
     }
     
-    // Create a fresh anonymous session
-    createSession();
-    
-    console.log('✅ INTENT: Fresh start - new session created and intent reset');
+    console.log('✅ INTENT: Intent reset');
   };
 
   return (
