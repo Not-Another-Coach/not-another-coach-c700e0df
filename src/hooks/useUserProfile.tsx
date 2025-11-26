@@ -105,8 +105,6 @@ export function useUserProfile(): ProfileData {
         'max_clients', 'qualifications', 'specializations', 'training_types', 'delivery_format',
         'ideal_client_types', 'coaching_style', 'communication_style', 'ideal_client_personality',
         'package_options', 'video_checkins', 'messaging_support', 'weekly_programming_only',
-        'ways_of_working_onboarding', 'ways_of_working_first_week', 'ways_of_working_ongoing',
-        'ways_of_working_tracking', 'ways_of_working_expectations', 'ways_of_working_what_i_bring',
         'how_started', 'philosophy', 'professional_milestones', 'uploaded_certificates',
         'testimonials', 'verification_status', 'verification_documents', 'admin_verification_notes',
         'admin_review_notes', 'is_verified', 'verification_requested_at', 'rating', 'total_ratings',

@@ -69,12 +69,6 @@ interface TrainerProfile {
   video_checkins: boolean | null;
   messaging_support: boolean | null;
   weekly_programming_only: boolean | null;
-  ways_of_working_onboarding: string[] | null;
-  ways_of_working_first_week: string[] | null;
-  ways_of_working_ongoing: string[] | null;
-  ways_of_working_tracking: string[] | null;
-  ways_of_working_expectations: string[] | null;
-  ways_of_working_what_i_bring: string[] | null;
   profile_setup_completed: boolean | null;
   terms_agreed: boolean | null;
   accuracy_confirmed: boolean | null;
@@ -195,9 +189,7 @@ export function useTrainerProfile() {
         'offers_discovery_call', 'discovery_call_price', 'calendar_link', 'testimonials', 'training_types',
         'training_type_delivery', 'delivery_format', 'communication_style', 'coaching_style', 'client_preferences', 
         'ideal_client_personality', 'ideal_client_types', 'video_checkins', 'messaging_support', 
-        'weekly_programming_only', 'ways_of_working_onboarding', 'ways_of_working_first_week',
-        'ways_of_working_ongoing', 'ways_of_working_tracking', 'ways_of_working_expectations',
-        'ways_of_working_what_i_bring', 'profile_setup_completed', 'how_started', 'philosophy', 
+        'weekly_programming_only', 'profile_setup_completed', 'how_started', 'philosophy', 
         'professional_milestones', 'document_not_applicable'
       ];
 

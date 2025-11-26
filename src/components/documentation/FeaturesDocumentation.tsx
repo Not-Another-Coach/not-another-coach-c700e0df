@@ -158,7 +158,7 @@ const features = [
       {
         name: 'Ways of Working Documentation',
         description: 'Detailed trainer methodology and process documentation',
-        components: ['WaysOfWorkingSection', 'PackageWaysOfWorkingSection', 'WaysOfWorkingBlock', 'usePackageWaysOfWorking'],
+        components: ['SimplifiedWaysOfWorkingSection', 'PackageWaysOfWorkingSection', 'WaysOfWorkingBlock', 'usePackageWaysOfWorking'],
         workflow: [
           'Trainer documents their coaching methodology',
           'Defines onboarding process and expectations',
