@@ -113,9 +113,9 @@ export default function Home() {
           // Check platform access before redirecting to dashboard
           setIsRedirecting(true);
           const checkAccessAndRedirect = async () => {
-            const { data: hasAccess } = await supabase.rpc('can_user_access_platform', {
-              user_id: user.id
-            });
+          const { data: hasAccess } = await supabase.rpc('can_user_access_platform', {
+            p_user_id: user.id
+          });
 
             if (hasAccess) {
               console.log('✅ Home - Trainer has platform access, redirecting to dashboard');
@@ -146,7 +146,7 @@ export default function Home() {
       const checkClientAccessAndRedirect = async () => {
         // Check platform access first
         const { data: hasAccess } = await supabase.rpc('can_user_access_platform', {
-          user_id: user.id
+          p_user_id: user.id
         });
 
         if (!hasAccess) {
