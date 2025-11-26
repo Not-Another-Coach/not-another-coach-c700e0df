@@ -948,8 +948,8 @@ const TrainerProfileSetup = () => {
             )}
           </div>
           
-          {/* Center: Title + Badge - Absolute positioned */}
-          <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
+          {/* Center: Title + Badge - Absolute positioned, hidden on mobile */}
+          <div className="absolute left-1/2 -translate-x-1/2 hidden sm:flex items-center gap-2">
             <h1 className="text-base sm:text-lg font-bold whitespace-nowrap">
               {isFullyComplete() ? 'Profile Management' : 'Profile Setup'}
             </h1>
