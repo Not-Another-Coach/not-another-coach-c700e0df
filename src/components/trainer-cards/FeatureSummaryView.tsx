@@ -10,6 +10,7 @@ import { VisibilityAwareRating } from "@/components/ui/VisibilityAwareRating";
 import { VisibilityAwareText } from "@/components/ui/VisibilityAwareText";
 import { VisibilityAwareBasicInfo } from "@/components/ui/VisibilityAwareBasicInfo";
 import { VisibilityAwareImage } from "@/components/ui/VisibilityAwareImage";
+import { isDemoTrainerId } from '@/config/demoTrainers';
 
 interface FeatureSummaryViewProps {
   trainer: AnyTrainer;
@@ -18,7 +19,7 @@ interface FeatureSummaryViewProps {
 
 export const FeatureSummaryView = ({ trainer, children }: FeatureSummaryViewProps) => {
   // Detect if this is a demo trainer
-  const isDemoProfile = trainer.id.startsWith('demo-trainer-') || require('@/config/demoTrainers').isDemoTrainerId(trainer.id);
+  const isDemoProfile = trainer.id.startsWith('demo-trainer-') || isDemoTrainerId(trainer.id);
   
   const { stage: engagementStage, isGuest } = useEngagementStage(trainer.id);
   const { canViewContent, getVisibility } = useContentVisibility({
