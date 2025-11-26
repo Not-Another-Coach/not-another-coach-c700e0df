@@ -1065,7 +1065,7 @@ const TrainerProfileSetup = () => {
 
       {/* Progress Bar - only show if not fully complete */}
       {!isFullyComplete() && (
-        <div className="bg-card border-b p-4">
+        <div className="bg-muted/50 border-b p-4">
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center gap-4 mb-2">
               <span className="text-sm font-medium">
@@ -1113,7 +1113,7 @@ const TrainerProfileSetup = () => {
 
       {/* Step indicators for completed profiles */}
       {isFullyComplete() && (
-        <div className="bg-card border-b p-4">
+        <div className="bg-muted/50 border-b p-4">
           <div className="max-w-4xl mx-auto">
             {/* Clickable step indicators */}
             <div className="flex justify-between gap-1 overflow-x-auto scrollbar-hide pb-2">
