@@ -99,16 +99,57 @@ export function useUserProfile(): ProfileData {
     console.log('useUserProfile: Updating profile for', user_type, updates);
 
     try {
-      // Determine which fields go to which tables
-      const profileFields = ['full_name', 'email', 'phone', 'profile_photo_url', 'location', 'bio'];
+      // Fields from trainer_profiles table (as defined in v_trainers view)
+      const trainerProfileFields = [
+        'hourly_rate', 'free_discovery_call', 'calendar_link', 'profile_setup_completed',
+        'max_clients', 'qualifications', 'specializations', 'training_types', 'delivery_format',
+        'ideal_client_types', 'coaching_style', 'communication_style', 'ideal_client_personality',
+        'package_options', 'video_checkins', 'messaging_support', 'weekly_programming_only',
+        'ways_of_working_onboarding', 'ways_of_working_first_week', 'ways_of_working_ongoing',
+        'ways_of_working_tracking', 'ways_of_working_expectations', 'ways_of_working_what_i_bring',
+        'how_started', 'philosophy', 'professional_milestones', 'uploaded_certificates',
+        'testimonials', 'verification_status', 'verification_documents', 'admin_verification_notes',
+        'admin_review_notes', 'is_verified', 'verification_requested_at', 'rating', 'total_ratings',
+        'certifying_body', 'year_certified', 'availability_schedule', 'works_bank_holidays',
+        'document_not_applicable', 'offers_discovery_call', 'discovery_call_price',
+        'client_preferences', 'training_type_delivery'
+      ];
+
+      // Fields from client_profiles table (as defined in v_clients view)
+      const clientProfileFields = [
+        'primary_goals', 'secondary_goals', 'fitness_goals', 'experience_level',
+        'preferred_training_frequency', 'preferred_time_slots', 'start_timeline',
+        'preferred_coaching_style', 'motivation_factors', 'client_personality_type',
+        'training_location_preference', 'open_to_virtual_coaching', 'budget_range_min',
+        'budget_range_max', 'budget_flexibility', 'waitlist_preference', 'flexible_scheduling',
+        'preferred_package_type', 'quiz_completed', 'quiz_answers', 'quiz_completed_at',
+        'client_survey_completed', 'client_survey_completed_at', 'client_status',
+        'client_journey_stage', 'journey_progress', 'fitness_equipment_access',
+        'lifestyle_description', 'lifestyle_other', 'health_conditions', 'has_specific_event',
+        'specific_event_details', 'specific_event_date'
+      ];
+
+      // Fields that don't exist in any table and should be skipped
+      const invalidFields = ['profile_completion_percentage'];
+
       const profileUpdates: any = {};
       const typeSpecificUpdates: any = {};
 
       Object.entries(updates).forEach(([key, value]) => {
-        if (profileFields.includes(key)) {
-          profileUpdates[key] = value;
-        } else {
+        // Skip invalid fields
+        if (invalidFields.includes(key)) {
+          console.warn(`useUserProfile: Skipping invalid field: ${key}`);
+          return;
+        }
+
+        // Route to appropriate table based on user type
+        if (user_type === 'trainer' && trainerProfileFields.includes(key)) {
           typeSpecificUpdates[key] = value;
+        } else if (user_type === 'client' && clientProfileFields.includes(key)) {
+          typeSpecificUpdates[key] = value;
+        } else {
+          // Default to profiles table for all other fields
+          profileUpdates[key] = value;
         }
       });
 
