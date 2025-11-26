@@ -280,56 +280,66 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="outcome_tags">Outcome Tags</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="outcome_tags">Outcome Tags</Label>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button type="button" variant="outline" size="sm">
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add tags
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent 
+                    className="w-56 max-h-64 overflow-y-auto"
+                    onCloseAutoFocus={(e) => e.preventDefault()}
+                  >
+                    {outcomeTags.map((tag) => {
+                      const selected = (newTestimonial.outcomeTags || []).includes(tag);
+                      return (
+                        <DropdownMenuCheckboxItem
+                          key={tag}
+                          checked={selected}
+                          onSelect={(e) => e.preventDefault()}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              const updated = [...(newTestimonial.outcomeTags || []), tag];
+                              setNewTestimonial({ ...newTestimonial, outcomeTags: updated });
+                            } else {
+                              const updated = (newTestimonial.outcomeTags || []).filter(t => t !== tag);
+                              setNewTestimonial({ ...newTestimonial, outcomeTags: updated });
+                            }
+                          }}
+                        >
+                          {tag}
+                        </DropdownMenuCheckboxItem>
+                      );
+                    })}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+              
               <div className="border border-input bg-background rounded-md p-2 min-h-[40px]">
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {(newTestimonial.outcomeTags || []).map((tag) => (
-                    <Badge key={tag} variant="secondary" className="flex items-center gap-1">
-                      {tag}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const updatedTags = (newTestimonial.outcomeTags || []).filter(t => t !== tag);
-                          setNewTestimonial({ ...newTestimonial, outcomeTags: updatedTags });
-                        }}
-                        className="text-xs hover:text-destructive"
-                      >
-                        ×
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-                <div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button type="button" variant="secondary" size="sm">
-                        Add outcome tags
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56">
-                      {outcomeTags.map((tag) => {
-                        const selected = (newTestimonial.outcomeTags || []).includes(tag);
-                        return (
-                          <DropdownMenuCheckboxItem
-                            key={tag}
-                            checked={selected}
-                            onCheckedChange={(checked) => {
-                              if (checked) {
-                                const updated = [...(newTestimonial.outcomeTags || []), tag];
-                                setNewTestimonial({ ...newTestimonial, outcomeTags: updated });
-                              } else {
-                                const updated = (newTestimonial.outcomeTags || []).filter(t => t !== tag);
-                                setNewTestimonial({ ...newTestimonial, outcomeTags: updated });
-                              }
-                            }}
-                          >
-                            {tag}
-                          </DropdownMenuCheckboxItem>
-                        );
-                      })}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
+                {(newTestimonial.outcomeTags || []).length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {(newTestimonial.outcomeTags || []).map((tag) => (
+                      <Badge key={tag} variant="secondary" className="flex items-center gap-1">
+                        {tag}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const updatedTags = (newTestimonial.outcomeTags || []).filter(t => t !== tag);
+                            setNewTestimonial({ ...newTestimonial, outcomeTags: updatedTags });
+                          }}
+                          className="text-xs hover:text-destructive"
+                        >
+                          ×
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No tags selected</p>
+                )}
               </div>
             </div>
           </div>
@@ -374,9 +384,10 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
               <TestimonialAIHelper
                 clientQuote={newTestimonial.clientQuote || ""}
                 outcomeTags={newTestimonial.outcomeTags || []}
-                onSuggestionSelect={(suggestion) => 
-                  setNewTestimonial({ ...newTestimonial, achievement: suggestion })
-                }
+                onSuggestionSelect={(suggestion) => {
+                  setNewTestimonial({ ...newTestimonial, achievement: suggestion });
+                  setAiHelperOpen(false);
+                }}
                 isOpen={aiHelperOpen}
                 autoGenerate={true}
                 onGeneratingChange={setIsAiGenerating}
