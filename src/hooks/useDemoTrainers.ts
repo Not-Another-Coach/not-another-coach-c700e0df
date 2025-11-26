@@ -8,40 +8,6 @@ const FALLBACK_IMAGES = [
   'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400',
 ];
 
-// Demo Instagram posts for gallery display
-const DEMO_INSTAGRAM_POSTS = [
-  {
-    id: 'demo-post-1',
-    media_url: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=400&h=400&fit=crop',
-    media_type: 'IMAGE' as const,
-  },
-  {
-    id: 'demo-post-2',
-    media_url: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop',
-    media_type: 'IMAGE' as const,
-  },
-  {
-    id: 'demo-post-3',
-    media_url: 'https://images.unsplash.com/photo-1526506118085-60ce8714f8c5?w=400&h=400&fit=crop',
-    media_type: 'IMAGE' as const,
-  },
-  {
-    id: 'demo-post-4',
-    media_url: 'https://images.unsplash.com/photo-1623874514711-0f321325f318?w=400&h=400&fit=crop',
-    media_type: 'IMAGE' as const,
-  },
-  {
-    id: 'demo-post-5',
-    media_url: 'https://images.unsplash.com/photo-1434682881908-b43d0467b798?w=400&h=400&fit=crop',
-    media_type: 'IMAGE' as const,
-  },
-  {
-    id: 'demo-post-6',
-    media_url: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=400&h=400&fit=crop',
-    media_type: 'IMAGE' as const,
-  },
-];
-
 export function useDemoTrainers() {
   const [trainers, setTrainers] = useState<Trainer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -84,7 +50,7 @@ export function useDemoTrainers() {
           hourlyRate: trainer.hourly_rate || 0,
           availability: 'Available',
           description: trainer.bio || '',
-          instagram_posts: DEMO_INSTAGRAM_POSTS,
+          instagram_posts: [], // Will be loaded from database via InstagramGalleryView
           testimonials: (trainer as any).testimonials || [],
           trainingTypes: trainer.training_types || [],
           specializations: trainer.specializations || [],
