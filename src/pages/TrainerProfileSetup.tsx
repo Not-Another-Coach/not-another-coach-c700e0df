@@ -33,6 +33,7 @@ import { ProfilePreviewModal } from "@/components/trainer-setup/ProfilePreviewMo
 import { ResponsiveBreadcrumb, BreadcrumbItem } from "@/components/ui/responsive-breadcrumb";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { ProfileLoadingState } from "@/components/ui/profile-loading-state";
+import { AppLogo } from "@/components/ui/app-logo";
 
 // Import form sections
 import { BasicInfoSection } from "@/components/trainer-setup/BasicInfoSection";
@@ -944,7 +945,8 @@ const TrainerProfileSetup = () => {
       {/* Header */}
       <div className="p-4 border-b bg-card">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-          <div className="flex items-center gap-4 min-w-0">
+          <div className="flex items-center gap-3 min-w-0 flex-wrap">
+            <AppLogo size="sm" showText={true} onClick={() => navigate('/')} />
             {trainerAccessEnabled && profile?.profile_setup_completed && (
               <Button
                 variant="ghost"
@@ -953,11 +955,12 @@ const TrainerProfileSetup = () => {
                 className="flex-shrink-0"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Dashboard
+                <span className="hidden sm:inline">Back to Dashboard</span>
+                <span className="sm:hidden">Back</span>
               </Button>
             )}
             <div className="flex items-center gap-2 min-w-0">
-              <h1 className="text-lg sm:text-xl font-bold truncate">
+              <h1 className="text-base sm:text-lg font-bold truncate">
                 {isFullyComplete() ? 'Profile Management' : 'Profile Setup'}
               </h1>
               {/* Verification Badge */}
@@ -997,28 +1000,53 @@ const TrainerProfileSetup = () => {
               })()}
             </div>
           </div>
-          <div className="flex items-center gap-2 justify-end sm:justify-start">
-            <Button variant="outline" size="sm" onClick={() => handleSave()} className="flex-1 sm:flex-none">
-              <Save className="h-4 w-4 mr-2" />
-              <span className="hidden xs:inline">{profile?.profile_setup_completed ? 'Update' : 'Save Draft'}</span>
-              <span className="xs:hidden">Save</span>
-            </Button>
-            <Button variant="outline" size="sm" onClick={handlePreview} className="flex-1 sm:flex-none">
-              <Eye className="h-4 w-4 mr-2" />
-              Preview
-            </Button>
+          <div className="flex items-center gap-2 justify-end sm:justify-start flex-wrap">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="outline" size="sm" onClick={() => handleSave()} className="flex-1 sm:flex-none">
+                    <Save className="h-4 w-4" />
+                    <span className="hidden lg:inline ml-2">{profile?.profile_setup_completed ? 'Update' : 'Save Draft'}</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{profile?.profile_setup_completed ? 'Update Profile' : 'Save Draft'}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="outline" size="sm" onClick={handlePreview} className="flex-1 sm:flex-none">
+                    <Eye className="h-4 w-4" />
+                    <span className="hidden lg:inline ml-2">Preview</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Preview Profile</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <PublishButton profile={profile} />
             {profile?.profile_published && (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => navigate(`/trainer/${profile?.id}?from=profile-setup`)}
-                className="flex-1 sm:flex-none"
-              >
-                <ExternalLink className="h-4 w-4 mr-2" />
-                <span className="hidden xs:inline">View Live</span>
-                <span className="xs:hidden">Live</span>
-              </Button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => navigate(`/trainer/${profile?.id}?from=profile-setup`)}
+                      className="flex-1 sm:flex-none"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      <span className="hidden lg:inline ml-2">View Live</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>View Live Profile</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             )}
             <ProfileDropdown profile={profile ? { 
               ...profile, 
