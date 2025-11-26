@@ -7,6 +7,7 @@ import { useUserTypeChecks } from "@/hooks/useUserType";
 import { useAnonymousSession } from "@/hooks/useAnonymousSession";
 import { useDataMigration } from "@/hooks/useDataMigration";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { AppLogo } from "@/components/ui/app-logo";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { Button } from "@/components/ui/button";
@@ -499,11 +500,24 @@ const ClientSurvey = () => {
           client_survey_completed: true
         });
         
+        // Check platform access before navigating
+        const { data: hasAccess } = await supabase.rpc('can_user_access_platform', {
+          user_id: user.id
+        });
+        
         toast({
           title: "Survey completed!",
-          description: "You can now discover and match with trainers.",
+          description: hasAccess 
+            ? "You can now discover and match with trainers." 
+            : "Your preferences have been saved. We'll notify you when you can start browsing trainers.",
         });
-        navigate('/client/dashboard', { state: { fromSurvey: true } });
+        
+        // Navigate to appropriate page based on access
+        if (hasAccess) {
+          navigate('/client/dashboard', { state: { fromSurvey: true } });
+        } else {
+          navigate('/client/access-pending', { replace: true });
+        }
       }
     } catch (error) {
       console.error('Error in handleNext:', error);

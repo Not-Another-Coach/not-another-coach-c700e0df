@@ -16,7 +16,7 @@ export function PlatformAccessGuard({ children }: PlatformAccessGuardProps) {
 
   useEffect(() => {
     // Skip access check for exempt paths
-    const exemptPaths = ['/profile-setup', '/survey', '/settings', '/access-pending', '/holding'];
+    const exemptPaths = ['/profile-setup', 'survey', '/settings', '/access-pending', '/holding'];
     const isExempt = exemptPaths.some(p => location.pathname.includes(p));
     
     if (isExempt) {
@@ -60,7 +60,7 @@ export function PlatformAccessGuard({ children }: PlatformAccessGuardProps) {
 
   // Allow access to profile setup routes
   const isProfileSetupPath = location.pathname.includes('/profile-setup') || 
-                             location.pathname.includes('/survey') ||
+                             location.pathname.includes('survey') ||
                              location.pathname.includes('/settings');
 
   // Allow access to holding pages
