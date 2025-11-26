@@ -770,7 +770,7 @@ const ClientSurvey = () => {
             <Button 
               onClick={handleNext}
               disabled={isLoading}
-              variant="success"
+                variant="hero"
               size="sm"
               className="sm:size-default"
             >
