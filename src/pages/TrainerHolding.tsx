@@ -1,10 +1,17 @@
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Check } from "lucide-react";
+import { CheckCircle, Check, LogOut } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 export const TrainerHolding = () => {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
 
   return (
     <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">
@@ -52,7 +59,7 @@ export const TrainerHolding = () => {
             </ul>
           </div>
 
-          <div className="pt-4 flex justify-center">
+          <div className="pt-4 flex flex-col sm:flex-row gap-3 justify-center">
             <Button
               onClick={() => navigate("/trainer/profile-setup", { 
                 replace: true,
@@ -61,6 +68,13 @@ export const TrainerHolding = () => {
               className="bg-gradient-primary hover:shadow-primary text-white"
             >
               Edit Profile
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleSignOut}
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign Out
             </Button>
           </div>
         </CardContent>
