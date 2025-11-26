@@ -33,7 +33,7 @@ export function AppLogo({
       <div className={`flex items-center gap-2 ${className}`}>
         <div className={`${sizeClasses[size]} rounded-full bg-muted animate-pulse`} />
         {showText && (
-          <div className="h-6 w-16 bg-muted rounded animate-pulse" />
+          <div className="h-6 w-40 bg-muted rounded animate-pulse" />
         )}
       </div>
     );
