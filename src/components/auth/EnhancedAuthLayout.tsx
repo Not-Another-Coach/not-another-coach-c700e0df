@@ -34,7 +34,7 @@ export const EnhancedAuthLayout: React.FC<EnhancedAuthLayoutProps> = ({ children
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => navigate('/')}
+                  onClick={() => navigate('/', { replace: true })}
                   className="p-2 text-card-foreground/70 hover:text-card-foreground hover:bg-white/10 transition-colors"
                 >
                   <ArrowLeft className="h-4 w-4" />
