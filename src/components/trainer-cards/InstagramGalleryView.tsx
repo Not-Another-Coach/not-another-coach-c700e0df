@@ -258,8 +258,8 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
           {/* Gradient overlay for text readability */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
           
-          {/* Content indicator */}
-          {displayImages.some(img => img.type === 'instagram') && (
+          {/* Content indicator - hidden for demo profiles */}
+          {!isDemoProfile && displayImages.some(img => img.type === 'instagram') && (
             <div className="absolute top-3 left-3">
               <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0">
                 <Instagram className="w-3 h-3 mr-1" />
