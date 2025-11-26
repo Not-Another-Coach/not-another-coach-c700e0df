@@ -15,6 +15,7 @@ import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, ArrowRight, Save, CheckCircle, AlertCircle, Target, MapPin, Calendar, Users, User, Heart, Package, DollarSign, Clock, Loader2 } from "lucide-react";
 
 // Import survey sections
+import { ProfileSection } from "@/components/client-survey/ProfileSection";
 import { GoalsSection } from "@/components/client-survey/GoalsSection";
 import { TrainingLocationSection } from "@/components/client-survey/TrainingLocationSection";
 import { SchedulingSection } from "@/components/client-survey/SchedulingSection";
@@ -49,6 +50,14 @@ const ClientSurvey = () => {
   
 
   const [formData, setFormData] = useState({
+    // Profile information
+    first_name: null as string | null,
+    last_name: null as string | null,
+    profile_photo_url: null as string | null,
+    gender_preference: null as string | null,
+    timezone: null as string | null,
+    phone_number: null as string | null,
+    
     // Goals and preferences
     primary_goals: [] as string[],
     secondary_goals: [] as string[],
@@ -94,14 +103,15 @@ const ClientSurvey = () => {
     client_survey_completed: false,
   });
 
-  const totalSteps = 9;
+  const totalSteps = 10;
 
   const stepTitles = [
+    "Your Profile",
     "Your Goals",
     "Training Location",
     "Training Schedule", 
     "Coaching Style",
-    "About You",
+    "Fitness Personality",
     "Lifestyle & Health",
     "Package Preferences",
     "Budget Range",
@@ -109,11 +119,12 @@ const ClientSurvey = () => {
   ];
 
   const stepIcons = [
+    User,          // Your Profile
     Target,        // Your Goals
     MapPin,        // Training Location  
     Calendar,      // Scheduling Preferences
     Users,         // Coaching Style
-    User,          // About You
+    Heart,         // Fitness Personality (was About You)
     Heart,         // Lifestyle & Health
     Package,       // Package Preferences
     DollarSign,    // Budget Range
@@ -195,6 +206,12 @@ const ClientSurvey = () => {
       console.log('⚡ Fast-path initialization (edit mode)', cachedProfile ? 'with cached profile' : 'with loaded profile');
       
       const initialData = {
+        first_name: (profileData as any).first_name || null,
+        last_name: (profileData as any).last_name || null,
+        profile_photo_url: (profileData as any).profile_photo_url || null,
+        gender_preference: (profileData as any).gender_preference || null,
+        timezone: (profileData as any).timezone || null,
+        phone_number: (profileData as any).phone_number || null,
         primary_goals: profileData.primary_goals || [],
         secondary_goals: profileData.secondary_goals || [],
         training_location_preference: profileData.training_location_preference || null,
@@ -241,6 +258,12 @@ const ClientSurvey = () => {
         
         // Start with profile data - use comprehensive mapping
         const initialData = {
+          first_name: (profile as any).first_name || null,
+          last_name: (profile as any).last_name || null,
+          profile_photo_url: (profile as any).profile_photo_url || null,
+          gender_preference: (profile as any).gender_preference || null,
+          timezone: (profile as any).timezone || null,
+          phone_number: (profile as any).phone_number || null,
           primary_goals: profile.primary_goals || [],
           secondary_goals: profile.secondary_goals || [],
           training_location_preference: profile.training_location_preference || null,
@@ -297,17 +320,25 @@ const ClientSurvey = () => {
     const newErrors: Record<string, string> = {};
     
     switch (currentStep) {
-      case 1: // Goals
+      case 1: // Profile
+        if (!formData.first_name || formData.first_name.trim() === "") {
+          newErrors.first_name = "First name is required";
+        }
+        if (!formData.last_name || formData.last_name.trim() === "") {
+          newErrors.last_name = "Last name is required";
+        }
+        break;
+      case 2: // Goals
         if (!formData.primary_goals || formData.primary_goals.length === 0) {
           newErrors.primary_goals = "Please select at least one primary goal";
         }
         break;
-      case 2: // Training Location
+      case 3: // Training Location
         if (!formData.training_location_preference) {
           newErrors.training_location_preference = "Please select your preferred training location";
         }
         break;
-      case 3: // Scheduling
+      case 4: // Scheduling
         if (!formData.preferred_training_frequency) {
           newErrors.preferred_training_frequency = "Please select how often you want to train";
         }
@@ -315,17 +346,17 @@ const ClientSurvey = () => {
           newErrors.preferred_time_slots = "Please select when you're usually available";
         }
         break;
-      case 4: // Coaching Style
+      case 5: // Coaching Style
         if (!formData.preferred_coaching_style || formData.preferred_coaching_style.length === 0) {
           newErrors.preferred_coaching_style = "Please select at least one coaching style preference";
         }
         break;
-      case 5: // About You
+      case 6: // Fitness Personality
         if (!formData.client_personality_type || formData.client_personality_type.length === 0) {
           newErrors.client_personality_type = "Please select at least one that describes you";
         }
         break;
-      case 6: // Lifestyle & Health
+      case 7: // Lifestyle & Health
         if (!formData.location || formData.location.trim() === "") {
           newErrors.location = "Please tell us where you're based";
         }
@@ -339,18 +370,18 @@ const ClientSurvey = () => {
           newErrors.has_specific_event = "Please let us know about any specific events or dates";
         }
         break;
-      case 7: // Package Preferences
+      case 8: // Package Preferences
         if (!formData.preferred_package_type) {
           newErrors.preferred_package_type = "Please select your package preference";
         }
         break;
-      case 8: // Budget
+      case 9: // Budget
         // Budget is now mandatory - either quick range or custom range required
         if (!formData.budget_range_min && !formData.budget_range_max) {
           newErrors.budget_range = "Please select a budget range or set custom min/max values";
         }
         break;
-      case 9: // Availability
+      case 10: // Availability
         if (formData.waitlist_preference === null) {
           newErrors.waitlist_preference = "Please select how you'd prefer to handle trainer availability";
         }
@@ -363,19 +394,23 @@ const ClientSurvey = () => {
 
   const getStepCompletion = (step: number): 'completed' | 'partial' | 'not_started' => {
     switch (step) {
-      case 1:
+      case 1: // Profile
+        const hasFirstName = formData.first_name && formData.first_name.trim() !== "";
+        const hasLastName = formData.last_name && formData.last_name.trim() !== "";
+        return hasFirstName && hasLastName ? 'completed' : (hasFirstName || hasLastName ? 'partial' : 'not_started');
+      case 2: // Goals
         return formData.primary_goals?.length > 0 ? 'completed' : 'not_started';
-      case 2:
+      case 3: // Training Location
         return formData.training_location_preference ? 'completed' : 'not_started';
-      case 3:
+      case 4: // Scheduling
         const hasFrequency = formData.preferred_training_frequency;
         const hasTimeSlots = formData.preferred_time_slots?.length > 0;
         return hasFrequency && hasTimeSlots ? 'completed' : (hasFrequency || hasTimeSlots ? 'partial' : 'not_started');
-      case 4:
+      case 5: // Coaching Style
         return formData.preferred_coaching_style?.length > 0 ? 'completed' : 'not_started';
-      case 5:
+      case 6: // Fitness Personality
         return formData.client_personality_type?.length > 0 ? 'completed' : 'not_started';
-      case 6: // Lifestyle & Health
+      case 7: // Lifestyle & Health
         const hasLocation = formData.location && formData.location.trim() !== "";
         const hasEquipment = formData.fitness_equipment_access && formData.fitness_equipment_access.length > 0;
         const hasLifestyle = formData.lifestyle_description?.length > 0;
@@ -385,12 +420,12 @@ const ClientSurvey = () => {
         if (lifestyleCompletedFields === 4) return 'completed';
         if (lifestyleCompletedFields > 0) return 'partial';
         return 'not_started';
-      case 7:
+      case 8: // Package Preferences
         return formData.preferred_package_type ? 'completed' : 'not_started';
-      case 8:
+      case 9: // Budget
         // Budget is mandatory - either min or max must be set
         return (formData.budget_range_min || formData.budget_range_max) ? 'completed' : 'not_started';
-      case 9:
+      case 10: // Availability
         return formData.waitlist_preference !== null ? 'completed' : 'not_started';
       default:
         return 'not_started';
@@ -527,22 +562,24 @@ const ClientSurvey = () => {
 
     switch (currentStep) {
       case 1:
-        return <GoalsSection {...commonProps} />;
+        return <ProfileSection {...commonProps} />;
       case 2:
-        return <TrainingLocationSection {...commonProps} />;
+        return <GoalsSection {...commonProps} />;
       case 3:
-        return <SchedulingSection {...commonProps} />;
+        return <TrainingLocationSection {...commonProps} />;
       case 4:
-        return <CoachingStyleSection {...commonProps} />;
+        return <SchedulingSection {...commonProps} />;
       case 5:
-        return <PersonalitySection {...commonProps} />;
+        return <CoachingStyleSection {...commonProps} />;
       case 6:
-        return <LifestyleHealthSection {...commonProps} />;
+        return <PersonalitySection {...commonProps} />;
       case 7:
-        return <PackagePreferencesSection {...commonProps} />;
+        return <LifestyleHealthSection {...commonProps} />;
       case 8:
-        return <BudgetSection {...commonProps} />;
+        return <PackagePreferencesSection {...commonProps} />;
       case 9:
+        return <BudgetSection {...commonProps} />;
+      case 10:
         return <AvailabilitySection {...commonProps} />;
       default:
         return null;

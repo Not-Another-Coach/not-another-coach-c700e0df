@@ -4385,6 +4385,7 @@ export type Database = {
           flexible_scheduling: boolean | null
           force_password_reset: boolean | null
           free_discovery_call: boolean | null
+          gender_preference: string | null
           hourly_rate: number | null
           id: string
           ideal_client_age_range: string | null
@@ -4413,6 +4414,7 @@ export type Database = {
           open_to_virtual_coaching: boolean | null
           package_inclusions: Json | null
           package_options: Json | null
+          phone_number: string | null
           preferred_coaching_style: string[] | null
           preferred_package_type: string | null
           preferred_time_slots: string[] | null
@@ -4441,6 +4443,7 @@ export type Database = {
           terms_agreed: boolean | null
           terms_version: string | null
           testimonials: Json | null
+          timezone: string | null
           total_client_survey_steps: number | null
           total_onboarding_steps: number | null
           total_profile_setup_steps: number | null
@@ -4513,6 +4516,7 @@ export type Database = {
           flexible_scheduling?: boolean | null
           force_password_reset?: boolean | null
           free_discovery_call?: boolean | null
+          gender_preference?: string | null
           hourly_rate?: number | null
           id: string
           ideal_client_age_range?: string | null
@@ -4541,6 +4545,7 @@ export type Database = {
           open_to_virtual_coaching?: boolean | null
           package_inclusions?: Json | null
           package_options?: Json | null
+          phone_number?: string | null
           preferred_coaching_style?: string[] | null
           preferred_package_type?: string | null
           preferred_time_slots?: string[] | null
@@ -4569,6 +4574,7 @@ export type Database = {
           terms_agreed?: boolean | null
           terms_version?: string | null
           testimonials?: Json | null
+          timezone?: string | null
           total_client_survey_steps?: number | null
           total_onboarding_steps?: number | null
           total_profile_setup_steps?: number | null
@@ -4641,6 +4647,7 @@ export type Database = {
           flexible_scheduling?: boolean | null
           force_password_reset?: boolean | null
           free_discovery_call?: boolean | null
+          gender_preference?: string | null
           hourly_rate?: number | null
           id?: string
           ideal_client_age_range?: string | null
@@ -4669,6 +4676,7 @@ export type Database = {
           open_to_virtual_coaching?: boolean | null
           package_inclusions?: Json | null
           package_options?: Json | null
+          phone_number?: string | null
           preferred_coaching_style?: string[] | null
           preferred_package_type?: string | null
           preferred_time_slots?: string[] | null
@@ -4697,6 +4705,7 @@ export type Database = {
           terms_agreed?: boolean | null
           terms_version?: string | null
           testimonials?: Json | null
+          timezone?: string | null
           total_client_survey_steps?: number | null
           total_onboarding_steps?: number | null
           total_profile_setup_steps?: number | null
