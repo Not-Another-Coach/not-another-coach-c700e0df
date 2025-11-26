@@ -130,6 +130,36 @@ export default {
 					900: 'hsl(var(--energy-900))'
 				},
 				
+				purple: {
+					DEFAULT: 'hsl(var(--purple))',
+					foreground: 'hsl(var(--purple-foreground))',
+					50: 'hsl(var(--purple-50))',
+					100: 'hsl(var(--purple-100))',
+					200: 'hsl(var(--purple-200))',
+					300: 'hsl(var(--purple-300))',
+					400: 'hsl(var(--purple-400))',
+					500: 'hsl(var(--purple-500))',
+					600: 'hsl(var(--purple-600))',
+					700: 'hsl(var(--purple-700))',
+					800: 'hsl(var(--purple-800))',
+					900: 'hsl(var(--purple-900))'
+				},
+				
+				indigo: {
+					DEFAULT: 'hsl(var(--indigo))',
+					foreground: 'hsl(var(--indigo-foreground))',
+					50: 'hsl(var(--indigo-50))',
+					100: 'hsl(var(--indigo-100))',
+					200: 'hsl(var(--indigo-200))',
+					300: 'hsl(var(--indigo-300))',
+					400: 'hsl(var(--indigo-400))',
+					500: 'hsl(var(--indigo-500))',
+					600: 'hsl(var(--indigo-600))',
+					700: 'hsl(var(--indigo-700))',
+					800: 'hsl(var(--indigo-800))',
+					900: 'hsl(var(--indigo-900))'
+				},
+				
 				gray: {
 					50: 'hsl(var(--gray-50))',
 					100: 'hsl(var(--gray-100))',
@@ -262,7 +292,8 @@ export default {
         'gradient-card': 'var(--gradient-card)',
         'gradient-accent': 'var(--gradient-accent)',
         'gradient-success': 'var(--gradient-success)',
-        'gradient-glass': 'var(--gradient-glass)'
+        'gradient-glass': 'var(--gradient-glass)',
+        'gradient-ai': 'var(--gradient-ai)'
       },
       keyframes: {
         'accordion-down': {

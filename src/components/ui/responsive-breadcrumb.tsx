@@ -117,16 +117,14 @@ export const ResponsiveBreadcrumb: React.FC<ResponsiveBreadcrumbProps> = ({
         </div>
       ) : null}
 
-      {/* Desktop Horizontal Layout */}
+      {/* Desktop Horizontal Scrollable Layout */}
       <div 
-        className="hidden sm:block w-full overflow-visible"
+        className="hidden sm:block w-full overflow-x-auto scrollbar-thin"
         style={{
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none',
           WebkitOverflowScrolling: 'touch',
         }}
       >
-        <div className="flex gap-1 sm:gap-2 lg:gap-3 flex-wrap justify-center px-2 pb-2">
+        <div className="flex gap-1 sm:gap-2 lg:gap-3 px-2 pb-2 min-w-max mx-auto justify-center">
           {children}
         </div>
       </div>

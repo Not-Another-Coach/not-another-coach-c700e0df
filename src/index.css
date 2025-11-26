@@ -168,6 +168,34 @@ All colors MUST be HSL.
     --energy-800: 190 75% 20%;
     --energy-900: 190 75% 10%;
 
+    /* AI/Purple color system */
+    --purple: 270 70% 60%;
+    --purple-foreground: 0 0% 100%;
+    --purple-50: 270 70% 97%;
+    --purple-100: 270 70% 94%;
+    --purple-200: 270 70% 88%;
+    --purple-300: 270 70% 80%;
+    --purple-400: 270 70% 70%;
+    --purple-500: 270 70% 60%;
+    --purple-600: 270 70% 50%;
+    --purple-700: 270 70% 40%;
+    --purple-800: 270 70% 30%;
+    --purple-900: 270 70% 20%;
+
+    /* Indigo color system */
+    --indigo: 240 75% 60%;
+    --indigo-foreground: 0 0% 100%;
+    --indigo-50: 240 75% 97%;
+    --indigo-100: 240 75% 94%;
+    --indigo-200: 240 75% 88%;
+    --indigo-300: 240 75% 80%;
+    --indigo-400: 240 75% 70%;
+    --indigo-500: 240 75% 60%;
+    --indigo-600: 240 75% 50%;
+    --indigo-700: 240 75% 40%;
+    --indigo-800: 240 75% 30%;
+    --indigo-900: 240 75% 20%;
+
     /* Neutral grays */
     --muted: 210 25% 92%;
     --muted-foreground: 215 15% 50%;
@@ -196,6 +224,7 @@ All colors MUST be HSL.
     --gradient-accent: linear-gradient(135deg, hsl(25, 85%, 60%), hsl(45, 95%, 55%));
     --gradient-success: linear-gradient(135deg, hsl(145, 65%, 45%), hsl(170, 70%, 50%));
     --gradient-glass: linear-gradient(135deg, hsl(0, 0%, 100% / 0.1), hsl(0, 0%, 100% / 0.05));
+    --gradient-ai: linear-gradient(135deg, hsl(270, 70%, 60%), hsl(240, 75%, 60%));
 
     /* Enhanced shadows & elevation */
     --shadow-xs: 0 1px 2px 0 hsl(210 60% 25% / 0.05);
