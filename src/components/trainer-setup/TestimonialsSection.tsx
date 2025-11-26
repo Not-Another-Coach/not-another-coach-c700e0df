@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
-import { Upload, Plus, Trash2, Image, Quote, Star, Edit, X, Check, Save } from "lucide-react";
+import { Upload, Plus, Trash2, Image, Quote, Star, Edit, X, Check, Save, Sparkles, RefreshCw } from "lucide-react";
 import { EnhancedImageUpload } from "./EnhancedImageUpload";
 import { SectionHeader } from './SectionHeader';
 import { TestimonialAIHelper } from './TestimonialAIHelper';
@@ -67,6 +67,10 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
   // Modal state for editing
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
+  
+  // AI Helper state
+  const [aiHelperOpen, setAiHelperOpen] = useState(false);
+  const [isAiGenerating, setIsAiGenerating] = useState(false);
 
   // Sync testimonials from parent formData changes
   useEffect(() => {
@@ -343,16 +347,41 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
           </div>
 
           {/* AI Helper for Achievement */}
-          <TestimonialAIHelper
-            clientQuote={newTestimonial.clientQuote || ""}
-            outcomeTags={newTestimonial.outcomeTags || []}
-            onSuggestionSelect={(suggestion) => 
-              setNewTestimonial({ ...newTestimonial, achievement: suggestion })
-            }
-          />
+          {aiHelperOpen && (
+            <TestimonialAIHelper
+              clientQuote={newTestimonial.clientQuote || ""}
+              outcomeTags={newTestimonial.outcomeTags || []}
+              onSuggestionSelect={(suggestion) => 
+                setNewTestimonial({ ...newTestimonial, achievement: suggestion })
+              }
+              isOpen={aiHelperOpen}
+              autoGenerate={true}
+              onGeneratingChange={setIsAiGenerating}
+            />
+          )}
           
           <div className="space-y-2">
-            <Label htmlFor="achievement">What did this client achieve? *</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="achievement">What did this client achieve? *</Label>
+              <Button
+                variant="ai"
+                size="sm"
+                onClick={() => setAiHelperOpen(!aiHelperOpen)}
+                disabled={isAiGenerating || (!newTestimonial.clientQuote?.trim() && !newTestimonial.outcomeTags?.length)}
+              >
+                {isAiGenerating ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    AI Helper
+                  </>
+                )}
+              </Button>
+            </div>
             <Input
               id="achievement"
               value={newTestimonial.achievement || ""}

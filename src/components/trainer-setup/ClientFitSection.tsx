@@ -238,7 +238,7 @@ export function ClientFitSection({ formData, updateFormData }: ClientFitSectionP
         <div className="flex items-center justify-between">
           <Label htmlFor="ideal_client_personality">Describe Your Ideal Client (Optional)</Label>
           <Button
-            variant="outline"
+            variant="ai"
             size="sm"
             onClick={() => setShowAIHelper(!showAIHelper)}
           >

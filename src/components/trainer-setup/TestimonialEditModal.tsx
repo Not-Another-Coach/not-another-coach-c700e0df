@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Check, Save, X } from "lucide-react";
+import { Check, Save, X, Sparkles, RefreshCw } from "lucide-react";
 import { EnhancedImageUpload } from "./EnhancedImageUpload";
 import { TestimonialAIHelper } from './TestimonialAIHelper';
 import { toast } from "@/hooks/use-toast";
@@ -61,6 +61,10 @@ export function TestimonialEditModal({ testimonial, isOpen, onClose, onSave }: T
     consentGiven: false,
     showImages: false
   });
+  
+  // AI Helper state
+  const [aiHelperOpen, setAiHelperOpen] = useState(false);
+  const [isAiGenerating, setIsAiGenerating] = useState(false);
 
   // Update form data when testimonial prop changes
   useEffect(() => {
@@ -196,16 +200,41 @@ export function TestimonialEditModal({ testimonial, isOpen, onClose, onSave }: T
           </div>
 
           {/* AI Helper for Achievement */}
-          <TestimonialAIHelper
-            clientQuote={editData.clientQuote || ""}
-            outcomeTags={editData.outcomeTags || []}
-            onSuggestionSelect={(suggestion) => 
-              setEditData({ ...editData, achievement: suggestion })
-            }
-          />
+          {aiHelperOpen && (
+            <TestimonialAIHelper
+              clientQuote={editData.clientQuote || ""}
+              outcomeTags={editData.outcomeTags || []}
+              onSuggestionSelect={(suggestion) => 
+                setEditData({ ...editData, achievement: suggestion })
+              }
+              isOpen={aiHelperOpen}
+              autoGenerate={true}
+              onGeneratingChange={setIsAiGenerating}
+            />
+          )}
           
           <div className="space-y-2">
-            <Label htmlFor="edit_achievement">What did this client achieve? *</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="edit_achievement">What did this client achieve? *</Label>
+              <Button
+                variant="ai"
+                size="sm"
+                onClick={() => setAiHelperOpen(!aiHelperOpen)}
+                disabled={isAiGenerating || (!editData.clientQuote?.trim() && !editData.outcomeTags?.length)}
+              >
+                {isAiGenerating ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    AI Helper
+                  </>
+                )}
+              </Button>
+            </div>
             <Input
               id="edit_achievement"
               value={editData.achievement || ""}
