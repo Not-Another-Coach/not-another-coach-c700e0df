@@ -82,10 +82,20 @@ export default function Auth() {
   // Check if this is a password recovery URL or signup URL
   useEffect(() => {
     const type = searchParams.get('type');
+    const mode = searchParams.get('mode');
+    const accessToken = searchParams.get('access_token');
     const signup = searchParams.get('signup');
     const intent = searchParams.get('intent');
     
-    if (type === 'recovery') {
+    if (type === 'recovery' || (mode === 'reset' && accessToken)) {
+      // Set the session with the access token for password reset
+      if (accessToken) {
+        supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: '' // Not needed for password reset
+        });
+      }
+      
       setShowPasswordReset(true);
       setShowForgotPassword(false);
       toast({

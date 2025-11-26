@@ -26,6 +26,7 @@ export default function AuthCallback() {
         // Parse the fragment parameters
         const params = new URLSearchParams(hashFragment);
         const type = params.get('type');
+        const accessToken = params.get('access_token');
 
         if (type === 'signup') {
           // Email is already confirmed by Supabase when they clicked the link
@@ -36,6 +37,12 @@ export default function AuthCallback() {
           
           // Redirect to auth page (login tab)
           navigate('/auth', { replace: true });
+          return;
+        }
+
+        if (type === 'recovery' && accessToken) {
+          // Password reset - redirect to auth page with reset mode
+          navigate(`/auth?mode=reset&access_token=${accessToken}`, { replace: true });
           return;
         }
       }
