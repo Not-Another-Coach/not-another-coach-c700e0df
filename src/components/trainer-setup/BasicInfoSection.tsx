@@ -475,7 +475,7 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
               Add key achievements and career milestones that showcase your professional journey
             </p>
           </div>
-          <Button variant="outline" size="sm" onClick={addMilestone}>
+          <Button variant="secondary" size="sm" onClick={addMilestone}>
             <Plus className="h-4 w-4 mr-2" />
             Add Milestone
           </Button>
@@ -553,7 +553,7 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
               <p className="text-sm text-muted-foreground mb-3">
                 No milestones added yet. Share your professional achievements to build credibility.
               </p>
-              <Button variant="outline" size="sm" onClick={addMilestone}>
+              <Button variant="secondary" size="sm" onClick={addMilestone}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add First Milestone
               </Button>

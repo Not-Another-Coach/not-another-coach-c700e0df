@@ -394,7 +394,7 @@ export const QualificationsSection: React.FC<QualificationsSectionProps> = ({
             <div className="flex justify-center">
               <Dialog open={requestDialogOpen} onOpenChange={setRequestDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" size="sm" className="text-sm">
+                  <Button variant="secondary" size="sm" className="text-sm">
                     <Send className="w-4 h-4 mr-2" />
                     Request New Qualification
                   </Button>

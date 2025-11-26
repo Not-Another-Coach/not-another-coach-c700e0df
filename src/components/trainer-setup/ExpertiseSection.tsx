@@ -225,7 +225,7 @@ export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionP
               </div>
               <Dialog open={showCustomSpecialtyDialog} onOpenChange={setShowCustomSpecialtyDialog}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" size="sm">
+                  <Button variant="secondary" size="sm">
                     <Plus className="w-4 h-4 mr-2" />
                     Request New
                   </Button>

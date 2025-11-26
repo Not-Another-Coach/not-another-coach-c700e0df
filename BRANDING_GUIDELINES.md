@@ -10,8 +10,8 @@
 | **success** | Completion actions | Solid green with white text | "Publish", "Save Profile", "Submit", "Complete" |
 | **ai** | AI-powered features | Purple gradient (purple → indigo) | "Improve", "AI Helper", AI generation buttons |
 | **default** | Standard actions | Solid primary color | General form submissions, confirmations |
-| **secondary** | Preview/secondary actions | Muted background | "Preview", "Cancel", secondary options |
-| **outline** | Back navigation | Bordered with transparent background | "Previous", "Back", non-primary navigation |
+| **secondary** | Additive/creation actions | Muted background | "Add Milestone", "Request New", "Preview", secondary options |
+| **outline** | Utility/file actions | Bordered with transparent background | "Upload Cert", "Select Images", "Browse Files", "Previous", "Back" |
 | **ghost** | Subtle actions | No background, text only | Inline actions, menu items |
 | **link** | Text links | Underlined text style | Navigation links, "Learn more" |
 | **destructive** | Dangerous actions | Red with white text | "Delete", "Remove", permanent actions |
@@ -22,8 +22,8 @@
 ```
 Level 1 (Highest): hero, success
 Level 2: default, ai
-Level 3: secondary, energy
-Level 4: outline, ghost, link
+Level 3: secondary (Preview, Add, Request, Create)
+Level 4: outline (Upload, Select, Browse, Previous), ghost, link
 Level 5 (Destructive): destructive
 ```
 
@@ -40,6 +40,26 @@ Level 5 (Destructive): destructive
 // AI features
 <Button variant="ai">Improve</Button>
 <Button variant="ai">AI Helper</Button>
+
+// Additive/creation actions
+<Button variant="secondary">
+  <Plus className="w-4 h-4 mr-2" />
+  Add Milestone
+</Button>
+<Button variant="secondary">
+  <Send className="w-4 h-4 mr-2" />
+  Request New Qualification
+</Button>
+
+// File/upload actions
+<Button variant="outline">
+  <Upload className="w-4 h-4 mr-2" />
+  Upload Cert
+</Button>
+<Button variant="outline">
+  <Upload className="w-4 h-4 mr-2" />
+  Select Images
+</Button>
 
 // Back navigation
 <Button variant="outline">Previous</Button>
@@ -392,8 +412,10 @@ When creating new components:
 Is it the main forward action? → `hero`
 Is it a completion/publish action? → `success`
 Is it an AI feature? → `ai`
+Is it adding/requesting new content? → `secondary`
+Is it uploading/selecting files? → `outline`
 Is it going back/canceling? → `outline`
-Is it a preview/secondary option? → `secondary`
+Is it a preview option? → `secondary`
 Is it a dangerous action? → `destructive`
 Is it a subtle inline action? → `ghost` or `link`
 Otherwise → `default`
