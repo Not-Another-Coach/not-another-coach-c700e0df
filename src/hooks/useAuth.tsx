@@ -70,13 +70,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('savedCredentials');
     localStorage.removeItem('rememberMe');
     
-    // Redirect IMMEDIATELY - before any state changes cause re-renders
+    // Sign out from Supabase FIRST to ensure session is cleared
+    const response = await AuthService.signOut();
+    
+    // Then redirect after sign out completes
     window.location.href = '/auth';
     
-    // Sign out from Supabase (executes but user is already navigating away)
-    await AuthService.signOut();
-    
-    return { error: null };
+    return { error: response.error || null };
   };
 
   const resendConfirmation = async (email: string) => {

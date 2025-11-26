@@ -40,14 +40,20 @@ export default function Home() {
     document.title = "Home - Find Your Perfect Coach";
   }, []);
 
-  // Minimum load time timer - increased for smoother UX
+  // Minimum load time timer - only for authenticated users
   useEffect(() => {
+    // Skip timer if no user (e.g., after sign out)
+    if (!user) {
+      setMinLoadTimeElapsed(true);
+      return;
+    }
+    
     const timer = setTimeout(() => {
       setMinLoadTimeElapsed(true);
     }, 600);
     
     return () => clearTimeout(timer);
-  }, []);
+  }, [user]);
 
   // Track if we've started loading for authenticated user
   useEffect(() => {
