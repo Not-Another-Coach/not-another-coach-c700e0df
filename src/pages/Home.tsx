@@ -32,6 +32,7 @@ export default function Home() {
   
   const [showQuizModal, setShowQuizModal] = useState(false);
   const [isCheckingRedirect, setIsCheckingRedirect] = useState(true);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const [minLoadTimeElapsed, setMinLoadTimeElapsed] = useState(false);
 
   // Initialize data migration hook
@@ -103,6 +104,7 @@ export default function Home() {
         
         if (isProfileComplete) {
           // Check platform access before redirecting to dashboard
+          setIsRedirecting(true);
           const checkAccessAndRedirect = async () => {
             const { data: hasAccess } = await supabase.rpc('can_user_access_platform', {
               user_id: user.id
@@ -118,18 +120,24 @@ export default function Home() {
           };
 
           checkAccessAndRedirect();
+          return;
         } else {
           console.log('📝 Home - Trainer profile incomplete, redirecting to setup');
+          setIsRedirecting(true);
           navigate('/trainer/profile-setup', { replace: true });
+          return;
         }
       } else {
         console.log('📝 Home - No trainer profile, redirecting to setup');
+        setIsRedirecting(true);
         navigate('/trainer/profile-setup', { replace: true });
+        return;
       }
     } else if (currentUserType === 'client') {
       // Check if client has completed survey OR has progressed beyond survey stage
       if (profile && 'client_survey_completed' in profile) {
         // Check engagement data to see if client has progressed beyond survey
+        setIsRedirecting(true);
         const checkEngagementAndRedirect = async () => {
           const { data: engagements } = await supabase
             .from('client_trainer_engagement')
@@ -157,19 +165,22 @@ export default function Home() {
         };
 
         checkEngagementAndRedirect();
+        return;
       } else {
         console.log('📝 Home - No client profile data, redirecting to survey');
+        setIsRedirecting(true);
         navigate('/client-survey', { replace: true });
+        return;
       }
     } else if (currentUserType === 'admin') {
       console.log('🔄 Home - Admin user, redirecting to admin');
+      setIsRedirecting(true);
       navigate('/admin', { replace: true });
+      return;
     }
 
-    // Set isCheckingRedirect to false after a small delay to ensure state settles
-    if (!loading && !profileLoading && !userTypeLoading && !isLoggingOut && !isMigrating) {
-      setTimeout(() => setIsCheckingRedirect(false), 100);
-    }
+    // Only set isCheckingRedirect to false if NO redirect is happening
+    setIsCheckingRedirect(false);
   }, [user, loading, profileLoading, userTypeLoading, isLoggingOut, isMigrating, userType, user_type, profile, navigate]);
 
   const handleQuizComplete = (results: any) => {
@@ -200,6 +211,7 @@ export default function Home() {
     (user && (profileLoading || userTypeLoading)) || 
     isMigrating || 
     isCheckingRedirect ||
+    isRedirecting ||
     (user && !minLoadTimeElapsed); // Only apply min load time for authenticated users
 
   if (shouldShowLoading) {
