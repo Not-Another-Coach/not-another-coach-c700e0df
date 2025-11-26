@@ -211,6 +211,105 @@ const createConfirmationEmailHTML = (
 </html>`;
 };
 
+// Create password reset email HTML with enhanced branding
+const createPasswordResetEmailHTML = (
+  token_hash: string,
+  site_url: string,
+  redirect_to: string,
+  firstName?: string,
+  logoSettings?: any
+) => {
+  const displayName = firstName || 'there';
+  const appName = logoSettings?.app_name || 'Not Another Coach';
+  const resetUrl = `${site_url}/auth/v1/verify?token=${token_hash}&type=recovery&redirect_to=${redirect_to}`;
+  
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="x-apple-disable-message-reformatting">
+    <title>Reset Your Password - ${appName}</title>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            .bg { background: #0c1523 !important; }
+            .card { background: #101a2b !important; border-color: #2a3754 !important; }
+            .text, .muted, .h1 { color: #f3f6fb !important; }
+            .btn { background: #2a74c0 !important; }
+            .rule { border-color: #2a3754 !important; }
+        }
+        a { text-decoration: none; }
+    </style>
+</head>
+<body style="margin:0;padding:0;background:#f6f8fb;">
+<center style="width:100%;background:#f6f8fb;">
+    <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">
+        Reset your password to regain access to your account
+    </div>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="bg" style="background:#f6f8fb;">
+        <tr><td align="center" style="padding:32px 16px;">
+            <table role="presentation" width="600" style="max-width:600px;width:100%;">
+                <!-- Logo -->
+                <tr>
+                    <td align="center" style="padding:0 8px 24px;">
+                        ${logoSettings?.logo_url ? 
+                            `<img src="${logoSettings.logo_url}" width="180" height="auto" alt="${appName}" style="display:block;border:0;max-width:180px;">` : 
+                            `<div style="font:700 32px/1 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#113a5d;">${appName}</div>`
+                        }
+                    </td>
+                </tr>
+                <!-- Card -->
+                <tr>
+                    <td class="card" style="background:#ffffff;border:1px solid #e7ecf5;border-radius:14px;padding:32px;">
+                        <h1 class="h1" style="margin:0 0 8px;font:700 28px/1.25 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#0d1b2a;text-align:center;">
+                            Reset Your Password 🔐
+                        </h1>
+                        <p class="text" style="margin:0 0 24px;font:16px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#1c2b3a;text-align:center;">
+                            Hi ${displayName}, we received a request to reset your password. Click the button below to create a new password.
+                        </p>
+                        
+                        <!-- CTA Button -->
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
+                            <tr><td align="center">
+                                <table role="presentation" cellpadding="0" cellspacing="0">
+                                    <tr><td class="btn" style="background:#113a5d;border-radius:10px;">
+                                        <a href="${resetUrl}" target="_blank"
+                                           style="display:inline-block;padding:16px 32px;font:600 16px -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#ffffff;background:#113a5d;border-radius:10px;text-decoration:none;">
+                                            🔑 Reset My Password
+                                        </a>
+                                    </td></tr>
+                                </table>
+                            </td></tr>
+                        </table>
+                        
+                        <!-- Security Note -->
+                        <div style="background:#fff8e6;border:1px solid #ffd791;border-radius:8px;padding:16px;margin:0 0 20px;">
+                            <p class="muted" style="margin:0;font:14px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#7d5a00;">
+                                <strong>🛡️ Security Notice:</strong> This link expires soon for your protection. If you didn't request a password reset, you can safely ignore this email - your account remains secure.
+                            </p>
+                        </div>
+                        
+                        <hr class="rule" style="border:none;border-top:1px solid #e7ecf5;margin:20px 0 16px">
+                        <p class="muted" style="margin:0;font:12px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#8a95a6;text-align:center;">
+                            Need help? <a href="mailto:support@notanother.coach" style="color:#113a5d;">Contact support</a> • We're here for you
+                        </p>
+                    </td>
+                </tr>
+                
+                <!-- Footer -->
+                <tr><td align="center" style="padding:20px 8px;">
+                    <p class="muted" style="margin:0;font:12px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#8a95a6;">
+                        © ${new Date().getFullYear()} ${appName} • Where fitness gets personal
+                    </p>
+                </td></tr>
+            </table>
+        </td></tr>
+    </table>
+</center>
+</body>
+</html>`;
+};
+
 const createWelcomeEmailHTML = (firstName?: string, userType?: string) => `
 <!DOCTYPE html>
 <html>
@@ -398,8 +497,64 @@ serve(async (req: Request): Promise<Response> => {
         actionType: email_action_type,
         isRepeatedSignup: email_action_type === 'user_repeated_signup'
       });
+    } 
+    // Handle password reset emails
+    else if (email_action_type === 'recovery') {
+      console.log('🔐 Sending password reset email for:', user.email);
+      console.log('Using from address:', fromEmail);
+      
+      // Fetch logo settings
+      const logoSettings = await fetchAppLogo();
+      const appName = logoSettings?.app_name || 'Not Another Coach';
+      
+      // Send password reset email with retry logic
+      const resetResult = await retryResendCall(() =>
+        resend.emails.send({
+          from: fromEmail,
+          to: [user.email],
+          subject: `🔐 Reset your ${appName} password`,
+          html: createPasswordResetEmailHTML(
+            token_hash,
+            Deno.env.get('SUPABASE_URL') || '',
+            redirect_to,
+            firstName,
+            logoSettings
+          ),
+        })
+      );
+
+      if (resetResult.error) {
+        const e = resetResult.error;
+        
+        // Enhanced error logging
+        console.error('Resend API error details:', {
+          message: e?.message,
+          name: e?.name,
+          code: e?.code,
+          status: e?.status,
+          response: e?.response,
+          fullError: JSON.stringify(e, Object.getOwnPropertyNames(e))
+        });
+        
+        const errorParts = [
+          e?.message,
+          e?.name,
+          e?.code && `Code: ${e.code}`,
+          e?.status && `Status: ${e.status}`,
+          typeof e === 'string' ? e : null
+        ].filter(Boolean);
+        
+        const message = errorParts.length > 0 ? errorParts.join(' | ') : JSON.stringify(e);
+        throw new Error(`Failed to send password reset email: ${message}`);
+      }
+
+      console.log('✅ Password reset email sent successfully:', {
+        id: resetResult.data?.id,
+        to: user.email,
+        actionType: email_action_type
+      });
     } else {
-      console.log('⏭️ Skipping confirmation email - action type:', email_action_type);
+      console.log('⏭️ Skipping email - action type:', email_action_type);
     }
 
     return new Response(
