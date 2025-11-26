@@ -302,7 +302,7 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
                 <div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button type="button" variant="outline" size="sm">
+                      <Button type="button" variant="secondary" size="sm">
                         Add outcome tags
                       </Button>
                     </DropdownMenuTrigger>
@@ -492,6 +492,7 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
           </div>
           
           <Button 
+            variant="secondary"
             onClick={addTestimonial}
             disabled={!newTestimonial.clientName || !newTestimonial.clientQuote || !newTestimonial.achievement || !newTestimonial.consentGiven}
             className="w-full"

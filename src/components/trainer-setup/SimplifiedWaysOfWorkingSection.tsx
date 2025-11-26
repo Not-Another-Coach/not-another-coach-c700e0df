@@ -320,7 +320,7 @@ export function SimplifiedWaysOfWorkingSection({
               <CardTitle className="text-lg flex items-center justify-between">
                 {section.title}
                 <Button
-                  variant="outline"
+                  variant="secondary"
                   size="sm"
                   onClick={() => setActivePickerSection(section.key)}
                 >

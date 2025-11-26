@@ -915,6 +915,7 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
           </div>
           
           <Button 
+            variant="secondary"
             onClick={addPackage}
             disabled={!newPackage.name || !newPackage.price || !newPackage.description || (newPackage.isPromotion && (!newPackage.promotionStartDate || !newPackage.promotionEndDate))}
             className="w-full"
