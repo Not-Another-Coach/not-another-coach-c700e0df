@@ -7,6 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { UserIntentProvider } from "@/hooks/useUserIntent";
 import { VisibilityConfigProvider } from "@/contexts/VisibilityConfigContext";
 import { TrainerProfileProvider } from "@/contexts/TrainerProfileContext";
+import { ClientProfileProvider } from "@/contexts/ClientProfileContext";
 import { PlatformAccessGuard } from "@/components/auth/PlatformAccessGuard";
 import { SessionNotification } from "@/components/SessionNotification";
 import Home from "./pages/Home";
@@ -60,7 +61,8 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <TrainerProfileProvider>
-        <UserIntentProvider>
+        <ClientProfileProvider>
+          <UserIntentProvider>
           <VisibilityConfigProvider>
             <TooltipProvider>
               <Toaster />
@@ -128,6 +130,7 @@ const App = () => (
           </TooltipProvider>
         </VisibilityConfigProvider>
       </UserIntentProvider>
+        </ClientProfileProvider>
       </TrainerProfileProvider>
     </AuthProvider>
   </QueryClientProvider>

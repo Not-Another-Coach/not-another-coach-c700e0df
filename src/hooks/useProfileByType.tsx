@@ -1,5 +1,5 @@
 import { useTrainerProfileContext } from '@/contexts/TrainerProfileContext';
-import { useClientProfile } from '@/hooks/useClientProfile';
+import { useClientProfileContext } from '@/contexts/ClientProfileContext';
 import { useUserType } from '@/hooks/useUserType';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -90,7 +90,7 @@ export function useProfileByType() {
   const { user } = useAuth();
   const { user_type, loading: userTypeLoading } = useUserType();
   const { profile: trainerProfile, loading: trainerLoading, updateProfile: updateTrainerProfile } = useTrainerProfileContext();
-  const { profile: clientProfile, loading: clientLoading, updateProfile: updateClientProfile } = useClientProfile();
+  const { profile: clientProfile, loading: clientLoading, updateProfile: updateClientProfile } = useClientProfileContext();
   const { profile: adminProfile, loading: adminLoading, updateProfile: updateAdminProfile } = useAdminProfile();
 
   // Return appropriate profile based on user type

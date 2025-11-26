@@ -34,6 +34,7 @@ export default function Home() {
   const [isCheckingRedirect, setIsCheckingRedirect] = useState(true);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [minLoadTimeElapsed, setMinLoadTimeElapsed] = useState(false);
+  const [hasStartedLoading, setHasStartedLoading] = useState(false);
 
   // Initialize data migration hook
   useDataMigration();
@@ -43,14 +44,21 @@ export default function Home() {
     document.title = "Home - Find Your Perfect Coach";
   }, []);
 
-  // Minimum load time timer
+  // Minimum load time timer - increased for smoother UX
   useEffect(() => {
     const timer = setTimeout(() => {
       setMinLoadTimeElapsed(true);
-    }, 300);
+    }, 600);
     
     return () => clearTimeout(timer);
   }, []);
+
+  // Track if we've started loading for authenticated user
+  useEffect(() => {
+    if (user && (loading || profileLoading || userTypeLoading || isMigrating || isCheckingRedirect)) {
+      setHasStartedLoading(true);
+    }
+  }, [user, loading, profileLoading, userTypeLoading, isMigrating, isCheckingRedirect]);
 
   // Redirect authenticated users based on their role and profile completion
   useEffect(() => {
@@ -133,11 +141,23 @@ export default function Home() {
         return;
       }
     } else if (currentUserType === 'client') {
-      // Check if client has completed survey OR has progressed beyond survey stage
-      if (profile && 'client_survey_completed' in profile) {
-        // Check engagement data to see if client has progressed beyond survey
-        setIsRedirecting(true);
-        const checkEngagementAndRedirect = async () => {
+      // Check platform access before proceeding
+      setIsRedirecting(true);
+      const checkClientAccessAndRedirect = async () => {
+        // Check platform access first
+        const { data: hasAccess } = await supabase.rpc('can_user_access_platform', {
+          user_id: user.id
+        });
+
+        if (!hasAccess) {
+          console.log('🚫 Home - Client access limited, redirecting to pending page');
+          navigate('/client/access-pending', { replace: true });
+          return;
+        }
+
+        // Client has access, now check survey completion
+        if (profile && 'client_survey_completed' in profile) {
+          // Check engagement data to see if client has progressed beyond survey
           const { data: engagements } = await supabase
             .from('client_trainer_engagement')
             .select('stage, discovery_completed_at, became_client_at')
@@ -161,16 +181,14 @@ export default function Home() {
             console.log('📝 Home - Client survey incomplete, redirecting to survey');
             navigate('/client-survey', { replace: true });
           }
-        };
+        } else {
+          console.log('📝 Home - No client profile data, redirecting to survey');
+          navigate('/client-survey', { replace: true });
+        }
+      };
 
-        checkEngagementAndRedirect();
-        return;
-      } else {
-        console.log('📝 Home - No client profile data, redirecting to survey');
-        setIsRedirecting(true);
-        navigate('/client-survey', { replace: true });
-        return;
-      }
+      checkClientAccessAndRedirect();
+      return;
     } else if (currentUserType === 'admin') {
       console.log('🔄 Home - Admin user, redirecting to admin');
       setIsRedirecting(true);
@@ -204,14 +222,13 @@ export default function Home() {
     }
   };
 
-  // Show loading while checking auth status or during migration
-  const shouldShowLoading = 
-    loading || 
-    (user && (profileLoading || userTypeLoading)) || 
-    isMigrating || 
-    isCheckingRedirect ||
-    isRedirecting ||
-    (user && !minLoadTimeElapsed); // Only apply min load time for authenticated users
+  // Show loading with lock pattern - once started, keep showing until all complete
+  const allChecksComplete = !loading && !profileLoading && !userTypeLoading && 
+                            !isMigrating && !isCheckingRedirect && !isRedirecting && minLoadTimeElapsed;
+  
+  const shouldShowLoading = user && (
+    hasStartedLoading ? !allChecksComplete : (loading || profileLoading || userTypeLoading || isMigrating)
+  );
 
   if (shouldShowLoading) {
     return <ProfileLoadingState />;
