@@ -48,6 +48,118 @@ const CATEGORIES = [
   { value: 'general', label: 'General' },
 ];
 
+// QualificationCard sub-component
+interface QualificationCardProps {
+  qualification: string;
+  requiresVerification: boolean;
+  certificate?: { name: string; url: string; type: string; };
+  onRemove: () => void;
+  onUpload: (file: File) => void;
+}
+
+const QualificationCard: React.FC<QualificationCardProps> = ({
+  qualification,
+  requiresVerification,
+  certificate,
+  onRemove,
+  onUpload,
+}) => {
+  const [isDragOver, setIsDragOver] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const file = e.dataTransfer.files[0];
+    if (file) onUpload(file);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) onUpload(file);
+  };
+
+  return (
+    <Card className="p-4">
+      <div className="flex justify-between items-start mb-3">
+        <span className="font-medium">{qualification}</span>
+        <Button variant="ghost" size="sm" onClick={onRemove} className="h-auto p-1 -mt-1">
+          <X className="w-4 h-4" />
+        </Button>
+      </div>
+
+      {requiresVerification && (
+        <>
+          {certificate ? (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm text-green-600">
+                <CheckCircle className="w-4 h-4" />
+                Certificate uploaded
+                <Badge variant="outline" className="text-xs">
+                  <Clock className="w-3 h-3 mr-1" />
+                  Pending Review
+                </Badge>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm">{certificate.name}</span>
+                </div>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => window.open(certificate.url, '_blank')}
+                  >
+                    View file
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    Replace
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <FileText className="w-4 h-4" />
+                Certificate required
+              </div>
+              <div
+                className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors
+                  ${isDragOver ? 'border-primary bg-primary/5' : 'border-muted-foreground/25 hover:border-muted-foreground/50'}`}
+                onDrop={handleDrop}
+                onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+                onDragLeave={() => setIsDragOver(false)}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Upload className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">
+                  Drop file here or click to upload
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  PDF, JPG, or PNG
+                </p>
+              </div>
+            </div>
+          )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".pdf,.jpg,.jpeg,.png"
+            className="hidden"
+            onChange={handleFileSelect}
+          />
+        </>
+      )}
+    </Card>
+  );
+};
+
 export const QualificationsSection: React.FC<QualificationsSectionProps> = ({
   formData,
   updateFormData,
@@ -55,7 +167,6 @@ export const QualificationsSection: React.FC<QualificationsSectionProps> = ({
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [customQualification, setCustomQualification] = useState('');
-  const [isDragOver, setIsDragOver] = useState(false);
   const [requestDialogOpen, setRequestDialogOpen] = useState(false);
   const [newRequestData, setNewRequestData] = useState({
     qualification_name: '',
@@ -68,6 +179,16 @@ export const QualificationsSection: React.FC<QualificationsSectionProps> = ({
   const { data: customRequests = [] } = useTrainerCustomRequests();
   const createCustomRequest = useCreateCustomQualificationRequest();
   const trackUsage = useTrackQualificationUsage();
+
+  // Helper functions
+  const getCertificateForQualification = (qualificationName: string) => {
+    return formData.certificates?.find(cert => cert.qualification === qualificationName);
+  };
+
+  const requiresVerification = (qualificationName: string) => {
+    const qual = popularQualifications.find(q => q.name === qualificationName);
+    return qual?.requires_verification || false;
+  };
 
   const handleQualificationToggle = (qualification: string, qualificationId?: string) => {
     const currentQualifications = formData.qualifications || [];
@@ -102,63 +223,7 @@ export const QualificationsSection: React.FC<QualificationsSectionProps> = ({
     }
   };
 
-  const handleFileUpload = async (files: File[]) => {
-    if (!user?.id) {
-      toast.error('User not authenticated');
-      return;
-    }
-
-    try {
-      const uploadPromises = files.map(async (file) => {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Math.random()}.${fileExt}`;
-        const filePath = `${user.id}/${fileName}`;
-
-        const uploadResult = await FileUploadService.uploadFile(
-          'documents',
-          filePath,
-          file
-        );
-
-        if (!uploadResult.success) {
-          throw new Error(uploadResult.error?.message || 'Upload failed');
-        }
-
-        return {
-          name: file.name,
-          url: uploadResult.data.publicUrl,
-          type: file.type,
-          qualification: '', // Will be linked to specific qualification later
-        };
-      });
-
-      const uploadedFiles = await Promise.all(uploadPromises);
-      const currentCertificates = formData.certificates || [];
-      
-      updateFormData({ 
-        certificates: [...currentCertificates, ...uploadedFiles]
-      });
-      
-      toast.success(`${uploadedFiles.length} certificate(s) uploaded successfully`);
-    } catch (error) {
-      console.error('Upload failed:', error);
-      toast.error('Failed to upload certificates');
-    }
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(false);
-    const files = Array.from(e.dataTransfer.files);
-    handleFileUpload(files);
-  };
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    handleFileUpload(files);
-  };
-
-  const handleQualificationFileSelect = async (qualification: string, file: File) => {
+  const handleQualificationFileUpload = async (qualification: string, file: File) => {
     if (!user?.id) {
       toast.error('User not authenticated');
       return;
@@ -179,43 +244,42 @@ export const QualificationsSection: React.FC<QualificationsSectionProps> = ({
       }
 
       const currentCertificates = formData.certificates || [];
-      updateFormData({
-        certificates: [
-          ...currentCertificates,
-          { name: file.name, url: uploadResult.data.publicUrl, type: file.type, qualification }
-        ]
-      });
-      toast.success(`Certificate linked to ${qualification}`);
+      const existingCertIndex = currentCertificates.findIndex(c => c.qualification === qualification);
+      
+      const newCert = { 
+        name: file.name, 
+        url: uploadResult.data.publicUrl, 
+        type: file.type, 
+        qualification 
+      };
+
+      if (existingCertIndex >= 0) {
+        // Replace existing certificate
+        const updatedCertificates = [...currentCertificates];
+        updatedCertificates[existingCertIndex] = newCert;
+        updateFormData({ certificates: updatedCertificates });
+        toast.success(`Certificate replaced for ${qualification}`);
+      } else {
+        // Add new certificate
+        updateFormData({
+          certificates: [...currentCertificates, newCert]
+        });
+        toast.success(`Certificate uploaded for ${qualification}`);
+      }
     } catch (err) {
       console.error('Upload failed:', err);
       toast.error('Failed to upload certificate');
     }
   };
 
-
   const removeQualification = (qualification: string) => {
     const currentQualifications = formData.qualifications || [];
-    updateFormData({ 
-      qualifications: currentQualifications.filter(q => q !== qualification) 
-    });
-  };
-
-  const removeCertificate = (index: number) => {
     const currentCertificates = formData.certificates || [];
-    updateFormData({ 
-      certificates: currentCertificates.filter((_, i) => i !== index) 
-    });
-  };
-
-  // Mock verification status for demonstration
-  const getVerificationStatus = (qualification: string) => {
-    // In real app, this would check against uploaded certificates and admin verification
-    const verified = ["NASM Certified Personal Trainer", "ACE Personal Trainer Certification"].includes(qualification);
-    const pending = ["ACSM Certified Personal Trainer"].includes(qualification);
     
-    if (verified) return "verified";
-    if (pending) return "pending";
-    return "unverified";
+    updateFormData({ 
+      qualifications: currentQualifications.filter(q => q !== qualification),
+      certificates: currentCertificates.filter(c => c.qualification !== qualification)
+    });
   };
 
   const handleSubmitCustomRequest = () => {
@@ -273,81 +337,51 @@ export const QualificationsSection: React.FC<QualificationsSectionProps> = ({
             <CardTitle className="text-lg">Selected Qualifications</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {formData.qualifications?.map((qualification: string) => {
-                const status = getVerificationStatus(qualification);
-                const inputId = `upload-${qualification.replace(/[^a-z0-9]/gi, '-').toLowerCase()}`;
-                return (
-                  <div key={qualification} className="flex items-center gap-2">
-                    <Badge
-                      variant="outline"
-                      className="flex items-center gap-2 px-3 py-1"
-                    >
-                      <span>{qualification}</span>
-                      {status === "verified" && (
-                        <CheckCircle className="w-3 h-3 text-green-600" />
-                      )}
-                      {status === "pending" && (
-                        <Clock className="w-3 h-3 text-amber-600" />
-                      )}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeQualification(qualification)}
-                        className="h-auto p-0 ml-2 hover:bg-transparent"
-                      >
-                        <X className="w-3 h-3" />
-                      </Button>
-                    </Badge>
-                    <div className="flex items-center gap-1">
-                      <input
-                        id={inputId}
-                        type="file"
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) handleQualificationFileSelect(qualification, file);
-                        }}
-                      />
-                      <Button variant="outline" size="sm" onClick={() => document.getElementById(inputId)?.click()}>
-                        <Upload className="w-3 h-3 mr-1" />
-                        Upload cert
-                      </Button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {customRequests.map((request: any) => (
-                <Badge
-                  key={`custom-${request.id}`}
-                  variant={
-                    request.status === 'approved' ? 'default' :
-                    request.status === 'rejected' ? 'destructive' : 'secondary'
-                  }
-                  className="flex items-center gap-2 px-3 py-1"
-                >
-                  <span>{request.qualification_name}</span>
-                  {request.status === 'approved' && (
-                    <CheckCircle className="w-3 h-3 text-green-600" />
-                  )}
-                  {request.status === 'pending' && (
-                    <Clock className="w-3 h-3 text-amber-600" />
-                  )}
-                  {request.status === 'rejected' && (
-                    <X className="w-3 h-3 text-red-600" />
-                  )}
-                  <Badge 
-                    variant="outline" 
-                    className="text-xs ml-1 bg-background"
-                  >
-                    {request.status}
-                  </Badge>
-                </Badge>
+            <div className="space-y-3">
+              {formData.qualifications?.map((qualification: string) => (
+                <QualificationCard
+                  key={qualification}
+                  qualification={qualification}
+                  requiresVerification={requiresVerification(qualification)}
+                  certificate={getCertificateForQualification(qualification)}
+                  onRemove={() => removeQualification(qualification)}
+                  onUpload={(file) => handleQualificationFileUpload(qualification, file)}
+                />
               ))}
             </div>
+            
+            {customRequests.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t">
+                <p className="text-sm text-muted-foreground w-full mb-2">Custom Requests</p>
+                {customRequests.map((request: any) => (
+                  <Badge
+                    key={`custom-${request.id}`}
+                    variant={
+                      request.status === 'approved' ? 'default' :
+                      request.status === 'rejected' ? 'destructive' : 'secondary'
+                    }
+                    className="flex items-center gap-2 px-3 py-1"
+                  >
+                    <span>{request.qualification_name}</span>
+                    {request.status === 'approved' && (
+                      <CheckCircle className="w-3 h-3 text-green-600" />
+                    )}
+                    {request.status === 'pending' && (
+                      <Clock className="w-3 h-3 text-amber-600" />
+                    )}
+                    {request.status === 'rejected' && (
+                      <X className="w-3 h-3 text-red-600" />
+                    )}
+                    <Badge 
+                      variant="outline" 
+                      className="text-xs ml-1 bg-background"
+                    >
+                      {request.status}
+                    </Badge>
+                  </Badge>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
@@ -472,66 +506,6 @@ export const QualificationsSection: React.FC<QualificationsSectionProps> = ({
               </Dialog>
             </div>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Certificate Upload */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Upload Certificates</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {/* Drag & drop upload removed as requested; upload via qualification-specific buttons */}
-          
-          {/* Uploaded Certificates */}
-          {formData.certificates && formData.certificates.length > 0 && (
-            <div className="space-y-2 mt-4">
-              <Label>Uploaded Certificates</Label>
-              <div className="space-y-2">
-                {formData.certificates.map((file: any, index: number) => (
-                  <Card key={index} className="p-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <FileText className="w-4 h-4 text-muted-foreground" />
-                        <div>
-                          <span className="text-sm font-medium">{file.name}</span>
-                          {file.qualification && (
-                            <Badge variant="secondary" className="text-xs ml-2">{file.qualification}</Badge>
-                          )}
-                          <Badge variant="outline" className="text-xs ml-2">
-                            <Clock className="w-3 h-3 mr-1" />
-                            Pending Review
-                          </Badge>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => {
-                            console.log('Attempting to view file:', file.name, 'URL:', file.url);
-                            // Since the bucket is now public, directly open the file
-                            window.open(file.url, '_blank');
-                          }}
-                          className="text-xs"
-                        >
-                          View
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => removeCertificate(index)}
-                          className="text-destructive hover:text-destructive text-xs"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
         </CardContent>
       </Card>
 
