@@ -258,7 +258,7 @@ export default function Auth() {
         setActiveTab('login');
         toast({
           title: "Account exists",
-          description: "This email is already registered. Check your email for the confirmation link or click 'Resend Confirmation' below.",
+          description: "This email is already registered. Check your email (including junk/spam folder) for the confirmation link or click 'Resend Confirmation' below.",
         });
         // Clear signup form
         setSignupForm({
@@ -284,7 +284,7 @@ export default function Auth() {
       setActiveTab('login');
       toast({
         title: "Account created!",
-        description: "Please check your email to confirm your account with Not Another Coach, then log in below.",
+        description: "Please check your email (including junk/spam folder) to confirm your account with Not Another Coach, then log in below.",
       });
       // Clear signup form
       setSignupForm({
@@ -416,7 +416,7 @@ export default function Auth() {
     } else {
       toast({
         title: "Confirmation Email Sent!",
-        description: "Please check your email for the confirmation link.",
+        description: "Please check your email (including junk/spam folder) for the confirmation link.",
       });
     }
     setIsLoading(false);
