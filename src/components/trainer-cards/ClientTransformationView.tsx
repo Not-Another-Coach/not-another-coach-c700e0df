@@ -63,7 +63,7 @@ export const ClientTransformationView = ({ trainer, children, testimonialIndex =
   const transformationData = getTransformationData(trainer);
   
   // Detect if this is a demo trainer
-  const isDemoProfile = trainer.id.startsWith('demo-trainer-');
+  const isDemoProfile = trainer.id.startsWith('demo-trainer-') || require('@/config/demoTrainers').isDemoTrainerId(trainer.id);
   
   // Add visibility logic
   const { stage, isGuest } = useEngagementStage(trainer.id);

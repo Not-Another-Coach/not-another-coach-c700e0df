@@ -93,7 +93,7 @@ export const EnhancedTrainerCard = memo(({
 
   // Add visibility context - this will be passed to sub-components through their own hooks
   const isAnonymousMode = config === 'anonymous';
-  const isDemoProfile = trainer.id.startsWith('demo-trainer-');
+  const isDemoProfile = trainer.id.startsWith('demo-trainer-') || require('@/config/demoTrainers').isDemoTrainerId(trainer.id);
   
   // Use prop engagement stage if provided, otherwise fetch it
   // For demo profiles, force guest mode but with full visibility

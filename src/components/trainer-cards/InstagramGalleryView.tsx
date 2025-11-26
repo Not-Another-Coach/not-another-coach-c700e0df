@@ -53,7 +53,7 @@ export const InstagramGalleryView = ({ trainer, children }: InstagramGalleryView
   const [gridSize, setGridSize] = useState<number>(6);
 
   // Detect if this is a demo trainer
-  const isDemoProfile = trainer.id.startsWith('demo-trainer-');
+  const isDemoProfile = trainer.id.startsWith('demo-trainer-') || require('@/config/demoTrainers').isDemoTrainerId(trainer.id);
   
   const { stage, isGuest } = useEngagementStage(trainer.id);
   const { visibilityMap, getVisibility, loading: visibilityLoading } = useContentVisibility({

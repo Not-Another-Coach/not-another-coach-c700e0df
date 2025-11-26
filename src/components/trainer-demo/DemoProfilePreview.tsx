@@ -369,15 +369,10 @@ export function DemoProfilePreview() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate a brief loading state for better UX
-    setLoading(true);
-    const timer = setTimeout(() => {
-      const currentDemoData = selectedProfile === 'female' ? DEMO_TRAINER_DATA : DEMO_TRAINER_DATA_MALE;
-      setTrainerData(currentDemoData as AnyTrainer);
-      setLoading(false);
-    }, 300);
-
-    return () => clearTimeout(timer);
+    // Load demo data immediately for smooth transitions
+    const currentDemoData = selectedProfile === 'female' ? DEMO_TRAINER_DATA : DEMO_TRAINER_DATA_MALE;
+    setTrainerData(currentDemoData as AnyTrainer);
+    setLoading(false);
   }, [selectedProfile]);
 
   if (loading) {

@@ -12,6 +12,7 @@ import { QuickResetMenu } from "@/components/ui/QuickResetMenu";
 import { ResetOptionsButton } from "@/components/ui/ResetOptionsButton";
 import { ClientJourneyInfographic } from "@/components/homepage/ClientJourneyInfographic";
 import { ProfileLoadingState } from "@/components/ui/profile-loading-state";
+import { DemoTrainerShowcase } from "@/components/homepage/DemoTrainerShowcase";
 
 import { UserModeToggle } from "@/components/user-intent/UserModeToggle";
 import { useUserIntent } from "@/hooks/useUserIntent";
@@ -256,16 +257,24 @@ export default function Home() {
         buttonText="Start Your Coaching Journey"
       />
 
-      {/* Meet The Coaches Section - Requires authentication */}
+      {/* Meet The Coaches Section - Demo Profiles */}
       <section id="browse-trainers" className="py-16 bg-muted/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">Meet The Coaches</h2>
-            <p className="text-xl text-muted-foreground mb-8">
-              Sign in to discover your perfect training match
+            <p className="text-xl text-muted-foreground mb-4">
+              Preview our verified coaches
+            </p>
+          </div>
+          
+          <DemoTrainerShowcase />
+          
+          <div className="text-center mt-12">
+            <p className="text-muted-foreground mb-4">
+              Sign up to explore all coaches and find your perfect match
             </p>
             <Button size="lg" onClick={() => navigate('/auth?signup=client')}>
-              Get Started
+              Discover More Coaches
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </div>

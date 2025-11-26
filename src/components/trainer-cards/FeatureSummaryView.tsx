@@ -18,7 +18,7 @@ interface FeatureSummaryViewProps {
 
 export const FeatureSummaryView = ({ trainer, children }: FeatureSummaryViewProps) => {
   // Detect if this is a demo trainer
-  const isDemoProfile = trainer.id.startsWith('demo-trainer-');
+  const isDemoProfile = trainer.id.startsWith('demo-trainer-') || require('@/config/demoTrainers').isDemoTrainerId(trainer.id);
   
   const { stage: engagementStage, isGuest } = useEngagementStage(trainer.id);
   const { canViewContent, getVisibility } = useContentVisibility({
