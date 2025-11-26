@@ -126,7 +126,7 @@ export const ResponsiveBreadcrumb: React.FC<ResponsiveBreadcrumbProps> = ({
           WebkitOverflowScrolling: 'touch',
         }}
       >
-        <div className="flex gap-1 md:gap-2 lg:gap-3 min-w-max md:flex-wrap md:justify-center px-2 pb-2">
+        <div className="flex gap-1 md:gap-2 lg:gap-3 flex-wrap justify-center px-2 pb-2">
           {children}
         </div>
       </div>
@@ -175,9 +175,9 @@ export const BreadcrumbItem: React.FC<BreadcrumbItemProps> = ({
     <div
       data-step={stepNumber}
       onClick={onClick}
-      className="flex flex-col items-center gap-0.5 md:gap-1 cursor-pointer hover:opacity-80 transition-opacity p-1.5 md:p-2 rounded-lg hover:bg-muted/50 min-w-fit"
+      className="flex flex-col items-center gap-0.5 md:gap-1 cursor-pointer hover:opacity-80 transition-opacity p-1.5 md:p-2 rounded-lg hover:bg-muted/50"
     >
-      <div className={`w-6 h-6 md:w-7 md:h-7 rounded-full border-2 flex items-center justify-center text-xs font-medium ${borderColor} ${bgColor} ${statusColor}`}>
+      <div className={`w-6 h-6 md:w-7 md:h-7 rounded-full border-2 flex items-center justify-center text-xs font-medium flex-shrink-0 ${borderColor} ${bgColor} ${statusColor}`}>
         {showIcon ? (
           isPartial ? (
             <AlertCircle className="w-3 h-3 text-white" />
@@ -188,7 +188,7 @@ export const BreadcrumbItem: React.FC<BreadcrumbItemProps> = ({
           stepNumber
         )}
       </div>
-      <div className={`text-[10px] md:text-xs leading-tight text-center whitespace-nowrap ${statusColor}`}>
+      <div className={`text-[10px] md:text-xs leading-tight text-center max-w-[80px] md:max-w-[100px] break-words ${statusColor}`}>
         {title}
       </div>
     </div>
