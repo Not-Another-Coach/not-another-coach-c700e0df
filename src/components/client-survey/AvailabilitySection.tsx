@@ -59,7 +59,11 @@ export function AvailabilitySection({ formData, updateFormData, errors, clearFie
   };
 
   // Helper function to get current selection based on boolean value
+  // Returns null if nothing is selected yet (formData.waitlist_preference is null or undefined)
   const getCurrentSelection = () => {
+    if (formData.waitlist_preference === null || formData.waitlist_preference === undefined) {
+      return null;
+    }
     if (formData.waitlist_preference === true) return "asap";
     if (formData.waitlist_preference === false) return "quality_over_speed";
     return null;

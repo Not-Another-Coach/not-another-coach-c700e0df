@@ -103,7 +103,6 @@ export function ClientCustomHeader({
                   navigate('/client/dashboard');
                 }
               }} />
-            <div className="hidden sm:block text-muted-foreground">Your Journey</div>
             {/* Your Journey Progress - Compact on mobile, full on desktop */}
             {showJourneyProgress && journeyProgress && (
               <div className="flex items-center gap-1 sm:gap-2 ml-2 sm:ml-6 px-2 sm:px-3 py-1 bg-primary/10 rounded-full">

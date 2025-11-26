@@ -7,7 +7,8 @@ import { useUserTypeChecks } from "@/hooks/useUserType";
 import { useAnonymousSession } from "@/hooks/useAnonymousSession";
 import { useDataMigration } from "@/hooks/useDataMigration";
 import { useToast } from "@/hooks/use-toast";
-import { ClientCustomHeader } from "@/components/layout/ClientCustomHeader";
+import { AppLogo } from "@/components/ui/app-logo";
+import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -600,84 +601,53 @@ const ClientSurvey = () => {
 
   return (
     <div className="min-h-screen bg-gradient-hero">
-      {/* Header with Navigation */}
+      {/* Simplified Header for Survey - No notifications/messaging/preferences */}
       {profile && (
-        <div className="bg-card border-b">
-          <ClientCustomHeader
-            currentPage="dashboard"
-            profile={profile}
-            onMessagingOpen={() => {}}
-            showJourneyProgress={false}
-            logoNavigateState={{ fromSurvey: true }}
-          />
-        </div>
+        <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border">
+          <div className="mx-auto px-3 sm:px-6 lg:px-8 xl:px-12 py-2 sm:py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <AppLogo onClick={() => navigate('/client/dashboard', { state: { fromSurvey: true } })} />
+              </div>
+              <div className="flex items-center gap-1.5 sm:gap-3">
+                {/* Save Progress Button - styled like trainer profile */}
+                <Button 
+                  variant="success"
+                  size="sm"
+                  onClick={() => handleSave()}
+                  className="flex items-center gap-2"
+                >
+                  <Save className="h-4 w-4" />
+                  <span className="hidden sm:inline">Save Progress</span>
+                </Button>
+                
+                {/* Profile Dropdown */}
+                <ProfileDropdown profile={profile} />
+              </div>
+            </div>
+          </div>
+        </header>
       )}
 
-      {/* Survey Progress & Content */}
-      <div className="pb-16 sm:pb-0">
-        {/* Progress indicator - only show after header */}
-        <div className="bg-card border-b px-4 py-3">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-            <div className="flex-1 min-w-0">
-              <h2 className="text-lg sm:text-xl font-bold truncate">
-                {isFullyComplete() ? 'Profile Settings' : 'Find Your Perfect Trainer'}
-              </h2>
-              <p className="text-xs sm:text-sm text-muted-foreground">
-                {isFullyComplete() 
-                  ? 'Manage your fitness preferences' 
-                  : 'Tell us about your fitness goals and preferences'
-                }
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  if (currentStep === 1) {
-                    // Confirm before leaving if survey not complete
-                    if (!isFullyComplete() && (formData.primary_goals?.length > 0 || formData.training_location_preference)) {
-                      if (window.confirm('You have unsaved changes. Are you sure you want to leave?')) {
-                        navigate('/client/dashboard', { state: { fromSurvey: true } });
-                      }
-                    } else {
-                      navigate('/client/dashboard', { state: { fromSurvey: true } });
-                    }
-                  } else {
-                    handlePrevious();
-                  }
-                }}
-                className="sm:hidden"
-              >
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => handleSave()}>
-                <Save className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Save Progress</span>
-              </Button>
-            </div>
+      {/* Survey Header with Title */}
+      <div className="bg-card border-b px-4 py-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center space-y-2">
+            <h1 className="text-2xl sm:text-3xl font-bold">
+              Find Your Perfect Trainer
+            </h1>
+            <p className="text-sm sm:text-base text-muted-foreground">
+              Tell us about your fitness goals and preferences
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Progress Bar - only show if not fully complete */}
-      {!isFullyComplete() && (
-        <div className="bg-card border-b p-3 sm:p-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-3">
-              <span className="text-sm font-medium whitespace-nowrap">
-                {calculateOverallCompletion()}% Complete
-              </span>
-              <div className="flex-1">
-                <Progress value={calculateOverallCompletion()} className="h-2" />
-              </div>
-              <p className="text-xs text-muted-foreground hidden sm:block">
-                💡 Click any step to jump there
-              </p>
-            </div>
-          
-          {/* Step indicators - More mobile friendly */}
-          <div className="grid grid-cols-4 sm:flex sm:justify-between gap-2 sm:gap-1 mt-3">
+      {/* Step indicators for navigation */}
+      <div className="bg-card border-b p-3 sm:p-4">
+        <div className="max-w-4xl mx-auto">
+          {/* Clickable step indicators */}
+          <div className="grid grid-cols-4 sm:flex sm:justify-between gap-2 sm:gap-1">
             {stepTitles.map((title, index) => {
               const stepNumber = index + 1;
               const completion = getStepCompletion(stepNumber);
@@ -707,118 +677,53 @@ const ClientSurvey = () => {
                 bgColor = 'bg-primary';
               }
               
-                return (
+              return (
+                <div
+                  key={stepNumber}
+                  className={`flex flex-col items-center text-xs cursor-pointer transition-all hover:scale-105 ${statusColor} p-1`}
+                  onClick={() => {
+                    setCurrentStep(stepNumber);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  title={`Go to step ${stepNumber}: ${title}`}
+                >
                   <div
-                    key={stepNumber}
-                    className={`flex flex-col items-center text-xs cursor-pointer transition-all hover:scale-105 ${statusColor} p-1`}
-                    onClick={() => {
-                      setCurrentStep(stepNumber);
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }}
-                    title={`Go to step ${stepNumber}: ${title}`}
+                    className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center mb-1 relative ${borderColor} ${
+                      completion === 'completed' || completion === 'partial' || isCurrent 
+                        ? `${bgColor} text-white`
+                        : 'bg-transparent'
+                    }`}
                   >
-                    <div
-                      className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center mb-1 relative ${borderColor} ${
-                        completion === 'completed' || completion === 'partial' || isCurrent 
-                          ? `${bgColor} text-white`
-                          : 'bg-transparent'
-                      }`}
-                    >
-                      {showIcon ? (
-                        isPartial ? <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4" /> : <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4" />
-                      ) : (
-                        <StepIcon className={cn(
-                          "h-3 w-3 sm:h-4 sm:w-4",
-                          isCurrent ? "text-white" : ""
-                        )} />
-                      )}
-                    </div>
-                    <span className={cn(
-                      "text-center text-xs leading-tight max-w-16 sm:max-w-20 hidden sm:block",
-                      isCurrent ? "font-bold" : ""
-                    )}>
-                      {title}
-                    </span>
-                    <span className={cn(
-                      "text-center text-xs leading-tight max-w-16 sm:hidden",
-                      isCurrent ? "font-bold" : ""
-                    )}>
-                      {title.split(' ')[0]}
-                    </span>
-                    {isCurrent && (
-                      <div className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                    {showIcon ? (
+                      isPartial ? <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4" /> : <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                    ) : (
+                      <StepIcon className={cn(
+                        "h-3 w-3 sm:h-4 sm:w-4",
+                        isCurrent ? "text-white" : ""
+                      )} />
                     )}
                   </div>
-                );
-              })}
-            </div>
+                  <span className={cn(
+                    "text-center text-xs leading-tight max-w-16 sm:max-w-20 hidden sm:block",
+                    isCurrent ? "font-bold" : ""
+                  )}>
+                    {title}
+                  </span>
+                  <span className={cn(
+                    "text-center text-xs leading-tight max-w-16 sm:hidden",
+                    isCurrent ? "font-bold" : ""
+                  )}>
+                    {title.split(' ')[0]}
+                  </span>
+                  {isCurrent && (
+                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
-      )}
-
-      {/* Step indicators for completed surveys */}
-      {isFullyComplete() && (
-        <div className="bg-card border-b p-3 sm:p-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <span className="text-sm font-medium text-green-600">✓ Survey Complete</span>
-              <span className="text-sm text-muted-foreground">•</span>
-              <span className="text-sm text-muted-foreground">
-                Currently editing: {stepTitles[currentStep - 1]}
-              </span>
-            </div>
-            
-            {/* Clickable step indicators */}
-            <div className="grid grid-cols-4 sm:flex sm:justify-between gap-2 sm:gap-1">
-              {stepTitles.map((title, index) => {
-                const stepNumber = index + 1;
-                const completion = getStepCompletion(stepNumber);
-                const isCurrent = stepNumber === currentStep;
-                
-                return (
-                  <div
-                    key={stepNumber}
-                    className={`flex flex-col items-center text-xs cursor-pointer transition-all hover:scale-105 ${
-                      isCurrent ? 'text-primary' : 'text-green-600'
-                    } p-1`}
-                    onClick={() => {
-                      setCurrentStep(stepNumber);
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }}
-                    title={`Go to step ${stepNumber}: ${title}`}
-                  >
-                    <div
-                      className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center mb-1 ${
-                        isCurrent 
-                          ? 'border-primary bg-primary text-white' 
-                          : 'border-green-600 bg-green-600 text-white'
-                      }`}
-                    >
-                      {isCurrent ? (
-                        <span className="text-xs sm:text-sm font-bold">{stepNumber}</span>
-                      ) : (
-                        <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4" />
-                      )}
-                    </div>
-                    <span className={cn(
-                      "text-center text-xs leading-tight max-w-16 sm:max-w-20 hidden sm:block",
-                      isCurrent ? "font-bold" : ""
-                    )}>
-                      {title}
-                    </span>
-                    <span className={cn(
-                      "text-center text-xs leading-tight max-w-16 sm:hidden",
-                      isCurrent ? "font-bold" : ""
-                    )}>
-                      {title.split(' ')[0]}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
+      </div>
       <div className="max-w-4xl mx-auto p-3 sm:p-6 pb-20 sm:pb-6">
         <Card className="shadow-sm">
           <CardHeader className="pb-4 sm:pb-6 text-center">
