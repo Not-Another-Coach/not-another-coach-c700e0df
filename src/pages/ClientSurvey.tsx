@@ -615,38 +615,43 @@ const ClientSurvey = () => {
 
   return (
     <div className="min-h-screen bg-gradient-hero">
-      {/* Simplified Header for Survey - No notifications/messaging/preferences */}
+      {/* Header - matching trainer profile format */}
       {profile && (
-        <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border">
-          <div className="mx-auto px-3 sm:px-6 lg:px-8 xl:px-12 py-2 sm:py-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 sm:gap-4">
-                <AppLogo onClick={() => navigate('/client/dashboard', { state: { fromSurvey: true } })} />
-                <h1 className="text-xl sm:text-2xl font-bold">Find Your Coach</h1>
-              </div>
-              <div className="flex items-center gap-1.5 sm:gap-3">
-                {/* Save Progress Button - styled like trainer profile */}
-                <Button 
-                  variant="success"
-                  size="sm"
-                  onClick={() => handleSave()}
-                  className="flex items-center gap-2"
-                >
-                  <Save className="h-4 w-4" />
-                  <span className="hidden sm:inline">Save Progress</span>
-                </Button>
-                
-                {/* Profile Dropdown */}
-                <ProfileDropdown profile={profile} />
-              </div>
+        <div className="p-4 border-b bg-card">
+          <div className="flex justify-between items-center relative">
+            {/* Left: Logo */}
+            <div className="flex items-center gap-3">
+              <AppLogo size="sm" showText={true} onClick={() => navigate('/client/dashboard', { state: { fromSurvey: true } })} />
+            </div>
+            
+            {/* Center: Title - Absolute positioned */}
+            <div className="absolute left-1/2 -translate-x-1/2">
+              <h1 className="text-base sm:text-lg font-bold whitespace-nowrap">
+                Find Your Coach
+              </h1>
+            </div>
+            
+            {/* Right: Action Buttons */}
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="success"
+                size="sm"
+                onClick={() => handleSave()}
+                className="flex items-center gap-2"
+              >
+                <Save className="h-4 w-4" />
+                <span className="hidden lg:inline">Save Progress</span>
+              </Button>
+              
+              <ProfileDropdown profile={profile} />
             </div>
           </div>
-        </header>
+        </div>
       )}
 
 
-      {/* Step indicators for navigation */}
-      <div className="bg-card border-b p-3 sm:p-4">
+      {/* Breadcrumb indicators for navigation */}
+      <div className="bg-card border-b p-4">
         <div className="max-w-4xl mx-auto">
           {/* Clickable step indicators */}
           <div className="grid grid-cols-4 sm:flex sm:justify-between gap-2 sm:gap-1">
