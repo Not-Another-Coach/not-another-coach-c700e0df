@@ -11,7 +11,6 @@ interface AuthContextType {
   signOut: () => Promise<{ error: any }>;
   resendConfirmation: (email: string) => Promise<{ error: any }>;
   loading: boolean;
-  isLoggingOut: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,7 +19,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { session: anonymousSession } = useAnonymousSession();
 
   useEffect(() => {
@@ -77,29 +75,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
-    // Set logging out flag to prevent redirect conflicts
-    setIsLoggingOut(true);
-    
     // Clear any saved credentials
     localStorage.removeItem('savedCredentials');
     localStorage.removeItem('rememberMe');
     
-    // Clear the user and session state immediately
-    setUser(null);
-    setSession(null);
-    
-    const response = await AuthService.signOut();
-    
-    if (response.error) {
-      console.error('Sign out error:', response.error);
-      // Even if there's an error (like session missing), still redirect
-      // because the user wants to be logged out
-    }
-    
-    // Use window.location for immediate, clean redirect
+    // Redirect IMMEDIATELY - before any state changes cause re-renders
     window.location.href = '/auth';
     
-    return { error: response.error || null };
+    // Sign out from Supabase (executes but user is already navigating away)
+    await AuthService.signOut();
+    
+    return { error: null };
   };
 
   const resendConfirmation = async (email: string) => {
@@ -124,7 +110,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signOut,
     resendConfirmation,
     loading,
-    isLoggingOut,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
