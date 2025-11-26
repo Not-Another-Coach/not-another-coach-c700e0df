@@ -1,20 +1,31 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Sparkles, RefreshCw } from "lucide-react";
 
 interface TestimonialAIHelperProps {
   clientQuote: string;
   outcomeTags: string[];
   onSuggestionSelect: (suggestion: string) => void;
+  isOpen?: boolean;
+  autoGenerate?: boolean;
+  onGeneratingChange?: (isGenerating: boolean) => void;
 }
 
-export function TestimonialAIHelper({ clientQuote, outcomeTags, onSuggestionSelect }: TestimonialAIHelperProps) {
+export function TestimonialAIHelper({ 
+  clientQuote, 
+  outcomeTags, 
+  onSuggestionSelect,
+  isOpen = true,
+  autoGenerate = false,
+  onGeneratingChange
+}: TestimonialAIHelperProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
 
   const generateSuggestions = async () => {
     setIsGenerating(true);
+    onGeneratingChange?.(true);
     
     // Simulate AI processing delay
     await new Promise(resolve => setTimeout(resolve, 1500));
@@ -22,7 +33,15 @@ export function TestimonialAIHelper({ clientQuote, outcomeTags, onSuggestionSele
     const generatedSuggestions = generateAchievementSuggestions(clientQuote, outcomeTags);
     setSuggestions(generatedSuggestions);
     setIsGenerating(false);
+    onGeneratingChange?.(false);
   };
+
+  // Auto-generate when component opens if autoGenerate is true
+  useEffect(() => {
+    if (isOpen && autoGenerate && (clientQuote.trim() || outcomeTags.length > 0)) {
+      generateSuggestions();
+    }
+  }, [isOpen, autoGenerate]);
 
   const generateAchievementSuggestions = (quote: string, tags: string[]): string[] => {
     const suggestions: string[] = [];
@@ -117,17 +136,21 @@ export function TestimonialAIHelper({ clientQuote, outcomeTags, onSuggestionSele
     return [...new Set(suggestions)].slice(0, 4);
   };
 
+  if (!isOpen) {
+    return null;
+  }
+
   const hasContent = clientQuote.trim() || outcomeTags.length > 0;
 
   if (!hasContent) {
     return (
-      <Card className="border-blue-200 bg-blue-50">
+      <Card className="border-purple-300 bg-gradient-to-br from-purple-500/10 to-indigo-500/10">
         <CardContent className="p-4">
-          <div className="flex items-center gap-2 text-blue-700">
+          <div className="flex items-center gap-2 text-purple-700">
             <Sparkles className="h-4 w-4" />
             <span className="text-sm font-medium">AI Achievement Helper</span>
           </div>
-          <p className="text-xs text-blue-600 mt-1">
+          <p className="text-xs text-purple-600 mt-1">
             Add a client quote and outcome tags to generate achievement suggestions
           </p>
         </CardContent>
@@ -136,53 +159,56 @@ export function TestimonialAIHelper({ clientQuote, outcomeTags, onSuggestionSele
   }
 
   return (
-    <Card className="border-blue-200 bg-blue-50">
+    <Card className="border-purple-300 bg-gradient-to-br from-purple-500/10 to-indigo-500/10">
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm flex items-center gap-2 text-blue-900">
+        <CardTitle className="text-sm flex items-center gap-2">
           <Sparkles className="h-4 w-4" />
           AI Achievement Helper
         </CardTitle>
-        <p className="text-xs text-blue-700">
+        <p className="text-xs text-muted-foreground">
           Get AI-powered suggestions based on the client's testimonial and outcome tags
         </p>
       </CardHeader>
       <CardContent className="space-y-3">
-        <Button
-          onClick={generateSuggestions}
-          disabled={isGenerating}
-          size="sm"
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-        >
-          {isGenerating ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Generating suggestions...
-            </>
-          ) : (
-            <>
-              <Sparkles className="h-4 w-4 mr-2" />
-              Generate Achievement Ideas
-            </>
-          )}
-        </Button>
+        {!autoGenerate && (
+          <Button
+            onClick={generateSuggestions}
+            disabled={isGenerating}
+            size="sm"
+            variant="ai"
+            className="w-full"
+          >
+            {isGenerating ? (
+              <>
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                Generating suggestions...
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4 mr-2" />
+                Generate Achievement Ideas
+              </>
+            )}
+          </Button>
+        )}
 
         {suggestions.length > 0 && (
           <div className="space-y-2">
-            <p className="text-xs font-medium text-blue-800">Click to use:</p>
+            <p className="text-xs font-medium">Click to use:</p>
             <div className="space-y-2">
               {suggestions.map((suggestion, index) => (
                 <Card
                   key={index}
-                  className="cursor-pointer hover:bg-blue-100 border-blue-300 transition-colors"
+                  className="cursor-pointer hover:bg-purple-100 transition-colors border-purple-200 bg-white/80"
                   onClick={() => onSuggestionSelect(suggestion)}
                 >
                   <CardContent className="p-3">
-                    <p className="text-sm text-blue-900">{suggestion}</p>
+                    <p className="text-sm">{suggestion}</p>
                   </CardContent>
                 </Card>
               ))}
             </div>
-            <p className="text-xs text-blue-600 italic">
+            <p className="text-xs text-muted-foreground italic">
               💡 These are AI-generated suggestions. Feel free to modify them to match your client's specific results.
             </p>
           </div>
