@@ -133,11 +133,6 @@ export const ProfileDropdown = ({ profile }: ProfileDropdownProps) => {
                 <p className="text-sm font-medium leading-none">
                   Welcome, {getFullName()}
                 </p>
-                <p className="text-xs leading-none text-muted-foreground mt-1">
-                  {profile.user_type === 'client' ? 'Fitness Enthusiast' : 
-                   profile.user_type === 'trainer' ? 'Personal Trainer' : 
-                   'Administrator'}
-                </p>
               </div>
             </div>
             <Badge 
