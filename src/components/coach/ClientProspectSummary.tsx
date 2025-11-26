@@ -8,7 +8,6 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
-import { useTrainerProfile } from '@/hooks/useTrainerProfile';
 import { format } from 'date-fns';
 import { 
   Users, 

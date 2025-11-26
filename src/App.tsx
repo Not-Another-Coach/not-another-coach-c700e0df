@@ -6,8 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { UserIntentProvider } from "@/hooks/useUserIntent";
 import { VisibilityConfigProvider } from "@/contexts/VisibilityConfigContext";
-import { TrainerProfileProvider } from "@/contexts/TrainerProfileContext";
-import { ClientProfileProvider } from "@/contexts/ClientProfileContext";
+import { UserProfileProvider } from "@/contexts/UserProfileContext";
 import { PlatformAccessGuard } from "@/components/auth/PlatformAccessGuard";
 import { SessionNotification } from "@/components/SessionNotification";
 import Home from "./pages/Home";
@@ -60,9 +59,8 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <TrainerProfileProvider>
-        <ClientProfileProvider>
-          <UserIntentProvider>
+      <UserProfileProvider>
+        <UserIntentProvider>
           <VisibilityConfigProvider>
             <TooltipProvider>
               <Toaster />
@@ -130,8 +128,7 @@ const App = () => (
           </TooltipProvider>
         </VisibilityConfigProvider>
       </UserIntentProvider>
-        </ClientProfileProvider>
-      </TrainerProfileProvider>
+      </UserProfileProvider>
     </AuthProvider>
   </QueryClientProvider>
 );

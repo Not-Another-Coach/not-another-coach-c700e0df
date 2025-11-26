@@ -1,3 +1,10 @@
+/**
+ * @deprecated This hook is now part of the unified useUserProfile hook
+ * The ClientProfileContext now uses the unified UserProfileProvider
+ * This file is kept for backwards compatibility but may be removed in the future
+ * Please use useUserProfileContext or useProfileByType instead
+ */
+
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
