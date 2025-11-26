@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Check, AlertCircle, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import React from 'react';
+import { Check, AlertCircle, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
@@ -33,11 +33,6 @@ export const ResponsiveBreadcrumb: React.FC<ResponsiveBreadcrumbProps> = ({
   totalSteps,
   overallProgress,
 }) => {
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
-  const [showControls, setShowControls] = useState(false);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-
   const getCurrentStepInfo = () => {
     if (!currentStep || !steps) return null;
     return steps.find(s => s.stepNumber === currentStep);
@@ -45,70 +40,6 @@ export const ResponsiveBreadcrumb: React.FC<ResponsiveBreadcrumbProps> = ({
 
   const currentStepInfo = getCurrentStepInfo();
   const completedSteps = steps?.filter(s => s.completion === 'completed').length || 0;
-
-  const checkScrollState = () => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-
-    const { scrollLeft, scrollWidth, clientWidth } = container;
-    const hasOverflow = scrollWidth > clientWidth;
-    
-    setShowControls(hasOverflow);
-    setCanScrollLeft(scrollLeft > 0);
-    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
-  };
-
-  const scroll = (direction: 'left' | 'right') => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-
-    const scrollAmount = 200;
-    const newScrollLeft = direction === 'left' 
-      ? container.scrollLeft - scrollAmount 
-      : container.scrollLeft + scrollAmount;
-
-    container.scrollTo({
-      left: newScrollLeft,
-      behavior: 'smooth'
-    });
-  };
-
-  useEffect(() => {
-    checkScrollState();
-    const container = scrollContainerRef.current;
-    if (!container) return;
-
-    const resizeObserver = new ResizeObserver(checkScrollState);
-    resizeObserver.observe(container);
-
-    container.addEventListener('scroll', checkScrollState);
-    window.addEventListener('resize', checkScrollState);
-
-    return () => {
-      resizeObserver.disconnect();
-      container.removeEventListener('scroll', checkScrollState);
-      window.removeEventListener('resize', checkScrollState);
-    };
-  }, [children]);
-
-  useEffect(() => {
-    if (currentStep && scrollContainerRef.current) {
-      const container = scrollContainerRef.current;
-      const currentStepElement = container.querySelector(`[data-step="${currentStep}"]`);
-      
-      if (currentStepElement) {
-        const elementLeft = (currentStepElement as HTMLElement).offsetLeft;
-        const elementWidth = (currentStepElement as HTMLElement).offsetWidth;
-        const containerWidth = container.clientWidth;
-        const scrollLeft = elementLeft - (containerWidth / 2) + (elementWidth / 2);
-
-        container.scrollTo({
-          left: scrollLeft,
-          behavior: 'smooth'
-        });
-      }
-    }
-  }, [currentStep]);
 
   return (
     <div className={cn("w-full", className)}>
@@ -186,45 +117,15 @@ export const ResponsiveBreadcrumb: React.FC<ResponsiveBreadcrumbProps> = ({
         </div>
       ) : null}
 
-      {/* Tablet/Medium Horizontal Scroll Layout */}
-      <div className="hidden sm:block lg:hidden relative">
-        {showControls && canScrollLeft && (
-          <button
-            onClick={() => scroll('left')}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-background/95 border border-border rounded-full p-1.5 shadow-lg hover:bg-accent transition-colors"
-            aria-label="Scroll left"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-        )}
-        
-        <div
-          ref={scrollContainerRef}
-          className="overflow-x-auto scrollbar-hide px-8 pb-2"
-          style={{
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none',
-            WebkitOverflowScrolling: 'touch',
-          }}
-        >
-          <div className="flex gap-2 justify-start min-w-max">
-            {children}
-          </div>
-        </div>
-
-        {showControls && canScrollRight && (
-          <button
-            onClick={() => scroll('right')}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-background/95 border border-border rounded-full p-1.5 shadow-lg hover:bg-accent transition-colors"
-            aria-label="Scroll right"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        )}
-      </div>
-
-      {/* Desktop Wrap Layout */}
-      <div className="hidden lg:block w-full overflow-visible">
+      {/* Desktop Horizontal Layout */}
+      <div 
+        className="hidden sm:block w-full overflow-visible"
+        style={{
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+          WebkitOverflowScrolling: 'touch',
+        }}
+      >
         <div className="flex gap-1 sm:gap-2 lg:gap-3 flex-wrap justify-center px-2 pb-2">
           {children}
         </div>
