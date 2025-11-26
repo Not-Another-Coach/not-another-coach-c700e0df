@@ -212,13 +212,15 @@ export default function Home() {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Left side: Logo + Toggle */}
-            <div className="flex items-center gap-4 flex-shrink-0">
+          <div className="flex items-center justify-between h-16 relative">
+            {/* Left side: Logo */}
+            <div className="flex items-center gap-3 flex-shrink-0">
               <AppLogo onClick={() => navigate('/')} />
-              <div className="hidden md:flex">
-                <UserModeToggle />
-              </div>
+            </div>
+            
+            {/* User Mode Toggle - Center */}
+            <div className="absolute left-1/2 -translate-x-1/2 hidden md:flex">
+              <UserModeToggle />
             </div>
           
             {/* Right side: Actions */}
