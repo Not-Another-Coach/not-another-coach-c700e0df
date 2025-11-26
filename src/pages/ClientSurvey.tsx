@@ -327,6 +327,9 @@ const ClientSurvey = () => {
         if (!formData.last_name || formData.last_name.trim() === "") {
           newErrors.last_name = "Last name is required";
         }
+        if (!formData.gender_preference || formData.gender_preference.trim() === "") {
+          newErrors.gender_preference = "Gender preference is required";
+        }
         break;
       case 2: // Goals
         if (!formData.primary_goals || formData.primary_goals.length === 0) {

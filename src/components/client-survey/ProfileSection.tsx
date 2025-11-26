@@ -117,7 +117,7 @@ export function ProfileSection({ formData, updateFormData, errors, clearFieldErr
   return (
     <div className="space-y-8">
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-bold">Your Profile</h2>
+        <h2 className="text-2xl font-bold">Profile Picture</h2>
         <p className="text-muted-foreground">
           Let's start with some basic information to help coaches know who they'll be working with
         </p>
@@ -197,7 +197,7 @@ export function ProfileSection({ formData, updateFormData, errors, clearFieldErr
 
       {/* Gender Preference */}
       <div className="space-y-2">
-        <Label htmlFor="gender_preference">Gender Preference (Optional)</Label>
+        <Label htmlFor="gender_preference">Gender Preference *</Label>
         <p className="text-sm text-muted-foreground">
           This helps us personalize your experience
         </p>
@@ -208,7 +208,7 @@ export function ProfileSection({ formData, updateFormData, errors, clearFieldErr
             clearFieldError?.('gender_preference');
           }}
         >
-          <SelectTrigger>
+          <SelectTrigger className={errors?.gender_preference ? 'border-destructive' : ''}>
             <SelectValue placeholder="Select gender preference" />
           </SelectTrigger>
           <SelectContent>
@@ -219,6 +219,9 @@ export function ProfileSection({ formData, updateFormData, errors, clearFieldErr
             ))}
           </SelectContent>
         </Select>
+        {errors?.gender_preference && (
+          <p className="text-sm text-destructive">{errors.gender_preference}</p>
+        )}
       </div>
 
       {/* Timezone */}
