@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Upload, Camera, Sparkles, User, Plus, X, Calendar, GripVertical } from "lucide-react";
+import { Upload, Camera, Sparkles, User, Plus, X, Calendar, GripVertical, RefreshCw } from "lucide-react";
 import { SectionHeader } from './SectionHeader';
 import { AIDescriptionHelper } from './AIDescriptionHelper';
 import { ProfileImagePositioner } from './ProfileImagePositioner';
@@ -25,6 +25,12 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
   const [howStartedAIHelperOpen, setHowStartedAIHelperOpen] = useState(false);
   const [philosophyAIHelperOpen, setPhilosophyAIHelperOpen] = useState(false);
   const [taglineAIHelperOpen, setTaglineAIHelperOpen] = useState(false);
+  
+  // Track AI generation state for each helper
+  const [taglineIsImproving, setTaglineIsImproving] = useState(false);
+  const [howStartedIsImproving, setHowStartedIsImproving] = useState(false);
+  const [philosophyIsImproving, setPhilosophyIsImproving] = useState(false);
+  const [bioIsImproving, setBioIsImproving] = useState(false);
   
   // Get current image position from formData or default
   const imagePosition = formData.profile_image_position || { x: 50, y: 50, scale: 1 };
@@ -228,13 +234,22 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
         <div className="flex items-center justify-between">
           <Label htmlFor="tagline">Short Tagline *</Label>
           <Button
-            variant="outline"
+            variant="ai"
             size="sm"
             onClick={() => setTaglineAIHelperOpen(!taglineAIHelperOpen)}
-            disabled={!formData.tagline?.trim()}
+            disabled={!formData.tagline?.trim() || taglineIsImproving}
           >
-            <Sparkles className="h-4 w-4 mr-2" />
-            {formData.tagline?.trim() ? 'Improve' : 'AI Helper'}
+            {taglineIsImproving ? (
+              <>
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                Improving...
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4 mr-2" />
+                {formData.tagline?.trim() ? 'Improve' : 'AI Helper'}
+              </>
+            )}
           </Button>
         </div>
         
@@ -245,6 +260,7 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
             currentDescription={formData.tagline || ''}
             fieldType="tagline"
             autoGenerate
+            onGeneratingChange={setTaglineIsImproving}
             onSuggestionSelect={(suggestion) => {
               updateFormData({ tagline: suggestion });
               setTaglineAIHelperOpen(false);
@@ -281,13 +297,22 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
         <div className="flex items-center justify-between">
           <Label htmlFor="how_started">How it all started?</Label>
           <Button
-            variant="outline"
+            variant="ai"
             size="sm"
             onClick={() => setHowStartedAIHelperOpen(!howStartedAIHelperOpen)}
-            disabled={!formData.how_started?.trim()}
+            disabled={!formData.how_started?.trim() || howStartedIsImproving}
           >
-            <Sparkles className="h-4 w-4 mr-2" />
-            {formData.how_started?.trim() ? 'Improve' : 'AI Helper'}
+            {howStartedIsImproving ? (
+              <>
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                Improving...
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4 mr-2" />
+                {formData.how_started?.trim() ? 'Improve' : 'AI Helper'}
+              </>
+            )}
           </Button>
         </div>
         
@@ -298,6 +323,7 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
             currentDescription={formData.how_started || ''}
             fieldType="how_started"
             autoGenerate
+            onGeneratingChange={setHowStartedIsImproving}
             onSuggestionSelect={(suggestion) => {
               updateFormData({ how_started: suggestion });
               setHowStartedAIHelperOpen(false);
@@ -329,13 +355,22 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
         <div className="flex items-center justify-between">
           <Label htmlFor="philosophy">My Philosophy?</Label>
           <Button
-            variant="outline"
+            variant="ai"
             size="sm"
             onClick={() => setPhilosophyAIHelperOpen(!philosophyAIHelperOpen)}
-            disabled={!formData.philosophy?.trim()}
+            disabled={!formData.philosophy?.trim() || philosophyIsImproving}
           >
-            <Sparkles className="h-4 w-4 mr-2" />
-            {formData.philosophy?.trim() ? 'Improve' : 'AI Helper'}
+            {philosophyIsImproving ? (
+              <>
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                Improving...
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4 mr-2" />
+                {formData.philosophy?.trim() ? 'Improve' : 'AI Helper'}
+              </>
+            )}
           </Button>
         </div>
         
@@ -346,6 +381,7 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
             currentDescription={formData.philosophy || ''}
             fieldType="philosophy"
             autoGenerate
+            onGeneratingChange={setPhilosophyIsImproving}
             onSuggestionSelect={(suggestion) => {
               updateFormData({ philosophy: suggestion });
               setPhilosophyAIHelperOpen(false);
@@ -377,13 +413,22 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
         <div className="flex items-center justify-between">
           <Label htmlFor="bio">Bio/About Me *</Label>
           <Button
-            variant="outline"
+            variant="ai"
             size="sm"
             onClick={() => setBioAIHelperOpen(!bioAIHelperOpen)}
-            disabled={!formData.bio?.trim()}
+            disabled={!formData.bio?.trim() || bioIsImproving}
           >
-            <Sparkles className="h-4 w-4 mr-2" />
-            {formData.bio?.trim() ? 'Improve' : 'AI Helper'}
+            {bioIsImproving ? (
+              <>
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                Improving...
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4 mr-2" />
+                {formData.bio?.trim() ? 'Improve' : 'AI Helper'}
+              </>
+            )}
           </Button>
         </div>
         
@@ -394,6 +439,7 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
             currentDescription={formData.bio || ''}
             fieldType="bio"
             autoGenerate
+            onGeneratingChange={setBioIsImproving}
             onSuggestionSelect={(suggestion) => {
               updateFormData({ bio: suggestion });
               setBioAIHelperOpen(false);
