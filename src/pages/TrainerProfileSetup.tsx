@@ -1178,6 +1178,7 @@ const TrainerProfileSetup = () => {
           
            <div className={currentStep === 1 ? "ml-auto flex items-center" : "flex items-center"}>
              <Button 
+               variant={currentStep === totalSteps ? "success" : "hero"}
                onClick={handleNext}
                disabled={isLoading}
              >

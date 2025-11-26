@@ -147,7 +147,7 @@ export const VisibilitySettingsSection = () => {
                           </Tooltip>
                         </div>
                         <Button
-                          variant="outline"
+                          variant="secondary"
                           size="sm"
                           onClick={() => setPreviewStage(stageGroup)}
                           className="h-7 text-xs px-2"

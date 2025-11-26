@@ -117,7 +117,7 @@ export const PublishButton = ({ profile }: PublishButtonProps) => {
       return {
         text: 'Resubmit',
         icon: Send,
-        variant: 'default' as const,
+        variant: 'success' as const,
         disabled: !readyToPublish,
         color: ''
       };
@@ -126,7 +126,7 @@ export const PublishButton = ({ profile }: PublishButtonProps) => {
     return {
       text: 'Publish',
       icon: Send,
-      variant: 'default' as const,
+      variant: 'success' as const,
       disabled: !readyToPublish,
       color: ''
     };

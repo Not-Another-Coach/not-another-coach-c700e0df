@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
-import { Users, Heart, Target, Zap, Sparkles } from "lucide-react";
+import { Users, Heart, Target, Zap, Sparkles, RefreshCw } from "lucide-react";
 import { AIDescriptionHelper } from "./AIDescriptionHelper";
 import { SectionHeader } from './SectionHeader';
 
@@ -78,6 +78,7 @@ const coachingStyles = [
 
 export function ClientFitSection({ formData, updateFormData }: ClientFitSectionProps) {
   const [showAIHelper, setShowAIHelper] = useState(false);
+  const [isImproving, setIsImproving] = useState(false);
   
   // Initialize arrays if they don't exist (same pattern as other sections)
   useEffect(() => {
@@ -237,14 +238,24 @@ export function ClientFitSection({ formData, updateFormData }: ClientFitSectionP
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <Label htmlFor="ideal_client_personality">Describe Your Ideal Client (Optional)</Label>
-          <Button
-            variant="ai"
-            size="sm"
-            onClick={() => setShowAIHelper(!showAIHelper)}
-          >
-            <Sparkles className="h-4 w-4 mr-2" />
-            AI Helper
-          </Button>
+              <Button
+                variant="ai"
+                size="sm"
+                onClick={() => setShowAIHelper(!showAIHelper)}
+                disabled={!formData.ideal_client_personality?.trim() || isImproving}
+              >
+                {isImproving ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Improving...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    {formData.ideal_client_personality?.trim() ? 'Improve' : 'AI Helper'}
+                  </>
+                )}
+              </Button>
         </div>
 
         {showAIHelper && (
@@ -252,6 +263,8 @@ export function ClientFitSection({ formData, updateFormData }: ClientFitSectionP
             selectedClientTypes={formData.ideal_client_types || []}
             selectedCoachingStyles={formData.coaching_style || []}
             currentDescription={formData.ideal_client_personality || ""}
+            autoGenerate
+            onGeneratingChange={setIsImproving}
             onSuggestionSelect={(suggestion) => {
               updateFormData({ ideal_client_personality: suggestion });
               setShowAIHelper(false);
