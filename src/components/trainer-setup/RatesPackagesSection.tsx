@@ -978,6 +978,7 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
           </div>
           
           <Button 
+            variant="secondary"
             onClick={addPackage}
             disabled={!newPackage.name || !newPackage.price || !newPackage.description || (newPackage.isPromotion && (!newPackage.promotionStartDate || !newPackage.promotionEndDate))}
             className="w-full"
