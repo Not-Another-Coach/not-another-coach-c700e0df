@@ -22,7 +22,7 @@ import { useUserIntent } from "@/hooks/useUserIntent";
 import { Heart, ArrowRight } from "lucide-react";
 
 export default function Home() {
-  const { user, loading, isLoggingOut } = useAuth();
+  const { user, loading } = useAuth();
   const { profile, loading: profileLoading, userType } = useProfileByType();
   const { user_type, loading: userTypeLoading } = useUserType();
   const { savedTrainersCount } = useAnonymousSession();
@@ -58,7 +58,6 @@ export default function Home() {
       loading,
       profileLoading,
       userTypeLoading,
-      isLoggingOut,
       isMigrating,
       hasUser: !!user,
       userType: userType || user_type,
@@ -66,7 +65,7 @@ export default function Home() {
     });
 
     // Wait for auth to complete
-    if (loading || isLoggingOut || isMigrating) {
+    if (loading || isMigrating) {
       console.log('⏳ Home - Auth still loading, waiting...');
       return;
     }
@@ -181,7 +180,7 @@ export default function Home() {
 
     // Only set isCheckingRedirect to false if NO redirect is happening
     setIsCheckingRedirect(false);
-  }, [user, loading, profileLoading, userTypeLoading, isLoggingOut, isMigrating, userType, user_type, profile, navigate]);
+  }, [user, loading, profileLoading, userTypeLoading, isMigrating, userType, user_type, profile, navigate]);
 
   const handleQuizComplete = (results: any) => {
     console.log('🎯 Quiz completed in Home component:', results);
