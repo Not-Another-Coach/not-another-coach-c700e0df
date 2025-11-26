@@ -6965,7 +6965,10 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: boolean
       }
-      can_user_access_platform: { Args: { user_id: string }; Returns: boolean }
+      can_user_access_platform: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
       cancel_trainer_plan: { Args: { p_reason?: string }; Returns: Json }
       carry_forward_incomplete_cts: {
         Args: {

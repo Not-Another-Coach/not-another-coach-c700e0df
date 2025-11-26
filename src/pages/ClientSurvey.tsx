@@ -502,7 +502,7 @@ const ClientSurvey = () => {
         
         // Check platform access before navigating
         const { data: hasAccess } = await supabase.rpc('can_user_access_platform', {
-          user_id: user.id
+          p_user_id: user.id
         });
         
         toast({

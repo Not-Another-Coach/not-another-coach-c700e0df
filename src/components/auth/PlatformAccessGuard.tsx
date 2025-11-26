@@ -37,7 +37,7 @@ export function PlatformAccessGuard({ children }: PlatformAccessGuardProps) {
 
     try {
       const { data, error } = await supabase
-        .rpc('can_user_access_platform', { user_id: user.id });
+        .rpc('can_user_access_platform', { p_user_id: user.id });
 
       if (error) {
         console.error('Error checking platform access:', error);
