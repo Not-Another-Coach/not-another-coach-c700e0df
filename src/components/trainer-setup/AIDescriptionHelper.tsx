@@ -326,7 +326,7 @@ export function AIDescriptionHelper({
   };
 
   return (
-    <Card className="border-primary/20 bg-primary/5">
+    <Card className="border-purple-300 bg-gradient-to-br from-purple-500/10 to-indigo-500/10">
       <CardContent className="p-4 space-y-4">
         <div className="flex items-center justify-between">
           <div>
@@ -370,7 +370,7 @@ export function AIDescriptionHelper({
           <div className="space-y-2">
             <div className="space-y-1">
               <p className="text-xs font-medium">Original:</p>
-              <div className="bg-muted/50 p-2 rounded text-xs text-muted-foreground">
+              <div className="bg-white/60 p-2 rounded text-xs text-muted-foreground border border-purple-100">
                 {currentDescription.length > 80 
                   ? currentDescription.substring(0, 80) + "..."
                   : currentDescription
@@ -388,11 +388,11 @@ export function AIDescriptionHelper({
             </p>
             <div className="space-y-2">
               {suggestions.map((suggestion, index) => (
-                <Card
-                  key={index}
-                  className="cursor-pointer hover:bg-primary/10 transition-colors border-primary/10"
-                  onClick={() => onSuggestionSelect(suggestion)}
-                >
+            <Card
+              key={index}
+              className="cursor-pointer hover:bg-purple-100 transition-colors border-purple-200 bg-white/80"
+              onClick={() => onSuggestionSelect(suggestion)}
+            >
                   <CardContent className="p-3">
                     <p className="text-sm leading-relaxed">{suggestion}</p>
                   </CardContent>
