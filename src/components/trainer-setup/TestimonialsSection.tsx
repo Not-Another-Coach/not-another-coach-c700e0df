@@ -270,7 +270,9 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="client_name">Client Name (First name only)</Label>
+              <div className="flex items-center justify-between h-9">
+                <Label htmlFor="client_name">Client Name (First name only)</Label>
+              </div>
               <Input
                 id="client_name"
                 value={newTestimonial.clientName || ""}
@@ -280,11 +282,11 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
             </div>
             
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between h-9">
                 <Label htmlFor="outcome_tags">Outcome Tags</Label>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button type="button" variant="outline" size="sm">
+                    <Button type="button" variant="default" size="sm">
                       <Plus className="h-4 w-4 mr-1" />
                       Add tags
                     </Button>
