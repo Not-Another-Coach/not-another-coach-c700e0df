@@ -22,55 +22,23 @@ export default function AuthCallback() {
           hashFragment = window.location.hash.substring(1);
         }
 
-        if (hashFragment) {
-          // Parse the fragment parameters
-          const params = new URLSearchParams(hashFragment);
-          const accessToken = params.get('access_token');
-          const refreshToken = params.get('refresh_token');
-          const type = params.get('type');
+      if (hashFragment) {
+        // Parse the fragment parameters
+        const params = new URLSearchParams(hashFragment);
+        const type = params.get('type');
 
-          if (accessToken && refreshToken && type === 'signup') {
-            // Set the session with the tokens
-            const { data, error } = await supabase.auth.setSession({
-              access_token: accessToken,
-              refresh_token: refreshToken
-            });
-
-            if (error) {
-              console.error('Session error:', error);
-              toast({
-                title: "Authentication Error",
-                description: "Failed to complete email verification. Please try again.",
-                variant: "destructive",
-              });
-              navigate('/auth');
-              return;
-            }
-
-            if (data.user) {
-              // Send welcome email after successful verification
-              try {
-                await supabase.functions.invoke('send-welcome-email', {
-                  body: { 
-                    user: data.user,
-                    userType: data.user.user_metadata?.user_type
-                  }
-                });
-              } catch (error) {
-                console.error('Failed to send welcome email:', error);
-              }
-
-              toast({
-                title: "Email Verified!",
-                description: "Your email has been verified successfully. Welcome!",
-              });
-              
-              // Navigate to home to trigger the normal role-based redirect
-              navigate('/', { replace: true });
-              return;
-            }
-          }
+        if (type === 'signup') {
+          // Email is already confirmed by Supabase when they clicked the link
+          toast({
+            title: "Email Verified!",
+            description: "Your email has been confirmed. Please log in to continue.",
+          });
+          
+          // Redirect to auth page (login tab)
+          navigate('/auth', { replace: true });
+          return;
         }
+      }
 
         // If we get here, something went wrong or it's not a valid callback
         toast({

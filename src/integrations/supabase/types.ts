@@ -4352,6 +4352,7 @@ export type Database = {
           ways_of_working_visibility: string | null
           ways_of_working_what_i_bring: Json | null
           weekly_programming_only: boolean | null
+          welcome_email_sent: boolean | null
           works_bank_holidays: boolean | null
           wow_activities: Json | null
           wow_activity_assignments: Json | null
@@ -4485,6 +4486,7 @@ export type Database = {
           ways_of_working_visibility?: string | null
           ways_of_working_what_i_bring?: Json | null
           weekly_programming_only?: boolean | null
+          welcome_email_sent?: boolean | null
           works_bank_holidays?: boolean | null
           wow_activities?: Json | null
           wow_activity_assignments?: Json | null
@@ -4618,6 +4620,7 @@ export type Database = {
           ways_of_working_visibility?: string | null
           ways_of_working_what_i_bring?: Json | null
           weekly_programming_only?: boolean | null
+          welcome_email_sent?: boolean | null
           works_bank_holidays?: boolean | null
           wow_activities?: Json | null
           wow_activity_assignments?: Json | null
