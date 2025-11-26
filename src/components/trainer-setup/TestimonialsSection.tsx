@@ -346,20 +346,6 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
             />
           </div>
 
-          {/* AI Helper for Achievement */}
-          {aiHelperOpen && (
-            <TestimonialAIHelper
-              clientQuote={newTestimonial.clientQuote || ""}
-              outcomeTags={newTestimonial.outcomeTags || []}
-              onSuggestionSelect={(suggestion) => 
-                setNewTestimonial({ ...newTestimonial, achievement: suggestion })
-              }
-              isOpen={aiHelperOpen}
-              autoGenerate={true}
-              onGeneratingChange={setIsAiGenerating}
-            />
-          )}
-          
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="achievement">What did this client achieve? *</Label>
@@ -382,6 +368,21 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
                 )}
               </Button>
             </div>
+            
+            {/* AI Helper - positioned below label, matching Tab 1 pattern */}
+            {aiHelperOpen && (
+              <TestimonialAIHelper
+                clientQuote={newTestimonial.clientQuote || ""}
+                outcomeTags={newTestimonial.outcomeTags || []}
+                onSuggestionSelect={(suggestion) => 
+                  setNewTestimonial({ ...newTestimonial, achievement: suggestion })
+                }
+                isOpen={aiHelperOpen}
+                autoGenerate={true}
+                onGeneratingChange={setIsAiGenerating}
+              />
+            )}
+            
             <Input
               id="achievement"
               value={newTestimonial.achievement || ""}
