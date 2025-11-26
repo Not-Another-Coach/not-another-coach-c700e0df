@@ -624,7 +624,7 @@ const ClientSurvey = () => {
             {/* Center: Title - Absolute positioned */}
             <div className="absolute left-1/2 -translate-x-1/2">
               <h1 className="text-base sm:text-lg font-bold whitespace-nowrap">
-                Find Your Coach
+                About You
               </h1>
             </div>
             
