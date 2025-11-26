@@ -32,20 +32,22 @@ export const ProfileDropdown = ({ profile }: ProfileDropdownProps) => {
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
   
-  // Early return if profile is null or undefined
-  if (!profile) {
-    return null;
-  }
-  
   const getInitials = () => {
+    if (!profile) return 'U';
     const first = profile.first_name?.charAt(0) || '';
     const last = profile.last_name?.charAt(0) || '';
     return (first + last).toUpperCase() || 'U';
   };
 
   const getFullName = () => {
+    if (!profile) return 'User';
     return `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'User';
   };
+  
+  // Don't render if no profile
+  if (!profile) {
+    return null;
+  }
 
   const handleResetPassword = async () => {
     try {
