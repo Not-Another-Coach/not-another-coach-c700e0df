@@ -362,6 +362,43 @@ className="bg-white" // ❌ Bad - use bg-card or bg-background
 
 ---
 
+## Interaction States
+
+All interactive buttons provide visual feedback through hover and active states to ensure users know when they can interact with elements.
+
+### Hover States
+All interactive buttons should provide visual feedback on hover:
+- **Primary actions** (hero, success, ai, energy): Lift effect (`hover:-translate-y-0.5`) + enhanced shadow (`hover:shadow-lg`)
+- **Standard actions** (default, secondary, destructive): Color darkening (90/80% opacity) + shadow increase (`hover:shadow-md`)
+- **Utility actions** (outline, ghost): Background fill change (`hover:bg-accent`)
+- **Links**: Underline appears (`hover:underline`)
+
+### Active States (Click/Press)
+All buttons provide immediate feedback when clicked:
+- **Scale reduction** (`active:scale-[0.98]`): Subtle "press" effect for tactile feedback
+- **Shadow reduction**: Shadow returns to default or smaller (`active:shadow-sm` or `active:shadow-md`)
+- **Position reset**: Any hover lift effect returns to baseline (`active:translate-y-0`)
+
+### Focus States
+All buttons have focus rings for keyboard accessibility:
+- `focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2`
+- Focus states are automatically included in the base button component
+
+### Visual Feedback Summary
+
+| Variant | Hover Effect | Active Effect |
+|---------|--------------|---------------|
+| **hero** | Lift up, larger shadow | Press down, scale 0.98 |
+| **success** | Lift up, darker, shadow | Press down, scale 0.98 |
+| **ai** | Lift up, brighter, shadow | Press down, scale 0.98 |
+| **energy** | Lift up, darker, shadow | Press down, scale 0.98 |
+| **default** | Darker (90%), shadow | Scale 0.98, smaller shadow |
+| **secondary** | Darker (80%), shadow | Scale 0.98, smaller shadow |
+| **outline** | Background fill, border color | Scale 0.98, darker fill |
+| **destructive** | Darker (90%), shadow | Scale 0.98, smaller shadow |
+| **ghost** | Subtle background | Scale 0.98, darker background |
+| **link** | Underline | Darker text |
+
 ## Design System Rules
 
 ### Critical Rules
