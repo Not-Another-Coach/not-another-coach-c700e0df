@@ -620,8 +620,9 @@ const ClientSurvey = () => {
         <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border">
           <div className="mx-auto px-3 sm:px-6 lg:px-8 xl:px-12 py-2 sm:py-3">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 sm:gap-3">
+              <div className="flex items-center gap-3 sm:gap-4">
                 <AppLogo onClick={() => navigate('/client/dashboard', { state: { fromSurvey: true } })} />
+                <h1 className="text-xl sm:text-2xl font-bold">Find Your Coach</h1>
               </div>
               <div className="flex items-center gap-1.5 sm:gap-3">
                 {/* Save Progress Button - styled like trainer profile */}
@@ -643,19 +644,6 @@ const ClientSurvey = () => {
         </header>
       )}
 
-      {/* Survey Header with Title */}
-      <div className="bg-card border-b px-4 py-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center space-y-2">
-            <h1 className="text-2xl sm:text-3xl font-bold">
-              Find Your Perfect Trainer
-            </h1>
-            <p className="text-sm sm:text-base text-muted-foreground">
-              Tell us about your fitness goals and preferences
-            </p>
-          </div>
-        </div>
-      </div>
 
       {/* Step indicators for navigation */}
       <div className="bg-card border-b p-3 sm:p-4">
