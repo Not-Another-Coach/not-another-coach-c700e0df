@@ -941,11 +941,12 @@ const TrainerProfileSetup = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background opacity-0 animate-fadeIn">
+    <div className="min-h-screen bg-gradient-hero opacity-0 animate-fadeIn">
       {/* Header */}
       <div className="p-4 border-b bg-card">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-          <div className="flex items-center gap-3 min-w-0 flex-wrap">
+        <div className="flex justify-between items-center relative">
+          {/* Left: Logo + Back Button */}
+          <div className="flex items-center gap-3">
             <AppLogo size="sm" showText={true} onClick={() => navigate('/')} />
             {trainerAccessEnabled && profile?.profile_setup_completed && (
               <Button
@@ -959,48 +960,52 @@ const TrainerProfileSetup = () => {
                 <span className="sm:hidden">Back</span>
               </Button>
             )}
-            <div className="flex items-center gap-2 min-w-0">
-              <h1 className="text-base sm:text-lg font-bold truncate">
-                {isFullyComplete() ? 'Profile Management' : 'Profile Setup'}
-              </h1>
-              {/* Verification Badge */}
-              {(() => {
-                const verificationStatus = (profile as any)?.verification_status || 'pending';
-                if (verificationStatus === 'verified') {
-                  return (
-                    <div className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium whitespace-nowrap">
-                      <Shield className="h-3 w-3" />
-                      <Check className="h-3 w-3" />
-                      Verified
-                    </div>
-                  );
-                } else if (verificationStatus === 'under_review') {
-                  return (
-                    <div className="flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium whitespace-nowrap">
-                      <Shield className="h-3 w-3" />
-                      Under Review
-                    </div>
-                  );
-                } else if (verificationStatus === 'pending') {
-                  return (
-                    <div className="flex items-center gap-1 px-2 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-medium whitespace-nowrap">
-                      <Shield className="h-3 w-3" />
-                      Pending
-                    </div>
-                  );
-                } else if (verificationStatus === 'rejected') {
-                  return (
-                    <div className="flex items-center gap-1 px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium whitespace-nowrap">
-                      <Shield className="h-3 w-3" />
-                      Rejected
-                    </div>
-                  );
-                }
-                return null;
-              })()}
-            </div>
           </div>
-          <div className="flex items-center gap-2 justify-end sm:justify-start flex-wrap">
+          
+          {/* Center: Title + Badge - Absolute positioned */}
+          <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
+            <h1 className="text-base sm:text-lg font-bold whitespace-nowrap">
+              {isFullyComplete() ? 'Profile Management' : 'Profile Setup'}
+            </h1>
+            {/* Verification Badge */}
+            {(() => {
+              const verificationStatus = (profile as any)?.verification_status || 'pending';
+              if (verificationStatus === 'verified') {
+                return (
+                  <div className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium whitespace-nowrap">
+                    <Shield className="h-3 w-3" />
+                    <Check className="h-3 w-3" />
+                    Verified
+                  </div>
+                );
+              } else if (verificationStatus === 'under_review') {
+                return (
+                  <div className="flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium whitespace-nowrap">
+                    <Shield className="h-3 w-3" />
+                    Under Review
+                  </div>
+                );
+              } else if (verificationStatus === 'pending') {
+                return (
+                  <div className="flex items-center gap-1 px-2 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-medium whitespace-nowrap">
+                    <Shield className="h-3 w-3" />
+                    Pending
+                  </div>
+                );
+              } else if (verificationStatus === 'rejected') {
+                return (
+                  <div className="flex items-center gap-1 px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium whitespace-nowrap">
+                    <Shield className="h-3 w-3" />
+                    Rejected
+                  </div>
+                );
+              }
+              return null;
+            })()}
+          </div>
+          
+          {/* Right: Action Buttons */}
+          <div className="flex items-center gap-2">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>

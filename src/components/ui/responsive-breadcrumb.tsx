@@ -45,7 +45,7 @@ export const ResponsiveBreadcrumb: React.FC<ResponsiveBreadcrumbProps> = ({
     <div className={cn("w-full", className)}>
       {/* Mobile Dropdown */}
       {currentStep && steps && onStepChange ? (
-        <div className="md:hidden w-full pb-2">
+        <div className="sm:hidden w-full pb-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="w-full flex items-center justify-between gap-2 p-3 bg-card border border-border rounded-lg hover:bg-accent/50 transition-colors">
@@ -119,14 +119,14 @@ export const ResponsiveBreadcrumb: React.FC<ResponsiveBreadcrumbProps> = ({
 
       {/* Desktop Horizontal Layout */}
       <div 
-        className="hidden md:block w-full overflow-x-auto scrollbar-hide"
+        className="hidden sm:block w-full overflow-visible"
         style={{
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
           WebkitOverflowScrolling: 'touch',
         }}
       >
-        <div className="flex gap-1 md:gap-2 lg:gap-3 flex-wrap justify-center px-2 pb-2">
+        <div className="flex gap-1 sm:gap-2 lg:gap-3 flex-wrap justify-center px-2 pb-2">
           {children}
         </div>
       </div>
