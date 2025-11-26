@@ -1009,7 +1009,7 @@ const TrainerProfileSetup = () => {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="outline" size="sm" onClick={() => handleSave()} className="flex-1 sm:flex-none">
+                  <Button variant="success" size="sm" onClick={() => handleSave()} className="flex-1 sm:flex-none">
                     <Save className="h-4 w-4" />
                     <span className="hidden lg:inline ml-2">{profile?.profile_setup_completed ? 'Update' : 'Save Draft'}</span>
                   </Button>
@@ -1022,7 +1022,7 @@ const TrainerProfileSetup = () => {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="outline" size="sm" onClick={handlePreview} className="flex-1 sm:flex-none">
+                  <Button variant="secondary" size="sm" onClick={handlePreview} className="flex-1 sm:flex-none">
                     <Eye className="h-4 w-4" />
                     <span className="hidden lg:inline ml-2">Preview</span>
                   </Button>

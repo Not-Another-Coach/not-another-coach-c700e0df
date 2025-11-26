@@ -443,16 +443,30 @@ When creating new components:
 
 ---
 
+## Header Action Button Hierarchy Example
+
+| Button | Variant | Reason |
+|--------|---------|--------|
+| **Publish/Resubmit** | `success` | Primary completion action |
+| **Save Draft/Update** | `success` | Completion action (saves data) |
+| **Preview** | `secondary` | Preview/secondary action |
+| **View Live** | `outline` | Navigation utility |
+| **Upload Photo** | `outline` | File upload utility |
+
+---
+
 ## Quick Reference: Button Variant Decision Tree
 
 ```
 Is it the main forward action? → `hero`
 Is it a completion/publish action? → `success`
+Is it saving/updating data? → `success`
 Is it an AI feature? → `ai`
 Is it adding/requesting new content? → `secondary`
 Is it uploading/selecting files? → `outline`
 Is it going back/canceling? → `outline`
 Is it a preview option? → `secondary`
+Is it viewing externally? → `outline`
 Is it a dangerous action? → `destructive`
 Is it a subtle inline action? → `ghost` or `link`
 Otherwise → `default`
