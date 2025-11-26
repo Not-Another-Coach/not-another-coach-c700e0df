@@ -340,7 +340,7 @@ export function AIDescriptionHelper({
             </p>
           </div>
           <Button
-            variant="outline"
+            variant="ai"
             size="sm"
             onClick={generateSuggestions}
             disabled={(!hasSelections && !hasContent) || isGenerating}

@@ -21,6 +21,7 @@ const buttonVariants = cva(
         hero: "bg-gradient-to-r from-primary to-secondary text-white hover:shadow-lg transform hover:-translate-y-0.5 font-semibold",
         energy: "bg-energy text-energy-foreground hover:bg-energy/90 shadow-sm hover:shadow-md",
         success: "bg-success text-success-foreground hover:bg-success/90 shadow-sm hover:shadow-md",
+        ai: "bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700 shadow-sm hover:shadow-md",
       },
       size: {
         default: "h-10 px-4 py-2",
