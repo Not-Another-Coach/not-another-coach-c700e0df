@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfileByType } from "@/hooks/useProfileByType";
-import { useUserType } from "@/hooks/useUserType";
 import { useDataMigration } from "@/hooks/useDataMigration";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,16 +20,13 @@ import { Heart, ArrowRight } from "lucide-react";
 export default function Home() {
   const { user, loading } = useAuth();
   const { profile, loading: profileLoading, userType } = useProfileByType();
-  const { user_type, loading: userTypeLoading } = useUserType();
   const { setUserIntent, userIntent } = useUserIntent();
   const { isMigrating, migrationCompleted, migrationState } = useDataMigration();
   const navigate = useNavigate();
   
   const [showQuizModal, setShowQuizModal] = useState(false);
-  const [isCheckingRedirect, setIsCheckingRedirect] = useState(true);
   const [isRedirecting, setIsRedirecting] = useState(false);
-  const [minLoadTimeElapsed, setMinLoadTimeElapsed] = useState(false);
-  const [hasStartedLoading, setHasStartedLoading] = useState(false);
+  const hasRedirected = useRef(false);
 
   // Initialize data migration hook
   useDataMigration();
@@ -40,37 +36,14 @@ export default function Home() {
     document.title = "Home - Find Your Perfect Coach";
   }, []);
 
-  // Minimum load time timer - only for authenticated users
-  useEffect(() => {
-    // Skip timer if no user (e.g., after sign out)
-    if (!user) {
-      setMinLoadTimeElapsed(true);
-      return;
-    }
-    
-    const timer = setTimeout(() => {
-      setMinLoadTimeElapsed(true);
-    }, 600);
-    
-    return () => clearTimeout(timer);
-  }, [user]);
-
-  // Track if we've started loading for authenticated user
-  useEffect(() => {
-    if (user && (loading || profileLoading || userTypeLoading || isMigrating || isCheckingRedirect)) {
-      setHasStartedLoading(true);
-    }
-  }, [user, loading, profileLoading, userTypeLoading, isMigrating, isCheckingRedirect]);
-
   // Redirect authenticated users based on their role and profile completion
   useEffect(() => {
     console.log('🔍 Home - Redirect Check:', {
       loading,
       profileLoading,
-      userTypeLoading,
       isMigrating,
       hasUser: !!user,
-      userType: userType || user_type,
+      userType,
       pathname: '/'
     });
 
@@ -80,8 +53,8 @@ export default function Home() {
       return;
     }
 
-    // Only wait for profile/userType loading if there IS a user
-    if (user && (profileLoading || userTypeLoading)) {
+    // Only wait for profile loading if there IS a user
+    if (user && profileLoading) {
       console.log('⏳ Home - User profile loading, waiting...');
       return;
     }
@@ -89,7 +62,12 @@ export default function Home() {
     // Only redirect if user is authenticated
     if (!user) {
       console.log('✅ Home - No user, staying on home page');
-      setIsCheckingRedirect(false);
+      return;
+    }
+    
+    // Prevent multiple redirects
+    if (hasRedirected.current) {
+      console.log('✅ Home - Already redirected, skipping');
       return;
     }
 
@@ -99,11 +77,11 @@ export default function Home() {
       return;
     }
 
-    const currentUserType = userType || user_type;
-    console.log('🔄 Home - Redirecting based on user type:', currentUserType);
+    console.log('🔄 Home - Redirecting based on user type:', userType);
 
     // Redirect based on user type
-    if (currentUserType === 'trainer') {
+    if (userType === 'trainer') {
+      hasRedirected.current = true;
       // Check if trainer profile is complete
       if (profile && 'bio' in profile) {
         const trainerProfile = profile as any;
@@ -142,7 +120,8 @@ export default function Home() {
         navigate('/trainer/profile-setup', { replace: true });
         return;
       }
-    } else if (currentUserType === 'client') {
+    } else if (userType === 'client') {
+      hasRedirected.current = true;
       // Check platform access before proceeding
       setIsRedirecting(true);
       const checkClientAccessAndRedirect = async () => {
@@ -191,16 +170,14 @@ export default function Home() {
 
       checkClientAccessAndRedirect();
       return;
-    } else if (currentUserType === 'admin') {
+    } else if (userType === 'admin') {
+      hasRedirected.current = true;
       console.log('🔄 Home - Admin user, redirecting to admin');
       setIsRedirecting(true);
       navigate('/admin', { replace: true });
       return;
     }
-
-    // Only set isCheckingRedirect to false if NO redirect is happening
-    setIsCheckingRedirect(false);
-  }, [user, loading, profileLoading, userTypeLoading, isMigrating, userType, user_type, profile, navigate]);
+  }, [user, loading, profileLoading, isMigrating, userType, profile, navigate]);
 
   const handleQuizComplete = (results: any) => {
     console.log('🎯 Quiz completed in Home component:', results);
@@ -224,15 +201,8 @@ export default function Home() {
     }
   };
 
-  // Show loading with lock pattern - once started, keep showing until all complete
-  const allChecksComplete = !loading && !profileLoading && !userTypeLoading && 
-                            !isMigrating && !isCheckingRedirect && !isRedirecting && minLoadTimeElapsed;
-  
-  const shouldShowLoading = user && (
-    hasStartedLoading ? !allChecksComplete : (loading || profileLoading || userTypeLoading || isMigrating)
-  );
-
-  if (shouldShowLoading) {
+  // Simple loading check like ClientDashboard
+  if (user && (loading || profileLoading || isMigrating || isRedirecting)) {
     return <ProfileLoadingState />;
   }
 
