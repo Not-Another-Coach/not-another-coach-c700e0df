@@ -459,7 +459,7 @@ export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionP
         <div className="flex items-center justify-between">
           <Label htmlFor="specialization_description">What I specialise in</Label>
           <Button
-            variant="outline"
+            variant="ai"
             size="sm"
             onClick={generateSpecializationDescription}
             disabled={!formData.specializations?.length}
