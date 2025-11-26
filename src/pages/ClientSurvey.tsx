@@ -124,6 +124,12 @@ const ClientSurvey = () => {
 
   // Redirect if not client or if survey is already completed
   useEffect(() => {
+    // If user is editing preferences, skip all redirect checks (like trainer profile does)
+    if (isEditMode) {
+      console.log('✅ ClientSurvey - Edit mode, skipping redirect checks');
+      return;
+    }
+
     console.log('🔍 ClientSurvey - Auth Check:', {
       loading,
       profileLoading,
@@ -134,8 +140,7 @@ const ClientSurvey = () => {
     });
 
     // Wait for all loading to complete before making navigation decisions
-    // Skip loading wait if we have cached profile from navigation
-    if ((loading || profileLoading) && !cachedProfile) {
+    if (loading || profileLoading) {
       console.log('⏳ ClientSurvey - Still loading, waiting...');
       return;
     }
@@ -163,7 +168,7 @@ const ClientSurvey = () => {
     console.log('✅ ClientSurvey - All checks passed, user can access survey');
     // Allow users to access this page even after completion to edit their preferences
     // Only redirect to dashboard if they explicitly complete the survey flow
-  }, [user, profile, loading, profileLoading, navigate, isClient]);
+  }, [user, profile, loading, profileLoading, navigate, isClient, isEditMode]);
 
   // Reset initialization flag when user changes
   useEffect(() => {
