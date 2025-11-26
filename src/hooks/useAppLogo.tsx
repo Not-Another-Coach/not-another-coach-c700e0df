@@ -7,13 +7,18 @@ interface LogoSettings {
   app_name: string;
 }
 
+// Module-level cache to prevent loading flash on re-renders
+let cachedLogoSettings: LogoSettings | null = null;
+
 export function useAppLogo() {
-  const [logoSettings, setLogoSettings] = useState<LogoSettings>({
-    logo_url: null,
-    fallback_text: 'YJ',
-    app_name: 'Your Journey'
-  });
-  const [loading, setLoading] = useState(true);
+  const [logoSettings, setLogoSettings] = useState<LogoSettings>(
+    cachedLogoSettings || {
+      logo_url: null,
+      fallback_text: 'YJ',
+      app_name: 'Your Journey'
+    }
+  );
+  const [loading, setLoading] = useState(!cachedLogoSettings);
 
   const fetchLogoSettings = async () => {
     try {
@@ -33,6 +38,9 @@ export function useAppLogo() {
         const parsedSettings = typeof data.setting_value === 'string' 
           ? JSON.parse(data.setting_value) 
           : data.setting_value;
+        
+        // Update cache
+        cachedLogoSettings = parsedSettings;
         setLogoSettings(parsedSettings);
       }
     } catch (error) {
@@ -58,6 +66,8 @@ export function useAppLogo() {
         return false;
       }
 
+      // Update cache
+      cachedLogoSettings = newSettings;
       setLogoSettings(newSettings);
       return true;
     } catch (error) {
