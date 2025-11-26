@@ -11,7 +11,6 @@ import { ClientTransformationView } from "./ClientTransformationView";
 import { MatchBadge } from "@/components/MatchBadge";
 import { Badge } from "@/components/ui/badge";
 import { useSavedTrainers } from "@/hooks/useSavedTrainers";
-import { useAnonymousSession } from "@/hooks/useAnonymousSession";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -72,26 +71,21 @@ export const EnhancedTrainerCard = memo(({
 }: EnhancedTrainerCardProps) => {
   const navigate = useNavigate();
   const { isTrainerSaved, saveTrainer, unsaveTrainer } = useSavedTrainers();
-  const { canSaveMoreTrainers, saveTrainer: anonymousSave } = useAnonymousSession();
   const { user } = useAuth();
 
   const handleSaveClick = async () => {
     if (!user) {
-      // Anonymous user - use anonymous session with limit
-      const success = anonymousSave(trainer.id);
-      if (!success) {
-        if (!canSaveMoreTrainers) {
-          toast({
-            title: "Limit Reached", 
-            description: "You can only save 5 trainers. Create a free account to save unlimited trainers.",
-            variant: "destructive"
-          });
-        }
-      }
-    } else {
-      // Authenticated user - use regular save
-      saveTrainer(trainer.id);
+      toast({
+        title: "Please Sign In", 
+        description: "You need to sign in to save trainers",
+        variant: "destructive"
+      });
+      navigate('/auth');
+      return;
     }
+    
+    // Authenticated user - use regular save
+    saveTrainer(trainer.id);
   };
   
   // Use trainer-specific saved state

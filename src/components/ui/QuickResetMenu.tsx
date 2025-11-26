@@ -9,8 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useUserIntent } from "@/hooks/useUserIntent";
-import { useAnonymousSession } from "@/hooks/useAnonymousSession";
-import { RefreshCw, RotateCcw, Trash2, Settings, ChevronDown } from "lucide-react";
+import { RotateCcw, Settings, ChevronDown } from "lucide-react";
 
 interface QuickResetMenuProps {
   variant?: "default" | "outline" | "ghost" | "link" | "destructive" | "secondary";
@@ -25,20 +24,10 @@ export const QuickResetMenu = ({
   children,
   className 
 }: QuickResetMenuProps) => {
-  const { clearIntent, resetIntentAndCreateNewSession, userIntent } = useUserIntent();
-  const { session } = useAnonymousSession();
-
-  const hasSavedData = session && (
-    (session.savedTrainers && session.savedTrainers.length > 0) || 
-    session.quizResults
-  );
+  const { clearIntent, userIntent } = useUserIntent();
 
   const handleIntentOnlyReset = () => {
     clearIntent();
-  };
-
-  const handleCompleteReset = () => {
-    resetIntentAndCreateNewSession();
   };
 
   return (
@@ -60,30 +49,13 @@ export const QuickResetMenu = ({
           Current: {userIntent ? `Looking as ${userIntent}` : "No intent set"}
         </DropdownMenuLabel>
         
-        {hasSavedData && (
-          <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
-            {session?.savedTrainers?.length || 0} saved • {session?.quizResults ? 'Quiz done' : 'No quiz'}
-          </DropdownMenuLabel>
-        )}
-        
         <DropdownMenuSeparator />
         
         <DropdownMenuItem onClick={handleIntentOnlyReset} className="text-sm">
           <RotateCcw className="h-4 w-4 mr-2" />
           <div>
-            <div>Change Intent Only</div>
-            <div className="text-xs text-muted-foreground">Keep saved data</div>
-          </div>
-        </DropdownMenuItem>
-        
-        <DropdownMenuItem 
-          onClick={handleCompleteReset} 
-          className="text-sm text-destructive focus:text-destructive"
-        >
-          <Trash2 className="h-4 w-4 mr-2" />
-          <div>
-            <div>Start Fresh</div>
-            <div className="text-xs text-muted-foreground">Clear everything</div>
+            <div>Change Intent</div>
+            <div className="text-xs text-muted-foreground">Reset selection</div>
           </div>
         </DropdownMenuItem>
       </DropdownMenuContent>

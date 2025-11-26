@@ -10,7 +10,6 @@ import { UserProfileProvider } from "@/contexts/UserProfileContext";
 import { PlatformAccessGuard } from "@/components/auth/PlatformAccessGuard";
 import { SessionNotification } from "@/components/SessionNotification";
 import Home from "./pages/Home";
-import ResetDemo from "./pages/ResetDemo";
 import ClientDashboard from "./pages/ClientDashboard";
 import ClientExplore from "./pages/ClientExplore";
 import MyTrainers from "./pages/MyTrainers";
@@ -19,7 +18,6 @@ import AuthCallback from "./pages/AuthCallback";
 import ClientSurvey from "./pages/ClientSurvey";
 import ClientJourney from "./pages/ClientJourney";
 import SavedTrainers from "./pages/SavedTrainers";
-import AnonymousSaved from "./pages/AnonymousSaved";
 import TrainerDashboard from "./pages/TrainerDashboard";
 import TrainerDemo from "./pages/TrainerDemo";
 import TrainerProfileSetup from "./pages/TrainerProfileSetup";
@@ -74,8 +72,6 @@ const App = () => (
                       <Route path="/" element={<Home />} />
                       <Route path="/auth" element={<Auth />} />
                       <Route path="/auth/callback" element={<AuthCallback />} />
-                      <Route path="/anonymous-saved" element={<AnonymousSaved />} />
-                      <Route path="/anonymous-shortlist" element={<AnonymousSaved />} />
                       
                       {/* Access pending routes */}
                       <Route path="/trainer/access-pending" element={<TrainerAccessPending />} />
@@ -116,7 +112,6 @@ const App = () => (
                 <Route path="/admin/system-settings" element={<AdminSystemSettings />} />
                 <Route path="/trainer/:trainerId" element={<TrainerProfile />} />
                 <Route path="/documentation" element={<Documentation />} />
-                <Route path="/reset-demo" element={<ResetDemo />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="/payment-management" element={<PaymentManagement />} />
                   <Route path="*" element={<NotFound />} />

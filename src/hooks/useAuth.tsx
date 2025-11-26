@@ -1,7 +1,6 @@
 import { useState, useEffect, createContext, useContext } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { AuthService } from '@/services';
-import { useAnonymousSession } from './useAnonymousSession';
 
 interface AuthContextType {
   user: User | null;
@@ -19,7 +18,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const { session: anonymousSession } = useAnonymousSession();
 
   useEffect(() => {
     // Set up auth state listener using AuthService
@@ -43,14 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signUp = async (email: string, password: string, userData?: any) => {
-    let redirectUrl = `${window.location.origin}/auth/callback`;
-    
-    // Include anonymous session ID in redirect URL for cross-device data migration
-    if (anonymousSession?.sessionId) {
-      const params = new URLSearchParams({ session_id: anonymousSession.sessionId });
-      redirectUrl += `?${params.toString()}`;
-      console.log('🔗 Including anonymous session in redirect URL for cross-device migration');
-    }
+    const redirectUrl = `${window.location.origin}/auth/callback`;
     
     const response = await AuthService.signUp(
       {
@@ -89,14 +80,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const resendConfirmation = async (email: string) => {
-    let redirectUrl = `${window.location.origin}/auth/callback`;
-    
-    // Include anonymous session ID in redirect URL for cross-device data migration
-    if (anonymousSession?.sessionId) {
-      const params = new URLSearchParams({ session_id: anonymousSession.sessionId });
-      redirectUrl += `?${params.toString()}`;
-      console.log('🔗 Including anonymous session in resend confirmation URL');
-    }
+    const redirectUrl = `${window.location.origin}/auth/callback`;
     
     const response = await AuthService.resendConfirmation(email, redirectUrl);
     return { error: response.error || null };

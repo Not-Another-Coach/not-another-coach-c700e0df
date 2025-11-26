@@ -233,36 +233,6 @@ export type Database = {
         }
         Relationships: []
       }
-      anonymous_sessions: {
-        Row: {
-          created_at: string
-          expires_at: string
-          id: string
-          quiz_results: Json | null
-          saved_trainers: Json
-          session_id: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          expires_at: string
-          id?: string
-          quiz_results?: Json | null
-          saved_trainers?: Json
-          session_id: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          expires_at?: string
-          id?: string
-          quiz_results?: Json | null
-          saved_trainers?: Json
-          session_id?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       app_settings: {
         Row: {
           created_at: string | null
@@ -6992,7 +6962,6 @@ export type Database = {
             Returns: undefined
           }
       check_verification_expiry: { Args: never; Returns: undefined }
-      cleanup_expired_anonymous_sessions: { Args: never; Returns: number }
       client_can_view_trainer_images:
         | {
             Args: { p_client_id: string; p_trainer_id: string }

@@ -4,10 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfileByType } from "@/hooks/useProfileByType";
 import { useUserType } from "@/hooks/useUserType";
 import { useDataMigration } from "@/hooks/useDataMigration";
-import { AnonymousBrowse } from "@/components/anonymous/AnonymousBrowse";
-import { MatchQuizModal } from "@/components/anonymous/MatchQuizModal";
 import { Button } from "@/components/ui/button";
-import { useAnonymousSession } from "@/hooks/useAnonymousSession";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLogo } from "@/components/ui/app-logo";
 import { EnhancedHeroSection } from "@/components/homepage/EnhancedHeroSection";
@@ -25,7 +22,6 @@ export default function Home() {
   const { user, loading } = useAuth();
   const { profile, loading: profileLoading, userType } = useProfileByType();
   const { user_type, loading: userTypeLoading } = useUserType();
-  const { savedTrainersCount } = useAnonymousSession();
   const { setUserIntent, userIntent } = useUserIntent();
   const { isMigrating, migrationCompleted, migrationState } = useDataMigration();
   const navigate = useNavigate();
@@ -253,20 +249,6 @@ export default function Home() {
           
             {/* Right side: Actions */}
             <div className="flex items-center gap-4 flex-shrink-0">
-              {savedTrainersCount > 0 && (
-                <Button
-                  variant="ghost"
-                  onClick={() => navigate('/anonymous-saved')}
-                  className="gap-2 animate-scale-in hover-scale"
-                  key={savedTrainersCount} // Force re-render for animation
-                >
-                  <Heart className="h-4 w-4 fill-primary text-primary animate-pulse" />
-                  <span className="animate-fade-in">
-                    {savedTrainersCount} saved
-                  </span>
-                </Button>
-              )}
-              
               {/* Desktop: Separate buttons */}
               <Button variant="ghost" onClick={() => navigate('/auth')} className="hidden md:flex">
                 Sign In
@@ -298,17 +280,19 @@ export default function Home() {
         buttonText="Start Your Coaching Journey"
       />
 
-      {/* Meet The Coaches Section */}
+      {/* Meet The Coaches Section - Requires authentication */}
       <section id="browse-trainers" className="py-16 bg-muted/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">Meet The Coaches</h2>
-            <p className="text-xl text-muted-foreground">
-              Discover your perfect training match
+            <p className="text-xl text-muted-foreground mb-8">
+              Sign in to discover your perfect training match
             </p>
+            <Button size="lg" onClick={() => navigate('/auth?signup=client')}>
+              Get Started
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
           </div>
-          
-          <AnonymousBrowse />
         </div>
       </section>
 
@@ -341,13 +325,6 @@ export default function Home() {
           </Button>
         </div>
       </section>
-
-      {/* Quiz Modal */}
-      <MatchQuizModal 
-        isOpen={showQuizModal}
-        onComplete={handleQuizComplete}
-        onClose={() => setShowQuizModal(false)}
-      />
     </div>
   );
 }
