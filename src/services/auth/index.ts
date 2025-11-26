@@ -193,7 +193,7 @@ export const AuthService = {
 
       if (error) {
         return ServiceResponseHelper.error(
-          ServiceError.database('Password update failed', error)
+          ServiceError.database(error.message || 'Password update failed', error)
         );
       }
 

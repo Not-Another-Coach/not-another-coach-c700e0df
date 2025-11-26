@@ -374,9 +374,17 @@ export default function Auth() {
     });
 
     if (!updateResult.success) {
+      const errorDetails = updateResult.error?.details;
+      let errorMessage = updateResult.error?.message || "Failed to update password";
+      
+      // Handle "same password" error with friendlier message
+      if (errorDetails?.code === 'same_password' || errorMessage.includes('different from the old password')) {
+        errorMessage = "Your new password must be different from your current password. Please choose a different password.";
+      }
+      
       toast({
         title: "Update Failed",
-        description: updateResult.error?.message || "Failed to update password",
+        description: errorMessage,
         variant: "destructive",
       });
     } else {
