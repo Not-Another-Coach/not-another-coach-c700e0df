@@ -7,6 +7,7 @@
 export { ProfileService } from './ProfileService';
 export { EngagementService } from './EngagementService';
 export { TrainerService } from './TrainerService';
+export { SensitiveDataService } from '../sensitiveData';
 
 export type {
   EngagementData,

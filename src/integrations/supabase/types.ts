@@ -260,6 +260,52 @@ export type Database = {
         }
         Relationships: []
       }
+      billing_addresses: {
+        Row: {
+          billing_address: Json | null
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          billing_address?: Json | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          billing_address?: Json | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_addresses_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_addresses_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "v_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_addresses_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "v_trainers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       billing_invoice: {
         Row: {
           amount_cents: number
@@ -1169,6 +1215,52 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      contact_info: {
+        Row: {
+          created_at: string
+          id: string
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_info_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_info_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "v_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_info_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "v_trainers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       conversations: {
         Row: {
@@ -3754,6 +3846,61 @@ export type Database = {
           },
         ]
       }
+      payment_methods: {
+        Row: {
+          card_expiry_month: number | null
+          card_expiry_year: number | null
+          card_last_four: string | null
+          card_type: string | null
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          card_expiry_month?: number | null
+          card_expiry_year?: number | null
+          card_last_four?: string | null
+          card_type?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          card_expiry_month?: number | null
+          card_expiry_year?: number | null
+          card_last_four?: string | null
+          card_type?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_methods_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_methods_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "v_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_methods_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "v_trainers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_packages: {
         Row: {
           applied_commission_plan_id: string | null
@@ -4207,16 +4354,11 @@ export type Database = {
           admin_verification_notes: string | null
           availability_schedule: Json | null
           before_after_photos: Json | null
-          billing_address: Json | null
           bio: string | null
           budget_flexibility: string | null
           budget_range_max: number | null
           budget_range_min: number | null
           calendar_link: string | null
-          card_expiry_month: number | null
-          card_expiry_year: number | null
-          card_last_four: string | null
-          card_type: string | null
           certifying_body: string | null
           client_journey_stage: string | null
           client_personality_type: string[] | null
@@ -4271,7 +4413,6 @@ export type Database = {
           open_to_virtual_coaching: boolean | null
           package_inclusions: Json | null
           package_options: Json | null
-          phone: string | null
           preferred_coaching_style: string[] | null
           preferred_package_type: string | null
           preferred_time_slots: string[] | null
@@ -4341,16 +4482,11 @@ export type Database = {
           admin_verification_notes?: string | null
           availability_schedule?: Json | null
           before_after_photos?: Json | null
-          billing_address?: Json | null
           bio?: string | null
           budget_flexibility?: string | null
           budget_range_max?: number | null
           budget_range_min?: number | null
           calendar_link?: string | null
-          card_expiry_month?: number | null
-          card_expiry_year?: number | null
-          card_last_four?: string | null
-          card_type?: string | null
           certifying_body?: string | null
           client_journey_stage?: string | null
           client_personality_type?: string[] | null
@@ -4405,7 +4541,6 @@ export type Database = {
           open_to_virtual_coaching?: boolean | null
           package_inclusions?: Json | null
           package_options?: Json | null
-          phone?: string | null
           preferred_coaching_style?: string[] | null
           preferred_package_type?: string | null
           preferred_time_slots?: string[] | null
@@ -4475,16 +4610,11 @@ export type Database = {
           admin_verification_notes?: string | null
           availability_schedule?: Json | null
           before_after_photos?: Json | null
-          billing_address?: Json | null
           bio?: string | null
           budget_flexibility?: string | null
           budget_range_max?: number | null
           budget_range_min?: number | null
           calendar_link?: string | null
-          card_expiry_month?: number | null
-          card_expiry_year?: number | null
-          card_last_four?: string | null
-          card_type?: string | null
           certifying_body?: string | null
           client_journey_stage?: string | null
           client_personality_type?: string[] | null
@@ -4539,7 +4669,6 @@ export type Database = {
           open_to_virtual_coaching?: boolean | null
           package_inclusions?: Json | null
           package_options?: Json | null
-          phone?: string | null
           preferred_coaching_style?: string[] | null
           preferred_package_type?: string | null
           preferred_time_slots?: string[] | null

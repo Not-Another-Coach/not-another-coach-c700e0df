@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfileByType } from "@/hooks/useProfileByType";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { ProfileService } from "@/services/data";
+import { SensitiveDataService } from "@/services/sensitiveData";
 import { 
   User, 
   Mail, 
@@ -37,19 +38,45 @@ export function ProfileViewEdit({ profile }: ProfileViewEditProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [showCardDetails, setShowCardDetails] = useState(false);
+  const [isLoadingSensitiveData, setIsLoadingSensitiveData] = useState(true);
   
   const [formData, setFormData] = useState({
     first_name: profile?.first_name || "",
     last_name: profile?.last_name || "",
     email: user?.email || "",
-    phone: profile?.phone || "",
+    phone: "",
     profile_photo_url: profile?.profile_photo_url || "",
-    card_last_four: profile?.card_last_four || "",
-    card_type: profile?.card_type || "",
-    card_expiry_month: profile?.card_expiry_month || "",
-    card_expiry_year: profile?.card_expiry_year || "",
-    billing_address: profile?.billing_address || {}
+    card_last_four: "",
+    card_type: "",
+    card_expiry_month: "",
+    card_expiry_year: "",
+    billing_address: {}
   });
+
+  // Load sensitive data from separate tables
+  useEffect(() => {
+    const loadSensitiveData = async () => {
+      setIsLoadingSensitiveData(true);
+      const result = await SensitiveDataService.getAllSensitiveData();
+      
+      if (result.success && result.data) {
+        setFormData(prev => ({
+          ...prev,
+          phone: result.data.contact?.phone || "",
+          card_last_four: result.data.payment?.card_last_four || "",
+          card_type: result.data.payment?.card_type || "",
+          card_expiry_month: result.data.payment?.card_expiry_month?.toString() || "",
+          card_expiry_year: result.data.payment?.card_expiry_year?.toString() || "",
+          billing_address: result.data.billing?.billing_address || {}
+        }));
+      }
+      setIsLoadingSensitiveData(false);
+    };
+
+    if (user?.id) {
+      loadSensitiveData();
+    }
+  }, [user?.id]);
 
   const handleInputChange = (field: string, value: string | number) => {
     setFormData(prev => ({
@@ -123,20 +150,30 @@ export function ProfileViewEdit({ profile }: ProfileViewEditProps) {
 
   const handleSave = async () => {
     try {
-      // Update profile data
+      // Update profile data (non-sensitive fields only)
       const profileUpdates: any = {
         first_name: formData.first_name,
         last_name: formData.last_name,
-        phone: formData.phone,
-        profile_photo_url: formData.profile_photo_url,
-        card_last_four: formData.card_last_four,
-        card_type: formData.card_type,
-        card_expiry_month: formData.card_expiry_month ? parseInt(formData.card_expiry_month.toString()) : null,
-        card_expiry_year: formData.card_expiry_year ? parseInt(formData.card_expiry_year.toString()) : null,
-        billing_address: formData.billing_address
+        profile_photo_url: formData.profile_photo_url
       };
 
       await updateProfile(profileUpdates);
+
+      // Update sensitive data in separate tables
+      await Promise.all([
+        SensitiveDataService.upsertContactInfo({
+          phone: formData.phone
+        }),
+        SensitiveDataService.upsertPaymentMethod({
+          card_last_four: formData.card_last_four,
+          card_type: formData.card_type,
+          card_expiry_month: formData.card_expiry_month ? parseInt(formData.card_expiry_month.toString()) : undefined,
+          card_expiry_year: formData.card_expiry_year ? parseInt(formData.card_expiry_year.toString()) : undefined
+        }),
+        SensitiveDataService.upsertBillingAddress({
+          billing_address: formData.billing_address
+        })
+      ]);
 
       // Handle email change separately if changed
       if (formData.email !== user?.email) {
@@ -431,17 +468,18 @@ export function ProfileViewEdit({ profile }: ProfileViewEditProps) {
         <div className="flex gap-2 justify-end">
           <Button variant="outline" onClick={() => {
             setIsEditing(false);
+            // Reset to original values
             setFormData({
               first_name: profile?.first_name || "",
               last_name: profile?.last_name || "",
               email: user?.email || "",
-              phone: profile?.phone || "",
+              phone: formData.phone, // Keep loaded sensitive data
               profile_photo_url: profile?.profile_photo_url || "",
-              card_last_four: profile?.card_last_four || "",
-              card_type: profile?.card_type || "",
-              card_expiry_month: profile?.card_expiry_month || "",
-              card_expiry_year: profile?.card_expiry_year || "",
-              billing_address: profile?.billing_address || {}
+              card_last_four: formData.card_last_four,
+              card_type: formData.card_type,
+              card_expiry_month: formData.card_expiry_month,
+              card_expiry_year: formData.card_expiry_year,
+              billing_address: formData.billing_address
             });
           }}>
             Cancel
