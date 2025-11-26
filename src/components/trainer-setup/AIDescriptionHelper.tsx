@@ -12,6 +12,7 @@ interface AIDescriptionHelperProps {
   onSuggestionSelect: (suggestion: string) => void;
   fieldType?: 'tagline' | 'how_started' | 'philosophy' | 'bio';
   autoGenerate?: boolean;
+  onGeneratingChange?: (isGenerating: boolean) => void;
 }
 
 export function AIDescriptionHelper({ 
@@ -21,12 +22,14 @@ export function AIDescriptionHelper({
   onSuggestionSelect,
   fieldType = 'bio',
   autoGenerate = false,
+  onGeneratingChange,
 }: AIDescriptionHelperProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
 
   const generateSuggestions = () => {
     setIsGenerating(true);
+    onGeneratingChange?.(true);
     
     // Simulate AI generation based on selections and field type
     setTimeout(() => {
@@ -35,6 +38,7 @@ export function AIDescriptionHelper({
         : generatePersonalisedSuggestions(selectedClientTypes, selectedCoachingStyles, fieldType);
       setSuggestions(baseSuggestions);
       setIsGenerating(false);
+      onGeneratingChange?.(false);
     }, 1500);
   };
 
@@ -339,24 +343,26 @@ export function AIDescriptionHelper({
               }
             </p>
           </div>
-          <Button
-            variant="ai"
-            size="sm"
-            onClick={generateSuggestions}
-            disabled={(!hasSelections && !hasContent) || isGenerating}
-          >
-            {isGenerating ? (
-              <>
-                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                {isImproveMode ? 'Improving...' : 'Generating...'}
-              </>
-            ) : (
-              <>
-                <Sparkles className="h-4 w-4 mr-2" />
-                {isImproveMode ? 'Improve' : 'Generate'}
-              </>
-            )}
-          </Button>
+          {!autoGenerate && (
+            <Button
+              variant="ai"
+              size="sm"
+              onClick={generateSuggestions}
+              disabled={(!hasSelections && !hasContent) || isGenerating}
+            >
+              {isGenerating ? (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  {isImproveMode ? 'Improving...' : 'Generating...'}
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  {isImproveMode ? 'Improve' : 'Generate'}
+                </>
+              )}
+            </Button>
+          )}
         </div>
 
         {/* Show selected context - only when relevant */}
