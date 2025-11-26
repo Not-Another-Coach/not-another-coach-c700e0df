@@ -6848,6 +6848,7 @@ export type Database = {
           fitness_equipment_access: Json | null
           fitness_goals: string[] | null
           flexible_scheduling: boolean | null
+          gender_preference: string | null
           has_specific_event: string | null
           health_conditions: string | null
           id: string | null
@@ -6859,6 +6860,7 @@ export type Database = {
           location: string | null
           motivation_factors: string[] | null
           open_to_virtual_coaching: boolean | null
+          phone_number: string | null
           preferred_coaching_style: string[] | null
           preferred_package_type: string | null
           preferred_time_slots: string[] | null
@@ -6874,6 +6876,7 @@ export type Database = {
           specific_event_details: string | null
           start_timeline: string | null
           tagline: string | null
+          timezone: string | null
           training_location_preference: string | null
           updated_at: string | null
           user_type: Database["public"]["Enums"]["user_type"] | null

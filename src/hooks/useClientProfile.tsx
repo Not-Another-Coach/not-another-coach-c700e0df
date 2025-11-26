@@ -20,6 +20,9 @@ interface ClientProfile {
   tagline: string | null;
   is_uk_based: boolean | null;
   profile_published: boolean | null;
+  gender_preference: string | null;
+  timezone: string | null;
+  phone_number: string | null;
   
   // Client-specific fields
   primary_goals: string[] | null;
@@ -109,7 +112,7 @@ export function useClientProfile() {
       const clientUpdates: any = {};
 
       // Shared profile fields
-      const sharedFields = ['first_name', 'last_name', 'bio', 'profile_photo_url', 'location', 'tagline', 'is_uk_based', 'profile_published'];
+      const sharedFields = ['first_name', 'last_name', 'bio', 'profile_photo_url', 'location', 'tagline', 'is_uk_based', 'profile_published', 'gender_preference', 'timezone', 'phone_number'];
       
       // Client-specific fields
       const clientFields = [
