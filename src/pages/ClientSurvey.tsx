@@ -12,6 +12,7 @@ import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { ResponsiveBreadcrumb, BreadcrumbItem } from "@/components/ui/responsive-breadcrumb";
 import { ArrowLeft, ArrowRight, Save, CheckCircle, AlertCircle, Target, MapPin, Calendar, Users, User, Heart, Package, DollarSign, Clock, Loader2 } from "lucide-react";
 
 // Import survey sections
@@ -624,8 +625,8 @@ const ClientSurvey = () => {
               <AppLogo size="sm" showText={true} onClick={() => navigate('/client/dashboard', { state: { fromSurvey: true } })} />
             </div>
             
-            {/* Center: Title - Absolute positioned */}
-            <div className="absolute left-1/2 -translate-x-1/2">
+            {/* Center: Title - Absolute positioned, hidden on mobile */}
+            <div className="absolute left-1/2 -translate-x-1/2 hidden sm:block">
               <h1 className="text-base sm:text-lg font-bold whitespace-nowrap">
                 About You
               </h1>
@@ -653,82 +654,39 @@ const ClientSurvey = () => {
       {/* Breadcrumb indicators for navigation */}
       <div className="bg-card border-b p-4">
         <div className="max-w-4xl mx-auto">
-          {/* Clickable step indicators */}
-          <div className="grid grid-cols-4 sm:flex sm:justify-between gap-2 sm:gap-1">
+          <ResponsiveBreadcrumb 
+            currentStep={currentStep}
+            steps={stepTitles.map((title, index) => ({
+              stepNumber: index + 1,
+              title,
+              completion: getStepCompletion(index + 1),
+            }))}
+            onStepChange={(step) => {
+              setCurrentStep(step);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            totalSteps={totalSteps}
+            overallProgress={Math.round((currentStep / totalSteps) * 100)}
+          >
             {stepTitles.map((title, index) => {
               const stepNumber = index + 1;
               const completion = getStepCompletion(stepNumber);
-              const isCurrent = stepNumber === currentStep;
-              const StepIcon = stepIcons[index];
-              
-              let statusColor = 'text-muted-foreground';
-              let borderColor = 'border-muted-foreground';
-              let bgColor = 'bg-transparent';
-              let showIcon = false;
-              let isPartial = false;
-
-              if (completion === 'completed') {
-                statusColor = 'text-green-600';
-                borderColor = 'border-green-600';
-                bgColor = 'bg-green-600';
-                showIcon = true;
-              } else if (completion === 'partial') {
-                statusColor = 'text-amber-600';
-                borderColor = 'border-amber-600';
-                bgColor = 'bg-amber-600';
-                showIcon = true;
-                isPartial = true;
-              } else if (isCurrent) {
-                statusColor = 'text-primary';
-                borderColor = 'border-primary';
-                bgColor = 'bg-primary';
-              }
               
               return (
-                <div
+                <BreadcrumbItem
                   key={stepNumber}
-                  className={`flex flex-col items-center text-xs cursor-pointer transition-all hover:scale-105 ${statusColor} p-1`}
+                  stepNumber={stepNumber}
+                  title={title}
+                  completion={completion}
+                  isCurrent={stepNumber === currentStep}
                   onClick={() => {
                     setCurrentStep(stepNumber);
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
-                  title={`Go to step ${stepNumber}: ${title}`}
-                >
-                  <div
-                    className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center mb-1 relative ${borderColor} ${
-                      completion === 'completed' || completion === 'partial' || isCurrent 
-                        ? `${bgColor} text-white`
-                        : 'bg-transparent'
-                    }`}
-                  >
-                    {showIcon ? (
-                      isPartial ? <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4" /> : <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4" />
-                    ) : (
-                      <StepIcon className={cn(
-                        "h-3 w-3 sm:h-4 sm:w-4",
-                        isCurrent ? "text-white" : ""
-                      )} />
-                    )}
-                  </div>
-                  <span className={cn(
-                    "text-center text-xs leading-tight max-w-16 sm:max-w-20 hidden sm:block",
-                    isCurrent ? "font-bold" : ""
-                  )}>
-                    {title}
-                  </span>
-                  <span className={cn(
-                    "text-center text-xs leading-tight max-w-16 sm:hidden",
-                    isCurrent ? "font-bold" : ""
-                  )}>
-                    {title.split(' ')[0]}
-                  </span>
-                  {isCurrent && (
-                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full animate-pulse"></div>
-                  )}
-                </div>
+                />
               );
             })}
-          </div>
+          </ResponsiveBreadcrumb>
         </div>
       </div>
       <div className="max-w-4xl mx-auto p-3 sm:p-6 pb-20 sm:pb-6">
