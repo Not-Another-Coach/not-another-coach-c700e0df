@@ -186,7 +186,7 @@ export function PersonalitySection({ formData, updateFormData, errors, clearFiel
       {(formData.experience_level || formData.client_personality_type?.length > 0) && (
         <Card className="bg-muted/50">
           <CardContent className="p-4">
-            <h4 className="font-semibold mb-2">Your Profile</h4>
+            <h4 className="font-semibold mb-2">Summary</h4>
             <div className="space-y-2">
               {formData.experience_level && (
                 <div>
