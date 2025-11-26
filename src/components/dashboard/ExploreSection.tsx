@@ -421,7 +421,7 @@ export function ExploreSection({ isActiveClient, journeyProgress }: ExploreSecti
               <p className="text-muted-foreground mb-4">
                 Great job completing your fitness preferences! Now let's find the perfect trainer for you.
               </p>
-              <Button size="lg">
+              <Button size="lg" variant="success">
                 Start Exploring Trainers
               </Button>
             </div>

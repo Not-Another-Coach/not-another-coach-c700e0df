@@ -227,7 +227,7 @@ export const OnboardingHeroCard = ({
               </div>
               <Button 
                 onClick={onNextActionClick}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground flex-shrink-0"
+                variant="success"
                 size="sm"
               >
                 Continue

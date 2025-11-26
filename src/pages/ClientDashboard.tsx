@@ -267,6 +267,7 @@ export default function ClientDashboard() {
                 </div>
                 <Button 
                   size="lg"
+                  variant="success"
                   onClick={() => navigate('/client-survey')}
                   className="mt-4"
                 >
