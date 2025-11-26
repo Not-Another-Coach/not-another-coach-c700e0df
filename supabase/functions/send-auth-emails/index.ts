@@ -190,17 +190,6 @@ const createConfirmationEmailHTML = (
                             </p>
                         </div>
                         
-                        <!-- Backup Link -->
-                        <p class="muted" style="margin:0 0 8px;font:13px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#6b778c;">
-                            <strong>Button not working?</strong> Copy and paste this link into your browser:
-                        </p>
-                        
-                        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:12px;margin:0 0 20px;">
-                            <a href="${confirmationUrl}" style="color:#113a5d;word-break:break-all;font:13px -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;text-decoration:none;">
-                                ${confirmationUrl}
-                            </a>
-                        </div>
-                        
                         <hr class="rule" style="border:none;border-top:1px solid #e7ecf5;margin:20px 0 16px">
                         <p class="muted" style="margin:0;font:12px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#8a95a6;text-align:center;">
                             Need help? <a href="mailto:support@notanother.coach" style="color:#113a5d;">Contact support</a> • We're here for you
