@@ -122,7 +122,7 @@ const createConfirmationEmailHTML = (
 ) => {
   const displayName = firstName || 'there';
   const appName = logoSettings?.app_name || 'Not Another Coach';
-  const confirmationUrl = `${site_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}`;
+  const confirmationUrl = `${site_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${encodeURIComponent(redirect_to)}`;
   
   return `<!DOCTYPE html>
 <html lang="en">
@@ -221,7 +221,7 @@ const createPasswordResetEmailHTML = (
 ) => {
   const displayName = firstName || 'there';
   const appName = logoSettings?.app_name || 'Not Another Coach';
-  const resetUrl = `${site_url}/auth/v1/verify?token=${token_hash}&type=recovery&redirect_to=${redirect_to}`;
+  const resetUrl = `${site_url}/auth/v1/verify?token=${token_hash}&type=recovery&redirect_to=${encodeURIComponent(redirect_to)}`;
   
   return `<!DOCTYPE html>
 <html lang="en">
