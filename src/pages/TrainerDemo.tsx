@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { TrainerDemoCalendar } from '@/components/trainer-demo/TrainerDemoCalendar';
 import { GrowthTracker } from '@/components/trainer-demo/GrowthTracker';
 import { CoachJourneyInfographic } from '@/components/trainer-demo/CoachJourneyInfographic';
-import { DemoProfilePreview } from '@/components/trainer-demo/DemoProfilePreview';
+import { DemoTrainerShowcase } from '@/components/homepage/DemoTrainerShowcase';
 import { PricingPlans } from '@/components/trainer-demo/PricingPlans';
 import { MonthlyEarningsCalculator } from '@/components/trainer-demo/MonthlyEarningsCalculator';
 // import { PlanComparison } from '@/components/trainer-demo/PlanComparison';
@@ -113,8 +113,16 @@ export default function TrainerDemo() {
       {/* Features Overview */}
       <div className="container mx-auto px-4 py-16">
         {/* Profile Preview Section */}
-        <div className="mb-12 max-w-md mx-auto">
-          <DemoProfilePreview />
+        <div className="mb-16">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              Profile Preview
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              See how your profile could look to potential clients
+            </p>
+          </div>
+          <DemoTrainerShowcase />
         </div>
 
         {/* Dashboard Preview Section */}
