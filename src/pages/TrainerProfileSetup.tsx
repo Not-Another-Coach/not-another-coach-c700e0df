@@ -146,14 +146,6 @@ const TrainerProfileSetup = () => {
     // Testimonials - this exists in TrainerProfile
     testimonials: [],
     
-    // Ways of Working - legacy fields still supported
-    ways_of_working_onboarding: [],
-    ways_of_working_first_week: [],
-    ways_of_working_ongoing: [],
-    ways_of_working_tracking: [],
-    ways_of_working_expectations: [],
-    ways_of_working_what_i_bring: [],
-    
     // New activity-centric Ways of Working fields
     wow_how_i_work: "",
     wow_what_i_provide: "",
@@ -290,12 +282,6 @@ const TrainerProfileSetup = () => {
         messaging_support: profile.messaging_support || false,
         weekly_programming_only: profile.weekly_programming_only || false,
         testimonials: profile.testimonials || [],
-        ways_of_working_onboarding: profile.ways_of_working_onboarding || [],
-        ways_of_working_first_week: profile.ways_of_working_first_week || [],
-        ways_of_working_ongoing: profile.ways_of_working_ongoing || [],
-        ways_of_working_tracking: profile.ways_of_working_tracking || [],
-        ways_of_working_expectations: profile.ways_of_working_expectations || [],
-        ways_of_working_what_i_bring: profile.ways_of_working_what_i_bring || [],
         // New activity-centric Ways of Working fields
         wow_how_i_work: profile.wow_how_i_work || "",
         wow_what_i_provide: profile.wow_what_i_provide || "",
