@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -92,8 +92,16 @@ export const ProfilePreviewModal = ({
   stage = 'browsing'
 }) => {
   const [currentView, setCurrentView] = useState<ProfileViewMode>('overview');
+  const [currentStage, setCurrentStage] = useState<EngagementStage>('browsing');
   const isMobile = useIsMobile();
-  const stageInfo = stageLabels[stage];
+  const stageInfo = stageLabels[currentStage];
+
+  // Sync currentStage with stage prop when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setCurrentStage(stage as EngagementStage);
+    }
+  }, [isOpen, stage]);
 
   const handleMessage = () => {
     console.log('Message action (preview mode)');
@@ -143,10 +151,24 @@ export const ProfilePreviewModal = ({
             <div className="flex items-center justify-between">
               <span className="text-lg sm:text-xl">Profile Preview</span>
             </div>
-            <div className="flex flex-col gap-1">
-              <Badge className={`${stageInfo.color} text-xs w-fit`}>
-                {stageInfo.label}
-              </Badge>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <Badge className={`${stageInfo.color} text-xs w-fit`}>
+                  {stageInfo.label}
+                </Badge>
+                <select 
+                  value={currentStage}
+                  onChange={(e) => setCurrentStage(e.target.value as EngagementStage)}
+                  className="text-xs border border-border rounded px-2 py-1 bg-background"
+                >
+                  <option value="browsing">Browsing</option>
+                  <option value="liked">Liked</option>
+                  <option value="shortlisted">Shortlisted</option>
+                  <option value="discovery_in_progress">Discovery In Progress</option>
+                  <option value="active_client">Active Client</option>
+                  <option value="declined">Declined</option>
+                </select>
+              </div>
               <p className="text-xs sm:text-sm text-muted-foreground">
                 {stageInfo.description}
               </p>

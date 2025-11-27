@@ -242,7 +242,8 @@ export function ClientFitSection({ formData, updateFormData }: ClientFitSectionP
                 variant="ai"
                 size="sm"
                 onClick={() => setShowAIHelper(!showAIHelper)}
-                disabled={!formData.ideal_client_personality?.trim() || isImproving}
+                disabled={isImproving || (!formData.ideal_client_personality?.trim() && 
+                  (!formData.ideal_client_types?.length && !formData.coaching_style?.length))}
               >
                 {isImproving ? (
                   <>
@@ -252,7 +253,7 @@ export function ClientFitSection({ formData, updateFormData }: ClientFitSectionP
                 ) : (
                   <>
                     <Sparkles className="h-4 w-4 mr-2" />
-                    {formData.ideal_client_personality?.trim() ? 'Improve' : 'AI Helper'}
+                    {formData.ideal_client_personality?.trim() ? 'Improve with AI' : 'Generate with AI'}
                   </>
                 )}
               </Button>
