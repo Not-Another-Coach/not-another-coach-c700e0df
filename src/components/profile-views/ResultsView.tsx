@@ -4,7 +4,7 @@ import { Progress } from '@/components/ui/progress';
 import { Trophy, TrendingUp, Target, Users, Calendar, Zap } from 'lucide-react';
 import { AnyTrainer } from '@/types/trainer';
 import { useContentVisibility } from '@/hooks/useContentVisibility';
-import { useEngagementStage } from '@/hooks/useEngagementStage';
+import { useEngagementStage, EngagementStage } from '@/hooks/useEngagementStage';
 import { VisibilityAwareImage } from '@/components/ui/VisibilityAwareImage';
 import { VisibilityAwareTestimonialSection } from '@/components/ui/VisibilityAwareTestimonialSection';
 import { VisibilityAwareTestimonialContent } from '@/components/ui/VisibilityAwareTestimonialContent';
@@ -25,6 +25,7 @@ interface Testimonial {
 
 interface ResultsViewProps {
   trainer: AnyTrainer;
+  previewEngagementStage?: EngagementStage;
 }
 
 // Helper function to process testimonials into results data
@@ -80,12 +81,14 @@ const processTestimonialsData = (testimonials: Testimonial[] = []) => {
   };
 };
 
-export const ResultsView = ({ trainer }: ResultsViewProps) => {
+export const ResultsView = ({ trainer, previewEngagementStage }: ResultsViewProps) => {
   const testimonials = (trainer as any).testimonials || [];
   const resultsData = processTestimonialsData(testimonials);
   
   // Get visibility state for testimonial images/content
-  const { stage: engagementStage, isGuest } = useEngagementStage((trainer as any).id || '');
+  const { stage: fetchedStage, isGuest: fetchedIsGuest } = useEngagementStage((trainer as any).id || '');
+  const engagementStage = previewEngagementStage || fetchedStage;
+  const isGuest = previewEngagementStage ? false : fetchedIsGuest;
   const { getVisibility } = useContentVisibility({
     engagementStage,
     isGuest

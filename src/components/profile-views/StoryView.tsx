@@ -3,12 +3,13 @@ import { Badge } from '@/components/ui/badge';
 import { Star, Quote, Heart, Users, Calendar, Award } from 'lucide-react';
 import { AnyTrainer } from '@/types/trainer';
 import { useContentVisibility } from '@/hooks/useContentVisibility';
-import { useEngagementStage } from '@/hooks/useEngagementStage';
+import { useEngagementStage, EngagementStage } from '@/hooks/useEngagementStage';
 import { VisibilityAwareImage } from '@/components/ui/VisibilityAwareImage';
 import { VisibilityAwareTestimonialSection } from '@/components/ui/VisibilityAwareTestimonialSection';
 
 interface StoryViewProps {
   trainer: AnyTrainer;
+  previewEngagementStage?: EngagementStage;
 }
 
 // Helper function to get journey content from trainer data
@@ -20,13 +21,15 @@ const getJourneyContent = (trainer: any) => {
   };
 };
 
-export const StoryView = ({ trainer }: StoryViewProps) => {
+export const StoryView = ({ trainer, previewEngagementStage }: StoryViewProps) => {
   const journeyContent = getJourneyContent(trainer as any);
   const milestones = (trainer as any).professional_milestones || [];
   const testimonials = (trainer as any).testimonials || [];
   
   // Get visibility state for testimonial images/content
-  const { stage: engagementStage, isGuest } = useEngagementStage((trainer as any).id || '');
+  const { stage: fetchedStage, isGuest: fetchedIsGuest } = useEngagementStage((trainer as any).id || '');
+  const engagementStage = previewEngagementStage || fetchedStage;
+  const isGuest = previewEngagementStage ? false : fetchedIsGuest;
   const { getVisibility } = useContentVisibility({
     engagementStage,
     isGuest

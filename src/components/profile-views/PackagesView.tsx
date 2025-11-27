@@ -2,18 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { AnyTrainer } from '@/types/trainer';
 import { PackageComparisonSection } from './PackageComparisonSection';
 import { useContentVisibility } from '@/hooks/useContentVisibility';
-import { useEngagementStage } from '@/hooks/useEngagementStage';
+import { useEngagementStage, EngagementStage } from '@/hooks/useEngagementStage';
 import { useAuth } from '@/hooks/useAuth';
 import { PackageWaysOfWorking } from '@/hooks/usePackageWaysOfWorking';
 import { supabase } from '@/integrations/supabase/client';
 
 interface PackagesViewProps {
   trainer: AnyTrainer;
+  previewEngagementStage?: EngagementStage;
 }
 
-export const PackagesView = ({ trainer }: PackagesViewProps) => {
+export const PackagesView = ({ trainer, previewEngagementStage }: PackagesViewProps) => {
   const { user } = useAuth();
-  const { stage: engagementStage, isGuest } = useEngagementStage(trainer.id, !user);
+  const { stage: fetchedStage, isGuest: fetchedIsGuest } = useEngagementStage(trainer.id, !user);
+  const engagementStage = previewEngagementStage || fetchedStage;
+  const isGuest = previewEngagementStage ? false : fetchedIsGuest;
   const { getVisibility } = useContentVisibility({
     engagementStage: engagementStage || 'browsing',
     isGuest

@@ -120,24 +120,26 @@ export const ProfilePreviewModal = ({
             trainer={trainer} 
             onMessage={handleMessage}
             onBookDiscovery={trainer.offers_discovery_call ? handleBookDiscovery : undefined}
+            previewEngagementStage={currentStage}
           />
         );
       case 'results':
-        return <ResultsView trainer={trainer} />;
+        return <ResultsView trainer={trainer} previewEngagementStage={currentStage} />;
       case 'story':
-        return <StoryView trainer={trainer} />;
+        return <StoryView trainer={trainer} previewEngagementStage={currentStage} />;
       case 'cards':
         return <CardsView trainer={trainer} />;
       case 'content':
         return <ContentView trainer={trainer} />;
       case 'packages':
-        return <PackagesView trainer={trainer} />;
+        return <PackagesView trainer={trainer} previewEngagementStage={currentStage} />;
       default:
         return (
           <OverviewView 
             trainer={trainer} 
             onMessage={handleMessage}
             onBookDiscovery={trainer.offers_discovery_call ? handleBookDiscovery : undefined}
+            previewEngagementStage={currentStage}
           />
         );
     }
@@ -181,7 +183,7 @@ export const ProfilePreviewModal = ({
             <div className="flex flex-col gap-2 sm:gap-3 mb-3">
               <h3 className="text-sm font-medium text-muted-foreground">Preview Mode</h3>
               <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded text-center sm:text-left w-fit">
-                This is how clients will see your profile
+                {stageInfo.description}
               </div>
             </div>
             <ProfileViewSelector
