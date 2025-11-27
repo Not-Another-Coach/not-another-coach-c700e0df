@@ -128,23 +128,13 @@ export const TrainerCalendar = () => {
       .gte('scheduled_at', weekStart.toISOString())
       .lte('scheduled_at', weekEnd.toISOString());
 
-    // Get average rating from feedback
-    const { data: feedback } = await supabase
-      .from('discovery_call_feedback')
-      .select('overall_rating')
-      .eq('trainer_id', user.id)
-      .not('overall_rating', 'is', null);
-
-    let avgRating = 0;
-    if (feedback && feedback.length > 0) {
-      const sum = feedback.reduce((acc: number, curr: any) => acc + (curr.overall_rating || 0), 0);
-      avgRating = Math.round((sum / feedback.length) * 10) / 10;
-    }
+    // Rating calculation removed - overall_rating column doesn't exist
+    // TODO: Implement rating system when feedback schema is updated
 
     setStats({
       activeClients: activeCount || 0,
       sessionsThisWeek: sessionsCount || 0,
-      averageRating: avgRating
+      averageRating: 0 // Placeholder until rating system is implemented
     });
   };
 
