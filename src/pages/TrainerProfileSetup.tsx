@@ -481,13 +481,8 @@ const TrainerProfileSetup = () => {
         return hasPackages ? 'completed' : 'not_started';
         
       case 6: // Discovery Calls
-        // First check if database record exists - if not, step hasn't been started
-        if (!discoverySettings?.id) {
-          return 'not_started';
-        }
-        
         console.log('🔍 Discovery Call Debug - Settings:', discoverySettings);
-        const offersDiscovery = discoverySettings.offers_discovery_call;
+        const offersDiscovery = discoverySettings?.offers_discovery_call;
         const hasCalendarLink = !!formData.calendar_link?.trim();
         const hasDcSlots = !!discoverySettings.availability_schedule && 
           Object.values(discoverySettings.availability_schedule).some((d: any) => 
