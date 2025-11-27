@@ -7,7 +7,7 @@ import { AnyTrainer, TrainerPackageExtended } from '@/types/trainer';
 import { getTrainerDisplayPrice } from '@/lib/priceUtils';
 import { useContentVisibility } from '@/hooks/useContentVisibility';
 import { VisibilityAwarePricing } from '@/components/ui/VisibilityAwarePricing';
-import { useEngagementStage } from '@/hooks/useEngagementStage';
+import { useEngagementStage, EngagementStage } from '@/hooks/useEngagementStage';
 import { VisibilityAwareImage } from '@/components/ui/VisibilityAwareImage';
 import { VisibilityAwareText } from '@/components/ui/VisibilityAwareText';
 import { VisibilityAwareSection } from '@/components/ui/VisibilityAwareSection';
@@ -17,10 +17,13 @@ interface OverviewViewProps {
   trainer: AnyTrainer;
   onMessage?: () => void;
   onBookDiscovery?: () => void;
+  previewEngagementStage?: EngagementStage;
 }
 
-export const OverviewView = ({ trainer, onMessage, onBookDiscovery }: OverviewViewProps) => {
-  const { stage: engagementStage, isGuest } = useEngagementStage(trainer.id);
+export const OverviewView = ({ trainer, onMessage, onBookDiscovery, previewEngagementStage }: OverviewViewProps) => {
+  const { stage: fetchedStage, isGuest: fetchedIsGuest } = useEngagementStage(trainer.id);
+  const engagementStage = previewEngagementStage || fetchedStage;
+  const isGuest = previewEngagementStage ? false : fetchedIsGuest;
   const { getVisibility } = useContentVisibility({
     engagementStage,
     isGuest
