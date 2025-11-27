@@ -158,7 +158,7 @@ export const useEnhancedTrainerVerification = () => {
       const fileName = `${user.id}/${checkType}_${Date.now()}.${fileExt}`;
 
       const uploadResult = await FileUploadService.uploadFile(
-        'verification-documents',
+        'trainer-verification-documents',
         fileName,
         file
       );

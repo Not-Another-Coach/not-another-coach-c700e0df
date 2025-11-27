@@ -10,6 +10,7 @@ import { Progress } from '@/components/ui/progress';
 import { AlertCircle, CheckCircle2, Clock, Upload, FileText, Shield, Award } from 'lucide-react';
 import { useEnhancedTrainerVerification } from '@/hooks/useEnhancedTrainerVerification';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface VerificationCheckFormData {
   provider?: string;
@@ -209,15 +210,28 @@ export const EnhancedVerificationSection = () => {
             {existingCheck.evidence_file_url && (
               <div className="text-sm">
                 <strong>Document:</strong> 
-                <a 
-                  href={`https://ogpiovfxjxcclptfybrk.supabase.co/storage/v1/object/public/trainer-verification-documents/${existingCheck.evidence_file_url.split('/').pop()}`}
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline ml-1 inline-flex items-center gap-1"
+                <Button
+                  variant="link"
+                  className="h-auto p-0 ml-1 inline-flex items-center gap-1"
+                  onClick={async () => {
+                    try {
+                      const { data, error } = await supabase.storage
+                        .from('trainer-verification-documents')
+                        .createSignedUrl(existingCheck.evidence_file_url!, 3600);
+                      
+                      if (error) throw error;
+                      if (data?.signedUrl) {
+                        window.open(data.signedUrl, '_blank');
+                      }
+                    } catch (error) {
+                      console.error('Error generating signed URL:', error);
+                      toast.error('Failed to open document');
+                    }
+                  }}
                 >
                   <FileText className="h-4 w-4" />
                   View document
-                </a>
+                </Button>
               </div>
             )}
             {existingCheck.rejection_reason && (
