@@ -100,6 +100,7 @@ const TrainerProfileSetup = () => {
   const [pendingAvailabilityChanges, setPendingAvailabilityChanges] = useState<any>(null);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [trainerAccessEnabled, setTrainerAccessEnabled] = useState<boolean>(true);
+  const [isFormReady, setIsFormReady] = useState(false); // Track if form is fully initialized
   const hasInitialized = useRef(false);
   const hasLoadedOnce = useRef(false);
   const initialFormData = useRef<typeof formData | null>(null);
@@ -246,7 +247,9 @@ const TrainerProfileSetup = () => {
     if (profile && profile.id && !hasInitialized.current) {
       hasInitialized.current = true;
       
-      console.log('Form data being initialized from profile:', {
+      console.log('✅ INIT: Form data being initialized from profile:', {
+        profile_id: profile.id,
+        first_name: profile.first_name,
         accuracy_confirmed: profile.accuracy_confirmed,
         terms_agreed: profile.terms_agreed,
         notify_profile_views: profile.notify_profile_views,
@@ -306,6 +309,10 @@ const TrainerProfileSetup = () => {
       setFormData(prev => ({ ...prev, ...initialData }));
       initialFormData.current = { ...initialData };
       setHasUnsavedChanges(false);
+      
+      // Mark form as ready after initialization
+      setIsFormReady(true);
+      console.log('✅ INIT: Form is now ready for user interaction');
     }
   }, [profile]);
 
@@ -606,8 +613,52 @@ const TrainerProfileSetup = () => {
   };
 
   const handleSave = async (showToast: boolean = true) => {
+    // 🛡️ PROTECTION 1: Don't save if form hasn't been initialized from profile
+    if (!hasInitialized.current || !isFormReady) {
+      console.error('🚫 DATA LOSS PROTECTION: Attempted to save before form was initialized', {
+        hasInitialized: hasInitialized.current,
+        isFormReady,
+        profile_id: profile?.id
+      });
+      toast({
+        title: "Cannot save yet",
+        description: "Please wait for your profile to load before saving.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // 🛡️ PROTECTION 2: Don't overwrite existing data with empty values for critical fields
+    const criticalFields = ['first_name', 'last_name', 'bio'];
+    const hasExistingData = criticalFields.some(field => profile?.[field as keyof typeof profile]);
+    const hasEmptyData = criticalFields.every(field => !formData[field as keyof typeof formData]);
+    
+    if (hasExistingData && hasEmptyData) {
+      console.error('🚫 DATA LOSS PROTECTION: Attempted to save empty core fields over existing data', {
+        profile_first_name: profile?.first_name,
+        profile_last_name: profile?.last_name,
+        profile_bio: profile?.bio,
+        formData_first_name: formData.first_name,
+        formData_last_name: formData.last_name,
+        formData_bio: formData.bio
+      });
+      toast({
+        title: "Data protection",
+        description: "Cannot save empty profile over existing data. Please wait for form to load completely.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     try {
       setIsLoading(true);
+      
+      console.log('💾 SAVING: Profile save initiated', {
+        hasInitialized: hasInitialized.current,
+        isFormReady,
+        first_name: formData.first_name,
+        last_name: formData.last_name
+      });
       
       // Convert form data to match TrainerProfile interface types
       const saveData = {
@@ -1145,7 +1196,17 @@ const TrainerProfileSetup = () => {
 
       {/* Main Content */}
       <div className="max-w-4xl mx-auto p-6">
-        <Card>
+        <Card className="relative">
+          {/* Loading overlay to prevent interaction before form is ready */}
+          {!isFormReady && (
+            <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg">
+              <div className="text-center space-y-3">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                <p className="text-sm text-muted-foreground">Loading your profile data...</p>
+                <p className="text-xs text-muted-foreground">Please wait before making changes</p>
+              </div>
+            </div>
+          )}
           <CardContent className="space-y-6 pt-6">
             {renderCurrentSection()}
           </CardContent>
@@ -1153,7 +1214,7 @@ const TrainerProfileSetup = () => {
 
         {/* Navigation */}
         <div className="flex justify-between mt-6">
-          {currentStep > 1 && (
+           {currentStep > 1 && (
             <Button
               variant="outline"
               onClick={handlePrevious}
@@ -1167,7 +1228,7 @@ const TrainerProfileSetup = () => {
              <Button 
                variant={currentStep === totalSteps ? "success" : "hero"}
                onClick={handleNext}
-               disabled={isLoading}
+               disabled={isLoading || !isFormReady}
              >
                {isLoading ? (
                  <>
