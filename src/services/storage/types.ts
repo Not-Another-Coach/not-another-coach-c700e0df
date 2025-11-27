@@ -4,11 +4,15 @@
 
 export type StorageBucket = 
   | 'trainer-images'
+  | 'trainer-verification-documents'
+  | 'trainer-documents'
+  | 'profile-photos'
+  | 'client-photos'
+  | 'onboarding'
   | 'onboarding-public'
-  | 'avatars'
-  | 'documents'
-  | 'verification-documents'
-  | 'qualification-proofs';
+  | 'onboarding-attachments'
+  | 'qualification-proofs'
+  | 'logos';
 
 export interface FileUploadOptions {
   cacheControl?: string;

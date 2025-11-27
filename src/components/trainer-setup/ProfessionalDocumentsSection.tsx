@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useProfessionalDocumentsState } from "@/hooks/useProfessionalDocumentsState";
 import { useEnhancedTrainerVerification } from "@/hooks/useEnhancedTrainerVerification";
 import { useTrainerProfileContext } from "@/contexts/TrainerProfileContext";
+import { supabase } from '@/integrations/supabase/client';
 
 interface DocumentFormData {
   provider?: string;
@@ -284,15 +285,32 @@ export const ProfessionalDocumentsSection = () => {
                   {check.evidence_file_url && (
                     <div className="text-sm">
                       <strong>Document:</strong> 
-                      <a 
-                        href={`https://ogpiovfxjxcclptfybrk.supabase.co/storage/v1/object/public/trainer-verification-documents/${check.evidence_file_url.split('/').pop()}`}
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline ml-1 inline-flex items-center gap-1"
+                      <Button
+                        variant="link"
+                        className="h-auto p-0 ml-1 inline-flex items-center gap-1"
+                        onClick={async () => {
+                          try {
+                            const { data, error } = await supabase.storage
+                              .from('trainer-verification-documents')
+                              .createSignedUrl(check.evidence_file_url!, 3600);
+                            
+                            if (error) throw error;
+                            if (data?.signedUrl) {
+                              window.open(data.signedUrl, '_blank');
+                            }
+                          } catch (error) {
+                            console.error('Error generating signed URL:', error);
+                            toast({
+                              title: "Error",
+                              description: "Failed to open document",
+                              variant: "destructive",
+                            });
+                          }
+                        }}
                       >
                         <FileText className="h-4 w-4" />
                         View uploaded document
-                      </a>
+                      </Button>
                     </div>
                   )}
                 </div>
