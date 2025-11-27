@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useTrainerProfileContext } from "@/contexts/TrainerProfileContext";
-import { useUserTypeChecks } from "@/hooks/useUserType";
+import { useUserTypeChecks, useUserType } from "@/hooks/useUserType";
 import { usePackageWaysOfWorking } from "@/hooks/usePackageWaysOfWorking";
 import { useTrainerVerification } from "@/hooks/useTrainerVerification";
 import { useEnhancedTrainerVerification } from "@/hooks/useEnhancedTrainerVerification";
@@ -57,6 +57,7 @@ const TrainerProfileSetup = () => {
   const { user, loading } = useAuth();
   const { profile, loading: profileLoading, updateProfile } = useTrainerProfileContext();
   const { isTrainer } = useUserTypeChecks();
+  const { loading: userTypeLoading } = useUserType();
   const { packageWorkflows, loading: waysOfWorkingLoading } = usePackageWaysOfWorking();
   const { verificationRequest } = useTrainerVerification();
   const { getCheckByType, loading: verificationLoading, overview } = useEnhancedTrainerVerification();
@@ -195,7 +196,7 @@ const TrainerProfileSetup = () => {
     if (cameFromHolding) return;
     
     // Wait for all loading to complete before checking redirects
-    if (loading || profileLoading) return;
+    if (loading || profileLoading || userTypeLoading) return;
     
     if (!user) {
       navigate('/auth');
@@ -205,7 +206,7 @@ const TrainerProfileSetup = () => {
     if (user && profile && !isTrainer()) {
       navigate('/');
     }
-  }, [user, profile, loading, profileLoading, isTrainer, navigate]);
+  }, [user, profile, loading, profileLoading, userTypeLoading, isTrainer, navigate]);
 
   // Stable loading check - wait 300ms minimum, then show content when data ready
   useEffect(() => {
