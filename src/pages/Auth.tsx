@@ -81,6 +81,17 @@ export default function Auth() {
 
   // Check if this is a password recovery URL or signup URL
   useEffect(() => {
+    const signoutRequested = searchParams.get('signout');
+    
+    // Handle sign-out on auth page (safe - no active components to error)
+    if (signoutRequested === 'true') {
+      AuthService.signOut().then(() => {
+        // Clear the URL parameter after sign-out
+        navigate('/auth', { replace: true });
+      });
+      return;
+    }
+    
     const type = searchParams.get('type');
     const mode = searchParams.get('mode');
     const accessToken = searchParams.get('access_token');
