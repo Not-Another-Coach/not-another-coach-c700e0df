@@ -71,11 +71,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('rememberMe');
     localStorage.removeItem('savedEmail');
     
-    // Redirect FIRST - this prevents race condition with onAuthStateChange
-    window.location.href = '/auth';
-    
-    // Fire-and-forget: Sign out from Supabase (server-side cleanup)
-    AuthService.signOut();
+    // Just navigate - auth page will handle the actual sign-out
+    window.location.href = '/auth?signout=true';
     
     return { error: null };
   };
