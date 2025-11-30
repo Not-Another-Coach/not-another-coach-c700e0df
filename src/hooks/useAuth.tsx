@@ -76,11 +76,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const projectRef = 'ogpiovfxjxcclptfybrk';
     localStorage.removeItem(`sb-${projectRef}-auth-token`);
     
-    // Sign out from Supabase (may fail if session already invalid)
-    await AuthService.signOut();
-    
-    // Redirect to auth page (state will be cleared by page reload)
+    // Redirect FIRST - this prevents race condition with onAuthStateChange
     window.location.href = '/auth';
+    
+    // Fire-and-forget: Sign out from Supabase (server-side cleanup)
+    AuthService.signOut();
     
     return { error: null };
   };
