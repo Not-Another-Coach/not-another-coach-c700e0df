@@ -116,7 +116,7 @@ export const EnhancedVerificationManagement = () => {
   // Fetch verification data when trainer is selected
   useEffect(() => {
     if (selectedTrainer) {
-      fetchVerificationData(selectedTrainer);
+      fetchVerificationData();
     }
   }, [selectedTrainer, fetchVerificationData]);
 
@@ -165,19 +165,19 @@ export const EnhancedVerificationManagement = () => {
       console.log('Found check ID:', checkData.id);
       console.log('About to call adminUpdateCheck...');
       
-      await adminUpdateCheck(
-        checkData.id,
-        reviewData.status,
-        reviewData.adminNotes,
-        reviewData.rejectionReason
-      );
+      await adminUpdateCheck({
+        checkId: checkData.id,
+        status: reviewData.status,
+        adminNotes: reviewData.adminNotes,
+        rejectionReason: reviewData.rejectionReason,
+      });
 
       console.log('adminUpdateCheck completed');
 
       // Refresh both the selected trainer data and all pending checks
       if (selectedTrainer) {
         console.log('Refreshing selected trainer data...');
-        await fetchVerificationData(selectedTrainer);
+        await fetchVerificationData();
       }
       
       console.log('Refreshing all pending checks...');

@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
-import { useUserType } from '@/hooks/useUserType';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { queryConfig } from '@/lib/queryConfig';
 
 interface ProfileData {
   profile: any;
@@ -13,28 +13,34 @@ interface ProfileData {
 
 /**
  * Unified hook that fetches the appropriate profile based on user type
- * Eliminates race conditions by coordinating user type check and profile fetch
+ * Uses React Query for caching and deduplication across all components
  */
 export function useUserProfile(): ProfileData {
   const { user } = useAuth();
-  const { user_type, loading: userTypeLoading } = useUserType();
   const { toast } = useToast();
-  const [profile, setProfile] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
-  const fetchProfile = useCallback(async () => {
-    if (!user || !user_type) {
-      setProfile(null);
-      setLoading(false);
-      return;
-    }
+  const { data: profile, isLoading, error, refetch } = useQuery({
+    queryKey: ['user-profile', user?.id],
+    queryFn: async () => {
+      if (!user) return null;
 
-    console.log('useUserProfile: Fetching profile for user type:', user_type);
-    setLoading(true);
+      console.log('useUserProfile: Fetching profile for user:', user.id);
 
-    try {
-      let data, error;
+      // First get user_type from profiles
+      const { data: baseProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('user_type')
+        .eq('id', user.id)
+        .single();
+      
+      if (profileError) throw profileError;
+      
+      const user_type = baseProfile.user_type as 'trainer' | 'client' | 'admin';
+      console.log('useUserProfile: User type:', user_type);
 
+      // Then fetch full profile based on type
+      let data, viewError;
       switch (user_type) {
         case 'trainer': {
           const response = await supabase
@@ -43,7 +49,7 @@ export function useUserProfile(): ProfileData {
             .eq('id', user.id)
             .single();
           data = response.data;
-          error = response.error;
+          viewError = response.error;
           break;
         }
         
@@ -54,7 +60,7 @@ export function useUserProfile(): ProfileData {
             .eq('id', user.id)
             .single();
           data = response.data;
-          error = response.error;
+          viewError = response.error;
           break;
         }
         
@@ -65,41 +71,34 @@ export function useUserProfile(): ProfileData {
             .eq('id', user.id)
             .single();
           data = response.data;
-          error = response.error;
+          viewError = response.error;
           break;
         }
         
         default:
           console.warn('useUserProfile: Unknown user type:', user_type);
-          setProfile(null);
-          setLoading(false);
-          return;
+          return null;
       }
 
-      if (error) {
-        console.error('useUserProfile: Error fetching profile:', error);
-        setProfile(null);
-      } else {
-        console.log('useUserProfile: Successfully fetched profile for', user_type);
-        setProfile(data);
+      if (viewError) throw viewError;
+      
+      console.log('useUserProfile: Successfully fetched profile for', user_type);
+      return { ...data, user_type };
+    },
+    enabled: !!user?.id,
+    staleTime: queryConfig.user.staleTime,
+    gcTime: queryConfig.user.gcTime,
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async (updates: any) => {
+      if (!user || !profile?.user_type) {
+        throw new Error('No user or user type available');
       }
-    } catch (error) {
-      console.error('useUserProfile: Exception fetching profile:', error);
-      setProfile(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [user, user_type]);
 
-  const updateProfile = useCallback(async (updates: any) => {
-    if (!user || !user_type) {
-      throw new Error('No user or user type available');
-    }
+      console.log('useUserProfile: Updating profile for', profile.user_type, updates);
 
-    console.log('useUserProfile: Updating profile for', user_type, updates);
-
-    try {
-      // Fields from trainer_profiles table (as defined in v_trainers view)
+      // Fields from trainer_profiles table
       const trainerProfileFields = [
         'hourly_rate', 'free_discovery_call', 'calendar_link', 'profile_setup_completed',
         'max_clients', 'qualifications', 'specializations', 'training_types', 'delivery_format',
@@ -113,7 +112,7 @@ export function useUserProfile(): ProfileData {
         'client_preferences', 'training_type_delivery'
       ];
 
-      // Fields from client_profiles table (as defined in v_clients view)
+      // Fields from client_profiles table
       const clientProfileFields = [
         'primary_goals', 'secondary_goals', 'fitness_goals', 'experience_level',
         'preferred_training_frequency', 'preferred_time_slots', 'start_timeline',
@@ -134,19 +133,17 @@ export function useUserProfile(): ProfileData {
       const typeSpecificUpdates: any = {};
 
       Object.entries(updates).forEach(([key, value]) => {
-        // Skip invalid fields
         if (invalidFields.includes(key)) {
           console.warn(`useUserProfile: Skipping invalid field: ${key}`);
           return;
         }
 
         // Route to appropriate table based on user type
-        if (user_type === 'trainer' && trainerProfileFields.includes(key)) {
+        if (profile.user_type === 'trainer' && trainerProfileFields.includes(key)) {
           typeSpecificUpdates[key] = value;
-        } else if (user_type === 'client' && clientProfileFields.includes(key)) {
+        } else if (profile.user_type === 'client' && clientProfileFields.includes(key)) {
           typeSpecificUpdates[key] = value;
         } else {
-          // Default to profiles table for all other fields
           profileUpdates[key] = value;
         }
       });
@@ -163,8 +160,8 @@ export function useUserProfile(): ProfileData {
 
       // Update type-specific table if needed
       if (Object.keys(typeSpecificUpdates).length > 0) {
-        const tableName = user_type === 'trainer' ? 'trainer_profiles' : 
-                         user_type === 'client' ? 'client_profiles' : null;
+        const tableName = profile.user_type === 'trainer' ? 'trainer_profiles' : 
+                         profile.user_type === 'client' ? 'client_profiles' : null;
         
         if (tableName) {
           const { error: typeError } = await supabase
@@ -176,53 +173,37 @@ export function useUserProfile(): ProfileData {
         }
       }
 
-      // Refetch to get updated data
-      await fetchProfile();
-
+      return profile;
+    },
+    onSuccess: () => {
+      // Invalidate the query to trigger a refetch
+      queryClient.invalidateQueries({ queryKey: ['user-profile', user?.id] });
+      
       toast({
         title: "Profile updated",
         description: "Your changes have been saved successfully.",
       });
-
-      return profile;
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error('useUserProfile: Error updating profile:', error);
       toast({
         title: "Update failed",
         description: "Failed to update profile. Please try again.",
         variant: "destructive",
       });
-      throw error;
-    }
-  }, [user, user_type, fetchProfile, profile, toast]);
+    },
+  });
 
-  // Effect to fetch profile when user or user_type changes
-  useEffect(() => {
-    console.log('useUserProfile: Effect triggered', { 
-      hasUser: !!user, 
-      userType: user_type, 
-      userTypeLoading 
-    });
-
-    // Wait for user type to be determined
-    if (userTypeLoading) {
-      console.log('useUserProfile: Waiting for user type...');
-      return;
-    }
-
-    // Fetch profile once user type is known
-    if (user && user_type) {
-      fetchProfile();
-    } else {
-      setProfile(null);
-      setLoading(false);
-    }
-  }, [user, user_type, userTypeLoading, fetchProfile]);
+  if (error) {
+    console.error('useUserProfile: Error fetching profile:', error);
+  }
 
   return {
-    profile,
-    loading: userTypeLoading || loading, // Combined loading state
-    updateProfile,
-    refetchProfile: fetchProfile,
+    profile: profile ?? null,
+    loading: isLoading,
+    updateProfile: updateMutation.mutateAsync,
+    refetchProfile: async () => {
+      await refetch();
+    },
   };
 }

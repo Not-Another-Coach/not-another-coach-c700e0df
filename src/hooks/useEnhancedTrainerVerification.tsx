@@ -1,8 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { FileUploadService } from '@/services';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { queryConfig } from '@/lib/queryConfig';
 
 interface VerificationCheck {
   id: string;
@@ -52,23 +54,27 @@ interface VerificationAuditEntry {
   created_at: string;
 }
 
-export const useEnhancedTrainerVerification = () => {
+interface VerificationData {
+  overview: VerificationOverview | null;
+  checks: VerificationCheck[];
+  auditLog: VerificationAuditEntry[];
+  isAdmin: boolean;
+}
+
+export const useEnhancedTrainerVerification = (trainerId?: string) => {
   const { user } = useAuth();
-  const [loading, setLoading] = useState(true); // Start true since we'll fetch on mount
-  const [overview, setOverview] = useState<VerificationOverview | null>(null);
-  const [checks, setChecks] = useState<VerificationCheck[]>([]);
-  const [auditLog, setAuditLog] = useState<VerificationAuditEntry[]>([]);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const targetTrainerId = trainerId || user?.id;
+  const queryClient = useQueryClient();
 
-  // Fetch trainer's verification data (optimized) - no admin state dependency to prevent double-fetch
-  const fetchVerificationData = useCallback(async (trainerId?: string) => {
-    if (!user) return;
-    
-    const targetTrainerId = trainerId || user.id;
-    setLoading(true);
+  // Single composite query for all verification data
+  const { data, isLoading, refetch } = useQuery<VerificationData>({
+    queryKey: ['trainer-verification', targetTrainerId],
+    queryFn: async () => {
+      if (!user) throw new Error('User not authenticated');
+      
+      console.log('Fetching verification data for trainer:', targetTrainerId);
 
-    try {
-      // Check admin role inline to avoid double-fetch from state changes
+      // Check admin role inline
       const { data: adminData } = await supabase
         .from('user_roles')
         .select('role')
@@ -77,9 +83,8 @@ export const useEnhancedTrainerVerification = () => {
         .maybeSingle();
       
       const isAdminUser = !!adminData;
-      setIsAdmin(isAdminUser);
 
-      // Batch all data fetching in parallel for better performance
+      // Parallel fetch all data
       const [overviewResult, checksResult, auditResult] = await Promise.all([
         supabase
           .from('trainer_verification_overview')
@@ -105,28 +110,30 @@ export const useEnhancedTrainerVerification = () => {
       if (overviewResult.error && overviewResult.error.code !== 'PGRST116') {
         throw overviewResult.error;
       }
-      setOverview(overviewResult.data);
 
       // Handle checks data  
       if (checksResult.error) throw checksResult.error;
-      setChecks(checksResult.data || []);
 
       // Handle audit log data
       if ('error' in auditResult && auditResult.error) throw auditResult.error;
-      setAuditLog(auditResult.data || []);
-    } catch (error) {
-      console.error('Error fetching verification data:', error);
-      toast.error('Failed to load verification data');
-    } finally {
-      setLoading(false);
-    }
-  }, [user]);
+
+      return {
+        overview: overviewResult.data,
+        checks: checksResult.data || [],
+        auditLog: auditResult.data || [],
+        isAdmin: isAdminUser,
+      };
+    },
+    enabled: !!targetTrainerId && !!user,
+    staleTime: queryConfig.verification.staleTime,
+    gcTime: queryConfig.verification.gcTime,
+  });
 
   // Update verification preference toggle
-  const updateDisplayPreference = useCallback(async (preference: 'verified_allowed' | 'hidden') => {
-    if (!user) return;
+  const updateDisplayPreferenceMutation = useMutation({
+    mutationFn: async (preference: 'verified_allowed' | 'hidden') => {
+      if (!user) throw new Error('User not authenticated');
 
-    try {
       const { error } = await supabase
         .from('trainer_verification_overview')
         .upsert({
@@ -137,14 +144,17 @@ export const useEnhancedTrainerVerification = () => {
         });
 
       if (error) throw error;
-
-      setOverview(prev => prev ? { ...prev, display_preference: preference } : null);
+      return preference;
+    },
+    onSuccess: (preference) => {
+      queryClient.invalidateQueries({ queryKey: ['trainer-verification', targetTrainerId] });
       toast.success(`Verification badge ${preference === 'verified_allowed' ? 'enabled' : 'disabled'}`);
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error('Error updating display preference:', error);
       toast.error('Failed to update preference');
-    }
-  }, [user]);
+    },
+  });
 
   // Upload document to storage
   const uploadDocument = useCallback(async (
@@ -176,25 +186,26 @@ export const useEnhancedTrainerVerification = () => {
   }, [user]);
 
   // Submit verification check
-  const submitVerificationCheck = useCallback(async (
-    checkType: string,
-    checkData: any,
-    isDraft: boolean = false,
-    suppressToast: boolean = false
-  ) => {
-    if (!user) {
-      throw new Error('User not authenticated');
-    }
+  const submitVerificationCheckMutation = useMutation({
+    mutationFn: async ({
+      checkType,
+      checkData,
+      isDraft = false,
+      suppressToast = false,
+    }: {
+      checkType: string;
+      checkData: any;
+      isDraft?: boolean;
+      suppressToast?: boolean;
+    }) => {
+      if (!user) throw new Error('User not authenticated');
 
-    try {
-      // Check if there's an existing check to preserve audit trail
-      const existingCheck = checks.find(c => c.check_type === checkType);
+      const existingCheck = data?.checks.find(c => c.check_type === checkType);
       const isResubmission = existingCheck && existingCheck.status === 'rejected';
       const isInitialSubmission = !existingCheck;
       
       // If resubmitting after rejection, preserve audit trail
       if (isResubmission) {
-        // Create audit log entry for the previous version before overwriting
         await supabase
           .from('trainer_verification_audit_log')
           .insert({
@@ -232,13 +243,12 @@ export const useEnhancedTrainerVerification = () => {
         draft_status: isDraft ? 'draft' : 'submitted'
       };
 
-      // Only set status to pending for actual submissions, not drafts
       if (!isDraft) {
         submitData.status = checkData.not_applicable ? 'not_applicable' : 'pending';
         submitData.submitted_at = new Date().toISOString();
       }
 
-      // Add optional fields only if they have values
+      // Add optional fields
       if (checkData.provider) submitData.provider = checkData.provider;
       if (checkData.member_id) submitData.member_id = checkData.member_id;
       if (checkData.certificate_id) submitData.certificate_id = checkData.certificate_id;
@@ -250,9 +260,7 @@ export const useEnhancedTrainerVerification = () => {
       // Upload file if provided
       if (checkData.file) {
         const fileUrl = await uploadDocument(checkType as any, checkData.file);
-        if (!fileUrl) {
-          throw new Error('Failed to upload document');
-        }
+        if (!fileUrl) throw new Error('Failed to upload document');
         submitData.evidence_file_url = fileUrl;
         submitData.evidence_metadata = {
           filename: checkData.file.name,
@@ -261,9 +269,7 @@ export const useEnhancedTrainerVerification = () => {
         };
       }
 
-      console.log('Submitting verification check with data:', submitData);
-
-      const { data, error } = await supabase
+      const { data: responseData, error } = await supabase
         .from('trainer_verification_checks')
         .upsert(submitData, {
           onConflict: 'trainer_id,check_type'
@@ -271,31 +277,20 @@ export const useEnhancedTrainerVerification = () => {
         .select()
         .single();
 
-      if (error) {
-        console.error('Database error details:', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        });
-        throw new Error(`Database error: ${error.message}`);
-      }
+      if (error) throw new Error(`Database error: ${error.message}`);
+      if (!responseData) throw new Error('No data returned from database after upsert');
 
-      if (!data) {
-        throw new Error('No data returned from database after upsert');
-      }
-
-      // Create audit log entry for initial submissions or updates
+      // Create audit log entry
       if (isInitialSubmission || !isResubmission) {
         await supabase
           .from('trainer_verification_audit_log')
           .insert({
             trainer_id: user.id,
-            check_id: data.id,
+            check_id: responseData.id,
             actor: 'trainer',
             action: 'upload',
             previous_status: existingCheck?.status || null,
-            new_status: data.status,
+            new_status: responseData.status,
             reason: checkData.not_applicable 
               ? 'Marked as not applicable' 
               : (isInitialSubmission ? 'Initial document submission' : 'Document updated'),
@@ -318,99 +313,68 @@ export const useEnhancedTrainerVerification = () => {
           });
       }
 
-      console.log('Verification check saved successfully:', data);
-
-      // Refresh data to update UI
-      await fetchVerificationData();
-      
-      console.log('Data refreshed after submission');
-      
-      // Only show success toast for actual submissions (not drafts) and when not suppressed
+      return { isDraft, suppressToast };
+    },
+    onSuccess: ({ isDraft, suppressToast }) => {
+      queryClient.invalidateQueries({ queryKey: ['trainer-verification', targetTrainerId] });
       if (!isDraft && !suppressToast) {
         toast.success('Verification check submitted successfully!');
       }
-    } catch (error) {
+    },
+    onError: (error: Error) => {
       console.error('Error submitting verification:', error);
-      // Show the actual error to help debug
-      if (error instanceof Error) {
-        toast.error(`Submission failed: ${error.message}`);
-      } else {
-        toast.error('Submission failed: Unknown error');
-      }
-      throw error;
-    }
-  }, [user, checks, fetchVerificationData, uploadDocument]);
+      toast.error(`Submission failed: ${error.message}`);
+    },
+  });
 
   // Admin function to update verification check status
-  const adminUpdateCheck = useCallback(async (
-    checkId: string,
-    status: VerificationCheck['status'],
-    adminNotes?: string,
-    rejectionReason?: string
-  ) => {
-    if (!isAdmin) {
-      toast.error('Admin privileges required');
-      return;
-    }
+  const adminUpdateCheckMutation = useMutation({
+    mutationFn: async ({
+      checkId,
+      status,
+      adminNotes,
+      rejectionReason,
+    }: {
+      checkId: string;
+      status: VerificationCheck['status'];
+      adminNotes?: string;
+      rejectionReason?: string;
+    }) => {
+      if (!data?.isAdmin) throw new Error('Admin privileges required');
 
-    try {
-      console.log('Calling admin_update_verification_check with:', {
-        checkId,
-        status,
-        adminNotes,
-        rejectionReason
-      });
-
-      const { data, error } = await supabase.rpc('admin_update_verification_check', {
+      const { error } = await supabase.rpc('admin_update_verification_check', {
         p_check_id: checkId,
         p_status: status,
         p_admin_notes: adminNotes || null,
         p_rejection_reason: rejectionReason || null,
       });
 
-      if (error) {
-        console.error('RPC error:', error);
-        throw error;
-      }
-
-      console.log('RPC success:', data);
-
-      // Refresh data
-      await fetchVerificationData();
+      if (error) throw error;
+      return status;
+    },
+    onSuccess: (status) => {
+      queryClient.invalidateQueries({ queryKey: ['trainer-verification', targetTrainerId] });
       toast.success(`Verification check ${status === 'verified' ? 'approved' : status}`);
-    } catch (error) {
+    },
+    onError: (error: Error) => {
       console.error('Error updating verification check:', error);
       toast.error(`Failed to update verification check: ${error.message}`);
-    }
-  }, [isAdmin, fetchVerificationData]);
+    },
+  });
 
-  // Get verification check by type
+  // Helper functions
   const getCheckByType = useCallback((type: VerificationCheck['check_type']) => {
-    const check = checks.find(check => check.check_type === type);
-    console.log(`Getting check for type ${type}:`, check);
-    return check;
-  }, [checks]);
+    return data?.checks.find(check => check.check_type === type);
+  }, [data?.checks]);
 
-  // Get overall verification badge status
   const getVerificationBadgeStatus = useCallback(() => {
-    if (!overview) return 'hidden';
+    if (!data?.overview) return 'hidden';
     
-    return overview.overall_status === 'verified' && overview.display_preference === 'verified_allowed' 
+    return data.overview.overall_status === 'verified' && data.overview.display_preference === 'verified_allowed' 
       ? 'verified' 
       : 'hidden';
-  }, [overview]);
+  }, [data?.overview]);
 
-  // Initialize data on mount - removed fetchVerificationData from deps to prevent re-fetch loop
-  useEffect(() => {
-    if (user) {
-      fetchVerificationData();
-    } else {
-      setLoading(false); // No user means no data to load
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
-
-  // Check if certificate is expiring within 14 days
   const isExpiringWithin14Days = useCallback((expiryDate?: string) => {
     if (!expiryDate) return false;
     
@@ -423,16 +387,16 @@ export const useEnhancedTrainerVerification = () => {
   }, []);
 
   return {
-    loading,
-    overview,
-    checks,
-    auditLog,
-    isAdmin,
-    fetchVerificationData,
-    updateDisplayPreference,
-    submitVerificationCheck,
+    loading: isLoading,
+    overview: data?.overview ?? null,
+    checks: data?.checks ?? [],
+    auditLog: data?.auditLog ?? [],
+    isAdmin: data?.isAdmin ?? false,
+    fetchVerificationData: refetch,
+    updateDisplayPreference: updateDisplayPreferenceMutation.mutateAsync,
+    submitVerificationCheck: submitVerificationCheckMutation.mutateAsync,
     uploadDocument,
-    adminUpdateCheck,
+    adminUpdateCheck: adminUpdateCheckMutation.mutateAsync,
     getCheckByType,
     getVerificationBadgeStatus,
     isExpiringWithin14Days,

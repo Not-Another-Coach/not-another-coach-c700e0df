@@ -1,6 +1,4 @@
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
-import { useState, useEffect, useCallback } from 'react';
+import { useUserProfile } from './useUserProfile';
 
 export interface UserTypeInfo {
   user_type: 'client' | 'trainer' | 'admin' | null;
@@ -8,52 +6,15 @@ export interface UserTypeInfo {
 }
 
 /**
- * Lightweight hook to get user type without loading full profile data
+ * Lightweight hook to get user type from the cached user profile
+ * No additional API calls - reads from React Query cache
  */
 export function useUserType(): UserTypeInfo {
-  const { user } = useAuth();
-  const [userType, setUserType] = useState<'client' | 'trainer' | 'admin' | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  const fetchUserType = useCallback(async () => {
-    if (!user) {
-      console.log('useUserType: No user, setting to null');
-      setUserType(null);
-      setLoading(false);
-      return;
-    }
-
-    console.log('useUserType: Fetching user type for user:', user.id);
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('user_type')
-        .eq('id', user.id)
-        .single();
-
-      if (error) {
-        console.error('useUserType: Error fetching user type:', error);
-        setUserType(null);
-      } else {
-        console.log('useUserType: Successfully fetched user type:', data.user_type);
-        setUserType(data.user_type as 'client' | 'trainer' | 'admin');
-      }
-    } catch (error) {
-      console.error('useUserType: Exception fetching user type:', error);
-      setUserType(null);
-    } finally {
-      console.log('useUserType: Setting loading to false');
-      setLoading(false);
-    }
-  }, [user]);
-
-  useEffect(() => {
-    fetchUserType();
-  }, [user]); // Use user directly instead of fetchUserType to prevent loops
-
+  const { profile, loading } = useUserProfile();
+  
   return {
-    user_type: userType,
-    loading
+    user_type: profile?.user_type ?? null,
+    loading,
   };
 }
 
@@ -61,12 +22,13 @@ export function useUserType(): UserTypeInfo {
  * Utility functions for type checking
  */
 export function useUserTypeChecks() {
-  const { user_type } = useUserType();
+  const { user_type, loading } = useUserType();
 
   return {
     isTrainer: () => user_type === 'trainer',
     isClient: () => user_type === 'client',
     isAdmin: () => user_type === 'admin',
-    user_type
+    user_type,
+    loading,
   };
 }
