@@ -8,7 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { CheckCircle, Clock, Pause, Calendar } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { useStatusFeedbackContext } from '@/contexts/StatusFeedbackContext';
 import { useAuth } from '@/hooks/useAuth';
 
 interface AvailabilitySectionProps {
@@ -21,7 +21,7 @@ export function AvailabilitySection({ formData, updateFormData, onAvailabilityCh
   const { user } = useAuth();
   const { settings: availabilitySettings, updateSettings, loading, saving, getWaitlistCount, refetch } = useCoachAvailability();
   const { startExclusivePeriod } = useWaitlistExclusive();
-  const { toast } = useToast();
+  const { showSuccess, showError } = useStatusFeedbackContext();
   const [nextAvailableDate, setNextAvailableDate] = useState('');
   const [allowDiscoveryCalls, setAllowDiscoveryCalls] = useState(true);
   const [autoFollowUpDays, setAutoFollowUpDays] = useState(14);
@@ -74,17 +74,10 @@ export function AvailabilitySection({ formData, updateFormData, onAvailabilityCh
         // Refresh data to ensure UI is in sync
         await refetch();
         
-        toast({
-          title: "Status Updated",
-          description: "Your availability status has been updated successfully.",
-        });
+        showSuccess("Your availability status has been updated successfully");
       } catch (error) {
         console.error('Failed to update status:', error);
-        toast({
-          title: "Error",
-          description: "Failed to update status. Please try again.",
-          variant: "destructive",
-        });
+        showError("Failed to update status. Please try again");
       } finally {
         setIsSaving(false);
       }
@@ -138,17 +131,10 @@ export function AvailabilitySection({ formData, updateFormData, onAvailabilityCh
       // Refresh data to ensure UI is in sync
       await refetch();
       
-      toast({
-        title: "Status Updated",
-        description: "Your availability status has been updated successfully.",
-      });
+      showSuccess("Your availability status has been updated successfully");
     } catch (error) {
       console.error('Failed to update status:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update status. Please try again.",
-        variant: "destructive",
-      });
+      showError("Failed to update status. Please try again");
     } finally {
       setIsSaving(false);
     }

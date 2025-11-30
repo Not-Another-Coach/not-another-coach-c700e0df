@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Check, Save, X, Sparkles, RefreshCw } from "lucide-react";
 import { EnhancedImageUpload } from "./EnhancedImageUpload";
 import { TestimonialAIHelper } from './TestimonialAIHelper';
-import { toast } from "@/hooks/use-toast";
+import { useStatusFeedbackContext } from '@/contexts/StatusFeedbackContext';
 
 interface Testimonial {
   id: string;
@@ -53,6 +53,7 @@ const outcomeTags = [
 ];
 
 export function TestimonialEditModal({ testimonial, isOpen, onClose, onSave }: TestimonialEditModalProps) {
+  const { showSuccess, showError } = useStatusFeedbackContext();
   const [editData, setEditData] = useState<Partial<Testimonial>>({
     clientName: "",
     clientQuote: "",
@@ -91,11 +92,7 @@ export function TestimonialEditModal({ testimonial, isOpen, onClose, onSave }: T
 
   const handleSave = () => {
     if (!testimonial || !editData.clientName || !editData.clientQuote || !editData.achievement || !editData.consentGiven) {
-      toast({
-        title: "Missing required fields",
-        description: "Please fill in all required fields and confirm consent.",
-        variant: "destructive"
-      });
+      showError("Missing required fields: Please fill in all required fields and confirm consent");
       return;
     }
 
@@ -114,10 +111,7 @@ export function TestimonialEditModal({ testimonial, isOpen, onClose, onSave }: T
     onSave(updatedTestimonial);
     onClose();
     
-    toast({
-      title: "Testimonial updated!",
-      description: `Successfully updated testimonial from ${editData.clientName}${editData.showImages ? ' with images' : ''}`,
-    });
+    showSuccess(`Successfully updated testimonial from ${editData.clientName}${editData.showImages ? ' with images' : ''}`);
   };
 
   const handleClose = () => {

@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Clock, Plus, Trash2, Calendar } from 'lucide-react';
 import { useCoachAvailability } from '@/hooks/useCoachAvailability';
-import { useToast } from '@/hooks/use-toast';
+import { useStatusFeedbackContext } from '@/contexts/StatusFeedbackContext';
 
 interface TimeSlot {
   id: string;
@@ -34,7 +34,7 @@ const timeOptions = Array.from({ length: 48 }, (_, i) => {
 
 export function WorkingHoursSection({ formData, updateFormData }: WorkingHoursSectionProps) {
   const { settings, loading, saving, updateSettings } = useCoachAvailability();
-  const { toast } = useToast();
+  const { showError } = useStatusFeedbackContext();
   const [isUKBased, setIsUKBased] = useState(formData.is_uk_based ?? true);
   
   // Initialize availability state from coach availability settings
@@ -120,11 +120,7 @@ export function WorkingHoursSection({ formData, updateFormData }: WorkingHoursSe
     
     // Validate for overlaps
     if (!validateTimeSlots(day, newSlots)) {
-      toast({
-        title: "Time Slot Conflict",
-        description: "This time slot overlaps with an existing slot. Please choose different times.",
-        variant: "destructive",
-      });
+      showError("Time Slot Conflict: This time slot overlaps with an existing slot. Please choose different times");
       return;
     }
     
@@ -145,22 +141,14 @@ export function WorkingHoursSection({ formData, updateFormData }: WorkingHoursSe
     
     // Validate for overlaps
     if (!validateTimeSlots(day, newSlots)) {
-      toast({
-        title: "Time Slot Conflict",
-        description: "This time change creates an overlap with another slot. Please choose different times.",
-        variant: "destructive",
-      });
+      showError("Time Slot Conflict: This time change creates an overlap with another slot. Please choose different times");
       return;
     }
     
     // Validate that start time is before end time
     const updatedSlot = newSlots[slotIndex];
     if (parseTime(updatedSlot.startTime) >= parseTime(updatedSlot.endTime)) {
-      toast({
-        title: "Invalid Time Range",
-        description: "Start time must be before end time.",
-        variant: "destructive",
-      });
+      showError("Invalid Time Range: Start time must be before end time");
       return;
     }
     

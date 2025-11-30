@@ -10,7 +10,7 @@ import { Trash2, Plus, ExternalLink, Calendar as CalendarIcon, Clock, Info } fro
 import { SectionHeader } from './SectionHeader';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useDiscoveryCallSettings } from "@/hooks/useDiscoveryCallSettings";
-import { useToast } from "@/hooks/use-toast";
+import { useStatusFeedbackContext } from '@/contexts/StatusFeedbackContext';
 
 interface DiscoveryCallSectionProps {
   formData: any;
@@ -69,7 +69,7 @@ const findAvailableDefaultSlot = (existingSlots: { start: string; end: string }[
 
 export function DiscoveryCallSection({ formData, updateFormData, errors }: DiscoveryCallSectionProps) {
   const { settings: discoverySettings, loading: discoveryLoading, updateSettings } = useDiscoveryCallSettings();
-  const { toast } = useToast();
+  const { showError } = useStatusFeedbackContext();
   const [prepNotesLocal, setPrepNotesLocal] = useState("");
   
   // Sync local state when settings load/update
@@ -312,11 +312,7 @@ export function DiscoveryCallSection({ formData, updateFormData, errors }: Disco
                                             );
                                             
                                             if (hasOverlap) {
-                                              toast({
-                                                title: "Time Slot Overlap",
-                                                description: "This time slot would overlap with another slot. Please choose a different time.",
-                                                variant: "destructive",
-                                              });
+                                              showError("Time Slot Overlap: This time slot would overlap with another slot. Please choose a different time");
                                               return;
                                             }
                                             
@@ -352,11 +348,7 @@ export function DiscoveryCallSection({ formData, updateFormData, errors }: Disco
                                             );
                                             
                                             if (hasOverlap) {
-                                              toast({
-                                                title: "Time Slot Overlap",
-                                                description: "This time slot would overlap with another slot. Please choose a different time.",
-                                                variant: "destructive",
-                                              });
+                                              showError("Time Slot Overlap: This time slot would overlap with another slot. Please choose a different time");
                                               return;
                                             }
                                             

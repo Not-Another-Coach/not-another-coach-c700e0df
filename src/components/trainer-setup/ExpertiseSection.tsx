@@ -12,7 +12,7 @@ import { MapPin, Monitor, Users, Globe, Target, Dumbbell, Sparkles, Search, Plus
 import { SectionHeader } from './SectionHeader';
 import { useSpecialties, useSpecialtyCategories, useTrainingTypes, useCustomSpecialtyRequests, useTrainerCustomSpecialtyRequests, useSpecialtyAnalytics } from '@/hooks/useSpecialties';
 import { useAuth } from '@/hooks/useAuth';
-import { toast } from '@/hooks/use-toast';
+import { useStatusFeedbackContext } from '@/contexts/StatusFeedbackContext';
 import { LocationAutocompleteField } from "@/components/ui/LocationAutocompleteField";
 
 interface ExpertiseSectionProps {
@@ -22,6 +22,7 @@ interface ExpertiseSectionProps {
 
 export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionProps) {
   const { user } = useAuth();
+  const { showSuccess } = useStatusFeedbackContext();
   const { categories, loading: categoriesLoading } = useSpecialtyCategories();
   const { specialties, loading: specialtiesLoading } = useSpecialties();
   const { trainingTypes, loading: trainingTypesLoading } = useTrainingTypes();
@@ -159,10 +160,7 @@ export function ExpertiseSection({ formData, updateFormData }: ExpertiseSectionP
         justification: ''
       });
 
-      toast({
-        title: "Request Submitted",
-        description: "Your custom specialty request has been submitted for admin review."
-      });
+      showSuccess("Your custom specialty request has been submitted for admin review");
     } catch (error) {
       console.error('Error submitting custom specialty request:', error);
     }

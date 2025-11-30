@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Shield, FileText, Heart, CheckCircle, Clock, XCircle, AlertTriangle, Save, Edit } from "lucide-react";
 import { format } from "date-fns";
-import { useToast } from "@/hooks/use-toast";
+import { useStatusFeedbackContext } from '@/contexts/StatusFeedbackContext';
 import { useProfessionalDocumentsState } from "@/hooks/useProfessionalDocumentsState";
 import { useEnhancedTrainerVerification } from "@/hooks/useEnhancedTrainerVerification";
 import { useTrainerProfileContext } from "@/contexts/TrainerProfileContext";
@@ -78,7 +78,7 @@ export const ProfessionalDocumentsSection = () => {
   } = useEnhancedTrainerVerification();
   
   const [uploadingFiles, setUploadingFiles] = useState<Record<string, boolean>>({});
-  const { toast } = useToast();
+  const { showSuccess, showError } = useStatusFeedbackContext();
 
   const handleInputChange = (checkType: string, field: string, value: any) => {
     updateFormData(checkType, field, value);
@@ -91,18 +91,11 @@ export const ProfessionalDocumentsSection = () => {
   const handleNotApplicableChange = async (checkType: string, isNotApplicable: boolean) => {
     try {
       await updateNotApplicable(checkType, isNotApplicable);
-      toast({
-        title: "Preference saved",
-        description: isNotApplicable 
-          ? `${CheckTypeConfig[checkType as keyof typeof CheckTypeConfig]?.title} marked as not applicable`
-          : `${CheckTypeConfig[checkType as keyof typeof CheckTypeConfig]?.title} marked as applicable`,
-      });
+      showSuccess(isNotApplicable 
+        ? `${CheckTypeConfig[checkType as keyof typeof CheckTypeConfig]?.title} marked as not applicable`
+        : `${CheckTypeConfig[checkType as keyof typeof CheckTypeConfig]?.title} marked as applicable`);
     } catch (error) {
-      toast({
-        title: "Failed to save preference",
-        description: "Please try again or contact support if the issue persists",
-        variant: "destructive",
-      });
+      showError("Failed to save preference. Please try again or contact support if the issue persists");
     }
   };
 
@@ -112,10 +105,7 @@ export const ProfessionalDocumentsSection = () => {
 
     await saveDraft(checkType);
     
-    toast({
-      title: "Draft Saved",
-      description: `Your ${CheckTypeConfig[checkType as keyof typeof CheckTypeConfig].title} draft has been saved.`,
-    });
+    showSuccess(`Your ${CheckTypeConfig[checkType as keyof typeof CheckTypeConfig].title} draft has been saved`);
   };
 
   const handleSubmitForReview = async (checkType: string) => {
@@ -130,11 +120,7 @@ export const ProfessionalDocumentsSection = () => {
       });
       
       if (missingFields.length > 0) {
-        toast({
-          variant: "destructive",
-          title: "Missing Required Fields",
-          description: `Please fill in all required fields: ${missingFields.join(', ')}`,
-        });
+        showError(`Missing Required Fields: ${missingFields.join(', ')}`);
         return;
       }
     }
@@ -154,16 +140,9 @@ export const ProfessionalDocumentsSection = () => {
           ? `Your ${config.title} has been ${isResubmission ? 'resubmitted' : 'submitted'} for admin review.`
           : `Your ${config.title} has been saved. Since verification is disabled, it won't be sent to admin for review.`;
         
-        toast({
-          title,
-          description,
-        });
+        showSuccess(description);
       } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Submission Failed",
-        description: "There was an error submitting your document. Please try again.",
-      });
+        showError("Submission Failed: There was an error submitting your document. Please try again");
     }
   };
 
@@ -300,11 +279,7 @@ export const ProfessionalDocumentsSection = () => {
                             }
                           } catch (error) {
                             console.error('Error generating signed URL:', error);
-                            toast({
-                              title: "Error",
-                              description: "Failed to open document",
-                              variant: "destructive",
-                            });
+                            showError("Failed to open document");
                           }
                         }}
                       >

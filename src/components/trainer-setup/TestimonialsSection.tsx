@@ -12,7 +12,7 @@ import { EnhancedImageUpload } from "./EnhancedImageUpload";
 import { SectionHeader } from './SectionHeader';
 import { TestimonialAIHelper } from './TestimonialAIHelper';
 import { TestimonialEditModal } from './TestimonialEditModal';
-import { toast } from "@/hooks/use-toast";
+import { useStatusFeedbackContext } from '@/contexts/StatusFeedbackContext';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
 
 interface TestimonialsSectionProps {
@@ -54,6 +54,7 @@ const outcomeTags = [
 ];
 
 export function TestimonialsSection({ formData, updateFormData }: TestimonialsSectionProps) {
+  const { showSuccess } = useStatusFeedbackContext();
   const [testimonials, setTestimonials] = useState<Testimonial[]>(formData.testimonials || []);
   const [newTestimonial, setNewTestimonial] = useState<Partial<Testimonial>>({
     clientName: "",
@@ -98,10 +99,7 @@ export function TestimonialsSection({ formData, updateFormData }: TestimonialsSe
       console.log('Added testimonial:', testimonial);
       console.log('Updated testimonials array:', updatedTestimonials);
       
-      toast({
-        title: "Testimonial added!",
-        description: `Successfully added testimonial from ${testimonial.clientName}${testimonial.showImages ? ' with images' : ''}`,
-      });
+      showSuccess(`Successfully added testimonial from ${testimonial.clientName}${testimonial.showImages ? ' with images' : ''}`);
       
       setNewTestimonial({
         clientName: "",
