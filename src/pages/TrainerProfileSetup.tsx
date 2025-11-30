@@ -12,6 +12,8 @@ import { useProfessionalDocumentsState } from "@/hooks/useProfessionalDocumentsS
 import { useToast } from "@/hooks/use-toast";
 import { useProfileStepValidation } from "@/hooks/useProfileStepValidation";
 import { useAppSettingsData } from "@/hooks/data/useAppSettingsData";
+import { useStatusFeedback } from "@/hooks/useStatusFeedback";
+import { InlineStatusBar } from "@/components/ui/inline-status-bar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -86,9 +88,13 @@ const TrainerProfileSetup = () => {
   const [pendingAvailabilityChanges, setPendingAvailabilityChanges] = useState<any>(null);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [isFormReady, setIsFormReady] = useState(false); // Track if form is fully initialized
+  const [validationShake, setValidationShake] = useState(false);
   const hasInitialized = useRef(false);
   const hasLoadedOnce = useRef(false);
   const initialFormData = useRef<typeof formData | null>(null);
+  
+  // Premium feedback system
+  const { status, hideStatus, showSuccess, showError, showWarning } = useStatusFeedback();
 
   const [formData, setFormData] = useState({
     // Basic Info - these exist in TrainerProfile
@@ -592,7 +598,7 @@ const TrainerProfileSetup = () => {
     }
   };
 
-  const handleSave = async (showToast: boolean = true) => {
+  const handleSave = async (showFeedback: boolean = true) => {
     // 🛡️ PROTECTION 1: Don't save if form hasn't been initialized from profile
     if (!hasInitialized.current || !isFormReady) {
       console.error('🚫 DATA LOSS PROTECTION: Attempted to save before form was initialized', {
@@ -600,11 +606,7 @@ const TrainerProfileSetup = () => {
         isFormReady,
         profile_id: profile?.id
       });
-      toast({
-        title: "Cannot save yet",
-        description: "Please wait for your profile to load before saving.",
-        variant: "destructive",
-      });
+      showError("Please wait for your profile to load before saving.");
       return;
     }
     
@@ -622,11 +624,7 @@ const TrainerProfileSetup = () => {
         formData_last_name: formData.last_name,
         formData_bio: formData.bio
       });
-      toast({
-        title: "Data protection",
-        description: "Cannot save empty profile over existing data. Please wait for form to load completely.",
-        variant: "destructive",
-      });
+      showError("Cannot save empty profile over existing data. Please wait for form to load completely.");
       return;
     }
     
@@ -698,11 +696,10 @@ const TrainerProfileSetup = () => {
         throw new Error(result.error.message || 'Failed to save profile');
       }
       
-      if (showToast) {
-        toast({
-          title: "Profile saved",
-          description: "Your changes have been saved successfully.",
-        });
+      if (showFeedback) {
+        showSuccess("Changes saved successfully");
+        // Scroll to top to show success message
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
       
       // Update initial form data and reset unsaved changes flag after successful save
@@ -712,11 +709,7 @@ const TrainerProfileSetup = () => {
       return result;
     } catch (error) {
       console.error('Error in handleSave:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save profile. Please try again.",
-        variant: "destructive",
-      });
+      showError("Failed to save profile. Please try again.");
       throw error;
     } finally {
       setIsLoading(false);
@@ -760,18 +753,16 @@ const TrainerProfileSetup = () => {
 
   const handleNext = async () => {
     if (!validateCurrentStep()) {
-      toast({
-        title: "Validation Error",
-        description: "Please complete all required fields before proceeding.",
-        variant: "destructive",
-      });
+      showWarning("Please complete all required fields before proceeding.");
+      setValidationShake(true);
+      setTimeout(() => setValidationShake(false), 400);
       return;
     }
 
     try {
       setIsLoading(true);
       
-      await handleSave(false);
+      await handleSave(true);
 
       // Also save availability settings if there are pending changes
       if (pendingAvailabilityChanges) {
@@ -794,19 +785,13 @@ const TrainerProfileSetup = () => {
           profile_setup_completed: true
         };
         await updateProfile(completionData);
-        toast({
-          title: 'Profile saved',
-          description: 'Your profile is saved.',
-        });
+        showSuccess('Profile saved successfully');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         // Stay on the page so trainer can submit for review
       }
     } catch (error) {
       console.error('Error in handleNext:', error);
-      toast({
-        title: "Error",
-        description: "Something went wrong. Please try again.",
-        variant: "destructive",
-      });
+      showError("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -1182,6 +1167,15 @@ const TrainerProfileSetup = () => {
 
       {/* Main Content */}
       <div className="max-w-4xl mx-auto p-6">
+        {/* Inline Status Bar */}
+        <InlineStatusBar
+          message={status.message}
+          variant={status.variant}
+          isVisible={status.isVisible}
+          onDismiss={hideStatus}
+          className="mb-4"
+        />
+        
         <Card className="relative">
           {/* Loading overlay to prevent interaction before form is ready */}
           {!isFormReady && (
@@ -1215,6 +1209,7 @@ const TrainerProfileSetup = () => {
                variant={currentStep === totalSteps ? "success" : "hero"}
                onClick={handleNext}
                disabled={isLoading || !isFormReady}
+               className={validationShake ? "animate-shake" : ""}
              >
                {isLoading ? (
                  <>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useProfilePublication } from '@/hooks/useProfilePublication';
 import { useProfileStepValidation } from '@/hooks/useProfileStepValidation';
 import { Button } from '@/components/ui/button';
+import { MilestoneModal } from '@/components/ui/milestone-modal';
 import { 
   Dialog,
   DialogContent,
@@ -23,7 +24,8 @@ import {
   Clock, 
   XCircle, 
   AlertCircle,
-  Shield
+  Shield,
+  Sparkles
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -35,6 +37,7 @@ export const PublishButton = ({ profile }: PublishButtonProps) => {
   const { currentRequest, loading, requestPublication, isProfileReadyToPublish } = useProfilePublication();
   const stepValidation = useProfileStepValidation();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showMilestoneModal, setShowMilestoneModal] = useState(false);
 
   const readyToPublish = isProfileReadyToPublish(profile, stepValidation);
   const isPublished = profile?.profile_published === true;
@@ -71,10 +74,10 @@ export const PublishButton = ({ profile }: PublishButtonProps) => {
   };
 
   const handlePublicationRequest = async () => {
-    const success = await requestPublication();
-    if (success) {
+    const success = await requestPublication(() => {
       setShowConfirmDialog(false);
-    }
+      setShowMilestoneModal(true);
+    });
   };
 
   const canRequestPublication = readyToPublish && 
@@ -227,6 +230,19 @@ export const PublishButton = ({ profile }: PublishButtonProps) => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Milestone Modal */}
+      <MilestoneModal
+        open={showMilestoneModal}
+        onOpenChange={setShowMilestoneModal}
+        title="Profile Submitted for Review!"
+        description="Your profile has been submitted to our admin team. You'll be notified when it's approved and published."
+        icon={<Sparkles className="h-8 w-8 text-primary" />}
+        primaryAction={{
+          label: "Got it!",
+          onClick: () => setShowMilestoneModal(false)
+        }}
+      />
     </TooltipProvider>
   );
 };
