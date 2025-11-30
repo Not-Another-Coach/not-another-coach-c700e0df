@@ -54,5 +54,8 @@ export const useDiscoveryCallSettingsData = () => {
     enabled: !!user?.id,
     staleTime: queryConfig.availability.staleTime,
     gcTime: queryConfig.availability.gcTime,
+    refetchOnMount: queryConfig.availability.refetchOnMount,
+    refetchOnWindowFocus: queryConfig.availability.refetchOnWindowFocus,
+    refetchOnReconnect: queryConfig.availability.refetchOnReconnect,
   });
 };
