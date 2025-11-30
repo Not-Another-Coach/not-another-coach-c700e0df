@@ -178,9 +178,12 @@ export function useUserProfile(): ProfileData {
 
       return profile;
     },
-    onSuccess: () => {
-      // Invalidate the query to trigger a refetch
-      queryClient.invalidateQueries({ queryKey: ['user-profile', user?.id] });
+    onSuccess: (_, updates) => {
+      // Optimistic update - apply changes directly to cache (no refetch)
+      queryClient.setQueryData(['user-profile', user?.id], (oldData: any) => {
+        if (!oldData) return oldData;
+        return { ...oldData, ...updates };
+      });
       
       toast({
         title: "Profile updated",
