@@ -71,8 +71,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('rememberMe');
     localStorage.removeItem('savedEmail');
     
-    // Just navigate - auth page will handle the actual sign-out
-    window.location.href = '/auth?signout=true';
+    // Clear Supabase auth token BEFORE navigation (instant, no async)
+    const projectRef = 'ogpiovfxjxcclptfybrk';
+    localStorage.removeItem(`sb-${projectRef}-auth-token`);
+    
+    // Direct navigation - no signout param needed
+    window.location.href = '/auth';
     
     return { error: null };
   };
