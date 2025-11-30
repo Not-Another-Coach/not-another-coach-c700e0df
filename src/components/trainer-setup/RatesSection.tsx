@@ -226,11 +226,7 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
       const sourceWorkflow = getPackageWorkflow(sourcePackageId);
       
       if (!sourceWorkflow) {
-        toast({
-          title: "No ways of working to copy",
-          description: "The source package doesn't have any ways of working configured.",
-          variant: "default",
-        });
+        showInfo("The source package doesn't have any ways of working configured");
         return;
       }
 
@@ -245,17 +241,10 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
         visibility: sourceWorkflow.visibility,
       });
       
-      toast({
-        title: "Ways of working copied",
-        description: "The ways of working have been copied to your new package",
-      });
+      showSuccess("Ways of working copied to your new package");
     } catch (error) {
       console.error('Error copying ways of working:', error);
-      toast({
-        title: "Error copying ways of working",
-        description: "There was an issue copying the ways of working. You can set them up manually in the Ways of Working tab.",
-        variant: "destructive",
-      });
+      showError("Error copying ways of working. You can set them up manually in the Ways of Working tab");
     }
   };
 
@@ -1127,11 +1116,7 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
                                               );
                                               
                                               if (hasOverlap) {
-                                                toast({
-                                                  title: "Time Slot Overlap",
-                                                  description: "This time slot would overlap with another slot. Please choose a different time.",
-                                                  variant: "destructive",
-                                                });
+                                                showError("This time slot would overlap with another slot. Please choose a different time");
                                                 return;
                                               }
                                               
@@ -1167,11 +1152,7 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
                                               );
                                               
                                               if (hasOverlap) {
-                                                toast({
-                                                  title: "Time Slot Overlap",
-                                                  description: "This time slot would overlap with another slot. Please choose a different time.",
-                                                  variant: "destructive",
-                                                });
+                                                showError("This time slot would overlap with another slot. Please choose a different time");
                                                 return;
                                               }
                                               

@@ -242,16 +242,9 @@ export function PackageWaysOfWorkingSection({
       });
 
 
-      toast({
-        title: "Suggestion added",
-        description: "Added to your ways of working",
-      });
+      showSuccess("Added to your ways of working");
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to add suggestion. Please try again.",
-        variant: "destructive",
-      });
+      showError("Failed to add suggestion. Please try again");
     }
   };
 
@@ -265,16 +258,9 @@ export function PackageWaysOfWorkingSection({
         visibility
       });
 
-      toast({
-        title: "Visibility updated",
-        description: `Package workflow is now ${visibility === 'public' ? 'public' : 'post-match only'}`,
-      });
+      showSuccess(`Package workflow is now ${visibility === 'public' ? 'public' : 'post-match only'}`);
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update visibility. Please try again.",
-        variant: "destructive",
-      });
+      showError("Failed to update visibility. Please try again");
     }
   };
 
@@ -290,10 +276,7 @@ export function PackageWaysOfWorkingSection({
     
     await savePackageWorkflow(targetPackageId, targetPackageName, clonedWorkflow);
     
-    toast({
-      title: "Ways of working cloned",
-      description: `Copied settings from ${sourceWorkflow.package_name}`,
-    });
+    showSuccess(`Copied settings from ${sourceWorkflow.package_name}`);
   };
 
   const renderSection = (section: string) => {
