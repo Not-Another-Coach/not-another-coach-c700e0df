@@ -52,7 +52,18 @@ import DataCleanup from "./pages/admin/DataCleanup";
 import TemplateManagement from "./pages/admin/TemplateManagement";
 import { AdminSystemSettings } from "./pages/AdminSystemSettings";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,       // 5 minutes default
+      gcTime: 10 * 60 * 1000,          // 10 minutes default
+      refetchOnMount: false,           // Don't refetch on component mount
+      refetchOnWindowFocus: false,     // Don't refetch when window regains focus
+      refetchOnReconnect: false,       // Don't refetch on network reconnect
+      retry: 1,                        // Only retry once on failure
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
