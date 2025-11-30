@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { FileUploadService } from '@/services';
 import { toast } from '@/hooks/use-toast';
+import { useTrainerImagesData } from './data/useTrainerImagesData';
+import type { TrainerUploadedImage, TrainerInstagramSelection, TrainerImagePreferences } from './data/useTrainerImagesData';
 
 // Single source of truth for grid size calculation - exported for reuse
 export const getRecommendedGridSizeForCount = (count: number) => {
@@ -26,117 +28,29 @@ export const getGridLabel = (gridSize: number) => {
   return labels[gridSize as keyof typeof labels] || `${gridSize} images`;
 };
 
-export interface TrainerUploadedImage {
-  id: string;
-  trainer_id: string;
-  file_path: string;
-  file_name: string;
-  file_size?: number;
-  mime_type?: string;
-  is_selected_for_display: boolean;
-  display_order: number;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface TrainerInstagramSelection {
-  id: string;
-  trainer_id: string;
-  instagram_media_id: string;
-  media_url: string;
-  media_type: string;
-  thumbnail_url?: string;
-  caption?: string;
-  is_selected_for_display: boolean;
-  display_order: number;
-  synced_at: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface TrainerImagePreferences {
-  id: string;
-  trainer_id: string;
-  max_images_per_view: number;
-  auto_sync_instagram: boolean;
-  instagram_sync_frequency: string;
-  last_instagram_sync?: string;
-  created_at: string;
-  updated_at: string;
-}
+// Re-export types from data hook
+export type { TrainerUploadedImage, TrainerInstagramSelection, TrainerImagePreferences };
 
 export const useTrainerImages = () => {
   const { user } = useAuth();
-  const [uploadedImages, setUploadedImages] = useState<TrainerUploadedImage[]>([]);
-  const [instagramSelections, setInstagramSelections] = useState<TrainerInstagramSelection[]>([]);
-  const [imagePreferences, setImagePreferences] = useState<TrainerImagePreferences | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
+  const queryClient = useQueryClient();
 
-  // Fetch all trainer images and preferences
-  const fetchTrainerImages = async () => {
-    if (!user?.id) return;
+  // Use data hook for fetching
+  const { data, isLoading } = useTrainerImagesData();
 
-    try {
-      setLoading(true);
+  const uploadedImages = data?.uploadedImages || [];
+  const instagramSelections = data?.instagramSelections || [];
+  const imagePreferences = data?.imagePreferences || null;
 
-      // Fetch uploaded images
-      const { data: uploadedData, error: uploadedError } = await supabase
-        .from('trainer_uploaded_images')
-        .select('*')
-        .eq('trainer_id', user.id)
-        .order('display_order', { ascending: true });
+  // Upload mutation
+  const uploadMutation = useMutation({
+    mutationFn: async (file: File) => {
+      if (!user?.id) throw new Error('No user authenticated');
 
-      if (uploadedError) throw uploadedError;
-
-      // Fetch Instagram selections
-      const { data: instagramData, error: instagramError } = await supabase
-        .from('trainer_instagram_selections')
-        .select('*')
-        .eq('trainer_id', user.id)
-        .order('display_order', { ascending: true });
-
-      if (instagramError) throw instagramError;
-
-      // Fetch preferences
-      const { data: preferencesData, error: preferencesError } = await supabase
-        .from('trainer_image_preferences')
-        .select('*')
-        .eq('trainer_id', user.id)
-        .single();
-
-      if (preferencesError && preferencesError.code !== 'PGRST116') {
-        throw preferencesError;
-      }
-
-      setUploadedImages(uploadedData || []);
-      setInstagramSelections(instagramData || []);
-      setImagePreferences(preferencesData || null);
-    } catch (error) {
-      console.error('Error fetching trainer images:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load images. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Upload new image
-  const uploadImage = async (file: File): Promise<TrainerUploadedImage | null> => {
-    if (!user?.id) return null;
-
-    try {
-      setUploading(true);
-
-      // Create file path
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}.${fileExt}`;
       const filePath = `${user.id}/${fileName}`;
 
-      // Upload to Supabase storage
       const uploadResult = await FileUploadService.uploadFile(
         'trainer-images',
         filePath,
@@ -147,7 +61,6 @@ export const useTrainerImages = () => {
         throw new Error(uploadResult.error.message);
       }
 
-      // Save to database
       const { data, error: dbError } = await supabase
         .from('trainer_uploaded_images')
         .insert({
@@ -162,39 +75,33 @@ export const useTrainerImages = () => {
         .single();
 
       if (dbError) throw dbError;
-
-      // Update local state
-      setUploadedImages(prev => [...prev, data]);
-
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['trainer-images', user?.id] });
       toast({
         title: "Success",
         description: "Image uploaded successfully!",
       });
-
-      return data;
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error('Error uploading image:', error);
       toast({
         title: "Error",
         description: "Failed to upload image. Please try again.",
         variant: "destructive",
       });
-      return null;
-    } finally {
-      setUploading(false);
     }
-  };
+  });
 
-  // Delete uploaded image
-  const deleteUploadedImage = async (imageId: string) => {
-    if (!user?.id) return;
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (imageId: string) => {
+      if (!user?.id) throw new Error('No user authenticated');
 
-    try {
-      // Find the image
       const image = uploadedImages.find(img => img.id === imageId);
-      if (!image) return;
+      if (!image) throw new Error('Image not found');
 
-      // Delete from storage
       const deleteResult = await FileUploadService.deleteFile(
         'trainer-images',
         image.file_path
@@ -204,22 +111,21 @@ export const useTrainerImages = () => {
         throw new Error(deleteResult.error.message);
       }
 
-      // Delete from database
       const { error: dbError } = await supabase
         .from('trainer_uploaded_images')
         .delete()
         .eq('id', imageId);
 
       if (dbError) throw dbError;
-
-      // Update local state
-      setUploadedImages(prev => prev.filter(img => img.id !== imageId));
-
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['trainer-images', user?.id] });
       toast({
         title: "Success",
         description: "Image deleted successfully!",
       });
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error('Error deleting image:', error);
       toast({
         title: "Error",
@@ -227,16 +133,16 @@ export const useTrainerImages = () => {
         variant: "destructive",
       });
     }
-  };
+  });
 
-  // Toggle image selection for display
-  const toggleImageSelection = async (imageId: string, type: 'uploaded' | 'instagram') => {
-    if (!user?.id) return;
+  // Toggle selection mutation
+  const toggleSelectionMutation = useMutation({
+    mutationFn: async ({ imageId, type }: { imageId: string; type: 'uploaded' | 'instagram' }) => {
+      if (!user?.id) throw new Error('No user authenticated');
 
-    try {
       if (type === 'uploaded') {
         const image = uploadedImages.find(img => img.id === imageId);
-        if (!image) return;
+        if (!image) throw new Error('Image not found');
 
         const { error } = await supabase
           .from('trainer_uploaded_images')
@@ -244,17 +150,9 @@ export const useTrainerImages = () => {
           .eq('id', imageId);
 
         if (error) throw error;
-
-        setUploadedImages(prev => 
-          prev.map(img => 
-            img.id === imageId 
-              ? { ...img, is_selected_for_display: !img.is_selected_for_display }
-              : img
-          )
-        );
       } else {
         const selection = instagramSelections.find(sel => sel.id === imageId);
-        if (!selection) return;
+        if (!selection) throw new Error('Selection not found');
 
         const { error } = await supabase
           .from('trainer_instagram_selections')
@@ -262,21 +160,16 @@ export const useTrainerImages = () => {
           .eq('id', imageId);
 
         if (error) throw error;
-
-        setInstagramSelections(prev => 
-          prev.map(sel => 
-            sel.id === imageId 
-              ? { ...sel, is_selected_for_display: !sel.is_selected_for_display }
-              : sel
-          )
-        );
       }
-
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['trainer-images', user?.id] });
       toast({
         title: "Success",
         description: "Image selection updated!",
       });
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error('Error toggling image selection:', error);
       toast({
         title: "Error",
@@ -284,13 +177,13 @@ export const useTrainerImages = () => {
         variant: "destructive",
       });
     }
-  };
+  });
 
-  // Update image preferences
-  const updateImagePreferences = async (preferences: Partial<TrainerImagePreferences>) => {
-    if (!user?.id) return;
+  // Update preferences mutation
+  const updatePreferencesMutation = useMutation({
+    mutationFn: async (preferences: Partial<TrainerImagePreferences>) => {
+      if (!user?.id) throw new Error('No user authenticated');
 
-    try {
       const { data, error } = await supabase
         .from('trainer_image_preferences')
         .upsert({
@@ -304,14 +197,16 @@ export const useTrainerImages = () => {
         .single();
 
       if (error) throw error;
-
-      setImagePreferences(data);
-
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['trainer-images', user?.id] });
       toast({
         title: "Success",
         description: "Preferences updated successfully!",
       });
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error('Error updating preferences:', error);
       toast({
         title: "Error",
@@ -319,11 +214,10 @@ export const useTrainerImages = () => {
         variant: "destructive",
       });
     }
-  };
+  });
 
   // Get public URL for uploaded image (synchronous version for JSX usage)
   const getImageUrl = (filePath: string) => {
-    // Create the public URL directly without async call
     const { data } = supabase.storage
       .from('trainer-images')
       .getPublicUrl(filePath);
@@ -353,16 +247,9 @@ export const useTrainerImages = () => {
         caption: sel.caption
       }));
 
-    const allSelected = [...selectedUploaded, ...selectedInstagram]
+    return [...selectedUploaded, ...selectedInstagram]
       .sort((a, b) => a.displayOrder - b.displayOrder);
-
-    // Return all selected images - grid layout will adapt based on count
-    return allSelected;
   };
-
-  useEffect(() => {
-    fetchTrainerImages();
-  }, [user?.id]);
 
   // Validation helpers
   const getSelectedImagesCount = () => {
@@ -383,41 +270,10 @@ export const useTrainerImages = () => {
     
     if (excessCount <= 0) return;
 
-    // Deselect excess images (starting from the end)
     const imagesToDeselect = selectedImages.slice(maxImages);
     
     for (const image of imagesToDeselect) {
-      if (image.type === 'uploaded') {
-        const { error } = await supabase
-          .from('trainer_uploaded_images')
-          .update({ is_selected_for_display: false })
-          .eq('id', image.id);
-        
-        if (!error) {
-          setUploadedImages(prev => 
-            prev.map(img => 
-              img.id === image.id 
-                ? { ...img, is_selected_for_display: false }
-                : img
-            )
-          );
-        }
-      } else {
-        const { error } = await supabase
-          .from('trainer_instagram_selections')
-          .update({ is_selected_for_display: false })
-          .eq('id', image.id);
-        
-        if (!error) {
-          setInstagramSelections(prev => 
-            prev.map(sel => 
-              sel.id === image.id 
-                ? { ...sel, is_selected_for_display: false }
-                : sel
-            )
-          );
-        }
-      }
+      await toggleSelectionMutation.mutateAsync({ imageId: image.id, type: image.type });
     }
 
     toast({
@@ -445,13 +301,14 @@ export const useTrainerImages = () => {
     uploadedImages,
     instagramSelections,
     imagePreferences,
-    loading,
-    uploading,
-    fetchTrainerImages,
-    uploadImage,
-    deleteUploadedImage,
-    toggleImageSelection,
-    updateImagePreferences,
+    loading: isLoading,
+    uploading: uploadMutation.isPending,
+    fetchTrainerImages: () => queryClient.invalidateQueries({ queryKey: ['trainer-images', user?.id] }),
+    uploadImage: uploadMutation.mutateAsync,
+    deleteUploadedImage: deleteMutation.mutate,
+    toggleImageSelection: (imageId: string, type: 'uploaded' | 'instagram') => 
+      toggleSelectionMutation.mutate({ imageId, type }),
+    updateImagePreferences: updatePreferencesMutation.mutate,
     getImageUrl,
     getSelectedImagesForDisplay,
     // Validation helpers
