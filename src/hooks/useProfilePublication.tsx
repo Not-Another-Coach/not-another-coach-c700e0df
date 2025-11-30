@@ -49,7 +49,7 @@ export const useProfilePublication = () => {
   }, [user?.id]);
 
   // Submit publication request
-  const requestPublication = async () => {
+  const requestPublication = async (onSuccess?: () => void) => {
     if (!user?.id) return false;
     
     setLoading(true);
@@ -58,12 +58,13 @@ export const useProfilePublication = () => {
       
       if (error) throw error;
       
-      toast({
-        title: "Publication Request Submitted",
-        description: "Your profile has been submitted for admin review. You'll be notified when it's approved.",
-      });
-      
       await fetchCurrentRequest();
+      
+      // Call success callback instead of showing toast
+      if (onSuccess) {
+        onSuccess();
+      }
+      
       return true;
     } catch (error: any) {
       toast({
