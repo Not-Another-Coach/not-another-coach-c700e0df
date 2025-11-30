@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, X, Eye, EyeOff, Info, Package, AlertCircle, Settings, Workflow, Activity, Zap } from "lucide-react";
 import { usePackageWaysOfWorking, PackageWaysOfWorking } from "@/hooks/usePackageWaysOfWorking";
 
-import { useToast } from "@/hooks/use-toast";
+import { useStatusFeedbackContext } from "@/contexts/StatusFeedbackContext";
 import { SectionHeader } from "./SectionHeader";
 import { useTrainerActivities } from "@/hooks/useTrainerActivities";
 import { useAuth } from "@/hooks/useAuth";
@@ -36,7 +36,7 @@ export function PackageWaysOfWorkingSection({
   const { user } = useAuth();
   const { packageWorkflows, loading, savePackageWorkflow, getPackageWorkflow } = usePackageWaysOfWorking();
   
-  const { toast } = useToast();
+  const { showSuccess, showError } = useStatusFeedbackContext();
   const [activePackageId, setActivePackageId] = useState<string>("");
   const [activeTab, setActiveTab] = useState<string>("onboarding");
   const [newItems, setNewItems] = useState<{ [key: string]: string }>({
@@ -200,16 +200,9 @@ export function PackageWaysOfWorkingSection({
 
       setNewItems(prev => ({ ...prev, [section]: "" }));
 
-      toast({
-        title: "Item added",
-        description: "Successfully added to ways of working",
-      });
+      showSuccess("Item added to ways of working");
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to add item. Please try again.",
-        variant: "destructive",
-      });
+      showError("Failed to add item. Please try again");
     }
   };
 
@@ -226,16 +219,9 @@ export function PackageWaysOfWorkingSection({
       });
 
 
-      toast({
-        title: "Item removed",
-        description: "Successfully removed from ways of working",
-      });
+      showSuccess("Item removed from ways of working");
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to remove item. Please try again.",
-        variant: "destructive",
-      });
+      showError("Failed to remove item. Please try again");
     }
   };
 

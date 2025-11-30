@@ -14,6 +14,8 @@ import { useProfileStepValidation } from "@/hooks/useProfileStepValidation";
 import { useAppSettingsData } from "@/hooks/data/useAppSettingsData";
 import { useStatusFeedback } from "@/hooks/useStatusFeedback";
 import { InlineStatusBar } from "@/components/ui/inline-status-bar";
+import { MilestoneModal } from "@/components/ui/milestone-modal";
+import { StatusFeedbackProvider } from "@/contexts/StatusFeedbackContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";

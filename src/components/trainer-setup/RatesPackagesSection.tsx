@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { usePackageWaysOfWorking } from "@/hooks/usePackageWaysOfWorking";
 import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
+import { useStatusFeedbackContext } from "@/contexts/StatusFeedbackContext";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -93,7 +93,7 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
   });
 
   const { getPackageWorkflow, savePackageWorkflow, cleanupOrphanedWorkflows, refetch } = usePackageWaysOfWorking();
-  const { toast } = useToast();
+  const { showSuccess, showError, showInfo } = useStatusFeedbackContext();
   
   // Clean up orphaned workflows ONLY on component mount (not on packages changes)
   useEffect(() => {
@@ -217,10 +217,7 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
   const copyPackageWaysOfWorking = async (sourcePackageId: string, targetPackageId: string, targetPackageName: string) => {
     try {
       // Show progress to user
-      toast({
-        title: "Copying ways of working...",
-        description: "Please wait while we copy the ways of working data.",
-      });
+      showInfo("Copying ways of working, please wait...");
 
       // Validate input parameters
       if (!sourcePackageId || !targetPackageId || !targetPackageName) {
@@ -287,10 +284,7 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
             await savePackageWorkflow(targetPackageId, targetPackageName, convertedWorkflow);
             console.log(`[Copy WoW] Successfully copied from profile to package ${targetPackageId}`);
 
-            toast({
-              title: "Ways of working copied",
-              description: "The ways of working have been copied from your profile to the new package",
-            });
+            showSuccess("Ways of working copied from your profile to the new package");
             return;
           }
         } else {
@@ -307,11 +301,7 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
 
           if (!hasContent) {
             console.log(`[Copy WoW] State data exists but is empty for package ${sourcePackageId}`);
-            toast({
-              title: "No content to copy",
-              description: "The source package has ways of working configured but no actual content to copy.",
-              variant: "default",
-            });
+            showInfo("The source package has ways of working configured but no actual content to copy");
             return;
           }
 
@@ -323,11 +313,7 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
       // Final check - if we still don't have source data, fail gracefully
       if (!fullSourceWorkflow) {
         console.log(`[Copy WoW] No source data found for package ${sourcePackageId}`);
-        toast({
-          title: "No ways of working to copy",
-          description: "The source package doesn't have any ways of working configured.",
-          variant: "default",
-        });
+        showInfo("The source package doesn't have any ways of working configured");
         return;
       }
 
@@ -354,11 +340,7 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
       // Check if the save operation succeeded
       if (!savedData) {
         console.warn(`[Copy WoW] Save operation returned no data for package ${targetPackageId}`);
-        toast({
-          title: "Copy failed",
-          description: "Failed to save the copied ways of working data.",
-          variant: "destructive",
-        });
+        showError("Failed to save the copied ways of working data");
         return;
       }
 
@@ -375,25 +357,14 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
 
       if (verifyData) {
         console.log(`[Copy WoW] Copy verification successful for package ${targetPackageId}`);
-        toast({
-          title: "Ways of working copied successfully",
-          description: `The ways of working have been copied to "${targetPackageName}"`,
-        });
+        showSuccess(`Ways of working copied to "${targetPackageName}"`);
       } else {
         console.warn(`[Copy WoW] Copy verification failed for package ${targetPackageId}`);
-        toast({
-          title: "Copy completed with warnings",
-          description: "The copy process completed but verification failed. Please check the Ways of Working tab.",
-          variant: "default",
-        });
+        showInfo("Copy completed but verification failed. Please check the Ways of Working tab");
       }
     } catch (error) {
       console.error('[Copy WoW] Error copying ways of working:', error);
-      toast({
-        title: "Error copying ways of working",
-        description: `Failed to copy ways of working: ${error instanceof Error ? error.message : 'Unknown error'}. You can set them up manually in the Ways of Working tab.`,
-        variant: "destructive",
-      });
+      showError(`Failed to copy ways of working: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -422,25 +393,14 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
         
         if (deleteError) {
           console.error('Error deleting Ways of Working data:', deleteError);
-          toast({
-            title: "Warning",
-            description: "Package deleted but some associated data may remain. Please refresh the page.",
-            variant: "destructive",
-          });
+          showInfo("Package deleted but some associated data may remain. Please refresh the page");
         } else {
-          toast({
-            title: "Package deleted",
-            description: `${packageToDelete?.name || 'Package'} and all associated data removed successfully.`,
-          });
+          showSuccess(`${packageToDelete?.name || 'Package'} and all associated data removed successfully`);
         }
       }
     } catch (error) {
       console.error('Error removing package:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete package. Please try again.",
-        variant: "destructive",
-      });
+      showError("Failed to delete package. Please try again");
       // Revert the local state on error
       setPackages(packages);
       updateFormData({ package_options: packages });
@@ -494,19 +454,13 @@ export function RatesPackagesSection({ formData, updateFormData, errors, clearFi
       if (isCloning) {
         // Add the new cloned package
         updatedPackages = [...packages, updatedPackage];
-        toast({
-          title: "Package cloned",
-          description: "Package has been duplicated successfully",
-        });
+        showSuccess("Package duplicated successfully");
       } else {
         // Update existing package
         updatedPackages = packages.map(pkg => 
           pkg.id === editingPackage.id ? updatedPackage : pkg
         );
-        toast({
-          title: "Package updated",
-          description: "Package has been updated successfully",
-        });
+        showSuccess("Package updated successfully");
       }
       
       setPackages(updatedPackages);

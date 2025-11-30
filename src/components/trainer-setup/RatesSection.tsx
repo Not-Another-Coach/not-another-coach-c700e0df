@@ -15,7 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useDiscoveryCallSettings } from "@/hooks/useDiscoveryCallSettings";
 import { usePackageWaysOfWorking } from "@/hooks/usePackageWaysOfWorking";
-import { useToast } from "@/hooks/use-toast";
+import { useStatusFeedbackContext } from "@/contexts/StatusFeedbackContext";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -135,7 +135,7 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
   // Use the discovery call settings hook
   const { settings: discoverySettings, loading: discoveryLoading, updateSettings } = useDiscoveryCallSettings();
   const { getPackageWorkflow, savePackageWorkflow } = usePackageWaysOfWorking();
-  const { toast } = useToast();
+  const { showSuccess, showError, showInfo } = useStatusFeedbackContext();
 
   const addPackage = () => {
     if (newPackage.name && newPackage.price && newPackage.description) {
@@ -296,10 +296,7 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
       if (isCloning) {
         // Add the new cloned package
         updatedPackages = [...packages, updatedPackage];
-        toast({
-          title: "Package cloned",
-          description: "Package has been duplicated successfully",
-        });
+        showSuccess("Package duplicated successfully");
         
         // Handle ways of working copying if needed
         if (cloneWaysOfWorkingData && cloneWaysOfWorkingData.targetPackageId === updatedPackage.id) {
@@ -315,10 +312,7 @@ export function RatesSection({ formData, updateFormData, errors }: RatesSectionP
         updatedPackages = packages.map(pkg => 
           pkg.id === editingPackage.id ? updatedPackage : pkg
         );
-        toast({
-          title: "Package updated",
-          description: "Package has been updated successfully",
-        });
+        showSuccess("Package updated successfully");
       }
       
       setPackages(updatedPackages);
