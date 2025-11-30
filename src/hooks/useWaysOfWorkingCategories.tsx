@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { queryConfig } from "@/lib/queryConfig";
 
 export type WaysOfWorkingCategory = {
   id: string;
@@ -15,34 +16,36 @@ export type WaysOfWorkingCategory = {
 };
 
 export function useWaysOfWorkingCategories() {
-  const [categories, setCategories] = useState<WaysOfWorkingCategory[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
-  const fetchCategories = async () => {
-    setLoading(true);
-    setError(null);
-    try {
+  // Use React Query for caching and deduplication
+  const { data: categories = [], isLoading: loading, error: queryError, refetch } = useQuery({
+    queryKey: ['ways-of-working-categories'],
+    queryFn: async () => {
+      console.log('useWaysOfWorkingCategories: Fetching categories');
+      
       const { data, error } = await supabase
         .from("ways_of_working_categories")
         .select("*")
         .order("section_key", { ascending: true })
         .order("display_order", { ascending: true });
 
-      if (error) throw error;
-      setCategories(data || []);
-    } catch (e: any) {
-      console.error("Failed to load categories:", e);
-      setError(e.message || "Failed to load categories");
-    } finally {
-      setLoading(false);
-    }
-  };
+      if (error) {
+        console.error("Failed to load categories:", error);
+        throw error;
+      }
+      
+      return data || [];
+    },
+    staleTime: 10 * 60 * 1000, // 10 min - categories rarely change
+    gcTime: 15 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
 
-  useEffect(() => {
-    fetchCategories();
-  }, []);
+  const error = queryError ? (queryError as Error).message : null;
 
   const createCategory = async (
     sectionKey: string, 
@@ -53,12 +56,9 @@ export function useWaysOfWorkingCategories() {
   ) => {
     if (!user?.id) {
       const msg = "You must be signed in to create categories";
-      setError(msg);
       return { error: msg } as const;
     }
-    
-    setLoading(true);
-    setError(null);
+
     try {
       const { data, error } = await supabase
         .from("ways_of_working_categories")
@@ -74,14 +74,14 @@ export function useWaysOfWorkingCategories() {
         .single();
 
       if (error) throw error;
-      await fetchCategories();
+      
+      // Invalidate cache to refetch
+      queryClient.invalidateQueries({ queryKey: ['ways-of-working-categories'] });
+      
       return { data } as const;
     } catch (e: any) {
       const msg = e.message || "Failed to create category";
-      setError(msg);
       return { error: msg } as const;
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -93,8 +93,6 @@ export function useWaysOfWorkingCategories() {
     displayOrder: number,
     profileSectionKey?: string
   ) => {
-    setLoading(true);
-    setError(null);
     try {
       const { data, error } = await supabase
         .from("ways_of_working_categories")
@@ -110,20 +108,18 @@ export function useWaysOfWorkingCategories() {
         .single();
 
       if (error) throw error;
-      await fetchCategories();
+      
+      // Invalidate cache to refetch
+      queryClient.invalidateQueries({ queryKey: ['ways-of-working-categories'] });
+      
       return { data } as const;
     } catch (e: any) {
       const msg = e.message || "Failed to update category";
-      setError(msg);
       return { error: msg } as const;
-    } finally {
-      setLoading(false);
     }
   };
 
   const deleteCategory = async (id: string) => {
-    setLoading(true);
-    setError(null);
     try {
       const { error } = await supabase
         .from("ways_of_working_categories")
@@ -131,14 +127,14 @@ export function useWaysOfWorkingCategories() {
         .eq("id", id);
 
       if (error) throw error;
-      await fetchCategories();
+      
+      // Invalidate cache to refetch
+      queryClient.invalidateQueries({ queryKey: ['ways-of-working-categories'] });
+      
       return { success: true } as const;
     } catch (e: any) {
       const msg = e.message || "Failed to delete category";
-      setError(msg);
       return { error: msg } as const;
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -162,7 +158,7 @@ export function useWaysOfWorkingCategories() {
     categories,
     loading,
     error,
-    refresh: fetchCategories,
+    refresh: () => refetch(),
     createCategory,
     updateCategory,
     deleteCategory,

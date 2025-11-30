@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useWaysOfWorkingCategories } from "@/hooks/useWaysOfWorkingCategories";
+import { queryConfig } from "@/lib/queryConfig";
 
 export type TrainerActivity = {
   id: string;
@@ -17,16 +18,16 @@ export type TrainerActivity = {
 
 
 export function useTrainerActivities() {
-  const [activities, setActivities] = useState<TrainerActivity[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const { getSectionToCategory, categories } = useWaysOfWorkingCategories();
 
-  const fetchAll = async () => {
-    setLoading(true);
-    setError(null);
-    try {
+  // Use React Query for caching and deduplication
+  const { data: activities = [], isLoading: loading, error: queryError, refetch } = useQuery({
+    queryKey: ['trainer-activities', user?.id],
+    queryFn: async () => {
+      console.log('useTrainerActivities: Fetching activities for user:', user?.id);
+      
       // RLS ensures we get: system activities + current trainer's activities
       const { data, error } = await supabase
         .from("trainer_onboarding_activities")
@@ -40,35 +41,24 @@ export function useTrainerActivities() {
       
       console.log("Fetched activities:", data?.length, "activities");
       console.log("System activities:", data?.filter(a => a.is_system).length);
-      setActivities(data || []);
-    } catch (e: any) {
-      console.error("Failed to load activities:", e);
-      setError(e.message || "Failed to load activities");
-    } finally {
-      setLoading(false);
-    }
-  };
+      return data || [];
+    },
+    enabled: !!user?.id,
+    staleTime: queryConfig.lists.staleTime,
+    gcTime: queryConfig.lists.gcTime,
+    refetchOnMount: queryConfig.lists.refetchOnMount,
+    refetchOnWindowFocus: queryConfig.lists.refetchOnWindowFocus,
+    refetchOnReconnect: queryConfig.lists.refetchOnReconnect,
+  });
 
-  // Fetch activities on mount and refresh when categories change
-  useEffect(() => {
-    fetchAll();
-  }, []);
-
-  // Refresh when categories data changes (for when database updates happen)
-  useEffect(() => {
-    if (categories.length > 0) {
-      fetchAll();
-    }
-  }, [categories.length]);
+  const error = queryError ? (queryError as Error).message : null;
 
   const createActivity = async (name: string, category: string, description?: string | null) => {
     if (!user?.id) {
       const msg = "You must be signed in to create activities";
-      setError(msg);
       return { error: msg } as const;
     }
-    setLoading(true);
-    setError(null);
+
     try {
       const { data, error } = await supabase
         .from("trainer_onboarding_activities")
@@ -82,20 +72,18 @@ export function useTrainerActivities() {
         .maybeSingle();
 
       if (error) throw error;
-      await fetchAll();
+      
+      // Invalidate cache to refetch
+      queryClient.invalidateQueries({ queryKey: ['trainer-activities', user.id] });
+      
       return { data } as const;
     } catch (e: any) {
       const msg = e.message || "Failed to create activity";
-      setError(msg);
       return { error: msg } as const;
-    } finally {
-      setLoading(false);
     }
   };
 
   const updateActivity = async (id: string, name: string, category: string, description?: string | null) => {
-    setLoading(true);
-    setError(null);
     try {
       const { data, error } = await supabase
         .from("trainer_onboarding_activities")
@@ -105,14 +93,14 @@ export function useTrainerActivities() {
         .maybeSingle();
 
       if (error) throw error;
-      await fetchAll();
+      
+      // Invalidate cache to refetch
+      queryClient.invalidateQueries({ queryKey: ['trainer-activities', user?.id] });
+      
       return { data } as const;
     } catch (e: any) {
       const msg = e.message || "Failed to update activity";
-      setError(msg);
       return { error: msg } as const;
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -128,8 +116,6 @@ export function useTrainerActivities() {
       default_sla_days?: number | null;
     }
   ) => {
-    setLoading(true);
-    setError(null);
     try {
       const { data, error } = await supabase
         .from("trainer_onboarding_activities")
@@ -147,14 +133,14 @@ export function useTrainerActivities() {
         .maybeSingle();
 
       if (error) throw error;
-      await fetchAll();
+      
+      // Invalidate cache to refetch
+      queryClient.invalidateQueries({ queryKey: ['trainer-activities', user?.id] });
+      
       return { data } as const;
     } catch (e: any) {
       const msg = e.message || "Failed to update activity details";
-      setError(msg);
       return { error: msg } as const;
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -198,7 +184,7 @@ export function useTrainerActivities() {
     activities,
     loading,
     error,
-    refresh: fetchAll,
+    refresh: () => refetch(),
     getSuggestionsBySection,
     getSuggestionsByProfileSection,
     createActivity,
