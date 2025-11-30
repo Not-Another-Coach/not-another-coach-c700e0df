@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Upload, Image, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/hooks/use-toast";
+import { useStatusFeedbackContext } from '@/contexts/StatusFeedbackContext';
 
 interface ImageUploadSectionProps {
   onImageUpload: (imageUrl: string, type: 'before' | 'after') => void;
@@ -11,6 +11,7 @@ interface ImageUploadSectionProps {
 }
 
 export const ImageUploadSection = ({ onImageUpload, existingImages }: ImageUploadSectionProps) => {
+  const { showSuccess, showError } = useStatusFeedbackContext();
   const [uploading, setUploading] = useState<{ before: boolean; after: boolean }>({
     before: false,
     after: false
@@ -27,11 +28,7 @@ export const ImageUploadSection = ({ onImageUpload, existingImages }: ImageUploa
 
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        toast({
-          title: "File too large",
-          description: "Please select an image smaller than 5MB",
-          variant: "destructive"
-        });
+        showError("File too large: Please select an image smaller than 5MB");
         return;
       }
 
@@ -61,18 +58,11 @@ export const ImageUploadSection = ({ onImageUpload, existingImages }: ImageUploa
 
         onImageUpload(signed?.signedUrl || '', type);
         
-        toast({
-          title: "Image uploaded successfully",
-          description: `${type.charAt(0).toUpperCase() + type.slice(1)} image has been uploaded`,
-        });
+        showSuccess(`${type.charAt(0).toUpperCase() + type.slice(1)} image has been uploaded`);
 
       } catch (error) {
         console.error('Upload error:', error);
-        toast({
-          title: "Upload failed",
-          description: "There was an error uploading your image. Please try again.",
-          variant: "destructive"
-        });
+        showError("Upload failed: There was an error uploading your image. Please try again");
       } finally {
         setUploading(prev => ({ ...prev, [type]: false }));
       }

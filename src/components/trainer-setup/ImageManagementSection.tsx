@@ -11,7 +11,7 @@ import { Upload, Instagram, Image, Trash2, Check, X, Eye, EyeOff, Camera, CheckC
 import { useTrainerImages } from '@/hooks/useTrainerImages';
 import { useInstagramIntegration } from '@/hooks/useInstagramIntegration';
 import { useInstagramConnection } from '@/hooks/useInstagramConnection';
-import { toast } from '@/hooks/use-toast';
+import { useStatusFeedbackContext } from '@/contexts/StatusFeedbackContext';
 import { SectionHeader } from './SectionHeader';
 
 interface ImageManagementSectionProps {
@@ -48,6 +48,7 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
   } = useInstagramIntegration();
 
   const { isConnected } = useInstagramConnection();
+  const { showSuccess, showError } = useStatusFeedbackContext();
 
   const [activeTab, setActiveTab] = useState<'upload' | 'instagram'>('upload');
   const [dragActive, setDragActive] = useState(false);
@@ -60,21 +61,13 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
       
       // Validate file type
       if (!file.type.startsWith('image/')) {
-        toast({
-          title: "Invalid file",
-          description: `${file.name} is not a valid image file.`,
-          variant: "destructive",
-        });
+        showError(`${file.name} is not a valid image file`);
         continue;
       }
 
       // Validate file size (5MB max)
       if (file.size > 5 * 1024 * 1024) {
-        toast({
-          title: "File too large",
-          description: `${file.name} is larger than 5MB.`,
-          variant: "destructive",
-        });
+        showError(`${file.name} is larger than 5MB`);
         continue;
       }
 
@@ -115,17 +108,10 @@ export const ImageManagementSection = ({ formData, updateFormData }: ImageManage
   const handleSyncMedia = async () => {
     try {
       const media = await fetchInstagramMedia();
-      toast({
-        title: "Success",
-        description: `Synced ${media.length} Instagram posts.`,
-      });
+      showSuccess(`Synced ${media.length} Instagram posts`);
     } catch (error) {
       console.error('Error syncing Instagram media:', error);
-      toast({
-        title: "Error",
-        description: "Failed to sync Instagram media. Please try again.",
-        variant: "destructive",
-      });
+      showError("Failed to sync Instagram media. Please try again");
     }
   };
 

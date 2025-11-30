@@ -952,9 +952,20 @@ const TrainerProfileSetup = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-hero opacity-0 animate-fadeIn">
-      {/* Header */}
-      <div className="p-4 border-b bg-card">
+    <StatusFeedbackProvider>
+      <div className="min-h-screen bg-gradient-hero opacity-0 animate-fadeIn">
+        {/* Status Feedback Bar */}
+        <InlineStatusBar
+          message={status.message}
+          variant={status.variant}
+          isVisible={status.isVisible}
+          onDismiss={hideStatus}
+          autoDismiss={true}
+          dismissDelay={5000}
+        />
+        
+        {/* Header */}
+        <div className="p-4 border-b bg-card">
         <div className="flex justify-between items-center relative">
           {/* Left: Logo + Back Button */}
           <div className="flex items-center gap-3">
@@ -1313,7 +1324,8 @@ const TrainerProfileSetup = () => {
             testimonials: formData.testimonials || []
           }}
       />
-    </div>
+      </div>
+    </StatusFeedbackProvider>
   );
 };
 

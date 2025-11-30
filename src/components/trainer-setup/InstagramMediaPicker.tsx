@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
+import { useStatusFeedbackContext } from '@/contexts/StatusFeedbackContext';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthService } from '@/services';
 import { Instagram, Loader2, AlertCircle, GripVertical, Play } from 'lucide-react';
@@ -32,7 +32,7 @@ export const InstagramMediaPicker = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
+  const { showSuccess, showError } = useStatusFeedbackContext();
 
   const fetchInstagramMedia = async () => {
     try {
@@ -57,11 +57,7 @@ export const InstagramMediaPicker = () => {
     } catch (err: any) {
       console.error('Error fetching Instagram media:', err);
       setError(err.message || 'Failed to fetch Instagram media');
-      toast({
-        title: 'Error',
-        description: err.message || 'Failed to fetch Instagram media',
-        variant: 'destructive',
-      });
+      showError(err.message || 'Failed to fetch Instagram media');
     } finally {
       setLoading(false);
     }
@@ -115,18 +111,11 @@ export const InstagramMediaPicker = () => {
         if (insertError) throw insertError;
       }
 
-      toast({
-        title: 'Success',
-        description: `Saved ${selectedMedia.length} selected posts`,
-      });
+      showSuccess(`Saved ${selectedMedia.length} selected posts`);
       
     } catch (err: any) {
       console.error('Error saving media selections:', err);
-      toast({
-        title: 'Error',
-        description: err.message || 'Failed to save media selections',
-        variant: 'destructive',
-      });
+      showError(err.message || 'Failed to save media selections');
     } finally {
       setSaving(false);
     }
