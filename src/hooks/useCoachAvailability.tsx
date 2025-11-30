@@ -1,8 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useToast } from './use-toast';
 import { useWaitlist } from '@/hooks/useWaitlist';
+import { queryConfig } from '@/lib/queryConfig';
 
 interface WeeklySchedule {
   [key: string]: {
@@ -27,71 +29,61 @@ interface CoachAvailabilitySettings {
   waitlist_exclusive_active?: boolean;
 }
 
+const defaultSchedule: WeeklySchedule = {
+  monday: { enabled: false, slots: [] },
+  tuesday: { enabled: false, slots: [] },
+  wednesday: { enabled: false, slots: [] },
+  thursday: { enabled: false, slots: [] },
+  friday: { enabled: false, slots: [] },
+  saturday: { enabled: false, slots: [] },
+  sunday: { enabled: false, slots: [] }
+};
+
 export function useCoachAvailability() {
-  const [settings, setSettings] = useState<CoachAvailabilitySettings | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
   const { waitlistEntries } = useWaitlist();
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    if (user) {
-      fetchSettings();
-    }
-  }, [user]);
-
-  const fetchSettings = async () => {
-    if (!user) return;
-    
-    try {
+  const { data: settings, isLoading, refetch } = useQuery({
+    queryKey: ['coach-availability', user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+      
       const { data, error } = await supabase
         .from('coach_availability_settings')
         .select('*')
         .eq('coach_id', user.id)
         .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching coach availability settings:', error);
-        return;
-      }
-
+      if (error && error.code !== 'PGRST116') throw error;
+      
+      // Return data if exists, otherwise return default settings
       if (data) {
-        setSettings({
+        return {
           ...data,
           availability_schedule: data.availability_schedule as WeeklySchedule
-        });
-      } else {
-        // Create default settings if none exist
-        const defaultSettings: CoachAvailabilitySettings = {
-          coach_id: user.id,
-          availability_status: 'accepting',
-          allow_discovery_calls_on_waitlist: true,
-          auto_follow_up_days: 14,
-          availability_schedule: {
-            monday: { enabled: false, slots: [] },
-            tuesday: { enabled: false, slots: [] },
-            wednesday: { enabled: false, slots: [] },
-            thursday: { enabled: false, slots: [] },
-            friday: { enabled: false, slots: [] },
-            saturday: { enabled: false, slots: [] },
-            sunday: { enabled: false, slots: [] }
-          }
         };
-        setSettings(defaultSettings);
       }
-    } catch (error) {
-      console.error('Error fetching coach availability settings:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+      
+      // Return default settings if none exist
+      return {
+        coach_id: user.id,
+        availability_status: 'accepting' as const,
+        allow_discovery_calls_on_waitlist: true,
+        auto_follow_up_days: 14,
+        availability_schedule: defaultSchedule,
+      };
+    },
+    enabled: !!user?.id,
+    staleTime: queryConfig.availability.staleTime,
+    gcTime: queryConfig.availability.gcTime,
+  });
 
-  const updateSettings = async (updates: Partial<CoachAvailabilitySettings>) => {
-    if (!user || !settings) return;
+  const updateMutation = useMutation({
+    mutationFn: async (updates: Partial<CoachAvailabilitySettings>) => {
+      if (!user || !settings) throw new Error('User or settings not available');
 
-    setSaving(true);
-    try {
       const updatedSettings = { ...settings, ...updates };
       
       const { data, error } = await supabase
@@ -110,36 +102,25 @@ export function useCoachAvailability() {
         .select()
         .single();
 
-      if (error) {
-        console.error('Error updating coach availability settings:', error);
-        toast({
-          title: "Error",
-          description: "Failed to update availability settings",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      setSettings({
-        ...data,
-        availability_schedule: data.availability_schedule as WeeklySchedule
-      });
-      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['coach-availability', user?.id] });
       toast({
         title: "Settings updated",
         description: "Your availability settings have been saved",
       });
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error('Error updating coach availability settings:', error);
       toast({
         title: "Error",
         description: "Failed to update availability settings",
         variant: "destructive",
       });
-    } finally {
-      setSaving(false);
-    }
-  };
+    },
+  });
 
   const getWaitlistCount = useCallback(() => {
     return waitlistEntries.filter(entry => entry.status === 'active').length;
@@ -147,10 +128,10 @@ export function useCoachAvailability() {
 
   return {
     settings,
-    loading,
-    saving,
-    updateSettings,
-    refetch: fetchSettings,
+    loading: isLoading,
+    saving: updateMutation.isPending,
+    updateSettings: updateMutation.mutateAsync,
+    refetch,
     getWaitlistCount
   };
 }

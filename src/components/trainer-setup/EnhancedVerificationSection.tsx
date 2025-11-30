@@ -139,7 +139,7 @@ export const EnhancedVerificationSection = () => {
 
       console.log('Submitting verification check:', { checkType, submitData });
       
-      await submitVerificationCheck(checkType, submitData);
+      await submitVerificationCheck({ checkType, checkData: submitData });
 
       // Clear form data
       setFormData(prev => ({

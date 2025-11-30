@@ -139,7 +139,12 @@ export const useProfessionalDocumentsState = (profileDocumentNotApplicable?: any
     
     try {
       // Save as draft - suppress the default toast since we show our own
-      await submitVerificationCheck(checkType as any, formData[checkType], true, true);
+      await submitVerificationCheck({ 
+        checkType: checkType as any, 
+        checkData: formData[checkType], 
+        isDraft: true, 
+        suppressToast: true 
+      });
     } catch (error) {
       console.error('Error saving draft:', error);
     } finally {
@@ -154,7 +159,12 @@ export const useProfessionalDocumentsState = (profileDocumentNotApplicable?: any
     
     try {
       // Submit for review - sets status to pending, suppress toast since we show our own
-      await submitVerificationCheck(checkType as any, formData[checkType], false, true);
+      await submitVerificationCheck({ 
+        checkType: checkType as any, 
+        checkData: formData[checkType], 
+        isDraft: false, 
+        suppressToast: true 
+      });
       
       // Clear form data after successful submission since it's now stored in the database
       setFormData(prev => ({
