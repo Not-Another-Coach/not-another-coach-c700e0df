@@ -85,10 +85,15 @@ export default function Auth() {
     
     // Handle sign-out on auth page (safe - no active components to error)
     if (signoutRequested === 'true') {
-      AuthService.signOut().then(() => {
-        // Clear the URL parameter after sign-out
-        navigate('/auth', { replace: true });
-      });
+      // Clear local auth token immediately (instant - no white screen)
+      const projectRef = 'ogpiovfxjxcclptfybrk';
+      localStorage.removeItem(`sb-${projectRef}-auth-token`);
+      
+      // Fire-and-forget server cleanup (don't wait)
+      AuthService.signOut();
+      
+      // Immediately show clean auth page
+      navigate('/auth', { replace: true });
       return;
     }
     
