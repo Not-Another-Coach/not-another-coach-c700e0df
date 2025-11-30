@@ -71,11 +71,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('rememberMe');
     localStorage.removeItem('savedEmail');
     
-    // Safety net: Clear Supabase auth token from localStorage
-    // Ensures logout works even if server session is invalid
-    const projectRef = 'ogpiovfxjxcclptfybrk';
-    localStorage.removeItem(`sb-${projectRef}-auth-token`);
-    
     // Redirect FIRST - this prevents race condition with onAuthStateChange
     window.location.href = '/auth';
     
