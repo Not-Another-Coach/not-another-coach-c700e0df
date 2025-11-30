@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { queryConfig } from '@/lib/queryConfig';
 
 interface Alert {
   id: string;
@@ -20,76 +21,63 @@ interface Alert {
 
 export function useAlerts() {
   const { user } = useAuth();
-  const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [unviewedCount, setUnviewedCount] = useState(0);
+  const queryClient = useQueryClient();
 
-  const fetchAlerts = useCallback(async () => {
-    if (!user) return;
+  const { data: alertsData, isLoading: loading } = useQuery({
+    queryKey: ['alerts', user?.id],
+    queryFn: async () => {
+      if (!user) return { alerts: [], unviewedCount: 0 };
 
-    try {
-      setLoading(true);
-      
-      console.log('🔥 useAlerts: Fetching alerts for user:', user.id);
-      
-      // Get active alerts
-      const { data: alertsData, error: alertsError } = await supabase
-        .from('alerts')
-        .select('*')
-        .order('priority', { ascending: false })
-        .order('created_at', { ascending: false })
-        .limit(10); // Increased limit to see more alerts
+      const [alertsRes, interactionsRes] = await Promise.all([
+        supabase
+          .from('alerts')
+          .select('*')
+          .order('priority', { ascending: false })
+          .order('created_at', { ascending: false })
+          .limit(10),
+        supabase
+          .from('user_alert_interactions')
+          .select('alert_id, interaction_type')
+          .eq('user_id', user.id)
+      ]);
 
-      console.log('🔥 useAlerts: Raw alerts data:', { alertsData, alertsError, alertTypes: alertsData?.map(a => a.alert_type) });
-
-      if (alertsError) {
-        console.error('Error fetching alerts:', alertsError);
-        return;
-      }
-
-      // Get user interactions to filter out dismissed alerts and check viewed status
-      const { data: interactionsData, error: interactionsError } = await supabase
-        .from('user_alert_interactions')
-        .select('alert_id, interaction_type')
-        .eq('user_id', user.id);
-
-      if (interactionsError) {
-        console.error('Error fetching interactions:', interactionsError);
-      }
+      if (alertsRes.error) throw alertsRes.error;
 
       const dismissedAlertIds = new Set(
-        interactionsData?.filter(i => i.interaction_type === 'dismissed').map(i => i.alert_id) || []
+        interactionsRes.data?.filter(i => i.interaction_type === 'dismissed').map(i => i.alert_id) || []
       );
       
       const viewedAlertIds = new Set(
-        interactionsData?.filter(i => i.interaction_type === 'viewed').map(i => i.alert_id) || []
+        interactionsRes.data?.filter(i => i.interaction_type === 'viewed').map(i => i.alert_id) || []
       );
 
-      // Filter out dismissed alerts
-      const filteredAlerts = alertsData?.filter(
+      const filteredAlerts = alertsRes.data?.filter(
         alert => !dismissedAlertIds.has(alert.id)
       ).map(alert => ({
         ...alert,
         is_dismissed: false
       })) || [];
 
-      setAlerts(filteredAlerts);
-      
-      // Count unviewed alerts (not dismissed and not viewed)
       const unviewed = filteredAlerts.filter(alert => !viewedAlertIds.has(alert.id));
-      setUnviewedCount(unviewed.length);
-    } catch (error) {
-      console.error('Error fetching alerts:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [user]);
 
-  const markAsViewed = useCallback(async (alertIds: string[]) => {
-    if (!user || alertIds.length === 0) return;
+      return {
+        alerts: filteredAlerts,
+        unviewedCount: unviewed.length
+      };
+    },
+    enabled: !!user,
+    staleTime: queryConfig.lists.staleTime,
+    gcTime: queryConfig.lists.gcTime,
+    refetchOnMount: false,
+  });
 
-    try {
-      // Mark all alerts as viewed
+  const alerts = alertsData?.alerts || [];
+  const unviewedCount = alertsData?.unviewedCount || 0;
+
+  const markAsViewedMutation = useMutation({
+    mutationFn: async (alertIds: string[]) => {
+      if (!user || alertIds.length === 0) throw new Error('Invalid parameters');
+
       const interactions = alertIds.map(alertId => ({
         user_id: user.id,
         alert_id: alertId,
@@ -103,22 +91,20 @@ export function useAlerts() {
           ignoreDuplicates: true
         });
 
-      if (error) {
-        console.error('Error marking alerts as viewed:', error);
-        return;
-      }
-
-      // Update unviewed count locally
-      setUnviewedCount(0);
-    } catch (error) {
-      console.error('Error marking alerts as viewed:', error);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.setQueryData(['alerts', user?.id], (old: any) => ({
+        ...old,
+        unviewedCount: 0
+      }));
     }
-  }, [user]);
+  });
 
-  const dismissAlert = useCallback(async (alertId: string) => {
-    if (!user) return;
+  const dismissAlertMutation = useMutation({
+    mutationFn: async (alertId: string) => {
+      if (!user) throw new Error('User not authenticated');
 
-    try {
       const { error } = await supabase
         .from('user_alert_interactions')
         .insert({
@@ -127,22 +113,21 @@ export function useAlerts() {
           interaction_type: 'dismissed'
         });
 
-      if (error) {
-        console.error('Error dismissing alert:', error);
-        return;
-      }
-
-      // Remove from local state
-      setAlerts(prev => prev.filter(alert => alert.id !== alertId));
-    } catch (error) {
-      console.error('Error dismissing alert:', error);
+      if (error) throw error;
+      return alertId;
+    },
+    onSuccess: (alertId) => {
+      queryClient.setQueryData(['alerts', user?.id], (old: any) => ({
+        alerts: old?.alerts.filter((alert: Alert) => alert.id !== alertId) || [],
+        unviewedCount: Math.max(0, (old?.unviewedCount || 0) - 1)
+      }));
     }
-  }, [user]);
+  });
 
-  const markAsClicked = useCallback(async (alertId: string) => {
-    if (!user) return;
+  const markAsClickedMutation = useMutation({
+    mutationFn: async (alertId: string) => {
+      if (!user) throw new Error('User not authenticated');
 
-    try {
       await supabase
         .from('user_alert_interactions')
         .insert({
@@ -150,19 +135,20 @@ export function useAlerts() {
           alert_id: alertId,
           interaction_type: 'clicked'
         });
-    } catch (error) {
-      console.error('Error marking alert as clicked:', error);
     }
-  }, [user]);
+  });
 
-  useEffect(() => {
-    if (user) {
-      fetchAlerts();
-    } else {
-      setAlerts([]);
-      setLoading(false);
-    }
-  }, [user, fetchAlerts]);
+  const markAsViewed = async (alertIds: string[]) => {
+    await markAsViewedMutation.mutateAsync(alertIds);
+  };
+
+  const dismissAlert = async (alertId: string) => {
+    await dismissAlertMutation.mutateAsync(alertId);
+  };
+
+  const markAsClicked = async (alertId: string) => {
+    await markAsClickedMutation.mutateAsync(alertId);
+  };
 
   return {
     alerts,
@@ -171,6 +157,6 @@ export function useAlerts() {
     dismissAlert,
     markAsClicked,
     markAsViewed,
-    refetchAlerts: fetchAlerts,
+    refetchAlerts: () => queryClient.invalidateQueries({ queryKey: ['alerts', user?.id] }),
   };
 }

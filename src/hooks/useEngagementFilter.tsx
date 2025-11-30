@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { queryConfig } from '@/lib/queryConfig';
 
 type EngagementStage = 'browsing' | 'liked' | 'shortlisted' | 'waitlist' | 'matched' | 'getting_to_know_your_coach' | 'discovery_in_progress' | 'discovery_completed' | 'active_client';
 
@@ -12,8 +13,8 @@ interface EngagementFilterResult {
 
 export function useEngagementFilter() {
   const { user } = useAuth();
-  const [loading, setLoading] = useState(true);
-  const [trainersByStage, setTrainersByStage] = useState<Record<EngagementStage, any[]>>({
+
+  const { data: trainersByStage = {
     browsing: [],
     liked: [],
     shortlisted: [],
@@ -23,18 +24,23 @@ export function useEngagementFilter() {
     discovery_in_progress: [],
     discovery_completed: [],
     active_client: []
-  });
+  }, isLoading: loading, refetch } = useQuery({
+    queryKey: ['client-engagements', user?.id],
+    queryFn: async () => {
+      if (!user?.id) {
+        return {
+          browsing: [],
+          liked: [],
+          shortlisted: [],
+          waitlist: [],
+          matched: [],
+          getting_to_know_your_coach: [],
+          discovery_in_progress: [],
+          discovery_completed: [],
+          active_client: []
+        };
+      }
 
-  const fetchEngagements = async () => {
-    if (!user?.id) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      // Get all engagement records for the current user
       const { data: engagements, error: engagementError } = await supabase
         .from('client_trainer_engagement')
         .select(`
@@ -45,11 +51,9 @@ export function useEngagementFilter() {
 
       if (engagementError) {
         console.error('Error fetching engagements:', engagementError);
-        setLoading(false);
-        return;
+        throw engagementError;
       }
 
-      // Group trainers by engagement stage
       const grouped: Record<EngagementStage, any[]> = {
         browsing: [],
         liked: [],
@@ -74,21 +78,18 @@ export function useEngagementFilter() {
         }
       });
 
-      setTrainersByStage(grouped);
-    } catch (error) {
-      console.error('Error in fetchEngagements:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchEngagements();
-  }, [user?.id]);
+      return grouped;
+    },
+    enabled: !!user?.id,
+    staleTime: queryConfig.lists.staleTime,
+    gcTime: queryConfig.lists.gcTime,
+    refetchOnMount: false,
+    select: (data) => data
+  });
 
   return {
     trainersByStage,
     loading,
-    refreshEngagements: fetchEngagements
+    refreshEngagements: refetch
   };
 }

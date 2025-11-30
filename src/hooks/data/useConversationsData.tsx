@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserTypeChecks } from '@/hooks/useUserType';
@@ -40,6 +40,7 @@ export interface Conversation {
 export function useConversationsData() {
   const { user } = useAuth();
   const { isClient } = useUserTypeChecks();
+  const queryClient = useQueryClient();
 
   const { data: conversations = [], isLoading, refetch } = useQuery({
     queryKey: ['conversations', user?.id],
@@ -89,18 +90,21 @@ export function useConversationsData() {
 
       // Filter out conversations with declined trainers (for clients only)
       if (isClient()) {
-        const { data: engagements } = await supabase
-          .from('client_trainer_engagement')
-          .select('trainer_id, stage')
-          .eq('client_id', user.id)
-          .eq('stage', 'declined');
-
-        const declinedTrainerIds = new Set(engagements?.map(e => e.trainer_id) || []);
+        // Read from React Query cache instead of making a fresh API call
+        const cachedEngagements = queryClient.getQueryData<any[]>(['client-engagements', user.id]);
         
-        return conversationsWithProfiles.filter(conv => {
-          const trainerId = conv.client_id === user.id ? conv.trainer_id : conv.client_id;
-          return !declinedTrainerIds.has(trainerId);
-        });
+        if (cachedEngagements) {
+          const declinedTrainerIds = new Set(
+            cachedEngagements
+              .filter(e => e.stage === 'declined')
+              .map(e => e.trainerId)
+          );
+          
+          return conversationsWithProfiles.filter(conv => {
+            const trainerId = conv.client_id === user.id ? conv.trainer_id : conv.client_id;
+            return !declinedTrainerIds.has(trainerId);
+          });
+        }
       }
 
       return conversationsWithProfiles as Conversation[];
