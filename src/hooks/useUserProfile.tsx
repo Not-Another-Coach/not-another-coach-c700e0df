@@ -27,63 +27,41 @@ export function useUserProfile(): ProfileData {
 
       console.log('useUserProfile: Fetching profile for user:', user.id);
 
-      // First get user_type from profiles
-      const { data: baseProfile, error: profileError } = await supabase
-        .from('profiles')
-        .select('user_type')
+      // Try trainer view first (includes user_type from join)
+      const { data: trainerData, error: trainerError } = await supabase
+        .from('v_trainers')
+        .select('*')
         .eq('id', user.id)
-        .single();
-      
-      if (profileError) throw profileError;
-      
-      const user_type = baseProfile.user_type as 'trainer' | 'client' | 'admin';
-      console.log('useUserProfile: User type:', user_type);
+        .maybeSingle();
 
-      // Then fetch full profile based on type
-      let data, viewError;
-      switch (user_type) {
-        case 'trainer': {
-          const response = await supabase
-            .from('v_trainers')
-            .select('*')
-            .eq('id', user.id)
-            .single();
-          data = response.data;
-          viewError = response.error;
-          break;
-        }
-        
-        case 'client': {
-          const response = await supabase
-            .from('v_clients')
-            .select('*')
-            .eq('id', user.id)
-            .single();
-          data = response.data;
-          viewError = response.error;
-          break;
-        }
-        
-        case 'admin': {
-          const response = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', user.id)
-            .single();
-          data = response.data;
-          viewError = response.error;
-          break;
-        }
-        
-        default:
-          console.warn('useUserProfile: Unknown user type:', user_type);
-          return null;
+      if (!trainerError && trainerData) {
+        console.log('useUserProfile: Successfully fetched trainer profile');
+        return trainerData;
       }
 
-      if (viewError) throw viewError;
+      // Try client view
+      const { data: clientData, error: clientError } = await supabase
+        .from('v_clients')
+        .select('*')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (!clientError && clientData) {
+        console.log('useUserProfile: Successfully fetched client profile');
+        return clientData;
+      }
+
+      // Fallback to base profile for admin
+      const { data: adminData, error: adminError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (adminError) throw adminError;
       
-      console.log('useUserProfile: Successfully fetched profile for', user_type);
-      return { ...data, user_type };
+      console.log('useUserProfile: Successfully fetched admin profile');
+      return adminData;
     },
     enabled: !!user?.id,
     staleTime: queryConfig.user.staleTime,

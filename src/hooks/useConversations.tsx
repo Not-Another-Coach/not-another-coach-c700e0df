@@ -10,10 +10,11 @@ export type { Conversation, Message } from '@/hooks/data/useConversationsData';
 /**
  * Logic hook for conversation operations
  * Consumes useConversationsData for data and adds mutations + real-time subscriptions
+ * Only runs when enabled parameter is true (defaults to true for backwards compatibility)
  */
-export function useConversations() {
+export function useConversations(enabled: boolean = true) {
   const { user } = useAuth();
-  const { conversations: cachedConversations, loading, refetch } = useConversationsData();
+  const { conversations: cachedConversations, loading, refetch } = useConversationsData(enabled);
   const queryClient = useQueryClient();
   
   // Local state for real-time updates (synced with cache)

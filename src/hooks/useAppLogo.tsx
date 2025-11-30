@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 interface LogoSettings {
@@ -7,51 +8,47 @@ interface LogoSettings {
   app_name: string;
 }
 
-// Module-level cache to prevent loading flash on re-renders
-let cachedLogoSettings: LogoSettings | null = null;
+const DEFAULT_LOGO_SETTINGS: LogoSettings = {
+  logo_url: null,
+  fallback_text: 'YJ',
+  app_name: 'Your Journey'
+};
 
 export function useAppLogo() {
-  const [logoSettings, setLogoSettings] = useState<LogoSettings>(
-    cachedLogoSettings || {
-      logo_url: null,
-      fallback_text: 'YJ',
-      app_name: 'Your Journey'
-    }
-  );
-  const [loading, setLoading] = useState(!cachedLogoSettings);
+  const queryClient = useQueryClient();
 
-  const fetchLogoSettings = async () => {
-    try {
+  const { data: logoSettings = DEFAULT_LOGO_SETTINGS, isLoading: loading } = useQuery({
+    queryKey: ['app-settings', 'app_logo'],
+    queryFn: async () => {
       const { data, error } = await supabase
         .from('app_settings')
         .select('setting_value')
         .eq('setting_key', 'app_logo')
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error fetching logo settings:', error);
-        return;
+        return DEFAULT_LOGO_SETTINGS;
       }
 
       if (data?.setting_value) {
-        // Parse JSON if it's a string, otherwise use directly
         const parsedSettings = typeof data.setting_value === 'string' 
           ? JSON.parse(data.setting_value) 
           : data.setting_value;
-        
-        // Update cache
-        cachedLogoSettings = parsedSettings;
-        setLogoSettings(parsedSettings);
+        return parsedSettings as LogoSettings;
       }
-    } catch (error) {
-      console.error('Error fetching logo settings:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const updateLogoSettings = async (newSettings: LogoSettings): Promise<boolean> => {
-    try {
+      return DEFAULT_LOGO_SETTINGS;
+    },
+    staleTime: 30 * 60 * 1000, // 30 minutes - logo rarely changes
+    gcTime: 60 * 60 * 1000, // 60 minutes
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async (newSettings: LogoSettings) => {
       const { error } = await supabase
         .from('app_settings')
         .upsert({
@@ -61,14 +58,31 @@ export function useAppLogo() {
           onConflict: 'setting_key'
         });
 
-      if (error) {
-        console.error('Error updating logo settings:', error);
-        return false;
+      if (error) throw error;
+      return newSettings;
+    },
+    onMutate: async (newSettings) => {
+      // Optimistic update
+      await queryClient.cancelQueries({ queryKey: ['app-settings', 'app_logo'] });
+      const previousSettings = queryClient.getQueryData(['app-settings', 'app_logo']);
+      queryClient.setQueryData(['app-settings', 'app_logo'], newSettings);
+      return { previousSettings };
+    },
+    onError: (err, newSettings, context) => {
+      // Revert on error
+      if (context?.previousSettings) {
+        queryClient.setQueryData(['app-settings', 'app_logo'], context.previousSettings);
       }
+      console.error('Error updating logo settings:', err);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['app-settings', 'app_logo'] });
+    }
+  });
 
-      // Update cache
-      cachedLogoSettings = newSettings;
-      setLogoSettings(newSettings);
+  const updateLogoSettings = async (newSettings: LogoSettings): Promise<boolean> => {
+    try {
+      await updateMutation.mutateAsync(newSettings);
       return true;
     } catch (error) {
       console.error('Error updating logo settings:', error);
@@ -76,10 +90,8 @@ export function useAppLogo() {
     }
   };
 
+  // Real-time subscription for admin updates
   useEffect(() => {
-    fetchLogoSettings();
-
-    // Listen for real-time updates
     const subscription = supabase
       .channel('app_settings_changes')
       .on('postgres_changes', {
@@ -88,19 +100,19 @@ export function useAppLogo() {
         table: 'app_settings',
         filter: 'setting_key=eq.app_logo'
       }, () => {
-        fetchLogoSettings();
+        queryClient.invalidateQueries({ queryKey: ['app-settings', 'app_logo'] });
       })
       .subscribe();
 
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [queryClient]);
 
   return {
     logoSettings,
     loading,
     updateLogoSettings,
-    refetch: fetchLogoSettings
+    refetch: () => queryClient.invalidateQueries({ queryKey: ['app-settings', 'app_logo'] })
   };
 }
