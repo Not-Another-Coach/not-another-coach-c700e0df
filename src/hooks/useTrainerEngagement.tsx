@@ -21,6 +21,10 @@ export function useTrainerEngagement(refreshTrigger?: number) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
+  // Get user profile to check if they're a client
+  const cachedProfile = queryClient.getQueryData<any>(['user-profile', user?.id]);
+  const isClient = cachedProfile?.user_type === 'client';
+
   const { data: engagements = [], isLoading: loading, refetch } = useQuery({
     queryKey: ['client-engagements', user?.id, refreshTrigger],
     queryFn: async () => {
@@ -50,7 +54,7 @@ export function useTrainerEngagement(refreshTrigger?: number) {
 
       return engagementData;
     },
-    enabled: !!user?.id,
+    enabled: !!user?.id && isClient,
     staleTime: queryConfig.lists.staleTime,
     gcTime: queryConfig.lists.gcTime,
     refetchOnMount: false,

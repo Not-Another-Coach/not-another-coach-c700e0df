@@ -34,10 +34,11 @@ export interface Conversation {
 }
 
 /**
- * Pure data hook for fetching conversations using React Query
- * Only fetches data - no mutations or business logic
+ * Data hook for conversations - pure data fetching with React Query
+ * Reused by both the MessagingPopup and the main conversations page
+ * Only runs when enabled parameter is true
  */
-export function useConversationsData() {
+export function useConversationsData(enabled: boolean = true) {
   const { user } = useAuth();
   const { isClient } = useUserTypeChecks();
   const queryClient = useQueryClient();
@@ -109,9 +110,10 @@ export function useConversationsData() {
 
       return conversationsWithProfiles as Conversation[];
     },
-    enabled: !!user?.id,
+    enabled: !!user?.id && enabled,
     staleTime: queryConfig.lists.staleTime,
     gcTime: queryConfig.lists.gcTime,
+    refetchOnMount: false,
   });
 
   return {
