@@ -1,4 +1,4 @@
-import { useUserProfile } from './useUserProfile';
+import { useUserProfileContext } from '@/contexts/UserProfileContext';
 
 export interface UserTypeInfo {
   user_type: 'client' | 'trainer' | 'admin' | null;
@@ -7,10 +7,10 @@ export interface UserTypeInfo {
 
 /**
  * Lightweight hook to get user type from the cached user profile
- * No additional API calls - reads from React Query cache
+ * No additional API calls - reads from shared context
  */
 export function useUserType(): UserTypeInfo {
-  const { profile, loading } = useUserProfile();
+  const { profile, loading } = useUserProfileContext();
   
   return {
     user_type: profile?.user_type ?? null,

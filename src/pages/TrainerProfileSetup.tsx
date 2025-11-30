@@ -4,7 +4,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useTrainerProfileContext } from "@/contexts/TrainerProfileContext";
 import { useUserTypeChecks, useUserType } from "@/hooks/useUserType";
 import { usePackageWaysOfWorking } from "@/hooks/usePackageWaysOfWorking";
-import { useTrainerVerification } from "@/hooks/useTrainerVerification";
 import { useEnhancedTrainerVerification } from "@/hooks/useEnhancedTrainerVerification";
 import { useDiscoveryCallSettings } from "@/hooks/useDiscoveryCallSettings";
 import { useCoachAvailability } from "@/hooks/useCoachAvailability";
@@ -60,7 +59,6 @@ const TrainerProfileSetup = () => {
   const { isTrainer } = useUserTypeChecks();
   const { loading: userTypeLoading } = useUserType();
   const { packageWorkflows, loading: waysOfWorkingLoading } = usePackageWaysOfWorking();
-  const { verificationRequest } = useTrainerVerification();
   const { getCheckByType, loading: verificationLoading, overview } = useEnhancedTrainerVerification();
   const { settings: discoverySettings } = useDiscoveryCallSettings();
   const { settings: availabilitySettings, refetch: refetchAvailability } = useCoachAvailability();

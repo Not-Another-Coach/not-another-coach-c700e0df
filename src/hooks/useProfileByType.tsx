@@ -1,6 +1,4 @@
 import { useUserProfileContext } from '@/contexts/UserProfileContext';
-import { useUserType } from '@/hooks/useUserType';
-import { useAuth } from '@/hooks/useAuth';
 
 export interface BaseSharedProfile {
   id: string;
@@ -12,21 +10,16 @@ export interface BaseSharedProfile {
 
 /**
  * Simplified hook that returns the unified profile with type information
- * Now uses the unified UserProfileContext which handles all user types
+ * Reads from the unified UserProfileContext - no redundant calls
  */
 export function useProfileByType() {
-  const { user } = useAuth();
-  const { user_type, loading: userTypeLoading } = useUserType();
   const { profile, loading, updateProfile } = useUserProfileContext();
 
   // Return unified profile with user type information
   return {
-    profile: profile ? {
-      ...profile,
-      user_type: user_type || profile.user_type,
-    } as BaseSharedProfile & typeof profile : null,
-    loading: userTypeLoading || loading,
+    profile,
+    loading,
     updateProfile,
-    userType: user_type
+    userType: profile?.user_type ?? null
   };
 }

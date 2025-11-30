@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { FileUploadService } from '@/services';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserRolesData } from '@/hooks/data/useUserRolesData';
 import { toast } from 'sonner';
 import { queryConfig } from '@/lib/queryConfig';
 
@@ -65,6 +66,10 @@ export const useEnhancedTrainerVerification = (trainerId?: string) => {
   const { user } = useAuth();
   const targetTrainerId = trainerId || user?.id;
   const queryClient = useQueryClient();
+  
+  // Use cached admin role check
+  const { data: roles } = useUserRolesData();
+  const isAdminUser = roles?.some(r => r.role === 'admin') ?? false;
 
   // Single composite query for all verification data
   const { data, isLoading, refetch } = useQuery<VerificationData>({
@@ -73,16 +78,6 @@ export const useEnhancedTrainerVerification = (trainerId?: string) => {
       if (!user) throw new Error('User not authenticated');
       
       console.log('Fetching verification data for trainer:', targetTrainerId);
-
-      // Check admin role inline
-      const { data: adminData } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-        .eq('role', 'admin')
-        .maybeSingle();
-      
-      const isAdminUser = !!adminData;
 
       // Parallel fetch all data
       const [overviewResult, checksResult, auditResult] = await Promise.all([
