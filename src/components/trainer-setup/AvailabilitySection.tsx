@@ -1,4 +1,4 @@
-import { useWaitlist } from "@/hooks/useWaitlist";
+import { useCoachAvailability } from "@/hooks/useCoachAvailability";
 import { useWaitlistExclusive } from '@/hooks/useWaitlistExclusive';
 import { WaitlistExclusivePrompt } from '@/components/coach/WaitlistExclusivePrompt';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,8 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { CheckCircle, Clock, Pause, Calendar, Users } from "lucide-react";
+import { CheckCircle, Clock, Pause, Calendar } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/hooks/useAuth';
@@ -20,7 +19,7 @@ interface AvailabilitySectionProps {
 
 export function AvailabilitySection({ formData, updateFormData, onAvailabilityChange }: AvailabilitySectionProps) {
   const { user } = useAuth();
-  const { availabilitySettings, updateAvailabilitySettings, loading, waitlistEntries, refetch } = useWaitlist();
+  const { settings: availabilitySettings, updateSettings, loading, saving, getWaitlistCount, refetch } = useCoachAvailability();
   const { startExclusivePeriod } = useWaitlistExclusive();
   const { toast } = useToast();
   const [nextAvailableDate, setNextAvailableDate] = useState('');
@@ -42,16 +41,12 @@ export function AvailabilitySection({ formData, updateFormData, onAvailabilityCh
     if (availabilitySettings) {
       // Do not prefill status in setup — require explicit selection
       setLocalAvailabilityStatus('');
-      setNextAvailableDate(availabilitySettings.next_available_date || '');
+      setNextAvailableDate(availabilitySettings.next_available_date ?? '');
       setAllowDiscoveryCalls(availabilitySettings.allow_discovery_calls_on_waitlist ?? true);
       setAutoFollowUpDays(availabilitySettings.auto_follow_up_days || 14);
-      setWaitlistMessage(availabilitySettings.waitlist_message || '');
+      setWaitlistMessage(availabilitySettings.waitlist_message ?? '');
     }
   }, [availabilitySettings]);
-
-  const getWaitlistCount = () => {
-    return waitlistEntries.filter(entry => entry.status === 'active').length;
-  };
 
   const handleAvailabilityStatusChange = async (newStatus: string) => {
     const currentStatus = availabilityStatus;
@@ -68,7 +63,7 @@ export function AvailabilitySection({ formData, updateFormData, onAvailabilityCh
       // Save directly to database
       setIsSaving(true);
       try {
-        await updateAvailabilitySettings({
+        await updateSettings({
           availability_status: newStatus as any,
           next_available_date: nextAvailableDate || null,
           allow_discovery_calls_on_waitlist: allowDiscoveryCalls,
@@ -121,7 +116,7 @@ export function AvailabilitySection({ formData, updateFormData, onAvailabilityCh
         // Start exclusive period and update status
         const result = await startExclusivePeriod(user.id);
         if (result.success) {
-          await updateAvailabilitySettings({
+          await updateSettings({
             availability_status: pendingAvailabilityChange as any,
             next_available_date: nextAvailableDate || null,
             allow_discovery_calls_on_waitlist: allowDiscoveryCalls,
@@ -131,7 +126,7 @@ export function AvailabilitySection({ formData, updateFormData, onAvailabilityCh
         }
       } else {
         // Just update the status normally
-        await updateAvailabilitySettings({
+        await updateSettings({
           availability_status: pendingAvailabilityChange as any,
           next_available_date: nextAvailableDate || null,
           allow_discovery_calls_on_waitlist: allowDiscoveryCalls,

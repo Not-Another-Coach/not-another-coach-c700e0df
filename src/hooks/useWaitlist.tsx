@@ -1,108 +1,27 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { useWaitlistEntriesData, WaitlistEntry } from '@/hooks/data/useWaitlistEntriesData';
 
-export type WaitlistStatus = 'active' | 'contacted' | 'converted' | 'archived';
+export type { WaitlistStatus, WaitlistEntry } from '@/hooks/data/useWaitlistEntriesData';
 export type CoachAvailabilityStatus = 'accepting' | 'waitlist' | 'unavailable';
 
-interface WaitlistEntry {
-  id: string;
-  client_id: string;
-  coach_id: string;
-  status: WaitlistStatus;
-  joined_at: string;
-  estimated_start_date?: string;
-  follow_up_scheduled_date?: string;
-  last_contacted_at?: string;
-  coach_notes?: string;
-  client_goals?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-interface CoachAvailabilitySettings {
-  id: string;
-  coach_id: string;
-  availability_status: CoachAvailabilityStatus;
-  next_available_date?: string;
-  allow_discovery_calls_on_waitlist: boolean;
-  auto_follow_up_days: number;
-  waitlist_message?: string;
-  created_at: string;
-  updated_at: string;
-}
-
+/**
+ * Logic hook for waitlist operations
+ * Consumes useWaitlistEntriesData for data and adds mutations
+ * Does NOT fetch availability settings (use useCoachAvailability instead)
+ */
 export function useWaitlist() {
   const { user } = useAuth();
-  const [waitlistEntries, setWaitlistEntries] = useState<WaitlistEntry[]>([]);
-  const [availabilitySettings, setAvailabilitySettings] = useState<CoachAvailabilitySettings | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { entries: waitlistEntries, loading, refetch } = useWaitlistEntriesData();
+  const queryClient = useQueryClient();
 
-  const fetchWaitlistEntries = useCallback(async () => {
-    if (!user) return;
+  const joinMutation = useMutation({
+    mutationFn: async ({ coachId, clientGoals }: { coachId: string; clientGoals?: string }) => {
+      if (!user) throw new Error('No user');
 
-    try {
-      const { data, error } = await supabase
-        .from('coach_waitlists')
-        .select('*')
-        .eq('coach_id', user.id)
-        .neq('status', 'converted') // Exclude converted clients from waitlist view
-        .order('joined_at', { ascending: false });
-
-      if (error) throw error;
-      setWaitlistEntries(data || []);
-    } catch (error) {
-      console.error('Error fetching waitlist entries:', error);
-    }
-  }, [user]);
-
-  const fetchAvailabilitySettings = useCallback(async () => {
-    if (!user) return;
-
-    try {
-      const { data, error } = await supabase
-        .from('coach_availability_settings')
-        .select('*')
-        .eq('coach_id', user.id)
-        .maybeSingle();
-
-      if (error) throw error;
-      setAvailabilitySettings(data);
-    } catch (error) {
-      console.error('Error fetching availability settings:', error);
-    }
-  }, [user]);
-
-  const updateAvailabilitySettings = useCallback(async (settings: Partial<CoachAvailabilitySettings>) => {
-    if (!user) return { error: 'No user' };
-
-    try {
-      const { data, error } = await supabase
-        .from('coach_availability_settings')
-        .upsert(
-          {
-            coach_id: user.id,
-            ...settings
-          },
-          { onConflict: 'coach_id' }
-        )
-        .select()
-        .single();
-
-      if (error) throw error;
-      setAvailabilitySettings(data);
-      return { success: true };
-    } catch (error) {
-      console.error('Error updating availability settings:', error);
-      return { error };
-    }
-  }, [user]);
-
-  const joinWaitlist = useCallback(async (coachId: string, clientGoals?: string) => {
-    if (!user) return { error: 'No user' };
-
-    try {
-      // First check if client is already on waitlist
+      // Check if already on waitlist
       const { data: existingEntry } = await supabase
         .from('coach_waitlists')
         .select('id')
@@ -111,18 +30,16 @@ export function useWaitlist() {
         .maybeSingle();
 
       if (existingEntry) {
-        console.log('🔥 Client already on waitlist');
-        return { error: 'You are already on this trainer\'s waitlist' };
+        throw new Error('You are already on this trainer\'s waitlist');
       }
 
-      // Get coach's availability settings to determine estimated start date
+      // Get coach's availability settings for estimated start date
       const { data: coachSettings } = await supabase
         .from('coach_availability_settings')
         .select('*')
         .eq('coach_id', coachId)
         .maybeSingle();
 
-      console.log('🔥 Attempting to join waitlist for coach:', coachId);
       const { data, error } = await supabase
         .from('coach_waitlists')
         .insert({
@@ -134,23 +51,18 @@ export function useWaitlist() {
         .select()
         .single();
 
-      if (error) {
-        console.error('🔥 Database error joining waitlist:', error);
-        throw error;
-      }
-      
-      console.log('🔥 Successfully joined waitlist:', data);
-      return { success: true, data };
-    } catch (error) {
-      console.error('🔥 Error joining waitlist:', error);
-      return { error: error.message || 'Failed to join waitlist' };
-    }
-  }, [user]);
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['waitlist-entries', user?.id] });
+    },
+  });
 
-  const updateWaitlistEntry = useCallback(async (entryId: string, updates: Partial<WaitlistEntry>) => {
-    if (!user) return { error: 'No user' };
+  const updateMutation = useMutation({
+    mutationFn: async ({ entryId, updates }: { entryId: string; updates: Partial<WaitlistEntry> }) => {
+      if (!user) throw new Error('No user');
 
-    try {
       const { data, error } = await supabase
         .from('coach_waitlists')
         .update(updates)
@@ -160,23 +72,17 @@ export function useWaitlist() {
         .single();
 
       if (error) throw error;
-      
-      // Refresh waitlist entries
-      await fetchWaitlistEntries();
-      return { success: true, data };
-    } catch (error) {
-      console.error('Error updating waitlist entry:', error);
-      return { error };
-    }
-  }, [user, fetchWaitlistEntries]);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['waitlist-entries', user?.id] });
+    },
+  });
 
-  const removeFromWaitlist = useCallback(async (coachId: string) => {
-    if (!user) return { error: 'No user' };
+  const removeMutation = useMutation({
+    mutationFn: async (coachId: string) => {
+      if (!user) throw new Error('No user');
 
-    console.log('🔥 removeFromWaitlist called:', { coachId, userId: user.id });
-
-    try {
-      // First check if user is actually on waitlist
       const { data: existingEntry, error: checkError } = await supabase
         .from('coach_waitlists')
         .select('*')
@@ -184,50 +90,58 @@ export function useWaitlist() {
         .eq('coach_id', coachId)
         .maybeSingle();
 
-      console.log('🔥 removeFromWaitlist - existing entry check:', { existingEntry, checkError });
+      if (checkError) throw checkError;
+      if (!existingEntry) throw new Error('You are not on this coach\'s waitlist');
 
-      if (checkError) {
-        console.error('🔥 removeFromWaitlist - check error:', checkError);
-        return { error: `Error checking waitlist status: ${checkError.message}` };
-      }
-
-      if (!existingEntry) {
-        console.log('🔥 removeFromWaitlist - no entry found');
-        return { error: 'You are not on this coach\'s waitlist' };
-      }
-
-      // Now attempt to delete
       const { data, error } = await supabase
         .from('coach_waitlists')
         .delete()
         .eq('client_id', user.id)
         .eq('coach_id', coachId)
-        .select(); // Add select to see what was deleted
+        .select();
 
-      console.log('🔥 removeFromWaitlist result:', { data, error, deletedCount: data?.length || 0 });
+      if (error) throw error;
+      if (!data || data.length === 0) throw new Error('No waitlist entry was removed');
+      
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['waitlist-entries', user?.id] });
+    },
+  });
 
-      if (error) {
-        console.error('🔥 removeFromWaitlist database error:', error);
-        return { error: `Database error: ${error.message}` };
-      }
-      
-      if (!data || data.length === 0) {
-        console.log('🔥 removeFromWaitlist - no rows deleted');
-        return { error: 'No waitlist entry was removed. Please try again.' };
-      }
-      
-      console.log('🔥 removeFromWaitlist successful, deleted rows:', data.length);
-      return { success: true, deletedRows: data };
+  const joinWaitlist = useCallback(async (coachId: string, clientGoals?: string) => {
+    try {
+      const data = await joinMutation.mutateAsync({ coachId, clientGoals });
+      return { success: true, data };
     } catch (error: any) {
-      console.error('🔥 removeFromWaitlist catch error:', error);
-      return { error: `Unexpected error: ${error.message || 'Something went wrong'}` };
+      console.error('Error joining waitlist:', error);
+      return { error: error.message || 'Failed to join waitlist' };
     }
-  }, [user]);
+  }, [joinMutation]);
+
+  const updateWaitlistEntry = useCallback(async (entryId: string, updates: Partial<WaitlistEntry>) => {
+    try {
+      const data = await updateMutation.mutateAsync({ entryId, updates });
+      return { success: true, data };
+    } catch (error: any) {
+      console.error('Error updating waitlist entry:', error);
+      return { error: error.message || 'Failed to update waitlist entry' };
+    }
+  }, [updateMutation]);
+
+  const removeFromWaitlist = useCallback(async (coachId: string) => {
+    try {
+      const deletedRows = await removeMutation.mutateAsync(coachId);
+      return { success: true, deletedRows };
+    } catch (error: any) {
+      console.error('Error removing from waitlist:', error);
+      return { error: error.message || 'Failed to remove from waitlist' };
+    }
+  }, [removeMutation]);
 
   const checkClientWaitlistStatus = useCallback(async (coachId: string) => {
     if (!user) return null;
-
-    console.log('🔥 checkClientWaitlistStatus called:', { coachId, userId: user.id });
 
     try {
       const { data, error } = await supabase
@@ -237,15 +151,10 @@ export function useWaitlist() {
         .eq('coach_id', coachId)
         .maybeSingle();
 
-      console.log('🔥 checkClientWaitlistStatus result:', { data, error });
-
-      if (error) {
-        console.error('🔥 checkClientWaitlistStatus database error:', error);
-        throw error;
-      }
+      if (error) throw error;
       return data;
     } catch (error) {
-      console.error('🔥 checkClientWaitlistStatus catch error:', error);
+      console.error('Error checking waitlist status:', error);
       return null;
     }
   }, [user]);
@@ -260,14 +169,13 @@ export function useWaitlist() {
 
       if (error) throw error;
       
-      // If no settings exist, return default availability status
+      // Return default if no settings exist
       if (!data) {
         return {
           coach_id: coachId,
-          availability_status: 'accepting' as CoachAvailabilityStatus,
+          availability_status: 'accepting' as const,
           allow_discovery_calls_on_waitlist: true,
           auto_follow_up_days: 14,
-          
           waitlist_message: null
         };
       }
@@ -279,29 +187,14 @@ export function useWaitlist() {
     }
   }, []);
 
-  useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      await Promise.all([
-        fetchWaitlistEntries(),
-        fetchAvailabilitySettings()
-      ]);
-      setLoading(false);
-    };
-
-    loadData();
-  }, [fetchWaitlistEntries, fetchAvailabilitySettings]);
-
   return {
     waitlistEntries,
-    availabilitySettings,
     loading,
-    updateAvailabilitySettings,
     joinWaitlist,
     removeFromWaitlist,
     updateWaitlistEntry,
     checkClientWaitlistStatus,
     getCoachAvailability,
-    refetch: () => Promise.all([fetchWaitlistEntries(), fetchAvailabilitySettings()])
+    refetch,
   };
 }
