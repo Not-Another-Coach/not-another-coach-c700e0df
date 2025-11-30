@@ -12,6 +12,7 @@ import { useTrainerImages } from "@/hooks/useTrainerImages";
 import { useProfessionalDocumentsState } from "@/hooks/useProfessionalDocumentsState";
 import { useToast } from "@/hooks/use-toast";
 import { useProfileStepValidation } from "@/hooks/useProfileStepValidation";
+import { useAppSettingsData } from "@/hooks/data/useAppSettingsData";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -75,22 +76,9 @@ const TrainerProfileSetup = () => {
   const isCriticalDataLoading = loading || profileLoading || verificationLoading;
   const [showContent, setShowContent] = useState(false);
 
-  // Fetch trainer access settings
-  useEffect(() => {
-    const fetchAccessSettings = async () => {
-      const { data } = await supabase
-        .from('app_settings')
-        .select('setting_value')
-        .eq('setting_key', 'platform_access_control')
-        .single();
-      
-      if (data?.setting_value) {
-        const accessControl = data.setting_value as any;
-        setTrainerAccessEnabled(accessControl?.trainer_access_enabled !== false);
-      }
-    };
-    fetchAccessSettings();
-  }, []);
+  // Fetch trainer access settings using data hook
+  const { data: accessSettingsData } = useAppSettingsData('platform_access_control');
+  const trainerAccessEnabled = accessSettingsData?.setting_value?.trainer_access_enabled !== false;
 
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -99,7 +87,6 @@ const TrainerProfileSetup = () => {
   const [showExitDialog, setShowExitDialog] = useState(false);
   const [pendingAvailabilityChanges, setPendingAvailabilityChanges] = useState<any>(null);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
-  const [trainerAccessEnabled, setTrainerAccessEnabled] = useState<boolean>(true);
   const [isFormReady, setIsFormReady] = useState(false); // Track if form is fully initialized
   const hasInitialized = useRef(false);
   const hasLoadedOnce = useRef(false);

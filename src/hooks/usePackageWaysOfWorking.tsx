@@ -1,81 +1,36 @@
-import { useState, useEffect } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
+import { usePackageWaysOfWorkingData } from "./data/usePackageWaysOfWorkingData";
+import type { PackageWaysOfWorking } from "./data/usePackageWaysOfWorkingData";
 
-export interface PackageWaysOfWorking {
-  id: string;
-  trainer_id: string;
-  package_id: string;
-  package_name: string;
-  onboarding_items: Array<{ id: string; text: string }>;
-  first_week_items: Array<{ id: string; text: string }>;
-  ongoing_structure_items: Array<{ id: string; text: string }>;
-  tracking_tools_items: Array<{ id: string; text: string }>;
-  client_expectations_items: Array<{ id: string; text: string }>;
-  what_i_bring_items: Array<{ id: string; text: string }>;
-  visibility: 'public' | 'post_match';
-  created_at: string;
-  updated_at: string;
-  // Activity ID fields for database compatibility - required by database
-  onboarding_activity_ids: any;
-  first_week_activity_ids: any;
-  ongoing_structure_activity_ids: any;
-  tracking_tools_activity_ids: any;
-  client_expectations_activity_ids: any;
-  what_i_bring_activity_ids: any;
-}
+// Re-export type from data hook
+export type { PackageWaysOfWorking };
 
 export function usePackageWaysOfWorking() {
   const { user } = useAuth();
-  const [packageWorkflows, setPackageWorkflows] = useState<PackageWaysOfWorking[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  // Fetch all package ways of working for the current trainer
-  const fetchPackageWorkflows = async () => {
-    if (!user?.id) return;
+  // Use data hook for fetching
+  const { data: packageWorkflows, isLoading, error: queryError } = usePackageWaysOfWorkingData();
 
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('package_ways_of_working')
-        .select('*')
-        .eq('trainer_id', user.id)
-        .order('created_at', { ascending: true });
-
-      if (error) throw error;
-      setPackageWorkflows((data || []).map(item => ({
-        ...item,
-        onboarding_items: (item.onboarding_items as any) || [],
-        first_week_items: (item.first_week_items as any) || [],
-        ongoing_structure_items: (item.ongoing_structure_items as any) || [],
-        tracking_tools_items: (item.tracking_tools_items as any) || [],
-        client_expectations_items: (item.client_expectations_items as any) || [],
-        what_i_bring_items: (item.what_i_bring_items as any) || [],
-        visibility: (item.visibility as 'public' | 'post_match') || 'public'
-      })));
-    } catch (err) {
-      console.error('Error fetching package workflows:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch package workflows');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const workflows = packageWorkflows || [];
+  const error = queryError ? (queryError as Error).message : null;
 
   // Get workflow for a specific package
   const getPackageWorkflow = (packageId: string): PackageWaysOfWorking | null => {
-    return packageWorkflows.find(workflow => workflow.package_id === packageId) || null;
+    return workflows.find(workflow => workflow.package_id === packageId) || null;
   };
 
-  // Create or update package workflow
-  const savePackageWorkflow = async (
-    packageId: string, 
-    packageName: string, 
-    workflowData: Partial<PackageWaysOfWorking>
-  ) => {
-    if (!user?.id) throw new Error('No user authenticated');
+  // Save mutation
+  const saveMutation = useMutation({
+    mutationFn: async ({ packageId, packageName, workflowData }: {
+      packageId: string;
+      packageName: string;
+      workflowData: Partial<PackageWaysOfWorking>;
+    }) => {
+      if (!user?.id) throw new Error('No user authenticated');
 
-    try {
       const existingWorkflow = getPackageWorkflow(packageId);
       
       const dataToSave = {
@@ -89,7 +44,6 @@ export function usePackageWaysOfWorking() {
         client_expectations_items: workflowData.client_expectations_items || existingWorkflow?.client_expectations_items || [],
         what_i_bring_items: workflowData.what_i_bring_items || existingWorkflow?.what_i_bring_items || [],
         visibility: workflowData.visibility || existingWorkflow?.visibility || 'public',
-        // Include required activity ID fields
         onboarding_activity_ids: [],
         first_week_activity_ids: [],
         ongoing_structure_activity_ids: [],
@@ -98,8 +52,7 @@ export function usePackageWaysOfWorking() {
         what_i_bring_activity_ids: [],
       };
 
-      // Use upsert to handle both insert and update cases
-      const result = await supabase
+      const { data, error } = await supabase
         .from('package_ways_of_working')
         .upsert(dataToSave, { 
           onConflict: 'trainer_id,package_id'
@@ -107,23 +60,19 @@ export function usePackageWaysOfWorking() {
         .select()
         .single();
 
-      if (result.error) throw result.error;
-
-      // Refresh the workflows
-      await fetchPackageWorkflows();
-      
-      return result.data;
-    } catch (err) {
-      console.error('Error saving package workflow:', err);
-      throw err;
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['package-ways-of-working', user?.id] });
     }
-  };
+  });
 
-  // Delete a package workflow
-  const deletePackageWorkflow = async (packageId: string) => {
-    if (!user?.id) throw new Error('No user authenticated');
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (packageId: string) => {
+      if (!user?.id) throw new Error('No user authenticated');
 
-    try {
       const { error } = await supabase
         .from('package_ways_of_working')
         .delete()
@@ -131,21 +80,17 @@ export function usePackageWaysOfWorking() {
         .eq('package_id', packageId);
 
       if (error) throw error;
-
-      // Refresh the workflows
-      await fetchPackageWorkflows();
-    } catch (err) {
-      console.error('Error deleting package workflow:', err);
-      throw err;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['package-ways-of-working', user?.id] });
     }
-  };
+  });
 
-  // Clean up orphaned package workflows
-  const cleanupOrphanedWorkflows = async (validPackageIds: string[]) => {
-    if (!user?.id) throw new Error('No user authenticated');
+  // Cleanup mutation
+  const cleanupMutation = useMutation({
+    mutationFn: async (validPackageIds: string[]) => {
+      if (!user?.id) throw new Error('No user authenticated');
 
-    try {
-      // Find orphaned workflows (ones that don't have a corresponding package)
       const { data: orphanedWorkflows, error: fetchError } = await supabase
         .from('package_ways_of_working')
         .select('package_id')
@@ -155,7 +100,6 @@ export function usePackageWaysOfWorking() {
       if (fetchError) throw fetchError;
 
       if (orphanedWorkflows && orphanedWorkflows.length > 0) {
-        // Delete orphaned workflows
         const { error: deleteError } = await supabase
           .from('package_ways_of_working')
           .delete()
@@ -163,25 +107,21 @@ export function usePackageWaysOfWorking() {
           .not('package_id', 'in', `(${validPackageIds.join(',')})`);
 
         if (deleteError) throw deleteError;
-
-        // Refresh the workflows
-        await fetchPackageWorkflows();
-        
         return orphanedWorkflows.length;
       }
       
       return 0;
-    } catch (err) {
-      console.error('Error cleaning up orphaned workflows:', err);
-      throw err;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['package-ways-of-working', user?.id] });
     }
-  };
+  });
 
-  // Bulk delete multiple package workflows
-  const bulkDeletePackageWorkflows = async (packageIds: string[]) => {
-    if (!user?.id) throw new Error('No user authenticated');
+  // Bulk delete mutation
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (packageIds: string[]) => {
+      if (!user?.id) throw new Error('No user authenticated');
 
-    try {
       const { error } = await supabase
         .from('package_ways_of_working')
         .delete()
@@ -189,33 +129,30 @@ export function usePackageWaysOfWorking() {
         .in('package_id', packageIds);
 
       if (error) throw error;
-
-      // Refresh the workflows
-      await fetchPackageWorkflows();
-      
       return packageIds.length;
-    } catch (err) {
-      console.error('Error bulk deleting package workflows:', err);
-      throw err;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['package-ways-of-working', user?.id] });
     }
-  };
-
-  // Initialize data and refetch when user changes
-  useEffect(() => {
-    if (user?.id) {
-      fetchPackageWorkflows();
-    }
-  }, [user?.id]);
+  });
 
   return {
-    packageWorkflows,
-    loading,
+    packageWorkflows: workflows,
+    loading: isLoading,
     error,
     getPackageWorkflow,
-    savePackageWorkflow,
-    deletePackageWorkflow,
-    cleanupOrphanedWorkflows,
-    bulkDeletePackageWorkflows,
-    refetch: fetchPackageWorkflows
+    savePackageWorkflow: async (packageId: string, packageName: string, workflowData: Partial<PackageWaysOfWorking>) => {
+      return saveMutation.mutateAsync({ packageId, packageName, workflowData });
+    },
+    deletePackageWorkflow: async (packageId: string) => {
+      return deleteMutation.mutateAsync(packageId);
+    },
+    cleanupOrphanedWorkflows: async (validPackageIds: string[]) => {
+      return cleanupMutation.mutateAsync(validPackageIds);
+    },
+    bulkDeletePackageWorkflows: async (packageIds: string[]) => {
+      return bulkDeleteMutation.mutateAsync(packageIds);
+    },
+    refetch: () => queryClient.invalidateQueries({ queryKey: ['package-ways-of-working', user?.id] })
   };
 }
