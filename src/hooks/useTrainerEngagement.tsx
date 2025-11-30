@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { queryConfig } from '@/lib/queryConfig';
 
 export type EngagementStage = 'browsing' | 'liked' | 'shortlisted' | 'getting_to_know_your_coach' | 'discovery_in_progress' | 'matched' | 'discovery_completed' | 'agreed' | 'payment_pending' | 'active_client' | 'unmatched' | 'declined' | 'declined_dismissed';
 
@@ -18,18 +19,13 @@ interface TrainerEngagement {
 
 export function useTrainerEngagement(refreshTrigger?: number) {
   const { user } = useAuth();
-  const [engagements, setEngagements] = useState<TrainerEngagement[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
-  const fetchEngagements = async () => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
-    
-    console.log('🔄 Fetching engagement data for user:', user.id);
+  const { data: engagements = [], isLoading: loading, refetch } = useQuery({
+    queryKey: ['client-engagements', user?.id, refreshTrigger],
+    queryFn: async () => {
+      if (!user) return [];
 
-    try {
       const { data, error } = await supabase
         .from('client_trainer_engagement')
         .select('*')
@@ -37,7 +33,7 @@ export function useTrainerEngagement(refreshTrigger?: number) {
 
       if (error) {
         console.error('Error fetching engagements:', error);
-        return;
+        throw error;
       }
 
       const engagementData: TrainerEngagement[] = data?.map(item => ({
@@ -52,71 +48,69 @@ export function useTrainerEngagement(refreshTrigger?: number) {
         becameClientAt: item.became_client_at
       })) || [];
 
-      setEngagements(engagementData);
-      console.log('✅ Engagement data loaded:', engagementData.length, 'engagements');
-    } catch (error) {
-      console.error('Error fetching engagements:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+      return engagementData;
+    },
+    enabled: !!user?.id,
+    staleTime: queryConfig.lists.staleTime,
+    gcTime: queryConfig.lists.gcTime,
+    refetchOnMount: false,
+  });
 
-  useEffect(() => {
-    fetchEngagements();
-  }, [user, refreshTrigger]);
+  const updateEngagementMutation = useMutation({
+    mutationFn: async ({ trainerId, newStage }: { trainerId: string; newStage: EngagementStage }) => {
+      if (!user) throw new Error('User not authenticated');
 
-  const updateEngagementStage = async (trainerId: string, newStage: EngagementStage) => {
-    if (!user) return;
-
-    // Store previous state for rollback
-    const previousEngagements = [...engagements];
-
-    // Optimistic update - update local state immediately
-    setEngagements(prevEngagements => {
-      const existingIndex = prevEngagements.findIndex(e => e.trainerId === trainerId);
-      const now = new Date().toISOString();
-      
-      if (existingIndex >= 0) {
-        // Update existing engagement
-        const updated = [...prevEngagements];
-        updated[existingIndex] = { 
-          ...updated[existingIndex], 
-          stage: newStage, 
-          updatedAt: now 
-        };
-        return updated;
-      } else {
-        // Create new engagement
-        return [...prevEngagements, {
-          trainerId,
-          stage: newStage,
-          createdAt: now,
-          updatedAt: now
-        }];
-      }
-    });
-
-    try {
       const { error } = await supabase.rpc('update_engagement_stage', {
         client_uuid: user.id,
         trainer_uuid: trainerId,
         new_stage: newStage as any
       });
 
-      if (error) {
-        console.error('Error updating engagement stage:', error);
-        // Rollback optimistic update
-        setEngagements(previousEngagements);
-        return;
-      }
+      if (error) throw error;
+      return { trainerId, newStage };
+    },
+    onMutate: async ({ trainerId, newStage }) => {
+      await queryClient.cancelQueries({ queryKey: ['client-engagements', user?.id] });
+      
+      const previousEngagements = queryClient.getQueryData<TrainerEngagement[]>(['client-engagements', user?.id]);
+      
+      queryClient.setQueryData<TrainerEngagement[]>(['client-engagements', user?.id], (old = []) => {
+        const existingIndex = old.findIndex(e => e.trainerId === trainerId);
+        const now = new Date().toISOString();
+        
+        if (existingIndex >= 0) {
+          const updated = [...old];
+          updated[existingIndex] = { 
+            ...updated[existingIndex], 
+            stage: newStage, 
+            updatedAt: now 
+          };
+          return updated;
+        } else {
+          return [...old, {
+            trainerId,
+            stage: newStage,
+            createdAt: now,
+            updatedAt: now
+          }];
+        }
+      });
 
-      // Confirm with database fetch
-      await fetchEngagements();
-    } catch (error) {
-      console.error('Error updating engagement stage:', error);
-      // Rollback optimistic update
-      setEngagements(previousEngagements);
+      return { previousEngagements };
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousEngagements) {
+        queryClient.setQueryData(['client-engagements', user?.id], context.previousEngagements);
+      }
+      console.error('Error updating engagement stage:', err);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['client-engagements', user?.id] });
     }
+  });
+
+  const updateEngagementStage = async (trainerId: string, newStage: EngagementStage) => {
+    await updateEngagementMutation.mutateAsync({ trainerId, newStage });
   };
 
   const getEngagementStage = (trainerId: string): EngagementStage => {
@@ -239,6 +233,6 @@ export function useTrainerEngagement(refreshTrigger?: number) {
     completeDiscoveryCall,
     proceedWithCoach,
     rejectCoach,
-    refresh: fetchEngagements
+    refresh: refetch
   };
 }

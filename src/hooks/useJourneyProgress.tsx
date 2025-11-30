@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { queryConfig } from '@/lib/queryConfig';
 
 export type JourneyStage = 
   | 'profile_setup'
@@ -70,56 +71,44 @@ const JOURNEY_STAGES: Record<JourneyStage, { title: string; steps: string[] }> =
 
 export const useJourneyProgress = () => {
   const { user } = useAuth();
-  const [progress, setProgress] = useState<JourneyProgress | null>(null);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
-  const fetchProgress = async () => {
-    if (!user) {
-      setProgress(null);
-      setLoading(false);
-      return;
-    }
+  const { data: progress = null, isLoading: loading, refetch } = useQuery({
+    queryKey: ['journey-progress', user?.id],
+    queryFn: async () => {
+      if (!user) return null;
 
-    try {
-      // Get user profile with journey data
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('journey_stage, onboarding_step, total_onboarding_steps, quiz_completed, journey_progress')
-        .eq('id', user.id)
-        .maybeSingle();
+      const [profileRes, stepsRes] = await Promise.all([
+        supabase
+          .from('profiles')
+          .select('journey_stage, onboarding_step, total_onboarding_steps, quiz_completed, journey_progress')
+          .eq('id', user.id)
+          .maybeSingle(),
+        supabase
+          .from('user_journey_tracking')
+          .select('stage, step_name, completed_at')
+          .eq('user_id', user.id)
+      ]);
 
-      if (profileError) {
-        console.error('Error fetching profile:', profileError);
-        throw profileError;
-      }
+      if (profileRes.error) throw profileRes.error;
+      if (stepsRes.error) throw stepsRes.error;
 
-      // Get completed journey steps
-      const { data: completedSteps, error: stepsError } = await supabase
-        .from('user_journey_tracking')
-        .select('stage, step_name, completed_at')
-        .eq('user_id', user.id);
-
-      if (stepsError) throw stepsError;
-
-      const currentStage = 'profile_setup' as JourneyStage; // Default since journey_stage column doesn't exist
+      const currentStage = 'profile_setup' as JourneyStage;
       const stageConfig = JOURNEY_STAGES[currentStage];
       
-      // Calculate progress
       let currentStep = 0;
       let totalSteps = stageConfig.steps.length;
       
       if (currentStage === 'onboarding') {
-        currentStep = 1; // Default since onboarding_step column doesn't exist
-        totalSteps = 5; // Default since total_onboarding_steps column doesn't exist
+        currentStep = 1;
+        totalSteps = 5;
       } else {
-        // Count completed steps for current stage
-        const completedInStage = completedSteps?.filter(step => step.stage === currentStage).length || 0;
+        const completedInStage = stepsRes.data?.filter(step => step.stage === currentStage).length || 0;
         currentStep = completedInStage;
       }
 
       const percentage = Math.round((currentStep / totalSteps) * 100);
 
-      // Build steps array
       const steps: JourneyStep[] = stageConfig.steps.map((stepTitle, index) => ({
         id: `${currentStage}_${index}`,
         title: stepTitle,
@@ -128,7 +117,6 @@ export const useJourneyProgress = () => {
         current: index === currentStep
       }));
 
-      // Determine next action
       let nextAction = '';
       switch (currentStage) {
         case 'profile_setup':
@@ -156,27 +144,25 @@ export const useJourneyProgress = () => {
           nextAction = 'Continue your fitness journey';
       }
 
-      setProgress({
+      return {
         stage: currentStage,
         currentStep,
         totalSteps,
         percentage,
         steps,
         nextAction
-      });
+      } as JourneyProgress;
+    },
+    enabled: !!user,
+    staleTime: queryConfig.lists.staleTime,
+    gcTime: queryConfig.lists.gcTime,
+    refetchOnMount: false,
+  });
 
-    } catch (error) {
-      console.error('Error fetching journey progress:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const updateProgressMutation = useMutation({
+    mutationFn: async ({ stage, stepName, metadata }: { stage: JourneyStage; stepName: string; metadata?: any }) => {
+      if (!user) throw new Error('User not authenticated');
 
-  const updateProgress = async (stage: JourneyStage, stepName: string, metadata?: any) => {
-    if (!user) return;
-
-    try {
-      // Record the completed step
       await supabase
         .from('user_journey_tracking')
         .upsert({
@@ -186,52 +172,55 @@ export const useJourneyProgress = () => {
           metadata: metadata || {}
         });
 
-      // Update profile journey stage if needed
       await supabase
         .from('profiles')
         .update({ journey_stage: stage })
         .eq('id', user.id);
-
-      // Refresh progress
-      await fetchProgress();
-    } catch (error) {
-      console.error('Error updating journey progress:', error);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['journey-progress', user?.id] });
     }
-  };
+  });
 
-  const updateOnboardingStep = async (step: number) => {
-    if (!user) return;
+  const updateOnboardingStepMutation = useMutation({
+    mutationFn: async (step: number) => {
+      if (!user) throw new Error('User not authenticated');
 
-    try {
       await supabase
         .from('profiles')
         .update({ onboarding_step: step })
         .eq('id', user.id);
-
-      await fetchProgress();
-    } catch (error) {
-      console.error('Error updating onboarding step:', error);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['journey-progress', user?.id] });
     }
-  };
+  });
 
-  const advanceToStage = async (newStage: JourneyStage) => {
-    if (!user) return;
+  const advanceToStageMutation = useMutation({
+    mutationFn: async (newStage: JourneyStage) => {
+      if (!user) throw new Error('User not authenticated');
 
-    try {
       await supabase
         .from('profiles')
         .update({ journey_stage: newStage })
         .eq('id', user.id);
-
-      await fetchProgress();
-    } catch (error) {
-      console.error('Error advancing to stage:', error);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['journey-progress', user?.id] });
     }
+  });
+
+  const updateProgress = async (stage: JourneyStage, stepName: string, metadata?: any) => {
+    await updateProgressMutation.mutateAsync({ stage, stepName, metadata });
   };
 
-  useEffect(() => {
-    fetchProgress();
-  }, [user]);
+  const updateOnboardingStep = async (step: number) => {
+    await updateOnboardingStepMutation.mutateAsync(step);
+  };
+
+  const advanceToStage = async (newStage: JourneyStage) => {
+    await advanceToStageMutation.mutateAsync(newStage);
+  };
 
   return {
     progress,
@@ -239,6 +228,6 @@ export const useJourneyProgress = () => {
     updateProgress,
     updateOnboardingStep,
     advanceToStage,
-    refetch: fetchProgress
+    refetch
   };
 };
