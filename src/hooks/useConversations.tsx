@@ -1,134 +1,34 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
-import { useUserTypeChecks } from '@/hooks/useUserType';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useConversationsData, Conversation, Message } from '@/hooks/data/useConversationsData';
 
-interface Conversation {
-  id: string;
-  client_id: string;
-  trainer_id: string;
-  created_at: string;
-  updated_at: string;
-  last_message_at: string | null;
-  client_last_read_at: string | null;
-  trainer_last_read_at: string | null;
-  messages: Message[];
-  otherUser?: {
-    id: string;
-    first_name: string;
-    last_name: string;
-    profile_photo_url?: string;
-  };
-}
+export type { Conversation, Message } from '@/hooks/data/useConversationsData';
 
-interface Message {
-  id: string;
-  conversation_id: string;
-  sender_id: string;
-  content: string;
-  message_type: string;
-  created_at: string;
-  read_at: string | null;
-  metadata: any;
-}
-
+/**
+ * Logic hook for conversation operations
+ * Consumes useConversationsData for data and adds mutations + real-time subscriptions
+ */
 export function useConversations() {
   const { user } = useAuth();
-  const { user_type, isClient } = useUserTypeChecks();
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { conversations: cachedConversations, loading, refetch } = useConversationsData();
+  const queryClient = useQueryClient();
+  
+  // Local state for real-time updates (synced with cache)
+  const [conversations, setConversations] = useState<Conversation[]>(cachedConversations);
 
-  const fetchConversations = useCallback(async () => {
-    if (!user) {
-      setConversations([]);
-      setLoading(false);
-      return;
-    }
+  // Sync local state with cached data
+  useEffect(() => {
+    setConversations(cachedConversations);
+  }, [cachedConversations]);
 
-    try {
-      setLoading(true);
-      
-      // Fetch conversations with the other user's profile data
-      const { data: conversationsData, error: conversationsError } = await supabase
-        .from('conversations')
-        .select(`
-          *,
-          messages:messages(*)
-        `)
-        .order('updated_at', { ascending: false });
+  const createConversationMutation = useMutation({
+    mutationFn: async (trainerId: string) => {
+      if (!user) throw new Error('No user logged in');
 
-      if (conversationsError) {
-        console.error('Error fetching conversations:', conversationsError);
-        toast.error('Failed to load conversations');
-        return;
-      }
-
-      // Fetch profile data for all users involved in conversations
-      const userIds = new Set<string>();
-      conversationsData?.forEach(conv => {
-        userIds.add(conv.client_id);
-        userIds.add(conv.trainer_id);
-      });
-
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('id, first_name, last_name, profile_photo_url')
-        .in('id', Array.from(userIds));
-
-      if (profilesError) {
-        console.error('Error fetching profiles:', profilesError);
-      }
-
-      // Map conversations with profile data
-      const conversationsWithProfiles = conversationsData?.map(conv => {
-        const otherUserId = conv.client_id === user.id ? conv.trainer_id : conv.client_id;
-        const otherUser = profiles?.find(p => p.id === otherUserId);
-        
-        return {
-          ...conv,
-          otherUser,
-          messages: conv.messages?.sort((a: Message, b: Message) => 
-            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-          ) || []
-        };
-      }) || [];
-
-      // Filter out conversations with declined trainers (for clients only)
-      let filteredConversations = conversationsWithProfiles;
-      if (isClient()) {
-        // Get engagement data to filter out declined trainers
-        const { data: engagements } = await supabase
-          .from('client_trainer_engagement')
-          .select('trainer_id, stage')
-          .eq('client_id', user.id)
-          .eq('stage', 'declined');
-
-        const declinedTrainerIds = new Set(engagements?.map(e => e.trainer_id) || []);
-        
-        filteredConversations = conversationsWithProfiles.filter(conv => {
-          const trainerId = conv.client_id === user.id ? conv.trainer_id : conv.client_id;
-          return !declinedTrainerIds.has(trainerId);
-        });
-      }
-
-      setConversations(filteredConversations);
-    } catch (error) {
-      console.error('Error fetching conversations:', error);
-      toast.error('Failed to load conversations');
-    } finally {
-      setLoading(false);
-    }
-  }, [user, user_type]);
-
-  const createConversation = useCallback(async (trainerId: string) => {
-    if (!user) {
-      toast.error('Please log in to start a conversation');
-      return { error: 'No user logged in' };
-    }
-
-    try {
-      // First check if conversation already exists
+      // Check if conversation exists
       const { data: existingConversation, error: fetchError } = await supabase
         .from('conversations')
         .select('*')
@@ -137,12 +37,10 @@ export function useConversations() {
         .single();
 
       if (existingConversation) {
-        // Conversation already exists, return it
-        toast.success('Opening existing conversation');
-        return { data: existingConversation };
+        return existingConversation;
       }
 
-      // If no existing conversation found, create a new one
+      // Create new conversation
       const { data, error } = await supabase
         .from('conversations')
         .insert({
@@ -153,10 +51,8 @@ export function useConversations() {
         .single();
 
       if (error) {
-        console.error('Error creating conversation:', error);
+        // Handle race condition
         if (error.code === '23505') {
-          // Race condition - conversation was created between our check and insert
-          // Fetch the existing conversation
           const { data: raceConversation } = await supabase
             .from('conversations')
             .select('*')
@@ -164,33 +60,30 @@ export function useConversations() {
             .eq('trainer_id', trainerId)
             .single();
           
-          if (raceConversation) {
-            toast.success('Opening existing conversation');
-            return { data: raceConversation };
-          }
+          if (raceConversation) return raceConversation;
         }
-        toast.error('Failed to create conversation');
-        return { error };
+        throw error;
       }
 
-      // Refresh conversations to show the new one
-      fetchConversations();
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['conversations', user?.id] });
       toast.success('Conversation started successfully!');
-      return { data };
-    } catch (error) {
-      console.error('Error creating conversation:', error);
+    },
+    onError: () => {
       toast.error('Failed to create conversation');
-      return { error };
-    }
-  }, [user, fetchConversations]);
+    },
+  });
 
-  const sendMessage = useCallback(async (conversationId: string, content: string, messageType: string = 'text') => {
-    if (!user) {
-      toast.error('Please log in to send messages');
-      return { error: 'No user logged in' };
-    }
+  const sendMessageMutation = useMutation({
+    mutationFn: async ({ conversationId, content, messageType = 'text' }: { 
+      conversationId: string; 
+      content: string; 
+      messageType?: string;
+    }) => {
+      if (!user) throw new Error('No user logged in');
 
-    try {
       const { data, error } = await supabase
         .from('messages')
         .insert({
@@ -202,41 +95,37 @@ export function useConversations() {
         .select()
         .single();
 
-      if (error) {
-        console.error('Error sending message:', error);
-        toast.error('Failed to send message');
-        return { error };
-      }
-
-      // Update the conversation in local state
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data, variables) => {
+      // Optimistic update to local state
       setConversations(prev => prev.map(conv => 
-        conv.id === conversationId 
-          ? { ...conv, messages: [...conv.messages, data] }
+        conv.id === variables.conversationId 
+          ? { ...conv, messages: [...conv.messages, data as Message] }
           : conv
       ));
-
-      // Note: Database trigger will automatically handle engagement stage transitions
-      // for trainers who don't offer discovery calls when both parties have exchanged messages
-
-      return { data };
-    } catch (error) {
-      console.error('Error sending message:', error);
+      queryClient.invalidateQueries({ queryKey: ['conversations', user?.id] });
+    },
+    onError: () => {
       toast.error('Failed to send message');
-      return { error };
-    }
-  }, [user]);
+    },
+  });
 
-  const markAsRead = useCallback(async (conversationId: string) => {
-    if (!user) return;
+  const markAsReadMutation = useMutation({
+    mutationFn: async (conversationId: string) => {
+      if (!user) throw new Error('No user');
 
-    try {
-      const readField = conversations.find(c => c.id === conversationId)?.client_id === user.id 
+      const conversation = conversations.find(c => c.id === conversationId);
+      if (!conversation) throw new Error('Conversation not found');
+
+      const readField = conversation.client_id === user.id 
         ? 'client_last_read_at' 
         : 'trainer_last_read_at';
 
       const now = new Date().toISOString();
 
-      // Update individual message read_at timestamps for unread messages
+      // Update message read timestamps
       await supabase
         .from('messages')
         .update({ read_at: now })
@@ -244,45 +133,68 @@ export function useConversations() {
         .neq('sender_id', user.id)
         .is('read_at', null);
 
-      // Update conversation-level read timestamp
+      // Update conversation read timestamp
       await supabase
         .from('conversations')
         .update({ [readField]: now })
         .eq('id', conversationId);
 
-      // Update local state
+      return { conversationId, readField, now };
+    },
+    onSuccess: ({ conversationId, readField, now }) => {
+      // Optimistic update to local state
       setConversations(prev => prev.map(conv => 
         conv.id === conversationId 
           ? { 
               ...conv, 
               [readField]: now,
               messages: conv.messages.map(msg => 
-                msg.sender_id !== user.id && !msg.read_at
+                msg.sender_id !== user?.id && !msg.read_at
                   ? { ...msg, read_at: now }
                   : msg
               )
             }
           : conv
       ));
+    },
+  });
+
+  const createConversation = useCallback(async (trainerId: string) => {
+    try {
+      const data = await createConversationMutation.mutateAsync(trainerId);
+      return { data };
+    } catch (error) {
+      console.error('Error creating conversation:', error);
+      return { error };
+    }
+  }, [createConversationMutation]);
+
+  const sendMessage = useCallback(async (conversationId: string, content: string, messageType: string = 'text') => {
+    try {
+      const data = await sendMessageMutation.mutateAsync({ conversationId, content, messageType });
+      return { data };
+    } catch (error) {
+      console.error('Error sending message:', error);
+      return { error };
+    }
+  }, [sendMessageMutation]);
+
+  const markAsRead = useCallback(async (conversationId: string) => {
+    try {
+      await markAsReadMutation.mutateAsync(conversationId);
     } catch (error) {
       console.error('Error marking conversation as read:', error);
     }
-  }, [user, conversations]);
+  }, [markAsReadMutation]);
 
   const getUnreadCount = useCallback((conversation: Conversation) => {
     if (!user) return 0;
-
-    // Count messages that are unread - check individual message read_at field
     return conversation.messages.filter(msg => 
       msg.sender_id !== user.id && !msg.read_at
     ).length;
   }, [user]);
 
-  useEffect(() => {
-    fetchConversations();
-  }, [fetchConversations]);
-
-  // Set up real-time subscriptions for messages and conversation updates
+  // Real-time subscriptions for messages and conversation updates
   useEffect(() => {
     if (!user) return;
 
@@ -359,6 +271,6 @@ export function useConversations() {
     sendMessage,
     markAsRead,
     getUnreadCount,
-    refetchConversations: fetchConversations
+    refetchConversations: refetch
   };
 }

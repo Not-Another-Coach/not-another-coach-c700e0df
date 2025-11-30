@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useToast } from './use-toast';
-import { useWaitlist } from '@/hooks/useWaitlist';
+import { useWaitlistEntriesData } from '@/hooks/data/useWaitlistEntriesData';
 import { queryConfig } from '@/lib/queryConfig';
 
 interface WeeklySchedule {
@@ -42,7 +42,7 @@ const defaultSchedule: WeeklySchedule = {
 export function useCoachAvailability() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { waitlistEntries } = useWaitlist();
+  const { entries: waitlistEntries } = useWaitlistEntriesData();
   const queryClient = useQueryClient();
 
   const { data: settings, isLoading, refetch } = useQuery({
@@ -73,6 +73,10 @@ export function useCoachAvailability() {
         allow_discovery_calls_on_waitlist: true,
         auto_follow_up_days: 14,
         availability_schedule: defaultSchedule,
+        next_available_date: undefined,
+        waitlist_message: undefined,
+        waitlist_exclusive_until: undefined,
+        waitlist_exclusive_active: undefined,
       };
     },
     enabled: !!user?.id,
