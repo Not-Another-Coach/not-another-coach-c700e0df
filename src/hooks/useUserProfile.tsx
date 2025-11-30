@@ -88,6 +88,9 @@ export function useUserProfile(): ProfileData {
     enabled: !!user?.id,
     staleTime: queryConfig.user.staleTime,
     gcTime: queryConfig.user.gcTime,
+    refetchOnMount: queryConfig.user.refetchOnMount,
+    refetchOnWindowFocus: queryConfig.user.refetchOnWindowFocus,
+    refetchOnReconnect: queryConfig.user.refetchOnReconnect,
   });
 
   const updateMutation = useMutation({

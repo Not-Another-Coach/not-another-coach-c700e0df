@@ -30,6 +30,9 @@ export const useUserRolesData = () => {
     enabled: !!user?.id,
     staleTime: 10 * 60 * 1000,  // 10 minutes - roles rarely change
     gcTime: 30 * 60 * 1000,      // Keep in cache for 30 minutes
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 };
 

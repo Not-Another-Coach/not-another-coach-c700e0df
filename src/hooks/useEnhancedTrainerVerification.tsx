@@ -122,6 +122,9 @@ export const useEnhancedTrainerVerification = (trainerId?: string) => {
     enabled: !!targetTrainerId && !!user,
     staleTime: queryConfig.verification.staleTime,
     gcTime: queryConfig.verification.gcTime,
+    refetchOnMount: queryConfig.verification.refetchOnMount,
+    refetchOnWindowFocus: queryConfig.verification.refetchOnWindowFocus,
+    refetchOnReconnect: queryConfig.verification.refetchOnReconnect,
   });
 
   // Update verification preference toggle
