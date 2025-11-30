@@ -784,7 +784,7 @@ const TrainerProfileSetup = () => {
       }
       
       if (currentStep < totalSteps) {
-        setCurrentStep(currentStep + 1);
+        navigateToStep(currentStep + 1);
       } else {
         // Final step: only save profile, do not claim publication
         const completionData = {
@@ -812,9 +812,15 @@ const TrainerProfileSetup = () => {
     }
   };
 
+  // Centralized step navigation with smooth scroll-to-top
+  const navigateToStep = (step: number) => {
+    setCurrentStep(step);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handlePrevious = () => {
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
+      navigateToStep(currentStep - 1);
     }
   };
 
@@ -1119,7 +1125,7 @@ const TrainerProfileSetup = () => {
                     title={title}
                     completion={completion}
                     isCurrent={isCurrent}
-                    onClick={() => setCurrentStep(stepNumber)}
+                    onClick={() => navigateToStep(stepNumber)}
                   />
                 );
               })}
@@ -1146,7 +1152,7 @@ const TrainerProfileSetup = () => {
                     className={`flex flex-col items-center text-xs cursor-pointer transition-all hover:scale-105 min-w-fit ${
                       isCurrent ? 'text-primary' : 'text-green-600'
                     }`}
-                    onClick={() => setCurrentStep(stepNumber)}
+                    onClick={() => navigateToStep(stepNumber)}
                   >
                     <div
                       className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center mb-1 ${
