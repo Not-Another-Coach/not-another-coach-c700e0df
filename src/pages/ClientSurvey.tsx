@@ -5,7 +5,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useClientProfile } from "@/hooks/useClientProfile";
 import { useUserTypeChecks } from "@/hooks/useUserType";
 import { useDataMigration } from "@/hooks/useDataMigration";
-import { useToast } from "@/hooks/use-toast";
+import { useStatusFeedback } from "@/hooks/useStatusFeedback";
+import { InlineStatusBar } from "@/components/ui/inline-status-bar";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLogo } from "@/components/ui/app-logo";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
@@ -35,7 +36,7 @@ const ClientSurvey = () => {
   const { isMigrating, migrationCompleted, migrationState, migrationProgress, migrationMessage } = useDataMigration();
   const navigate = useNavigate();
   const location = useLocation();
-  const { toast } = useToast();
+  const { status, showSuccess, showError, hideStatus } = useStatusFeedback();
   
   // Check if this is edit mode (navigating from dashboard)
   const isEditMode = location.state?.editMode === true;
@@ -454,19 +455,12 @@ const ClientSurvey = () => {
       }
       
       if (showToast) {
-        toast({
-          title: "Progress saved",
-          description: "Your survey progress has been saved.",
-        });
+        showSuccess("Your survey progress has been saved.");
       }
       return result;
     } catch (error) {
       console.error('Error in handleSave:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save progress. Please try again.",
-        variant: "destructive",
-      });
+      showError("Failed to save progress. Please try again.");
       throw error;
     } finally {
       setIsLoading(false);
@@ -475,11 +469,7 @@ const ClientSurvey = () => {
 
   const handleNext = async () => {
     if (!validateCurrentStep()) {
-      toast({
-        title: "Please complete this step",
-        description: "Fill in all required fields before proceeding.",
-        variant: "destructive",
-      });
+      showError("Please fill in all required fields before proceeding.");
       return;
     }
 
@@ -504,27 +494,22 @@ const ClientSurvey = () => {
           p_user_id: user.id
         });
         
-        toast({
-          title: "Survey completed!",
-          description: hasAccess 
-            ? "You can now discover and match with trainers." 
-            : "Your preferences have been saved. We'll notify you when you can start browsing trainers.",
-        });
+        showSuccess(hasAccess 
+          ? "Survey completed! You can now discover and match with trainers." 
+          : "Survey completed! Your preferences have been saved. We'll notify you when you can start browsing trainers.");
         
-        // Navigate to appropriate page based on access
-        if (hasAccess) {
-          navigate('/client/dashboard', { state: { fromSurvey: true } });
-        } else {
-          navigate('/client/access-pending', { replace: true });
-        }
+        // Navigate to appropriate page based on access (with slight delay for message visibility)
+        setTimeout(() => {
+          if (hasAccess) {
+            navigate('/client/dashboard', { state: { fromSurvey: true } });
+          } else {
+            navigate('/client/access-pending', { replace: true });
+          }
+        }, 1500);
       }
     } catch (error) {
       console.error('Error in handleNext:', error);
-      toast({
-        title: "Error",
-        description: "Something went wrong. Please try again.",
-        variant: "destructive",
-      });
+      showError("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -650,6 +635,18 @@ const ClientSurvey = () => {
         </div>
       )}
 
+
+      {/* Inline Status Bar */}
+      <div className="max-w-4xl mx-auto px-3 sm:px-6 pt-4">
+        <InlineStatusBar
+          message={status.message}
+          variant={status.variant}
+          isVisible={status.isVisible}
+          onDismiss={hideStatus}
+          autoDismiss={true}
+          dismissDelay={4000}
+        />
+      </div>
 
       {/* Breadcrumb indicators for navigation */}
       <div className="bg-card border-b p-4">
