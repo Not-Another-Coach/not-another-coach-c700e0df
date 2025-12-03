@@ -480,8 +480,10 @@ const ClientSurvey = () => {
       
       if (currentStep < totalSteps) {
         setCurrentStep(currentStep + 1);
-        // Scroll to top when moving to next step
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // Scroll to top after React re-renders the new step
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 50);
       } else {
         await updateProfile({ 
           ...formData, 
@@ -518,8 +520,10 @@ const ClientSurvey = () => {
   const handlePrevious = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
-      // Scroll to top when moving to previous step
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Scroll to top after React re-renders
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 50);
     }
   };
 
