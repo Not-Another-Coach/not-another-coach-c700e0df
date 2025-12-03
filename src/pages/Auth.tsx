@@ -9,13 +9,14 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { toast } from '@/hooks/use-toast';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthService } from '@/services';
 import { EnhancedAuthLayout } from '@/components/auth/EnhancedAuthLayout';
 import { MotivationalHeader } from '@/components/auth/MotivationalHeader';
 import { BrandedFormField } from '@/components/auth/BrandedFormField';
+import { useStatusFeedback } from '@/hooks/useStatusFeedback';
+import { InlineStatusBar } from '@/components/ui/inline-status-bar';
 
 
 
@@ -44,6 +45,7 @@ export default function Auth() {
   const { signIn, signUp, resendConfirmation } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { status, showSuccess, showError, showInfo, showWarning, hideStatus } = useStatusFeedback();
 
   // Detect signup context from URL
   const signupContext = searchParams.get('signup');
@@ -98,10 +100,7 @@ export default function Auth() {
       
       setShowPasswordReset(true);
       setShowForgotPassword(false);
-      toast({
-        title: "Password Reset",
-        description: "Please enter your new password below.",
-      });
+      showInfo("Please enter your new password below.");
     } else if (signup === 'true' || signup === 'client' || signup === 'trainer' || intent === 'trainer-signup') {
       setActiveTab('signup');
       // Set user type based on context - default to client for generic signup
@@ -113,14 +112,21 @@ export default function Auth() {
     }
   }, [searchParams]);
 
+  // Clear status when changing tabs or views
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    hideStatus();
+  };
+
+  const handleShowForgotPassword = (show: boolean) => {
+    setShowForgotPassword(show);
+    hideStatus();
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!loginForm.email || !loginForm.password) {
-      toast({
-        title: "Error",
-        description: "Please fill in all fields",
-        variant: "destructive",
-      });
+      showError("Please fill in all fields");
       return;
     }
 
@@ -134,15 +140,10 @@ export default function Auth() {
       if (isUnconfirmed) {
         setConfirmationEmail(loginForm.email);
         setShowResendConfirmation(true);
+        showWarning("Please confirm your email. You can resend the confirmation below.");
+      } else {
+        showError(error.message || "Login failed");
       }
-
-      toast({
-        title: isUnconfirmed ? "Email not confirmed" : "Login Failed",
-        description: isUnconfirmed
-          ? "Please confirm your email. You can resend the confirmation below."
-          : error.message,
-        variant: "destructive",
-      });
     } else {
       // Handle remember me functionality - ONLY store email for security
       if (rememberMe) {
@@ -156,11 +157,8 @@ export default function Auth() {
         localStorage.removeItem('rememberMe');
       }
 
-      toast({
-        title: "Welcome back!",
-        description: "You have successfully logged in.",
-      });
       // Navigate to home page to trigger role-based redirect logic
+      // No toast needed - user is redirected immediately
       navigate('/');
     }
     setIsLoading(false);
@@ -172,40 +170,24 @@ export default function Auth() {
     // For contextual signup, only require email and password
     if (isContextualSignup) {
       if (!signupForm.email || !signupForm.password) {
-        toast({
-          title: "Error",
-          description: "Please fill in all required fields",
-          variant: "destructive",
-        });
+        showError("Please fill in all required fields");
         return;
       }
     } else {
       // For regular signup, require all fields
       if (!signupForm.email || !signupForm.password || !signupForm.firstName || !signupForm.lastName) {
-        toast({
-          title: "Error",
-          description: "Please fill in all required fields",
-          variant: "destructive",
-        });
+        showError("Please fill in all required fields");
         return;
       }
     }
 
     if (signupForm.password !== signupForm.confirmPassword) {
-      toast({
-        title: "Error",
-        description: "Passwords do not match",
-        variant: "destructive",
-      });
+      showError("Passwords do not match");
       return;
     }
 
     if (signupForm.password.length < 6) {
-      toast({
-        title: "Error",
-        description: "Password must be at least 6 characters long",
-        variant: "destructive",
-      });
+      showError("Password must be at least 6 characters long");
       return;
     }
 
@@ -238,10 +220,7 @@ export default function Auth() {
       console.log('Existing confirmed user detected:', signUpResult.data.user.email);
       setLoginForm({ email: signupForm.email, password: '' });
       setActiveTab('login');
-      toast({
-        title: "Account already exists",
-        description: "This email is already registered and confirmed. Please log in below.",
-      });
+      showInfo("This email is already registered and confirmed. Please log in below.");
       setSignupForm({
         email: '',
         password: '',
@@ -266,10 +245,7 @@ export default function Auth() {
         setConfirmationEmail(signupForm.email);
         setShowResendConfirmation(true);
         setActiveTab('login');
-        toast({
-          title: "Account exists",
-          description: "This email is already registered. Check your email (including junk/spam folder) for the confirmation link or click 'Resend Confirmation' below.",
-        });
+        showInfo("This email is already registered. Check your email (including junk/spam folder) for the confirmation link or click 'Resend Confirmation' below.");
         // Clear signup form
         setSignupForm({
           email: '',
@@ -280,11 +256,7 @@ export default function Auth() {
           userType: signupContext === 'client' ? 'client' : 'trainer',
         });
       } else {
-        toast({
-          title: "Signup Failed",
-          description: error.message,
-          variant: "destructive",
-        });
+        showError(error.message || "Signup failed");
       }
     } else {
       // New signup - Pre-populate login form with the email and set up resend confirmation
@@ -292,10 +264,7 @@ export default function Auth() {
       setConfirmationEmail(signupForm.email);
       setShowResendConfirmation(true);
       setActiveTab('login');
-      toast({
-        title: "Account created!",
-        description: "Please check your email (including junk/spam folder) to confirm your account with Not Another Coach, then log in below.",
-      });
+      showSuccess("Account created! Please check your email (including junk/spam folder) to confirm your account, then log in below.");
       // Clear signup form
       setSignupForm({
         email: '',
@@ -313,11 +282,7 @@ export default function Auth() {
     e.preventDefault();
     
     if (!resetEmail) {
-      toast({
-        title: "Error",
-        description: "Please enter your email address",
-        variant: "destructive",
-      });
+      showError("Please enter your email address");
       return;
     }
 
@@ -329,16 +294,9 @@ export default function Auth() {
     );
 
     if (result.error) {
-      toast({
-        title: "Reset Failed",
-        description: result.error.message,
-        variant: "destructive",
-      });
+      showError(result.error.message || "Password reset failed");
     } else {
-      toast({
-        title: "Reset Email Sent!",
-        description: "Check your email for a password reset link.",
-      });
+      showSuccess("Reset email sent! Check your inbox for the link.");
       setShowForgotPassword(false);
       setResetEmail('');
     }
@@ -350,29 +308,17 @@ export default function Auth() {
     e.preventDefault();
     
     if (!newPassword || !confirmNewPassword) {
-      toast({
-        title: "Error",
-        description: "Please fill in all fields",
-        variant: "destructive",
-      });
+      showError("Please fill in all fields");
       return;
     }
 
     if (newPassword !== confirmNewPassword) {
-      toast({
-        title: "Error",
-        description: "Passwords do not match",
-        variant: "destructive",
-      });
+      showError("Passwords do not match");
       return;
     }
 
     if (newPassword.length < 6) {
-      toast({
-        title: "Error",
-        description: "Password must be at least 6 characters long",
-        variant: "destructive",
-      });
+      showError("Password must be at least 6 characters long");
       return;
     }
 
@@ -392,16 +338,9 @@ export default function Auth() {
         errorMessage = "Your new password must be different from your current password. Please choose a different password.";
       }
       
-      toast({
-        title: "Update Failed",
-        description: errorMessage,
-        variant: "destructive",
-      });
+      showError(errorMessage);
     } else {
-      toast({
-        title: "Password Updated!",
-        description: "Your password has been successfully updated. You can now login.",
-      });
+      showSuccess("Password updated! You can now login.");
       setShowPasswordReset(false);
       setNewPassword('');
       setConfirmNewPassword('');
@@ -414,11 +353,7 @@ export default function Auth() {
 
   const handleResendConfirmation = async () => {
     if (!confirmationEmail) {
-      toast({
-        title: "Error",
-        description: "No email address found for confirmation",
-        variant: "destructive",
-      });
+      showError("No email address found for confirmation");
       return;
     }
 
@@ -426,16 +361,9 @@ export default function Auth() {
     const { error } = await resendConfirmation(confirmationEmail);
     
     if (error) {
-      toast({
-        title: "Resend Failed",
-        description: error.message,
-        variant: "destructive",
-      });
+      showError(error.message || "Failed to resend confirmation");
     } else {
-      toast({
-        title: "Confirmation Email Sent!",
-        description: "Please check your email (including junk/spam folder) for the confirmation link.",
-      });
+      showSuccess("Confirmation email sent! Please check your email (including junk/spam folder).");
     }
     setIsLoading(false);
   };
@@ -444,6 +372,16 @@ export default function Auth() {
   console.log('About to render Auth component UI');
   return (
     <EnhancedAuthLayout>
+      <InlineStatusBar
+        message={status.message}
+        variant={status.variant}
+        isVisible={status.isVisible}
+        onDismiss={hideStatus}
+        autoDismiss={true}
+        dismissDelay={5000}
+        className="mb-4"
+      />
+      
             {showPasswordReset ? (
               <div className="space-y-6">
                 <MotivationalHeader context="reset" onTaglineClick={() => navigate('/')} />
@@ -491,7 +429,7 @@ export default function Auth() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => setShowForgotPassword(false)}
+                    onClick={() => handleShowForgotPassword(false)}
                     className="p-0 h-auto text-card-foreground/70 hover:text-card-foreground"
                   >
                     <ArrowLeft className="h-4 w-4 mr-1" />
@@ -532,7 +470,7 @@ export default function Auth() {
                   onTaglineClick={() => navigate('/')}
                 />
                 
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
                   <TabsList className="grid w-full grid-cols-2 bg-white/10 border border-white/20">
                     <TabsTrigger 
                       value="login" 
@@ -600,7 +538,7 @@ export default function Auth() {
                       <Button
                         variant="link"
                         className="text-sm text-card-foreground/70 hover:text-card-foreground"
-                        onClick={() => setShowForgotPassword(true)}
+                        onClick={() => handleShowForgotPassword(true)}
                       >
                         Forgot your password?
                       </Button>
