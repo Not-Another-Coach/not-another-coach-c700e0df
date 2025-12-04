@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -57,17 +57,34 @@ export function WorkingHoursSection({ formData, updateFormData, onScheduleChange
   const { showError } = useStatusFeedbackContext();
   const [isUKBased, setIsUKBased] = useState(formData.is_uk_based ?? true);
   
+  // Track if we've done initial load to prevent overwriting local changes
+  const hasInitializedRef = useRef(false);
+  
   // Initialize availability state from coach availability settings
   const [availability, setAvailability] = useState<Record<string, TimeSlot[]>>({});
   const [localSchedule, setLocalSchedule] = useState<WeeklySchedule>(defaultSchedule);
 
-  // Initialize availability from coach availability settings
+  // Initialize availability - only once, and prioritize formData over settings
   useEffect(() => {
-    if (settings?.availability_schedule) {
+    // Skip if already initialized (prevents overwriting local changes when settings refetch)
+    if (hasInitializedRef.current) {
+      return;
+    }
+
+    // Check if formData has pending schedule changes first
+    const formDataHasSchedule = formData.availability_schedule && 
+      Object.values(formData.availability_schedule).some((day: any) => day?.slots?.length > 0);
+    
+    // Use formData if it has data, otherwise fall back to settings
+    const scheduleToUse = formDataHasSchedule 
+      ? formData.availability_schedule 
+      : settings?.availability_schedule;
+
+    if (scheduleToUse) {
       const grouped: Record<string, TimeSlot[]> = {};
       
-      Object.entries(settings.availability_schedule).forEach(([day, daySchedule]) => {
-        grouped[day] = daySchedule.slots.map((slot, index) => ({
+      Object.entries(scheduleToUse).forEach(([day, daySchedule]: [string, any]) => {
+        grouped[day] = (daySchedule.slots || []).map((slot: any, index: number) => ({
           id: `${day}-${index}`,
           day,
           startTime: slot.start,
@@ -76,9 +93,10 @@ export function WorkingHoursSection({ formData, updateFormData, onScheduleChange
       });
       
       setAvailability(grouped);
-      setLocalSchedule(settings.availability_schedule as WeeklySchedule);
+      setLocalSchedule(scheduleToUse as WeeklySchedule);
+      hasInitializedRef.current = true;
     }
-  }, [settings?.availability_schedule]);
+  }, [settings?.availability_schedule, formData.availability_schedule]);
 
   // Build schedule from availability slots
   const buildScheduleFromAvailability = (avail: Record<string, TimeSlot[]>): WeeklySchedule => {
