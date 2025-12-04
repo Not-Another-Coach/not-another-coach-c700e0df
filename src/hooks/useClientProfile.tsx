@@ -98,18 +98,31 @@ export function useClientProfile() {
     }
   }, [user]); // Remove fetchProfile from dependencies to prevent loops
 
-  const updateProfile = useCallback(async (updates: Partial<ClientProfile>) => {
+  const updateProfile = useCallback(async (updates: Partial<ClientProfile>, dirtyFields?: Set<string>) => {
     if (!user) {
       console.error('❌ No authenticated user for profile update');
       return { error: 'No user logged in' };
     }
 
-    console.log('📤 Starting profile update with:', updates);
+    // If dirtyFields provided, filter to only changed fields
+    const filteredUpdates = dirtyFields && dirtyFields.size > 0
+      ? Object.fromEntries(
+          Object.entries(updates).filter(([key]) => dirtyFields.has(key))
+        )
+      : updates;
+
+    // Skip if no actual changes
+    if (Object.keys(filteredUpdates).length === 0) {
+      console.log('⏭️ No changes to save, skipping API call');
+      return { data: true };
+    }
+
+    console.log('📤 Starting profile update with:', Object.keys(filteredUpdates).length, 'fields');
 
     try {
       // Split updates between profiles and client_profiles tables
-      const profileUpdates: any = {};
-      const clientUpdates: any = {};
+      const profileData: Record<string, any> = {};
+      const clientData: Record<string, any> = {};
 
       // Shared profile fields
       const sharedFields = ['first_name', 'last_name', 'bio', 'profile_photo_url', 'location', 'tagline', 'is_uk_based', 'profile_published', 'gender_preference', 'timezone', 'phone_number'];
@@ -128,56 +141,44 @@ export function useClientProfile() {
         'has_specific_event', 'specific_event_details', 'specific_event_date'
       ];
 
-      Object.keys(updates).forEach(key => {
+      Object.keys(filteredUpdates).forEach(key => {
+        const value = filteredUpdates[key as keyof typeof filteredUpdates];
         if (sharedFields.includes(key)) {
-          profileUpdates[key] = updates[key as keyof ClientProfile];
+          profileData[key] = value;
         } else if (clientFields.includes(key)) {
-          clientUpdates[key] = updates[key as keyof ClientProfile];
+          clientData[key] = value;
         }
       });
 
-      console.log('🔄 Split updates:', { profileUpdates, clientUpdates });
+      const hasProfileData = Object.keys(profileData).length > 0;
+      const hasClientData = Object.keys(clientData).length > 0;
 
-      // Update profiles table if needed
-      if (Object.keys(profileUpdates).length > 0) {
-        console.log('📝 Updating profiles table...');
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update(profileUpdates)
-          .eq('id', user.id);
+      console.log('🔄 Using combined RPC call:', { 
+        profileFields: Object.keys(profileData).length, 
+        clientFields: Object.keys(clientData).length 
+      });
 
-        if (profileError) {
-          console.error('❌ Error updating profiles table:', profileError);
-          return { error: profileError };
-        }
-        console.log('✅ Profiles table updated successfully');
+      // Single RPC call to update both tables atomically
+      const { error } = await supabase.rpc('update_client_profile_combined', {
+        p_profile_data: hasProfileData ? profileData : {},
+        p_client_data: hasClientData ? clientData : {}
+      });
+
+      if (error) {
+        console.error('❌ Error in combined update:', error);
+        return { error };
       }
 
-      // Upsert client_profiles table if needed
-      if (Object.keys(clientUpdates).length > 0) {
-        console.log('📝 Upserting client_profiles table...');
-        const { error: clientError } = await supabase
-          .from('client_profiles')
-          .upsert({ id: user.id, ...clientUpdates })
-          .eq('id', user.id);
-
-        if (clientError) {
-          console.error('❌ Error updating client_profiles table:', clientError);
-          return { error: clientError };
-        }
-        console.log('✅ Client_profiles table updated successfully');
-      }
-
-      // Refetch the updated profile
-      console.log('🔄 Refetching profile after update...');
-      await fetchProfile();
-      console.log('✅ Profile update complete');
+      // Optimistic update - update local state directly without refetch
+      setProfile(prev => prev ? { ...prev, ...filteredUpdates } as ClientProfile : null);
+      
+      console.log('✅ Profile update complete (optimistic)');
       return { data: true };
     } catch (error) {
       console.error('❌ Error updating profile:', error);
       return { error };
     }
-  }, [user, fetchProfile]);
+  }, [user]);
 
   return {
     profile,

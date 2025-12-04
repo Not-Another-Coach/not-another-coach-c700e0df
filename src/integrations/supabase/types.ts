@@ -7491,6 +7491,10 @@ export type Database = {
       }
       update_all_user_passwords_dev: { Args: never; Returns: undefined }
       update_all_user_passwords_dev_simple: { Args: never; Returns: undefined }
+      update_client_profile_combined: {
+        Args: { p_client_data?: Json; p_profile_data?: Json }
+        Returns: undefined
+      }
       update_engagement_stage: {
         Args: {
           client_uuid: string
