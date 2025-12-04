@@ -91,6 +91,7 @@ const TrainerProfileSetup = () => {
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [isFormReady, setIsFormReady] = useState(false); // Track if form is fully initialized
   const [validationShake, setValidationShake] = useState(false);
+  const [dirtyFields, setDirtyFields] = useState<Set<string>>(new Set()); // Track changed fields
   const hasInitialized = useRef(false);
   const hasLoadedOnce = useRef(false);
   const initialFormData = useRef<typeof formData | null>(null);
@@ -351,9 +352,10 @@ const TrainerProfileSetup = () => {
     }
   }, [searchParams]);
 
-  // Stable update function
+  // Stable update function with dirty field tracking
   const updateFormData = (updates: Partial<typeof formData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
+    setDirtyFields(prev => new Set([...prev, ...Object.keys(updates)]));
   };
 
   // Stable clear error function
@@ -612,6 +614,15 @@ const TrainerProfileSetup = () => {
       return;
     }
     
+    // Skip save if no fields have changed
+    if (dirtyFields.size === 0) {
+      console.log('💾 SKIP: No dirty fields to save');
+      if (showFeedback) {
+        showSuccess("No changes to save");
+      }
+      return { data: true };
+    }
+    
     // 🛡️ PROTECTION 2: Don't overwrite existing data with empty values for critical fields
     const criticalFields = ['first_name', 'last_name', 'bio'];
     const hasExistingData = criticalFields.some(field => profile?.[field as keyof typeof profile]);
@@ -636,63 +647,33 @@ const TrainerProfileSetup = () => {
       console.log('💾 SAVING: Profile save initiated', {
         hasInitialized: hasInitialized.current,
         isFormReady,
+        dirtyFieldCount: dirtyFields.size,
+        dirtyFields: [...dirtyFields],
         first_name: formData.first_name,
         last_name: formData.last_name
       });
       
-      // Convert form data to match TrainerProfile interface types
-      const saveData = {
-        ...formData,
-        // Store the current completion percentage for dashboard consistency
-        profile_completion_percentage: calculateOverallCompletion(),
-        // Explicitly include testimonials to ensure persistence
-        testimonials: formData.testimonials || [],
-        // Convert delivery_format from string to array
-        delivery_format: [formData.delivery_format],
-        // Convert communication_style from string to array
-        communication_style: formData.communication_style.split(',').map(s => s.trim()).filter(s => s),
-        // Ensure array fields are properly formatted
-        ideal_client_types: formData.ideal_client_types || [],
-        coaching_style: formData.coaching_style || [],
-        specializations: formData.specializations || [],
-        training_types: formData.training_types || [],
-        training_type_delivery: formData.training_type_delivery || {},
-        // Map certificates back to uploaded_certificates for database storage
-        uploaded_certificates: formData.certificates || [],
-        // Explicitly include Ways of Working fields to ensure persistence
-        wow_how_i_work: formData.wow_how_i_work || "",
-        wow_what_i_provide: formData.wow_what_i_provide || "",
-        wow_client_expectations: formData.wow_client_expectations || "",
-        wow_activities: formData.wow_activities || {
-          wow_how_i_work: [],
-          wow_what_i_provide: [],
-          wow_client_expectations: []
-        },
-        wow_activity_assignments: formData.wow_activity_assignments || [],
-        wow_visibility: formData.wow_visibility || "public",
-        wow_setup_completed: formData.wow_setup_completed || false,
-        // Explicitly include terms and accuracy confirmation to ensure persistence
-        terms_agreed: formData.terms_agreed || false,
-        accuracy_confirmed: formData.accuracy_confirmed || false,
-        // Explicitly include notification preferences
-        notify_profile_views: formData.notify_profile_views || false,
-        notify_messages: formData.notify_messages || true,
-        notify_insights: formData.notify_insights || true,
-      };
+      // Build save data only from dirty fields
+      const changedData: Record<string, any> = {};
       
-      console.log('Saving profile with accuracy_confirmed:', saveData.accuracy_confirmed);
-      console.log('Saving profile with terms_agreed:', saveData.terms_agreed);
+      dirtyFields.forEach(field => {
+        const value = formData[field as keyof typeof formData];
+        
+        // Handle special field transformations
+        if (field === 'delivery_format') {
+          changedData[field] = [value];
+        } else if (field === 'communication_style' && typeof value === 'string') {
+          changedData[field] = value.split(',').map((s: string) => s.trim()).filter((s: string) => s);
+        } else if (field === 'certificates') {
+          changedData['uploaded_certificates'] = value || [];
+        } else {
+          changedData[field] = value;
+        }
+      });
       
-      console.log('Saving trainer profile data:', saveData);
-      console.log('Testimonials being saved:', saveData.testimonials);
-      console.log('Number of testimonials:', saveData.testimonials?.length || 0);
-      console.log('Client types being saved:', saveData.ideal_client_types);
-      console.log('Coaching styles being saved:', saveData.coaching_style);
-      console.log('Ways of Working activities being saved:', saveData.wow_activities);
-      console.log('Ways of Working assignments being saved:', saveData.wow_activity_assignments);
-      console.log('WoW setup completed:', saveData.wow_setup_completed);
+      console.log('💾 SAVING: Changed fields only:', changedData);
       
-      const result = await updateProfile(saveData);
+      const result = await updateProfile(changedData, { suppressToast: true });
       
       if (result && 'error' in result && result.error) {
         throw new Error(result.error.message || 'Failed to save profile');
@@ -707,6 +688,7 @@ const TrainerProfileSetup = () => {
       // Update initial form data and reset unsaved changes flag after successful save
       initialFormData.current = { ...formData };
       setHasUnsavedChanges(false);
+      setDirtyFields(new Set()); // Clear dirty fields after save
       
       return result;
     } catch (error) {
@@ -786,7 +768,7 @@ const TrainerProfileSetup = () => {
           communication_style: formData.communication_style.split(',').map(s => s.trim()).filter(s => s),
           profile_setup_completed: true
         };
-        await updateProfile(completionData);
+        await updateProfile(completionData, { suppressToast: true });
         showSuccess('Profile saved successfully');
         window.scrollTo({ top: 0, behavior: 'smooth' });
         // Stay on the page so trainer can submit for review

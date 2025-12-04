@@ -7516,6 +7516,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      update_trainer_profile_combined: {
+        Args: { p_profile_data?: Json; p_trainer_data?: Json }
+        Returns: undefined
+      }
       update_trainer_verification_status:
         | { Args: { p_trainer_id: string }; Returns: undefined }
         | {
