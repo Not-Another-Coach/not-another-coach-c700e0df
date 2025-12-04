@@ -160,19 +160,45 @@ export function WorkingHoursSection({ formData, updateFormData, onScheduleChange
   };
 
   const addTimeSlot = (day: string) => {
+    const currentSlots = availability[day] || [];
+    
+    // Calculate smart default time based on existing slots
+    let defaultStartTime = "07:00";
+    let defaultEndTime = "08:00";
+    
+    if (currentSlots.length > 0) {
+      // Find the latest end time from existing slots
+      const sortedSlots = [...currentSlots].sort((a, b) => 
+        parseTime(b.endTime) - parseTime(a.endTime)
+      );
+      const latestEndTime = sortedSlots[0].endTime;
+      const latestEndMinutes = parseTime(latestEndTime);
+      
+      // Set new slot to start after the latest slot ends (cap at 22:30 to allow 1hr slot)
+      if (latestEndMinutes < 22 * 60 + 30) {
+        defaultStartTime = latestEndTime;
+        const endMinutes = Math.min(latestEndMinutes + 60, 23 * 60 + 30);
+        const endHour = Math.floor(endMinutes / 60);
+        const endMin = endMinutes % 60;
+        defaultEndTime = `${endHour.toString().padStart(2, '0')}:${endMin === 0 ? '00' : '30'}`;
+      } else {
+        showError("Cannot add more slots - day is fully scheduled");
+        return;
+      }
+    }
+    
     const newSlot: TimeSlot = {
       id: `${day}-${Date.now()}`,
       day,
-      startTime: "07:00",
-      endTime: "08:00"
+      startTime: defaultStartTime,
+      endTime: defaultEndTime
     };
     
-    const currentSlots = availability[day] || [];
     const newSlots = [...currentSlots, newSlot];
     
-    // Validate for overlaps
+    // Validate for overlaps (should pass with smart defaults)
     if (!validateTimeSlots(day, newSlots)) {
-      showError("Time Slot Conflict: This time slot overlaps with an existing slot. Please choose different times");
+      showError("Time Slot Conflict: Cannot add slot. Please adjust existing times first");
       return;
     }
     
