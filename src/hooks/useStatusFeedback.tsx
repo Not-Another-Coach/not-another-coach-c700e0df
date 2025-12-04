@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { toast } from '@/hooks/use-toast';
 
 export type StatusVariant = 'success' | 'info' | 'warning' | 'error';
 
@@ -29,6 +30,11 @@ export const useStatusFeedback = () => {
 
   const showError = useCallback((message: string) => {
     showStatus(message, 'error');
+    toast({
+      title: 'Error',
+      description: message,
+      variant: 'destructive',
+    });
   }, [showStatus]);
 
   const showWarning = useCallback((message: string) => {
