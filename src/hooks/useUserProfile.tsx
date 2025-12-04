@@ -110,7 +110,7 @@ export function useUserProfile(): ProfileData {
       ];
 
       // Fields that don't exist in any table and should be skipped
-      const invalidFields = ['profile_completion_percentage', 'certificates'];
+      const invalidFields = ['profile_completion_percentage', 'certificates', 'wow_activities', 'profile_image_position'];
 
       const profileUpdates: any = {};
       const typeSpecificUpdates: any = {};

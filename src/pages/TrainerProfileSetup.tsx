@@ -761,16 +761,29 @@ const TrainerProfileSetup = () => {
       if (currentStep < totalSteps) {
         navigateToStep(currentStep + 1);
       } else {
-        // Final step: only save profile, do not claim publication
-        const completionData = {
-          ...formData,
-          delivery_format: [formData.delivery_format],
-          communication_style: formData.communication_style.split(',').map(s => s.trim()).filter(s => s),
-          profile_setup_completed: true
-        };
-        await updateProfile(completionData, { suppressToast: true });
+        // Final step: only save dirty fields plus the completion flag
+        const changedData: Record<string, any> = {};
+        
+        // Add only dirty fields with proper transformations
+        dirtyFields.forEach(field => {
+          const value = formData[field as keyof typeof formData];
+          if (field === 'delivery_format') {
+            changedData[field] = [value];
+          } else if (field === 'communication_style' && typeof value === 'string') {
+            changedData[field] = value.split(',').map((s: string) => s.trim()).filter((s: string) => s);
+          } else if (field === 'certificates') {
+            changedData['uploaded_certificates'] = value || [];
+          } else {
+            changedData[field] = value;
+          }
+        });
+        
+        // Always set completion flag
+        changedData.profile_setup_completed = true;
+        
+        await updateProfile(changedData, { suppressToast: true });
         showSuccess('Profile saved successfully');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
         // Stay on the page so trainer can submit for review
       }
     } catch (error) {
@@ -784,7 +797,8 @@ const TrainerProfileSetup = () => {
   // Centralized step navigation with smooth scroll-to-top
   const navigateToStep = (step: number) => {
     setCurrentStep(step);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Delay scroll to allow component to render
+    setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 50);
   };
 
   const handlePrevious = () => {
