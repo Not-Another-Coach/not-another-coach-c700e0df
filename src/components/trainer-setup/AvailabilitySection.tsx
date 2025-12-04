@@ -60,7 +60,19 @@ export function AvailabilitySection({ formData, updateFormData, onAvailabilityCh
       // Update the local availability status to reflect the selection
       setLocalAvailabilityStatus(newStatus);
       
-      // Save directly to database
+      // If parent provides callback (profile setup mode), defer save to parent
+      if (onAvailabilityChange) {
+        onAvailabilityChange(newStatus, {
+          next_available_date: nextAvailableDate || null,
+          allow_discovery_calls_on_waitlist: allowDiscoveryCalls,
+          auto_follow_up_days: autoFollowUpDays,
+          waitlist_message: waitlistMessage || null,
+        });
+        console.log('Availability status changed to:', newStatus);
+        return;
+      }
+      
+      // Otherwise save directly to database (standalone mode)
       setIsSaving(true);
       try {
         await updateSettings({
@@ -82,16 +94,6 @@ export function AvailabilitySection({ formData, updateFormData, onAvailabilityCh
         setIsSaving(false);
       }
       
-      // Also notify parent component if callback exists (for profile setup integration)
-      if (onAvailabilityChange) {
-        onAvailabilityChange(newStatus, {
-          next_available_date: nextAvailableDate || null,
-          allow_discovery_calls_on_waitlist: allowDiscoveryCalls,
-          auto_follow_up_days: autoFollowUpDays,
-          waitlist_message: waitlistMessage || null,
-        });
-      }
-      
       console.log('Availability status changed to:', newStatus);
     }
   };
@@ -102,7 +104,20 @@ export function AvailabilitySection({ formData, updateFormData, onAvailabilityCh
     // Update the local status when waitlist prompt is responded to
     setLocalAvailabilityStatus(pendingAvailabilityChange);
     
-    // Save directly to database
+    // If parent provides callback (profile setup mode), defer save to parent
+    if (onAvailabilityChange) {
+      onAvailabilityChange(pendingAvailabilityChange, {
+        next_available_date: nextAvailableDate || null,
+        allow_discovery_calls_on_waitlist: allowDiscoveryCalls,
+        auto_follow_up_days: autoFollowUpDays,
+        waitlist_message: waitlistMessage || null,
+      });
+      setShowWaitlistPrompt(false);
+      setPendingAvailabilityChange(null);
+      return;
+    }
+    
+    // Otherwise save directly to database (standalone mode)
     setIsSaving(true);
     try {
       if (offerToWaitlist) {
@@ -139,18 +154,9 @@ export function AvailabilitySection({ formData, updateFormData, onAvailabilityCh
       setIsSaving(false);
     }
     
-    // Also notify parent component if callback exists
-    if (onAvailabilityChange) {
-      onAvailabilityChange(pendingAvailabilityChange, {
-        next_available_date: nextAvailableDate || null,
-        allow_discovery_calls_on_waitlist: allowDiscoveryCalls,
-        auto_follow_up_days: autoFollowUpDays,
-        waitlist_message: waitlistMessage || null,
-      });
-    }
-    
     console.log('Waitlist prompt response:', offerToWaitlist, 'New status:', pendingAvailabilityChange);
     
+    setShowWaitlistPrompt(false);
     setPendingAvailabilityChange(null);
   };
 
