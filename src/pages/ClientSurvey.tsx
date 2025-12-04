@@ -46,10 +46,12 @@ const ClientSurvey = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   
+  // Track dirty fields for efficient API calls - only save changed fields
+  const [dirtyFields, setDirtyFields] = useState<Set<string>>(new Set());
+  
   // Track initialization to prevent preferences from being wiped
   const hasInitialized = useRef(false);
   const lastUserId = useRef<string | null>(null);
-  
 
   const [formData, setFormData] = useState({
     // Profile information
@@ -243,6 +245,7 @@ const ClientSurvey = () => {
       };
       
       setFormData(initialData);
+      setDirtyFields(new Set()); // Clear dirty fields on init
       setCurrentStep(1);
       return;
     }
@@ -296,6 +299,7 @@ const ClientSurvey = () => {
         
         console.log('📝 Setting form data:', initialData);
         setFormData(initialData);
+        setDirtyFields(new Set()); // Clear dirty fields on init
         
         // Set current step to continue from where left off, or start from step 1
         setCurrentStep(1);
@@ -303,9 +307,11 @@ const ClientSurvey = () => {
     }
   }, [profile?.id, migrationCompleted, migrationState, isMigrating]);
 
-  // Stable update function
+  // Stable update function - tracks dirty fields for efficient saves
   const updateFormData = (updates: Partial<typeof formData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
+    // Track which fields were changed
+    setDirtyFields(prev => new Set([...prev, ...Object.keys(updates)]));
   };
 
   // Stable clear error function
@@ -438,6 +444,15 @@ const ClientSurvey = () => {
   };
 
   const handleSave = async (showToast: boolean = true) => {
+    // Skip API call if nothing changed
+    if (dirtyFields.size === 0) {
+      console.log('⏭️ No dirty fields, skipping save');
+      if (showToast) {
+        showSuccess("No changes to save.");
+      }
+      return { data: true };
+    }
+
     try {
       setIsLoading(true);
       
@@ -448,11 +463,15 @@ const ClientSurvey = () => {
         preferred_training_frequency: formData.preferred_training_frequency ? String(formData.preferred_training_frequency) : null,
       };
       
-      const result = await updateProfile(dataToSave);
+      // Pass dirty fields to updateProfile for efficient partial updates
+      const result = await updateProfile(dataToSave, dirtyFields);
       
       if (result && 'error' in result && result.error) {
         throw new Error(result.error.message || 'Failed to save survey');
       }
+      
+      // Clear dirty fields after successful save
+      setDirtyFields(new Set());
       
       if (showToast) {
         showSuccess("Your survey progress has been saved.");
@@ -485,11 +504,16 @@ const ClientSurvey = () => {
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }, 50);
       } else {
+        // Final submission - include client_survey_completed in dirty fields
+        const finalDirtyFields = new Set([...dirtyFields, 'client_survey_completed']);
         await updateProfile({ 
           ...formData, 
           preferred_training_frequency: formData.preferred_training_frequency ? String(formData.preferred_training_frequency) : null,
           client_survey_completed: true
-        });
+        }, finalDirtyFields);
+        
+        // Clear dirty fields after final save
+        setDirtyFields(new Set());
         
         // Check platform access before navigating
         const { data: hasAccess } = await supabase.rpc('can_user_access_platform', {
