@@ -9,9 +9,10 @@ interface WorkingHoursAndAvailabilitySectionProps {
   formData: any;
   updateFormData: (updates: any) => void;
   onAvailabilityChange?: (status: string, settings: any) => void;
+  onScheduleChange?: (schedule: any) => void;
 }
 
-export function WorkingHoursAndAvailabilitySection({ formData, updateFormData, onAvailabilityChange }: WorkingHoursAndAvailabilitySectionProps) {
+export function WorkingHoursAndAvailabilitySection({ formData, updateFormData, onAvailabilityChange, onScheduleChange }: WorkingHoursAndAvailabilitySectionProps) {
   return (
     <div className="space-y-6">
       <SectionHeader 
@@ -21,7 +22,11 @@ export function WorkingHoursAndAvailabilitySection({ formData, updateFormData, o
       />
 
       {/* Working Hours */}
-      <WorkingHoursSection formData={formData} updateFormData={updateFormData} />
+      <WorkingHoursSection 
+        formData={formData} 
+        updateFormData={updateFormData} 
+        onScheduleChange={onScheduleChange}
+      />
       
       {/* New Client Availability Status */}
       <AvailabilitySection 

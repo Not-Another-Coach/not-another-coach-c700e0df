@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Plus, Trash2, Calendar } from 'lucide-react';
+import { Clock, Plus, Trash2 } from 'lucide-react';
 import { useCoachAvailability } from '@/hooks/useCoachAvailability';
 import { useStatusFeedbackContext } from '@/contexts/StatusFeedbackContext';
 
@@ -17,9 +16,20 @@ interface TimeSlot {
   endTime: string;
 }
 
+interface WeeklySchedule {
+  [key: string]: {
+    enabled: boolean;
+    slots: Array<{
+      start: string;
+      end: string;
+    }>;
+  };
+}
+
 interface WorkingHoursSectionProps {
   formData: any;
   updateFormData: (updates: any) => void;
+  onScheduleChange?: (schedule: WeeklySchedule) => void;
 }
 
 const daysOfWeek = [
@@ -32,13 +42,24 @@ const timeOptions = Array.from({ length: 48 }, (_, i) => {
   return `${hour.toString().padStart(2, '0')}:${minute}`;
 });
 
-export function WorkingHoursSection({ formData, updateFormData }: WorkingHoursSectionProps) {
-  const { settings, loading, saving, updateSettings } = useCoachAvailability();
+const defaultSchedule: WeeklySchedule = {
+  monday: { enabled: false, slots: [] },
+  tuesday: { enabled: false, slots: [] },
+  wednesday: { enabled: false, slots: [] },
+  thursday: { enabled: false, slots: [] },
+  friday: { enabled: false, slots: [] },
+  saturday: { enabled: false, slots: [] },
+  sunday: { enabled: false, slots: [] }
+};
+
+export function WorkingHoursSection({ formData, updateFormData, onScheduleChange }: WorkingHoursSectionProps) {
+  const { settings, loading } = useCoachAvailability();
   const { showError } = useStatusFeedbackContext();
   const [isUKBased, setIsUKBased] = useState(formData.is_uk_based ?? true);
   
   // Initialize availability state from coach availability settings
   const [availability, setAvailability] = useState<Record<string, TimeSlot[]>>({});
+  const [localSchedule, setLocalSchedule] = useState<WeeklySchedule>(defaultSchedule);
 
   // Initialize availability from coach availability settings
   useEffect(() => {
@@ -55,29 +76,42 @@ export function WorkingHoursSection({ formData, updateFormData }: WorkingHoursSe
       });
       
       setAvailability(grouped);
+      setLocalSchedule(settings.availability_schedule as WeeklySchedule);
     }
   }, [settings?.availability_schedule]);
 
-  const updateDayAvailability = async (day: string, slots: TimeSlot[]) => {
-    const newAvailability = { ...availability, [day]: slots };
-    setAvailability(newAvailability);
+  // Build schedule from availability slots
+  const buildScheduleFromAvailability = (avail: Record<string, TimeSlot[]>): WeeklySchedule => {
+    const schedule: WeeklySchedule = { ...defaultSchedule };
     
-    // Update coach availability settings
-    if (settings) {
-      const newSchedule = { ...settings.availability_schedule };
-      
-      newSchedule[day] = {
+    daysOfWeek.forEach(day => {
+      const slots = avail[day] || [];
+      schedule[day] = {
         enabled: slots.length > 0,
         slots: slots.map(slot => ({
           start: slot.startTime,
           end: slot.endTime
         }))
       };
-      
-      await updateSettings({ availability_schedule: newSchedule });
-    }
+    });
+    
+    return schedule;
   };
 
+  const updateDayAvailability = (day: string, slots: TimeSlot[]) => {
+    const newAvailability = { ...availability, [day]: slots };
+    setAvailability(newAvailability);
+    
+    // Build the schedule and pass to parent (local state only, no direct save)
+    const newSchedule = buildScheduleFromAvailability(newAvailability);
+    setLocalSchedule(newSchedule);
+    
+    // Pass changes to parent for later save
+    if (onScheduleChange) {
+      onScheduleChange(newSchedule);
+    }
+    updateFormData({ availability_schedule: newSchedule });
+  };
 
   // Helper function to check if two time slots overlap
   const doSlotsOverlap = (slot1: { startTime: string; endTime: string }, slot2: { startTime: string; endTime: string }) => {
@@ -161,14 +195,14 @@ export function WorkingHoursSection({ formData, updateFormData }: WorkingHoursSe
     updateFormData({ is_uk_based: ukBased });
   };
 
-  const setQuickSchedule = async (type: 'weekdays' | 'weekends' | 'clear') => {
-    if (!settings) return;
-
-    const newSchedule = { ...settings.availability_schedule };
+  const setQuickSchedule = (type: 'weekdays' | 'weekends' | 'clear') => {
+    let newSchedule = { ...localSchedule };
+    let newAvailability: Record<string, TimeSlot[]> = { ...availability };
 
     if (type === 'clear') {
       daysOfWeek.forEach(day => {
         newSchedule[day] = { enabled: false, slots: [] };
+        newAvailability[day] = [];
       });
     } else if (type === 'weekdays') {
       const weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
@@ -177,6 +211,12 @@ export function WorkingHoursSection({ formData, updateFormData }: WorkingHoursSe
           enabled: true,
           slots: [{ start: '09:00', end: '17:00' }]
         };
+        newAvailability[day] = [{
+          id: `${day}-0`,
+          day,
+          startTime: '09:00',
+          endTime: '17:00'
+        }];
       });
     } else if (type === 'weekends') {
       const weekends = ['saturday', 'sunday'];
@@ -185,10 +225,23 @@ export function WorkingHoursSection({ formData, updateFormData }: WorkingHoursSe
           enabled: true,
           slots: [{ start: '10:00', end: '16:00' }]
         };
+        newAvailability[day] = [{
+          id: `${day}-0`,
+          day,
+          startTime: '10:00',
+          endTime: '16:00'
+        }];
       });
     }
 
-    await updateSettings({ availability_schedule: newSchedule });
+    setAvailability(newAvailability);
+    setLocalSchedule(newSchedule);
+    
+    // Pass changes to parent for later save (no direct DB call)
+    if (onScheduleChange) {
+      onScheduleChange(newSchedule);
+    }
+    updateFormData({ availability_schedule: newSchedule });
   };
 
   if (loading) {
@@ -249,7 +302,6 @@ export function WorkingHoursSection({ formData, updateFormData }: WorkingHoursSe
               variant="outline"
               size="sm"
               onClick={() => setQuickSchedule('weekdays')}
-              disabled={saving}
             >
               Weekdays (9AM-5PM)
             </Button>
@@ -258,7 +310,6 @@ export function WorkingHoursSection({ formData, updateFormData }: WorkingHoursSe
               variant="outline"
               size="sm"
               onClick={() => setQuickSchedule('weekends')}
-              disabled={saving}
             >
               Weekends (10AM-4PM)
             </Button>
@@ -267,7 +318,6 @@ export function WorkingHoursSection({ formData, updateFormData }: WorkingHoursSe
               variant="outline"
               size="sm"
               onClick={() => setQuickSchedule('clear')}
-              disabled={saving}
             >
               Clear All
             </Button>
@@ -300,7 +350,6 @@ export function WorkingHoursSection({ formData, updateFormData }: WorkingHoursSe
                       size="sm"
                       variant="outline"
                       onClick={() => addTimeSlot(day)}
-                      disabled={saving}
                     >
                       <Plus className="w-4 h-4 mr-1" />
                       Add Slot
@@ -318,7 +367,6 @@ export function WorkingHoursSection({ formData, updateFormData }: WorkingHoursSe
                           <Select
                             value={slot.startTime}
                             onValueChange={(value) => updateTimeSlot(day, index, 'startTime', value)}
-                            disabled={saving}
                           >
                             <SelectTrigger className="w-24">
                               <SelectValue />
@@ -333,7 +381,6 @@ export function WorkingHoursSection({ formData, updateFormData }: WorkingHoursSe
                           <Select
                             value={slot.endTime}
                             onValueChange={(value) => updateTimeSlot(day, index, 'endTime', value)}
-                            disabled={saving}
                           >
                             <SelectTrigger className="w-24">
                               <SelectValue />
@@ -349,7 +396,6 @@ export function WorkingHoursSection({ formData, updateFormData }: WorkingHoursSe
                             size="sm"
                             variant="ghost"
                             onClick={() => removeTimeSlot(day, index)}
-                            disabled={saving}
                           >
                             <Trash2 className="w-4 h-4 text-destructive" />
                           </Button>
@@ -376,7 +422,6 @@ export function WorkingHoursSection({ formData, updateFormData }: WorkingHoursSe
               <Switch
                 checked={formData.works_bank_holidays || false}
                 onCheckedChange={(checked) => updateFormData({ works_bank_holidays: checked })}
-                disabled={saving}
               />
             </div>
           </div>
