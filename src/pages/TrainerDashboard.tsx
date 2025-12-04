@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect, lazy, Suspense, startTransition } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useTrainerProfileContext } from "@/contexts/TrainerProfileContext";
@@ -95,8 +95,15 @@ const TrainerDashboard = () => {
   const [availabilityStatus, setAvailabilityStatus] = useState<'accepting' | 'waitlist' | 'unavailable'>('accepting');
   const [prospectsCount, setProspectsCount] = useState(0);
   const [activeClientsCount, setActiveClientsCount] = useState(0);
-  const [activeView, setActiveView] = useState('dashboard');
+  const [activeView, setActiveViewState] = useState('dashboard');
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  
+  // Wrap view changes in startTransition to prevent Suspense errors
+  const setActiveView = (view: string) => {
+    startTransition(() => {
+      setActiveViewState(view);
+    });
+  };
   // Remove unused state
   // const [showProspectsDropdown, setShowProspectsDropdown] = useState(false);
 
@@ -656,10 +663,14 @@ const TrainerDashboard = () => {
             <div className="grid md:grid-cols-2 gap-6">
               
               {/* Live Activity */}
-              <LiveActivityFeed />
+              <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
+                <LiveActivityFeed />
+              </Suspense>
 
               {/* Coach Feedback Summary */}
-              <CoachFeedbackSummary />
+              <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
+                <CoachFeedbackSummary />
+              </Suspense>
             </div>
 
             {/* 5. Match Quality Distribution */}

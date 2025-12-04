@@ -9,6 +9,7 @@ import { VisibilityConfigProvider } from "@/contexts/VisibilityConfigContext";
 import { UserProfileProvider } from "@/contexts/UserProfileContext";
 import { PlatformAccessGuard } from "@/components/auth/PlatformAccessGuard";
 import { SessionNotification } from "@/components/SessionNotification";
+import { InactivityHandler } from "@/components/InactivityHandler";
 import Home from "./pages/Home";
 import ClientDashboard from "./pages/ClientDashboard";
 import ClientExplore from "./pages/ClientExplore";
@@ -75,6 +76,7 @@ const App = () => (
               <Toaster />
               <Sonner />
               <SessionNotification />
+              <InactivityHandler timeoutMinutes={30} warningMinutes={2} />
               <BrowserRouter>
                 <DiagnosticsProvider>
                   <ErrorBoundary>
