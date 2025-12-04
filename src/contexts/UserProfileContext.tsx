@@ -4,7 +4,7 @@ import { useUserProfile } from '@/hooks/useUserProfile';
 interface UserProfileContextType {
   profile: any;
   loading: boolean;
-  updateProfile: (updates: any) => Promise<any>;
+  updateProfile: (updates: any, options?: { suppressToast?: boolean }) => Promise<any>;
   refetchProfile: () => Promise<void>;
 }
 

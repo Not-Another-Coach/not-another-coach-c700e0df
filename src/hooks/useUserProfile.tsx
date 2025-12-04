@@ -7,7 +7,7 @@ import { queryConfig } from '@/lib/queryConfig';
 interface ProfileData {
   profile: any;
   loading: boolean;
-  updateProfile: (updates: any) => Promise<any>;
+  updateProfile: (updates: any, options?: { suppressToast?: boolean }) => Promise<any>;
   refetchProfile: () => Promise<void>;
 }
 
@@ -72,7 +72,7 @@ export function useUserProfile(): ProfileData {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (updates: any) => {
+    mutationFn: async ({ updates, options }: { updates: any; options?: { suppressToast?: boolean } }) => {
       if (!user || !profile?.user_type) {
         throw new Error('No user or user type available');
       }
@@ -90,7 +90,9 @@ export function useUserProfile(): ProfileData {
         'admin_review_notes', 'is_verified', 'verification_requested_at', 'rating', 'total_ratings',
         'certifying_body', 'year_certified', 'availability_schedule', 'works_bank_holidays',
         'document_not_applicable', 'offers_discovery_call', 'discovery_call_price',
-        'client_preferences', 'training_type_delivery'
+        'client_preferences', 'training_type_delivery',
+        'wow_how_i_work', 'wow_what_i_provide', 'wow_client_expectations',
+        'wow_activities', 'wow_activity_assignments', 'wow_visibility', 'wow_setup_completed'
       ];
 
       // Fields from client_profiles table
@@ -129,44 +131,50 @@ export function useUserProfile(): ProfileData {
         }
       });
 
-      // Update profiles table if needed
-      if (Object.keys(profileUpdates).length > 0) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update(profileUpdates)
-          .eq('id', user.id);
-
-        if (profileError) throw profileError;
+      // Use combined RPC for trainers
+      if (profile.user_type === 'trainer') {
+        const { error } = await supabase.rpc('update_trainer_profile_combined', {
+          p_profile_data: profileUpdates,
+          p_trainer_data: typeSpecificUpdates
+        });
+        if (error) throw error;
+      } 
+      // Use combined RPC for clients
+      else if (profile.user_type === 'client') {
+        const { error } = await supabase.rpc('update_client_profile_combined', {
+          p_profile_data: profileUpdates,
+          p_client_data: typeSpecificUpdates
+        });
+        if (error) throw error;
       }
-
-      // Update type-specific table if needed
-      if (Object.keys(typeSpecificUpdates).length > 0) {
-        const tableName = profile.user_type === 'trainer' ? 'trainer_profiles' : 
-                         profile.user_type === 'client' ? 'client_profiles' : null;
-        
-        if (tableName) {
-          const { error: typeError } = await supabase
-            .from(tableName)
-            .update(typeSpecificUpdates)
+      // Fallback for admin - direct table updates
+      else {
+        if (Object.keys(profileUpdates).length > 0) {
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .update(profileUpdates)
             .eq('id', user.id);
 
-          if (typeError) throw typeError;
+          if (profileError) throw profileError;
         }
       }
 
-      return profile;
+      return { updates, options };
     },
-    onSuccess: (_, updates) => {
+    onSuccess: ({ updates, options }) => {
       // Optimistic update - apply changes directly to cache (no refetch)
       queryClient.setQueryData(['user-profile', user?.id], (oldData: any) => {
         if (!oldData) return oldData;
         return { ...oldData, ...updates };
       });
       
-      toast({
-        title: "Profile updated",
-        description: "Your changes have been saved successfully.",
-      });
+      // Only show toast if not suppressed
+      if (!options?.suppressToast) {
+        toast({
+          title: "Profile updated",
+          description: "Your changes have been saved successfully.",
+        });
+      }
     },
     onError: (error) => {
       console.error('useUserProfile: Error updating profile:', error);
@@ -185,7 +193,8 @@ export function useUserProfile(): ProfileData {
   return {
     profile: profile ?? null,
     loading: isLoading,
-    updateProfile: updateMutation.mutateAsync,
+    updateProfile: (updates: any, options?: { suppressToast?: boolean }) => 
+      updateMutation.mutateAsync({ updates, options }),
     refetchProfile: async () => {
       await refetch();
     },
