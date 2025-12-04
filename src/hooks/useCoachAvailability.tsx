@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
@@ -84,6 +84,9 @@ export function useCoachAvailability() {
     gcTime: queryConfig.availability.gcTime,
   });
 
+  // Track suppressToast option for the mutation
+  const suppressToastRef = useRef(false);
+
   const updateMutation = useMutation({
     mutationFn: async (updates: Partial<CoachAvailabilitySettings>) => {
       if (!user || !settings) throw new Error('User or settings not available');
@@ -111,10 +114,13 @@ export function useCoachAvailability() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['coach-availability', user?.id] });
-      toast({
-        title: "Settings updated",
-        description: "Your availability settings have been saved",
-      });
+      if (!suppressToastRef.current) {
+        toast({
+          title: "Settings updated",
+          description: "Your availability settings have been saved",
+        });
+      }
+      suppressToastRef.current = false; // Reset after use
     },
     onError: (error) => {
       console.error('Error updating coach availability settings:', error);
@@ -123,8 +129,15 @@ export function useCoachAvailability() {
         description: "Failed to update availability settings",
         variant: "destructive",
       });
+      suppressToastRef.current = false; // Reset after use
     },
   });
+
+  // Wrapper function to handle suppressToast option
+  const updateSettings = async (updates: Partial<CoachAvailabilitySettings>, options?: { suppressToast?: boolean }) => {
+    suppressToastRef.current = options?.suppressToast ?? false;
+    return updateMutation.mutateAsync(updates);
+  };
 
   const getWaitlistCount = useCallback(() => {
     return waitlistEntries.filter(entry => entry.status === 'active').length;
@@ -134,7 +147,7 @@ export function useCoachAvailability() {
     settings,
     loading: isLoading,
     saving: updateMutation.isPending,
-    updateSettings: updateMutation.mutateAsync,
+    updateSettings,
     refetch,
     getWaitlistCount
   };

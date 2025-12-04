@@ -700,21 +700,31 @@ const TrainerProfileSetup = () => {
     }
   };
 
+  // Track pending schedule changes from WorkingHoursSection
+  const [pendingScheduleChanges, setPendingScheduleChanges] = useState<any>(null);
+
   // Save availability settings to coach_availability_settings table
-  const saveAvailabilitySettings = async (status: string, settings: any) => {
+  const saveAvailabilitySettings = async (status: string, settings: any, schedule?: any) => {
     if (!user) return;
 
     try {
+      const updateData: any = {
+        coach_id: user.id,
+        availability_status: status as 'accepting' | 'waitlist' | 'unavailable',
+        next_available_date: settings.next_available_date,
+        allow_discovery_calls_on_waitlist: settings.allow_discovery_calls_on_waitlist,
+        auto_follow_up_days: settings.auto_follow_up_days,
+        waitlist_message: settings.waitlist_message,
+      };
+      
+      // Include schedule if provided
+      if (schedule) {
+        updateData.availability_schedule = schedule;
+      }
+
       const { data, error } = await supabase
         .from('coach_availability_settings')
-        .upsert({
-          coach_id: user.id,
-          availability_status: status as 'accepting' | 'waitlist' | 'unavailable',
-          next_available_date: settings.next_available_date,
-          allow_discovery_calls_on_waitlist: settings.allow_discovery_calls_on_waitlist,
-          auto_follow_up_days: settings.auto_follow_up_days,
-          waitlist_message: settings.waitlist_message,
-        }, {
+        .upsert(updateData, {
           onConflict: 'coach_id'
         });
 
@@ -735,6 +745,13 @@ const TrainerProfileSetup = () => {
     setHasUnsavedChanges(true);
   };
 
+  // Handle schedule changes from WorkingHoursSection (local state only)
+  const handleScheduleChange = (schedule: any) => {
+    setPendingScheduleChanges(schedule);
+    setDirtyFields(prev => new Set([...prev, 'availability_schedule']));
+    setHasUnsavedChanges(true);
+  };
+
   const handleNext = async () => {
     if (!validateCurrentStep()) {
       showWarning("Please complete all required fields before proceeding.");
@@ -748,14 +765,20 @@ const TrainerProfileSetup = () => {
       
       await handleSave(true);
 
-      // Also save availability settings if there are pending changes
-      if (pendingAvailabilityChanges) {
-        await saveAvailabilitySettings(
-          pendingAvailabilityChanges.status,
-          pendingAvailabilityChanges.settings
-        );
+      // Save availability settings if there are pending changes (status or schedule)
+      if (pendingAvailabilityChanges || pendingScheduleChanges) {
+        const status = pendingAvailabilityChanges?.status || availabilitySettings?.availability_status || 'accepting';
+        const settings = pendingAvailabilityChanges?.settings || {
+          next_available_date: availabilitySettings?.next_available_date,
+          allow_discovery_calls_on_waitlist: availabilitySettings?.allow_discovery_calls_on_waitlist,
+          auto_follow_up_days: availabilitySettings?.auto_follow_up_days,
+          waitlist_message: availabilitySettings?.waitlist_message,
+        };
+        
+        await saveAvailabilitySettings(status, settings, pendingScheduleChanges);
         await refetchAvailability?.();
         setPendingAvailabilityChanges(null);
+        setPendingScheduleChanges(null);
       }
       
       if (currentStep < totalSteps) {
@@ -811,13 +834,19 @@ const TrainerProfileSetup = () => {
     try {
       await handleSave(false);
       
-      // Also save availability settings if there are pending changes
-      if (pendingAvailabilityChanges) {
-        await saveAvailabilitySettings(
-          pendingAvailabilityChanges.status,
-          pendingAvailabilityChanges.settings
-        );
+      // Save availability settings if there are pending changes
+      if (pendingAvailabilityChanges || pendingScheduleChanges) {
+        const status = pendingAvailabilityChanges?.status || availabilitySettings?.availability_status || 'accepting';
+        const settings = pendingAvailabilityChanges?.settings || {
+          next_available_date: availabilitySettings?.next_available_date,
+          allow_discovery_calls_on_waitlist: availabilitySettings?.allow_discovery_calls_on_waitlist,
+          auto_follow_up_days: availabilitySettings?.auto_follow_up_days,
+          waitlist_message: availabilitySettings?.waitlist_message,
+        };
+        
+        await saveAvailabilitySettings(status, settings, pendingScheduleChanges);
         setPendingAvailabilityChanges(null);
+        setPendingScheduleChanges(null);
       }
       
       setShowPreviewModal(true);
@@ -842,13 +871,19 @@ const TrainerProfileSetup = () => {
     try {
       await handleSave(false);
       
-      // Also save availability settings if there are pending changes
-      if (pendingAvailabilityChanges) {
-        await saveAvailabilitySettings(
-          pendingAvailabilityChanges.status,
-          pendingAvailabilityChanges.settings
-        );
+      // Save availability settings if there are pending changes (status or schedule)
+      if (pendingAvailabilityChanges || pendingScheduleChanges) {
+        const status = pendingAvailabilityChanges?.status || availabilitySettings?.availability_status || 'accepting';
+        const settings = pendingAvailabilityChanges?.settings || {
+          next_available_date: availabilitySettings?.next_available_date,
+          allow_discovery_calls_on_waitlist: availabilitySettings?.allow_discovery_calls_on_waitlist,
+          auto_follow_up_days: availabilitySettings?.auto_follow_up_days,
+          waitlist_message: availabilitySettings?.waitlist_message,
+        };
+        
+        await saveAvailabilitySettings(status, settings, pendingScheduleChanges);
         setPendingAvailabilityChanges(null);
+        setPendingScheduleChanges(null);
       }
       
       navigate(getExitDestination());
@@ -928,6 +963,7 @@ const TrainerProfileSetup = () => {
         return <WorkingHoursAndAvailabilitySection 
           {...commonProps} 
           onAvailabilityChange={handleAvailabilityChange}
+          onScheduleChange={handleScheduleChange}
         />;
       case 11:
         return <TermsAndNotificationsSection {...commonProps} />;
