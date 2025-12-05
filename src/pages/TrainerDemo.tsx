@@ -23,7 +23,7 @@ export default function TrainerDemo() {
   const navigate = useNavigate();
 
   const handleCreateProfile = () => {
-    navigate('/auth?signup=trainer');
+    navigate('/auth/signup/trainer');
   };
 
 

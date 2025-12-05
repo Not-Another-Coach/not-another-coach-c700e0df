@@ -59,7 +59,7 @@ export const AuthPrompt = ({
   const Icon = config.icon;
 
   const handleCreateAccount = () => {
-    navigate('/auth?signup=true');
+    navigate('/auth/signup');
   };
 
   const handleSignIn = () => {

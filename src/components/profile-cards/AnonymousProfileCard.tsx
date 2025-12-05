@@ -71,7 +71,7 @@ export const AnonymousProfileCard: React.FC<AnonymousProfileCardProps> = ({
             <Button variant="outline" onClick={() => navigate('/auth')}>
               Sign In
             </Button>
-            <Button onClick={() => navigate('/auth?signup=true')}>
+            <Button onClick={() => navigate('/auth/signup')}>
               Join Free
             </Button>
           </div>
@@ -262,7 +262,7 @@ export const AnonymousProfileCard: React.FC<AnonymousProfileCardProps> = ({
           <p className="text-sm text-muted-foreground mb-4">
             Join thousands of people who've found their perfect trainer match
           </p>
-          <Button onClick={() => navigate('/auth?signup=true')} size="lg">
+          <Button onClick={() => navigate('/auth/signup')} size="lg">
             Get Started for Free
           </Button>
         </CardContent>
