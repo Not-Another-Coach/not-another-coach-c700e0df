@@ -8,6 +8,7 @@ import { UserIntentProvider } from "@/hooks/useUserIntent";
 import { VisibilityConfigProvider } from "@/contexts/VisibilityConfigContext";
 import { UserProfileProvider } from "@/contexts/UserProfileContext";
 import { PlatformAccessGuard } from "@/components/auth/PlatformAccessGuard";
+import { EncodedUrlHandler } from "@/components/auth/EncodedUrlHandler";
 import { SessionNotification } from "@/components/SessionNotification";
 import { InactivityHandler } from "@/components/InactivityHandler";
 import Home from "./pages/Home";
@@ -79,7 +80,8 @@ const App = () => (
               <InactivityHandler timeoutMinutes={30} warningMinutes={2} />
               <BrowserRouter>
                 <DiagnosticsProvider>
-                  <ErrorBoundary>
+                <ErrorBoundary>
+                  <EncodedUrlHandler>
                     <PlatformAccessGuard>
                     <Routes>
                       <Route path="/" element={<Home />} />
@@ -129,7 +131,8 @@ const App = () => (
                   <Route path="/payment-management" element={<PaymentManagement />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
-                  </PlatformAccessGuard>
+                    </PlatformAccessGuard>
+                  </EncodedUrlHandler>
                 </ErrorBoundary>
               </DiagnosticsProvider>
             </BrowserRouter>
