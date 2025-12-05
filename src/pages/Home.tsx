@@ -230,12 +230,12 @@ export default function Home() {
               <Button variant="ghost" onClick={() => navigate('/auth')} className="hidden md:flex">
                 Sign In
               </Button>
-              <Button onClick={() => navigate('/auth?signup=client')} className="hidden md:flex">
+              <Button onClick={() => navigate('/auth/signup/client')} className="hidden md:flex">
                 Join
               </Button>
               
               {/* Mobile: Single pill button */}
-              <Button onClick={() => navigate('/auth?signup=client')} className="md:hidden">
+              <Button onClick={() => navigate('/auth/signup/client')} className="md:hidden">
                 Join
               </Button>
             </div>
@@ -252,7 +252,7 @@ export default function Home() {
 
       {/* Enhanced Hero Section */}
       <EnhancedHeroSection 
-        onFindMatch={() => navigate('/auth?signup=client')}
+        onFindMatch={() => navigate('/auth/signup/client')}
         showFindMatchButton={true}
         buttonText="Start Your Coaching Journey"
       />
@@ -273,7 +273,7 @@ export default function Home() {
             <p className="text-muted-foreground mb-4">
               Sign up to explore all coaches and find your perfect match
             </p>
-            <Button size="lg" onClick={() => navigate('/auth?signup=client')}>
+            <Button size="lg" onClick={() => navigate('/auth/signup/client')}>
               Discover More Coaches
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>

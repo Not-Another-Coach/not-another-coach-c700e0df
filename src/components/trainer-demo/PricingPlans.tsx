@@ -99,7 +99,7 @@ export function PricingPlans() {
                   className="w-full" 
                   variant={plan.popular ? 'default' : 'outline'}
                   size="lg"
-                  onClick={() => navigate('/auth?signup=trainer')}
+                  onClick={() => navigate('/auth/signup/trainer')}
                 >
                   {plan.cta}
                 </Button>

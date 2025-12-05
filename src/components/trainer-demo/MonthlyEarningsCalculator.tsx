@@ -126,7 +126,7 @@ export function MonthlyEarningsCalculator() {
                   <Button 
                     className="w-full mt-4" 
                     size="lg"
-                    onClick={() => navigate('/auth?signup=trainer')}
+                    onClick={() => navigate('/auth/signup/trainer')}
                   >
                     Start Building Your Profile
                   </Button>
@@ -142,7 +142,7 @@ export function MonthlyEarningsCalculator() {
                     className="w-full mt-4" 
                     variant="outline"
                     size="lg"
-                    onClick={() => navigate('/auth?signup=trainer')}
+                    onClick={() => navigate('/auth/signup/trainer')}
                   >
                     Start with Starter Plan
                   </Button>

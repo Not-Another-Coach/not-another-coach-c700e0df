@@ -220,7 +220,7 @@ export const TrainerProfile = () => {
                 <Button variant="ghost" onClick={() => navigate('/auth')}>
                   Sign In
                 </Button>
-                <Button onClick={() => navigate('/auth?signup=true')}>
+                <Button onClick={() => navigate('/auth/signup')}>
                   Join Free
                 </Button>
               </div>

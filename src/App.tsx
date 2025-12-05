@@ -8,7 +8,6 @@ import { UserIntentProvider } from "@/hooks/useUserIntent";
 import { VisibilityConfigProvider } from "@/contexts/VisibilityConfigContext";
 import { UserProfileProvider } from "@/contexts/UserProfileContext";
 import { PlatformAccessGuard } from "@/components/auth/PlatformAccessGuard";
-import { EncodedUrlHandler } from "@/components/auth/EncodedUrlHandler";
 import { SessionNotification } from "@/components/SessionNotification";
 import { InactivityHandler } from "@/components/InactivityHandler";
 import Home from "./pages/Home";
@@ -81,10 +80,12 @@ const App = () => (
               <BrowserRouter>
                 <DiagnosticsProvider>
                 <ErrorBoundary>
-                  <EncodedUrlHandler>
-                    <PlatformAccessGuard>
+                  <PlatformAccessGuard>
                     <Routes>
                       <Route path="/" element={<Home />} />
+                      <Route path="/auth/signup/:userType" element={<Auth />} />
+                      <Route path="/auth/signup" element={<Auth />} />
+                      <Route path="/auth/login" element={<Auth />} />
                       <Route path="/auth" element={<Auth />} />
                       <Route path="/auth/callback" element={<AuthCallback />} />
                       
@@ -131,8 +132,7 @@ const App = () => (
                   <Route path="/payment-management" element={<PaymentManagement />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
-                    </PlatformAccessGuard>
-                  </EncodedUrlHandler>
+                  </PlatformAccessGuard>
                 </ErrorBoundary>
               </DiagnosticsProvider>
             </BrowserRouter>

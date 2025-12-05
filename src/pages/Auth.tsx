@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useParams, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -45,12 +45,15 @@ export default function Auth() {
   const { signIn, signUp, resendConfirmation } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { userType: routeUserType } = useParams<{ userType?: string }>();
+  const location = useLocation();
   const { status, showSuccess, showError, showInfo, showWarning, hideStatus } = useStatusFeedback();
 
-  // Detect signup context from URL
+  // Detect signup context from URL - support both path-based and query param URLs
   const signupContext = searchParams.get('signup');
   const intentContext = searchParams.get('intent');
-  const isContextualSignup = signupContext === 'true' || signupContext === 'client' || signupContext === 'trainer' || intentContext === 'trainer-signup';
+  const isPathBasedSignup = location.pathname.includes('/auth/signup');
+  const isContextualSignup = isPathBasedSignup || signupContext === 'true' || signupContext === 'client' || signupContext === 'trainer' || intentContext === 'trainer-signup';
   
   // Load saved email on component mount (secure - no password storage)
   useEffect(() => {
@@ -101,16 +104,17 @@ export default function Auth() {
       setShowPasswordReset(true);
       setShowForgotPassword(false);
       showInfo("Please enter your new password below.");
-    } else if (signup === 'true' || signup === 'client' || signup === 'trainer' || intent === 'trainer-signup') {
+    } else if (isPathBasedSignup || signup === 'true' || signup === 'client' || signup === 'trainer' || intent === 'trainer-signup') {
       setActiveTab('signup');
-      // Set user type based on context - default to client for generic signup
-      if (signup === 'client' || signup === 'true') {
+      // Set user type based on context - check route param first, then query param
+      const detectedUserType = routeUserType || signup;
+      if (detectedUserType === 'client' || detectedUserType === 'true' || !detectedUserType) {
         setSignupForm(prev => ({ ...prev, userType: 'client' }));
-      } else if (signup === 'trainer' || intent === 'trainer-signup') {
+      } else if (detectedUserType === 'trainer' || intent === 'trainer-signup') {
         setSignupForm(prev => ({ ...prev, userType: 'trainer' }));
       }
     }
-  }, [searchParams]);
+  }, [searchParams, routeUserType, location.pathname, isPathBasedSignup]);
 
   // Clear status when changing tabs or views
   const handleTabChange = (value: string) => {
