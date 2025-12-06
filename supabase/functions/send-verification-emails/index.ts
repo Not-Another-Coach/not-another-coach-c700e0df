@@ -3,6 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { Resend } from "npm:resend@2.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+const fromEmail = Deno.env.get("FROM_EMAIL") || "Not Another Coach <onboarding@resend.dev>";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -95,7 +96,7 @@ serve(async (req: Request) => {
     const template = emailTemplates[type](data);
     
     const emailResponse = await resend.emails.send({
-      from: "FitMatch <noreply@fitmatch.co.uk>",
+      from: fromEmail,
       to: [profile.email],
       subject: template.subject,
       html: template.html,
