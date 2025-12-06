@@ -52,16 +52,16 @@ export function LogoManagement() {
       if (logoSettings.logo_url) {
         const oldPath = logoSettings.logo_url.split('/').pop();
         if (oldPath) {
-          await FileUploadService.deleteFile('onboarding-public', oldPath);
+          await FileUploadService.deleteFile('logos', oldPath);
         }
       }
 
-      // Upload new logo
+      // Upload new logo to the logos bucket
       const fileExt = file.name.split('.').pop();
       const fileName = `app-logo-${Date.now()}.${fileExt}`;
       
       const uploadResult = await FileUploadService.uploadFile(
-        'onboarding-public',
+        'logos',
         fileName,
         file,
         { cacheControl: '3600', upsert: false }
@@ -107,10 +107,10 @@ export function LogoManagement() {
 
     setUploading(true);
     try {
-      // Delete from storage
+      // Delete from storage (logos bucket)
       const fileName = logoSettings.logo_url.split('/').pop();
       if (fileName) {
-        const deleteResult = await FileUploadService.deleteFile('onboarding-public', fileName);
+        const deleteResult = await FileUploadService.deleteFile('logos', fileName);
         if (!deleteResult.success) {
           throw new Error(deleteResult.error?.message || 'Delete failed');
         }
