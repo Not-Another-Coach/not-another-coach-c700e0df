@@ -1,4 +1,5 @@
 import { Toaster } from "@/components/ui/toaster";
+import { DevEnvironmentBanner } from "@/components/DevEnvironmentBanner";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -73,6 +74,7 @@ const App = () => (
         <UserIntentProvider>
           <VisibilityConfigProvider>
             <TooltipProvider>
+              <DevEnvironmentBanner />
               <Toaster />
               <Sonner />
               <SessionNotification />
