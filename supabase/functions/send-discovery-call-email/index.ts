@@ -12,6 +12,7 @@ const supabaseUrl = Deno.env.get('SUPABASE_URL')!
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey)
+const fromEmail = Deno.env.get('FROM_EMAIL') || 'Not Another Coach <onboarding@resend.dev>'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -165,8 +166,9 @@ serve(async (req) => {
     }
 
     // Send email using Resend
+    console.log('Sending email from:', fromEmail)
     const { data: emailResult, error: emailError } = await resend.emails.send({
-      from: 'FitMatch <noreply@fitmatch.app>',
+      from: fromEmail,
       to: [recipientEmail],
       subject,
       html: emailHtml,
