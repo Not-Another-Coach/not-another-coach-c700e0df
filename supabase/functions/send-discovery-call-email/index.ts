@@ -95,7 +95,7 @@ serve(async (req) => {
 
     const clientName = `${client.first_name} ${client.last_name}`
     const trainerName = `${trainer.first_name} ${trainer.last_name}`
-    const appUrl = supabaseUrl.replace('.supabase.co', '.lovable.app') || 'https://your-app.com'
+    const appUrl = Deno.env.get('APP_BASE_URL') || supabaseUrl.replace('.supabase.co', '.lovable.app') || 'https://your-app.com'
 
     let emailHtml: string
     let subject: string
