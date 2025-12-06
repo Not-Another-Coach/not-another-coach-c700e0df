@@ -1,4 +1,4 @@
-project_id = "ogpiovfxjxcclptfybrk"
+project_id = "zkzahqnsfjnvskfywbvg"
 
 [api]
 enabled = true
@@ -97,6 +97,48 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.manage-payment-method]
+verify_jwt = true
+
+[functions.admin-retry-payment]
+verify_jwt = true
+
+[functions.approve-payout-period]
+verify_jwt = true
+
+[functions.bulk-create-users]
+verify_jwt = false
+
+[functions.cancel-subscription]
+verify_jwt = true
+
+[functions.complete-plan-upgrade]
+verify_jwt = true
+
+[functions.generate-payment-statement]
+verify_jwt = true
+
+[functions.get-user-emails]
+verify_jwt = true
+
+[functions.process-plan-changes]
+verify_jwt = false
+
+[functions.process-verification-expiry]
+verify_jwt = false
+
+[functions.process-waitlist-exclusivity]
+verify_jwt = false
+
+[functions.reject-payout-period]
+verify_jwt = true
+
+[functions.send-grace-reminders]
+verify_jwt = false
+
+[functions.send-verification-emails]
+verify_jwt = false
+
+[functions.update-stripe-subscription]
 verify_jwt = true
 
 [analytics]
