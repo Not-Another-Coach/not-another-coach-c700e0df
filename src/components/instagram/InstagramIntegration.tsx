@@ -77,11 +77,12 @@ export const InstagramIntegration = () => {
             // Clean up listener
             window.removeEventListener('message', handleMessage);
             
-            // Exchange code for access token
+            // Exchange code for access token - use dynamic Supabase URL
+            const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
             const { error: exchangeError } = await supabase.functions.invoke('instagram-oauth', {
               body: { 
                 code: event.data.code,
-                redirect_uri: `https://ogpiovfxjxcclptfybrk.supabase.co/functions/v1/instagram-oauth`
+                redirect_uri: `${supabaseUrl}/functions/v1/instagram-oauth`
               }
             });
 
