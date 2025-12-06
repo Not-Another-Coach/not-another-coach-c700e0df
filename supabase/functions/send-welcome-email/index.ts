@@ -24,7 +24,7 @@ const corsHeaders = {
 
 const createWelcomeEmailHTML = (firstName?: string, userType?: string) => {
   const displayName = firstName || 'there';
-  const appUrl = Deno.env.get('SUPABASE_URL')?.replace('/v1', '') || 'https://notanothercoach.com';
+  const appUrl = Deno.env.get('APP_BASE_URL') || Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '.lovable.app') || 'https://notanothercoach.com';
   
   return `<!DOCTYPE html>
 <html lang="en">
@@ -237,7 +237,7 @@ const createWelcomeEmailHTML = (firstName?: string, userType?: string) => {
 
                         <hr class="rule" style="border:none;border-top:1px solid #e7ecf5;margin:20px 0 16px">
                         <p class="muted" style="margin:0;font:12px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#8a95a6;text-align:center;">
-                            Need help getting started? <a href="mailto:support@notanother.coach" style="color:#113a5d;">Contact our support team</a>
+                            Need help getting started? <a href="mailto:${Deno.env.get('SUPPORT_EMAIL') || 'support@notanother.coach'}" style="color:#113a5d;">Contact our support team</a>
                         </p>
                     </td>
                 </tr>

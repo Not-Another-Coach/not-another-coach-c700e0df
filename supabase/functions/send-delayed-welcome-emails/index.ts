@@ -139,7 +139,7 @@ const handler = async (req: Request): Promise<Response> => {
                   </p>
                   
                   <div style="text-align:center;margin:30px 0;">
-                    <a href="${Deno.env.get("SUPABASE_URL")?.replace(".supabase.co", ".lovable.app") || "https://lovable.app"}/auth" 
+                    <a href="${Deno.env.get("APP_BASE_URL") || Deno.env.get("SUPABASE_URL")?.replace(".supabase.co", ".lovable.app") || "https://lovable.app"}/auth"
                        style="display:inline-block;background:#113a5d;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;font-size:16px;">
                       Log In to Your Dashboard
                     </a>
@@ -148,7 +148,7 @@ const handler = async (req: Request): Promise<Response> => {
                   <hr style="border:none;border-top:1px solid #e7ecf5;margin:30px 0;">
                   
                   <p style="margin:0;font-size:12px;line-height:1.6;color:#8a95a6;text-align:center;">
-                    Need help? <a href="mailto:support@notanother.coach" style="color:#113a5d;">Contact support</a> • We're here for you
+                  Need help? <a href="mailto:${Deno.env.get("SUPPORT_EMAIL") || "support@notanother.coach"}" style="color:#113a5d;">Contact support</a> • We're here for you
                   </p>
                 </div>
               </div>
@@ -193,7 +193,7 @@ const handler = async (req: Request): Promise<Response> => {
                   </p>
                   
                   <div style="text-align:center;margin:30px 0;">
-                    <a href="${Deno.env.get("SUPABASE_URL")?.replace(".supabase.co", ".lovable.app") || "https://lovable.app"}/auth" 
+                    <a href="${Deno.env.get("APP_BASE_URL") || Deno.env.get("SUPABASE_URL")?.replace(".supabase.co", ".lovable.app") || "https://lovable.app"}/auth" 
                        style="display:inline-block;background:#113a5d;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;font-size:16px;">
                       Log In & Explore Trainers
                     </a>
@@ -202,7 +202,7 @@ const handler = async (req: Request): Promise<Response> => {
                   <hr style="border:none;border-top:1px solid #e7ecf5;margin:30px 0;">
                   
                   <p style="margin:0;font-size:12px;line-height:1.6;color:#8a95a6;text-align:center;">
-                    Need help? <a href="mailto:support@notanother.coach" style="color:#113a5d;">Contact support</a> • We're here for you
+                    Need help? <a href="mailto:${Deno.env.get("SUPPORT_EMAIL") || "support@notanother.coach"}" style="color:#113a5d;">Contact support</a> • We're here for you
                   </p>
                 </div>
               </div>

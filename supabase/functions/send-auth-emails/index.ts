@@ -192,7 +192,7 @@ const createConfirmationEmailHTML = (
                         
                         <hr class="rule" style="border:none;border-top:1px solid #e7ecf5;margin:20px 0 16px">
                         <p class="muted" style="margin:0;font:12px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#8a95a6;text-align:center;">
-                            Need help? <a href="mailto:support@notanother.coach" style="color:#113a5d;">Contact support</a> • We're here for you
+                        Need help? <a href="mailto:${Deno.env.get('SUPPORT_EMAIL') || 'support@notanother.coach'}" style="color:#113a5d;">Contact support</a> • We're here for you
                         </p>
                     </td>
                 </tr>
@@ -291,7 +291,7 @@ const createPasswordResetEmailHTML = (
                         
                         <hr class="rule" style="border:none;border-top:1px solid #e7ecf5;margin:20px 0 16px">
                         <p class="muted" style="margin:0;font:12px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#8a95a6;text-align:center;">
-                            Need help? <a href="mailto:support@notanother.coach" style="color:#113a5d;">Contact support</a> • We're here for you
+                            Need help? <a href="mailto:${Deno.env.get('SUPPORT_EMAIL') || 'support@notanother.coach'}" style="color:#113a5d;">Contact support</a> • We're here for you
                         </p>
                     </td>
                 </tr>
@@ -350,7 +350,7 @@ const createWelcomeEmailHTML = (firstName?: string, userType?: string) => `
     `}
     
     <div style="text-align: center; margin: 30px 0;">
-      <a href="${Deno.env.get('SUPABASE_URL')?.replace('supabase.co', 'lovable.app') || 'https://lovable.app'}" 
+      <a href="${Deno.env.get('APP_BASE_URL') || Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '.lovable.app') || 'https://lovable.app'}" 
          style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">
         Get Started Now
       </a>
