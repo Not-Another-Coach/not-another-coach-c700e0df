@@ -16,7 +16,7 @@ const PROD_PROJECT_ID = 'ogpiovfxjxcclptfybrk';
 // ============================================================
 // CHANGE THIS VALUE WHEN SWITCHING ENVIRONMENTS
 // ============================================================
-const CURRENT_PROJECT_ID = DEV_PROJECT_ID as ProjectId;
+const CURRENT_PROJECT_ID = PROD_PROJECT_ID as ProjectId;
 // ============================================================
 
 // Supabase anon keys per environment
