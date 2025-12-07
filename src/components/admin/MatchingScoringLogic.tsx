@@ -18,12 +18,11 @@ interface MatchingScoringLogicProps {
   isDraft?: boolean;
 }
 
-// Experience level criteria - still hardcoded
-
+// Experience level matching - now a hardcode match based on trainer preferences
 const EXPERIENCE_LEVEL_CRITERIA = [
-  { clientLevel: "beginner", trainerPreference: "Beginners", bonus: 20, description: "Full bonus for matching" },
-  { clientLevel: "intermediate", trainerPreference: "Intermediate", bonus: 15, description: "Good match" },
-  { clientLevel: "advanced", trainerPreference: "Advanced", bonus: 20, description: "Full bonus for matching" },
+  { clientLevel: "beginner", trainerPreference: "preferred_client_experience_levels includes 'beginner'", description: "Trainer must have 'beginner' in their experience levels" },
+  { clientLevel: "intermediate", trainerPreference: "preferred_client_experience_levels includes 'intermediate'", description: "Trainer must have 'intermediate' in their experience levels" },
+  { clientLevel: "advanced", trainerPreference: "preferred_client_experience_levels includes 'advanced'", description: "Trainer must have 'advanced' in their experience levels" },
 ];
 
 
@@ -479,36 +478,39 @@ export function MatchingScoringLogic({ currentConfig, liveConfig, isDraft = fals
         </Card>
       </Collapsible>
 
-      {/* Experience Level Criteria - Hardcoded */}
+      {/* Experience Level Matching - Hardcode Match */}
       <Collapsible>
         <Card>
           <CollapsibleTrigger className="w-full">
             <CardHeader className="flex flex-row items-center justify-between cursor-pointer hover:bg-muted/50">
               <div className="flex items-center gap-2">
                 <Lock className="w-4 h-4 text-muted-foreground" />
-                <CardTitle className="text-base">Experience Level Criteria</CardTitle>
-                <Badge variant="outline" className="text-xs">Hardcoded</Badge>
+                <CardTitle className="text-base">Experience Level Matching</CardTitle>
+                <Badge variant="outline" className="text-xs text-amber-600 border-amber-600/20">Hardcode Match</Badge>
               </div>
               <ChevronDown className="w-4 h-4" />
             </CardHeader>
           </CollapsibleTrigger>
           <CollapsibleContent>
             <CardContent>
+              <CardDescription className="mb-4">
+                Experience level is now a <strong>hardcode match</strong>. Trainers specify which experience levels they work with 
+                (Beginner, Intermediate, Advanced) in their profile. Clients are matched only to trainers who have selected their experience level.
+                If a trainer hasn't selected any levels, they are assumed to work with all levels.
+              </CardDescription>
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Client Level</TableHead>
-                    <TableHead>Trainer Preference</TableHead>
-                    <TableHead>Bonus</TableHead>
-                    <TableHead>Notes</TableHead>
+                    <TableHead>Matching Logic</TableHead>
+                    <TableHead>Description</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {EXPERIENCE_LEVEL_CRITERIA.map((criteria) => (
                     <TableRow key={criteria.clientLevel}>
-                      <TableCell className="font-mono text-sm">{criteria.clientLevel}</TableCell>
-                      <TableCell>{criteria.trainerPreference}</TableCell>
-                      <TableCell><Badge variant="outline">+{criteria.bonus}</Badge></TableCell>
+                      <TableCell className="font-mono text-sm capitalize">{criteria.clientLevel}</TableCell>
+                      <TableCell className="font-mono text-xs">{criteria.trainerPreference}</TableCell>
                       <TableCell className="text-muted-foreground">{criteria.description}</TableCell>
                     </TableRow>
                   ))}

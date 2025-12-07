@@ -18,7 +18,6 @@ interface ClientFitSectionProps {
 }
 
 const idealClientTypes = [
-  "Complete Beginners",
   "Busy Parents", 
   "Working Professionals",
   "Seniors (55+)",
@@ -32,6 +31,12 @@ const idealClientTypes = [
   "Pre/Postnatal",
   "Teenagers",
   "Body Positive Focus"
+];
+
+const experienceLevelOptions = [
+  { id: "beginner", label: "Beginner", description: "New to fitness or returning after a long break" },
+  { id: "intermediate", label: "Intermediate", description: "Some fitness experience, knows basic exercises" },
+  { id: "advanced", label: "Advanced", description: "Experienced with various workout styles" },
 ];
 
 export function ClientFitSection({ formData, updateFormData }: ClientFitSectionProps) {
@@ -50,7 +55,18 @@ export function ClientFitSection({ formData, updateFormData }: ClientFitSectionP
     if (!formData.preferred_client_genders) {
       updateFormData({ preferred_client_genders: ["all"] });
     }
-  }, [formData.ideal_client_types, formData.coaching_style, formData.preferred_client_genders, updateFormData]);
+    if (!formData.preferred_client_experience_levels) {
+      updateFormData({ preferred_client_experience_levels: [] });
+    }
+  }, [formData.ideal_client_types, formData.coaching_style, formData.preferred_client_genders, formData.preferred_client_experience_levels, updateFormData]);
+
+  const handleExperienceLevelToggle = (level: string) => {
+    const current = formData.preferred_client_experience_levels || [];
+    const updated = current.includes(level)
+      ? current.filter((l: string) => l !== level)
+      : [...current, level];
+    updateFormData({ preferred_client_experience_levels: updated });
+  };
 
   const clientGenderOptions = [
     { id: "all", label: "All Genders", description: "I work with clients of any gender" },
@@ -232,6 +248,44 @@ export function ClientFitSection({ formData, updateFormData }: ClientFitSectionP
             })}
           </div>
         )}
+      </div>
+
+      {/* Experience Level Preferences */}
+      <div className="space-y-4">
+        <div>
+          <Label>Client Experience Levels *</Label>
+          <p className="text-sm text-muted-foreground mt-1">
+            Select which experience levels you work with (used for matching)
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {experienceLevelOptions.map((option) => {
+            const isSelected = formData.preferred_client_experience_levels?.includes(option.id);
+            return (
+              <Card 
+                key={option.id}
+                className={`cursor-pointer transition-colors ${
+                  isSelected ? 'border-primary bg-primary/5' : 'hover:border-primary/50'
+                }`}
+                onClick={() => handleExperienceLevelToggle(option.id)}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <Checkbox 
+                      checked={isSelected}
+                      onCheckedChange={() => handleExperienceLevelToggle(option.id)}
+                    />
+                    <div className="flex-1">
+                      <p className="font-medium">{option.label}</p>
+                      <p className="text-sm text-muted-foreground">{option.description}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
       </div>
 
       {/* Preferred Client Genders */}
