@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { MatchingVersion, MatchingAlgorithmConfig, DEFAULT_MATCHING_CONFIG } from "@/types/matching";
+import type { Json } from "@/integrations/supabase/types";
 
 const QUERY_KEY = ['matching-algorithm-versions'];
 
@@ -69,13 +70,13 @@ export function useCreateMatchingVersion() {
 
       const { data, error } = await supabase
         .from('matching_algorithm_versions')
-        .insert({
+        .insert([{
           name,
           version_number: nextVersion,
-          config: (config || DEFAULT_MATCHING_CONFIG) as unknown as Record<string, unknown>,
-          status: 'draft',
+          config: JSON.parse(JSON.stringify(config || DEFAULT_MATCHING_CONFIG)) as Json,
+          status: 'draft' as const,
           notes,
-        })
+        }])
         .select()
         .single();
 
@@ -118,13 +119,13 @@ export function useCloneMatchingVersion() {
 
       const { data, error } = await supabase
         .from('matching_algorithm_versions')
-        .insert({
+        .insert([{
           name: source.name,
           version_number: nextVersion,
-          config: source.config as unknown as Record<string, unknown>,
-          status: 'draft',
+          config: JSON.parse(JSON.stringify(source.config)) as Json,
+          status: 'draft' as const,
           notes: notes || `Cloned from v${source.version_number}`,
-        })
+        }])
         .select()
         .single();
 
@@ -147,8 +148,8 @@ export function useUpdateMatchingVersion() {
 
   return useMutation({
     mutationFn: async ({ id, config, name, notes }: { id: string; config?: MatchingAlgorithmConfig; name?: string; notes?: string }) => {
-      const updates: Record<string, unknown> = {};
-      if (config !== undefined) updates.config = config as unknown as Record<string, unknown>;
+      const updates: Record<string, Json | string> = {};
+      if (config !== undefined) updates.config = JSON.parse(JSON.stringify(config)) as Json;
       if (name !== undefined) updates.name = name;
       if (notes !== undefined) updates.notes = notes;
 
