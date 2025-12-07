@@ -73,7 +73,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('savedEmail');
     
     // Clear Supabase auth token BEFORE navigation (instant, no async)
-    localStorage.removeItem(`sb-${ENV_CONFIG.projectId}-auth-token`);
+    // Extract project ref from Supabase URL dynamically
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+    const projectRef = supabaseUrl.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1] || '';
+    if (projectRef) {
+      localStorage.removeItem(`sb-${projectRef}-auth-token`);
+    }
     
     // Direct navigation - no signout param needed
     window.location.href = '/auth';
