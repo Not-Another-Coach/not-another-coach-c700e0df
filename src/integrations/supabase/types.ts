@@ -7191,6 +7191,7 @@ export type Database = {
           offers_discovery_call: boolean | null
           package_options: Json | null
           philosophy: string | null
+          preferred_client_experience_levels: string[] | null
           preferred_client_genders: string[] | null
           professional_milestones: Json | null
           profile_image_position: Json | null

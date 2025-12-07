@@ -66,6 +66,7 @@ interface TrainerProfile {
   client_preferences: string[] | null;
   ideal_client_personality: string | null;
   ideal_client_types: string[] | null;
+  preferred_client_experience_levels: string[] | null;
   video_checkins: boolean | null;
   messaging_support: boolean | null;
   weekly_programming_only: boolean | null;
@@ -125,6 +126,7 @@ export function useTrainerProfile() {
           client_preferences: (data as any)?.client_preferences || null,
           ideal_client_personality: (data as any)?.ideal_client_personality || null,
           ideal_client_types: (data as any)?.ideal_client_types || null,
+          preferred_client_experience_levels: (data as any)?.preferred_client_experience_levels || null,
           // New activity-centric Ways of Working fields
           wow_how_i_work: (data as any)?.wow_how_i_work || null,
           wow_what_i_provide: (data as any)?.wow_what_i_provide || null,
@@ -188,7 +190,7 @@ export function useTrainerProfile() {
         'is_verified', 'rating', 'total_ratings', 'free_discovery_call', 
         'offers_discovery_call', 'discovery_call_price', 'calendar_link', 'testimonials', 'training_types',
         'training_type_delivery', 'delivery_format', 'communication_style', 'coaching_style', 'client_preferences', 
-        'ideal_client_personality', 'ideal_client_types', 'video_checkins', 'messaging_support', 
+        'ideal_client_personality', 'ideal_client_types', 'preferred_client_experience_levels', 'video_checkins', 'messaging_support',
         'weekly_programming_only', 'profile_setup_completed', 'how_started', 'philosophy', 
         'professional_milestones', 'document_not_applicable'
       ];
