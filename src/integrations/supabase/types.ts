@@ -2886,6 +2886,48 @@ export type Database = {
           },
         ]
       }
+      matching_algorithm_versions: {
+        Row: {
+          archived_at: string | null
+          config: Json
+          created_at: string | null
+          created_by: string | null
+          id: string
+          name: string
+          notes: string | null
+          published_at: string | null
+          published_by: string | null
+          status: string
+          version_number: number
+        }
+        Insert: {
+          archived_at?: string | null
+          config: Json
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          published_at?: string | null
+          published_by?: string | null
+          status?: string
+          version_number: number
+        }
+        Update: {
+          archived_at?: string | null
+          config?: Json
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          published_at?: string | null
+          published_by?: string | null
+          status?: string
+          version_number?: number
+        }
+        Relationships: []
+      }
       membership_commission_config: {
         Row: {
           created_at: string
