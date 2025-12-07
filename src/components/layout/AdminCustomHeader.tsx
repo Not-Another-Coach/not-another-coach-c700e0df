@@ -9,7 +9,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { AppLogo } from "@/components/ui/app-logo";
 import { useUserRoles } from "@/hooks/useUserRoles";
-import { Bell, MessageCircle, Users, Shield, FileText, Database, Briefcase, Settings, BarChart3, ChevronDown, Menu } from "lucide-react";
+import { Bell, MessageCircle, Users, Shield, FileText, Database, Briefcase, Settings, BarChart3, ChevronDown, Menu, Target } from "lucide-react";
 
 interface AdminCustomHeaderProps {
   profile: any;
@@ -46,6 +46,7 @@ export function AdminCustomHeader({
         { key: "qualifications", label: "Qualifications", icon: Briefcase, path: "/admin/qualifications" },
         { key: "templates", label: "Templates", icon: Settings, path: "/admin/templates" },
         { key: "feedback-builder", label: "Feedback", icon: Settings, path: "/admin/feedback-builder" },
+        { key: "matching", label: "Matching", icon: Target, path: "/admin/matching-config" },
       ]
     },
     {
