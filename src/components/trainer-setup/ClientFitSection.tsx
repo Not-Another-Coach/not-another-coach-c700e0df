@@ -4,6 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useState, useEffect } from "react";
 import { Users, Heart, Target, Zap, Sparkles, RefreshCw } from "lucide-react";
 import { AIDescriptionHelper } from "./AIDescriptionHelper";
@@ -88,7 +89,42 @@ export function ClientFitSection({ formData, updateFormData }: ClientFitSectionP
     if (!formData.coaching_style) {
       updateFormData({ coaching_style: [] });
     }
-  }, [formData.ideal_client_types, formData.coaching_style, updateFormData]);
+    if (!formData.preferred_client_genders) {
+      updateFormData({ preferred_client_genders: ["all"] });
+    }
+  }, [formData.ideal_client_types, formData.coaching_style, formData.preferred_client_genders, updateFormData]);
+
+  const clientGenderOptions = [
+    { id: "all", label: "All Genders", description: "I work with clients of any gender" },
+    { id: "male", label: "Male", description: "Male-identifying clients" },
+    { id: "female", label: "Female", description: "Female-identifying clients" },
+    { id: "non-binary", label: "Non-binary", description: "Non-binary clients" },
+  ];
+
+  const handleClientGenderToggle = (genderId: string) => {
+    const current = formData.preferred_client_genders || ["all"];
+    
+    if (genderId === "all") {
+      // If selecting "all", clear other selections
+      updateFormData({ preferred_client_genders: ["all"] });
+    } else {
+      // If selecting specific gender, remove "all" and toggle this gender
+      let updated = current.filter((g: string) => g !== "all");
+      
+      if (updated.includes(genderId)) {
+        updated = updated.filter((g: string) => g !== genderId);
+      } else {
+        updated = [...updated, genderId];
+      }
+      
+      // If no specific genders selected, default to "all"
+      if (updated.length === 0) {
+        updated = ["all"];
+      }
+      
+      updateFormData({ preferred_client_genders: updated });
+    }
+  };
   
   const handleClientTypeToggle = (clientType: string) => {
     const current = formData.ideal_client_types || [];
@@ -225,6 +261,43 @@ export function ClientFitSection({ formData, updateFormData }: ClientFitSectionP
                     <div className="flex-1">
                       <p className="font-medium">{style.label}</p>
                       <p className="text-sm text-muted-foreground">{style.description}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Preferred Client Genders */}
+      <div className="space-y-4">
+        <div>
+          <Label>Client Gender Preferences</Label>
+          <p className="text-sm text-muted-foreground mt-1">
+            Select which client genders you prefer to work with
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {clientGenderOptions.map((option) => {
+            const isSelected = formData.preferred_client_genders?.includes(option.id);
+            return (
+              <Card 
+                key={option.id}
+                className={`cursor-pointer transition-colors ${
+                  isSelected ? 'border-primary bg-primary/5' : 'hover:border-primary/50'
+                }`}
+                onClick={() => handleClientGenderToggle(option.id)}
+              >
+                <CardContent className="p-3">
+                  <div className="flex items-center gap-2">
+                    <Checkbox 
+                      checked={isSelected}
+                      onCheckedChange={() => handleClientGenderToggle(option.id)}
+                    />
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">{option.label}</p>
                     </div>
                   </div>
                 </CardContent>
