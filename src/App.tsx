@@ -54,6 +54,7 @@ import DataCleanup from "./pages/admin/DataCleanup";
 import TemplateManagement from "./pages/admin/TemplateManagement";
 import MatchingConfiguration from "./pages/admin/MatchingConfiguration";
 import GoalManagement from "./pages/admin/GoalManagement";
+import CoachingStylesPage from "./pages/admin/CoachingStylesPage";
 import { AdminSystemSettings } from "./pages/AdminSystemSettings";
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -131,6 +132,7 @@ const App = () => (
                 <Route path="/admin/system-settings" element={<AdminSystemSettings />} />
                 <Route path="/admin/matching-config" element={<MatchingConfiguration />} />
                 <Route path="/admin/goals" element={<GoalManagement />} />
+                <Route path="/admin/coaching-styles" element={<CoachingStylesPage />} />
                 <Route path="/trainer/:trainerId" element={<TrainerProfile />} />
                 <Route path="/documentation" element={<Documentation />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
