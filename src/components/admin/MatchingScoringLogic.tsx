@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "react-router-dom";
 import { useActiveClientGoals, ClientGoal } from "@/hooks/useClientGoals";
 import { useAllGoalMappings, GoalSpecialtyMapping } from "@/hooks/useClientGoalMappings";
+import { useCoachingStyleMappings, CoachingStyleMapping } from "@/hooks/useCoachingStyleMappings";
 import { MatchingAlgorithmConfig } from "@/types/matching";
 
 interface MatchingScoringLogicProps {
@@ -17,13 +18,7 @@ interface MatchingScoringLogicProps {
   isDraft?: boolean;
 }
 
-// Hardcoded matching logic constants - these are baked into useEnhancedTrainerMatching.tsx
-const COACHING_STYLE_MAPPINGS = [
-  { clientStyle: "motivational", trainerStyles: ["Motivational", "Encouraging", "Positive"], score: 100 },
-  { clientStyle: "structured", trainerStyles: ["Structured", "Methodical", "Data-Driven"], score: 100 },
-  { clientStyle: "flexible", trainerStyles: ["Adaptive", "Flexible", "Personalized"], score: 100 },
-  { clientStyle: "tough_love", trainerStyles: ["Direct", "Challenging", "No-Nonsense"], score: 100 },
-];
+// Experience level criteria - still hardcoded
 
 const EXPERIENCE_LEVEL_CRITERIA = [
   { clientLevel: "beginner", trainerPreference: "Beginners", bonus: 20, description: "Full bonus for matching" },
@@ -186,9 +181,80 @@ function GoalMappingsSection({ goals, mappingsByGoalId, loading }: {
   );
 }
 
+// Component to render coaching style mappings from database
+function CoachingStyleMappingsSection({ mappings, loading }: { 
+  mappings: CoachingStyleMapping[] | undefined; 
+  loading: boolean;
+}) {
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        {[1, 2, 3].map(i => (
+          <Skeleton key={i} className="h-12 w-full" />
+        ))}
+      </div>
+    );
+  }
+
+  if (!mappings || mappings.length === 0) {
+    return (
+      <div className="text-center py-6 text-muted-foreground">
+        <p>No coaching style mappings configured yet.</p>
+        <Button asChild variant="link" className="mt-2">
+          <Link to="/admin/coaching-styles">Configure Coaching Styles →</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  const getMappingTypeBadge = (type: string) => {
+    switch (type) {
+      case 'primary':
+        return <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-xs">Primary</Badge>;
+      case 'secondary':
+        return <Badge className="bg-blue-500/10 text-blue-600 border-blue-500/20 text-xs">Secondary</Badge>;
+      case 'tertiary':
+        return <Badge variant="outline" className="text-xs">Tertiary</Badge>;
+      default:
+        return null;
+    }
+  };
+
+  // Group mappings by client style
+  const groupedMappings = mappings.reduce((acc, mapping) => {
+    const clientLabel = mapping.client_style?.label || 'Unknown';
+    if (!acc[clientLabel]) {
+      acc[clientLabel] = [];
+    }
+    acc[clientLabel].push(mapping);
+    return acc;
+  }, {} as Record<string, CoachingStyleMapping[]>);
+
+  return (
+    <div className="space-y-3">
+      {Object.entries(groupedMappings).map(([clientLabel, styleMappings]) => (
+        <div key={clientLabel} className="border rounded-lg p-3 space-y-2">
+          <div className="font-medium">{clientLabel}</div>
+          <div className="flex flex-wrap gap-2">
+            {styleMappings.map(m => (
+              <div key={m.id} className="flex items-center gap-1">
+                {getMappingTypeBadge(m.mapping_type)}
+                <Badge variant="secondary" className="text-xs">
+                  {m.trainer_style?.label || 'Unknown'} ({m.weight}%)
+                </Badge>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function MatchingScoringLogic({ currentConfig, liveConfig, isDraft = false }: MatchingScoringLogicProps) {
   const { goals, loading: goalsLoading } = useActiveClientGoals();
   const { mappingsByGoalId, loading: mappingsLoading } = useAllGoalMappings();
+  const { data: coachingStyleMappings, isLoading: coachingStylesLoading } = useCoachingStyleMappings();
 
   const showComparison = isDraft && liveConfig && currentConfig;
 
@@ -386,49 +452,35 @@ export function MatchingScoringLogic({ currentConfig, liveConfig, isDraft = fals
         </Card>
       </Collapsible>
 
-      {/* Coaching Style Mappings - Hardcoded */}
+      {/* Coaching Style Mappings - Database Driven */}
       <Collapsible>
         <Card>
           <CollapsibleTrigger className="w-full">
             <CardHeader className="flex flex-row items-center justify-between cursor-pointer hover:bg-muted/50">
               <div className="flex items-center gap-2">
-                <Lock className="w-4 h-4 text-muted-foreground" />
+                <Database className="w-4 h-4 text-emerald-600" />
                 <CardTitle className="text-base">Coaching Style Mappings</CardTitle>
-                <Badge variant="outline" className="text-xs">Hardcoded</Badge>
+                <Badge variant="outline" className="text-xs text-emerald-600 border-emerald-600/20">Configurable</Badge>
               </div>
               <ChevronDown className="w-4 h-4" />
             </CardHeader>
           </CollapsibleTrigger>
           <CollapsibleContent>
             <CardContent>
-              <CardDescription className="mb-4">
-                <Code className="w-3 h-3 inline mr-1" />
-                These mappings are defined in code. Changes require code modification.
-              </CardDescription>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Client Preference</TableHead>
-                    <TableHead>Trainer Styles</TableHead>
-                    <TableHead>Score</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {COACHING_STYLE_MAPPINGS.map((mapping) => (
-                    <TableRow key={mapping.clientStyle}>
-                      <TableCell className="font-mono text-sm">{mapping.clientStyle}</TableCell>
-                      <TableCell>
-                        <div className="flex flex-wrap gap-1">
-                          {mapping.trainerStyles.map((s) => (
-                            <Badge key={s} variant="secondary" className="text-xs">{s}</Badge>
-                          ))}
-                        </div>
-                      </TableCell>
-                      <TableCell>{mapping.score}%</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <div className="flex items-center justify-between mb-4">
+                <CardDescription>
+                  How client coaching style preferences map to trainer styles. Configure these in Admin → Coaching Styles.
+                </CardDescription>
+                <Button asChild variant="outline" size="sm">
+                  <Link to="/admin/coaching-styles" className="flex items-center gap-1">
+                    Edit Mappings <ExternalLink className="w-3 h-3" />
+                  </Link>
+                </Button>
+              </div>
+              <CoachingStyleMappingsSection 
+                mappings={coachingStyleMappings} 
+                loading={coachingStylesLoading} 
+              />
             </CardContent>
           </CollapsibleContent>
         </Card>
