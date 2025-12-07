@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ChevronDown, Code, Lock, Info, Database, ExternalLink, ArrowUp, ArrowDown, Minus } from "lucide-react";
+import { ChevronDown, Code, Lock, Info, Database, ExternalLink, ArrowUp, ArrowDown, Minus, ShieldX, AlertTriangle, Ban, DollarSign, Calendar } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -12,7 +12,8 @@ import { useAllGoalMappings, GoalSpecialtyMapping } from "@/hooks/useClientGoalM
 import { useCoachingStyleMappings, CoachingStyleMapping } from "@/hooks/useCoachingStyleMappings";
 import { useAllClientMotivators, ClientMotivator } from "@/hooks/useClientMotivators";
 import { useMotivatorActivityMappings } from "@/hooks/useMotivatorActivityMappings";
-import { MatchingAlgorithmConfig } from "@/types/matching";
+import { MatchingAlgorithmConfig, DEFAULT_MATCHING_CONFIG } from "@/types/matching";
+import { HARD_EXCLUSION_RULES } from "@/hooks/useHardExclusions";
 
 interface MatchingScoringLogicProps {
   currentConfig?: MatchingAlgorithmConfig;
@@ -44,9 +45,10 @@ const WEIGHT_CATEGORIES = [
   { key: "schedule_frequency", label: "Schedule & Frequency", description: "Availability and session frequency" },
   { key: "budget_fit", label: "Budget Fit", description: "Price range compatibility" },
   { key: "experience_level", label: "Experience Level", description: "Client experience vs trainer expertise" },
-  { key: "ideal_client_type", label: "Ideal Client Type", description: "Trainer's preferred client profile" },
-  { key: "package_alignment", label: "Package Alignment", description: "Package type preferences" },
-  { key: "discovery_call", label: "Discovery Call", description: "Discovery call offering" },
+  { key: "ideal_client_type", label: "Ideal Client Type", description: "Trainer's preferred client profile match" },
+  { key: "package_alignment", label: "Package Alignment", description: "Package type (ongoing/short-term/single session) preferences" },
+  { key: "discovery_call", label: "Discovery Call", description: "Discovery call preference alignment" },
+  { key: "motivation_alignment", label: "Motivation Alignment", description: "Client motivators vs trainer ways of working" },
 ];
 
 // Helper component to show weight comparison
@@ -621,6 +623,109 @@ export function MatchingScoringLogic({ currentConfig, liveConfig, isDraft = fals
         </Card>
       </Collapsible>
 
+      {/* Hard Exclusions - Mixed Configurable/Hardcoded */}
+      <Collapsible>
+        <Card>
+          <CollapsibleTrigger className="w-full">
+            <CardHeader className="flex flex-row items-center justify-between cursor-pointer hover:bg-muted/50">
+              <div className="flex items-center gap-2">
+                <ShieldX className="w-4 h-4 text-destructive" />
+                <CardTitle className="text-base">Hard Exclusions</CardTitle>
+                <Badge variant="outline" className="text-xs text-amber-600 border-amber-600/20">Mixed</Badge>
+              </div>
+              <ChevronDown className="w-4 h-4" />
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent>
+              <CardDescription className="mb-4">
+                These rules <strong>completely exclude</strong> trainers from matching results before scoring begins.
+                Hard exclusions cannot be overridden by high scores in other categories.
+              </CardDescription>
+              
+              {/* Master Toggle Status */}
+              <div className="mb-4 p-3 border rounded-lg bg-muted/30">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Database className="w-4 h-4 text-emerald-600" />
+                    <span className="font-medium">Hard Exclusions Enabled</span>
+                  </div>
+                  <Badge variant={currentConfig?.feature_flags?.enable_hard_exclusions !== false ? "default" : "secondary"}>
+                    {currentConfig?.feature_flags?.enable_hard_exclusions !== false ? "ON" : "OFF"}
+                  </Badge>
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Toggle in Feature Flags section of the config editor
+                </p>
+              </div>
+
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Exclusion Rule</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Configuration</TableHead>
+                    <TableHead>Description</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {HARD_EXCLUSION_RULES.map((rule) => {
+                    const getIcon = () => {
+                      switch (rule.id) {
+                        case 'gender': return <Ban className="w-4 h-4" />;
+                        case 'format': return <AlertTriangle className="w-4 h-4" />;
+                        case 'budget': return <DollarSign className="w-4 h-4" />;
+                        case 'availability': return <Calendar className="w-4 h-4" />;
+                        default: return <ShieldX className="w-4 h-4" />;
+                      }
+                    };
+
+                    const getConfigValue = () => {
+                      if (rule.id === 'budget') {
+                        const percent = currentConfig?.budget?.hard_exclusion_percent ?? 
+                                        liveConfig?.budget?.hard_exclusion_percent ?? 
+                                        DEFAULT_MATCHING_CONFIG.budget.hard_exclusion_percent;
+                        return `${percent}% over budget`;
+                      }
+                      return "—";
+                    };
+
+                    return (
+                      <TableRow key={rule.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            {getIcon()}
+                            <span className="font-medium">{rule.name}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {rule.configurable ? (
+                            <Badge variant="outline" className="text-xs text-emerald-600 border-emerald-600/20">
+                              <Database className="w-3 h-3 mr-1" /> Configurable
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-xs text-amber-600 border-amber-600/20">
+                              <Lock className="w-3 h-3 mr-1" /> Hardcoded
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {rule.configurable ? (
+                            <Badge variant="secondary" className="font-mono">{getConfigValue()}</Badge>
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-sm">{rule.description}</TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
 
     </div>
   );

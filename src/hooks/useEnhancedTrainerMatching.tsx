@@ -443,8 +443,114 @@ export const useEnhancedTrainerMatching = (
         }
       }
 
+      // Package Alignment Match - Uses LIVE config weights and package_boundaries
+      let packageScore = 0;
+      const clientPackagePref = clientSurveyData?.preferred_package_type;
+      
+      if (clientPackagePref && trainer.package_options?.length > 0) {
+        const boundaries = liveVersion?.config?.package_boundaries || DEFAULT_MATCHING_CONFIG.package_boundaries;
+        
+        const hasMatchingPackage = trainer.package_options.some((pkg: any) => {
+          const sessions = pkg.sessions || 1;
+          const durationMonths = pkg.duration_months || 0;
+          
+          if (clientPackagePref === 'single_session') {
+            return sessions <= boundaries.single_session.max_sessions;
+          } else if (clientPackagePref === 'short_term') {
+            return sessions >= boundaries.short_term.min_sessions && 
+                   sessions <= boundaries.short_term.max_sessions;
+          } else if (clientPackagePref === 'ongoing') {
+            return sessions >= boundaries.ongoing.min_sessions || 
+                   durationMonths >= boundaries.ongoing.min_months;
+          }
+          return false;
+        });
+        
+        packageScore = hasMatchingPackage ? 100 : 40;
+        score += packageScore * (liveWeights.package_alignment.value / 100);
+        
+        details.push({
+          category: 'Package',
+          score: packageScore,
+          icon: Users,
+          color: 'text-indigo-500'
+        });
+        
+        if (hasMatchingPackage) {
+          reasons.push(`Offers ${clientPackagePref.replace('_', ' ')} packages`);
+        }
+      }
 
-      // PHASE 2 IMPROVEMENT: Ensure minimum baseline score  
+      // Discovery Call Match - Uses LIVE config weights
+      let discoveryScore = 0;
+      const discoveryPref = clientSurveyData?.discovery_call_preference;
+      const trainerOffersDiscovery = (trainer as any).offers_discovery_call || (trainer as any).free_discovery_call;
+      
+      if (discoveryPref) {
+        if (discoveryPref === 'required' && trainerOffersDiscovery) {
+          discoveryScore = 100;
+        } else if (discoveryPref === 'prefer_no' && !trainerOffersDiscovery) {
+          discoveryScore = 100;
+        } else if (discoveryPref === 'flexible') {
+          discoveryScore = 80; // Flexible clients are easy to satisfy
+        } else {
+          discoveryScore = 50; // Partial match
+        }
+        
+        score += discoveryScore * (liveWeights.discovery_call.value / 100);
+        
+        details.push({
+          category: 'Discovery',
+          score: discoveryScore,
+          icon: Calendar,
+          color: 'text-teal-500'
+        });
+        
+        if (discoveryScore >= 80) {
+          reasons.push(trainerOffersDiscovery ? 'Offers discovery calls' : 'No discovery call required');
+        }
+      }
+
+      // Ideal Client Type Match - Uses LIVE config weights and feature flag
+      let idealClientScore = 0;
+      const useIdealClientBonus = liveVersion?.config?.feature_flags?.use_ideal_client_bonus ?? true;
+      
+      if (useIdealClientBonus) {
+        const trainerIdealTypes = (trainer as any).ideal_client_types || [];
+        const clientExperience = clientSurveyData?.experience_level;
+        
+        if (trainerIdealTypes.length > 0 && clientExperience) {
+          // Map experience level to ideal client type keywords
+          const experienceToIdealMap: Record<string, string[]> = {
+            'beginner': ['beginners', 'new_to_fitness', 'first_timers', 'beginner'],
+            'intermediate': ['intermediate', 'regular_exercisers', 'consistent'],
+            'advanced': ['advanced', 'athletes', 'competitive', 'experienced']
+          };
+          
+          const clientKeywords = experienceToIdealMap[clientExperience] || [];
+          const hasMatch = trainerIdealTypes.some((type: string) => 
+            clientKeywords.some(keyword => 
+              type.toLowerCase().includes(keyword) || keyword.includes(type.toLowerCase())
+            )
+          );
+          
+          idealClientScore = hasMatch ? 100 : 50;
+          score += idealClientScore * (liveWeights.ideal_client_type.value / 100);
+          
+          details.push({
+            category: 'Ideal Client',
+            score: idealClientScore,
+            icon: Heart,
+            color: 'text-pink-500'
+          });
+          
+          if (hasMatch) {
+            reasons.push(`You match this trainer's ideal client profile`);
+          }
+        }
+      }
+
+      // PHASE 2 IMPROVEMENT: Ensure minimum baseline score
       const finalScore = Math.max(Math.round(score), MINIMUM_BASELINE_SCORE);
       
       // Add baseline reasons if score is low
