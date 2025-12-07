@@ -1,0 +1,20 @@
+name: Mirror to Production Repository
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Push to production repository
+        run: |
+          git remote add prod https://x-access-token:${{ secrets.PROD_REPO_TOKEN }}@github.com/Not-Another-Coach/not-another-coach-prod.git
+          git push prod main:main --force
