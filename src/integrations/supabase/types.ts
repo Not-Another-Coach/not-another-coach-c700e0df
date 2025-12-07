@@ -663,6 +663,42 @@ export type Database = {
         }
         Relationships: []
       }
+      client_motivators: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          key: string
+          label: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          key: string
+          label: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          key?: string
+          label?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       client_onboarding_progress: {
         Row: {
           activity_id: string | null
@@ -3227,6 +3263,45 @@ export type Database = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      motivator_activity_mappings: {
+        Row: {
+          activity_id: string
+          created_at: string | null
+          id: string
+          motivator_id: string
+          weight: number | null
+        }
+        Insert: {
+          activity_id: string
+          created_at?: string | null
+          id?: string
+          motivator_id: string
+          weight?: number | null
+        }
+        Update: {
+          activity_id?: string
+          created_at?: string | null
+          id?: string
+          motivator_id?: string
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "motivator_activity_mappings_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "trainer_onboarding_activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "motivator_activity_mappings_motivator_id_fkey"
+            columns: ["motivator_id"]
+            isOneToOne: false
+            referencedRelation: "client_motivators"
             referencedColumns: ["id"]
           },
         ]

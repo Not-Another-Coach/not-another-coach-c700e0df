@@ -17,6 +17,7 @@ export interface MatchingAlgorithmConfig {
     ideal_client_type: WeightConfig;
     package_alignment: WeightConfig;
     discovery_call: WeightConfig;
+    motivation_alignment: WeightConfig;
   };
   thresholds: {
     min_match_to_show: number;
@@ -71,7 +72,8 @@ export const DEFAULT_MATCHING_CONFIG: MatchingAlgorithmConfig = {
     experience_level: { value: 5, min: 0, max: 15 },
     ideal_client_type: { value: 5, min: 0, max: 10 },
     package_alignment: { value: 3, min: 0, max: 10 },
-    discovery_call: { value: 2, min: 0, max: 5 }
+    discovery_call: { value: 2, min: 0, max: 5 },
+    motivation_alignment: { value: 0, min: 0, max: 10 }
   },
   thresholds: {
     min_match_to_show: 30,
