@@ -397,18 +397,11 @@ export const useEnhancedTrainerMatching = (
         reasons.push(`Doesn't typically work with ${clientExperience} level clients`);
       }
 
-      // Trainer Gender Preference Match (filter, not scored)
+      // Gender preference is now a hard exclusion - no soft scoring needed
+      // Trainers not matching gender preference are filtered out by applyHardExclusions
       const trainerGenderPref = clientSurveyData?.trainer_gender_preference;
-      const trainerGender = (trainer as any).gender; // From profiles.gender
-      
-      if (trainerGenderPref && trainerGenderPref !== 'no_preference' && trainerGender) {
-        // If client has a preference and trainer's gender doesn't match, significantly reduce score
-        if (trainerGender !== trainerGenderPref) {
-          score = score * 0.3; // Reduce to 30% - still show but much lower
-          reasons.push(`Gender preference not matched`);
-        } else {
-          reasons.push(`Matches your trainer gender preference`);
-        }
+      if (trainerGenderPref && trainerGenderPref !== 'no_preference') {
+        reasons.push(`Matches your trainer gender preference`);
       }
 
 
