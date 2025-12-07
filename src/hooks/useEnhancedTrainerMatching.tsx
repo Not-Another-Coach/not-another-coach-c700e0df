@@ -1,9 +1,11 @@
 import { useMemo } from 'react';
 import { Trainer } from '@/types/trainer';
 import { Target, MapPin, Clock, DollarSign, Heart, Users, Calendar } from 'lucide-react';
-import { useMatchingConfig, MatchingAlgorithmConfig } from './useMatchingConfig';
+import { useMatchingConfig } from './useMatchingConfig';
 import { applyHardExclusions, ExcludedTrainer, ExclusionSummary, HARD_EXCLUSION_RULES } from './useHardExclusions';
-
+import { useLiveMatchingVersion } from './useMatchingVersions';
+import { useGoalSpecialtyMappingsForMatching, GoalMappingsLookup } from './useGoalSpecialtyMappingsForMatching';
+import { DEFAULT_MATCHING_CONFIG } from '@/types/matching';
 interface QuizAnswers {
   fitness_goals?: string[];
   experience_level?: string;
@@ -84,6 +86,14 @@ export const useEnhancedTrainerMatching = (
 ): EnhancedMatchingResult => {
   const { config } = useMatchingConfig();
   
+  // Fetch live matching config for weight percentages
+  const { data: liveVersion } = useLiveMatchingVersion();
+  const liveWeights = liveVersion?.config?.weights || DEFAULT_MATCHING_CONFIG.weights;
+  
+  // Fetch goal-specialty mappings from database
+  const { data: goalMappings } = useGoalSpecialtyMappingsForMatching();
+  const dbGoalMappings: GoalMappingsLookup = goalMappings || {};
+  
   // Apply hard exclusions first
   const { includedTrainers, excludedTrainers, exclusionSummary } = useMemo(() => {
     return applyHardExclusions(trainers, clientSurveyData, config);
@@ -126,37 +136,42 @@ export const useEnhancedTrainerMatching = (
       // Use new client survey data if available, otherwise fallback to old quiz
       const surveyData = clientSurveyData || userAnswers;
       
-      // Goals Match (25% weight) - Enhanced for new survey
+      // Goals Match - Uses LIVE config weights and DATABASE goal-specialty mappings
       let goalsScore = 0;
       const primaryGoals = clientSurveyData?.primary_goals || userAnswers?.fitness_goals || [];
       
       if (primaryGoals.length > 0) {
-        const goalMapping: Record<string, string[]> = {
-          'weight_loss': ['Weight Loss', 'Fat Loss', 'Body Composition', 'Nutrition'],
-          'strength_training': ['Strength Training', 'Powerlifting', 'Muscle Building', 'Bodybuilding'],
-          'fitness_health': ['General Fitness', 'Health & Wellness', 'Functional Training'],
-          'energy_confidence': ['Lifestyle Coaching', 'Motivation', 'Confidence Building'],
-          'injury_prevention': ['Rehabilitation', 'Corrective Exercise', 'Injury Prevention', 'Mobility'],
-          'specific_sport': ['Sports Performance', 'Athletic Training', 'Sport-Specific'],
-          'muscle_gain': ['Muscle Building', 'Strength Training', 'Bodybuilding'],
-          'endurance': ['Endurance', 'Cardio', 'Marathon Training'],
-          'flexibility': ['Yoga', 'Pilates', 'Flexibility', 'Mobility'],
-          'general_fitness': ['Functional Training', 'HIIT', 'CrossFit'],
-          'rehabilitation': ['Rehabilitation', 'Corrective Exercise', 'Physical Therapy']
-        };
+        // Use database mappings with weighted scoring (100/60/30 for primary/secondary/optional)
+        let totalWeightedScore = 0;
+        let maxPossibleScore = 0;
         
-        const matchingGoals = primaryGoals.filter(goal => {
-          const relatedSpecialties = goalMapping[goal] || [];
-          return trainer.specialties.some(specialty => 
-            relatedSpecialties.some(related => 
-              specialty.toLowerCase().includes(related.toLowerCase()) ||
-              related.toLowerCase().includes(specialty.toLowerCase())
-            )
-          );
-        }).length;
+        primaryGoals.forEach(goal => {
+          const mappings = dbGoalMappings[goal] || [];
+          
+          if (mappings.length === 0) {
+            // No mappings in DB for this goal - fallback behavior
+            maxPossibleScore += 100;
+            return;
+          }
+          
+          // Find the best matching specialty for this goal
+          let bestMatchWeight = 0;
+          mappings.forEach(mapping => {
+            const hasMatch = trainer.specialties.some(specialty => 
+              specialty.toLowerCase().includes(mapping.specialty.toLowerCase()) ||
+              mapping.specialty.toLowerCase().includes(specialty.toLowerCase())
+            );
+            if (hasMatch && mapping.weight > bestMatchWeight) {
+              bestMatchWeight = mapping.weight;
+            }
+          });
+          
+          maxPossibleScore += 100; // Max possible is always 100 per goal
+          totalWeightedScore += bestMatchWeight; // Add the best match weight (0, 30, 60, or 100)
+        });
         
-        goalsScore = Math.round((matchingGoals / primaryGoals.length) * 100);
-        score += goalsScore * 0.25;
+        goalsScore = maxPossibleScore > 0 ? Math.round((totalWeightedScore / maxPossibleScore) * 100) : 0;
+        score += goalsScore * (liveWeights.goals_specialties.value / 100);
         
         details.push({
           category: 'Goals',
@@ -165,12 +180,22 @@ export const useEnhancedTrainerMatching = (
           color: 'text-blue-500'
         });
         
+        const matchingGoals = primaryGoals.filter(goal => {
+          const mappings = dbGoalMappings[goal] || [];
+          return mappings.some(mapping => 
+            trainer.specialties.some(specialty => 
+              specialty.toLowerCase().includes(mapping.specialty.toLowerCase()) ||
+              mapping.specialty.toLowerCase().includes(specialty.toLowerCase())
+            )
+          );
+        }).length;
+        
         if (matchingGoals > 0) {
           reasons.push(`${matchingGoals}/${primaryGoals.length} goals align with expertise`);
         }
       }
       
-      // Training Location & Format Match (20% weight)
+      // Training Location & Format Match - Uses LIVE config weights
       let locationScore = 0;
       const locationPreference = clientSurveyData?.training_location_preference || 
         (userAnswers?.session_preference === 'in_person' ? 'in-person' : 
@@ -194,7 +219,7 @@ export const useEnhancedTrainerMatching = (
         }
         
         locationScore = formatMatch ? 100 : (clientSurveyData?.open_to_virtual_coaching ? 70 : 0);
-        score += locationScore * 0.20;
+        score += locationScore * (liveWeights.location_format.value / 100);
         
         details.push({
           category: 'Location',
@@ -208,7 +233,7 @@ export const useEnhancedTrainerMatching = (
         }
       }
       
-      // Coaching Style Match (20% weight) - New from survey
+      // Coaching Style Match - Uses LIVE config weights
       let styleScore = 0;
       if (clientSurveyData?.preferred_coaching_style?.length) {
         const styleMapping: Record<string, string[]> = {
@@ -230,7 +255,7 @@ export const useEnhancedTrainerMatching = (
         }).length;
         
         styleScore = Math.round((styleMatches / clientSurveyData.preferred_coaching_style.length) * 100);
-        score += styleScore * 0.20;
+        score += styleScore * (liveWeights.coaching_style.value / 100);
         
         details.push({
           category: 'Style',
@@ -244,7 +269,7 @@ export const useEnhancedTrainerMatching = (
         }
       }
       
-      // Schedule & Frequency Match (15% weight)
+      // Schedule & Frequency Match - Uses LIVE config weights
       let scheduleScore = 0;
       const preferredFrequency = clientSurveyData?.preferred_training_frequency || 
         (userAnswers?.workout_frequency === 'daily' ? 7 :
@@ -259,7 +284,7 @@ export const useEnhancedTrainerMatching = (
           scheduleScore = 100; // Bonus for flexible clients
         }
         
-        score += scheduleScore * 0.15;
+        score += scheduleScore * (liveWeights.schedule_frequency.value / 100);
         
         details.push({
           category: 'Schedule',
@@ -273,7 +298,7 @@ export const useEnhancedTrainerMatching = (
         }
       }
       
-      // Budget Match (10% weight) - Enhanced
+      // Budget Match - Uses LIVE config weights
       let budgetScore = 0;
       const budgetMin = clientSurveyData?.budget_range_min;
       const budgetMax = clientSurveyData?.budget_range_max;
@@ -314,7 +339,7 @@ export const useEnhancedTrainerMatching = (
         }
         
         budgetScore = withinBudget ? 100 : (budgetFlex === 'negotiable' ? 60 : 0);
-        score += budgetScore * 0.10;
+        score += budgetScore * (liveWeights.budget_fit.value / 100);
         
         details.push({
           category: 'Budget',
@@ -330,7 +355,7 @@ export const useEnhancedTrainerMatching = (
         }
       }
       
-      // Experience & Client Fit Match (10% weight) - Enhanced
+      // Experience & Client Fit Match - Uses LIVE config weights
       let experienceScore = 0;
       const clientExperience = clientSurveyData?.experience_level || userAnswers?.experience_level || 'beginner';
       
@@ -341,8 +366,8 @@ export const useEnhancedTrainerMatching = (
       };
       
       const experienceMatch = experienceMapping[clientExperience]?.(trainer) || false;
-      experienceScore = experienceMatch ? 100 : 70; // Most trainers can work with different levels
-      score += experienceScore * 0.10;
+      experienceScore = experienceMatch ? 100 : 70;
+      score += experienceScore * (liveWeights.experience_level.value / 100);
       
       details.push({
         category: 'Experience',
@@ -451,7 +476,7 @@ export const useEnhancedTrainerMatching = (
 
     // Apply diversity algorithm
     return implementTrainerDiversity(scoredTrainers);
-  }, [includedTrainers, userAnswers, clientSurveyData]);
+  }, [includedTrainers, userAnswers, clientSurveyData, dbGoalMappings, liveWeights]);
 
   return {
     matchedTrainers,
