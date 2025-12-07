@@ -291,6 +291,7 @@ export function MatchingVersionEditor({ version, mode, onBack, onVersionCreated 
                 <WeightSlider label="Ideal Client Type" weightKey="ideal_client_type" weight={config.weights.ideal_client_type} />
                 <WeightSlider label="Package Alignment" weightKey="package_alignment" weight={config.weights.package_alignment} />
                 <WeightSlider label="Discovery Call" weightKey="discovery_call" weight={config.weights.discovery_call} />
+                <WeightSlider label="Motivation Alignment" weightKey="motivation_alignment" weight={config.weights.motivation_alignment} />
               </CardContent>
             </Card>
           </TabsContent>

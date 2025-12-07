@@ -3,8 +3,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Heart, Zap, Target, Users, Award, Smile, Leaf, BookOpen, Flame, Sparkles } from "lucide-react";
+import { Heart, Zap, Target, Users, Award, Smile, Leaf, BookOpen, Flame, Sparkles, ThumbsUp, TrendingUp, Trophy, Shuffle, Lightbulb, GraduationCap } from "lucide-react";
 import { useClientCoachingStyles } from "@/hooks/useClientCoachingStyles";
+import { useClientMotivators } from "@/hooks/useClientMotivators";
 
 interface CoachingStyleSectionProps {
   formData: any;
@@ -25,24 +26,19 @@ const iconMap: Record<string, React.ReactNode> = {
   BookOpen: <BookOpen className="h-6 w-6" />,
   Flame: <Flame className="h-6 w-6" />,
   Sparkles: <Sparkles className="h-6 w-6" />,
+  ThumbsUp: <ThumbsUp className="h-6 w-6" />,
+  TrendingUp: <TrendingUp className="h-6 w-6" />,
+  Trophy: <Trophy className="h-6 w-6" />,
+  Shuffle: <Shuffle className="h-6 w-6" />,
+  Lightbulb: <Lightbulb className="h-6 w-6" />,
+  GraduationCap: <GraduationCap className="h-6 w-6" />,
 };
-
-const motivationFactors = [
-  "Positive reinforcement",
-  "Celebrating small wins",
-  "Setting clear goals",
-  "Friendly competition",
-  "Progress tracking",
-  "Personal connection",
-  "Variety in workouts",
-  "Understanding my 'why'",
-  "Flexible expectations",
-  "Professional expertise"
-];
 
 export function CoachingStyleSection({ formData, updateFormData, errors, clearFieldError }: CoachingStyleSectionProps) {
   // Fetch coaching styles from database
-  const { data: coachingStyleOptions, isLoading } = useClientCoachingStyles();
+  const { data: coachingStyleOptions, isLoading: stylesLoading } = useClientCoachingStyles();
+  // Fetch motivators from database
+  const { data: motivatorOptions, isLoading: motivatorsLoading } = useClientMotivators();
 
   const handleCoachingStyleToggle = (styleKey: string) => {
     const current = formData.preferred_coaching_style || [];
@@ -53,11 +49,11 @@ export function CoachingStyleSection({ formData, updateFormData, errors, clearFi
     clearFieldError?.('preferred_coaching_style');
   };
 
-  const handleMotivationFactorToggle = (factor: string) => {
+  const handleMotivationFactorToggle = (motivatorKey: string) => {
     const current = formData.motivation_factors || [];
-    const updated = current.includes(factor)
-      ? current.filter((f: string) => f !== factor)
-      : [...current, factor];
+    const updated = current.includes(motivatorKey)
+      ? current.filter((f: string) => f !== motivatorKey)
+      : [...current, motivatorKey];
     updateFormData({ motivation_factors: updated });
   };
 
@@ -83,7 +79,7 @@ export function CoachingStyleSection({ formData, updateFormData, errors, clearFi
           <p className="text-sm text-destructive">{errors.preferred_coaching_style}</p>
         )}
 
-        {isLoading ? (
+        {stylesLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-32 w-full" />)}
           </div>
@@ -141,22 +137,28 @@ export function CoachingStyleSection({ formData, updateFormData, errors, clearFi
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-2">
-          {motivationFactors.map((factor) => {
-            const isSelected = formData.motivation_factors?.includes(factor);
-            
-            return (
-              <Badge
-                key={factor}
-                variant={isSelected ? "default" : "outline"}
-                className="cursor-pointer px-3 py-2 text-sm"
-                onClick={() => handleMotivationFactorToggle(factor)}
-              >
-                {factor}
-              </Badge>
-            );
-          })}
-        </div>
+        {motivatorsLoading ? (
+          <div className="flex flex-wrap gap-2">
+            {[1, 2, 3, 4, 5].map(i => <Skeleton key={i} className="h-8 w-24" />)}
+          </div>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {motivatorOptions?.map((motivator) => {
+              const isSelected = formData.motivation_factors?.includes(motivator.key);
+              
+              return (
+                <Badge
+                  key={motivator.id}
+                  variant={isSelected ? "default" : "outline"}
+                  className="cursor-pointer px-3 py-2 text-sm"
+                  onClick={() => handleMotivationFactorToggle(motivator.key)}
+                >
+                  {motivator.label}
+                </Badge>
+              );
+            })}
+          </div>
+        )}
       </div>
 
     </div>
