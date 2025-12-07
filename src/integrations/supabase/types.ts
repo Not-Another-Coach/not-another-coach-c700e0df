@@ -437,6 +437,45 @@ export type Database = {
           },
         ]
       }
+      client_coaching_styles: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number
+          icon: string | null
+          id: string
+          is_active: boolean
+          keywords: string[] | null
+          label: string
+          style_key: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          keywords?: string[] | null
+          label: string
+          style_key: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          keywords?: string[] | null
+          label?: string
+          style_key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       client_commitment_acknowledgments: {
         Row: {
           acknowledged_at: string | null
@@ -1269,6 +1308,48 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      coaching_style_mappings: {
+        Row: {
+          client_style_id: string
+          created_at: string
+          id: string
+          mapping_type: string
+          trainer_style_id: string
+          weight: number
+        }
+        Insert: {
+          client_style_id: string
+          created_at?: string
+          id?: string
+          mapping_type?: string
+          trainer_style_id: string
+          weight?: number
+        }
+        Update: {
+          client_style_id?: string
+          created_at?: string
+          id?: string
+          mapping_type?: string
+          trainer_style_id?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coaching_style_mappings_client_style_id_fkey"
+            columns: ["client_style_id"]
+            isOneToOne: false
+            referencedRelation: "client_coaching_styles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coaching_style_mappings_trainer_style_id_fkey"
+            columns: ["trainer_style_id"]
+            isOneToOne: false
+            referencedRelation: "trainer_coaching_styles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       consent_audit_log: {
         Row: {
@@ -5267,6 +5348,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      trainer_coaching_styles: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number
+          emoji: string | null
+          id: string
+          is_active: boolean
+          label: string
+          style_key: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          emoji?: string | null
+          id?: string
+          is_active?: boolean
+          label: string
+          style_key: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          emoji?: string | null
+          id?: string
+          is_active?: boolean
+          label?: string
+          style_key?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       trainer_image_preferences: {
         Row: {

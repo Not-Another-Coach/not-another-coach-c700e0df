@@ -5,6 +5,7 @@ import { useMatchingConfig } from './useMatchingConfig';
 import { applyHardExclusions, ExcludedTrainer, ExclusionSummary, HARD_EXCLUSION_RULES } from './useHardExclusions';
 import { useLiveMatchingVersion } from './useMatchingVersions';
 import { useGoalSpecialtyMappingsForMatching, GoalMappingsLookup } from './useGoalSpecialtyMappingsForMatching';
+import { useCoachingStyleMappingsForMatching, CoachingStyleMappingLookup } from './useCoachingStyleMappings';
 import { DEFAULT_MATCHING_CONFIG } from '@/types/matching';
 interface QuizAnswers {
   fitness_goals?: string[];
@@ -93,6 +94,10 @@ export const useEnhancedTrainerMatching = (
   // Fetch goal-specialty mappings from database
   const { data: goalMappings } = useGoalSpecialtyMappingsForMatching();
   const dbGoalMappings: GoalMappingsLookup = goalMappings || {};
+  
+  // Fetch coaching style mappings from database
+  const { data: styleMappings } = useCoachingStyleMappingsForMatching();
+  const dbStyleMappings: CoachingStyleMappingLookup = styleMappings || {};
   
   // Apply hard exclusions first
   const { includedTrainers, excludedTrainers, exclusionSummary } = useMemo(() => {
@@ -234,28 +239,38 @@ export const useEnhancedTrainerMatching = (
         }
       }
       
-      // Coaching Style Match - Uses LIVE config weights
+      // Coaching Style Match - Uses LIVE config weights and DATABASE style mappings
       let styleScore = 0;
       if (clientSurveyData?.preferred_coaching_style?.length) {
-        const styleMapping: Record<string, string[]> = {
-          'nurturing': ['supportive', 'patient', 'encouraging', 'nurturing'],
-          'tough_love': ['challenging', 'direct', 'accountability', 'strict'],
-          'high_energy': ['energetic', 'motivating', 'enthusiastic', 'dynamic'],
-          'analytical': ['technical', 'data-driven', 'precise', 'scientific'],
-          'social': ['fun', 'social', 'interactive', 'group'],
-          'calm': ['calm', 'mindful', 'peaceful', 'balanced']
-        };
+        const trainerStyles = (trainer as any).coaching_style || [];
+        let totalWeightedScore = 0;
+        let maxPossibleScore = 0;
         
-        const trainerVibe = (trainer as any).training_vibe || '';
-        const trainerStyle = (trainer as any).communication_style || '';
-        const trainerText = `${trainerVibe} ${trainerStyle}`.toLowerCase();
+        clientSurveyData.preferred_coaching_style.forEach(clientStyle => {
+          const mappings = dbStyleMappings[clientStyle] || [];
+          maxPossibleScore += 100;
+          
+          if (mappings.length === 0) {
+            // No mappings in DB - use fallback text matching
+            return;
+          }
+          
+          // Find the best matching trainer style
+          let bestMatchWeight = 0;
+          mappings.forEach(mapping => {
+            const hasMatch = trainerStyles.some((ts: string) => 
+              ts.toLowerCase() === mapping.trainerStyleKey.toLowerCase() ||
+              ts.toLowerCase().includes(mapping.trainerStyleKey.toLowerCase())
+            );
+            if (hasMatch && mapping.weight > bestMatchWeight) {
+              bestMatchWeight = mapping.weight;
+            }
+          });
+          
+          totalWeightedScore += bestMatchWeight;
+        });
         
-        const styleMatches = clientSurveyData.preferred_coaching_style.filter(style => {
-          const keywords = styleMapping[style] || [];
-          return keywords.some(keyword => trainerText.includes(keyword));
-        }).length;
-        
-        styleScore = Math.round((styleMatches / clientSurveyData.preferred_coaching_style.length) * 100);
+        styleScore = maxPossibleScore > 0 ? Math.round((totalWeightedScore / maxPossibleScore) * 100) : 0;
         score += styleScore * (liveWeights.coaching_style.value / 100);
         
         details.push({
@@ -265,7 +280,7 @@ export const useEnhancedTrainerMatching = (
           color: 'text-purple-500'
         });
         
-        if (styleMatches > 0) {
+        if (styleScore > 0) {
           reasons.push(`Coaching style matches your preferences`);
         }
       }
