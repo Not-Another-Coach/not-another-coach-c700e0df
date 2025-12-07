@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Upload, Camera, Sparkles, User, Plus, X, Calendar, GripVertical, RefreshCw } from "lucide-react";
 import { SectionHeader } from './SectionHeader';
 import { AIDescriptionHelper } from './AIDescriptionHelper';
@@ -150,7 +151,34 @@ export function BasicInfoSection({ formData, updateFormData, errors = {}, clearF
         </div>
       </div>
 
-      {/* Profile Photo */}
+      {/* Gender (trainer's own gender - used for client matching) */}
+      <div className="space-y-2">
+        <Label htmlFor="gender">Gender *</Label>
+        <p className="text-xs text-muted-foreground">
+          This helps clients who have a preference find you
+        </p>
+        <Select 
+          value={formData.gender || ""} 
+          onValueChange={(value) => {
+            updateFormData({ gender: value });
+            if (errors.gender && clearFieldError) clearFieldError('gender');
+          }}
+        >
+          <SelectTrigger className={errors.gender ? 'border-red-500' : ''}>
+            <SelectValue placeholder="Select your gender" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="male">Male</SelectItem>
+            <SelectItem value="female">Female</SelectItem>
+            <SelectItem value="non_binary">Non-binary</SelectItem>
+            <SelectItem value="prefer_not_to_say">Prefer not to say</SelectItem>
+          </SelectContent>
+        </Select>
+        {errors.gender && (
+          <p className="text-sm text-red-500 mt-1">{errors.gender}</p>
+        )}
+      </div>
+
       <div className="space-y-2">
         <Label>Profile Photo</Label>
         <Card className={`border-2 border-dashed transition-colors ${dragOver ? 'border-primary bg-primary/5' : 'border-muted-foreground/25'}`}>
