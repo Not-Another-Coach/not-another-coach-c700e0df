@@ -6945,12 +6945,15 @@ export type Database = {
           client_survey_completed: boolean | null
           client_survey_completed_at: string | null
           created_at: string | null
+          discovery_call_preference:
+            | Database["public"]["Enums"]["discovery_call_preference"]
+            | null
           experience_level: string | null
           first_name: string | null
           fitness_equipment_access: Json | null
           fitness_goals: string[] | null
           flexible_scheduling: boolean | null
-          gender_preference: string | null
+          gender: string | null
           has_specific_event: string | null
           health_conditions: string | null
           id: string | null
@@ -6979,9 +6982,12 @@ export type Database = {
           start_timeline: string | null
           tagline: string | null
           timezone: string | null
+          trainer_gender_preference:
+            | Database["public"]["Enums"]["trainer_gender_preference"]
+            | null
           training_location_preference: string | null
           updated_at: string | null
-          user_type: Database["public"]["Enums"]["user_type"] | null
+          user_type: string | null
           waitlist_preference: boolean | null
         }
         Relationships: []
