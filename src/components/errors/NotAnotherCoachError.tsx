@@ -188,7 +188,7 @@ export function NotAnotherCoachError({
       role="main" 
       aria-labelledby="error-title"
       className={`min-h-screen flex items-center justify-center p-4 bg-background ${className}`}
-      style={code === '500' ? {
+      style={code === '500' || code === '404' ? {
         backgroundImage: `url(${runnersBackground})`,
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
