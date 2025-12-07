@@ -7,6 +7,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import runnersBackground from '@/assets/images/runners-timeout.png';
 
 type ErrorCode = '404' | '500' | '403' | 'offline';
 
@@ -187,6 +188,12 @@ export function NotAnotherCoachError({
       role="main" 
       aria-labelledby="error-title"
       className={`min-h-screen flex items-center justify-center p-4 bg-background ${className}`}
+      style={code === '500' ? {
+        backgroundImage: `url(${runnersBackground})`,
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundSize: 'cover',
+      } : undefined}
     >
       <div className="w-full max-w-2xl">
         <div className="bg-card rounded-3xl border border-border shadow-lg p-8 md:p-12 text-center">
