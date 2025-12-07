@@ -39,7 +39,6 @@ export interface MatchingAlgorithmConfig {
   };
   feature_flags: {
     use_ideal_client_bonus: boolean;
-    use_discovery_call_penalty: boolean;
     enable_hard_exclusions: boolean;
   };
 }
@@ -95,7 +94,6 @@ export const DEFAULT_MATCHING_CONFIG: MatchingAlgorithmConfig = {
   },
   feature_flags: {
     use_ideal_client_bonus: true,
-    use_discovery_call_penalty: true,
     enable_hard_exclusions: true
   }
 };

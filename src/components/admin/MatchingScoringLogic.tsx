@@ -26,13 +26,6 @@ const EXPERIENCE_LEVEL_CRITERIA = [
   { clientLevel: "advanced", trainerPreference: "Advanced", bonus: 20, description: "Full bonus for matching" },
 ];
 
-const SCORE_MODIFIERS = [
-  { name: "Gender Preference Match", modifier: "+10", condition: "Client's gender preference matches trainer's gender" },
-  { name: "Discovery Call Mismatch", modifier: "-5", condition: "Client wants discovery call but trainer doesn't offer" },
-  { name: "Virtual Training Bonus", modifier: "+5", condition: "Client open to virtual, trainer offers online" },
-  { name: "Budget Over Soft Tolerance", modifier: "-10 to -30", condition: "Trainer price exceeds client budget by 20-40%" },
-  { name: "Ideal Client Match", modifier: "+10", condition: "Client matches trainer's ideal client type" },
-];
 
 const DIVERSITY_TIERS = [
   { tier: "Top Match", range: "75-100%", color: "bg-emerald-500" },
@@ -526,47 +519,6 @@ export function MatchingScoringLogic({ currentConfig, liveConfig, isDraft = fals
         </Card>
       </Collapsible>
 
-      {/* Score Modifiers - Hardcoded */}
-      <Collapsible>
-        <Card>
-          <CollapsibleTrigger className="w-full">
-            <CardHeader className="flex flex-row items-center justify-between cursor-pointer hover:bg-muted/50">
-              <div className="flex items-center gap-2">
-                <Lock className="w-4 h-4 text-muted-foreground" />
-                <CardTitle className="text-base">Score Modifiers & Penalties</CardTitle>
-                <Badge variant="outline" className="text-xs">Hardcoded</Badge>
-              </div>
-              <ChevronDown className="w-4 h-4" />
-            </CardHeader>
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Modifier</TableHead>
-                    <TableHead>Value</TableHead>
-                    <TableHead>Condition</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {SCORE_MODIFIERS.map((mod) => (
-                    <TableRow key={mod.name}>
-                      <TableCell className="font-medium">{mod.name}</TableCell>
-                      <TableCell>
-                        <Badge variant={mod.modifier.startsWith('-') ? 'destructive' : 'default'}>
-                          {mod.modifier}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">{mod.condition}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </CollapsibleContent>
-        </Card>
-      </Collapsible>
 
       {/* Diversity Tiers - Hardcoded */}
       <Collapsible>
