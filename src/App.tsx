@@ -52,6 +52,7 @@ import VerificationAnalytics from "./pages/admin/VerificationAnalytics";
 import FeedbackBuilder from "./pages/admin/FeedbackBuilder";
 import DataCleanup from "./pages/admin/DataCleanup";
 import TemplateManagement from "./pages/admin/TemplateManagement";
+import MatchingConfiguration from "./pages/admin/MatchingConfiguration";
 import { AdminSystemSettings } from "./pages/AdminSystemSettings";
 
 const queryClient = new QueryClient({
@@ -128,6 +129,7 @@ const App = () => (
                 <Route path="/admin/data-cleanup" element={<DataCleanup />} />
                 <Route path="/admin/templates" element={<TemplateManagement />} />
                 <Route path="/admin/system-settings" element={<AdminSystemSettings />} />
+                <Route path="/admin/matching-config" element={<MatchingConfiguration />} />
                 <Route path="/trainer/:trainerId" element={<TrainerProfile />} />
                 <Route path="/documentation" element={<Documentation />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
