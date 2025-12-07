@@ -34,7 +34,8 @@ import { MatchingVersion, MatchingAlgorithmConfig, WeightConfig } from "@/types/
 import { 
   useUpdateMatchingVersion, 
   usePublishMatchingVersion, 
-  useCloneMatchingVersion 
+  useCloneMatchingVersion,
+  useLiveMatchingVersion
 } from "@/hooks/useMatchingVersions";
 import { MatchingScoringLogic } from "./MatchingScoringLogic";
 
@@ -55,9 +56,11 @@ export function MatchingVersionEditor({ version, mode, onBack, onVersionCreated 
   const updateMutation = useUpdateMatchingVersion();
   const publishMutation = usePublishMatchingVersion();
   const cloneMutation = useCloneMatchingVersion();
+  const { data: liveVersion } = useLiveMatchingVersion();
 
   const isReadOnly = mode === 'view' || version.status !== 'draft';
   const isDraft = version.status === 'draft';
+  const liveConfig = liveVersion?.config;
 
   useEffect(() => {
     setConfig(version.config);
@@ -456,7 +459,11 @@ export function MatchingVersionEditor({ version, mode, onBack, onVersionCreated 
           </TabsContent>
 
           <TabsContent value="scoring-logic">
-            <MatchingScoringLogic />
+            <MatchingScoringLogic 
+              currentConfig={config}
+              liveConfig={liveConfig}
+              isDraft={isDraft}
+            />
           </TabsContent>
         </Tabs>
       </div>
