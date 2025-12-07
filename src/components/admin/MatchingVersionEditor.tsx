@@ -304,7 +304,23 @@ export function MatchingVersionEditor({ version, mode, onBack, onVersionCreated 
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="grid gap-6 md:grid-cols-3">
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>Minimum Baseline Score</Label>
+                    <div className="flex items-center gap-2">
+                      <Slider
+                        value={[config.thresholds.minimum_baseline_score ?? 45]}
+                        min={0}
+                        max={60}
+                        step={5}
+                        onValueChange={([v]) => handleThresholdChange('minimum_baseline_score', v)}
+                        disabled={isReadOnly}
+                        className={isReadOnly ? "opacity-60 flex-1" : "flex-1"}
+                      />
+                      <span className="font-mono text-sm w-12">{config.thresholds.minimum_baseline_score ?? 45}%</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Floor for all scores - no trainer scores below this</p>
+                  </div>
                   <div className="space-y-2">
                     <Label>Minimum Score to Show</Label>
                     <div className="flex items-center gap-2">

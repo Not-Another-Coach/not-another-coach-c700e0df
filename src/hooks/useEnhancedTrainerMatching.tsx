@@ -100,8 +100,9 @@ export const useEnhancedTrainerMatching = (
   }, [trainers, clientSurveyData, config]);
 
   const matchedTrainers = useMemo(() => {
-    // PHASE 2 IMPROVEMENT: Ensure minimum baseline score for all trainers
-    const MINIMUM_BASELINE_SCORE = 45; // All trainers get at least 45% compatibility
+    // PHASE 2 IMPROVEMENT: Ensure minimum baseline score for all trainers - now configurable via live config
+    const MINIMUM_BASELINE_SCORE = liveVersion?.config?.thresholds?.minimum_baseline_score 
+      ?? DEFAULT_MATCHING_CONFIG.thresholds.minimum_baseline_score;
     
     const calculateMatch = (trainer: Trainer): MatchScore => {
       let score = 0;

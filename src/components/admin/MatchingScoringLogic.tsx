@@ -45,6 +45,14 @@ const DIVERSITY_TIERS = [
   { tier: "Potential Match", range: "30-49%", color: "bg-amber-500" },
 ];
 
+// Threshold categories for display
+const THRESHOLD_CATEGORIES = [
+  { key: "minimum_baseline_score", label: "Minimum Baseline Score", description: "Floor for all calculated scores - no trainer scores below this" },
+  { key: "min_match_to_show", label: "Minimum Score to Show", description: "Trainers below this threshold are hidden from results" },
+  { key: "good_match_label", label: "Good Match Threshold", description: "Minimum score to receive 'Good Match' badge" },
+  { key: "top_match_label", label: "Top Match Threshold", description: "Minimum score to receive 'Top Match' badge" },
+];
+
 // Weight categories with descriptions
 const WEIGHT_CATEGORIES = [
   { key: "goals_specialties", label: "Goals & Specialties", description: "Client goals matched to trainer specialties" },
@@ -194,6 +202,80 @@ export function MatchingScoringLogic({ currentConfig, liveConfig, isDraft = fals
           are <strong> hardcoded</strong> and require code changes to modify.
         </AlertDescription>
       </Alert>
+
+      {/* Match Thresholds - Configurable */}
+      <Collapsible defaultOpen>
+        <Card>
+          <CollapsibleTrigger className="w-full">
+            <CardHeader className="flex flex-row items-center justify-between cursor-pointer hover:bg-muted/50">
+              <div className="flex items-center gap-2">
+                <Database className="w-4 h-4 text-emerald-600" />
+                <CardTitle className="text-base">Match Thresholds</CardTitle>
+                <Badge variant="outline" className="text-xs text-emerald-600 border-emerald-600/20">Configurable</Badge>
+              </div>
+              <ChevronDown className="w-4 h-4" />
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent>
+              <CardDescription className="mb-4">
+                Score thresholds that control display and labeling of matches.
+                {showComparison && " Comparing current draft to the live version."}
+              </CardDescription>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Threshold</TableHead>
+                    {showComparison ? (
+                      <>
+                        <TableHead className="text-center">Live</TableHead>
+                        <TableHead className="text-center">Draft</TableHead>
+                        <TableHead className="text-center">Change</TableHead>
+                      </>
+                    ) : (
+                      <TableHead>Value</TableHead>
+                    )}
+                    <TableHead>Description</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {THRESHOLD_CATEGORIES.map(cat => {
+                    const configKey = cat.key as keyof MatchingAlgorithmConfig['thresholds'];
+                    const currentValue = currentConfig?.thresholds?.[configKey];
+                    const liveValue = liveConfig?.thresholds?.[configKey];
+                    
+                    return (
+                      <TableRow key={cat.key}>
+                        <TableCell className="font-medium">{cat.label}</TableCell>
+                        {showComparison ? (
+                          <>
+                            <TableCell className="text-center">
+                              <Badge variant="outline" className="font-mono">{liveValue ?? '—'}%</Badge>
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Badge variant="secondary" className="font-mono">{currentValue ?? '—'}%</Badge>
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {liveValue !== undefined && currentValue !== undefined && (
+                                <WeightChangeIndicator liveWeight={liveValue} draftWeight={currentValue} />
+                              )}
+                            </TableCell>
+                          </>
+                        ) : (
+                          <TableCell>
+                            <Badge variant="outline">{currentValue ?? liveValue ?? '—'}%</Badge>
+                          </TableCell>
+                        )}
+                        <TableCell className="text-muted-foreground">{cat.description}</TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
 
       {/* Base Category Weights - Configurable */}
       <Collapsible defaultOpen>
