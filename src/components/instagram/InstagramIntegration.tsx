@@ -83,7 +83,6 @@ export const InstagramIntegration = () => {
             const { error: exchangeError } = await supabase.functions.invoke('instagram-oauth', {
               body: { 
                 code: event.data.code,
-                redirect_uri: getSupabaseEdgeFunctionUrl('instagram-oauth')
                 redirect_uri: `${supabaseUrl}/functions/v1/instagram-oauth`
               }
             });
