@@ -410,16 +410,6 @@ export const useEnhancedTrainerMatching = (
         }
       }
 
-      // Discovery Call Preference (bonus/penalty)
-      const discoveryCallPref = clientSurveyData?.discovery_call_preference;
-      const trainerOffersDiscovery = (trainer as any).offers_discovery_call ?? (trainer as any).free_discovery_call;
-      
-      if (discoveryCallPref === 'required' && trainerOffersDiscovery === false) {
-        score = score * 0.8; // 20% penalty if client wants discovery but trainer doesn't offer
-      } else if (discoveryCallPref === 'required' && trainerOffersDiscovery === true) {
-        score = Math.min(score * 1.1, 100); // 10% bonus for matching
-        reasons.push(`Offers discovery calls`);
-      }
 
       // PHASE 2 IMPROVEMENT: Ensure minimum baseline score  
       const finalScore = Math.max(Math.round(score), MINIMUM_BASELINE_SCORE);

@@ -445,20 +445,6 @@ export function MatchingVersionEditor({ version, mode, onBack, onVersionCreated 
                 <Separator />
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label>Discovery Call Penalty</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Apply slight penalty when trainer doesn't offer discovery calls but client wants one
-                    </p>
-                  </div>
-                  <Switch
-                    checked={config.feature_flags.use_discovery_call_penalty}
-                    onCheckedChange={(v) => handleFeatureFlagChange('use_discovery_call_penalty', v)}
-                    disabled={isReadOnly}
-                  />
-                </div>
-                <Separator />
-                <div className="flex items-center justify-between">
-                  <div>
                     <Label>Hard Exclusions</Label>
                     <p className="text-sm text-muted-foreground">
                       Completely exclude trainers who fail critical criteria (e.g., way over budget)
