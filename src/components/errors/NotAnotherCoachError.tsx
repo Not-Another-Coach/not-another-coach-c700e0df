@@ -229,6 +229,7 @@ export function NotAnotherCoachError({
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button
               size="lg"
+              variant="success"
               onClick={handlePrimaryClick}
               className="w-full sm:w-auto min-w-[160px]"
             >
@@ -240,7 +241,11 @@ export function NotAnotherCoachError({
                 size="lg"
                 variant="outline"
                 onClick={handleSecondaryClick}
-                className="w-full sm:w-auto min-w-[160px]"
+                className={`w-full sm:w-auto min-w-[160px] ${
+                  code === '500' || code === '404' 
+                    ? 'border-white/50 text-white hover:bg-white/10 hover:border-white' 
+                    : ''
+                }`}
               >
                 {getSecondaryButtonText()}
               </Button>
