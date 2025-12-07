@@ -152,51 +152,6 @@ export function GoalsSection({ formData, updateFormData, errors, clearFieldError
         </div>
       )}
 
-      {/* Selected Goals Summary */}
-      {formData.primary_goals?.length > 0 && (
-        <Card className="bg-muted/50">
-          <CardHeader>
-            <CardTitle className="text-lg">Your Goals Summary</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div>
-                <Label className="text-sm font-medium">Primary Goals:</Label>
-                <div className="flex flex-wrap gap-2 mt-1">
-                  {formData.primary_goals.map((goalKey: string) => {
-                    const goal = primaryGoals.find(g => g.goal_key === goalKey);
-                    return goal ? (
-                      <Badge key={goalKey} variant="secondary">
-                        {goal.label}
-                      </Badge>
-                    ) : null;
-                  })}
-                </div>
-              </div>
-              
-              {formData.secondary_goals?.length > 0 && (
-                <div>
-                  <Label className="text-sm font-medium">Additional Benefits:</Label>
-                  <div className="flex flex-wrap gap-2 mt-1">
-                    {formData.secondary_goals.map((goalKey: string) => {
-                      const goal = secondaryGoals.find(g => g.goal_key === goalKey);
-                      return goal ? (
-                        <Badge key={goalKey} variant="outline" className="text-xs">
-                          {goal.label}
-                        </Badge>
-                      ) : (
-                        <Badge key={goalKey} variant="outline" className="text-xs">
-                          {goalKey}
-                        </Badge>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }

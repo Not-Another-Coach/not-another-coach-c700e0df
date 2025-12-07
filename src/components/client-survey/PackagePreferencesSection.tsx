@@ -109,27 +109,6 @@ export function PackagePreferencesSection({ formData, updateFormData, errors, cl
         </div>
       </div>
 
-      {/* Selection Summary */}
-      {formData.preferred_package_type && (
-        <Card className="bg-muted/50">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="text-primary">
-                {packageOptions.find(opt => opt.id === formData.preferred_package_type)?.icon}
-              </div>
-              <div>
-                <h4 className="font-medium">
-                  {packageOptions.find(opt => opt.id === formData.preferred_package_type)?.label}
-                </h4>
-                <p className="text-sm text-muted-foreground">
-                  {packageOptions.find(opt => opt.id === formData.preferred_package_type)?.description}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Additional Info */}
       <Card className="border-dashed">
         <CardContent className="p-4">

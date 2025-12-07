@@ -120,31 +120,6 @@ export function TrainingLocationSection({ formData, updateFormData, errors, clea
         </Card>
       )}
 
-      {/* Selection Summary */}
-      {formData.training_location_preference && (
-        <Card className="bg-muted/50">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="text-primary">
-                {locationOptions.find(opt => opt.id === formData.training_location_preference)?.icon}
-              </div>
-              <div>
-                <h4 className="font-medium">
-                  {locationOptions.find(opt => opt.id === formData.training_location_preference)?.label}
-                </h4>
-                <p className="text-sm text-muted-foreground">
-                  {locationOptions.find(opt => opt.id === formData.training_location_preference)?.description}
-                </p>
-                {formData.training_location_preference === "in-person" && formData.open_to_virtual_coaching && (
-                  <p className="text-xs text-primary mt-1">
-                    ✓ Open to virtual sessions too
-                  </p>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }

@@ -182,40 +182,6 @@ export function PersonalitySection({ formData, updateFormData, errors, clearFiel
         </div>
       </div>
 
-      {/* Summary */}
-      {(formData.experience_level || formData.client_personality_type?.length > 0) && (
-        <Card className="bg-muted/50">
-          <CardContent className="p-4">
-            <h4 className="font-semibold mb-2">Summary</h4>
-            <div className="space-y-2">
-              {formData.experience_level && (
-                <div>
-                  <Label className="text-sm font-medium">Experience level:</Label>
-                  <Badge variant="secondary" className="ml-2">
-                    {experienceLevels.find(level => level.value === formData.experience_level)?.label}
-                  </Badge>
-                </div>
-              )}
-              
-              {formData.client_personality_type?.length > 0 && (
-                <div>
-                  <Label className="text-sm font-medium">Personality traits:</Label>
-                  <div className="flex flex-wrap gap-2 mt-1">
-                    {formData.client_personality_type.map((typeId: string) => {
-                      const type = personalityTypes.find(t => t.id === typeId);
-                      return type ? (
-                        <Badge key={typeId} variant="outline">
-                          {type.label}
-                        </Badge>
-                      ) : null;
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }
