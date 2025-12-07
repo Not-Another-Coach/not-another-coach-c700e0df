@@ -22,6 +22,7 @@ export interface MatchingAlgorithmConfig {
     min_match_to_show: number;
     top_match_label: number;
     good_match_label: number;
+    minimum_baseline_score: number;
   };
   package_boundaries: {
     single_session: { max_sessions: number; max_weeks: number };
@@ -76,7 +77,8 @@ export const DEFAULT_MATCHING_CONFIG: MatchingAlgorithmConfig = {
   thresholds: {
     min_match_to_show: 30,
     top_match_label: 75,
-    good_match_label: 50
+    good_match_label: 50,
+    minimum_baseline_score: 45
   },
   package_boundaries: {
     single_session: { max_sessions: 2, max_weeks: 2 },
