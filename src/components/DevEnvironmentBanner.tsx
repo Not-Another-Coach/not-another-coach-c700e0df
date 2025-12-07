@@ -1,14 +1,13 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
-
-const DEV_SUPABASE_PROJECT_ID = 'zkzahqnsfjnvskfywbvg';
+import { ENV_CONFIG } from '@/config/environment';
 
 export const DevEnvironmentBanner = () => {
   const [isDismissed, setIsDismissed] = useState(() => {
     return sessionStorage.getItem('dev-banner-dismissed') === 'true';
   });
 
-  const isDev = import.meta.env.VITE_SUPABASE_PROJECT_ID === DEV_SUPABASE_PROJECT_ID;
+  const isDev = ENV_CONFIG.isDevEnvironment;
 
   if (!isDev || isDismissed) return null;
 

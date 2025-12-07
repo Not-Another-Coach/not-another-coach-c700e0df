@@ -1,6 +1,7 @@
 import { useState, useEffect, createContext, useContext } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { AuthService } from '@/services';
+import { ENV_CONFIG } from '@/config/environment';
 
 interface AuthContextType {
   user: User | null;
@@ -72,8 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('savedEmail');
     
     // Clear Supabase auth token BEFORE navigation (instant, no async)
-    const projectRef = 'ogpiovfxjxcclptfybrk';
-    localStorage.removeItem(`sb-${projectRef}-auth-token`);
+    localStorage.removeItem(`sb-${ENV_CONFIG.projectId}-auth-token`);
     
     // Direct navigation - no signout param needed
     window.location.href = '/auth';
