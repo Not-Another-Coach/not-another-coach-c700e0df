@@ -25,7 +25,8 @@ export function useMatchingVersions() {
         config: d.config as unknown as MatchingAlgorithmConfig
       })) as MatchingVersion[];
     },
-    staleTime: 2 * 60 * 1000,
+    staleTime: 0, // Always refetch when component mounts
+    refetchOnMount: true,
   });
 }
 
