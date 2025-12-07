@@ -93,7 +93,8 @@ export function useUserProfile(): ProfileData {
         'client_preferences', 'training_type_delivery',
         'wow_how_i_work', 'wow_what_i_provide', 'wow_client_expectations',
         'wow_activities', 'wow_activity_assignments', 'wow_visibility', 'wow_setup_completed',
-        'preferred_client_genders'
+        'preferred_client_genders',
+        'preferred_client_experience_levels'
       ];
 
       // Fields from client_profiles table
