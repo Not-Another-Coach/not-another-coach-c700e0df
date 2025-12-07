@@ -26,18 +26,12 @@ const EXPERIENCE_LEVEL_CRITERIA = [
 ];
 
 
-const DIVERSITY_TIERS = [
-  { tier: "Top Match", range: "75-100%", color: "bg-emerald-500" },
-  { tier: "Good Match", range: "50-74%", color: "bg-blue-500" },
-  { tier: "Potential Match", range: "30-49%", color: "bg-amber-500" },
-];
-
-// Threshold categories for display
+// Threshold categories for display with tier colors
 const THRESHOLD_CATEGORIES = [
-  { key: "minimum_baseline_score", label: "Minimum Baseline Score", description: "Floor for all calculated scores - no trainer scores below this" },
-  { key: "min_match_to_show", label: "Minimum Score to Show", description: "Trainers below this threshold are hidden from results" },
-  { key: "good_match_label", label: "Good Match Threshold", description: "Minimum score to receive 'Good Match' badge" },
-  { key: "top_match_label", label: "Top Match Threshold", description: "Minimum score to receive 'Top Match' badge" },
+  { key: "minimum_baseline_score", label: "Minimum Baseline Score", description: "Floor for all calculated scores - no trainer scores below this", color: null },
+  { key: "min_match_to_show", label: "Minimum Score to Show", description: "Trainers below this threshold are hidden from results (Potential Match tier starts here)", color: "bg-amber-500" },
+  { key: "good_match_label", label: "Good Match Threshold", description: "Minimum score to receive 'Good Match' badge", color: "bg-blue-500" },
+  { key: "top_match_label", label: "Top Match Threshold", description: "Minimum score to receive 'Top Match' badge", color: "bg-emerald-500" },
 ];
 
 // Weight categories with descriptions
@@ -304,7 +298,12 @@ export function MatchingScoringLogic({ currentConfig, liveConfig, isDraft = fals
                     
                     return (
                       <TableRow key={cat.key}>
-                        <TableCell className="font-medium">{cat.label}</TableCell>
+                        <TableCell className="font-medium">
+                          <div className="flex items-center gap-2">
+                            {cat.color && <div className={`w-3 h-3 rounded-full ${cat.color}`} />}
+                            {cat.label}
+                          </div>
+                        </TableCell>
                         {showComparison ? (
                           <>
                             <TableCell className="text-center">
@@ -522,37 +521,6 @@ export function MatchingScoringLogic({ currentConfig, liveConfig, isDraft = fals
       </Collapsible>
 
 
-      {/* Diversity Tiers - Hardcoded */}
-      <Collapsible>
-        <Card>
-          <CollapsibleTrigger className="w-full">
-            <CardHeader className="flex flex-row items-center justify-between cursor-pointer hover:bg-muted/50">
-              <div className="flex items-center gap-2">
-                <Lock className="w-4 h-4 text-muted-foreground" />
-                <CardTitle className="text-base">Diversity Tiers</CardTitle>
-                <Badge variant="outline" className="text-xs">Hardcoded</Badge>
-              </div>
-              <ChevronDown className="w-4 h-4" />
-            </CardHeader>
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <CardContent>
-              <CardDescription className="mb-4">
-                Results are interleaved from different score tiers to ensure diversity.
-              </CardDescription>
-              <div className="flex gap-4">
-                {DIVERSITY_TIERS.map((tier) => (
-                  <div key={tier.tier} className="flex items-center gap-2">
-                    <div className={`w-3 h-3 rounded-full ${tier.color}`} />
-                    <span className="font-medium">{tier.tier}</span>
-                    <span className="text-muted-foreground">{tier.range}</span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </CollapsibleContent>
-        </Card>
-      </Collapsible>
     </div>
   );
 }
