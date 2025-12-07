@@ -5758,6 +5758,7 @@ export type Database = {
           offers_discovery_call: boolean | null
           package_options: Json | null
           philosophy: string | null
+          preferred_client_genders: string[] | null
           professional_milestones: Json | null
           profile_setup_completed: boolean | null
           qualifications: string[] | null
@@ -5809,6 +5810,7 @@ export type Database = {
           offers_discovery_call?: boolean | null
           package_options?: Json | null
           philosophy?: string | null
+          preferred_client_genders?: string[] | null
           professional_milestones?: Json | null
           profile_setup_completed?: boolean | null
           qualifications?: string[] | null
@@ -5860,6 +5862,7 @@ export type Database = {
           offers_discovery_call?: boolean | null
           package_options?: Json | null
           philosophy?: string | null
+          preferred_client_genders?: string[] | null
           professional_milestones?: Json | null
           profile_setup_completed?: boolean | null
           qualifications?: string[] | null
@@ -7004,9 +7007,11 @@ export type Database = {
           coaching_style: string[] | null
           communication_style: string[] | null
           delivery_format: string[] | null
+          discovery_call_price: number | null
           document_not_applicable: Json | null
           first_name: string | null
           free_discovery_call: boolean | null
+          gender: string | null
           hourly_rate: number | null
           how_started: string | null
           id: string | null
@@ -7021,8 +7026,10 @@ export type Database = {
           notify_insights: boolean | null
           notify_messages: boolean | null
           notify_profile_views: boolean | null
+          offers_discovery_call: boolean | null
           package_options: Json | null
           philosophy: string | null
+          preferred_client_genders: string[] | null
           professional_milestones: Json | null
           profile_image_position: Json | null
           profile_photo_url: string | null
