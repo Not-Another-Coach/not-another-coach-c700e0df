@@ -9,9 +9,62 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useMatchingConfig, DEFAULT_MATCHING_CONFIG, MatchingAlgorithmConfig as ConfigType } from "@/hooks/useMatchingConfig";
 import { HARD_EXCLUSION_RULES } from "@/hooks/useHardExclusions";
-import { AlertTriangle, Save, RotateCcw, Sparkles, Target, Scale, Clock, Settings2, Ban, User, MapPin, DollarSign, Lock } from "lucide-react";
+import { AlertTriangle, Save, RotateCcw, Sparkles, Target, Scale, Clock, Settings2, Ban, User, MapPin, DollarSign, Lock, Code, ChevronDown, Percent, Zap, Layers } from "lucide-react";
+
+// Hardcoded scoring logic constants for read-only display
+const HARDCODED_WEIGHTS = [
+  { category: "Goals → Specialties", weight: 25, configKey: "goals_specialties" },
+  { category: "Location / Format", weight: 20, configKey: "location_format" },
+  { category: "Coaching Style", weight: 20, configKey: "coaching_style" },
+  { category: "Schedule / Frequency", weight: 15, configKey: "schedule_frequency" },
+  { category: "Budget Fit", weight: 10, configKey: "budget_fit" },
+  { category: "Experience Level", weight: 10, configKey: "experience_level" },
+];
+
+const GOAL_SPECIALTY_MAPPINGS = [
+  { goal: "Weight Loss", specialties: ["Weight Loss", "Fat Loss", "Body Composition", "Nutrition"] },
+  { goal: "Muscle Building", specialties: ["Strength Training", "Bodybuilding", "Muscle Building", "Hypertrophy"] },
+  { goal: "Strength Training", specialties: ["Strength Training", "Powerlifting", "Muscle Building", "Bodybuilding"] },
+  { goal: "General Fitness", specialties: ["General Fitness", "Health & Wellness", "Functional Training"] },
+  { goal: "Sports Performance", specialties: ["Sports Performance", "Athletic Training", "Speed & Agility"] },
+  { goal: "Flexibility & Mobility", specialties: ["Flexibility", "Mobility", "Yoga", "Stretching"] },
+  { goal: "Endurance", specialties: ["Cardio", "Endurance Training", "Running", "HIIT"] },
+  { goal: "Rehabilitation", specialties: ["Rehabilitation", "Injury Prevention", "Corrective Exercise"] },
+  { goal: "Prenatal/Postnatal", specialties: ["Pre/Postnatal", "Women's Fitness", "Core Training"] },
+  { goal: "Senior Fitness", specialties: ["Senior Fitness", "Balance", "Functional Training"] },
+  { goal: "Competition Prep", specialties: ["Competition Prep", "Bodybuilding", "Physique"] },
+];
+
+const COACHING_STYLE_MAPPINGS = [
+  { style: "Nurturing / Supportive", keywords: ["supportive", "patient", "encouraging", "nurturing", "empathetic"] },
+  { style: "Tough Love", keywords: ["challenging", "direct", "accountability", "strict", "no-excuses"] },
+  { style: "High Energy", keywords: ["energetic", "motivating", "enthusiastic", "dynamic", "upbeat"] },
+  { style: "Calm & Methodical", keywords: ["calm", "methodical", "structured", "analytical", "precise"] },
+  { style: "Educational", keywords: ["educational", "teaching", "science-based", "informative", "detailed"] },
+  { style: "Flexible / Adaptive", keywords: ["flexible", "adaptive", "personalized", "intuitive", "responsive"] },
+];
+
+const EXPERIENCE_LEVEL_CRITERIA = [
+  { level: "Beginner", criteria: "Trainers with rating ≥ 4.7 (patient, highly rated)", ratingMin: 4.7, yearsMin: null },
+  { level: "Intermediate", criteria: "Trainers with rating ≥ 4.5", ratingMin: 4.5, yearsMin: null },
+  { level: "Advanced", criteria: "Trainers with 5+ years experience AND rating ≥ 4.5", ratingMin: 4.5, yearsMin: 5 },
+];
+
+const SCORE_MODIFIERS = [
+  { condition: "Gender mismatch (when client has preference)", modifier: -70, type: "penalty" },
+  { condition: "Discovery call required but trainer doesn't offer", modifier: -20, type: "penalty" },
+  { condition: "Discovery call preference alignment", modifier: 10, type: "bonus" },
+  { condition: "Minimum baseline score (all trainers)", modifier: 45, type: "baseline" },
+];
+
+const DIVERSITY_TIERS = [
+  { tier: "High Scorers", scoreRange: "≥75%", description: "Top tier matches, shown first" },
+  { tier: "Medium Scorers", scoreRange: "60-74%", description: "Good potential matches" },
+  { tier: "Lower Scorers", scoreRange: "<60%", description: "Included for variety/diversity" },
+];
 
 export function MatchingAlgorithmConfig() {
   const { config, isConfigured, isLoading, saveConfig, isSaving } = useMatchingConfig();
@@ -166,10 +219,14 @@ export function MatchingAlgorithmConfig() {
 
       {isConfigured && (
         <Tabs defaultValue="exclusions" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="exclusions" className="flex items-center gap-2">
               <Ban className="h-4 w-4" />
               Exclusions
+            </TabsTrigger>
+            <TabsTrigger value="scoring-logic" className="flex items-center gap-2">
+              <Code className="h-4 w-4" />
+              Scoring Logic
             </TabsTrigger>
             <TabsTrigger value="weights" className="flex items-center gap-2">
               <Target className="h-4 w-4" />
@@ -313,6 +370,302 @@ export function MatchingAlgorithmConfig() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Scoring Logic Tab (Read-Only) */}
+          <TabsContent value="scoring-logic" className="space-y-4">
+            <Alert className="border-amber-500/50 bg-amber-500/10">
+              <AlertTriangle className="h-4 w-4 text-amber-500" />
+              <AlertTitle className="text-amber-600">Hardcoded Logic Reference</AlertTitle>
+              <AlertDescription className="text-amber-600/80">
+                The values below are currently hardcoded in the matching algorithm. They cannot be changed from this panel. 
+                To modify these values, a code update is required.
+              </AlertDescription>
+            </Alert>
+
+            {/* Hardcoded Weights */}
+            <Collapsible defaultOpen>
+              <Card>
+                <CardHeader className="pb-3">
+                  <CollapsibleTrigger className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-2">
+                      <Percent className="h-5 w-5 text-muted-foreground" />
+                      <CardTitle className="text-base">Category Weights (Hardcoded)</CardTitle>
+                      <Badge variant="outline" className="ml-2 flex items-center gap-1">
+                        <Lock className="h-3 w-3" />
+                        Read-Only
+                      </Badge>
+                    </div>
+                    <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform" />
+                  </CollapsibleTrigger>
+                  <CardDescription>
+                    These weights are used in the scoring algorithm regardless of the configurable weights above.
+                  </CardDescription>
+                </CardHeader>
+                <CollapsibleContent>
+                  <CardContent className="pt-0">
+                    <div className="rounded-md border">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b bg-muted/50">
+                            <th className="px-4 py-2 text-left font-medium">Category</th>
+                            <th className="px-4 py-2 text-center font-medium">Hardcoded</th>
+                            <th className="px-4 py-2 text-center font-medium">Config Value</th>
+                            <th className="px-4 py-2 text-center font-medium">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {HARDCODED_WEIGHTS.map((item) => {
+                            const configValue = localConfig.weights[item.configKey as keyof typeof localConfig.weights]?.value;
+                            const matches = configValue === item.weight;
+                            return (
+                              <tr key={item.configKey} className="border-b last:border-0">
+                                <td className="px-4 py-2">{item.category}</td>
+                                <td className="px-4 py-2 text-center">
+                                  <Badge variant="secondary">{item.weight}%</Badge>
+                                </td>
+                                <td className="px-4 py-2 text-center">
+                                  <Badge variant="outline">{configValue}%</Badge>
+                                </td>
+                                <td className="px-4 py-2 text-center">
+                                  <Badge variant={matches ? "default" : "destructive"}>
+                                    {matches ? "Synced" : "Override"}
+                                  </Badge>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
+
+            {/* Goal → Specialty Mappings */}
+            <Collapsible>
+              <Card>
+                <CardHeader className="pb-3">
+                  <CollapsibleTrigger className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-2">
+                      <Target className="h-5 w-5 text-muted-foreground" />
+                      <CardTitle className="text-base">Goal → Specialty Mappings</CardTitle>
+                      <Badge variant="outline" className="ml-2 flex items-center gap-1">
+                        <Lock className="h-3 w-3" />
+                        Read-Only
+                      </Badge>
+                    </div>
+                    <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform" />
+                  </CollapsibleTrigger>
+                  <CardDescription>
+                    Client goals are matched to trainer specialties using these mappings.
+                  </CardDescription>
+                </CardHeader>
+                <CollapsibleContent>
+                  <CardContent className="pt-0">
+                    <div className="space-y-3">
+                      {GOAL_SPECIALTY_MAPPINGS.map((mapping) => (
+                        <div key={mapping.goal} className="flex items-start gap-3 p-3 rounded-lg border bg-muted/30">
+                          <Badge variant="secondary" className="mt-0.5 shrink-0">{mapping.goal}</Badge>
+                          <div className="flex flex-wrap gap-1">
+                            {mapping.specialties.map((specialty) => (
+                              <Badge key={specialty} variant="outline" className="text-xs">
+                                {specialty}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
+
+            {/* Coaching Style Mappings */}
+            <Collapsible>
+              <Card>
+                <CardHeader className="pb-3">
+                  <CollapsibleTrigger className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-2">
+                      <User className="h-5 w-5 text-muted-foreground" />
+                      <CardTitle className="text-base">Coaching Style Mappings</CardTitle>
+                      <Badge variant="outline" className="ml-2 flex items-center gap-1">
+                        <Lock className="h-3 w-3" />
+                        Read-Only
+                      </Badge>
+                    </div>
+                    <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform" />
+                  </CollapsibleTrigger>
+                  <CardDescription>
+                    Client coaching style preferences are matched using these keywords in trainer profiles.
+                  </CardDescription>
+                </CardHeader>
+                <CollapsibleContent>
+                  <CardContent className="pt-0">
+                    <div className="space-y-3">
+                      {COACHING_STYLE_MAPPINGS.map((mapping) => (
+                        <div key={mapping.style} className="flex items-start gap-3 p-3 rounded-lg border bg-muted/30">
+                          <Badge variant="secondary" className="mt-0.5 shrink-0">{mapping.style}</Badge>
+                          <div className="flex flex-wrap gap-1">
+                            {mapping.keywords.map((keyword) => (
+                              <Badge key={keyword} variant="outline" className="text-xs italic">
+                                "{keyword}"
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
+
+            {/* Experience Level Criteria */}
+            <Collapsible>
+              <Card>
+                <CardHeader className="pb-3">
+                  <CollapsibleTrigger className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-2">
+                      <Layers className="h-5 w-5 text-muted-foreground" />
+                      <CardTitle className="text-base">Experience Level Criteria</CardTitle>
+                      <Badge variant="outline" className="ml-2 flex items-center gap-1">
+                        <Lock className="h-3 w-3" />
+                        Read-Only
+                      </Badge>
+                    </div>
+                    <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform" />
+                  </CollapsibleTrigger>
+                  <CardDescription>
+                    Trainers are matched based on client experience level using these criteria.
+                  </CardDescription>
+                </CardHeader>
+                <CollapsibleContent>
+                  <CardContent className="pt-0">
+                    <div className="rounded-md border">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b bg-muted/50">
+                            <th className="px-4 py-2 text-left font-medium">Client Level</th>
+                            <th className="px-4 py-2 text-left font-medium">Trainer Criteria</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {EXPERIENCE_LEVEL_CRITERIA.map((item) => (
+                            <tr key={item.level} className="border-b last:border-0">
+                              <td className="px-4 py-2">
+                                <Badge variant="secondary">{item.level}</Badge>
+                              </td>
+                              <td className="px-4 py-2 text-muted-foreground">{item.criteria}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
+
+            {/* Score Modifiers & Penalties */}
+            <Collapsible>
+              <Card>
+                <CardHeader className="pb-3">
+                  <CollapsibleTrigger className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-2">
+                      <Zap className="h-5 w-5 text-muted-foreground" />
+                      <CardTitle className="text-base">Score Modifiers & Penalties</CardTitle>
+                      <Badge variant="outline" className="ml-2 flex items-center gap-1">
+                        <Lock className="h-3 w-3" />
+                        Read-Only
+                      </Badge>
+                    </div>
+                    <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform" />
+                  </CollapsibleTrigger>
+                  <CardDescription>
+                    These modifiers are applied to scores based on specific conditions.
+                  </CardDescription>
+                </CardHeader>
+                <CollapsibleContent>
+                  <CardContent className="pt-0">
+                    <div className="space-y-2">
+                      {SCORE_MODIFIERS.map((item, idx) => (
+                        <div 
+                          key={idx} 
+                          className={`flex items-center justify-between p-3 rounded-lg border ${
+                            item.type === 'penalty' 
+                              ? 'bg-destructive/5 border-destructive/20' 
+                              : item.type === 'bonus'
+                              ? 'bg-green-500/5 border-green-500/20'
+                              : 'bg-muted/30'
+                          }`}
+                        >
+                          <span className="text-sm">{item.condition}</span>
+                          <Badge 
+                            variant={item.type === 'penalty' ? 'destructive' : item.type === 'bonus' ? 'default' : 'secondary'}
+                            className={item.type === 'bonus' ? 'bg-green-600 hover:bg-green-700' : ''}
+                          >
+                            {item.type === 'baseline' ? `${item.modifier} pts` : `${item.modifier > 0 ? '+' : ''}${item.modifier}%`}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
+
+            {/* Diversity Tiers */}
+            <Collapsible>
+              <Card>
+                <CardHeader className="pb-3">
+                  <CollapsibleTrigger className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-2">
+                      <Layers className="h-5 w-5 text-muted-foreground" />
+                      <CardTitle className="text-base">Diversity Algorithm Tiers</CardTitle>
+                      <Badge variant="outline" className="ml-2 flex items-center gap-1">
+                        <Lock className="h-3 w-3" />
+                        Read-Only
+                      </Badge>
+                    </div>
+                    <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform" />
+                  </CollapsibleTrigger>
+                  <CardDescription>
+                    Results are interleaved from these tiers to ensure variety in displayed trainers.
+                  </CardDescription>
+                </CardHeader>
+                <CollapsibleContent>
+                  <CardContent className="pt-0">
+                    <div className="rounded-md border">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b bg-muted/50">
+                            <th className="px-4 py-2 text-left font-medium">Tier</th>
+                            <th className="px-4 py-2 text-center font-medium">Score Range</th>
+                            <th className="px-4 py-2 text-left font-medium">Purpose</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {DIVERSITY_TIERS.map((tier) => (
+                            <tr key={tier.tier} className="border-b last:border-0">
+                              <td className="px-4 py-2">
+                                <Badge variant="secondary">{tier.tier}</Badge>
+                              </td>
+                              <td className="px-4 py-2 text-center">
+                                <Badge variant="outline">{tier.scoreRange}</Badge>
+                              </td>
+                              <td className="px-4 py-2 text-muted-foreground">{tier.description}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
           </TabsContent>
 
           {/* Weights Tab */}
