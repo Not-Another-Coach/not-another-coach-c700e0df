@@ -1,11 +1,12 @@
 import { useMemo } from 'react';
 import { Trainer } from '@/types/trainer';
-import { Target, MapPin, Clock, DollarSign, Heart, Users, Calendar } from 'lucide-react';
+import { Target, MapPin, Clock, DollarSign, Heart, Users, Calendar, Flame } from 'lucide-react';
 import { useMatchingConfig } from './useMatchingConfig';
 import { applyHardExclusions, ExcludedTrainer, ExclusionSummary, HARD_EXCLUSION_RULES } from './useHardExclusions';
 import { useLiveMatchingVersion } from './useMatchingVersions';
 import { useGoalSpecialtyMappingsForMatching, GoalMappingsLookup } from './useGoalSpecialtyMappingsForMatching';
 import { useCoachingStyleMappingsForMatching, CoachingStyleMappingLookup } from './useCoachingStyleMappings';
+import { useMotivatorActivityMappingsForMatching } from './useMotivatorActivityMappings';
 import { DEFAULT_MATCHING_CONFIG } from '@/types/matching';
 interface QuizAnswers {
   fitness_goals?: string[];
@@ -98,6 +99,9 @@ export const useEnhancedTrainerMatching = (
   // Fetch coaching style mappings from database
   const { data: styleMappings } = useCoachingStyleMappingsForMatching();
   const dbStyleMappings: CoachingStyleMappingLookup = styleMappings || {};
+  
+  // Fetch motivator-activity mappings from database
+  const { data: motivatorMappings } = useMotivatorActivityMappingsForMatching();
   
   // Apply hard exclusions first
   const { includedTrainers, excludedTrainers, exclusionSummary } = useMemo(() => {
@@ -402,6 +406,41 @@ export const useEnhancedTrainerMatching = (
       const trainerGenderPref = clientSurveyData?.trainer_gender_preference;
       if (trainerGenderPref && trainerGenderPref !== 'no_preference') {
         reasons.push(`Matches your trainer gender preference`);
+      }
+
+      // Motivation Alignment Match - Uses LIVE config weights and DATABASE motivator-activity mappings
+      let motivationScore = 0;
+      const clientMotivators = clientSurveyData?.motivation_factors || [];
+      
+      if (clientMotivators.length > 0 && motivatorMappings) {
+        // Get trainer's ways of working activities from their packages
+        const trainerActivities: string[] = (trainer as any).ways_of_working || [];
+        let matchCount = 0;
+        
+        clientMotivators.forEach(motivatorKey => {
+          const mappedActivityIds = motivatorMappings.get(motivatorKey) || [];
+          const hasMatch = mappedActivityIds.some(activityId => 
+            trainerActivities.includes(activityId)
+          );
+          if (hasMatch) matchCount++;
+        });
+        
+        motivationScore = clientMotivators.length > 0 
+          ? Math.round((matchCount / clientMotivators.length) * 100) 
+          : 0;
+        
+        score += motivationScore * (liveWeights.motivation_alignment.value / 100);
+        
+        details.push({
+          category: 'Motivation',
+          score: motivationScore,
+          icon: Flame,
+          color: 'text-orange-500'
+        });
+        
+        if (matchCount > 0) {
+          reasons.push(`${matchCount}/${clientMotivators.length} motivators align with training style`);
+        }
       }
 
 
