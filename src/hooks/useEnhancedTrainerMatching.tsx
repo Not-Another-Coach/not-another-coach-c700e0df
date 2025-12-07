@@ -371,18 +371,17 @@ export const useEnhancedTrainerMatching = (
         }
       }
       
-      // Experience & Client Fit Match - Uses LIVE config weights
+      // Experience Level Match - HARDCODE MATCH (trainer must support client's level)
       let experienceScore = 0;
       const clientExperience = clientSurveyData?.experience_level || userAnswers?.experience_level || 'beginner';
+      const trainerExperienceLevels = (trainer as any).preferred_client_experience_levels || [];
       
-      const experienceMapping: Record<string, (trainer: Trainer) => boolean> = {
-        'beginner': (t) => t.rating >= 4.7, // Patient, highly rated trainers
-        'intermediate': (t) => t.rating >= 4.5, // Good trainers
-        'advanced': (t) => parseInt(t.experience) >= 5 && t.rating >= 4.5, // Experienced trainers
-      };
+      // If trainer has specified experience levels, check for match
+      // If trainer hasn't specified any (empty array), assume they work with all levels
+      const experienceMatch = trainerExperienceLevels.length === 0 || 
+        trainerExperienceLevels.includes(clientExperience);
       
-      const experienceMatch = experienceMapping[clientExperience]?.(trainer) || false;
-      experienceScore = experienceMatch ? 100 : 70;
+      experienceScore = experienceMatch ? 100 : 0;
       score += experienceScore * (liveWeights.experience_level.value / 100);
       
       details.push({
@@ -393,7 +392,9 @@ export const useEnhancedTrainerMatching = (
       });
       
       if (experienceMatch) {
-        reasons.push(`Perfect fit for ${clientExperience} level`);
+        reasons.push(`Works with ${clientExperience} level clients`);
+      } else {
+        reasons.push(`Doesn't typically work with ${clientExperience} level clients`);
       }
 
       // Trainer Gender Preference Match (filter, not scored)
