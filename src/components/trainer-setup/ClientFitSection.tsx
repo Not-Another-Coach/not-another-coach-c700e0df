@@ -172,7 +172,7 @@ export function ClientFitSection({ formData, updateFormData }: ClientFitSectionP
           <Label>Selected Coaching Styles</Label>
           <div className="flex flex-wrap gap-2">
             {formData.coaching_style.map((style: string) => {
-              const styleObj = coachingStyles.find(s => s.id === style);
+              const styleObj = coachingStyles?.find(s => s.id === style || s.style_key === style);
               return (
                 <Badge
                   key={style}
