@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthService } from '@/services';
 import { Instagram, ExternalLink, Settings, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
+import { getSupabaseEdgeFunctionUrl } from '@/config/environment';
 import { Separator } from '@/components/ui/separator';
 import { InstagramRevealSettings } from './InstagramRevealSettings';
 import { InstagramMediaPicker } from '../trainer-setup/InstagramMediaPicker';
@@ -81,7 +82,7 @@ export const InstagramIntegration = () => {
             const { error: exchangeError } = await supabase.functions.invoke('instagram-oauth', {
               body: { 
                 code: event.data.code,
-                redirect_uri: `https://ogpiovfxjxcclptfybrk.supabase.co/functions/v1/instagram-oauth`
+                redirect_uri: getSupabaseEdgeFunctionUrl('instagram-oauth')
               }
             });
 
