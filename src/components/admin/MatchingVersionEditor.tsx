@@ -30,7 +30,7 @@ import {
   Loader2,
   Lock
 } from "lucide-react";
-import { MatchingVersion, MatchingAlgorithmConfig, WeightConfig } from "@/types/matching";
+import { MatchingVersion, MatchingAlgorithmConfig, WeightConfig, DEFAULT_MATCHING_CONFIG } from "@/types/matching";
 import { 
   useUpdateMatchingVersion, 
   usePublishMatchingVersion, 
@@ -46,8 +46,38 @@ interface MatchingVersionEditorProps {
   onVersionCreated?: (version: MatchingVersion) => void;
 }
 
+// Deep merge loaded config with defaults to handle missing fields in older versions
+const mergeWithDefaults = (config: Partial<MatchingAlgorithmConfig>): MatchingAlgorithmConfig => ({
+  ...DEFAULT_MATCHING_CONFIG,
+  ...config,
+  weights: {
+    ...DEFAULT_MATCHING_CONFIG.weights,
+    ...config.weights,
+  },
+  thresholds: {
+    ...DEFAULT_MATCHING_CONFIG.thresholds,
+    ...config.thresholds,
+  },
+  package_boundaries: {
+    ...DEFAULT_MATCHING_CONFIG.package_boundaries,
+    ...config.package_boundaries,
+  },
+  budget: {
+    ...DEFAULT_MATCHING_CONFIG.budget,
+    ...config.budget,
+  },
+  availability: {
+    ...DEFAULT_MATCHING_CONFIG.availability,
+    ...config.availability,
+  },
+  feature_flags: {
+    ...DEFAULT_MATCHING_CONFIG.feature_flags,
+    ...config.feature_flags,
+  },
+});
+
 export function MatchingVersionEditor({ version, mode, onBack, onVersionCreated }: MatchingVersionEditorProps) {
-  const [config, setConfig] = useState<MatchingAlgorithmConfig>(version.config);
+  const [config, setConfig] = useState<MatchingAlgorithmConfig>(() => mergeWithDefaults(version.config));
   const [name, setName] = useState(version.name);
   const [notes, setNotes] = useState(version.notes || "");
   const [showPublishDialog, setShowPublishDialog] = useState(false);
@@ -63,7 +93,7 @@ export function MatchingVersionEditor({ version, mode, onBack, onVersionCreated 
   const liveConfig = liveVersion?.config;
 
   useEffect(() => {
-    setConfig(version.config);
+    setConfig(mergeWithDefaults(version.config));
     setName(version.name);
     setNotes(version.notes || "");
     setHasChanges(false);
