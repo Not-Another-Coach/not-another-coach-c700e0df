@@ -12,7 +12,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Skeleton } from '@/components/ui/skeleton';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { toast } from 'sonner';
-import { Plus, Pencil, Trash2, GripVertical, Flame, Link2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, GripVertical, Flame, Link2, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { 
   useAllClientMotivators, 
   useClientMotivatorMutations, 
@@ -261,6 +262,9 @@ function ActivityMappingsTab() {
     return <div className="space-y-4">{[1,2,3].map(i => <Skeleton key={i} className="h-24 w-full" />)}</div>;
   }
   
+  // Find unmapped motivators
+  const unmappedMotivators = groupedMappings.filter(g => g.activityIds.length === 0);
+  
   return (
     <div className="space-y-4">
       <p className="text-muted-foreground">
@@ -268,16 +272,39 @@ function ActivityMappingsTab() {
         they'll score higher for clients who selected that motivator.
       </p>
       
+      {unmappedMotivators.length > 0 && (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Unmapped Motivators</AlertTitle>
+          <AlertDescription>
+            The following motivators have no activity mappings: {unmappedMotivators.map(g => g.motivator.label).join(', ')}
+          </AlertDescription>
+        </Alert>
+      )}
+      
       <Accordion type="multiple" className="space-y-2">
         {groupedMappings.map(({ motivator, activityIds }) => (
           <AccordionItem key={motivator.id} value={motivator.id} className="border rounded-lg px-4">
             <AccordionTrigger className="hover:no-underline">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-1">
                 <Flame className="w-4 h-4 text-primary" />
                 <span className="font-medium">{motivator.label}</span>
                 <Badge variant="secondary" className="ml-2">
                   {activityIds.length} {activityIds.length === 1 ? 'activity' : 'activities'}
                 </Badge>
+                <div className="ml-auto mr-4">
+                  {activityIds.length === 0 ? (
+                    <span className="flex items-center gap-1 text-destructive text-sm">
+                      <AlertTriangle className="w-4 h-4" />
+                      No mappings
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1 text-green-600 text-sm">
+                      <CheckCircle2 className="w-4 h-4" />
+                      Complete
+                    </span>
+                  )}
+                </div>
               </div>
             </AccordionTrigger>
             <AccordionContent>
@@ -331,16 +358,22 @@ export function ClientMotivatorsManager() {
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="motivators" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="motivators">Motivators</TabsTrigger>
-            <TabsTrigger value="mappings">Activity Mappings</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="motivators" className="flex items-center gap-2">
+              <Flame className="w-4 h-4" />
+              Motivators
+            </TabsTrigger>
+            <TabsTrigger value="mappings" className="flex items-center gap-2">
+              <Link2 className="w-4 h-4" />
+              Activity Mappings
+            </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="motivators">
+          <TabsContent value="motivators" className="mt-6">
             <MotivatorsTab />
           </TabsContent>
           
-          <TabsContent value="mappings">
+          <TabsContent value="mappings" className="mt-6">
             <ActivityMappingsTab />
           </TabsContent>
         </Tabs>
