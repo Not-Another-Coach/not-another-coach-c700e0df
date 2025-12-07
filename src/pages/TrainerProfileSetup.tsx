@@ -103,6 +103,7 @@ const TrainerProfileSetup = () => {
     // Basic Info - these exist in TrainerProfile
     first_name: "",
     last_name: "",
+    gender: "",
     tagline: "",
     bio: "",
     profile_photo_url: "",
@@ -126,6 +127,8 @@ const TrainerProfileSetup = () => {
     ideal_client_types: [] as string[],
     coaching_style: [] as string[],
     ideal_client_personality: "",
+    preferred_client_genders: ["all"] as string[],
+    preferred_client_experience_levels: [] as string[],
     
     // Rates & Discovery Calls - these exist in TrainerProfile
     hourly_rate: null as number | null,
@@ -254,6 +257,7 @@ const TrainerProfileSetup = () => {
       const initialData = {
         first_name: profile.first_name || "",
         last_name: profile.last_name || "",
+        gender: profile.gender || "",
         tagline: profile.tagline || "",
         bio: profile.bio || "",
         how_started: profile.how_started || "",
@@ -271,6 +275,8 @@ const TrainerProfileSetup = () => {
         ideal_client_types: Array.isArray(profile.ideal_client_types) ? profile.ideal_client_types : [],
         coaching_style: Array.isArray(profile.coaching_style) ? profile.coaching_style : [],
         ideal_client_personality: profile.ideal_client_personality || "",
+        preferred_client_genders: Array.isArray(profile.preferred_client_genders) ? profile.preferred_client_genders : ["all"],
+        preferred_client_experience_levels: Array.isArray(profile.preferred_client_experience_levels) ? profile.preferred_client_experience_levels : [],
         hourly_rate: profile.hourly_rate || null,
         package_options: profile.package_options || [],
         free_discovery_call: profile.free_discovery_call || false,

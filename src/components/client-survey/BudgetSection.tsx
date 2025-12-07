@@ -207,29 +207,6 @@ export function BudgetSection({ formData, updateFormData, errors, clearFieldErro
         </div>
       )}
 
-      {/* Budget Summary */}
-      {getCurrentBudgetLabel() && (
-        <Card className="bg-muted/50">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="font-semibold">Your Budget Range</h4>
-                <Badge variant="secondary" className="mt-1">
-                  {getCurrentBudgetLabel()}
-                </Badge>
-              </div>
-              {formData.budget_flexibility && (
-                <div className="text-right">
-                  <p className="text-sm text-muted-foreground">
-                    {flexibilityOptions.find(opt => opt.value === formData.budget_flexibility)?.label}
-                  </p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Information Note */}
       <Card className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950">
         <CardContent className="p-4 text-center">

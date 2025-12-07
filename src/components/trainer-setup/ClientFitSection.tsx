@@ -4,10 +4,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useState, useEffect } from "react";
 import { Users, Heart, Target, Zap, Sparkles, RefreshCw } from "lucide-react";
 import { AIDescriptionHelper } from "./AIDescriptionHelper";
 import { SectionHeader } from './SectionHeader';
+import { useTrainerCoachingStyles } from "@/hooks/useTrainerCoachingStyles";
 
 interface ClientFitSectionProps {
   formData: any;
@@ -15,7 +18,6 @@ interface ClientFitSectionProps {
 }
 
 const idealClientTypes = [
-  "Complete Beginners",
   "Busy Parents", 
   "Working Professionals",
   "Seniors (55+)",
@@ -31,52 +33,14 @@ const idealClientTypes = [
   "Body Positive Focus"
 ];
 
-const coachingStyles = [
-  { 
-    id: "tough-love", 
-    label: "Tough Love", 
-    icon: Zap, 
-    description: "Direct, challenging, results-driven",
-    emoji: "🎯" 
-  },
-  { 
-    id: "calm", 
-    label: "Calm & Patient", 
-    icon: Heart, 
-    description: "Gentle, understanding, supportive",
-    emoji: "🧘" 
-  },
-  { 
-    id: "encouraging", 
-    label: "Encouraging", 
-    icon: Heart, 
-    description: "Motivational, positive, uplifting",
-    emoji: "💬" 
-  },
-  { 
-    id: "structured", 
-    label: "Structured", 
-    icon: Target, 
-    description: "Systematic, data-driven, organized",
-    emoji: "📊" 
-  },
-  { 
-    id: "fun", 
-    label: "Fun & Energetic", 
-    icon: Zap, 
-    description: "Playful, dynamic, engaging",
-    emoji: "🎉" 
-  },
-  { 
-    id: "holistic", 
-    label: "Holistic", 
-    icon: Heart, 
-    description: "Mind-body connection, lifestyle focused",
-    emoji: "🌿" 
-  }
+const experienceLevelOptions = [
+  { id: "beginner", label: "Beginner", description: "New to fitness or returning after a long break" },
+  { id: "intermediate", label: "Intermediate", description: "Some fitness experience, knows basic exercises" },
+  { id: "advanced", label: "Advanced", description: "Experienced with various workout styles" },
 ];
 
 export function ClientFitSection({ formData, updateFormData }: ClientFitSectionProps) {
+  const { data: coachingStyles, isLoading: stylesLoading } = useTrainerCoachingStyles();
   const [showAIHelper, setShowAIHelper] = useState(false);
   const [isImproving, setIsImproving] = useState(false);
   
@@ -88,7 +52,53 @@ export function ClientFitSection({ formData, updateFormData }: ClientFitSectionP
     if (!formData.coaching_style) {
       updateFormData({ coaching_style: [] });
     }
-  }, [formData.ideal_client_types, formData.coaching_style, updateFormData]);
+    if (!formData.preferred_client_genders) {
+      updateFormData({ preferred_client_genders: ["all"] });
+    }
+    if (!formData.preferred_client_experience_levels) {
+      updateFormData({ preferred_client_experience_levels: [] });
+    }
+  }, [formData.ideal_client_types, formData.coaching_style, formData.preferred_client_genders, formData.preferred_client_experience_levels, updateFormData]);
+
+  const handleExperienceLevelToggle = (level: string) => {
+    const current = formData.preferred_client_experience_levels || [];
+    const updated = current.includes(level)
+      ? current.filter((l: string) => l !== level)
+      : [...current, level];
+    updateFormData({ preferred_client_experience_levels: updated });
+  };
+
+  const clientGenderOptions = [
+    { id: "all", label: "All Genders", description: "I work with clients of any gender" },
+    { id: "male", label: "Male", description: "Male-identifying clients" },
+    { id: "female", label: "Female", description: "Female-identifying clients" },
+    { id: "non-binary", label: "Non-binary", description: "Non-binary clients" },
+  ];
+
+  const handleClientGenderToggle = (genderId: string) => {
+    const current = formData.preferred_client_genders || ["all"];
+    
+    if (genderId === "all") {
+      // If selecting "all", clear other selections
+      updateFormData({ preferred_client_genders: ["all"] });
+    } else {
+      // If selecting specific gender, remove "all" and toggle this gender
+      let updated = current.filter((g: string) => g !== "all");
+      
+      if (updated.includes(genderId)) {
+        updated = updated.filter((g: string) => g !== genderId);
+      } else {
+        updated = [...updated, genderId];
+      }
+      
+      // If no specific genders selected, default to "all"
+      if (updated.length === 0) {
+        updated = ["all"];
+      }
+      
+      updateFormData({ preferred_client_genders: updated });
+    }
+  };
   
   const handleClientTypeToggle = (clientType: string) => {
     const current = formData.ideal_client_types || [];
@@ -178,7 +188,7 @@ export function ClientFitSection({ formData, updateFormData }: ClientFitSectionP
           <Label>Selected Coaching Styles</Label>
           <div className="flex flex-wrap gap-2">
             {formData.coaching_style.map((style: string) => {
-              const styleObj = coachingStyles.find(s => s.id === style);
+              const styleObj = coachingStyles?.find(s => s.id === style || s.style_key === style);
               return (
                 <Badge
                   key={style}
@@ -208,23 +218,104 @@ export function ClientFitSection({ formData, updateFormData }: ClientFitSectionP
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {coachingStyles.map((style) => {
-            const isSelected = formData.coaching_style?.includes(style.id);
+        {stylesLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-24 w-full" />)}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {coachingStyles?.map((style) => {
+              const isSelected = formData.coaching_style?.includes(style.style_key);
+              return (
+                <Card 
+                  key={style.id}
+                  className={`cursor-pointer transition-colors ${
+                    isSelected ? 'border-primary bg-primary/5' : 'hover:border-primary/50'
+                  }`}
+                  onClick={() => handleCoachingStyleToggle(style.style_key)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="text-2xl">{style.emoji}</div>
+                      <div className="flex-1">
+                        <p className="font-medium">{style.label}</p>
+                        <p className="text-sm text-muted-foreground">{style.description}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Experience Level Preferences */}
+      <div className="space-y-4">
+        <div>
+          <Label>Client Experience Levels *</Label>
+          <p className="text-sm text-muted-foreground mt-1">
+            Select which experience levels you work with (used for matching)
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {experienceLevelOptions.map((option) => {
+            const isSelected = formData.preferred_client_experience_levels?.includes(option.id);
             return (
               <Card 
-                key={style.id}
+                key={option.id}
                 className={`cursor-pointer transition-colors ${
                   isSelected ? 'border-primary bg-primary/5' : 'hover:border-primary/50'
                 }`}
-                onClick={() => handleCoachingStyleToggle(style.id)}
+                onClick={() => handleExperienceLevelToggle(option.id)}
               >
                 <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
-                    <div className="text-2xl">{style.emoji}</div>
+                  <div className="flex items-center gap-3">
+                    <Checkbox 
+                      checked={isSelected}
+                      onCheckedChange={() => handleExperienceLevelToggle(option.id)}
+                    />
                     <div className="flex-1">
-                      <p className="font-medium">{style.label}</p>
-                      <p className="text-sm text-muted-foreground">{style.description}</p>
+                      <p className="font-medium">{option.label}</p>
+                      <p className="text-sm text-muted-foreground">{option.description}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Preferred Client Genders */}
+      <div className="space-y-4">
+        <div>
+          <Label>Client Gender Preferences</Label>
+          <p className="text-sm text-muted-foreground mt-1">
+            Select which client genders you prefer to work with
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {clientGenderOptions.map((option) => {
+            const isSelected = formData.preferred_client_genders?.includes(option.id);
+            return (
+              <Card 
+                key={option.id}
+                className={`cursor-pointer transition-colors ${
+                  isSelected ? 'border-primary bg-primary/5' : 'hover:border-primary/50'
+                }`}
+                onClick={() => handleClientGenderToggle(option.id)}
+              >
+                <CardContent className="p-3">
+                  <div className="flex items-center gap-2">
+                    <Checkbox 
+                      checked={isSelected}
+                      onCheckedChange={() => handleClientGenderToggle(option.id)}
+                    />
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">{option.label}</p>
                     </div>
                   </div>
                 </CardContent>

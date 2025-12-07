@@ -1,7 +1,13 @@
 import { useMemo } from 'react';
 import { Trainer } from '@/types/trainer';
-import { Target, Dumbbell, MapPin, Clock, DollarSign, Heart, Users, Calendar } from 'lucide-react';
-
+import { Target, MapPin, Clock, DollarSign, Heart, Users, Calendar, Flame } from 'lucide-react';
+import { useMatchingConfig } from './useMatchingConfig';
+import { applyHardExclusions, ExcludedTrainer, ExclusionSummary, HARD_EXCLUSION_RULES } from './useHardExclusions';
+import { useLiveMatchingVersion } from './useMatchingVersions';
+import { useGoalSpecialtyMappingsForMatching, GoalMappingsLookup } from './useGoalSpecialtyMappingsForMatching';
+import { useCoachingStyleMappingsForMatching, CoachingStyleMappingLookup } from './useCoachingStyleMappings';
+import { useMotivatorActivityMappingsForMatching } from './useMotivatorActivityMappings';
+import { DEFAULT_MATCHING_CONFIG } from '@/types/matching';
 interface QuizAnswers {
   fitness_goals?: string[];
   experience_level?: string;
@@ -23,7 +29,7 @@ interface ClientSurveyData {
   // Training frequency and scheduling
   preferred_training_frequency?: number;
   preferred_time_slots?: string[];
-  start_timeline?: "urgent" | "next_month" | "flexible";
+  start_timeline?: "asap" | "within_month" | "flexible";
   
   // Coaching style preferences
   preferred_coaching_style?: string[];
@@ -42,6 +48,10 @@ interface ClientSurveyData {
   // Waitlist and availability preferences
   waitlist_preference?: "asap" | "quality_over_speed";
   flexible_scheduling?: boolean;
+  
+  // Trainer preferences (new fields)
+  trainer_gender_preference?: "male" | "female" | "no_preference";
+  discovery_call_preference?: "required" | "prefer_no" | "flexible";
 }
 
 interface MatchDetail {
@@ -59,10 +69,49 @@ interface MatchScore {
   compatibilityPercentage: number;
 }
 
-export const useEnhancedTrainerMatching = (trainers: Trainer[], userAnswers?: QuizAnswers, clientSurveyData?: ClientSurveyData) => {
+export interface EnhancedMatchingResult {
+  matchedTrainers: MatchScore[];
+  excludedTrainers: ExcludedTrainer[];
+  exclusionSummary: ExclusionSummary;
+  hasMatches: boolean;
+  topMatches: MatchScore[];
+  goodMatches: MatchScore[];
+  allTrainers: MatchScore[];
+}
+
+export { HARD_EXCLUSION_RULES } from './useHardExclusions';
+
+export const useEnhancedTrainerMatching = (
+  trainers: Trainer[], 
+  userAnswers?: QuizAnswers, 
+  clientSurveyData?: ClientSurveyData
+): EnhancedMatchingResult => {
+  const { config } = useMatchingConfig();
+  
+  // Fetch live matching config for weight percentages
+  const { data: liveVersion } = useLiveMatchingVersion();
+  const liveWeights = liveVersion?.config?.weights || DEFAULT_MATCHING_CONFIG.weights;
+  
+  // Fetch goal-specialty mappings from database
+  const { data: goalMappings } = useGoalSpecialtyMappingsForMatching();
+  const dbGoalMappings: GoalMappingsLookup = goalMappings || {};
+  
+  // Fetch coaching style mappings from database
+  const { data: styleMappings } = useCoachingStyleMappingsForMatching();
+  const dbStyleMappings: CoachingStyleMappingLookup = styleMappings || {};
+  
+  // Fetch motivator-activity mappings from database
+  const { data: motivatorMappings } = useMotivatorActivityMappingsForMatching();
+  
+  // Apply hard exclusions first
+  const { includedTrainers, excludedTrainers, exclusionSummary } = useMemo(() => {
+    return applyHardExclusions(trainers, clientSurveyData, config);
+  }, [trainers, clientSurveyData, config]);
+
   const matchedTrainers = useMemo(() => {
-    // PHASE 2 IMPROVEMENT: Ensure minimum baseline score for all trainers
-    const MINIMUM_BASELINE_SCORE = 45; // All trainers get at least 45% compatibility
+    // PHASE 2 IMPROVEMENT: Ensure minimum baseline score for all trainers - now configurable via live config
+    const MINIMUM_BASELINE_SCORE = liveVersion?.config?.thresholds?.minimum_baseline_score 
+      ?? DEFAULT_MATCHING_CONFIG.thresholds.minimum_baseline_score;
     
     const calculateMatch = (trainer: Trainer): MatchScore => {
       let score = 0;
@@ -97,37 +146,42 @@ export const useEnhancedTrainerMatching = (trainers: Trainer[], userAnswers?: Qu
       // Use new client survey data if available, otherwise fallback to old quiz
       const surveyData = clientSurveyData || userAnswers;
       
-      // Goals Match (25% weight) - Enhanced for new survey
+      // Goals Match - Uses LIVE config weights and DATABASE goal-specialty mappings
       let goalsScore = 0;
       const primaryGoals = clientSurveyData?.primary_goals || userAnswers?.fitness_goals || [];
       
       if (primaryGoals.length > 0) {
-        const goalMapping: Record<string, string[]> = {
-          'weight_loss': ['Weight Loss', 'Fat Loss', 'Body Composition', 'Nutrition'],
-          'strength_training': ['Strength Training', 'Powerlifting', 'Muscle Building', 'Bodybuilding'],
-          'fitness_health': ['General Fitness', 'Health & Wellness', 'Functional Training'],
-          'energy_confidence': ['Lifestyle Coaching', 'Motivation', 'Confidence Building'],
-          'injury_prevention': ['Rehabilitation', 'Corrective Exercise', 'Injury Prevention', 'Mobility'],
-          'specific_sport': ['Sports Performance', 'Athletic Training', 'Sport-Specific'],
-          'muscle_gain': ['Muscle Building', 'Strength Training', 'Bodybuilding'],
-          'endurance': ['Endurance', 'Cardio', 'Marathon Training'],
-          'flexibility': ['Yoga', 'Pilates', 'Flexibility', 'Mobility'],
-          'general_fitness': ['Functional Training', 'HIIT', 'CrossFit'],
-          'rehabilitation': ['Rehabilitation', 'Corrective Exercise', 'Physical Therapy']
-        };
+        // Use database mappings with weighted scoring (100/60/30 for primary/secondary/optional)
+        let totalWeightedScore = 0;
+        let maxPossibleScore = 0;
         
-        const matchingGoals = primaryGoals.filter(goal => {
-          const relatedSpecialties = goalMapping[goal] || [];
-          return trainer.specialties.some(specialty => 
-            relatedSpecialties.some(related => 
-              specialty.toLowerCase().includes(related.toLowerCase()) ||
-              related.toLowerCase().includes(specialty.toLowerCase())
-            )
-          );
-        }).length;
+        primaryGoals.forEach(goal => {
+          const mappings = dbGoalMappings[goal] || [];
+          
+          if (mappings.length === 0) {
+            // No mappings in DB for this goal - fallback behavior
+            maxPossibleScore += 100;
+            return;
+          }
+          
+          // Find the best matching specialty for this goal
+          let bestMatchWeight = 0;
+          mappings.forEach(mapping => {
+            const hasMatch = trainer.specialties.some(specialty => 
+              specialty.toLowerCase().includes(mapping.specialty.toLowerCase()) ||
+              mapping.specialty.toLowerCase().includes(specialty.toLowerCase())
+            );
+            if (hasMatch && mapping.weight > bestMatchWeight) {
+              bestMatchWeight = mapping.weight;
+            }
+          });
+          
+          maxPossibleScore += 100; // Max possible is always 100 per goal
+          totalWeightedScore += bestMatchWeight; // Add the best match weight (0, 30, 60, or 100)
+        });
         
-        goalsScore = Math.round((matchingGoals / primaryGoals.length) * 100);
-        score += goalsScore * 0.25;
+        goalsScore = maxPossibleScore > 0 ? Math.round((totalWeightedScore / maxPossibleScore) * 100) : 0;
+        score += goalsScore * (liveWeights.goals_specialties.value / 100);
         
         details.push({
           category: 'Goals',
@@ -136,12 +190,22 @@ export const useEnhancedTrainerMatching = (trainers: Trainer[], userAnswers?: Qu
           color: 'text-blue-500'
         });
         
+        const matchingGoals = primaryGoals.filter(goal => {
+          const mappings = dbGoalMappings[goal] || [];
+          return mappings.some(mapping => 
+            trainer.specialties.some(specialty => 
+              specialty.toLowerCase().includes(mapping.specialty.toLowerCase()) ||
+              mapping.specialty.toLowerCase().includes(specialty.toLowerCase())
+            )
+          );
+        }).length;
+        
         if (matchingGoals > 0) {
           reasons.push(`${matchingGoals}/${primaryGoals.length} goals align with expertise`);
         }
       }
       
-      // Training Location & Format Match (20% weight)
+      // Training Location & Format Match - Uses LIVE config weights
       let locationScore = 0;
       const locationPreference = clientSurveyData?.training_location_preference || 
         (userAnswers?.session_preference === 'in_person' ? 'in-person' : 
@@ -165,7 +229,7 @@ export const useEnhancedTrainerMatching = (trainers: Trainer[], userAnswers?: Qu
         }
         
         locationScore = formatMatch ? 100 : (clientSurveyData?.open_to_virtual_coaching ? 70 : 0);
-        score += locationScore * 0.20;
+        score += locationScore * (liveWeights.location_format.value / 100);
         
         details.push({
           category: 'Location',
@@ -179,29 +243,39 @@ export const useEnhancedTrainerMatching = (trainers: Trainer[], userAnswers?: Qu
         }
       }
       
-      // Coaching Style Match (20% weight) - New from survey
+      // Coaching Style Match - Uses LIVE config weights and DATABASE style mappings
       let styleScore = 0;
       if (clientSurveyData?.preferred_coaching_style?.length) {
-        const styleMapping: Record<string, string[]> = {
-          'nurturing': ['supportive', 'patient', 'encouraging', 'nurturing'],
-          'tough_love': ['challenging', 'direct', 'accountability', 'strict'],
-          'high_energy': ['energetic', 'motivating', 'enthusiastic', 'dynamic'],
-          'analytical': ['technical', 'data-driven', 'precise', 'scientific'],
-          'social': ['fun', 'social', 'interactive', 'group'],
-          'calm': ['calm', 'mindful', 'peaceful', 'balanced']
-        };
+        const trainerStyles = (trainer as any).coaching_style || [];
+        let totalWeightedScore = 0;
+        let maxPossibleScore = 0;
         
-        const trainerVibe = (trainer as any).training_vibe || '';
-        const trainerStyle = (trainer as any).communication_style || '';
-        const trainerText = `${trainerVibe} ${trainerStyle}`.toLowerCase();
+        clientSurveyData.preferred_coaching_style.forEach(clientStyle => {
+          const mappings = dbStyleMappings[clientStyle] || [];
+          maxPossibleScore += 100;
+          
+          if (mappings.length === 0) {
+            // No mappings in DB - use fallback text matching
+            return;
+          }
+          
+          // Find the best matching trainer style
+          let bestMatchWeight = 0;
+          mappings.forEach(mapping => {
+            const hasMatch = trainerStyles.some((ts: string) => 
+              ts.toLowerCase() === mapping.trainerStyleKey.toLowerCase() ||
+              ts.toLowerCase().includes(mapping.trainerStyleKey.toLowerCase())
+            );
+            if (hasMatch && mapping.weight > bestMatchWeight) {
+              bestMatchWeight = mapping.weight;
+            }
+          });
+          
+          totalWeightedScore += bestMatchWeight;
+        });
         
-        const styleMatches = clientSurveyData.preferred_coaching_style.filter(style => {
-          const keywords = styleMapping[style] || [];
-          return keywords.some(keyword => trainerText.includes(keyword));
-        }).length;
-        
-        styleScore = Math.round((styleMatches / clientSurveyData.preferred_coaching_style.length) * 100);
-        score += styleScore * 0.20;
+        styleScore = maxPossibleScore > 0 ? Math.round((totalWeightedScore / maxPossibleScore) * 100) : 0;
+        score += styleScore * (liveWeights.coaching_style.value / 100);
         
         details.push({
           category: 'Style',
@@ -210,12 +284,12 @@ export const useEnhancedTrainerMatching = (trainers: Trainer[], userAnswers?: Qu
           color: 'text-purple-500'
         });
         
-        if (styleMatches > 0) {
+        if (styleScore > 0) {
           reasons.push(`Coaching style matches your preferences`);
         }
       }
       
-      // Schedule & Frequency Match (15% weight)
+      // Schedule & Frequency Match - Uses LIVE config weights
       let scheduleScore = 0;
       const preferredFrequency = clientSurveyData?.preferred_training_frequency || 
         (userAnswers?.workout_frequency === 'daily' ? 7 :
@@ -230,7 +304,7 @@ export const useEnhancedTrainerMatching = (trainers: Trainer[], userAnswers?: Qu
           scheduleScore = 100; // Bonus for flexible clients
         }
         
-        score += scheduleScore * 0.15;
+        score += scheduleScore * (liveWeights.schedule_frequency.value / 100);
         
         details.push({
           category: 'Schedule',
@@ -244,7 +318,7 @@ export const useEnhancedTrainerMatching = (trainers: Trainer[], userAnswers?: Qu
         }
       }
       
-      // Budget Match (10% weight) - Enhanced
+      // Budget Match - Uses LIVE config weights
       let budgetScore = 0;
       const budgetMin = clientSurveyData?.budget_range_min;
       const budgetMax = clientSurveyData?.budget_range_max;
@@ -285,7 +359,7 @@ export const useEnhancedTrainerMatching = (trainers: Trainer[], userAnswers?: Qu
         }
         
         budgetScore = withinBudget ? 100 : (budgetFlex === 'negotiable' ? 60 : 0);
-        score += budgetScore * 0.10;
+        score += budgetScore * (liveWeights.budget_fit.value / 100);
         
         details.push({
           category: 'Budget',
@@ -301,19 +375,18 @@ export const useEnhancedTrainerMatching = (trainers: Trainer[], userAnswers?: Qu
         }
       }
       
-      // Experience & Client Fit Match (10% weight) - Enhanced
+      // Experience Level Match - HARDCODE MATCH (trainer must support client's level)
       let experienceScore = 0;
       const clientExperience = clientSurveyData?.experience_level || userAnswers?.experience_level || 'beginner';
+      const trainerExperienceLevels = (trainer as any).preferred_client_experience_levels || [];
       
-      const experienceMapping: Record<string, (trainer: Trainer) => boolean> = {
-        'beginner': (t) => t.rating >= 4.7, // Patient, highly rated trainers
-        'intermediate': (t) => t.rating >= 4.5, // Good trainers
-        'advanced': (t) => parseInt(t.experience) >= 5 && t.rating >= 4.5, // Experienced trainers
-      };
+      // If trainer has specified experience levels, check for match
+      // If trainer hasn't specified any (empty array), assume they work with all levels
+      const experienceMatch = trainerExperienceLevels.length === 0 || 
+        trainerExperienceLevels.includes(clientExperience);
       
-      const experienceMatch = experienceMapping[clientExperience]?.(trainer) || false;
-      experienceScore = experienceMatch ? 100 : 70; // Most trainers can work with different levels
-      score += experienceScore * 0.10;
+      experienceScore = experienceMatch ? 100 : 0;
+      score += experienceScore * (liveWeights.experience_level.value / 100);
       
       details.push({
         category: 'Experience',
@@ -323,10 +396,161 @@ export const useEnhancedTrainerMatching = (trainers: Trainer[], userAnswers?: Qu
       });
       
       if (experienceMatch) {
-        reasons.push(`Perfect fit for ${clientExperience} level`);
+        reasons.push(`Works with ${clientExperience} level clients`);
+      } else {
+        reasons.push(`Doesn't typically work with ${clientExperience} level clients`);
       }
 
-      // PHASE 2 IMPROVEMENT: Ensure minimum baseline score  
+      // Gender preference is now a hard exclusion - no soft scoring needed
+      // Trainers not matching gender preference are filtered out by applyHardExclusions
+      const trainerGenderPref = clientSurveyData?.trainer_gender_preference;
+      if (trainerGenderPref && trainerGenderPref !== 'no_preference') {
+        reasons.push(`Matches your trainer gender preference`);
+      }
+
+      // Motivation Alignment Match - Uses LIVE config weights and DATABASE motivator-activity mappings
+      let motivationScore = 0;
+      const clientMotivators = clientSurveyData?.motivation_factors || [];
+      
+      if (clientMotivators.length > 0 && motivatorMappings) {
+        // Get trainer's ways of working activities from their packages
+        const trainerActivities: string[] = (trainer as any).ways_of_working || [];
+        let matchCount = 0;
+        
+        clientMotivators.forEach(motivatorKey => {
+          const mappedActivityIds = motivatorMappings.get(motivatorKey) || [];
+          const hasMatch = mappedActivityIds.some(activityId => 
+            trainerActivities.includes(activityId)
+          );
+          if (hasMatch) matchCount++;
+        });
+        
+        motivationScore = clientMotivators.length > 0 
+          ? Math.round((matchCount / clientMotivators.length) * 100) 
+          : 0;
+        
+        score += motivationScore * (liveWeights.motivation_alignment.value / 100);
+        
+        details.push({
+          category: 'Motivation',
+          score: motivationScore,
+          icon: Flame,
+          color: 'text-orange-500'
+        });
+        
+        if (matchCount > 0) {
+          reasons.push(`${matchCount}/${clientMotivators.length} motivators align with training style`);
+        }
+      }
+
+      // Package Alignment Match - Uses LIVE config weights and package_boundaries
+      let packageScore = 0;
+      const clientPackagePref = clientSurveyData?.preferred_package_type;
+      
+      if (clientPackagePref && trainer.package_options?.length > 0) {
+        const boundaries = liveVersion?.config?.package_boundaries || DEFAULT_MATCHING_CONFIG.package_boundaries;
+        
+        const hasMatchingPackage = trainer.package_options.some((pkg: any) => {
+          const sessions = pkg.sessions || 1;
+          const durationMonths = pkg.duration_months || 0;
+          
+          if (clientPackagePref === 'single_session') {
+            return sessions <= boundaries.single_session.max_sessions;
+          } else if (clientPackagePref === 'short_term') {
+            return sessions >= boundaries.short_term.min_sessions && 
+                   sessions <= boundaries.short_term.max_sessions;
+          } else if (clientPackagePref === 'ongoing') {
+            return sessions >= boundaries.ongoing.min_sessions || 
+                   durationMonths >= boundaries.ongoing.min_months;
+          }
+          return false;
+        });
+        
+        packageScore = hasMatchingPackage ? 100 : 40;
+        score += packageScore * (liveWeights.package_alignment.value / 100);
+        
+        details.push({
+          category: 'Package',
+          score: packageScore,
+          icon: Users,
+          color: 'text-indigo-500'
+        });
+        
+        if (hasMatchingPackage) {
+          reasons.push(`Offers ${clientPackagePref.replace('_', ' ')} packages`);
+        }
+      }
+
+      // Discovery Call Match - Uses LIVE config weights
+      let discoveryScore = 0;
+      const discoveryPref = clientSurveyData?.discovery_call_preference;
+      const trainerOffersDiscovery = (trainer as any).offers_discovery_call || (trainer as any).free_discovery_call;
+      
+      if (discoveryPref) {
+        if (discoveryPref === 'required' && trainerOffersDiscovery) {
+          discoveryScore = 100;
+        } else if (discoveryPref === 'prefer_no' && !trainerOffersDiscovery) {
+          discoveryScore = 100;
+        } else if (discoveryPref === 'flexible') {
+          discoveryScore = 80; // Flexible clients are easy to satisfy
+        } else {
+          discoveryScore = 50; // Partial match
+        }
+        
+        score += discoveryScore * (liveWeights.discovery_call.value / 100);
+        
+        details.push({
+          category: 'Discovery',
+          score: discoveryScore,
+          icon: Calendar,
+          color: 'text-teal-500'
+        });
+        
+        if (discoveryScore >= 80) {
+          reasons.push(trainerOffersDiscovery ? 'Offers discovery calls' : 'No discovery call required');
+        }
+      }
+
+      // Ideal Client Type Match - Uses LIVE config weights and feature flag
+      let idealClientScore = 0;
+      const useIdealClientBonus = liveVersion?.config?.feature_flags?.use_ideal_client_bonus ?? true;
+      
+      if (useIdealClientBonus) {
+        const trainerIdealTypes = (trainer as any).ideal_client_types || [];
+        const clientExperience = clientSurveyData?.experience_level;
+        
+        if (trainerIdealTypes.length > 0 && clientExperience) {
+          // Map experience level to ideal client type keywords
+          const experienceToIdealMap: Record<string, string[]> = {
+            'beginner': ['beginners', 'new_to_fitness', 'first_timers', 'beginner'],
+            'intermediate': ['intermediate', 'regular_exercisers', 'consistent'],
+            'advanced': ['advanced', 'athletes', 'competitive', 'experienced']
+          };
+          
+          const clientKeywords = experienceToIdealMap[clientExperience] || [];
+          const hasMatch = trainerIdealTypes.some((type: string) => 
+            clientKeywords.some(keyword => 
+              type.toLowerCase().includes(keyword) || keyword.includes(type.toLowerCase())
+            )
+          );
+          
+          idealClientScore = hasMatch ? 100 : 50;
+          score += idealClientScore * (liveWeights.ideal_client_type.value / 100);
+          
+          details.push({
+            category: 'Ideal Client',
+            score: idealClientScore,
+            icon: Heart,
+            color: 'text-pink-500'
+          });
+          
+          if (hasMatch) {
+            reasons.push(`You match this trainer's ideal client profile`);
+          }
+        }
+      }
+
+      // PHASE 2 IMPROVEMENT: Ensure minimum baseline score
       const finalScore = Math.max(Math.round(score), MINIMUM_BASELINE_SCORE);
       
       // Add baseline reasons if score is low
@@ -347,7 +571,8 @@ export const useEnhancedTrainerMatching = (trainers: Trainer[], userAnswers?: Qu
       };
     };
 
-    const scoredTrainers = trainers.map(calculateMatch);
+    // Score only included trainers (after hard exclusions)
+    const scoredTrainers = includedTrainers.map(calculateMatch);
 
     // PHASE 2 IMPROVEMENT: Implement trainer diversity algorithm
     const implementTrainerDiversity = (trainers: MatchScore[]) => {
@@ -396,13 +621,15 @@ export const useEnhancedTrainerMatching = (trainers: Trainer[], userAnswers?: Qu
 
     // Apply diversity algorithm
     return implementTrainerDiversity(scoredTrainers);
-  }, [trainers, userAnswers, clientSurveyData]);
+  }, [includedTrainers, userAnswers, clientSurveyData, dbGoalMappings, liveWeights]);
 
   return {
     matchedTrainers,
-    hasMatches: matchedTrainers.length > 0, // PHASE 2: All trainers should appear
-    topMatches: matchedTrainers.filter(match => match.score >= 70), // High compatibility matches
-    goodMatches: matchedTrainers.filter(match => match.score >= 50 && match.score < 70), // Good matches
-    allTrainers: matchedTrainers, // PHASE 2: Expose all for debugging
+    excludedTrainers,
+    exclusionSummary,
+    hasMatches: matchedTrainers.length > 0,
+    topMatches: matchedTrainers.filter(match => match.score >= 70),
+    goodMatches: matchedTrainers.filter(match => match.score >= 50 && match.score < 70),
+    allTrainers: matchedTrainers,
   };
 };

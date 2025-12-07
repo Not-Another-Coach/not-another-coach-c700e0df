@@ -3,13 +3,13 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { ProfileDropdown } from "@/components/ProfileDropdown";
 import { AppLogo } from "@/components/ui/app-logo";
 import { useUserRoles } from "@/hooks/useUserRoles";
-import { Bell, MessageCircle, Users, Shield, FileText, Database, Briefcase, Settings, BarChart3, ChevronDown, Menu } from "lucide-react";
+import { Bell, MessageCircle, Users, Shield, FileText, Database, Briefcase, Settings, BarChart3, ChevronDown, Menu, Target, Heart, ChevronRight } from "lucide-react";
 
 interface AdminCustomHeaderProps {
   profile: any;
@@ -23,6 +23,16 @@ export function AdminCustomHeader({
   const navigate = useNavigate();
   const { users } = useUserRoles();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Profile sub-items (nested under Configuration)
+  const profileItems = [
+    { key: "specialties", label: "Specialties", icon: Database, path: "/admin/specialties" },
+    { key: "goals", label: "Goals", icon: Target, path: "/admin/goals" },
+    { key: "qualifications", label: "Qualifications", icon: Briefcase, path: "/admin/qualifications" },
+    { key: "coaching-styles", label: "Coaching Styles", icon: Heart, path: "/admin/coaching-styles" },
+    { key: "motivators", label: "Motivators", icon: Heart, path: "/admin/motivators" },
+    { key: "matching", label: "Matching", icon: Target, path: "/admin/matching-config" },
+  ];
 
   // Navigation Groups
   const navigationGroups = [
@@ -40,10 +50,9 @@ export function AdminCustomHeader({
       key: "configuration",
       label: "Configuration",
       icon: Settings,
+      hasProfileSubmenu: true,
       items: [
         { key: "highlights", label: "Highlights", icon: FileText, path: "/admin/highlights" },
-        { key: "specialties", label: "Specialties", icon: Database, path: "/admin/specialties" },
-        { key: "qualifications", label: "Qualifications", icon: Briefcase, path: "/admin/qualifications" },
         { key: "templates", label: "Templates", icon: Settings, path: "/admin/templates" },
         { key: "feedback-builder", label: "Feedback", icon: Settings, path: "/admin/feedback-builder" },
       ]
@@ -67,6 +76,8 @@ export function AdminCustomHeader({
       ]
     }
   ];
+
+  const hasActiveProfileItem = profileItems.some(item => window.location.pathname === item.path);
 
   const handleNavigation = (path: string) => {
     navigate(path);
@@ -145,7 +156,8 @@ export function AdminCustomHeader({
           <nav className="flex items-center gap-2 py-3 overflow-x-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
             {navigationGroups.map((group) => {
               const GroupIcon = group.icon;
-              const hasActiveItem = group.items.some(item => window.location.pathname === item.path);
+              const hasActiveItem = group.items.some(item => window.location.pathname === item.path) || 
+                (group.hasProfileSubmenu && hasActiveProfileItem);
               
               return (
                 <DropdownMenu key={group.key}>
@@ -164,6 +176,39 @@ export function AdminCustomHeader({
                     align="start" 
                     className="w-48 bg-background border border-border shadow-lg z-[100]"
                   >
+                    {/* Profile submenu for Configuration group */}
+                    {group.hasProfileSubmenu && (
+                      <DropdownMenuSub>
+                        <DropdownMenuSubTrigger className={`flex items-center gap-2 px-3 py-2 cursor-pointer ${
+                          hasActiveProfileItem ? 'bg-primary/10 text-primary' : ''
+                        }`}>
+                          <Users className="h-4 w-4" />
+                          <span>Profile</span>
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuSubContent className="w-48 bg-background border border-border shadow-lg z-[100]">
+                          {profileItems.map((item) => {
+                            const ItemIcon = item.icon;
+                            const isActive = window.location.pathname === item.path;
+                            
+                            return (
+                              <DropdownMenuItem
+                                key={item.key}
+                                onClick={() => handleNavigation(item.path)}
+                                className={`flex items-center gap-2 px-3 py-2 cursor-pointer ${
+                                  isActive 
+                                    ? 'bg-primary text-primary-foreground' 
+                                    : 'hover:bg-muted'
+                                }`}
+                              >
+                                <ItemIcon className="h-4 w-4" />
+                                <span>{item.label}</span>
+                              </DropdownMenuItem>
+                            );
+                          })}
+                        </DropdownMenuSubContent>
+                      </DropdownMenuSub>
+                    )}
+                    
                     {group.items.map((item) => {
                       const ItemIcon = item.icon;
                       const isActive = window.location.pathname === item.path;
@@ -206,10 +251,11 @@ export function AdminCustomHeader({
                 <SheetTitle>Admin Menu</SheetTitle>
               </SheetHeader>
               <div className="mt-6">
-                <Accordion type="single" collapsible className="w-full">
+                <Accordion type="multiple" className="w-full">
                   {navigationGroups.map((group, groupIdx) => {
                     const GroupIcon = group.icon;
-                    const hasActiveItem = group.items.some(item => window.location.pathname === item.path);
+                    const hasActiveItem = group.items.some(item => window.location.pathname === item.path) ||
+                      (group.hasProfileSubmenu && hasActiveProfileItem);
                     
                     return (
                       <AccordionItem key={group.key} value={`group-${groupIdx}`}>
@@ -221,6 +267,41 @@ export function AdminCustomHeader({
                         </AccordionTrigger>
                         <AccordionContent>
                           <div className="flex flex-col gap-1 pl-6">
+                            {/* Profile nested accordion for Configuration group */}
+                            {group.hasProfileSubmenu && (
+                              <Accordion type="single" collapsible className="w-full">
+                                <AccordionItem value="profile-submenu" className="border-none">
+                                  <AccordionTrigger className="hover:no-underline py-2">
+                                    <div className="flex items-center gap-2">
+                                      <Users className="h-4 w-4" />
+                                      <span className="font-medium text-sm">Profile</span>
+                                    </div>
+                                  </AccordionTrigger>
+                                  <AccordionContent>
+                                    <div className="flex flex-col gap-1 pl-6">
+                                      {profileItems.map((item) => {
+                                        const ItemIcon = item.icon;
+                                        const isActive = window.location.pathname === item.path;
+                                        
+                                        return (
+                                          <Button
+                                            key={item.key}
+                                            variant={isActive ? "default" : "ghost"}
+                                            size="sm"
+                                            onClick={() => handleNavigation(item.path)}
+                                            className="justify-start gap-2 w-full"
+                                          >
+                                            <ItemIcon className="h-4 w-4" />
+                                            <span>{item.label}</span>
+                                          </Button>
+                                        );
+                                      })}
+                                    </div>
+                                  </AccordionContent>
+                                </AccordionItem>
+                              </Accordion>
+                            )}
+                            
                             {group.items.map((item) => {
                               const ItemIcon = item.icon;
                               const isActive = window.location.pathname === item.path;

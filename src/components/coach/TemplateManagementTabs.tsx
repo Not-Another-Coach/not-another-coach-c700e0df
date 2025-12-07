@@ -370,7 +370,7 @@ export function TemplateManagementTabs() {
 
   // Define which tabs to show based on user role
   const visibleTabs = isAdmin 
-    ? ['activities', 'categories', 'sections'] // Admin sees only these tabs
+    ? ['sections', 'categories', 'activities'] // Admin sees only these tabs
     : ['templates', 'assignment', 'activities', 'advanced']; // Trainers see these tabs
 
   return (

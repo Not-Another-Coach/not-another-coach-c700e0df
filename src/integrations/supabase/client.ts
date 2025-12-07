@@ -13,8 +13,8 @@ if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
 // import { supabase } from "@/integrations/supabase/client";
 
 export const supabase = createClient<Database>(
-  ENV_CONFIG.supabaseUrl,
-  getSupabaseAnonKey(),
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY,
   {
     auth: {
       storage: localStorage,
@@ -22,4 +22,4 @@ export const supabase = createClient<Database>(
       autoRefreshToken: true,
     }
   }
-});
+);

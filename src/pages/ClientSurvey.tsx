@@ -58,7 +58,7 @@ const ClientSurvey = () => {
     first_name: null as string | null,
     last_name: null as string | null,
     profile_photo_url: null as string | null,
-    gender_preference: null as string | null,
+    gender: null as string | null, // User's own gender (renamed from gender_preference)
     timezone: null as string | null,
     phone_number: null as string | null,
     
@@ -102,6 +102,10 @@ const ClientSurvey = () => {
     // Waitlist and availability preferences
     waitlist_preference: null as boolean | null,
     flexible_scheduling: false,
+    
+    // Trainer preferences (new fields)
+    trainer_gender_preference: "no_preference" as string,
+    discovery_call_preference: "flexible" as string,
     
     // Survey completion tracking
     client_survey_completed: false,
@@ -213,7 +217,7 @@ const ClientSurvey = () => {
         first_name: (profileData as any).first_name || null,
         last_name: (profileData as any).last_name || null,
         profile_photo_url: (profileData as any).profile_photo_url || null,
-        gender_preference: (profileData as any).gender_preference || null,
+        gender: (profileData as any).gender || (profileData as any).gender_preference || null, // Support both old and new field names
         timezone: (profileData as any).timezone || null,
         phone_number: (profileData as any).phone_number || null,
         primary_goals: profileData.primary_goals || [],
@@ -241,6 +245,8 @@ const ClientSurvey = () => {
         budget_flexibility: profileData.budget_flexibility || "flexible",
         waitlist_preference: profileData.waitlist_preference ?? null,
         flexible_scheduling: profileData.flexible_scheduling ?? false,
+        trainer_gender_preference: (profileData as any).trainer_gender_preference || "no_preference",
+        discovery_call_preference: (profileData as any).discovery_call_preference || "flexible",
         client_survey_completed: false,
       };
       
@@ -266,7 +272,7 @@ const ClientSurvey = () => {
           first_name: (profile as any).first_name || null,
           last_name: (profile as any).last_name || null,
           profile_photo_url: (profile as any).profile_photo_url || null,
-          gender_preference: (profile as any).gender_preference || null,
+          gender: (profile as any).gender || (profile as any).gender_preference || null,
           timezone: (profile as any).timezone || null,
           phone_number: (profile as any).phone_number || null,
           primary_goals: profile.primary_goals || [],
@@ -294,6 +300,8 @@ const ClientSurvey = () => {
           budget_flexibility: profile.budget_flexibility || "flexible",
           waitlist_preference: profile.waitlist_preference ?? null,
           flexible_scheduling: profile.flexible_scheduling ?? false,
+          trainer_gender_preference: (profile as any).trainer_gender_preference || "no_preference",
+          discovery_call_preference: (profile as any).discovery_call_preference || "flexible",
           client_survey_completed: false,
         };
         
@@ -335,8 +343,8 @@ const ClientSurvey = () => {
         if (!formData.last_name || formData.last_name.trim() === "") {
           newErrors.last_name = "Last name is required";
         }
-        if (!formData.gender_preference || formData.gender_preference.trim() === "") {
-          newErrors.gender_preference = "Gender preference is required";
+        if (!formData.gender || formData.gender.trim() === "") {
+          newErrors.gender = "Gender is required";
         }
         break;
       case 2: // Goals

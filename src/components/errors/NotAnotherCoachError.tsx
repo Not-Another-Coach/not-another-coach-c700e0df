@@ -7,6 +7,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import runnersBackground from '@/assets/images/runners-timeout.png';
 
 type ErrorCode = '404' | '500' | '403' | 'offline';
 
@@ -187,24 +188,40 @@ export function NotAnotherCoachError({
       role="main" 
       aria-labelledby="error-title"
       className={`min-h-screen flex items-center justify-center p-4 bg-background ${className}`}
+      style={code === '500' || code === '404' ? {
+        backgroundImage: `url(${runnersBackground})`,
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundSize: 'cover',
+      } : undefined}
     >
       <div className="w-full max-w-2xl">
-        <div className="bg-card rounded-3xl border border-border shadow-lg p-8 md:p-12 text-center">
+        <div className={`rounded-3xl border shadow-lg p-8 md:p-12 text-center ${
+          code === '500' || code === '404' 
+            ? 'bg-primary border-primary-600' 
+            : 'bg-card border-border'
+        }`}>
           {/* Icon */}
-          <div className="flex justify-center mb-6 text-accent">
+          <div className={`flex justify-center mb-6 ${
+            code === '500' || code === '404' ? 'text-primary-foreground' : 'text-accent'
+          }`}>
             {icon}
           </div>
 
           {/* Headline */}
           <h1 
             id="error-title"
-            className="text-3xl md:text-4xl font-bold text-foreground mb-4"
+            className={`text-3xl md:text-4xl font-bold mb-4 ${
+              code === '500' || code === '404' ? 'text-primary-foreground' : 'text-foreground'
+            }`}
           >
             {variant.headline}
           </h1>
 
           {/* Body text */}
-          <p className="text-lg text-muted-foreground mb-8 max-w-md mx-auto">
+          <p className={`text-lg mb-8 max-w-md mx-auto ${
+            code === '500' || code === '404' ? 'text-primary-100' : 'text-muted-foreground'
+          }`}>
             {variant.body}
           </p>
 
@@ -212,6 +229,7 @@ export function NotAnotherCoachError({
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button
               size="lg"
+              variant="success"
               onClick={handlePrimaryClick}
               className="w-full sm:w-auto min-w-[160px]"
             >
@@ -223,7 +241,11 @@ export function NotAnotherCoachError({
                 size="lg"
                 variant="outline"
                 onClick={handleSecondaryClick}
-                className="w-full sm:w-auto min-w-[160px]"
+                className={`w-full sm:w-auto min-w-[160px] ${
+                  code === '500' || code === '404' 
+                    ? 'border-white/50 text-white hover:bg-white/10 hover:border-white' 
+                    : ''
+                }`}
               >
                 {getSecondaryButtonText()}
               </Button>

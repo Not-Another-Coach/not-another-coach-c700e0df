@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSavedTrainers } from "@/hooks/useSavedTrainers";
 import { useShortlistedTrainers } from "@/hooks/useShortlistedTrainers";
@@ -8,26 +8,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { EnhancedTrainerCard } from "@/components/trainer-cards/EnhancedTrainerCard";
+import { FilterSection } from "@/components/FilterSection";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { 
   Search, 
-  Filter, 
-  Heart, 
-  Users, 
-  Star, 
   Grid3X3,
   List,
   Target,
-  Shuffle,
-  MapPin,
-  Phone,
-  MessageCircle,
-  Calendar,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  SlidersHorizontal
 } from "lucide-react";
 
 // Fallback images for trainers
@@ -56,10 +48,26 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
   
   // State for filters and search
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedGoal, setSelectedGoal] = useState("all");
-  const [selectedLocation, setSelectedLocation] = useState("all");
-  const [selectedAvailability, setSelectedAvailability] = useState("all");
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [showFilters, setShowFilters] = useState(true);
+  const [activeFilters, setActiveFilters] = useState<{
+    trainingType: string;
+    experience: string;
+    rating: string;
+    priceRange: number[];
+    selectedSpecialties: string[];
+  }>({
+    trainingType: "",
+    experience: "",
+    rating: "",
+    priceRange: [25, 150],
+    selectedSpecialties: []
+  });
+
+  // Handle filter changes from FilterSection
+  const handleFiltersChange = useCallback((filters: any) => {
+    setActiveFilters(filters);
+  }, []);
 
   // Fetch all published trainers excluding those with engagement
   useEffect(() => {
@@ -191,22 +199,51 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
     };
   }, []);
 
-  // Filter trainers based on search and filters
+  // Filter trainers based on search and comprehensive filters
   const filteredTrainers = useMemo(() => {
     return allTrainers.filter(trainer => {
+      // Search filter
       const matchesSearch = !searchTerm || 
         trainer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         trainer.specialties.some((spec: string) => spec.toLowerCase().includes(searchTerm.toLowerCase()));
       
-      const matchesGoal = selectedGoal === "all" || 
-        trainer.specialties.some((spec: string) => spec.toLowerCase().includes(selectedGoal.toLowerCase()));
+      // Training type filter
+      const matchesTrainingType = !activeFilters.trainingType || 
+        trainer.trainingType?.some((type: string) => 
+          type.toLowerCase().includes(activeFilters.trainingType.toLowerCase()) ||
+          (activeFilters.trainingType === "online" && type.toLowerCase() === "virtual") ||
+          (activeFilters.trainingType === "in-person" && type.toLowerCase().includes("person"))
+        );
       
-      const matchesLocation = selectedLocation === "all" || 
-        trainer.location.toLowerCase().includes(selectedLocation.toLowerCase());
+      // Experience filter (parse years from experience string or use a default)
+      const matchesExperience = !activeFilters.experience || (() => {
+        // For now, we'll assume all verified professionals have 5+ years
+        // This can be enhanced when experience_years is added to the trainer data
+        if (activeFilters.experience === "10+") return trainer.experience?.includes("Verified");
+        return true;
+      })();
       
-      return matchesSearch && matchesGoal && matchesLocation;
+      // Rating filter
+      const matchesRating = !activeFilters.rating || 
+        trainer.rating >= parseFloat(activeFilters.rating);
+      
+      // Price range filter
+      const matchesPriceRange = 
+        trainer.hourlyRate >= activeFilters.priceRange[0] && 
+        trainer.hourlyRate <= activeFilters.priceRange[1];
+      
+      // Specialties filter
+      const matchesSpecialties = activeFilters.selectedSpecialties.length === 0 || 
+        activeFilters.selectedSpecialties.some(specialty => 
+          trainer.specialties.some((spec: string) => 
+            spec.toLowerCase().includes(specialty.toLowerCase())
+          )
+        );
+      
+      return matchesSearch && matchesTrainingType && matchesExperience && 
+             matchesRating && matchesPriceRange && matchesSpecialties;
     });
-  }, [allTrainers, searchTerm, selectedGoal, selectedLocation]);
+  }, [allTrainers, searchTerm, activeFilters]);
 
   // Pagination calculations
   const totalPages = Math.ceil(filteredTrainers.length / trainersPerPage);
@@ -217,7 +254,7 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, selectedGoal, selectedLocation, selectedAvailability]);
+  }, [searchTerm, activeFilters]);
 
   const handleViewProfile = (trainerId: string) => {
     navigate(`/trainer/${trainerId}`);
@@ -336,7 +373,7 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
 
   return (
     <div className="space-y-6">
-      {/* Header with Search and Filters */}
+      {/* Header with Search */}
       <Card>
         <CardHeader>
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
@@ -349,70 +386,37 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
                 {filteredTrainers.length} trainers
               </Badge>
               <Badge variant="secondary">
-                Page {currentPage} of {totalPages}
+                Page {currentPage} of {totalPages || 1}
               </Badge>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              placeholder="Search trainers by name or specialty..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-
-          {/* Filters */}
-          <div className="grid sm:grid-cols-3 gap-4">
-            <Select value={selectedGoal} onValueChange={setSelectedGoal}>
-              <SelectTrigger>
-                <SelectValue placeholder="Fitness Goal" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Goals</SelectItem>
-                <SelectItem value="weight loss">Weight Loss</SelectItem>
-                <SelectItem value="strength">Strength Training</SelectItem>
-                <SelectItem value="muscle">Muscle Building</SelectItem>
-                <SelectItem value="cardio">Cardio</SelectItem>
-                <SelectItem value="flexibility">Flexibility</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-              <SelectTrigger>
-                <SelectValue placeholder="Location" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Locations</SelectItem>
-                <SelectItem value="downtown">Downtown</SelectItem>
-                <SelectItem value="uptown">Uptown</SelectItem>
-                <SelectItem value="suburbs">Suburbs</SelectItem>
-                <SelectItem value="online">Online Only</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={selectedAvailability} onValueChange={setSelectedAvailability}>
-              <SelectTrigger>
-                <SelectValue placeholder="Availability" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Any Time</SelectItem>
-                <SelectItem value="morning">Morning</SelectItem>
-                <SelectItem value="afternoon">Afternoon</SelectItem>
-                <SelectItem value="evening">Evening</SelectItem>
-                <SelectItem value="weekend">Weekends</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="flex gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                placeholder="Search trainers by name or specialty..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Button
+              variant={showFilters ? "default" : "outline"}
+              onClick={() => setShowFilters(!showFilters)}
+              className="gap-2"
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+              Filters
+            </Button>
           </div>
 
           {/* View Mode Toggle */}
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
-              Showing {startIndex + 1}-{Math.min(endIndex, filteredTrainers.length)} of {filteredTrainers.length} trainers
+              Showing {filteredTrainers.length > 0 ? startIndex + 1 : 0}-{Math.min(endIndex, filteredTrainers.length)} of {filteredTrainers.length} trainers
             </p>
             <div className="flex items-center gap-2">
               <Button
@@ -433,6 +437,11 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Comprehensive Filter Section */}
+      {showFilters && (
+        <FilterSection onFiltersChange={handleFiltersChange} />
+      )}
 
       {/* Trainers Grid/List */}
       {paginatedTrainers.length > 0 ? (
@@ -470,9 +479,13 @@ export function ExploreAllTrainers({ profile }: ExploreAllTrainersProps) {
             <Button 
               onClick={() => {
                 setSearchTerm("");
-                setSelectedGoal("all");
-                setSelectedLocation("all");
-                setSelectedAvailability("all");
+                setActiveFilters({
+                  trainingType: "",
+                  experience: "",
+                  rating: "",
+                  priceRange: [25, 150],
+                  selectedSpecialties: []
+                });
               }}
             >
               Clear Filters

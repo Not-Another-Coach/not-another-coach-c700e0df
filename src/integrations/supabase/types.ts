@@ -437,6 +437,45 @@ export type Database = {
           },
         ]
       }
+      client_coaching_styles: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number
+          icon: string | null
+          id: string
+          is_active: boolean
+          keywords: string[] | null
+          label: string
+          style_key: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          keywords?: string[] | null
+          label: string
+          style_key: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          keywords?: string[] | null
+          label?: string
+          style_key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       client_commitment_acknowledgments: {
         Row: {
           acknowledged_at: string | null
@@ -539,6 +578,126 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      client_goal_specialty_mappings: {
+        Row: {
+          created_at: string
+          goal_id: string
+          id: string
+          mapping_type: Database["public"]["Enums"]["client_goal_mapping_type"]
+          specialty_id: string
+          weight: number
+        }
+        Insert: {
+          created_at?: string
+          goal_id: string
+          id?: string
+          mapping_type?: Database["public"]["Enums"]["client_goal_mapping_type"]
+          specialty_id: string
+          weight?: number
+        }
+        Update: {
+          created_at?: string
+          goal_id?: string
+          id?: string
+          mapping_type?: Database["public"]["Enums"]["client_goal_mapping_type"]
+          specialty_id?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_goal_specialty_mappings_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "client_goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_goal_specialty_mappings_specialty_id_fkey"
+            columns: ["specialty_id"]
+            isOneToOne: false
+            referencedRelation: "specialties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_goals: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number
+          goal_key: string
+          goal_type: Database["public"]["Enums"]["client_goal_type"]
+          icon: string | null
+          id: string
+          is_active: boolean
+          label: string
+          updated_at: string
+          visibility_rules: Json | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          goal_key: string
+          goal_type?: Database["public"]["Enums"]["client_goal_type"]
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          label: string
+          updated_at?: string
+          visibility_rules?: Json | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          goal_key?: string
+          goal_type?: Database["public"]["Enums"]["client_goal_type"]
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          label?: string
+          updated_at?: string
+          visibility_rules?: Json | null
+        }
+        Relationships: []
+      }
+      client_motivators: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          key: string
+          label: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          key: string
+          label: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          key?: string
+          label?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       client_onboarding_progress: {
         Row: {
@@ -740,6 +899,9 @@ export type Database = {
           client_survey_completed: boolean | null
           client_survey_completed_at: string | null
           created_at: string | null
+          discovery_call_preference:
+            | Database["public"]["Enums"]["discovery_call_preference"]
+            | null
           experience_level: string | null
           fitness_equipment_access: Json | null
           fitness_goals: string[] | null
@@ -764,6 +926,9 @@ export type Database = {
           specific_event_date: string | null
           specific_event_details: string | null
           start_timeline: string | null
+          trainer_gender_preference:
+            | Database["public"]["Enums"]["trainer_gender_preference"]
+            | null
           training_location_preference: string | null
           updated_at: string | null
           waitlist_preference: boolean | null
@@ -778,6 +943,9 @@ export type Database = {
           client_survey_completed?: boolean | null
           client_survey_completed_at?: string | null
           created_at?: string | null
+          discovery_call_preference?:
+            | Database["public"]["Enums"]["discovery_call_preference"]
+            | null
           experience_level?: string | null
           fitness_equipment_access?: Json | null
           fitness_goals?: string[] | null
@@ -802,6 +970,9 @@ export type Database = {
           specific_event_date?: string | null
           specific_event_details?: string | null
           start_timeline?: string | null
+          trainer_gender_preference?:
+            | Database["public"]["Enums"]["trainer_gender_preference"]
+            | null
           training_location_preference?: string | null
           updated_at?: string | null
           waitlist_preference?: boolean | null
@@ -816,6 +987,9 @@ export type Database = {
           client_survey_completed?: boolean | null
           client_survey_completed_at?: string | null
           created_at?: string | null
+          discovery_call_preference?:
+            | Database["public"]["Enums"]["discovery_call_preference"]
+            | null
           experience_level?: string | null
           fitness_equipment_access?: Json | null
           fitness_goals?: string[] | null
@@ -840,6 +1014,9 @@ export type Database = {
           specific_event_date?: string | null
           specific_event_details?: string | null
           start_timeline?: string | null
+          trainer_gender_preference?:
+            | Database["public"]["Enums"]["trainer_gender_preference"]
+            | null
           training_location_preference?: string | null
           updated_at?: string | null
           waitlist_preference?: boolean | null
@@ -1167,6 +1344,48 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      coaching_style_mappings: {
+        Row: {
+          client_style_id: string
+          created_at: string
+          id: string
+          mapping_type: string
+          trainer_style_id: string
+          weight: number
+        }
+        Insert: {
+          client_style_id: string
+          created_at?: string
+          id?: string
+          mapping_type?: string
+          trainer_style_id: string
+          weight?: number
+        }
+        Update: {
+          client_style_id?: string
+          created_at?: string
+          id?: string
+          mapping_type?: string
+          trainer_style_id?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coaching_style_mappings_client_style_id_fkey"
+            columns: ["client_style_id"]
+            isOneToOne: false
+            referencedRelation: "client_coaching_styles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coaching_style_mappings_trainer_style_id_fkey"
+            columns: ["trainer_style_id"]
+            isOneToOne: false
+            referencedRelation: "trainer_coaching_styles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       consent_audit_log: {
         Row: {
@@ -2784,6 +3003,48 @@ export type Database = {
           },
         ]
       }
+      matching_algorithm_versions: {
+        Row: {
+          archived_at: string | null
+          config: Json
+          created_at: string | null
+          created_by: string | null
+          id: string
+          name: string
+          notes: string | null
+          published_at: string | null
+          published_by: string | null
+          status: string
+          version_number: number
+        }
+        Insert: {
+          archived_at?: string | null
+          config: Json
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          published_at?: string | null
+          published_by?: string | null
+          status?: string
+          version_number: number
+        }
+        Update: {
+          archived_at?: string | null
+          config?: Json
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          published_at?: string | null
+          published_by?: string | null
+          status?: string
+          version_number?: number
+        }
+        Relationships: []
+      }
       membership_commission_config: {
         Row: {
           created_at: string
@@ -3002,6 +3263,45 @@ export type Database = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      motivator_activity_mappings: {
+        Row: {
+          activity_id: string
+          created_at: string | null
+          id: string
+          motivator_id: string
+          weight: number | null
+        }
+        Insert: {
+          activity_id: string
+          created_at?: string | null
+          id?: string
+          motivator_id: string
+          weight?: number | null
+        }
+        Update: {
+          activity_id?: string
+          created_at?: string | null
+          id?: string
+          motivator_id?: string
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "motivator_activity_mappings_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "trainer_onboarding_activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "motivator_activity_mappings_motivator_id_fkey"
+            columns: ["motivator_id"]
+            isOneToOne: false
+            referencedRelation: "client_motivators"
             referencedColumns: ["id"]
           },
         ]
@@ -4385,7 +4685,7 @@ export type Database = {
           flexible_scheduling: boolean | null
           force_password_reset: boolean | null
           free_discovery_call: boolean | null
-          gender_preference: string | null
+          gender: string | null
           hourly_rate: number | null
           id: string
           ideal_client_age_range: string | null
@@ -4516,7 +4816,7 @@ export type Database = {
           flexible_scheduling?: boolean | null
           force_password_reset?: boolean | null
           free_discovery_call?: boolean | null
-          gender_preference?: string | null
+          gender?: string | null
           hourly_rate?: number | null
           id: string
           ideal_client_age_range?: string | null
@@ -4647,7 +4947,7 @@ export type Database = {
           flexible_scheduling?: boolean | null
           force_password_reset?: boolean | null
           free_discovery_call?: boolean | null
-          gender_preference?: string | null
+          gender?: string | null
           hourly_rate?: number | null
           id?: string
           ideal_client_age_range?: string | null
@@ -5123,6 +5423,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      trainer_coaching_styles: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number
+          emoji: string | null
+          id: string
+          is_active: boolean
+          label: string
+          style_key: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          emoji?: string | null
+          id?: string
+          is_active?: boolean
+          label: string
+          style_key: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          emoji?: string | null
+          id?: string
+          is_active?: boolean
+          label?: string
+          style_key?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       trainer_image_preferences: {
         Row: {
@@ -5656,6 +5992,8 @@ export type Database = {
           offers_discovery_call: boolean | null
           package_options: Json | null
           philosophy: string | null
+          preferred_client_experience_levels: string[] | null
+          preferred_client_genders: string[] | null
           professional_milestones: Json | null
           profile_setup_completed: boolean | null
           qualifications: string[] | null
@@ -5707,6 +6045,8 @@ export type Database = {
           offers_discovery_call?: boolean | null
           package_options?: Json | null
           philosophy?: string | null
+          preferred_client_experience_levels?: string[] | null
+          preferred_client_genders?: string[] | null
           professional_milestones?: Json | null
           profile_setup_completed?: boolean | null
           qualifications?: string[] | null
@@ -5758,6 +6098,8 @@ export type Database = {
           offers_discovery_call?: boolean | null
           package_options?: Json | null
           philosophy?: string | null
+          preferred_client_experience_levels?: string[] | null
+          preferred_client_genders?: string[] | null
           professional_milestones?: Json | null
           profile_setup_completed?: boolean | null
           qualifications?: string[] | null
@@ -6843,12 +7185,15 @@ export type Database = {
           client_survey_completed: boolean | null
           client_survey_completed_at: string | null
           created_at: string | null
+          discovery_call_preference:
+            | Database["public"]["Enums"]["discovery_call_preference"]
+            | null
           experience_level: string | null
           first_name: string | null
           fitness_equipment_access: Json | null
           fitness_goals: string[] | null
           flexible_scheduling: boolean | null
-          gender_preference: string | null
+          gender: string | null
           has_specific_event: string | null
           health_conditions: string | null
           id: string | null
@@ -6877,9 +7222,12 @@ export type Database = {
           start_timeline: string | null
           tagline: string | null
           timezone: string | null
+          trainer_gender_preference:
+            | Database["public"]["Enums"]["trainer_gender_preference"]
+            | null
           training_location_preference: string | null
           updated_at: string | null
-          user_type: Database["public"]["Enums"]["user_type"] | null
+          user_type: string | null
           waitlist_preference: boolean | null
         }
         Relationships: []
@@ -6896,9 +7244,11 @@ export type Database = {
           coaching_style: string[] | null
           communication_style: string[] | null
           delivery_format: string[] | null
+          discovery_call_price: number | null
           document_not_applicable: Json | null
           first_name: string | null
           free_discovery_call: boolean | null
+          gender: string | null
           hourly_rate: number | null
           how_started: string | null
           id: string | null
@@ -6913,8 +7263,11 @@ export type Database = {
           notify_insights: boolean | null
           notify_messages: boolean | null
           notify_profile_views: boolean | null
+          offers_discovery_call: boolean | null
           package_options: Json | null
           philosophy: string | null
+          preferred_client_experience_levels: string[] | null
+          preferred_client_genders: string[] | null
           professional_milestones: Json | null
           profile_image_position: Json | null
           profile_photo_url: string | null
@@ -7560,6 +7913,8 @@ export type Database = {
         | "approved"
         | "rejected"
         | "auto_approved"
+      client_goal_mapping_type: "primary" | "secondary" | "optional"
+      client_goal_type: "primary" | "secondary"
       client_status:
         | "onboarding"
         | "survey_completed"
@@ -7593,6 +7948,7 @@ export type Database = {
         | "sales"
         | "delivery"
       customer_payment_mode_enum: "upfront" | "installments"
+      discovery_call_preference: "required" | "prefer_no" | "flexible"
       discovery_call_status:
         | "scheduled"
         | "completed"
@@ -7660,6 +8016,8 @@ export type Database = {
       onboarding_visibility: "client" | "trainer" | "shared"
       payout_frequency_enum: "weekly" | "monthly"
       publication_request_status: "pending" | "approved" | "rejected"
+      trainer_gender_preference: "male" | "female" | "no_preference"
+      user_gender: "male" | "female" | "non_binary" | "prefer_not_to_say"
       user_type: "client" | "trainer" | "admin"
       verification_audit_action:
         | "upload"
@@ -7821,6 +8179,8 @@ export const Constants = {
         "rejected",
         "auto_approved",
       ],
+      client_goal_mapping_type: ["primary", "secondary", "optional"],
+      client_goal_type: ["primary", "secondary"],
       client_status: [
         "onboarding",
         "survey_completed",
@@ -7857,6 +8217,7 @@ export const Constants = {
         "delivery",
       ],
       customer_payment_mode_enum: ["upfront", "installments"],
+      discovery_call_preference: ["required", "prefer_no", "flexible"],
       discovery_call_status: [
         "scheduled",
         "completed",
@@ -7924,6 +8285,8 @@ export const Constants = {
       onboarding_visibility: ["client", "trainer", "shared"],
       payout_frequency_enum: ["weekly", "monthly"],
       publication_request_status: ["pending", "approved", "rejected"],
+      trainer_gender_preference: ["male", "female", "no_preference"],
+      user_gender: ["male", "female", "non_binary", "prefer_not_to_say"],
       user_type: ["client", "trainer", "admin"],
       verification_audit_action: [
         "upload",
