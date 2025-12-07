@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { useMatchingConfig, DEFAULT_MATCHING_CONFIG, MatchingAlgorithmConfig as ConfigType } from "@/hooks/useMatchingConfig";
-import { AlertTriangle, Save, RotateCcw, Sparkles, Target, DollarSign, Clock, Settings2 } from "lucide-react";
+import { AlertTriangle, Save, RotateCcw, Sparkles, Target, Scale, Clock, Settings2 } from "lucide-react";
 
 export function MatchingAlgorithmConfig() {
   const { config, isConfigured, isLoading, saveConfig, isSaving } = useMatchingConfig();
@@ -131,10 +131,10 @@ export function MatchingAlgorithmConfig() {
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Matching Algorithm Not Configured</AlertTitle>
           <AlertDescription className="flex items-center justify-between">
-            <span>No match scores will be calculated until configuration is initialized. Clients can still explore all trainers.</span>
+            <span>No match scores will be calculated until configuration is initialised. Clients can still explore all trainers.</span>
             <Button onClick={handleInitialize} size="sm" className="ml-4">
               <Sparkles className="h-4 w-4 mr-2" />
-              Initialize with Defaults
+              Initialise with Defaults
             </Button>
           </AlertDescription>
         </Alert>
@@ -175,7 +175,7 @@ export function MatchingAlgorithmConfig() {
               Thresholds
             </TabsTrigger>
             <TabsTrigger value="boundaries" className="flex items-center gap-2">
-              <DollarSign className="h-4 w-4" />
+              <Scale className="h-4 w-4" />
               Boundaries
             </TabsTrigger>
             <TabsTrigger value="features" className="flex items-center gap-2">
@@ -456,9 +456,17 @@ export function MatchingAlgorithmConfig() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                      <Label>Ideal Client Type Bonus</Label>
+                      <div className="flex items-center gap-2">
+                        <Label>Ideal Client Type Bonus</Label>
+                        <Badge variant="secondary" className="text-xs">
+                          {localConfig.weights.ideal_client_type.value}%
+                        </Badge>
+                      </div>
                       <p className="text-xs text-muted-foreground">
                         Apply bonus scoring when client matches trainer's ideal client profile
+                      </p>
+                      <p className="text-xs text-muted-foreground/70 italic">
+                        When enabled, contributes up to {localConfig.weights.ideal_client_type.value}% to the total match score
                       </p>
                     </div>
                     <Switch
@@ -471,9 +479,17 @@ export function MatchingAlgorithmConfig() {
 
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                      <Label>Discovery Call Penalty</Label>
+                      <div className="flex items-center gap-2">
+                        <Label>Discovery Call Penalty</Label>
+                        <Badge variant="secondary" className="text-xs">
+                          {localConfig.weights.discovery_call.value}%
+                        </Badge>
+                      </div>
                       <p className="text-xs text-muted-foreground">
                         Reduce score when trainer's discovery call preference doesn't match client's
+                      </p>
+                      <p className="text-xs text-muted-foreground/70 italic">
+                        When enabled, contributes up to {localConfig.weights.discovery_call.value}% to the total match score
                       </p>
                     </div>
                     <Switch
@@ -503,9 +519,14 @@ export function MatchingAlgorithmConfig() {
             {/* Availability Settings */}
             <Card>
               <CardHeader>
-                <CardTitle>Availability Scoring</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  Availability Scoring
+                  <Badge variant="secondary" className="text-xs">
+                    Part of Schedule/Frequency ({localConfig.weights.schedule_frequency.value}%)
+                  </Badge>
+                </CardTitle>
                 <CardDescription>
-                  Configure how availability timing affects match scores.
+                  Configure how availability timing affects match scores. These settings are calculated as part of the Schedule/Frequency weight.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
