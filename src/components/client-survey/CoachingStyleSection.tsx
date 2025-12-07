@@ -159,51 +159,6 @@ export function CoachingStyleSection({ formData, updateFormData, errors, clearFi
         </div>
       </div>
 
-      {/* Selection Summary */}
-      {formData.preferred_coaching_style?.length > 0 && (
-        <Card className="bg-muted/50">
-          <CardContent className="p-4">
-            <h4 className="font-semibold mb-2">Your Coaching Preferences</h4>
-            <div className="space-y-2">
-              <div>
-                <Label className="text-sm font-medium">Preferred styles:</Label>
-                <div className="flex flex-wrap gap-2 mt-1">
-                  {formData.preferred_coaching_style.map((styleKey: string) => {
-                    const style = coachingStyleOptions?.find(s => s.style_key === styleKey);
-                    return style ? (
-                      <Badge key={styleKey} variant="secondary">
-                        {style.label}
-                      </Badge>
-                    ) : (
-                      <Badge key={styleKey} variant="secondary">
-                        {styleKey}
-                      </Badge>
-                    );
-                  })}
-                </div>
-              </div>
-              
-              {formData.motivation_factors?.length > 0 && (
-                <div>
-                  <Label className="text-sm font-medium">Motivation factors:</Label>
-                  <div className="flex flex-wrap gap-2 mt-1">
-                    {formData.motivation_factors.slice(0, 5).map((factor: string) => (
-                      <Badge key={factor} variant="outline" className="text-xs">
-                        {factor}
-                      </Badge>
-                    ))}
-                    {formData.motivation_factors.length > 5 && (
-                      <Badge variant="outline" className="text-xs">
-                        +{formData.motivation_factors.length - 5} more
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }

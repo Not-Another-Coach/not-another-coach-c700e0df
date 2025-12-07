@@ -134,29 +134,6 @@ export function SchedulingSection({ formData, updateFormData, errors, clearField
         </div>
       </div>
 
-
-      {/* Schedule Summary */}
-      {formData.preferred_training_frequency && formData.preferred_time_slots?.length > 0 && (
-        <Card className="bg-muted/50">
-          <CardContent className="p-4">
-            <h4 className="font-semibold mb-2">Your Schedule Preferences</h4>
-            <div className="space-y-2 text-sm">
-              <div>
-                <span className="font-medium">Frequency:</span> {
-                  frequencyOptions.find(opt => opt.value === formData.preferred_training_frequency)?.label
-                }
-              </div>
-              <div>
-                <span className="font-medium">Available times:</span>{" "}
-                {formData.preferred_time_slots.map((slotId: string) => {
-                  const slot = timeSlotOptions.find(s => s.id === slotId);
-                  return slot?.label;
-                }).join(", ")}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }
