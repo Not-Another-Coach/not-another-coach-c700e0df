@@ -28,7 +28,9 @@ import {
   FileEdit, 
   Archive,
   Loader2,
-  Lock
+  Lock,
+  Minus,
+  Plus
 } from "lucide-react";
 import { MatchingVersion, MatchingAlgorithmConfig, WeightConfig, DEFAULT_MATCHING_CONFIG } from "@/types/matching";
 import { 
@@ -193,24 +195,60 @@ export function MatchingVersionEditor({ version, mode, onBack, onVersionCreated 
     label: string; 
     weightKey: keyof MatchingAlgorithmConfig['weights']; 
     weight: WeightConfig;
-  }) => (
-    <div className="space-y-2">
-      <div className="flex justify-between items-center">
-        <Label className="text-sm">{label}</Label>
-        <span className="text-sm font-mono text-muted-foreground">{weight.value}%</span>
+  }) => {
+    const handleIncrement = () => {
+      if (weight.value < weight.max) {
+        handleWeightChange(weightKey, weight.value + 1);
+      }
+    };
+    
+    const handleDecrement = () => {
+      if (weight.value > weight.min) {
+        handleWeightChange(weightKey, weight.value - 1);
+      }
+    };
+
+    return (
+      <div className="space-y-2">
+        <div className="flex justify-between items-center">
+          <Label className="text-sm">{label}</Label>
+          <span className="text-sm font-mono text-muted-foreground">{weight.value}%</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            className="h-8 w-8 shrink-0"
+            onClick={handleDecrement}
+            disabled={isReadOnly || weight.value <= weight.min}
+          >
+            <Minus className="h-3 w-3" />
+          </Button>
+          <Slider
+            value={[weight.value]}
+            min={weight.min}
+            max={weight.max}
+            step={1}
+            onValueChange={([v]) => handleWeightChange(weightKey, v)}
+            disabled={isReadOnly}
+            className={isReadOnly ? "opacity-60 flex-1" : "flex-1"}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            className="h-8 w-8 shrink-0"
+            onClick={handleIncrement}
+            disabled={isReadOnly || weight.value >= weight.max}
+          >
+            <Plus className="h-3 w-3" />
+          </Button>
+        </div>
+        <p className="text-xs text-muted-foreground">Range: {weight.min}–{weight.max}%</p>
       </div>
-      <Slider
-        value={[weight.value]}
-        min={weight.min}
-        max={weight.max}
-        step={1}
-        onValueChange={([v]) => handleWeightChange(weightKey, v)}
-        disabled={isReadOnly}
-        className={isReadOnly ? "opacity-60" : ""}
-      />
-      <p className="text-xs text-muted-foreground">Range: {weight.min}–{weight.max}%</p>
-    </div>
-  );
+    );
+  };
 
   return (
     <>
