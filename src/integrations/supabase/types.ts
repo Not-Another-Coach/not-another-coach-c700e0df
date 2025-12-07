@@ -824,6 +824,9 @@ export type Database = {
           client_survey_completed: boolean | null
           client_survey_completed_at: string | null
           created_at: string | null
+          discovery_call_preference:
+            | Database["public"]["Enums"]["discovery_call_preference"]
+            | null
           experience_level: string | null
           fitness_equipment_access: Json | null
           fitness_goals: string[] | null
@@ -848,6 +851,9 @@ export type Database = {
           specific_event_date: string | null
           specific_event_details: string | null
           start_timeline: string | null
+          trainer_gender_preference:
+            | Database["public"]["Enums"]["trainer_gender_preference"]
+            | null
           training_location_preference: string | null
           updated_at: string | null
           waitlist_preference: boolean | null
@@ -862,6 +868,9 @@ export type Database = {
           client_survey_completed?: boolean | null
           client_survey_completed_at?: string | null
           created_at?: string | null
+          discovery_call_preference?:
+            | Database["public"]["Enums"]["discovery_call_preference"]
+            | null
           experience_level?: string | null
           fitness_equipment_access?: Json | null
           fitness_goals?: string[] | null
@@ -886,6 +895,9 @@ export type Database = {
           specific_event_date?: string | null
           specific_event_details?: string | null
           start_timeline?: string | null
+          trainer_gender_preference?:
+            | Database["public"]["Enums"]["trainer_gender_preference"]
+            | null
           training_location_preference?: string | null
           updated_at?: string | null
           waitlist_preference?: boolean | null
@@ -900,6 +912,9 @@ export type Database = {
           client_survey_completed?: boolean | null
           client_survey_completed_at?: string | null
           created_at?: string | null
+          discovery_call_preference?:
+            | Database["public"]["Enums"]["discovery_call_preference"]
+            | null
           experience_level?: string | null
           fitness_equipment_access?: Json | null
           fitness_goals?: string[] | null
@@ -924,6 +939,9 @@ export type Database = {
           specific_event_date?: string | null
           specific_event_details?: string | null
           start_timeline?: string | null
+          trainer_gender_preference?:
+            | Database["public"]["Enums"]["trainer_gender_preference"]
+            | null
           training_location_preference?: string | null
           updated_at?: string | null
           waitlist_preference?: boolean | null
@@ -4469,7 +4487,7 @@ export type Database = {
           flexible_scheduling: boolean | null
           force_password_reset: boolean | null
           free_discovery_call: boolean | null
-          gender_preference: string | null
+          gender: string | null
           hourly_rate: number | null
           id: string
           ideal_client_age_range: string | null
@@ -4600,7 +4618,7 @@ export type Database = {
           flexible_scheduling?: boolean | null
           force_password_reset?: boolean | null
           free_discovery_call?: boolean | null
-          gender_preference?: string | null
+          gender?: string | null
           hourly_rate?: number | null
           id: string
           ideal_client_age_range?: string | null
@@ -4731,7 +4749,7 @@ export type Database = {
           flexible_scheduling?: boolean | null
           force_password_reset?: boolean | null
           free_discovery_call?: boolean | null
-          gender_preference?: string | null
+          gender?: string | null
           hourly_rate?: number | null
           id?: string
           ideal_client_age_range?: string | null
@@ -7679,6 +7697,7 @@ export type Database = {
         | "sales"
         | "delivery"
       customer_payment_mode_enum: "upfront" | "installments"
+      discovery_call_preference: "required" | "prefer_no" | "flexible"
       discovery_call_status:
         | "scheduled"
         | "completed"
@@ -7746,6 +7765,8 @@ export type Database = {
       onboarding_visibility: "client" | "trainer" | "shared"
       payout_frequency_enum: "weekly" | "monthly"
       publication_request_status: "pending" | "approved" | "rejected"
+      trainer_gender_preference: "male" | "female" | "no_preference"
+      user_gender: "male" | "female" | "non_binary" | "prefer_not_to_say"
       user_type: "client" | "trainer" | "admin"
       verification_audit_action:
         | "upload"
@@ -7945,6 +7966,7 @@ export const Constants = {
         "delivery",
       ],
       customer_payment_mode_enum: ["upfront", "installments"],
+      discovery_call_preference: ["required", "prefer_no", "flexible"],
       discovery_call_status: [
         "scheduled",
         "completed",
@@ -8012,6 +8034,8 @@ export const Constants = {
       onboarding_visibility: ["client", "trainer", "shared"],
       payout_frequency_enum: ["weekly", "monthly"],
       publication_request_status: ["pending", "approved", "rejected"],
+      trainer_gender_preference: ["male", "female", "no_preference"],
+      user_gender: ["male", "female", "non_binary", "prefer_not_to_say"],
       user_type: ["client", "trainer", "admin"],
       verification_audit_action: [
         "upload",

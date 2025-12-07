@@ -1,7 +1,8 @@
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Calendar, Clock, Users, Zap } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Calendar, Clock, Users, Zap, UserCheck, Phone } from "lucide-react";
 
 interface AvailabilitySectionProps {
   formData: any;
@@ -29,13 +30,13 @@ const waitlistOptions = [
 
 const startTimelineOptions = [
   { 
-    id: "urgent", 
+    id: "asap", 
     label: "ASAP", 
     description: "I want to start within the next week",
     icon: <Zap className="h-5 w-5" />
   },
   { 
-    id: "next_month", 
+    id: "within_month", 
     label: "Within a month", 
     description: "I'm ready to start soon but not rushing",
     icon: <Calendar className="h-5 w-5" />
@@ -46,6 +47,18 @@ const startTimelineOptions = [
     description: "I'll wait for the right trainer match",
     icon: <Clock className="h-5 w-5" />
   },
+];
+
+const trainerGenderPreferenceOptions = [
+  { value: "no_preference", label: "No preference" },
+  { value: "male", label: "Male trainer" },
+  { value: "female", label: "Female trainer" }
+];
+
+const discoveryCallPreferenceOptions = [
+  { value: "required", label: "I'd like a discovery call first", description: "I want to chat before committing" },
+  { value: "prefer_no", label: "I'd rather skip it", description: "Let's get straight to training" },
+  { value: "flexible", label: "I'm flexible", description: "Either way works for me" }
 ];
 
 export function AvailabilitySection({ formData, updateFormData, errors, clearFieldError }: AvailabilitySectionProps) {
@@ -165,6 +178,77 @@ export function AvailabilitySection({ formData, updateFormData, errors, clearFie
                       <span className="font-medium">Benefit:</span> {option.benefit}
                     </p>
                   </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Trainer Gender Preference */}
+      <div className="space-y-4">
+        <div>
+          <Label className="text-base font-semibold flex items-center gap-2">
+            <UserCheck className="h-5 w-5 text-primary" />
+            Trainer Gender Preference
+          </Label>
+          <p className="text-sm text-muted-foreground">
+            Do you have a preference for your trainer's gender?
+          </p>
+        </div>
+
+        <Select 
+          value={formData.trainer_gender_preference || "no_preference"} 
+          onValueChange={(value) => {
+            updateFormData({ trainer_gender_preference: value });
+            clearFieldError?.('trainer_gender_preference');
+          }}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select preference" />
+          </SelectTrigger>
+          <SelectContent>
+            {trainerGenderPreferenceOptions.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Discovery Call Preference */}
+      <div className="space-y-4">
+        <div>
+          <Label className="text-base font-semibold flex items-center gap-2">
+            <Phone className="h-5 w-5 text-primary" />
+            Discovery Call Preference
+          </Label>
+          <p className="text-sm text-muted-foreground">
+            Would you like a discovery call before starting with a trainer?
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {discoveryCallPreferenceOptions.map((option) => {
+            const isSelected = formData.discovery_call_preference === option.value;
+            
+            return (
+              <Card 
+                key={option.value}
+                className={`cursor-pointer transition-all hover:shadow-md ${
+                  isSelected ? 'border-primary bg-primary/5' : ''
+                }`}
+                onClick={() => {
+                  updateFormData({ discovery_call_preference: option.value });
+                  clearFieldError?.('discovery_call_preference');
+                }}
+              >
+                <CardContent className="p-4 text-center space-y-2">
+                  <h3 className="font-semibold">{option.label}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {option.description}
+                  </p>
                 </CardContent>
               </Card>
             );

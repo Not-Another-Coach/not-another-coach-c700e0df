@@ -21,8 +21,7 @@ const genderOptions = [
   { value: "prefer_not_to_say", label: "Prefer not to say" },
   { value: "male", label: "Male" },
   { value: "female", label: "Female" },
-  { value: "non_binary", label: "Non-binary" },
-  { value: "other", label: "Other" }
+  { value: "non_binary", label: "Non-binary" }
 ];
 
 // Common timezones - can be expanded
@@ -195,21 +194,21 @@ export function ProfileSection({ formData, updateFormData, errors, clearFieldErr
         </div>
       </div>
 
-      {/* Gender Preference */}
+      {/* Gender (user's own gender) */}
       <div className="space-y-2">
-        <Label htmlFor="gender_preference">Gender Preference *</Label>
+        <Label htmlFor="gender">Gender *</Label>
         <p className="text-sm text-muted-foreground">
           This helps us personalize your experience
         </p>
         <Select 
-          value={formData.gender_preference || ""} 
+          value={formData.gender || ""} 
           onValueChange={(value) => {
-            updateFormData({ gender_preference: value });
-            clearFieldError?.('gender_preference');
+            updateFormData({ gender: value });
+            clearFieldError?.('gender');
           }}
         >
-          <SelectTrigger className={errors?.gender_preference ? 'border-destructive' : ''}>
-            <SelectValue placeholder="Select gender preference" />
+          <SelectTrigger className={errors?.gender ? 'border-destructive' : ''}>
+            <SelectValue placeholder="Select your gender" />
           </SelectTrigger>
           <SelectContent>
             {genderOptions.map((option) => (
@@ -219,8 +218,8 @@ export function ProfileSection({ formData, updateFormData, errors, clearFieldErr
             ))}
           </SelectContent>
         </Select>
-        {errors?.gender_preference && (
-          <p className="text-sm text-destructive">{errors.gender_preference}</p>
+        {errors?.gender && (
+          <p className="text-sm text-destructive">{errors.gender}</p>
         )}
       </div>
 

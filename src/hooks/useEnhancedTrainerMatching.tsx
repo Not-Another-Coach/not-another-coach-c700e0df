@@ -23,7 +23,7 @@ interface ClientSurveyData {
   // Training frequency and scheduling
   preferred_training_frequency?: number;
   preferred_time_slots?: string[];
-  start_timeline?: "urgent" | "next_month" | "flexible";
+  start_timeline?: "asap" | "within_month" | "flexible";
   
   // Coaching style preferences
   preferred_coaching_style?: string[];
@@ -42,6 +42,10 @@ interface ClientSurveyData {
   // Waitlist and availability preferences
   waitlist_preference?: "asap" | "quality_over_speed";
   flexible_scheduling?: boolean;
+  
+  // Trainer preferences (new fields)
+  trainer_gender_preference?: "male" | "female" | "no_preference";
+  discovery_call_preference?: "required" | "prefer_no" | "flexible";
 }
 
 interface MatchDetail {
@@ -324,6 +328,31 @@ export const useEnhancedTrainerMatching = (trainers: Trainer[], userAnswers?: Qu
       
       if (experienceMatch) {
         reasons.push(`Perfect fit for ${clientExperience} level`);
+      }
+
+      // Trainer Gender Preference Match (filter, not scored)
+      const trainerGenderPref = clientSurveyData?.trainer_gender_preference;
+      const trainerGender = (trainer as any).gender; // From profiles.gender
+      
+      if (trainerGenderPref && trainerGenderPref !== 'no_preference' && trainerGender) {
+        // If client has a preference and trainer's gender doesn't match, significantly reduce score
+        if (trainerGender !== trainerGenderPref) {
+          score = score * 0.3; // Reduce to 30% - still show but much lower
+          reasons.push(`Gender preference not matched`);
+        } else {
+          reasons.push(`Matches your trainer gender preference`);
+        }
+      }
+
+      // Discovery Call Preference (bonus/penalty)
+      const discoveryCallPref = clientSurveyData?.discovery_call_preference;
+      const trainerOffersDiscovery = (trainer as any).offers_discovery_call ?? (trainer as any).free_discovery_call;
+      
+      if (discoveryCallPref === 'required' && trainerOffersDiscovery === false) {
+        score = score * 0.8; // 20% penalty if client wants discovery but trainer doesn't offer
+      } else if (discoveryCallPref === 'required' && trainerOffersDiscovery === true) {
+        score = Math.min(score * 1.1, 100); // 10% bonus for matching
+        reasons.push(`Offers discovery calls`);
       }
 
       // PHASE 2 IMPROVEMENT: Ensure minimum baseline score  
