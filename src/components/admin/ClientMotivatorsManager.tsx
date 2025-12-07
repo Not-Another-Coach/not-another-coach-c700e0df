@@ -14,6 +14,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { toast } from 'sonner';
 import { Plus, Pencil, Trash2, GripVertical, Flame, Link2, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { EmojiPicker } from '@/components/admin/EmojiPicker';
 import { 
   useAllClientMotivators, 
   useClientMotivatorMutations, 
@@ -35,7 +36,7 @@ function MotivatorsTab() {
     key: '',
     label: '',
     description: '',
-    icon: 'Flame',
+    icon: '🔥',
     display_order: 0,
     is_active: true
   });
@@ -45,7 +46,7 @@ function MotivatorsTab() {
       key: '',
       label: '',
       description: '',
-      icon: 'Flame',
+      icon: '🔥',
       display_order: 0,
       is_active: true
     });
@@ -137,11 +138,10 @@ function MotivatorsTab() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Icon (Lucide name)</Label>
-                  <Input 
-                    value={formData.icon} 
-                    onChange={(e) => setFormData(prev => ({ ...prev, icon: e.target.value }))}
-                    placeholder="e.g., Flame, Target, Heart"
+                  <Label>Emoji</Label>
+                  <EmojiPicker
+                    value={formData.icon}
+                    onChange={(emoji) => setFormData(prev => ({ ...prev, icon: emoji }))}
                   />
                 </div>
                 <div>
@@ -172,6 +172,7 @@ function MotivatorsTab() {
         <TableHeader>
           <TableRow>
             <TableHead className="w-8"></TableHead>
+            <TableHead className="w-12">Emoji</TableHead>
             <TableHead>Key</TableHead>
             <TableHead>Label</TableHead>
             <TableHead>Description</TableHead>
@@ -183,6 +184,7 @@ function MotivatorsTab() {
           {motivators?.map(motivator => (
             <TableRow key={motivator.id}>
               <TableCell><GripVertical className="w-4 h-4 text-muted-foreground" /></TableCell>
+              <TableCell className="text-xl">{motivator.icon || '🔥'}</TableCell>
               <TableCell className="font-mono text-sm">{motivator.key}</TableCell>
               <TableCell className="font-medium">{motivator.label}</TableCell>
               <TableCell className="text-muted-foreground text-sm max-w-xs truncate">{motivator.description}</TableCell>
