@@ -196,22 +196,32 @@ export function NotAnotherCoachError({
       } : undefined}
     >
       <div className="w-full max-w-2xl">
-        <div className="bg-card rounded-3xl border border-border shadow-lg p-8 md:p-12 text-center">
+        <div className={`rounded-3xl border shadow-lg p-8 md:p-12 text-center ${
+          code === '500' || code === '404' 
+            ? 'bg-primary border-primary-600' 
+            : 'bg-card border-border'
+        }`}>
           {/* Icon */}
-          <div className="flex justify-center mb-6 text-accent">
+          <div className={`flex justify-center mb-6 ${
+            code === '500' || code === '404' ? 'text-primary-foreground' : 'text-accent'
+          }`}>
             {icon}
           </div>
 
           {/* Headline */}
           <h1 
             id="error-title"
-            className="text-3xl md:text-4xl font-bold text-foreground mb-4"
+            className={`text-3xl md:text-4xl font-bold mb-4 ${
+              code === '500' || code === '404' ? 'text-primary-foreground' : 'text-foreground'
+            }`}
           >
             {variant.headline}
           </h1>
 
           {/* Body text */}
-          <p className="text-lg text-muted-foreground mb-8 max-w-md mx-auto">
+          <p className={`text-lg mb-8 max-w-md mx-auto ${
+            code === '500' || code === '404' ? 'text-primary-100' : 'text-muted-foreground'
+          }`}>
             {variant.body}
           </p>
 
