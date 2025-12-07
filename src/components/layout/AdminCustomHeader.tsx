@@ -30,6 +30,7 @@ export function AdminCustomHeader({
     { key: "goals", label: "Goals", icon: Target, path: "/admin/goals" },
     { key: "qualifications", label: "Qualifications", icon: Briefcase, path: "/admin/qualifications" },
     { key: "coaching-styles", label: "Coaching Styles", icon: Heart, path: "/admin/coaching-styles" },
+    { key: "motivators", label: "Motivators", icon: Heart, path: "/admin/motivators" },
     { key: "matching", label: "Matching", icon: Target, path: "/admin/matching-config" },
   ];
 
