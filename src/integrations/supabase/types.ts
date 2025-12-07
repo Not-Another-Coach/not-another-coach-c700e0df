@@ -540,6 +540,90 @@ export type Database = {
           },
         ]
       }
+      client_goal_specialty_mappings: {
+        Row: {
+          created_at: string
+          goal_id: string
+          id: string
+          mapping_type: Database["public"]["Enums"]["client_goal_mapping_type"]
+          specialty_id: string
+          weight: number
+        }
+        Insert: {
+          created_at?: string
+          goal_id: string
+          id?: string
+          mapping_type?: Database["public"]["Enums"]["client_goal_mapping_type"]
+          specialty_id: string
+          weight?: number
+        }
+        Update: {
+          created_at?: string
+          goal_id?: string
+          id?: string
+          mapping_type?: Database["public"]["Enums"]["client_goal_mapping_type"]
+          specialty_id?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_goal_specialty_mappings_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "client_goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_goal_specialty_mappings_specialty_id_fkey"
+            columns: ["specialty_id"]
+            isOneToOne: false
+            referencedRelation: "specialties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_goals: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number
+          goal_key: string
+          goal_type: Database["public"]["Enums"]["client_goal_type"]
+          icon: string | null
+          id: string
+          is_active: boolean
+          label: string
+          updated_at: string
+          visibility_rules: Json | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          goal_key: string
+          goal_type?: Database["public"]["Enums"]["client_goal_type"]
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          label: string
+          updated_at?: string
+          visibility_rules?: Json | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          goal_key?: string
+          goal_type?: Database["public"]["Enums"]["client_goal_type"]
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          label?: string
+          updated_at?: string
+          visibility_rules?: Json | null
+        }
+        Relationships: []
+      }
       client_onboarding_progress: {
         Row: {
           activity_id: string | null
@@ -7560,6 +7644,8 @@ export type Database = {
         | "approved"
         | "rejected"
         | "auto_approved"
+      client_goal_mapping_type: "primary" | "secondary" | "optional"
+      client_goal_type: "primary" | "secondary"
       client_status:
         | "onboarding"
         | "survey_completed"
@@ -7821,6 +7907,8 @@ export const Constants = {
         "rejected",
         "auto_approved",
       ],
+      client_goal_mapping_type: ["primary", "secondary", "optional"],
+      client_goal_type: ["primary", "secondary"],
       client_status: [
         "onboarding",
         "survey_completed",

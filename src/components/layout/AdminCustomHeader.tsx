@@ -43,6 +43,7 @@ export function AdminCustomHeader({
       items: [
         { key: "highlights", label: "Highlights", icon: FileText, path: "/admin/highlights" },
         { key: "specialties", label: "Specialties", icon: Database, path: "/admin/specialties" },
+        { key: "goals", label: "Goals", icon: Target, path: "/admin/goals" },
         { key: "qualifications", label: "Qualifications", icon: Briefcase, path: "/admin/qualifications" },
         { key: "templates", label: "Templates", icon: Settings, path: "/admin/templates" },
         { key: "feedback-builder", label: "Feedback", icon: Settings, path: "/admin/feedback-builder" },

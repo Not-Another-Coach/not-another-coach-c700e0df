@@ -53,8 +53,8 @@ import FeedbackBuilder from "./pages/admin/FeedbackBuilder";
 import DataCleanup from "./pages/admin/DataCleanup";
 import TemplateManagement from "./pages/admin/TemplateManagement";
 import MatchingConfiguration from "./pages/admin/MatchingConfiguration";
+import GoalManagement from "./pages/admin/GoalManagement";
 import { AdminSystemSettings } from "./pages/AdminSystemSettings";
-
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -130,6 +130,7 @@ const App = () => (
                 <Route path="/admin/templates" element={<TemplateManagement />} />
                 <Route path="/admin/system-settings" element={<AdminSystemSettings />} />
                 <Route path="/admin/matching-config" element={<MatchingConfiguration />} />
+                <Route path="/admin/goals" element={<GoalManagement />} />
                 <Route path="/trainer/:trainerId" element={<TrainerProfile />} />
                 <Route path="/documentation" element={<Documentation />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
