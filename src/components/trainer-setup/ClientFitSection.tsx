@@ -5,10 +5,12 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useState, useEffect } from "react";
 import { Users, Heart, Target, Zap, Sparkles, RefreshCw } from "lucide-react";
 import { AIDescriptionHelper } from "./AIDescriptionHelper";
 import { SectionHeader } from './SectionHeader';
+import { useTrainerCoachingStyles } from "@/hooks/useTrainerCoachingStyles";
 
 interface ClientFitSectionProps {
   formData: any;
@@ -32,52 +34,8 @@ const idealClientTypes = [
   "Body Positive Focus"
 ];
 
-const coachingStyles = [
-  { 
-    id: "tough-love", 
-    label: "Tough Love", 
-    icon: Zap, 
-    description: "Direct, challenging, results-driven",
-    emoji: "🎯" 
-  },
-  { 
-    id: "calm", 
-    label: "Calm & Patient", 
-    icon: Heart, 
-    description: "Gentle, understanding, supportive",
-    emoji: "🧘" 
-  },
-  { 
-    id: "encouraging", 
-    label: "Encouraging", 
-    icon: Heart, 
-    description: "Motivational, positive, uplifting",
-    emoji: "💬" 
-  },
-  { 
-    id: "structured", 
-    label: "Structured", 
-    icon: Target, 
-    description: "Systematic, data-driven, organized",
-    emoji: "📊" 
-  },
-  { 
-    id: "fun", 
-    label: "Fun & Energetic", 
-    icon: Zap, 
-    description: "Playful, dynamic, engaging",
-    emoji: "🎉" 
-  },
-  { 
-    id: "holistic", 
-    label: "Holistic", 
-    icon: Heart, 
-    description: "Mind-body connection, lifestyle focused",
-    emoji: "🌿" 
-  }
-];
-
 export function ClientFitSection({ formData, updateFormData }: ClientFitSectionProps) {
+  const { data: coachingStyles, isLoading: stylesLoading } = useTrainerCoachingStyles();
   const [showAIHelper, setShowAIHelper] = useState(false);
   const [isImproving, setIsImproving] = useState(false);
   
@@ -244,30 +202,36 @@ export function ClientFitSection({ formData, updateFormData }: ClientFitSectionP
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {coachingStyles.map((style) => {
-            const isSelected = formData.coaching_style?.includes(style.id);
-            return (
-              <Card 
-                key={style.id}
-                className={`cursor-pointer transition-colors ${
-                  isSelected ? 'border-primary bg-primary/5' : 'hover:border-primary/50'
-                }`}
-                onClick={() => handleCoachingStyleToggle(style.id)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
-                    <div className="text-2xl">{style.emoji}</div>
-                    <div className="flex-1">
-                      <p className="font-medium">{style.label}</p>
-                      <p className="text-sm text-muted-foreground">{style.description}</p>
+        {stylesLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-24 w-full" />)}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {coachingStyles?.map((style) => {
+              const isSelected = formData.coaching_style?.includes(style.style_key);
+              return (
+                <Card 
+                  key={style.id}
+                  className={`cursor-pointer transition-colors ${
+                    isSelected ? 'border-primary bg-primary/5' : 'hover:border-primary/50'
+                  }`}
+                  onClick={() => handleCoachingStyleToggle(style.style_key)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="text-2xl">{style.emoji}</div>
+                      <div className="flex-1">
+                        <p className="font-medium">{style.label}</p>
+                        <p className="text-sm text-muted-foreground">{style.description}</p>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Preferred Client Genders */}
