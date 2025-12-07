@@ -20,9 +20,13 @@ interface ClientProfile {
   tagline: string | null;
   is_uk_based: boolean | null;
   profile_published: boolean | null;
-  gender_preference: string | null;
+  gender: string | null;
   timezone: string | null;
   phone_number: string | null;
+  
+  // Client preferences
+  trainer_gender_preference: string | null;
+  discovery_call_preference: string | null;
   
   // Client-specific fields
   primary_goals: string[] | null;
@@ -125,7 +129,7 @@ export function useClientProfile() {
       const clientData: Record<string, any> = {};
 
       // Shared profile fields
-      const sharedFields = ['first_name', 'last_name', 'bio', 'profile_photo_url', 'location', 'tagline', 'is_uk_based', 'profile_published', 'gender_preference', 'timezone', 'phone_number'];
+      const sharedFields = ['first_name', 'last_name', 'bio', 'profile_photo_url', 'location', 'tagline', 'is_uk_based', 'profile_published', 'gender', 'timezone', 'phone_number'];
       
       // Client-specific fields
       const clientFields = [
@@ -138,7 +142,9 @@ export function useClientProfile() {
         'client_status', 'client_journey_stage', 'journey_progress',
         // Lifestyle and health fields
         'fitness_equipment_access', 'lifestyle_description', 'lifestyle_other', 'health_conditions',
-        'has_specific_event', 'specific_event_details', 'specific_event_date'
+        'has_specific_event', 'specific_event_details', 'specific_event_date',
+        // Client preferences
+        'trainer_gender_preference', 'discovery_call_preference'
       ];
 
       Object.keys(filteredUpdates).forEach(key => {
