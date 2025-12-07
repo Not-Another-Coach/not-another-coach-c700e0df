@@ -10,7 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { useMatchingConfig, DEFAULT_MATCHING_CONFIG, MatchingAlgorithmConfig as ConfigType } from "@/hooks/useMatchingConfig";
-import { AlertTriangle, Save, RotateCcw, Sparkles, Target, Scale, Clock, Settings2 } from "lucide-react";
+import { HARD_EXCLUSION_RULES } from "@/hooks/useHardExclusions";
+import { AlertTriangle, Save, RotateCcw, Sparkles, Target, Scale, Clock, Settings2, Ban, User, MapPin, DollarSign, Lock } from "lucide-react";
 
 export function MatchingAlgorithmConfig() {
   const { config, isConfigured, isLoading, saveConfig, isSaving } = useMatchingConfig();
@@ -164,8 +165,12 @@ export function MatchingAlgorithmConfig() {
       )}
 
       {isConfigured && (
-        <Tabs defaultValue="weights" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+        <Tabs defaultValue="exclusions" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="exclusions" className="flex items-center gap-2">
+              <Ban className="h-4 w-4" />
+              Exclusions
+            </TabsTrigger>
             <TabsTrigger value="weights" className="flex items-center gap-2">
               <Target className="h-4 w-4" />
               Weights
@@ -183,6 +188,132 @@ export function MatchingAlgorithmConfig() {
               Features
             </TabsTrigger>
           </TabsList>
+
+          {/* Hard Exclusion Rules Tab (Read-Only) */}
+          <TabsContent value="exclusions" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Ban className="h-5 w-5 text-destructive" />
+                  Hard Exclusion Rules
+                  <Badge variant="outline" className="ml-2 flex items-center gap-1">
+                    <Lock className="h-3 w-3" />
+                    Read-Only
+                  </Badge>
+                </CardTitle>
+                <CardDescription>
+                  These rules are enforced before scoring when hard exclusions are enabled. 
+                  Trainers who fail these criteria are completely excluded from results.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {!localConfig.feature_flags.enable_hard_exclusions && (
+                  <Alert>
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertTitle>Hard Exclusions Disabled</AlertTitle>
+                    <AlertDescription>
+                      Enable hard exclusions in the Features tab to activate these rules.
+                    </AlertDescription>
+                  </Alert>
+                )}
+                
+                <div className="space-y-3">
+                  {/* Gender Mismatch Rule */}
+                  <div className={`flex items-start gap-3 p-4 rounded-lg border ${
+                    localConfig.feature_flags.enable_hard_exclusions 
+                      ? 'bg-destructive/5 border-destructive/20' 
+                      : 'bg-muted/50 border-muted'
+                  }`}>
+                    <User className={`h-5 w-5 mt-0.5 ${
+                      localConfig.feature_flags.enable_hard_exclusions 
+                        ? 'text-destructive' 
+                        : 'text-muted-foreground'
+                    }`} />
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">Trainer Gender Mismatch</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        If client specifies "Male" or "Female" preference, trainers of other genders are excluded.
+                      </p>
+                    </div>
+                    <Badge variant={localConfig.feature_flags.enable_hard_exclusions ? "destructive" : "secondary"}>
+                      {localConfig.feature_flags.enable_hard_exclusions ? "Active" : "Inactive"}
+                    </Badge>
+                  </div>
+
+                  {/* Format Incompatibility Rule */}
+                  <div className={`flex items-start gap-3 p-4 rounded-lg border ${
+                    localConfig.feature_flags.enable_hard_exclusions 
+                      ? 'bg-destructive/5 border-destructive/20' 
+                      : 'bg-muted/50 border-muted'
+                  }`}>
+                    <MapPin className={`h-5 w-5 mt-0.5 ${
+                      localConfig.feature_flags.enable_hard_exclusions 
+                        ? 'text-destructive' 
+                        : 'text-muted-foreground'
+                    }`} />
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">Training Format Incompatibility</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        If client requires in-person only and trainer only offers online (or vice versa), trainer is excluded.
+                      </p>
+                    </div>
+                    <Badge variant={localConfig.feature_flags.enable_hard_exclusions ? "destructive" : "secondary"}>
+                      {localConfig.feature_flags.enable_hard_exclusions ? "Active" : "Inactive"}
+                    </Badge>
+                  </div>
+
+                  {/* Budget Hard Ceiling Rule */}
+                  <div className={`flex items-start gap-3 p-4 rounded-lg border ${
+                    localConfig.feature_flags.enable_hard_exclusions 
+                      ? 'bg-destructive/5 border-destructive/20' 
+                      : 'bg-muted/50 border-muted'
+                  }`}>
+                    <DollarSign className={`h-5 w-5 mt-0.5 ${
+                      localConfig.feature_flags.enable_hard_exclusions 
+                        ? 'text-destructive' 
+                        : 'text-muted-foreground'
+                    }`} />
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">Budget Hard Ceiling</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        If trainer's minimum price exceeds client's max budget by more than{" "}
+                        <span className="font-semibold text-foreground">{localConfig.budget.hard_exclusion_percent}%</span>, 
+                        trainer is excluded.
+                      </p>
+                      <p className="text-xs text-muted-foreground/70 mt-1 italic">
+                        Configure threshold in the Boundaries tab
+                      </p>
+                    </div>
+                    <Badge variant={localConfig.feature_flags.enable_hard_exclusions ? "destructive" : "secondary"}>
+                      {localConfig.feature_flags.enable_hard_exclusions ? "Active" : "Inactive"}
+                    </Badge>
+                  </div>
+
+                  {/* Availability Mismatch Rule */}
+                  <div className={`flex items-start gap-3 p-4 rounded-lg border ${
+                    localConfig.feature_flags.enable_hard_exclusions 
+                      ? 'bg-destructive/5 border-destructive/20' 
+                      : 'bg-muted/50 border-muted'
+                  }`}>
+                    <Clock className={`h-5 w-5 mt-0.5 ${
+                      localConfig.feature_flags.enable_hard_exclusions 
+                        ? 'text-destructive' 
+                        : 'text-muted-foreground'
+                    }`} />
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">Availability Mismatch</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        If client timeline is "ASAP" and trainer is not accepting new clients, trainer is excluded.
+                      </p>
+                    </div>
+                    <Badge variant={localConfig.feature_flags.enable_hard_exclusions ? "destructive" : "secondary"}>
+                      {localConfig.feature_flags.enable_hard_exclusions ? "Active" : "Inactive"}
+                    </Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           {/* Weights Tab */}
           <TabsContent value="weights" className="space-y-4">

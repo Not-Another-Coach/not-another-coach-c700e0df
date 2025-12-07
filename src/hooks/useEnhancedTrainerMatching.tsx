@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
 import { Trainer } from '@/types/trainer';
-import { Target, Dumbbell, MapPin, Clock, DollarSign, Heart, Users, Calendar } from 'lucide-react';
+import { Target, MapPin, Clock, DollarSign, Heart, Users, Calendar } from 'lucide-react';
+import { useMatchingConfig, MatchingAlgorithmConfig } from './useMatchingConfig';
+import { applyHardExclusions, ExcludedTrainer, ExclusionSummary, HARD_EXCLUSION_RULES } from './useHardExclusions';
 
 interface QuizAnswers {
   fitness_goals?: string[];
@@ -63,7 +65,30 @@ interface MatchScore {
   compatibilityPercentage: number;
 }
 
-export const useEnhancedTrainerMatching = (trainers: Trainer[], userAnswers?: QuizAnswers, clientSurveyData?: ClientSurveyData) => {
+export interface EnhancedMatchingResult {
+  matchedTrainers: MatchScore[];
+  excludedTrainers: ExcludedTrainer[];
+  exclusionSummary: ExclusionSummary;
+  hasMatches: boolean;
+  topMatches: MatchScore[];
+  goodMatches: MatchScore[];
+  allTrainers: MatchScore[];
+}
+
+export { HARD_EXCLUSION_RULES } from './useHardExclusions';
+
+export const useEnhancedTrainerMatching = (
+  trainers: Trainer[], 
+  userAnswers?: QuizAnswers, 
+  clientSurveyData?: ClientSurveyData
+): EnhancedMatchingResult => {
+  const { config } = useMatchingConfig();
+  
+  // Apply hard exclusions first
+  const { includedTrainers, excludedTrainers, exclusionSummary } = useMemo(() => {
+    return applyHardExclusions(trainers, clientSurveyData, config);
+  }, [trainers, clientSurveyData, config]);
+
   const matchedTrainers = useMemo(() => {
     // PHASE 2 IMPROVEMENT: Ensure minimum baseline score for all trainers
     const MINIMUM_BASELINE_SCORE = 45; // All trainers get at least 45% compatibility
@@ -376,7 +401,8 @@ export const useEnhancedTrainerMatching = (trainers: Trainer[], userAnswers?: Qu
       };
     };
 
-    const scoredTrainers = trainers.map(calculateMatch);
+    // Score only included trainers (after hard exclusions)
+    const scoredTrainers = includedTrainers.map(calculateMatch);
 
     // PHASE 2 IMPROVEMENT: Implement trainer diversity algorithm
     const implementTrainerDiversity = (trainers: MatchScore[]) => {
@@ -425,13 +451,15 @@ export const useEnhancedTrainerMatching = (trainers: Trainer[], userAnswers?: Qu
 
     // Apply diversity algorithm
     return implementTrainerDiversity(scoredTrainers);
-  }, [trainers, userAnswers, clientSurveyData]);
+  }, [includedTrainers, userAnswers, clientSurveyData]);
 
   return {
     matchedTrainers,
-    hasMatches: matchedTrainers.length > 0, // PHASE 2: All trainers should appear
-    topMatches: matchedTrainers.filter(match => match.score >= 70), // High compatibility matches
-    goodMatches: matchedTrainers.filter(match => match.score >= 50 && match.score < 70), // Good matches
-    allTrainers: matchedTrainers, // PHASE 2: Expose all for debugging
+    excludedTrainers,
+    exclusionSummary,
+    hasMatches: matchedTrainers.length > 0,
+    topMatches: matchedTrainers.filter(match => match.score >= 70),
+    goodMatches: matchedTrainers.filter(match => match.score >= 50 && match.score < 70),
+    allTrainers: matchedTrainers,
   };
 };
