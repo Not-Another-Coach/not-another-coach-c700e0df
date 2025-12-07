@@ -10,6 +10,8 @@ import { Link } from "react-router-dom";
 import { useActiveClientGoals, ClientGoal } from "@/hooks/useClientGoals";
 import { useAllGoalMappings, GoalSpecialtyMapping } from "@/hooks/useClientGoalMappings";
 import { useCoachingStyleMappings, CoachingStyleMapping } from "@/hooks/useCoachingStyleMappings";
+import { useAllClientMotivators, ClientMotivator } from "@/hooks/useClientMotivators";
+import { useMotivatorActivityMappings } from "@/hooks/useMotivatorActivityMappings";
 import { MatchingAlgorithmConfig } from "@/types/matching";
 
 interface MatchingScoringLogicProps {
@@ -237,11 +239,75 @@ function CoachingStyleMappingsSection({ mappings, loading }: {
   );
 }
 
+// Component to render motivator-activity mappings from database
+function MotivatorMappingsSection({ motivators, mappings, loading }: { 
+  motivators: ClientMotivator[] | undefined; 
+  mappings: any[] | undefined;
+  loading: boolean;
+}) {
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        {[1, 2, 3].map(i => (
+          <Skeleton key={i} className="h-12 w-full" />
+        ))}
+      </div>
+    );
+  }
+
+  if (!motivators || motivators.length === 0) {
+    return (
+      <div className="text-center py-6 text-muted-foreground">
+        <p>No motivators configured yet.</p>
+        <Button asChild variant="link" className="mt-2">
+          <Link to="/admin/matching-config">Configure Motivators →</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  // Group mappings by motivator
+  const mappingsByMotivator = motivators.reduce((acc, motivator) => {
+    const motivatorMappings = mappings?.filter(m => m.motivator_id === motivator.id) || [];
+    acc[motivator.id] = {
+      motivator,
+      activities: motivatorMappings.map(m => m.activity?.activity_name || 'Unknown')
+    };
+    return acc;
+  }, {} as Record<string, { motivator: ClientMotivator; activities: string[] }>);
+
+  return (
+    <div className="space-y-3">
+      {Object.values(mappingsByMotivator).map(({ motivator, activities }) => (
+        <div key={motivator.id} className="border rounded-lg p-3 space-y-2">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">{motivator.icon || '🔥'}</span>
+            <span className="font-medium">{motivator.label}</span>
+            <span className="text-xs text-muted-foreground font-mono">({motivator.key})</span>
+          </div>
+          {activities.length === 0 ? (
+            <p className="text-sm text-muted-foreground italic">No activity mappings configured</p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {activities.map((activity, idx) => (
+                <Badge key={idx} variant="secondary" className="text-xs">
+                  {activity}
+                </Badge>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function MatchingScoringLogic({ currentConfig, liveConfig, isDraft = false }: MatchingScoringLogicProps) {
   const { goals, loading: goalsLoading } = useActiveClientGoals();
   const { mappingsByGoalId, loading: mappingsLoading } = useAllGoalMappings();
   const { data: coachingStyleMappings, isLoading: coachingStylesLoading } = useCoachingStyleMappings();
-
+  const { data: motivators, isLoading: motivatorsLoading } = useAllClientMotivators();
+  const { data: motivatorMappings, isLoading: motivatorMappingsLoading } = useMotivatorActivityMappings();
   const showComparison = isDraft && liveConfig && currentConfig;
 
   return (
@@ -403,6 +469,41 @@ export function MatchingScoringLogic({ currentConfig, liveConfig, isDraft = fals
                   })}
                 </TableBody>
               </Table>
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
+
+      {/* Motivator → Activity Mappings - Database Driven */}
+      <Collapsible>
+        <Card>
+          <CollapsibleTrigger className="w-full">
+            <CardHeader className="flex flex-row items-center justify-between cursor-pointer hover:bg-muted/50">
+              <div className="flex items-center gap-2">
+                <Database className="w-4 h-4 text-emerald-600" />
+                <CardTitle className="text-base">Motivator → Activity Mappings</CardTitle>
+                <Badge variant="outline" className="text-xs text-emerald-600 border-emerald-600/20">Configurable</Badge>
+              </div>
+              <ChevronDown className="w-4 h-4" />
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent>
+              <div className="flex items-center justify-between mb-4">
+                <CardDescription>
+                  How client motivators are matched to trainer ways of working. Configure these in Client Motivators below.
+                </CardDescription>
+                <Button asChild variant="outline" size="sm">
+                  <Link to="/admin/matching-config" className="flex items-center gap-1">
+                    Edit Mappings <ExternalLink className="w-3 h-3" />
+                  </Link>
+                </Button>
+              </div>
+              <MotivatorMappingsSection 
+                motivators={motivators} 
+                mappings={motivatorMappings} 
+                loading={motivatorsLoading || motivatorMappingsLoading} 
+              />
             </CardContent>
           </CollapsibleContent>
         </Card>
